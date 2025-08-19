@@ -1,18 +1,20 @@
 <template>
   <div class="login-page">
-    <div class="login-left-panel">
-      </div>
+    <div class="login-left-panel"></div>
     <div class="login-right-panel">
       <div class="login-container">
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        
         <div class="input-group">
           <span class="input-icon">✉</span>
           <input type="text" v-model="email" placeholder="email id" class="input-field">
         </div>
+
         <div class="input-group">
           <span class="input-icon">🔒</span>
           <input type="password" v-model="password" placeholder="password" class="input-field">
         </div>
+
         <button @click="login" class="login-button">LOGIN</button>
       </div>
     </div>
@@ -29,26 +31,42 @@ export default {
     };
   },
   methods: {
-    login() {
-      // Basic validation
+    async login() {
       if (!this.email || !this.password) {
         alert('Please enter your email and password.');
         return;
       }
-      
-      // Here you will integrate with your Flask backend
-      console.log('Attempting to log in with:', this.email, 'and password:', this.password);
-      
-      // A placeholder for API call
-      // this.$http.post('/api/login', { email: this.email, password: this.password })
-      //   .then(response => {
-      //     const userRole = response.data.role;
-      //     // Navigate to the correct home page based on the user's role
-      //     this.$router.push({ name: `HomePage${userRole}` });
-      //   })
-      //   .catch(error => {
-      //     alert('Login failed. Please check your credentials.');
-      //   });
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: this.email,
+            password: this.password
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(`Welcome ${data.user.name} (${data.user.role})`);
+
+          // Role-based navigation
+          if (data.user.role.toLowerCase() === "admin") {
+            this.$router.push({ name: "HomePageAdmin" });
+          } else if (data.user.role.toLowerCase() === "reviewer") {
+            this.$router.push({ name: "HomePageReviewer" });
+          } else {
+            alert("Unknown role. Please contact support.");
+          }
+        } else {
+          alert(data.message);
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        alert("Server error. Please try again later.");
+      }
     },
   },
 };
@@ -60,7 +78,7 @@ export default {
   height: 829px;
   width: 98vw;
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0; /* Match background color */
+  background-color: #f0f0f0;
 }
 
 .login-left-panel {
@@ -90,7 +108,7 @@ export default {
 }
 
 .logo {
-  width: 180px; /* Adjust size as needed */
+  width: 180px;
   margin-bottom: 50px;
 }
 

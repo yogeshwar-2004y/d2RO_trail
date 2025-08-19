@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 import LoginPage from '@/views/LoginPage.vue'
 import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
 import ProjectsDashboard from '@/views/admin/ProjectsDashboard.vue'
@@ -6,6 +6,7 @@ import LruDashboard from '@/views/admin/LruDashboard.vue'
 import MemoDashboard from '@/views/admin/MemoDashboard.vue'
 import ReportDashboard from '@/views/admin/ReportDashboard.vue'
 import UserActivities from '@/views/admin/UserActivities.vue'
+import reviewerRoutes from './reviewerroutes'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -45,8 +46,11 @@ const router = createRouter({
       name: 'UserActivities',
       component: UserActivities
     },
+    ...reviewerRoutes 
   ],
 })
+
+
 
 export default router
 
