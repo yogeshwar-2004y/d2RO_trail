@@ -57,12 +57,18 @@
 
 <script>
 export default {
-  name: 'UserActivities',
+  name: "UserActivities",
   methods: {
     goToPage(pageName) {
-      // Placeholder for navigation to the respective pages
-      alert(`Navigating to ${pageName}`);
-      // this.$router.push({ name: pageName });
+      if (pageName === "AddUpdateProjects") {
+        this.$router.push({ path: "/AddUpdateProjects" }); 
+      } else if (pageName === "AddUpdateUsers") {
+        this.$router.push({ path: "/add-update-users" });
+      } else if (pageName === "ActivityLogs") {
+        this.$router.push({ path: "/activity-logs" });
+      } else if (pageName === "Tests") {
+        this.$router.push({ path: "/tests" });
+      }
     },
   },
 };

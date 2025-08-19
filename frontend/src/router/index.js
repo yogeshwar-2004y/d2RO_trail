@@ -6,6 +6,7 @@ import LruDashboard from '@/views/admin/LruDashboard.vue'
 import MemoDashboard from '@/views/admin/MemoDashboard.vue'
 import ReportDashboard from '@/views/admin/ReportDashboard.vue'
 import UserActivities from '@/views/admin/UserActivities.vue'
+import AddUpdateProjects from "@/views/admin/AddUpdateProjects.vue";
 import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
 import designheadRoutes from './designhead'
@@ -15,46 +16,52 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      name: 'login',
+      path: "/",
+      name: "login",
       component: LoginPage,
     },
     {
-      path: '/admin',
-      name: 'HomePageAdmin',
+      path: "/admin",
+      name: "HomePageAdmin",
       component: HomePageAdmin,
     },
     {
-      path: '/projects',
-      name: 'ProjectsDashboard',
-      component: ProjectsDashboard
+      path: "/AddUpdateProjects",
+      name: "AddUpdateProjects",
+      component: AddUpdateProjects,
+    },
+
+    {
+      path: "/projects",
+      name: "ProjectsDashboard",
+      component: ProjectsDashboard,
     },
     {
-      path: '/projects/:projectName/lrus', // New route for the LRU dashboard
-      name: 'LruDashboard',
-      component: LruDashboard
+      path: "/projects/:projectName/lrus", // New route for the LRU dashboard
+      name: "LruDashboard",
+      component: LruDashboard,
     },
     {
-      path: '/memos',
-      name: 'MemoDashboard',
-      component: MemoDashboard
+      path: "/memos",
+      name: "MemoDashboard",
+      component: MemoDashboard,
     },
     {
-      path: '/reports',
-      name: 'ReportDashboard',
-      component: ReportDashboard
+      path: "/reports",
+      name: "ReportDashboard",
+      component: ReportDashboard,
     },
     {
-      path: '/user-activities',
-      name: 'UserActivities',
-      component: UserActivities
+      path: "/user-activities",
+      name: "UserActivities",
+      component: UserActivities,
     },
-    ...reviewerRoutes ,
+    ...reviewerRoutes,
     ...qaheadRoutes,
     ...designheadRoutes,
-    ...designerRoutes
+    ...designerRoutes,
   ],
-})
+});
 
 
 
