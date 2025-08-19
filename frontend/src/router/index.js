@@ -8,6 +8,8 @@ import ReportDashboard from '@/views/admin/ReportDashboard.vue'
 import UserActivities from '@/views/admin/UserActivities.vue'
 import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
+import designheadRoutes from './designhead'
+import designerRoutes from './designer'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -48,7 +50,9 @@ const router = createRouter({
       component: UserActivities
     },
     ...reviewerRoutes ,
-    ...qaheadRoutes
+    ...qaheadRoutes,
+    ...designheadRoutes,
+    ...designerRoutes
   ],
 })
 
