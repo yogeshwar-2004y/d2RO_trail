@@ -57,6 +57,8 @@ export default {
             this.$router.push({ name: "HomePageAdmin" });
           } else if (data.user.role.toLowerCase() === "reviewer") {
             this.$router.push({ name: "HomePageReviewer" });
+          } else if (data.user.role.toLowerCase() === "qahead") {
+            this.$router.push({ name: "HomePageQAHead" });
           } else {
             alert("Unknown role. Please contact support.");
           }
