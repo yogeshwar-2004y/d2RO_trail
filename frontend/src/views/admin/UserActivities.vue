@@ -61,7 +61,7 @@ export default {
   methods: {
     goToPage(pageName) {
       if (pageName === "AddUpdateProjects") {
-        this.$router.push({ path: "/AddUpdateProjects" }); 
+        this.$router.push({ path: "/add-update-projects" });
       } else if (pageName === "AddUpdateUsers") {
         this.$router.push({ path: "/add-update-users" });
       } else if (pageName === "ActivityLogs") {

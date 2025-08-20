@@ -11,6 +11,11 @@ import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
 import designheadRoutes from './designhead'
 import designerRoutes from './designer'
+import ManageProjects from "@/views/admin/ManageProjects.vue";
+import AddUpdateUser from "@/views/admin/AddUpdateUser.vue";
+import ManageUsers from "@/views/admin/ManageUsers.vue";
+import ActivityLogs from "@/views/admin/ActivityLogs.vue";
+import TestsPage from "@/views/admin/TestsPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,25 +26,34 @@ const router = createRouter({
       component: LoginPage,
     },
     {
+      path: "/activity-logs",
+      name: "ActivityLogs",
+      component: ActivityLogs
+    },
+    {
+      path: "/add-update-projects",
+      name: "AddUpdateProjects",
+      component: AddUpdateProjects,
+    },
+    {
+      path: "/add-update-users",
+      name: "AddUpdateUser",
+      component: AddUpdateUser
+    },
+    {
       path: "/admin",
       name: "HomePageAdmin",
       component: HomePageAdmin,
     },
     {
-      path: "/AddUpdateProjects",
-      name: "AddUpdateProjects",
-      component: AddUpdateProjects,
-    },
-
-    {
-      path: "/projects",
-      name: "ProjectsDashboard",
-      component: ProjectsDashboard,
+      path: "/manage-projects",
+      name: "ManageProjects",
+      component: ManageProjects
     },
     {
-      path: "/projects/:projectName/lrus", // New route for the LRU dashboard
-      name: "LruDashboard",
-      component: LruDashboard,
+      path: "/manage-users",
+      name: "ManageUsers",
+      component: ManageUsers
     },
     {
       path: "/memos",
@@ -47,9 +61,24 @@ const router = createRouter({
       component: MemoDashboard,
     },
     {
+      path: "/projects",
+      name: "ProjectsDashboard",
+      component: ProjectsDashboard,
+    },
+    {
+      path: "/projects/:projectName/lrus",
+      name: "LruDashboard",
+      component: LruDashboard,
+    },
+    {
       path: "/reports",
       name: "ReportDashboard",
       component: ReportDashboard,
+    },
+    {
+      path: "/tests",
+      name: "TestsPage",
+      component: TestsPage
     },
     {
       path: "/user-activities",
@@ -62,8 +91,6 @@ const router = createRouter({
     ...designerRoutes,
   ],
 });
-
-
 
 export default router
 
