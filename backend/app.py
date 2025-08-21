@@ -5,7 +5,8 @@ import hashlib
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173"]}}, supports_credentials=True)
+
 
 def hash_password(password):
     """Hash password using SHA-256"""
@@ -24,6 +25,14 @@ conn = psycopg2.connect(
     host="localhost",
     port="5432"
 )
+
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+    return response
+
 
 @app.route('/api')
 def hello_world():
@@ -59,7 +68,7 @@ def login():
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 401
 
-        # Check if password matches (assuming password_hash stores the actual password for now)
+        # Check if password matches (password_hash column stores plain text passwords)
         if verify_password(password, user[3]):
             cur.close()
             return jsonify({

@@ -1,12 +1,12 @@
 // src/router/reviewerroutes.js
 
 import HomePageReviewer from '@/views/reviewer/HomePageReviewer.vue'
-import ReviewerProjectsDashboard from '@/views/reviewer/ReviewerProjectsDashboard.vue'
+/**import ReviewerProjectsDashboard from '@/views/reviewer/ReviewerProjectsDashboard.vue'
 import ReviewerReports from '@/views/reviewer/ReviewerReports.vue'
 import ProjectsDashboard from "@/views/admin/ProjectsDashboard.vue";
 import LruDashboard from "@/views/admin/LruDashboard.vue";
 import MemoDashboard from "@/views/admin/MemoDashboard.vue";
-import ReportDashboard from "@/views/admin/ReportDashboard.vue";
+import ReportDashboard from "@/views/admin/ReportDashboard.vue";*/
 
 const reviewerRoutes = [
   {
