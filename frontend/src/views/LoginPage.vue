@@ -50,21 +50,25 @@ export default {
         const data = await response.json();
 
         if (data.success) {
+          console.log('Login successful:', data.user);
           alert(`Welcome ${data.user.name} (${data.user.role})`);
 
-          // Role-based navigation
-          if (data.user.role.toLowerCase() === "admin") {
+          // Role-based navigation - handle exact role names from database
+          const role = data.user.role.toLowerCase();
+          
+          if (role === "admin") {
             this.$router.push({ name: "HomePageAdmin" });
-          } else if (data.user.role.toLowerCase() === "reviewer") {
+          } else if (role === "qa reviewer") {
             this.$router.push({ name: "HomePageReviewer" });
-          } else if (data.user.role.toLowerCase() === "qahead") {
+          } else if (role === "qa head") {
             this.$router.push({ name: "HomePageQAHead" });
-          } else if (data.user.role.toLowerCase() === "designhead") {
+          } else if (role === "design head") {
             this.$router.push({ name: "HomePageDesignHead" });
-          } else if (data.user.role.toLowerCase() === "designer") {
+          } else if (role === "designer") {
             this.$router.push({ name: "HomePageDesigner" });
           } else {
-            alert("Unknown role. Please contact support.");
+            console.error('Unknown role:', data.user.role);
+            alert(`Unknown role: ${data.user.role}. Please contact support.`);
           }
         } else {
           alert(data.message);

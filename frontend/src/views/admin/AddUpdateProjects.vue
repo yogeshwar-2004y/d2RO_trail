@@ -13,8 +13,8 @@
       <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
 
       <div class="header-actions">
-        <button class="action-btn">Manage Projects</button>
-        <button class="action-btn">Update existing project</button>
+        <button class="action-btn" @click="goToManageProjects">Manage Projects</button>
+        <button class="action-btn" @click="goToUpdateProject">Update existing project</button>
       </div>
     </div>
 
@@ -73,8 +73,15 @@ export default {
   methods: {
     createProject() {
       alert("Project Created: " + JSON.stringify(this.project, null, 2));
-    }
-  }
+    },
+    goToManageProjects() {
+      this.$router.push({ name: 'ManageProjects' });
+    },
+    goToUpdateProject() {
+      alert('Navigating to Update existing project page.');
+      // this.$router.push({ name: 'UpdateProject' });
+    },
+  },
 };
 </script>
 
