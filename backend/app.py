@@ -14,6 +14,7 @@ def hash_password(password):
 def verify_password(password, hashed_password):
     """Verify password against hash"""
     return hash_password(password) == hashed_password
+    #return password == hashed_password
 
 # PostgreSQL connection
 conn = psycopg2.connect(

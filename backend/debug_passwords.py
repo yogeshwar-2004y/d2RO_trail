@@ -18,7 +18,7 @@ def debug_passwords():
         conn = psycopg2.connect(
             dbname="ERP",
             user="postgres",
-            password="Admin",
+            password="12345",
             host="localhost",
             port="5432"
         )
