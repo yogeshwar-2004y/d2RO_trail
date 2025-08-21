@@ -296,8 +296,15 @@ export default {
     },
     selectVersion(version) {
       console.log('Selected version:', version);
-      // Here you would typically load the selected version content
-      alert(`Loading version ${version.version} of ${version.projectId}`);
+      // Navigate to the document version view page
+      this.$router.push({
+        name: 'QAHeadDocumentVersionView',
+        params: {
+          projectName: this.projectName,
+          lruName: this.lruName,
+          versionId: `${version.projectId}-${version.version}`
+        }
+      });
     },
     toggleFavorite(version) {
       version.isFavorite = !version.isFavorite;
