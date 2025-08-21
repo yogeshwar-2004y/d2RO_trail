@@ -85,7 +85,7 @@ export default {
 .activity-logs-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #2c2c2c;
+  background-color: #8f6c6c;
   display: flex;
   flex-direction: column;
   align-items: center;

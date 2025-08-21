@@ -343,4 +343,22 @@ export default {
   font-weight: bold;
   color: #333;
 }
+
+/* Report card background colors based on status */
+.successfully-completed {
+  background-color: #e2fbdc; /* light green */
+}
+
+.assigned {
+  background-color: #c0f4f9; /* light cyan */
+}
+
+.test-not-conducted {
+  background-color: #e8d0fd; /* light purple */
+}
+
+.test-failed {
+  background-color: #ffc4be; /* light red */
+}
+
 </style>

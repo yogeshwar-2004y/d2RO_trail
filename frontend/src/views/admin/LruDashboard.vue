@@ -112,7 +112,14 @@ export default {
       this.showFilter = false;
     },
     viewLru(lruName) {
-      alert(`Viewing LRU: ${lruName}`);
+      // alert(`Viewing LRU: ${lruName}`);
+      this.$router.push({ 
+        name: 'DocumentViewer', 
+        params: { 
+          lruId: lruName, 
+          documentId: 'DOC-ABC-123' 
+        } 
+      });
     },
   },
 };
