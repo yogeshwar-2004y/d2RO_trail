@@ -6,6 +6,7 @@ import PlanDocumentsPage from '@/views/designer/PlanDocumentsPage.vue'
 import MemoPage from '@/views/designer/MemoPage.vue'
 import NewMemoForm from '@/views/designer/NewMemoForm.vue'
 import TestReportsPage from '@/views/designer/TestReportsPage.vue'
+import IqaObservationReport from '@/views/designer/IqaObservationReport.vue'
 
 const routes = [
   {
@@ -38,6 +39,12 @@ const routes = [
     path: '/designer/test-reports',
     name: 'DesignerTestReports',
     component: TestReportsPage
+  },
+  {
+    path: '/designer/iqa-observation-report/:reportId',
+    name: 'DesignerIqaObservationReport',
+    component: IqaObservationReport,
+    props: true
   }
 ]
 

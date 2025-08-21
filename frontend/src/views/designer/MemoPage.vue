@@ -66,7 +66,7 @@
     </div>
     
     <div class="memo-list">
-      <div v-for="memo in filteredMemos" :key="memo.id" class="memo-card" :class="memo.status.toLowerCase().replace(/ /g, '-')">
+      <div v-for="memo in filteredMemos" :key="memo.id" class="memo-card" :class="memo.status.toLowerCase().replace(/ /g, '-')" @click="showMemoDetails(memo)">
         <div class="memo-details">
           <div class="memo-project">{{ memo.project }}</div>
           <div class="memo-author">FROM - AUTHORISING EMP (DESIGN TEAM)</div>
@@ -74,6 +74,140 @@
         <div class="memo-schedule" v-if="memo.assignedDate">
           <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
           <div class="memo-scheduled">TEST SCHEDULED ON : {{ memo.scheduledDate }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Memo Details Modal -->
+    <div v-if="showMemoDetails" class="memo-modal-overlay" @click="closeMemoDetails">
+      <div class="memo-modal" @click.stop>
+        <div class="modal-header">
+          <h2>Memo Details - {{ selectedMemo?.project }}</h2>
+          <button class="close-button" @click="closeMemoDetails">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-content" v-if="selectedMemo">
+          <!-- Basic Memo Info -->
+          <div class="memo-info-section">
+            <h3>Basic Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <label>Project:</label>
+                <span>{{ selectedMemo.project }}</span>
+              </div>
+              <div class="info-item">
+                <label>Status:</label>
+                <span>{{ selectedMemo.status }}</span>
+              </div>
+              <div class="info-item">
+                <label>Assigned Date:</label>
+                <span>{{ selectedMemo.assignedDate }}</span>
+              </div>
+              <div class="info-item">
+                <label>Scheduled Date:</label>
+                <span>{{ selectedMemo.scheduledDate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Data (if available) -->
+          <div v-if="selectedMemo.formData" class="form-data-section">
+            <h3>DGAQA Inspection Details</h3>
+            
+            <!-- General Requisition Information -->
+            <div class="form-section">
+              <h4>General Requisition Information</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>FROM:</label>
+                  <span>{{ selectedMemo.formData.from[0] }} {{ selectedMemo.formData.from[1] }}</span>
+                </div>
+                <div class="info-item">
+                  <label>CASDIC Ref No.:</label>
+                  <span>{{ selectedMemo.formData.casdicRef }}</span>
+                </div>
+                <div class="info-item">
+                  <label>CASDIC:</label>
+                  <span>{{ selectedMemo.formData.casdic }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Dated:</label>
+                  <span>{{ selectedMemo.formData.dated }}</span>
+                </div>
+                <div class="info-item">
+                  <label>TO:</label>
+                  <span>{{ selectedMemo.formData.to[0] }} {{ selectedMemo.formData.to[1] }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Wing/Proj Ref No.:</label>
+                  <span>{{ selectedMemo.formData.wingProjRef }}</span>
+                </div>
+                <div class="info-item full-width">
+                  <label>Coordinator:</label>
+                  <span>{{ selectedMemo.formData.coordinator }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- LRU/SRU Details -->
+            <div class="form-section">
+              <h4>LRU/SRU Details</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Part No:</label>
+                  <span>{{ selectedMemo.formData.partNo }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Manufacturer:</label>
+                  <span>{{ selectedMemo.formData.manufacturer }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Units:</label>
+                  <span>{{ selectedMemo.formData.units }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Drawing No/Rev:</label>
+                  <span>{{ selectedMemo.formData.drawingNo }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Qty Offered:</label>
+                  <span>{{ selectedMemo.formData.qtyOffered }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Source:</label>
+                  <span>{{ selectedMemo.formData.source }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unit Identification -->
+            <div class="form-section">
+              <h4>Unit Identification & Inspection</h4>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Unit Identification:</label>
+                  <span>{{ selectedMemo.formData.unitIdentification }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Mechanical Inspection:</label>
+                  <span>{{ selectedMemo.formData.mechanicalInspn }}</span>
+                </div>
+                <div class="info-item">
+                  <label>Inspection Stage:</label>
+                  <span>{{ selectedMemo.formData.inspectionStage }}</span>
+                </div>
+                <div class="info-item">
+                  <label>STTE Status:</label>
+                  <span>{{ selectedMemo.formData.stteStatus }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -90,6 +224,8 @@ export default {
       showMemoFilter: false,
       activeProjectFilter: null,
       activeMemoFilter: null,
+      showMemoDetails: false,
+      selectedMemo: null,
       projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
       memoStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
@@ -110,6 +246,19 @@ export default {
         { id: 8, project: 'PROJ004', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'SUCCESSFULLY COMPLETED' },
       ],
     };
+  },
+  mounted() {
+    // Check if there's a new memo from the form
+    if (this.$route.params.newMemo) {
+      try {
+        const newMemo = JSON.parse(this.$route.params.newMemo);
+        this.addNewMemo(newMemo);
+        // Clear the route params
+        this.$router.replace({ name: 'DesignerMemo' });
+      } catch (error) {
+        console.error('Error parsing new memo:', error);
+      }
+    }
   },
   computed: {
     filteredMemos() {
@@ -151,6 +300,18 @@ export default {
     submitNewMemo() {
       // Navigate to the new memo form
       this.$router.push({ name: 'DesignerNewMemo' });
+    },
+    addNewMemo(newMemo) {
+      // Add the new memo to the beginning of the list
+      this.memos.unshift(newMemo);
+    },
+    showMemoDetails(memo) {
+      this.selectedMemo = memo;
+      this.showMemoDetails = true;
+    },
+    closeMemoDetails() {
+      this.showMemoDetails = false;
+      this.selectedMemo = null;
     }
   }
 };
@@ -301,23 +462,24 @@ export default {
   border: 2px solid #007bff;
 }
 
+/* Status-based colors for Memo Cards - Updated to very light pastel shades */
 .success, .successfully-completed {
-  background-color: #e2fbdc;
+  background-color: #f5f5dc; /* Very Light Yellow/Beige */
 }
 .disapproved {
-  background-color: #ffd8d6;
+  background-color: #ffe4e1; /* Very Light Red/Salmon */
 }
 .assigned {
-  background-color: #d1d8ff;
+  background-color: #e6f3ff; /* Very Light Blue */
 }
 .observation, .completed-with-observations {
-  background-color: #fdddfa;
+  background-color: #f0e6ff; /* Very Light Purple */
 }
 .not-conducted, .test-not-conducted {
-  background-color: #fdd8d6;
+  background-color: #ffe6f0; /* Very Light Pink */
 }
 .not-assigned {
-  background-color: #fff1d6;
+  background-color: #fff2e6; /* Very Light Orange/Peach */
 }
 
 .memo-list {
@@ -362,5 +524,111 @@ export default {
   text-align: right;
   font-size: 0.9em;
   color: #555;
+}
+
+/* Memo Modal Styles */
+.memo-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.memo-modal {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  color: #888;
+}
+
+.close-button:hover {
+  color: #333;
+}
+
+.modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.memo-info-section, .form-data-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.memo-info-section h3, .form-data-section h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-weight: bold;
+  font-size: 0.9em;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.info-item span {
+  font-size: 1em;
+  color: #000;
+  word-break: break-word;
+}
+
+.form-section h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  color: #333;
+}
+
+.full-width {
+  grid-column: 1 / -1; /* Span across all columns */
 }
 </style>

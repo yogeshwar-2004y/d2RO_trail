@@ -18,39 +18,39 @@
         <div class="form-row">
           <div class="form-group">
             <label>FROM:</label>
-            <input type="text" class="form-input" placeholder="">
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.from[0]" placeholder="">
+            <input type="text" class="form-input" v-model="formData.from[1]" placeholder="">
           </div>
           <div class="form-group">
             <label>CASDIC Ref No.:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.casdicRef" placeholder="">
           </div>
           <div class="form-group">
             <label>CASDIC/</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.casdic" placeholder="">
           </div>
           <div class="form-group">
             <label>Dated:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.dated" placeholder="">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>TO:</label>
-            <input type="text" class="form-input" placeholder="">
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.to[0]" placeholder="">
+            <input type="text" class="form-input" v-model="formData.to[1]" placeholder="">
           </div>
           <div class="form-group">
             <label>Wing/Proj Ref No.:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.wingProjRef" placeholder="">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group full-width">
             <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.coordinator" placeholder="">
           </div>
         </div>
       </div>
@@ -74,18 +74,18 @@
         <div class="form-row">
           <div class="form-group">
             <label>Part No:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.partNo" placeholder="">
           </div>
           <div class="form-group">
             <label>Manufacturer:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.manufacturer" placeholder="">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Sl.No of units:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.units" placeholder="">
             <div class="dropdown-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6,9 12,15 18,9"></polyline>
@@ -94,18 +94,18 @@
           </div>
           <div class="form-group">
             <label>Drawing no /Rev:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.drawingNo" placeholder="">
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Qty Offered:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.qtyOffered" placeholder="">
           </div>
           <div class="form-group">
             <label>source:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.source" placeholder="">
           </div>
         </div>
 
@@ -117,11 +117,11 @@
             <span>rev</span>
           </div>
           <div class="ref-rows">
-            <div class="ref-row" v-for="i in 5" :key="i">
-              <input type="text" class="ref-input" placeholder="">
-              <input type="text" class="ref-input" placeholder="">
-              <input type="text" class="ref-input" placeholder="">
-              <input type="text" class="ref-input" placeholder="">
+            <div class="ref-row" v-for="(doc, index) in formData.referenceDocs" :key="index">
+              <input type="text" class="ref-input" v-model="doc.doc" placeholder="">
+              <input type="text" class="ref-input" v-model="doc.refNo" placeholder="">
+              <input type="text" class="ref-input" v-model="doc.ver" placeholder="">
+              <input type="text" class="ref-input" v-model="doc.rev" placeholder="">
             </div>
           </div>
         </div>
@@ -134,7 +134,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>UNIT IDENTIFICATION:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.unitIdentification" placeholder="">
             <div class="dropdown-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6,9 12,15 18,9"></polyline>
@@ -143,7 +143,7 @@
           </div>
           <div class="form-group">
             <label>MECHANICAL INSPN:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.mechanicalInspn" placeholder="">
             <div class="dropdown-icon">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6,9 12,15 18,9"></polyline>
@@ -155,11 +155,11 @@
         <div class="form-row">
           <div class="form-group">
             <label>INSPECTION / TEST STAGE OFFERED NOW :</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.inspectionStage" placeholder="">
           </div>
           <div class="form-group">
             <label>STTE Status:</label>
-            <input type="text" class="form-input" placeholder="">
+            <input type="text" class="form-input" v-model="formData.stteStatus" placeholder="">
           </div>
         </div>
       </div>
@@ -200,10 +200,22 @@ export default {
   },
   methods: {
     submitForm() {
-      // Handle form submission
-      console.log('Form submitted:', this.formData);
-      // Navigate back or show success message
-      this.$router.go(-1);
+      // Create new memo object
+      const newMemo = {
+        id: Date.now(), // Generate unique ID
+        project: this.formData.wingProjRef || 'NEW PROJECT',
+        author: 'Design Team',
+        assignedDate: this.formData.dated || '01-07-2025',
+        scheduledDate: '04-07-2025',
+        status: 'NOT ASSIGNED',
+        formData: { ...this.formData } // Store all form data
+      };
+
+      // Emit event to parent or use router to pass data
+      this.$router.push({
+        name: 'DesignerMemo',
+        params: { newMemo: JSON.stringify(newMemo) }
+      });
     }
   }
 };
