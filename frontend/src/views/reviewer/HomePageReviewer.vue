@@ -65,6 +65,7 @@ export default {
       // Logic to log the user out and redirect to the login page
       // e.g., this.$router.push({ name: 'login' });
       alert('Logging out...');
+      this.$router.push({ name: 'login' }); 
     }
   }
 };

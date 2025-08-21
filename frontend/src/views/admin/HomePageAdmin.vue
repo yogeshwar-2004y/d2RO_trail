@@ -33,7 +33,7 @@
         <div class="card-title">MEMO</div>
       </div>
       <div class="card" @click="goToPage('ReportDashboard')">
-        <div class="card-icon">u
+        <div class="card-icon">
           <svg xmlns="" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 20h9"></path>
             <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
@@ -78,6 +78,8 @@ export default {
       // Logic to log the user out and redirect to the login page
       // e.g., this.$router.push({ name: 'login' });
       alert('Logging out...');
+            this.$router.push({ name: 'login' }); 
+
     }
   }
 };
