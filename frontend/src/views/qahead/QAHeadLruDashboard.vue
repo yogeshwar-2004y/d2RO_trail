@@ -112,7 +112,14 @@ export default {
       this.showFilter = false;
     },
     viewLru(lruName) {
-      alert(`QA Head viewing LRU: ${lruName}`);
+      // Navigate to the LRU Document View, passing the LRU name and project name
+      this.$router.push({ 
+        name: 'QAHeadLruDocumentView', 
+        params: { 
+          lruName: lruName,
+          projectName: this.$route.params.projectName || 'Unknown Project'
+        } 
+      });
     },
   },
 };

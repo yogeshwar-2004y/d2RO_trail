@@ -3,6 +3,9 @@
 import HomePageQAHead from '@/views/qahead/HomePageQAHead.vue'
 import QAHeadProjectsDashboard from '@/views/qahead/QAHeadProjectsDashboard.vue'
 import QAHeadLruDashboard from '@/views/qahead/QAHeadLruDashboard.vue'
+import QAHeadLruDocumentView from '@/views/qahead/QAHeadLruDocumentView.vue'
+import QAHeadAssignReviewer from '@/views/qahead/QAHeadAssignReviewer.vue'
+import QAHeadViewObservations from '@/views/qahead/QAHeadViewObservations.vue'
 import QAHeadMemoDashboard from '@/views/qahead/QAHeadMemoDashboard.vue'
 import QAHeadReportDashboard from '@/views/qahead/QAHeadReportDashboard.vue'
 
@@ -23,6 +26,21 @@ const qaheadRoutes = [
     component: QAHeadLruDashboard,
   },
   {
+    path: '/qahead/projects/:projectName/lrus/:lruName',
+    name: 'QAHeadLruDocumentView',
+    component: QAHeadLruDocumentView,
+  },
+  {
+    path: '/qahead/assign-reviewer',
+    name: 'QAHeadAssignReviewer',
+    component: QAHeadAssignReviewer,
+  },
+  {
+    path: '/qahead/view-observations',
+    name: 'QAHeadViewObservations',
+    component: QAHeadViewObservations,
+  },
+  {
     path: '/qahead/memos',
     name: 'QAHeadMemoDashboard',
     component: QAHeadMemoDashboard,
@@ -32,6 +50,6 @@ const qaheadRoutes = [
     name: 'QAHeadReportDashboard',
     component: QAHeadReportDashboard,
   },
-]
+];
 
-export default qaheadRoutes
+export default qaheadRoutes;
