@@ -43,6 +43,9 @@
         <span v-if="isVersionSpecific" class="version-info">
           (Version {{ currentVersion }} - Revision {{ reportData.revision }})
         </span>
+        <span v-if="isReportSpecific" class="report-info">
+          (Report {{ reportData.projectNumber }} - {{ reportData.status || 'Status: Pending' }})
+        </span>
       </div>
 
       <!-- Document Details Grid -->
@@ -126,15 +129,6 @@
             </tbody>
           </table>
         </div>
-        
-        <!-- Add New Observation Button -->
-        <button class="add-observation-btn" @click="addObservation">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"></line>
-            <line x1="5" y1="12" x2="19" y2="12"></line>
-          </svg>
-          Add Observation
-        </button>
       </div>
 
       <!-- Digital Signatures -->
@@ -176,8 +170,10 @@ export default {
       lruName: '',
       projectName: '',
       versionId: '',
+      reportId: '',
       currentVersion: '',
       isVersionSpecific: false,
+      isReportSpecific: false,
       reportData: {
         projectName: '',
         projectNumber: '',
@@ -185,6 +181,7 @@ export default {
         version: '',
         revision: '',
         lruName: '',
+        status: '',
         observations: [],
         reviewedBy: '',
         approvedBy: '',
@@ -212,6 +209,7 @@ export default {
     this.lruName = this.$route.params.lruName || 'Unknown LRU';
     this.projectName = this.$route.params.projectName || 'Unknown Project';
     this.versionId = this.$route.params.versionId || '';
+    this.reportId = this.$route.params.reportId || '';
     
     // Check if this is a version-specific observation view
     if (this.versionId) {
@@ -221,6 +219,11 @@ export default {
       if (lastDashIndex !== -1) {
         this.currentVersion = this.versionId.substring(lastDashIndex + 1);
       }
+    }
+    
+    // Check if this is a report-specific view
+    if (this.reportId) {
+      this.isReportSpecific = true;
     }
     
     // Load observation data
@@ -233,6 +236,9 @@ export default {
       if (this.isVersionSpecific) {
         // Load version-specific observation data
         this.loadVersionSpecificData();
+      } else if (this.isReportSpecific) {
+        // Load report-specific observation data
+        this.loadReportSpecificData();
       } else {
         // Load general observation data
         this.loadGeneralData();
@@ -423,6 +429,7 @@ export default {
         version: 'General',
         revision: '1.0',
         lruName: this.lruName,
+        status: 'In Progress',
         observations: [
           {
             observationNumber: 'OBS-001',
@@ -442,8 +449,99 @@ export default {
       };
     },
     
-    addObservation() {
-      this.reportData.observations.push({ category: '', description: '', status: '', notes: '' });
+    loadReportSpecificData() {
+      // Load report-specific observation data based on reportId
+      const reportData = {
+        '1': {
+          projectName: this.projectName,
+          projectNumber: 'PRJ-2025-078',
+          projectDate: '2025-01-15',
+          version: 'A',
+          revision: '1.0',
+          lruName: this.lruName,
+          status: 'SUCCESSFULLY COMPLETED',
+          observations: [
+            {
+              observationNumber: 'OBS-001',
+              description: 'Report MEMO-2025-018 successfully completed with all QA requirements met',
+              category: 'Quality Assurance',
+              severity: 'Low',
+              status: 'Completed',
+              assignedTo: 'QA Team',
+              dueDate: '2025-01-20',
+              notes: 'All quality standards verified and documented'
+            },
+            {
+              observationNumber: 'OBS-002',
+              description: 'Technical specifications reviewed and approved',
+              category: 'Technical Review',
+              severity: 'Medium',
+              status: 'Completed',
+              assignedTo: 'Technical Lead',
+              dueDate: '2025-01-25',
+              notes: 'Technical requirements fully satisfied'
+            }
+          ],
+          reviewedBy: 'Sarah Johnson',
+          approvedBy: 'Mike Wilson',
+          reviewDate: '2025-01-18',
+          approvalDate: '2025-01-20'
+        },
+        '2': {
+          projectName: this.projectName,
+          projectNumber: 'PRJ-2025-079',
+          projectDate: '2025-01-18',
+          version: 'B',
+          revision: '2.0',
+          lruName: this.lruName,
+          status: 'ASSIGNED',
+          observations: [
+            {
+              observationNumber: 'OBS-003',
+              description: 'Report MEMO002 assigned and under review',
+              category: 'Assignment',
+              severity: 'Medium',
+              status: 'In Progress',
+              assignedTo: 'QA Team',
+              dueDate: '2025-01-30',
+              notes: 'Currently being reviewed by assigned team members'
+            }
+          ],
+          reviewedBy: 'John Smith',
+          approvedBy: 'Pending',
+          reviewDate: '2025-01-22',
+          approvalDate: 'Pending'
+        },
+        '3': {
+          projectName: this.projectName,
+          projectNumber: 'PRJ-2025-080',
+          projectDate: '2025-01-20',
+          version: 'C',
+          revision: '3.0',
+          lruName: this.lruName,
+          status: 'TEST FAILED',
+          observations: [
+            {
+              observationNumber: 'OBS-004',
+              description: 'Report MEMO003 test failed during execution',
+              category: 'Test Execution',
+              severity: 'High',
+              status: 'Failed',
+              assignedTo: 'Test Team',
+              dueDate: '2025-01-28',
+              notes: 'Test failure analysis in progress, root cause investigation required'
+            }
+          ],
+          reviewedBy: 'Test Lead',
+          approvedBy: 'Pending',
+          reviewDate: '2025-01-25',
+          approvalDate: 'Pending'
+        }
+      };
+      
+      // Load data for the specific report, or default to first report if not found
+      const selectedReportData = reportData[this.reportId] || reportData['1'];
+      this.reportData = { ...this.reportData, ...selectedReportData };
     },
     
     saveReport() {
@@ -617,6 +715,13 @@ export default {
   margin-left: 10px;
 }
 
+.report-info {
+  font-size: 0.9em;
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 10px;
+}
+
 .version-badge, .revision-badge {
   background-color: #6c757d;
   color: white;
@@ -749,26 +854,6 @@ export default {
   font-size: 0.9em;
   resize: vertical;
   font-family: inherit;
-}
-
-.add-observation-btn {
-  background: #4a5568;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3);
-}
-
-.add-observation-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(74, 85, 104, 0.4);
 }
 
 /* Signatures Section */

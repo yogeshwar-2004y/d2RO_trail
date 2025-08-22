@@ -66,7 +66,13 @@
     </div>
     
     <div class="report-grid">
-      <div v-for="report in filteredReports" :key="report.id" class="report-card" :class="report.status.toLowerCase().replace(/ /g, '-')">
+      <div 
+        v-for="report in filteredReports" 
+        :key="report.id" 
+        class="report-card" 
+        :class="report.status.toLowerCase().replace(/ /g, '-')"
+        @click="viewReport(report)"
+      >
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -152,6 +158,17 @@ export default {
     selectReportStatus(status) {
       this.activeReportFilter = this.activeReportFilter === status ? null : status;
       this.showReportFilter = false;
+    },
+    viewReport(report) {
+      // Navigate to the QAHeadViewObservations form with report data
+      this.$router.push({
+        name: 'QAHeadViewObservations',
+        params: {
+          lruName: report.name,
+          projectName: report.project,
+          reportId: report.id
+        }
+      });
     }
   }
 };
