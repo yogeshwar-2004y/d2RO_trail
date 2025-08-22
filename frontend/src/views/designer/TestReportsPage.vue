@@ -1,5 +1,5 @@
 <template>
-  <div class="report-dashboard">
+  <div class="test-reports-page">
     <div class="header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
@@ -8,30 +8,36 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-      </div>
-      <div class="header-center">
-        <div class="page-title">
-          <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <line x1="10" y1="9" x2="8" y2="9"></line>
-          </svg>
-          <span class="title-text">REPORTS</span>
+        <div class="brand-section">
+          <img src="@/assets/images/aviatrax-logo.png" alt="AVIATRAX Logo" class="logo">
         </div>
       </div>
+      
+      <div class="header-center">
+        <div class="title-section">
+          <span class="title-text">REPORT</span>
+          <svg class="report-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14,2 14,8 20,8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10,9 9,9 8,9"></polyline>
+          </svg>
+        </div>
+      </div>
+      
       <div class="header-right">
-        <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search Reports" class="search-input">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="search-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
         <div class="filter-dropdown">
           <button class="filter-button" @click="toggleProjectFilter">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"></polygon>
+            </svg>
             Filter By Projects
           </button>
           <div v-if="showProjectFilter" class="filter-panel">
@@ -48,6 +54,9 @@
         </div>
         <div class="filter-dropdown">
           <button class="filter-button" @click="toggleReportFilter">
+            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"></polygon>
+            </svg>
             Filter Reports
           </button>
           <div v-if="showReportFilter" class="filter-panel">
@@ -65,21 +74,27 @@
       </div>
     </div>
     
-    <div class="report-grid">
+    <div class="reports-grid">
       <div 
         v-for="report in filteredReports" 
         :key="report.id" 
-        class="report-card" 
+        class="report-card"
         :class="report.status.toLowerCase().replace(/ /g, '-')"
-        @click="viewReport(report)"
+        @click="selectReport(report)"
       >
-        <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="report-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
+            <polyline points="14,2 14,8 20,8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10,9 9,9 8,9"></polyline>
           </svg>
         </div>
-        <span class="card-title">{{ report.name }}</span>
+        <div class="report-label">
+          <div class="report-text">MEMO</div>
+          <div class="report-number">{{ report.number }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -87,38 +102,31 @@
 
 <script>
 export default {
-  name: 'QAHeadReportDashboard',
+  name: 'DesignerTestReportsPage',
   data() {
     return {
-      searchQuery: '',
       showProjectFilter: false,
       showReportFilter: false,
       activeProjectFilter: null,
       activeReportFilter: null,
       projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
       reportStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
+        { name: 'SUCCESSFULLY COMPLETED', color: 'successfully-completed' },
         { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'TEST FAILED', color: 'failed' },
+        { name: 'COMPLETED WITH OBSERVATIONS', color: 'completed-with-observations' },
+        { name: 'TEST NOT CONDUCTED', color: 'test-not-conducted' },
+        { name: 'TEST FAILED', color: 'test-failed' },
       ],
       reports: [
-        { id: 1, project: 'PROJ001', name: 'MEMO-2025-018', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 2, project: 'PROJ002', name: 'MEMO002', status: 'ASSIGNED' },
-        { id: 3, project: 'PROJ003', name: 'MEMO003', status: 'TEST FAILED' },
-        { id: 4, project: 'PROJ001', name: 'MEMO004', status: 'TEST NOT CONDUCTED' },
-        { id: 5, project: 'PROJ002', name: 'MEMO005', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 6, project: 'PROJ003', name: 'MEMO006', status: 'ASSIGNED' },
-        { id: 7, project: 'PROJ004', name: 'MEMO007', status: 'TEST NOT CONDUCTED' },
-        { id: 8, project: 'PROJ004', name: 'MEMO008', status: 'TEST FAILED' },
-        { id: 9, project: 'PROJ005', name: 'MEMO009', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 10, project: 'PROJ005', name: 'MEMO010', status: 'ASSIGNED' },
-        { id: 11, project: 'PROJ006', name: 'MEMO011', status: 'TEST NOT CONDUCTED' },
-        { id: 12, project: 'PROJ006', name: 'MEMO012', status: 'TEST FAILED' },
-        { id: 13, project: 'PROJ001', name: 'MEMO013', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 14, project: 'PROJ002', name: 'MEMO014', status: 'ASSIGNED' },
-        { id: 15, project: 'PROJ003', name: 'MEMO015', status: 'TEST NOT CONDUCTED' },
-        { id: 16, project: 'PROJ004', name: 'MEMO016', status: 'TEST FAILED' },
+        { id: 1, number: '001', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ001' },
+        { id: 2, number: '002', status: 'ASSIGNED', project: 'PROJ002' },
+        { id: 3, number: '004', status: 'TEST NOT CONDUCTED', project: 'PROJ003' },
+        { id: 4, number: '005', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ001' },
+        { id: 5, number: '007', status: 'TEST FAILED', project: 'PROJ002' },
+        { id: 6, number: '012', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ003' },
+        { id: 7, number: '013', status: 'TEST NOT CONDUCTED', project: 'PROJ004' },
+        { id: 8, number: '019', status: 'ASSIGNED', project: 'PROJ005' },
+        { id: 9, number: '020', status: 'COMPLETED WITH OBSERVATIONS', project: 'PROJ006' },
       ],
     };
   },
@@ -132,11 +140,6 @@ export default {
 
       if (this.activeReportFilter) {
         filtered = filtered.filter(report => report.status === this.activeReportFilter);
-      }
-      
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(report => report.name.toLowerCase().includes(query));
       }
 
       return filtered;
@@ -159,24 +162,17 @@ export default {
       this.activeReportFilter = this.activeReportFilter === status ? null : status;
       this.showReportFilter = false;
     },
-    viewReport(report) {
-      // Navigate to the QAHeadViewObservations form with report data
-      this.$router.push({
-        name: 'QAHeadViewObservations',
-        params: {
-          lruName: report.name,
-          projectName: report.project,
-          reportId: report.id
-        }
-      });
+    selectReport(report) {
+      // Handle report selection - navigate to report details or open modal
+      console.log('Selected report:', report);
+      // Example: this.$router.push({ name: 'ReportDetails', params: { reportId: report.id } });
     }
   }
 };
 </script>
 
 <style scoped>
-.report-dashboard {
-  font-family: Arial, sans-serif;
+.test-reports-page {
   min-height: 100vh;
   background-color: #f0f0f0;
 }
@@ -185,7 +181,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 30px;
+  padding: 20px;
   background: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -196,12 +192,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex: 1;
 }
 
 .back-button {
   background: none;
   border: none;
   cursor: pointer;
+  color: #333;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
 }
 
 .logo {
@@ -210,52 +213,38 @@ export default {
 
 .header-center {
   display: flex;
-  align-items: center;
-  flex-grow: 1;
   justify-content: center;
+  align-items: center;
+  flex: 1;
 }
 
-.page-title {
+.title-section {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.title-icon {
-  color: #555;
-  width: 32px;
-  height: 32px;
+.title-text {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #333;
 }
 
-.title-text {
-  font-size: 1.5em;
-  font-weight: bold;
+.report-icon {
+  color: #333;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 20px;
-}
-
-.search-box {
-  position: relative;
-}
-
-.search-input {
-  width: 250px;
-  padding: 10px 15px;
-  padding-left: 40px;
-  border: 1px solid #ccc;
-  border-radius: 25px;
+  flex: 1;
+  justify-content: flex-end;
 }
 
 .search-icon {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
+  cursor: pointer;
+  color: #333;
 }
 
 .filter-dropdown {
@@ -269,12 +258,20 @@ export default {
   padding: 10px 15px;
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9em;
+}
+
+.filter-icon {
+  color: #333;
 }
 
 .filter-panel {
   position: absolute;
   top: 100%;
-  left: -114px;
+  right: 0;
   margin-top: 10px;
   width: 250px;
   background: #fff;
@@ -304,74 +301,91 @@ export default {
   border: 2px solid #007bff;
 }
 
-/* Status-based colors for Report Filters */
-.success, .successfully-completed {
-  background-color: #e2fbdc;
+/* Status-based colors for Report Cards */
+.successfully-completed {
+  background-color: #e2fbdc; /* Light Green */
 }
 .assigned {
-  background-color: #c0f4f9;
+  background-color: #d1d8ff; /* Light Blue */
 }
-.not-conducted, .test-not-conducted {
-  background-color: #e8d0fd;
+.completed-with-observations {
+  background-color: #fdddfa; /* Light Pink */
 }
-.failed, .test-failed {
-  background-color: #ffc4be;
+.test-not-conducted {
+  background-color: #ffd8d6; /* Light Red/Salmon */
+}
+.test-failed {
+  background-color: #fdd8d6; /* Light Purple */
 }
 
-.report-grid {
+.reports-grid {
+  padding: 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
-  padding: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .report-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
   border-radius: 15px;
-  padding: 20px;
+  padding: 30px 20px;
+  text-align: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 180px;
-  text-align: center;
+  transition: all 0.3s ease;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .report-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
-/* Dynamic card colors based on status */
-.report-card.successfully-completed {
-  background-color: #e2fbdc;
-}
-.report-card.assigned {
-  background-color: #c0f4f9;
-}
-.report-card.test-not-conducted {
-  background-color: #e8d0fd;
-}
-.report-card.test-failed {
-  background-color: #ffc4be;
-}
-
-.card-icon {
-  margin-bottom: 10px;
-}
-
-.card-icon svg {
-  color: #555;
-  width: 48px;
-  height: 48px;
-}
-
-.card-title {
-  font-size: 1em;
-  font-weight: bold;
+.report-icon {
+  margin-bottom: 15px;
   color: #333;
+}
+
+.report-label {
+  text-align: center;
+}
+
+.report-text {
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.report-number {
+  font-weight: bold;
+  font-size: 1.3em;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .header-left,
+  .header-center,
+  .header-right {
+    flex: none;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .reports-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 15px;
+  }
 }
 </style>

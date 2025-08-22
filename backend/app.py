@@ -13,14 +13,14 @@ def hash_password(password):
 
 def verify_password(password, hashed_password):
     """Verify password against hash"""
-    #return hash_password(password) == hashed_password
-    return password == hashed_password
+    return hash_password(password) == hashed_password
+    #return password == hashed_password
 
 # PostgreSQL connection
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Mahadev@2004",
+    password="Admin",
     host="localhost",
     port="5432"
 )
