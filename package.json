@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mammoth": "^1.10.0",
+    "vue-pdf-embed": "^2.1.3"
+  }
+}
