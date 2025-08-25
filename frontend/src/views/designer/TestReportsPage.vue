@@ -4,25 +4,22 @@
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5"></path>
-            <polyline points="12 19 5 12 12 5"></polyline>
+            <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
-        <div class="brand-section">
-          <img src="@/assets/images/aviatrax-logo.png" alt="AVIATRAX Logo" class="logo">
-        </div>
+        <img src="@/assets/images/aviatrax-logo.png" alt="AVIATRAX Logo" class="logo">
       </div>
       
       <div class="header-center">
         <div class="title-section">
-          <span class="title-text">REPORT</span>
-          <svg class="report-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14,2 14,8 20,8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <polyline points="10,9 9,9 8,9"></polyline>
           </svg>
+          <span class="title-text">REPORT</span>
         </div>
       </div>
       
@@ -35,9 +32,6 @@
         </div>
         <div class="filter-dropdown">
           <button class="filter-button" @click="toggleProjectFilter">
-            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"></polygon>
-            </svg>
             Filter By Projects
           </button>
           <div v-if="showProjectFilter" class="filter-panel">
@@ -54,9 +48,6 @@
         </div>
         <div class="filter-dropdown">
           <button class="filter-button" @click="toggleReportFilter">
-            <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46 22,3"></polygon>
-            </svg>
             Filter Reports
           </button>
           <div v-if="showReportFilter" class="filter-panel">
@@ -64,7 +55,7 @@
               v-for="status in reportStatuses"
               :key="status.name"
               class="filter-option"
-              :class="[status.color, { 'selected': activeReportFilter === status.name }]"
+              :class="{ 'selected': activeReportFilter === status.name }"
               @click="selectReportStatus(status.name)"
             >
               {{ status.name }}
@@ -75,13 +66,7 @@
     </div>
     
     <div class="reports-grid">
-      <div 
-        v-for="report in filteredReports" 
-        :key="report.id" 
-        class="report-card"
-        :class="report.status.toLowerCase().replace(/ /g, '-')"
-        @click="selectReport(report)"
-      >
+      <div v-for="report in filteredReports" :key="report.id" class="report-card" :class="report.status.toLowerCase().replace(/ /g, '-')" @click="selectReport(report)">
         <div class="report-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -96,6 +81,25 @@
           <div class="report-number">{{ report.number }}</div>
         </div>
       </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination">
+      <button class="pagination-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="pagination-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Restart Button -->
+    <div class="restart-section">
+      <button class="restart-btn">Restart R</button>
     </div>
   </div>
 </template>
@@ -118,17 +122,28 @@ export default {
         { name: 'TEST FAILED', color: 'test-failed' },
       ],
       reports: [
-        { id: 1, number: '001', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ001' },
-        { id: 2, number: '002', status: 'ASSIGNED', project: 'PROJ002' },
-        { id: 3, number: '004', status: 'TEST NOT CONDUCTED', project: 'PROJ003' },
-        { id: 4, number: '005', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ001' },
-        { id: 5, number: '007', status: 'TEST FAILED', project: 'PROJ002' },
-        { id: 6, number: '012', status: 'SUCCESSFULLY COMPLETED', project: 'PROJ003' },
-        { id: 7, number: '013', status: 'TEST NOT CONDUCTED', project: 'PROJ004' },
-        { id: 8, number: '019', status: 'ASSIGNED', project: 'PROJ005' },
-        { id: 9, number: '020', status: 'COMPLETED WITH OBSERVATIONS', project: 'PROJ006' },
+        { id: 1, number: '001', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 2, number: '002', status: 'ASSIGNED' },
+        { id: 3, number: '004', status: 'TEST NOT CONDUCTED' },
+        { id: 4, number: '005', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 5, number: '007', status: 'TEST FAILED' },
+        { id: 6, number: '012', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 7, number: '013', status: 'TEST NOT CONDUCTED' },
+        { id: 8, number: '019', status: 'ASSIGNED' },
+        { id: 9, number: '020', status: 'COMPLETED WITH OBSERVATIONS' }
       ],
     };
+  },
+  mounted() {
+    // Log all available routes for debugging
+    console.log('All available routes:', this.$router.getRoutes());
+    console.log('Current route:', this.$route);
+    
+    // Check if our specific route exists
+    const targetRoute = this.$router.getRoutes().find(route => 
+      route.name === 'DesignerIqaObservationReport'
+    );
+    console.log('Target route found:', targetRoute);
   },
   computed: {
     filteredReports() {
@@ -163,9 +178,33 @@ export default {
       this.showReportFilter = false;
     },
     selectReport(report) {
-      // Handle report selection - navigate to report details or open modal
-      console.log('Selected report:', report);
-      // Example: this.$router.push({ name: 'ReportDetails', params: { reportId: report.id } });
+      console.log('Report clicked:', report);
+      console.log('Current route:', this.$route);
+      
+      // Try using route name first
+      this.$router.push({
+        name: 'DesignerIqaObservationReport',
+        params: { reportId: report.id.toString() }
+      }).then(() => {
+        console.log('Navigation successful using name');
+      }).catch((error) => {
+        console.error('Navigation failed with name, trying path:', error);
+        
+        // Fallback to path
+        const targetPath = `/designer/iqa-observation-report/${report.id}`;
+        this.$router.push(targetPath).then(() => {
+          console.log('Navigation successful using path');
+        }).catch((pathError) => {
+          console.error('Navigation failed with path too:', pathError);
+          
+          // Last resort - try to navigate to a simple route
+          this.$router.push('/designer').then(() => {
+            console.log('Basic navigation works, issue is with specific route');
+          }).catch((basicError) => {
+            console.error('Even basic navigation failed:', basicError);
+          });
+        });
+      });
     }
   }
 };
@@ -192,19 +231,13 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  flex: 1;
 }
 
 .back-button {
   background: none;
   border: none;
   cursor: pointer;
-  color: #333;
-}
-
-.brand-section {
-  display: flex;
-  align-items: center;
+  padding: 5px;
 }
 
 .logo {
@@ -224,13 +257,15 @@ export default {
   gap: 10px;
 }
 
-.title-text {
-  font-weight: bold;
-  font-size: 1.1em;
+.title-icon {
   color: #333;
+  width: 32px;
+  height: 32px;
 }
 
-.report-icon {
+.title-text {
+  font-size: 1.8em;
+  font-weight: bold;
   color: #333;
 }
 
@@ -238,13 +273,15 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
-  flex: 1;
-  justify-content: flex-end;
 }
 
 .search-icon {
-  cursor: pointer;
   color: #333;
+}
+
+.search-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .filter-dropdown {
@@ -253,15 +290,17 @@ export default {
 
 .filter-button {
   background: #f0f0f0;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 20px;
-  padding: 10px 15px;
-  font-weight: bold;
+  padding: 10px 16px;
+  font-weight: 500;
+  color: #333;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9em;
+  transition: background-color 0.2s;
+}
+
+.filter-button:hover {
+  background: #e0e0e0;
 }
 
 .filter-icon {
@@ -299,23 +338,6 @@ export default {
 
 .filter-option.selected {
   border: 2px solid #007bff;
-}
-
-/* Status-based colors for Report Cards */
-.successfully-completed {
-  background-color: #e2fbdc; /* Light Green */
-}
-.assigned {
-  background-color: #d1d8ff; /* Light Blue */
-}
-.completed-with-observations {
-  background-color: #fdddfa; /* Light Pink */
-}
-.test-not-conducted {
-  background-color: #ffd8d6; /* Light Red/Salmon */
-}
-.test-failed {
-  background-color: #fdd8d6; /* Light Purple */
 }
 
 .reports-grid {
@@ -366,6 +388,75 @@ export default {
   font-weight: bold;
   font-size: 1.3em;
   color: #333;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.pagination-btn {
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.pagination-btn:hover {
+  background: #555;
+}
+
+/* Restart Button */
+.restart-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-right: 20px;
+}
+
+.restart-btn {
+  background: #333;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.restart-btn:hover {
+  background: #555;
+}
+
+/* Status-based colors for Report Cards */
+.successfully-completed {
+  background-color: #e2fbdc;
+}
+
+.assigned {
+  background-color: #d1d8ff;
+}
+
+.completed-with-observations {
+  background-color: #fdddfa;
+}
+
+.test-not-conducted {
+  background-color: #ffd8d6;
+}
+
+.test-failed {
+  background-color: #fdd8d6;
 }
 
 @media (max-width: 768px) {
