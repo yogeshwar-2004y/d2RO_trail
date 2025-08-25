@@ -10,15 +10,32 @@
       <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
       <span class="page-title">ASSIGN PROJECT</span>
     </div>
-    <div class="card-grid">
-      <div v-for="project in projects" :key="project.id" class="project-card" @click="viewProjectMembers(project.id)">
+    
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading projects...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div v-else-if="error" class="error-container">
+      <p class="error-message">{{ error }}</p>
+      <button @click="fetchProjects" class="retry-button">Retry</button>
+    </div>
+    
+    <!-- Projects grid -->
+    <div v-else class="card-grid">
+      <div v-if="projects.length === 0" class="no-projects">
+        <p>No projects found.</p>
+      </div>
+      <div v-else v-for="project in projects" :key="project.id" class="project-card" @click="viewProjectMembers(project.id)">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
-        <span class="card-title">{{ project.name }}</span>
+        <span class="card-title">PROJ ID: {{ project.id }}</span>
       </div>
     </div>
   </div>
@@ -29,14 +46,35 @@ export default {
   name: 'ProjectsForAssigning',
   data() {
     return {
-      projects: [
-        { id: 'PRJ001', name: 'PRJ001' },
-        { id: 'PRJ002', name: 'PRJ002' },
-        { id: 'PRJ003', name: 'PRJ003' },
-      ],
+      projects: [],
+      loading: true,
+      error: null
     };
   },
+  async mounted() {
+    await this.fetchProjects();
+  },
   methods: {
+    async fetchProjects() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch('http://localhost:5000/api/projects');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.projects = data.projects;
+        } else {
+          this.error = data.message || 'Failed to fetch projects';
+        }
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        this.error = 'Failed to connect to server. Please check if the backend is running.';
+      } finally {
+        this.loading = false;
+      }
+    },
     viewProjectMembers(projectId) {
       this.$router.push({ name: 'ProjectMembers', params: { projectId } });
     },
@@ -105,5 +143,77 @@ export default {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+}
+
+.card-description {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 5px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #555;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background-color: #1565c0;
+}
+
+.no-projects {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1.1em;
 }
 </style>

@@ -23,7 +23,7 @@ const qaheadRoutes = [
     component: QAHeadProjectsDashboard,
   },
   {
-    path: '/qahead/projects/:projectName/lrus',
+    path: '/qahead/projects/:projectId/lrus',
     name: 'QAHeadLruDashboard',
     component: QAHeadLruDashboard,
   },
