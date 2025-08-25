@@ -331,9 +331,207 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-buttons" v-if="memoData.status === 'Not Assigned'">
-      <button class="btn btn-accept" @click="acceptMemo">ACCEPT</button>
-      <button class="btn btn-reject" @click="rejectMemo">REJECT</button>
+    <div class="action-buttons" v-if="memoData.status === 'Not Assigned' && !showTestReviewSection && !showRejectionSection">
+      <button class="btn btn-accept" @click="showAcceptOverlay = true">ACCEPT</button>
+      <button class="btn btn-reject" @click="showRejectOverlay = true">REJECT</button>
+    </div>
+
+    <!-- Status Display (shown after Accept/Reject) -->
+    <div v-if="showTestReviewSection || showRejectionSection" class="status-display">
+      <div class="status-badge" :class="showTestReviewSection ? 'accepted' : 'rejected'">
+        <svg v-if="showTestReviewSection" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+        <span>{{ showTestReviewSection ? 'MEMO ACCEPTED' : 'MEMO REJECTED' }}</span>
+      </div>
+      <p class="status-date">Processed on: {{ new Date().toLocaleDateString() }}</p>
+    </div>
+
+    <!-- Accept Overlay - Test or Review Details -->
+    <div v-if="showAcceptOverlay" class="overlay" @click="closeAcceptOverlay">
+      <div class="overlay-content" @click.stop>
+        <div class="overlay-header">
+          <h2>TEST OR REVIEW DETAILS</h2>
+          <button class="close-button" @click="closeAcceptOverlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="overlay-body">
+          <div class="form-row">
+            <div class="form-field">
+              <label>DATE OF TEST OR REVIEW</label>
+              <input type="date" v-model="acceptFormData.testDate">
+            </div>
+            <div class="form-field">
+              <label>INTERNAL TESTER EMP ID</label>
+              <input type="text" v-model="acceptFormData.testerId" placeholder="Enter tester ID">
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-field">
+              <label>INTERNAL TESTER NAME</label>
+              <input type="text" v-model="acceptFormData.testerName" placeholder="Enter tester name">
+            </div>
+            <div class="form-field">
+              <label>COMMENTS</label>
+              <textarea v-model="acceptFormData.comments" placeholder="Enter comments"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-field">
+              <label>AUTHENTICATION</label>
+              <input type="text" v-model="acceptFormData.authentication" placeholder="Enter authentication">
+            </div>
+            <div class="form-field">
+              <label>ATTACHMENTS</label>
+              <input type="file" @change="handleAttachmentUpload" multiple>
+            </div>
+          </div>
+        </div>
+        
+        <div class="overlay-footer">
+          <button class="btn btn-primary" @click="submitAcceptForm">DONE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reject Overlay - Memo Rejection Details -->
+    <div v-if="showRejectOverlay" class="overlay" @click="closeRejectOverlay">
+      <div class="overlay-content" @click.stop>
+        <div class="overlay-header">
+          <h2>MEMO REJECTION DETAILS</h2>
+          <button class="close-button" @click="closeRejectOverlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="overlay-body">
+          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'comments' }" @click="selectRejectionSection('comments')">
+            <div class="section-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <span>COMMENTS</span>
+            <div class="notification-icon">!</div>
+          </div>
+          
+          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'authentication' }" @click="selectRejectionSection('authentication')">
+            <div class="section-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+            </div>
+            <span>AUTHENTICATION</span>
+            <div class="notification-icon">!</div>
+          </div>
+          
+          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'attachments' }" @click="selectRejectionSection('attachments')">
+            <div class="section-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+              </svg>
+            </div>
+            <span>ATTACHMENTS</span>
+          </div>
+          
+          <!-- Dynamic content based on selected section -->
+          <div class="section-content">
+            <div v-if="rejectionFormData.section === 'comments'" class="content-area">
+              <label>Rejection Comments:</label>
+              <textarea v-model="rejectionFormData.comments" placeholder="Enter rejection comments..."></textarea>
+            </div>
+            
+            <div v-if="rejectionFormData.section === 'authentication'" class="content-area">
+              <label>Authentication Details:</label>
+              <input type="text" v-model="rejectionFormData.authentication" placeholder="Enter authentication details">
+            </div>
+            
+            <div v-if="rejectionFormData.section === 'attachments'" class="content-area">
+              <label>Rejection Attachments:</label>
+              <input type="file" @change="handleRejectionAttachmentUpload" multiple>
+            </div>
+          </div>
+        </div>
+        
+        <div class="overlay-footer">
+          <button class="btn btn-primary" @click="submitRejectForm">DONE</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Section - Test or Review Details (shown after Accept) -->
+    <div v-if="showTestReviewSection" class="form-section test-review-details">
+      <h3>Test or Review Details</h3>
+      <div class="details-grid">
+        <div class="detail-row">
+          <div class="detail-field">
+            <label>Date of Test or Review :</label>
+            <div class="detail-value">{{ acceptFormData.testDate }}</div>
+          </div>
+          <div class="detail-field wide-field">
+            <label>Comments :</label>
+            <div class="detail-value">{{ acceptFormData.comments }}</div>
+          </div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-field">
+            <label>Internal Tester ID:</label>
+            <div class="detail-value">{{ acceptFormData.testerId }}</div>
+          </div>
+          <div class="detail-field">
+            <label>Internal Tester Name :</label>
+            <div class="detail-value">{{ acceptFormData.testerName }}</div>
+          </div>
+        </div>
+        
+        <div class="detail-row">
+          <div class="detail-field">
+            <label>Authentication</label>
+            <div class="detail-value">{{ acceptFormData.authentication }}</div>
+          </div>
+          <div class="detail-field">
+            <label>Attachments</label>
+            <div class="detail-value">{{ acceptFormData.attachments.length > 0 ? acceptFormData.attachments.join(', ') : 'No attachments' }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Section - Rejection Details (shown after Reject) -->
+    <div v-if="showRejectionSection" class="form-section rejection-details">
+      <h3>Memo Rejection Details</h3>
+      <div class="rejection-content">
+        <div class="rejection-item">
+          <label>Rejection Comments:</label>
+          <div class="rejection-value">{{ rejectionFormData.comments }}</div>
+        </div>
+        
+        <div class="rejection-item">
+          <label>Authentication:</label>
+          <div class="rejection-value">{{ rejectionFormData.authentication }}</div>
+        </div>
+        
+        <div class="rejection-item">
+          <label>Attachments:</label>
+          <div class="rejection-value">{{ rejectionFormData.attachments.length > 0 ? rejectionFormData.attachments.join(', ') : 'No attachments' }}</div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -347,6 +545,32 @@ export default {
       memoData: {
         status: 'Not Assigned'
       },
+      // Overlay visibility
+      showAcceptOverlay: false,
+      showRejectOverlay: false,
+      
+      // Accept form data
+      acceptFormData: {
+        testDate: '',
+        testerId: '',
+        testerName: '',
+        comments: '',
+        authentication: '',
+        attachments: []
+      },
+      
+      // Reject form data
+      rejectionFormData: {
+        section: 'comments',
+        comments: '',
+        authentication: '',
+        attachments: []
+      },
+      
+      // Additional sections visibility
+      showTestReviewSection: false,
+      showRejectionSection: false,
+      
       formData: {
         from: '',
         casdicRef: '',
@@ -414,6 +638,11 @@ export default {
   mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
+    console.log('Component mounted, initial data:', {
+      memoId: this.memoId,
+      rejectionFormData: this.rejectionFormData,
+      acceptFormData: this.acceptFormData
+    });
   },
   methods: {
     loadMemoData() {
@@ -439,13 +668,68 @@ export default {
       this.formData.manufacturer = 'Aviatrax Industries';
       this.formData.description = 'Main Control Unit for Aircraft Navigation System';
     },
-    acceptMemo() {
-      alert('Memo accepted successfully!');
-      this.$router.go(-1);
+    // Overlay management
+    closeAcceptOverlay() {
+      this.showAcceptOverlay = false;
     },
+    
+    closeRejectOverlay() {
+      this.showRejectOverlay = false;
+    },
+    
+    // Rejection section selection
+    selectRejectionSection(section) {
+      console.log('Selecting rejection section:', section);
+      this.rejectionFormData.section = section;
+      console.log('Updated rejection form data:', this.rejectionFormData);
+    },
+    
+    // File upload handlers
+    handleAttachmentUpload(event) {
+      const files = Array.from(event.target.files);
+      this.acceptFormData.attachments = files.map(file => file.name);
+    },
+    
+    handleRejectionAttachmentUpload(event) {
+      const files = Array.from(event.target.files);
+      this.rejectionFormData.attachments = files.map(file => file.name);
+    },
+    
+    // Form submission
+    submitAcceptForm() {
+      if (!this.acceptFormData.testDate || !this.acceptFormData.testerId || !this.acceptFormData.testerName) {
+        alert('Please fill in all required fields');
+        return;
+      }
+      
+      this.showTestReviewSection = true;
+      this.closeAcceptOverlay();
+      alert('Memo accepted successfully! Test/Review details have been added.');
+    },
+    
+    submitRejectForm() {
+      console.log('Submit reject form called');
+      console.log('Rejection form data:', this.rejectionFormData);
+      
+      if (!this.rejectionFormData.comments || !this.rejectionFormData.authentication) {
+        alert('Please fill in all required fields');
+        console.log('Validation failed - missing required fields');
+        return;
+      }
+      
+      this.showRejectionSection = true;
+      this.closeRejectOverlay();
+      alert('Memo rejected! Rejection details have been added.');
+      console.log('Rejection form submitted successfully');
+    },
+    
+    // Legacy methods (kept for compatibility)
+    acceptMemo() {
+      this.showAcceptOverlay = true;
+    },
+    
     rejectMemo() {
-      alert('Memo rejected!');
-      this.$router.go(-1);
+      this.showRejectOverlay = true;
     }
   }
 };
@@ -839,6 +1123,17 @@ export default {
   box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
 }
 
+.btn-primary {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
 @media (max-width: 768px) {
   .form-header {
     flex-direction: column;
@@ -883,6 +1178,332 @@ export default {
   .btn {
     width: 100%;
     max-width: 300px;
+  }
+}
+
+/* Overlay Styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+}
+
+.overlay-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.close-button:hover {
+  background-color: #e9ecef;
+}
+
+.overlay-body {
+  padding: 20px;
+}
+
+.overlay-body .form-row {
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.overlay-body .form-field {
+  margin-bottom: 15px;
+}
+
+.overlay-body textarea {
+  width: 100%;
+  height: 80px;
+  padding: 12px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 1em;
+}
+
+.overlay-footer {
+  padding: 20px;
+  border-top: 1px solid #e9ecef;
+  background-color: #f8f9fa;
+  text-align: center;
+}
+
+/* Rejection Section Styles */
+.rejection-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: white;
+  border: 1px solid #e9ecef;
+}
+
+.rejection-section:hover {
+  background-color: #f8f9fa;
+}
+
+.rejection-section.active {
+  background-color: #e9ecef;
+  border-color: #007bff;
+}
+
+.section-icon {
+  color: #6c757d;
+}
+
+.notification-icon {
+  background-color: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  margin-left: auto;
+}
+
+.section-content {
+  margin-top: 20px;
+}
+
+.content-area {
+  margin-bottom: 20px;
+}
+
+.content-area label {
+  display: block;
+  font-weight: bold;
+  color: #495057;
+  margin-bottom: 8px;
+}
+
+.content-area input,
+.content-area textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 1em;
+  background-color: white;
+  color: #333;
+  cursor: text;
+}
+
+.content-area input:focus,
+.content-area textarea:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.content-area textarea {
+  height: 100px;
+  resize: vertical;
+}
+
+/* Additional Sections Styles */
+.test-review-details,
+.rejection-details {
+  background-color: white;
+  border-radius: 10px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.test-review-details h3,
+.rejection-details h3 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
+}
+
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.detail-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-field.wide-field {
+  grid-column: span 2;
+}
+
+.detail-field label {
+  font-weight: bold;
+  color: #495057;
+  font-size: 0.9em;
+}
+
+.detail-value {
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  color: #333;
+  min-height: 20px;
+}
+
+.rejection-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rejection-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rejection-item label {
+  font-weight: bold;
+  color: #495057;
+  font-size: 0.9em;
+}
+
+.rejection-value {
+  padding: 12px 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  color: #333;
+  min-height: 20px;
+}
+
+/* Status Display Styles */
+.status-display {
+  text-align: center;
+  margin: 40px 0;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px 40px;
+  border-radius: 50px;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.status-badge.accepted {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.status-badge.rejected {
+  background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.status-badge svg {
+  width: 28px;
+  height: 28px;
+}
+
+.status-date {
+  color: #6c757d;
+  font-size: 1em;
+  margin: 0;
+}
+
+/* Responsive Design for Overlays */
+@media (max-width: 768px) {
+  .overlay-content {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .overlay-body .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .detail-field.wide-field {
+    grid-column: span 1;
+  }
+  
+  .rejection-section {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .notification-icon {
+    margin-left: 0;
+  }
+  
+  .status-badge {
+    flex-direction: column;
+    gap: 10px;
+    padding: 15px 30px;
   }
 }
 </style>
