@@ -16,7 +16,7 @@
       </div>
       <div class="header-right">
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search Projects" class="search-input">
+          <input type="text" v-model="searchQuery" placeholder="Search by Project ID" class="search-input">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -24,15 +24,32 @@
         </div>
       </div>
     </div>
-    <div class="card-grid">
-      <div v-for="project in filteredProjects" :key="project.id" class="project-card" @click="viewProject(project.name)">
+    
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading projects...</p>
+    </div>
+    
+    <!-- Error state -->
+    <div v-else-if="error" class="error-container">
+      <p class="error-message">{{ error }}</p>
+      <button @click="fetchProjects" class="retry-button">Retry</button>
+    </div>
+    
+    <!-- Projects grid -->
+    <div v-else class="card-grid">
+      <div v-if="filteredProjects.length === 0" class="no-projects">
+        <p>No projects found.</p>
+      </div>
+      <div v-else v-for="project in filteredProjects" :key="project.id" class="project-card" @click="viewProject(project)">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
-        <span class="card-title">{{ project.name }}</span>
+        <span class="card-title">PROJ ID: {{ project.id }}</span>
       </div>
     </div>
   </div>
@@ -44,32 +61,9 @@ export default {
   data() {
     return {
       searchQuery: '',
-      projects: [
-        { id: 1, name: 'PRJ-2025-018' },
-        { id: 2, name: 'PRJ002' },
-        { id: 3, name: 'PRJ003' },
-        { id: 4, name: 'PRJ004' },
-        { id: 5, name: 'PRJ005' },
-        { id: 6, name: 'PRJ006' },
-        { id: 7, name: 'PRJ007' },
-        { id: 8, name: 'PRJ008' },
-        { id: 9, name: 'PRJ009' },
-        { id: 10, name: 'PRJ010' },
-        { id: 11, name: 'PRJ011' },
-        { id: 12, name: 'PRJ012' },
-        { id: 13, name: 'PRJ013' },
-        { id: 14, name: 'PRJ014' },
-        { id: 15, name: 'PRJ015' },
-        { id: 16, name: 'PRJ016' },
-        { id: 17, name: 'PRJ017' },
-        { id: 18, name: 'PRJ018' },
-        { id: 19, name: 'PRJ019' },
-        { id: 20, name: 'PRJ020' },
-        { id: 21, name: 'PRJ021' },
-        { id: 22, name: 'PRJ022' },
-        { id: 23, name: 'PRJ023' },
-        { id: 24, name: 'PRJ024' },
-      ],
+      projects: [],
+      loading: true,
+      error: null
     };
   },
   computed: {
@@ -79,18 +73,40 @@ export default {
       }
       const query = this.searchQuery.toLowerCase();
       return this.projects.filter(project =>
-        project.name.toLowerCase().includes(query)
+        project.id.toString().toLowerCase().includes(query)
       );
     },
   },
+  async mounted() {
+    await this.fetchProjects();
+  },
   methods: {
-    viewProject(projectName) {
-      // Navigate to the LRU Dashboard, passing the project name as a parameter
-      this.$router.push({ name: 'LruDashboard', params: { projectName } });
-      
-      // In a real application, you would navigate to the project's detail page
-      // this.$router.push({ name: 'ProjectDetail', params: { projectName } });
-      // alert(`Viewing project: ${projectName}`);
+    async fetchProjects() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch('http://localhost:5000/api/projects');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.projects = data.projects;
+        } else {
+          this.error = data.message || 'Failed to fetch projects';
+        }
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        this.error = 'Failed to connect to server. Please check if the backend is running.';
+      } finally {
+        this.loading = false;
+      }
+    },
+    viewProject(project) {
+      // Navigate to the LRU Dashboard, passing the project ID as a parameter
+      this.$router.push({ 
+        name: 'LruDashboard', 
+        params: { projectId: project.id, projectName: project.name } 
+      });
     },
   },
 };
@@ -201,5 +217,77 @@ export default {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+}
+
+.card-description {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 5px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #555;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background-color: #1565c0;
+}
+
+.no-projects {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1.1em;
 }
 </style>

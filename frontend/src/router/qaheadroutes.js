@@ -8,6 +8,7 @@ import QAHeadDocumentVersionView from '@/views/qahead/QAHeadDocumentVersionView.
 import QAHeadAssignReviewer from '@/views/qahead/QAHeadAssignReviewer.vue'
 import QAHeadViewObservations from '@/views/qahead/QAHeadViewObservations.vue'
 import QAHeadMemoDashboard from '@/views/qahead/QAHeadMemoDashboard.vue'
+import QAHeadMemoForm from '@/views/qahead/QAHeadMemoForm.vue'
 import QAHeadReportDashboard from '@/views/qahead/QAHeadReportDashboard.vue'
 
 const qaheadRoutes = [
@@ -22,7 +23,7 @@ const qaheadRoutes = [
     component: QAHeadProjectsDashboard,
   },
   {
-    path: '/qahead/projects/:projectName/lrus',
+    path: '/qahead/projects/:projectId/lrus',
     name: 'QAHeadLruDashboard',
     component: QAHeadLruDashboard,
   },
@@ -50,6 +51,11 @@ const qaheadRoutes = [
     path: '/qahead/memos',
     name: 'QAHeadMemoDashboard',
     component: QAHeadMemoDashboard,
+  },
+  {
+    path: '/qahead/memos/:memoId',
+    name: 'QAHeadMemoForm',
+    component: QAHeadMemoForm,
   },
   {
     path: '/qahead/reports',

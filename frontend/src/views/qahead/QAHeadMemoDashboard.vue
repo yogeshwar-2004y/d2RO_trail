@@ -54,7 +54,13 @@
     </div>
     
     <div class="memo-list">
-      <div v-for="memo in filteredMemos" :key="memo.id" class="memo-card" :class="memo.status.toLowerCase().replace(/ /g, '-')">
+      <div 
+        v-for="memo in filteredMemos" 
+        :key="memo.id" 
+        class="memo-card" 
+        :class="memo.status.toLowerCase().replace(/ /g, '-')"
+        @click="viewMemo(memo)"
+      >
         <div class="memo-details">
           <div class="memo-project">{{ memo.project }}</div>
           <div class="memo-author">FROM - AUTHORISING EMP (DESIGN TEAM)</div>
@@ -135,6 +141,12 @@ export default {
     selectMemoStatus(status) {
       this.activeMemoFilter = this.activeMemoFilter === status ? null : status;
       this.showMemoFilter = false;
+    },
+    viewMemo(memo) {
+      this.$router.push({ 
+        name: 'QAHeadMemoForm', 
+        params: { memoId: memo.id } 
+      });
     }
   }
 };
@@ -281,6 +293,12 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: #000;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.memo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .memo-details {

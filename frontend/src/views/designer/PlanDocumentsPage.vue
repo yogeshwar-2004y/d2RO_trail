@@ -39,20 +39,8 @@
           
           <!-- Filter Dropdown -->
           <div class="filter-dropdown" v-if="showFilterDropdown">
-            <div class="filter-option cleared" @click="filterByStatus('cleared')">
-              CLEARED
-            </div>
-            <div class="filter-option disapproved" @click="filterByStatus('disapproved')">
-              DISAPPROVED
-            </div>
-            <div class="filter-option assigned-returned" @click="filterByStatus('assigned-returned')">
-              ASSIGNED & RETURNED
-            </div>
-            <div class="filter-option moved-next" @click="filterByStatus('moved-next')">
-              MOVED TO NEXT STAGE
-            </div>
-            <div class="filter-option not-cleared" @click="filterByStatus('not-cleared')">
-              NOT CLEARED
+            <div class="filter-option" v-for="option in filterOptions" :key="option" @click="filterByStatus(option)">
+              {{ option }}
             </div>
           </div>
         </div>
@@ -62,24 +50,20 @@
     <!-- Main Content -->
     <main class="main-content">
       <div class="lru-grid">
-        <div 
-          v-for="lru in filteredLrus" 
-          :key="lru.id" 
-          class="lru-card"
-          :class="lru.status"
-          @click="selectLru(lru)"
-        >
+        <div v-for="lru in filteredLrus" :key="lru.id" class="lru-card" :class="lru.status.toLowerCase().replace(/ /g, '-')" @click="selectLru(lru)">
           <div class="lru-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
+              <polyline points="14,2 14,8 20,8"></polyline>
               <line x1="16" y1="13" x2="8" y2="13"></line>
               <line x1="16" y1="17" x2="8" y2="17"></line>
-              <line x1="10" y1="9" x2="8" y2="9"></line>
+              <polyline points="10,9 9,9 8,9"></polyline>
             </svg>
           </div>
-          <div class="lru-label">LRU</div>
-          <div class="lru-name">&lt;NAME&gt;</div>
+          <div class="lru-label">
+            <div class="lru-text">LRU</div>
+            <div class="lru-name">{{ lru.name }}</div>
+          </div>
         </div>
       </div>
     </main>
@@ -98,26 +82,34 @@ export default {
   data() {
     return {
       showFilterDropdown: false,
-      currentFilter: null,
+      currentFilter: 'All',
       lrus: [
-        { id: 1, status: 'cleared', name: 'LRU001' },
-        { id: 2, status: 'assigned-returned', name: 'LRU002' },
-        { id: 3, status: 'moved-next', name: 'LRU003' },
-        { id: 4, status: 'not-cleared', name: 'LRU004' },
-        { id: 5, status: 'cleared', name: 'LRU005' },
-        { id: 6, status: 'assigned-returned', name: 'LRU006' },
-        { id: 7, status: 'disapproved', name: 'LRU007' },
-        { id: 8, status: 'cleared', name: 'LRU008' },
-        { id: 9, status: 'assigned-returned', name: 'LRU009' },
-        { id: 10, status: 'moved-next', name: 'LRU010' },
-        { id: 11, status: 'not-cleared', name: 'LRU011' },
-        { id: 12, status: 'cleared', name: 'LRU012' }
+        { id: 1, name: 'LRU001', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 2, name: 'LRU002', status: 'ASSIGNED' },
+        { id: 3, name: 'LRU003', status: 'COMPLETED WITH OBSERVATIONS' },
+        { id: 4, name: 'LRU004', status: 'TEST NOT CONDUCTED' },
+        { id: 5, name: 'LRU005', status: 'TEST FAILED' },
+        { id: 6, name: 'LRU006', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 7, name: 'LRU007', status: 'ASSIGNED' },
+        { id: 8, name: 'LRU008', status: 'COMPLETED WITH OBSERVATIONS' },
+        { id: 9, name: 'LRU009', status: 'SUCCESSFULLY COMPLETED' },
+        { id: 10, name: 'LRU010', status: 'ASSIGNED' },
+        { id: 11, name: 'LRU011', status: 'TEST NOT CONDUCTED' },
+        { id: 12, name: 'LRU012', status: 'SUCCESSFULLY COMPLETED' }
+      ],
+      filterOptions: [
+        'All',
+        'SUCCESSFULLY COMPLETED',
+        'ASSIGNED',
+        'COMPLETED WITH OBSERVATIONS',
+        'TEST NOT CONDUCTED',
+        'TEST FAILED'
       ]
     };
   },
   computed: {
     filteredLrus() {
-      if (!this.currentFilter) return this.lrus;
+      if (this.currentFilter === 'All') return this.lrus;
       return this.lrus.filter(lru => lru.status === this.currentFilter);
     }
   },
@@ -129,7 +121,7 @@ export default {
       this.showFilterDropdown = !this.showFilterDropdown;
     },
     filterByStatus(status) {
-      this.currentFilter = this.currentFilter === status ? null : status;
+      this.currentFilter = status;
       this.showFilterDropdown = false;
     },
     selectLru(lru) {
@@ -332,66 +324,87 @@ export default {
 
 /* LRU Card Styles */
 .lru-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  background: white;
   border-radius: 15px;
   padding: 30px 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
-  height: 200px;
-  text-align: center;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .lru-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
 }
 
 .lru-icon {
   margin-bottom: 15px;
-}
-
-.lru-icon svg {
   color: #333;
-  width: 48px;
-  height: 48px;
 }
 
 .lru-label {
-  font-size: 1.2em;
+  text-align: center;
+}
+
+.lru-text {
   font-weight: bold;
+  font-size: 1.1em;
   color: #333;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .lru-name {
-  font-size: 1em;
   font-weight: bold;
+  font-size: 1.3em;
   color: #333;
 }
 
-/* LRU Card Colors - Exact from Figma */
-.lru-card.cleared {
-  background: #90EE90; /* Light Green */
+/* Status-based colors for LRU Cards - Updated to match Test Reports colors */
+.successfully-completed {
+  background-color: #e2fbdc; /* Light Green - matches Test Reports */
 }
 
-.lru-card.assigned-returned {
-  background: #87CEEB; /* Light Blue/Cyan */
+.assigned {
+  background-color: #d1d8ff; /* Light Blue - matches Test Reports */
 }
 
-.lru-card.moved-next {
-  background: #DDA0DD; /* Light Purple */
+.completed-with-observations {
+  background-color: #fdddfa; /* Light Pink - matches Test Reports */
 }
 
-.lru-card.not-cleared {
-  background: #FFDAB9; /* Light Orange */
+.test-not-conducted {
+  background-color: #ffd8d6; /* Light Red/Salmon - matches Test Reports */
 }
 
-.lru-card.disapproved {
-  background: #FFB6C1; /* Light Red/Pink */
+.test-failed {
+  background-color: #fdddfa; /* Light Pink - matches Test Reports */
+}
+
+/* Additional status colors to match Test Reports */
+.cleared {
+  background-color: #e2fbdc; /* Light Green */
+}
+
+.disapproved {
+  background-color: #ffd8d6; /* Light Red/Salmon */
+}
+
+.pending {
+  background-color: #d1d8ff; /* Light Blue */
+}
+
+.approved {
+  background-color: #e2fbdc; /* Light Green */
+}
+
+.review {
+  background-color: #fdddfa; /* Light Pink */
 }
 
 /* Responsive Design */

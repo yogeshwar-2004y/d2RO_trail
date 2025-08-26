@@ -17,46 +17,45 @@
             <line x1="16" y1="17" x2="8" y2="17"></line>
             <line x1="10" y1="9" x2="8" y2="9"></line>
           </svg>
-          <span class="title-text">PLAN DOCUMENTS</span>
+          <span class="title-text">{{ projectName }} - LRUs</span>
         </div>
       </div>
       <div class="header-right">
-        <button class="filter-button" @click="toggleFilter">
-          <svg class="filter-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+        <div class="search-box">
+          <input type="text" v-model="searchQuery" placeholder="Search LRUs" class="search-input">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <span class="filter-text">Filter Documents</span>
-        </button>
+        </div>
       </div>
     </div>
 
-    <div v-if="showFilter" class="filter-panel">
-      <div
-        v-for="status in statuses"
-        :key="status.name"
-        class="filter-option"
-        :class="[status.color, { active: activeFilter === status.name }]"
-        @click="filterByStatus(status.name)"
-      >
-        {{ status.name }}
-      </div>
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading LRUs...</p>
     </div>
 
-    <div class="lru-grid">
-      <div
-        v-for="lru in filteredLrus"
-        :key="lru.id"
-        class="lru-card"
-        :class="lru.status.toLowerCase().replace(/ /g, '-')"
-        @click="viewLru(lru.name)"
-      >
+    <!-- Error state -->
+    <div v-else-if="error" class="error-container">
+      <p class="error-message">{{ error }}</p>
+      <button @click="fetchLrus" class="retry-button">Retry</button>
+    </div>
+
+    <!-- LRUs grid -->
+    <div v-else class="lru-grid">
+      <div v-if="filteredLrus.length === 0" class="no-lrus">
+        <p>No LRUs found for this project.</p>
+      </div>
+      <div v-else v-for="lru in filteredLrus" :key="lru.id" class="lru-card" @click="viewLru(lru)">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
-        <span class="card-title">LRU <br> &lt;NAME&gt;</span>
+        <span class="card-title">{{ lru.name }}</span>
       </div>
     </div>
   </div>
@@ -67,60 +66,76 @@ export default {
   name: 'LruDashboard',
   data() {
     return {
-      showFilter: false,
-      activeFilter: null,
-      statuses: [
-        { name: 'Cleared', color: 'cleared-color' },
-        { name: 'Disapproved', color: 'disapproved-color' },
-        { name: 'Assigned & Returned', color: 'assigned-returned-color' },
-        { name: 'Moved to Next Stage', color: 'moved-to-next-stage-color' },
-        { name: 'Not Cleared', color: 'not-cleared-color' }
-      ],
-      lrus: [
-        { id: 1, name: 'LRU-001', status: 'Cleared' },
-        { id: 2, name: 'LRU-002', status: 'Assigned & Returned' },
-        { id: 3, name: 'LRU-003', status: 'Moved to Next Stage' },
-        { id: 4, name: 'LRU-004', status: 'Cleared' },
-        { id: 5, name: 'LRU-005', status: 'Disapproved' },
-        { id: 6, name: 'LRU-006', status: 'Not Cleared' },
-        { id: 7, name: 'LRU-007', status: 'Cleared' },
-        { id: 8, name: 'LRU-008', status: 'Disapproved' },
-        { id: 9, name: 'LRU-009', status: 'Assigned & Returned' },
-        { id: 10, name: 'LRU-010', status: 'Cleared' },
-        { id: 11, name: 'LRU-011', status: 'Moved to Next Stage' },
-        { id: 12, name: 'LRU-012', status: 'Not Cleared' },
-        { id: 13, name: 'LRU-013', status: 'Cleared' },
-        { id: 14, name: 'LRU-014', status: 'Disapproved' },
-        { id: 15, name: 'LRU-015', status: 'Assigned & Returned' },
-      ],
+      projectId: null,
+      projectName: '',
+      searchQuery: '',
+      lrus: [],
+      loading: true,
+      error: null
     };
   },
   computed: {
     filteredLrus() {
-      if (!this.activeFilter) {
+      if (!this.searchQuery) {
         return this.lrus;
       }
-      return this.lrus.filter(lru => lru.status === this.activeFilter);
+      const query = this.searchQuery.toLowerCase();
+      return this.lrus.filter(lru =>
+        lru.name.toLowerCase().includes(query)
+      );
     },
   },
+  async mounted() {
+    // Get project ID and name from route params
+    this.projectId = parseInt(this.$route.params.projectId);
+    this.projectName = this.$route.params.projectName || 'Project';
+    
+    if (this.projectId) {
+      await this.fetchLrus();
+    } else {
+      this.error = 'Project ID not found';
+      this.loading = false;
+    }
+  },
   methods: {
-    toggleFilter() {
-      this.showFilter = !this.showFilter;
+    async fetchLrus() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}/lrus`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.lrus = data.lrus;
+          this.projectName = data.project.name;
+        } else {
+          this.error = data.message || 'Failed to fetch LRUs';
+        }
+      } catch (err) {
+        console.error('Error fetching LRUs:', err);
+        this.error = 'Failed to connect to server. Please check if the backend is running.';
+      } finally {
+        this.loading = false;
+      }
     },
-    filterByStatus(status) {
-      this.activeFilter = this.activeFilter === status ? null : status;
-      this.showFilter = false;
+    viewLru(lru) {
+      // Navigate to document viewer or LRU detail page
+      alert(`Viewing LRU: ${lru.name}`);
+      // this.$router.push({ 
+      //   name: 'DocumentViewer', 
+      //   params: { 
+      //     lruId: lru.id, 
+      //     lruName: lru.name,
+      //     projectId: this.projectId
+      //   } 
+      // });
     },
-    viewLru(lruName) {
-      // alert(`Viewing LRU: ${lruName}`);
-      this.$router.push({ 
-        name: 'DocumentViewer', 
-        params: { 
-          lruId: lruName, 
-          documentId: 'DOC-ABC-123' 
-        } 
-      });
-    },
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    }
   },
 };
 </script>
@@ -147,6 +162,13 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
+  padding: 8px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #f0f0f0;
 }
 
 .header-center {
@@ -176,77 +198,89 @@ export default {
   font-weight: bold;
 }
 
-.filter-button {
+.header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px 15px;
-  border-radius: 20px;
-  background-color: #f0f0f0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 15px;
 }
 
-.filter-text {
-  font-weight: bold;
-}
-
-.filter-panel {
-  position: absolute;
-  top: 90px;
-  right: 30px;
+.search-box {
+  position: relative;
   width: 250px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  padding: 10px;
-  z-index: 5;
 }
 
-.filter-option {
-  padding: 15px;
-  margin-bottom: 5px;
-  border-radius: 8px;
-  font-weight: bold;
-  color: #000;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+.search-input {
+  width: 100%;
+  padding: 10px 15px;
+  padding-right: 40px;
+  border: 1px solid #ccc;
+  border-radius: 25px;
+  font-size: 1em;
+  outline: none;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
   text-align: center;
 }
 
-.filter-option:hover {
-  transform: translateY(-2px);
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #555;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
 }
 
-.filter-option.active {
-  border: 2px solid #007bff;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* Status colors based on the image */
-.cleared-color, .cleared-color.active {
-  background-color: #e2fbdc;
-  border-color: #008000;
-}
-.disapproved-color, .disapproved-color.active {
-  background-color: #ffd8d6;
-  border-color: #ff0000;
-}
-.assigned-returned-color, .assigned-returned-color.active {
-  background-color: #d1d8ff;
-  border-color: #0000ff;
-}
-.moved-to-next-stage-color, .moved-to-next-stage-color.active {
-  background-color: #fdddfa;
-  border-color: #800080;
-}
-.not-cleared-color, .not-cleared-color.active {
-  background-color: #fff1d6;
-  border-color: #ff8c00;
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
 }
 
+.error-message {
+  color: #d32f2f;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background-color: #1565c0;
+}
 
 .lru-grid {
   display: grid;
@@ -289,12 +323,22 @@ export default {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+  margin-bottom: 5px;
 }
 
-/* Dynamic card colors based on status */
-.cleared { background-color: #e2fbdc; }
-.disapproved { background-color: #ffd8d6; }
-.assigned-returned { background-color: #d1d8ff; }
-.moved-to-next-stage { background-color: #fdddfa; }
-.not-cleared { background-color: #fff1d6; }
+.card-date {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.no-lrus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+  font-size: 1.1em;
+  grid-column: 1 / -1;
+}
 </style>

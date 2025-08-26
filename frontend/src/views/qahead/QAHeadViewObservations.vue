@@ -163,6 +163,8 @@
 </template>
 
 <script>
+import jsPDF from 'jspdf';
+
 export default {
   name: 'QAHeadViewObservations',
   data() {
@@ -567,14 +569,332 @@ export default {
     },
     
     exportReport() {
-      // Export report logic
-      console.log('Exporting report:', {
-        observations: this.reportData.observations,
-        version: this.currentVersion,
-        projectName: this.projectName,
-        lruName: this.lruName
-      });
-      alert('Report exported successfully!');
+      try {
+        console.log('Starting PDF export...');
+        console.log('Report data:', this.reportData);
+        console.log('Component data:', {
+          lruName: this.lruName,
+          projectName: this.projectName,
+          serialNumber: this.serialNumber,
+          observationCount: this.observationCount,
+          currentYear: this.currentYear,
+          currentDate: this.currentDate,
+          lruPartNumber: this.lruPartNumber,
+          docReviewDate: this.docReviewDate,
+          reviewVenue: this.reviewVenue
+        });
+
+        // Create new PDF document
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - (2 * margin);
+        
+        let yPosition = margin;
+        
+        // Set font styles
+        doc.setFont('helvetica');
+        
+        // ===== HEADER SECTION =====
+        // Main Title - IQA OBSERVATION REPORT
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('IQA OBSERVATION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Document path and date on same line
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        // Left side - Document path
+        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.observationCount || '001'}/${this.currentYear || '2025'}`;
+        doc.text(documentPath, margin, yPosition);
+        
+        // Right side - Date
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 12;
+        
+        // ===== SUBJECT LINE =====
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        const subjectText = `SUB: IQA Observation Report for ${this.lruName || this.reportData.lruName || 'Unknown LRU'}`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // ===== DOCUMENT DETAILS SECTION =====
+        doc.setFontSize(10);
+        
+        // Left column details
+        const leftColumnX = margin;
+        const rightColumnX = margin + contentWidth / 2;
+        const labelOffset = 40; // Space after label
+        
+        // Left column - Project details
+        yPosition = margin + 42;
+        
+        // Project Name
+        doc.setFont('helvetica', 'bold');
+        doc.text('Project Name :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.projectName || this.projectName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Project Number (if available)
+        if (this.reportData.projectNumber) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Project Number :', leftColumnX, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(this.reportData.projectNumber, leftColumnX + labelOffset, yPosition);
+          yPosition += 8;
+        }
+        
+        // Project Date (if available)
+        if (this.reportData.projectDate) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Project Date :', leftColumnX, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(this.reportData.projectDate, leftColumnX + labelOffset, yPosition);
+          yPosition += 8;
+        }
+        
+        // LRU Name
+        doc.setFont('helvetica', 'bold');
+        doc.text('LRU Name :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.lruName || this.lruName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // LRU Part No
+        doc.setFont('helvetica', 'bold');
+        doc.text('LRU Part No. :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.lruPartNumber || 'Not specified', leftColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Serial Number
+        doc.setFont('helvetica', 'bold');
+        doc.text('Serial Number :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.serialNumber || 'Not specified', leftColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Right column details
+        yPosition = margin + 42;
+        
+        // Version
+        if (this.reportData.version) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Version :', rightColumnX, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(this.reportData.version, rightColumnX + labelOffset, yPosition);
+          yPosition += 8;
+        }
+        
+        // Revision
+        if (this.reportData.revision) {
+          doc.setFont('helvetica', 'bold');
+          doc.text('Revision :', rightColumnX, yPosition);
+          doc.setFont('helvetica', 'normal');
+          doc.text(this.reportData.revision, rightColumnX + labelOffset, yPosition);
+          yPosition += 8;
+        }
+        
+        // Inspection stage
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inspection stage :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Document review/report', rightColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Date of doc review
+        doc.setFont('helvetica', 'bold');
+        doc.text('Date of doc review :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.docReviewDate || 'Not specified', rightColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Review venue
+        doc.setFont('helvetica', 'bold');
+        doc.text('Review venue :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reviewVenue || 'Not specified', rightColumnX + labelOffset, yPosition);
+        yPosition += 8;
+        
+        // Reference Document
+        doc.setFont('helvetica', 'bold');
+        doc.text('Reference Document :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        const revision = this.reportData.revision || 'Not specified';
+        const version = this.reportData.version || 'Not specified';
+        const projectDate = this.reportData.projectDate || 'Not specified';
+        const referenceText = `${this.lruName || 'N/A'}, ${this.lruPartNumber || 'N/A'}, Rev ${revision} & Ver ${version}, dated ${projectDate}`;
+        doc.text(referenceText, rightColumnX + labelOffset, yPosition);
+        yPosition += 15;
+        
+        // ===== OBSERVATIONS SECTION =====
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('OBSERVATIONS', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 12;
+        
+        // ===== OBSERVATIONS TABLE =====
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        
+        // Table column widths and positions (optimized for single page)
+        const tableStartX = margin;
+        const snoWidth = 15;
+        const categoryWidth = 30;
+        const observationWidth = 55;
+        const acceptRejectWidth = 25;
+        const justificationWidth = 40;
+        
+        // Table headers with proper spacing
+        doc.text('SNO', tableStartX, yPosition);
+        doc.text('Category', tableStartX + snoWidth, yPosition);
+        doc.text('Observations', tableStartX + snoWidth + categoryWidth, yPosition);
+        doc.text('Accept/Reject', tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
+        doc.text('Justification', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+        yPosition += 6;
+        
+        // Draw table header lines
+        doc.line(margin, yPosition - 3, pageWidth - margin, yPosition - 3);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        yPosition += 4;
+        
+        // Table data
+        doc.setFont('helvetica', 'normal');
+        
+        // Safety check - ensure observations array exists and has items
+        if (!this.reportData.observations || this.reportData.observations.length === 0) {
+          doc.text('No observations available', tableStartX + snoWidth + categoryWidth, yPosition);
+          yPosition += 15;
+        } else {
+          // Limit observations to fit on single page
+          const maxObservations = Math.min(this.reportData.observations.length, 8);
+          const observationsToShow = this.reportData.observations.slice(0, maxObservations);
+          
+          observationsToShow.forEach((obs, index) => {
+            yPosition += 6;
+            
+            // SNO
+            doc.text((index + 1).toString(), tableStartX, yPosition);
+            
+            // Category (shortened)
+            const categoryText = (obs.category || 'N/A').substring(0, 20);
+            doc.text(categoryText, tableStartX + snoWidth, yPosition);
+            
+            // Observations - handle long text with proper wrapping
+            const observationText = (obs.description || obs.observation || 'No observation text').substring(0, 80);
+            const observationLines = doc.splitTextToSize(observationText, observationWidth - 2);
+            doc.text(observationLines, tableStartX + snoWidth + categoryWidth, yPosition);
+            
+            // Accept/Reject
+            const acceptRejectText = (obs.acceptReject || obs.status || 'Pending').substring(0, 20);
+            doc.text(acceptRejectText, tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
+            
+            // Justification - handle long text with proper wrapping
+            const justificationText = (obs.justification || obs.notes || 'No justification provided').substring(0, 60);
+            const justificationLines = doc.splitTextToSize(justificationText, justificationWidth - 2);
+            doc.text(justificationLines, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+            
+            // Calculate row height based on the longest text
+            const maxLines = Math.max(observationLines.length, justificationLines.length, 1);
+            yPosition += Math.max(maxLines * 3, 8);
+          });
+          
+          // Show message if observations were truncated
+          if (this.reportData.observations.length > maxObservations) {
+            yPosition += 8;
+            doc.setFont('helvetica', 'italic');
+            doc.setFontSize(8);
+            doc.text(`Note: Showing ${maxObservations} of ${this.reportData.observations.length} observations. Export detailed report for complete list.`, margin, yPosition);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+          }
+        }
+        
+        yPosition += 15;
+        
+        // ===== SIGNATURES SECTION =====
+        // Optimize for single page - ensure we have enough space
+        if (yPosition > pageHeight - 60) {
+          yPosition = pageHeight - 60;
+        }
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SIGNATURES', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // ===== CORRECTED SIGNATURE AREA =====
+        // Create a single horizontal signature box divided into three sections
+        const totalSignatureWidth = contentWidth - 20; // Leave some margin
+        const signatureHeight = 25;
+        const leftSectionWidth = totalSignatureWidth * 0.25; // 25% for left
+        const centerSectionWidth = totalSignatureWidth * 0.5; // 50% for center
+        const rightSectionWidth = totalSignatureWidth * 0.25; // 25% for right
+        
+        const signatureStartX = margin + 10;
+        const signatureY = yPosition;
+        
+        // Draw the main signature box
+        doc.rect(signatureStartX, signatureY, totalSignatureWidth, signatureHeight);
+        
+        // Draw vertical dividing lines
+        doc.line(signatureStartX + leftSectionWidth, signatureY, signatureStartX + leftSectionWidth, signatureY + signatureHeight);
+        doc.line(signatureStartX + leftSectionWidth + centerSectionWidth, signatureY, signatureStartX + leftSectionWidth + centerSectionWidth, signatureY + signatureHeight);
+        
+        // Add labels below the signature box
+        yPosition += signatureHeight + 8;
+        
+        // Left section label
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Reviewed by', signatureStartX + (leftSectionWidth / 2), yPosition, { align: 'center' });
+        
+        // Center section label
+        doc.text('Approved by', signatureStartX + leftSectionWidth + (centerSectionWidth / 2), yPosition, { align: 'center' });
+        
+        // Right section label
+        doc.text('Not specified', signatureStartX + leftSectionWidth + centerSectionWidth + (rightSectionWidth / 2), yPosition, { align: 'center' });
+        
+        // Add names inside the signature boxes
+        yPosition -= 8;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        
+        // Reviewed by name
+        const reviewedByName = this.reportData.reviewedBy || 'Not specified';
+        doc.text(reviewedByName, signatureStartX + (leftSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
+        
+        // Approved by name
+        const approvedByName = this.reportData.approvedBy || 'Not specified';
+        doc.text(approvedByName, signatureStartX + leftSectionWidth + (centerSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
+        
+        // Right section (Not specified)
+        doc.text('Not specified', signatureStartX + leftSectionWidth + centerSectionWidth + (rightSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
+        
+        // ===== SAVE PDF =====
+        const lruNameForFile = this.lruName || this.reportData.lruName || 'Unknown_LRU';
+        const currentDateForFile = this.currentDate || new Date().toLocaleDateString('en-GB');
+        const fileName = `IQA_Observation_Report_${lruNameForFile}_${currentDateForFile.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        
+        // Show success message
+        this.$nextTick(() => {
+          alert('Report exported successfully as PDF!');
+        });
+        
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        this.$nextTick(() => {
+          alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        });
+      }
     }
   }
 };
