@@ -163,6 +163,8 @@
 </template>
 
 <script>
+import jsPDF from 'jspdf';
+
 export default {
   name: 'QAHeadViewObservations',
   data() {
@@ -567,14 +569,214 @@ export default {
     },
     
     exportReport() {
-      // Export report logic
-      console.log('Exporting report:', {
-        observations: this.reportData.observations,
-        version: this.currentVersion,
-        projectName: this.projectName,
-        lruName: this.lruName
-      });
-      alert('Report exported successfully!');
+      try {
+        // Create new PDF document
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - (2 * margin);
+        
+        let yPosition = margin;
+        
+        // Set font styles
+        doc.setFont('helvetica');
+        
+        // Header - IQA OBSERVATION REPORT
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('IQA OBSERVATION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Document path and date
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const documentPath = `CASDIC/${this.projectName}/${this.lruName}/SL.${this.serialNumber}/${this.observationCount}/${this.currentYear}`;
+        doc.text(documentPath, margin, yPosition);
+        
+        const dateText = `Date: ${this.currentDate}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 15;
+        
+        // Subject line
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        const subjectText = `SUB: IQA Observation Report for ${this.lruName}`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 20;
+        
+        // Document details table
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        // Left column
+        const leftColumnX = margin;
+        const rightColumnX = margin + contentWidth / 2;
+        
+        // Project Name
+        doc.setFont('helvetica', 'bold');
+        doc.text('Project Name :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.projectName, leftColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // LRU Name
+        doc.setFont('helvetica', 'bold');
+        doc.text('LRU Name :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.lruName, leftColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // LRU Part No
+        doc.setFont('helvetica', 'bold');
+        doc.text('LRU Part No. :', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.lruPartNumber, leftColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // Serial Number
+        doc.setFont('helvetica', 'bold');
+        doc.text('Serial Number:', leftColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.serialNumber, leftColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // Right column
+        yPosition = margin + 20;
+        
+        // Inspection stage
+        doc.setFont('helvetica', 'bold');
+        doc.text('Inspection stage :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Document review/report', rightColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // Date of doc review
+        doc.setFont('helvetica', 'bold');
+        doc.text('Date of doc review :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.docReviewDate, rightColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // Review venue
+        doc.setFont('helvetica', 'bold');
+        doc.text('Review venue :', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reviewVenue, rightColumnX + 40, yPosition);
+        yPosition += 8;
+        
+        // Reference Document
+        doc.setFont('helvetica', 'bold');
+        doc.text('Reference Document:', rightColumnX, yPosition);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`${this.lruName}, ${this.lruPartNumber}, Rev ${this.reportData.revision} & Ver ${this.reportData.version}, dated ${this.reportData.projectDate}`, rightColumnX + 40, yPosition);
+        yPosition += 20;
+        
+        // Observations table
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('OBSERVATIONS', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Table headers
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        const tableStartX = margin;
+        const snoWidth = 15;
+        const categoryWidth = 30;
+        const observationWidth = 70;
+        const acceptRejectWidth = 25;
+        const justificationWidth = 50;
+        
+        doc.text('SNO', tableStartX, yPosition);
+        doc.text('Category (Major/Minor)', tableStartX + snoWidth, yPosition);
+        doc.text('Observations', tableStartX + snoWidth + categoryWidth, yPosition);
+        doc.text('Accept/Reject', tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
+        doc.text('Justification', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+        yPosition += 8;
+        
+        // Draw table lines
+        doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        
+        // Table data
+        doc.setFont('helvetica', 'normal');
+        this.reportData.observations.forEach((obs, index) => {
+          yPosition += 8;
+          
+          // Check if we need a new page
+          if (yPosition > pageHeight - 60) {
+            doc.addPage();
+            yPosition = margin + 20;
+          }
+          
+          doc.text((index + 1).toString(), tableStartX, yPosition);
+          doc.text(obs.category, tableStartX + snoWidth, yPosition);
+          
+          // Handle long observation text
+          const observationLines = doc.splitTextToSize(obs.observation, observationWidth - 5);
+          doc.text(observationLines, tableStartX + snoWidth + categoryWidth, yPosition);
+          
+          doc.text(obs.acceptReject, tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
+          
+          // Handle long justification text
+          const justificationLines = doc.splitTextToSize(obs.justification, justificationWidth - 5);
+          doc.text(justificationLines, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+          
+          yPosition += Math.max(observationLines.length * 4, justificationLines.length * 4, 8);
+        });
+        
+        yPosition += 20;
+        
+        // Check if we need a new page for signatures
+        if (yPosition > pageHeight - 80) {
+          doc.addPage();
+          yPosition = margin + 20;
+        }
+        
+        // Signatures section
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SIGNATURES', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 20;
+        
+        // Signature boxes
+        const signatureBoxWidth = 60;
+        const signatureBoxHeight = 25;
+        const leftSignatureX = margin + 30;
+        const rightSignatureX = pageWidth - margin - 30 - signatureBoxWidth;
+        
+        // Reviewed by
+        doc.rect(leftSignatureX, yPosition, signatureBoxWidth, signatureBoxHeight);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Reviewed by', leftSignatureX + signatureBoxWidth / 2, yPosition + signatureBoxHeight + 8, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.reviewedBy, leftSignatureX + signatureBoxWidth / 2, yPosition + signatureBoxHeight + 15, { align: 'center' });
+        
+        // Approved by
+        doc.rect(rightSignatureX, yPosition, signatureBoxWidth, signatureBoxHeight);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Approved by', rightSignatureX + signatureBoxWidth / 2, yPosition + signatureBoxHeight + 8, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
+        doc.text(this.reportData.approvedBy, rightSignatureX + signatureBoxWidth / 2, yPosition + signatureBoxHeight + 15, { align: 'center' });
+        
+        // Save the PDF
+        const fileName = `IQA_Observation_Report_${this.lruName}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        
+        // Show success message
+        this.$nextTick(() => {
+          alert('Report exported successfully as PDF!');
+        });
+        
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        this.$nextTick(() => {
+          alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        });
+      }
     }
   }
 };
