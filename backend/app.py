@@ -336,5 +336,82 @@ def create_user():
         print(f"Error creating user: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+# Get projects with LRUs and serial numbers endpoint
+@app.route('/api/projects/manage', methods=['GET'])
+def get_projects_with_details():
+    try:
+        cur = conn.cursor()
+        
+        # Fetch all projects with their LRUs and serial numbers
+        cur.execute("""
+            SELECT 
+                p.project_id,
+                p.project_name,
+                l.lru_id,
+                l.lru_name,
+                s.serial_id,
+                s.serial_number
+            FROM projects p
+            LEFT JOIN lrus l ON p.project_id = l.project_id
+            LEFT JOIN serial_numbers s ON l.lru_id = s.lru_id
+            ORDER BY p.project_id, l.lru_id, s.serial_number
+        """)
+        
+        results = cur.fetchall()
+        cur.close()
+        
+        # Organize data hierarchically
+        projects_dict = {}
+        
+        for row in results:
+            project_id = row[0]
+            project_name = row[1]
+            lru_id = row[2]
+            lru_name = row[3]
+            serial_id = row[4]
+            serial_number = row[5]
+            
+            # Initialize project if not exists
+            if project_id not in projects_dict:
+                projects_dict[project_id] = {
+                    "project_id": project_id,
+                    "project_name": project_name,
+                    "lrus": {}
+                }
+            
+            # Add LRU if it exists and not already added
+            if lru_id and lru_id not in projects_dict[project_id]["lrus"]:
+                projects_dict[project_id]["lrus"][lru_id] = {
+                    "lru_id": lru_id,
+                    "lru_name": lru_name,
+                    "serial_numbers": []
+                }
+            
+            # Add serial number if it exists
+            if serial_id and lru_id:
+                projects_dict[project_id]["lrus"][lru_id]["serial_numbers"].append({
+                    "serial_id": serial_id,
+                    "serial_number": serial_number
+                })
+        
+        # Convert to list format for frontend
+        projects_list = []
+        for project_id, project_data in projects_dict.items():
+            project = {
+                "project_id": project_data["project_id"],
+                "project_name": project_data["project_name"],
+                "lrus": list(project_data["lrus"].values())
+            }
+            projects_list.append(project)
+        
+        return jsonify({
+            "success": True,
+            "projects": projects_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching projects with details: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
