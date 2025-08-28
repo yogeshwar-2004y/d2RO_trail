@@ -413,5 +413,46 @@ def get_projects_with_details():
         print(f"Error fetching projects with details: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+# Get users with roles endpoint
+@app.route('/api/users/manage', methods=['GET'])
+def get_users_with_roles():
+    try:
+        cur = conn.cursor()
+        
+        # Fetch all users with their roles using JOIN
+        cur.execute("""
+            SELECT 
+                u.user_id,
+                u.name,
+                u.email,
+                r.role_name
+            FROM users u
+            LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.role_id
+            ORDER BY u.user_id
+        """)
+        
+        results = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        users_list = []
+        for row in results:
+            users_list.append({
+                "user_id": row[0],
+                "name": row[1],
+                "email": row[2],
+                "role": row[3] if row[3] else "No Role Assigned"
+            })
+        
+        return jsonify({
+            "success": True,
+            "users": users_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching users with roles: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
