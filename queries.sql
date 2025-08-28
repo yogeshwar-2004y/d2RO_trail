@@ -262,7 +262,7 @@ CREATE TABLE memos (
 );
 
 CREATE TABLE memo_references (
-    ref_id SERIAL PRIMARY KEY,
+    ref_id SERIAL PRIMARY KEY,a
     memo_id INT REFERENCES memos(memo_id) ON DELETE CASCADE,
     ref_doc VARCHAR(255),
     ref_no VARCHAR(255),
@@ -270,7 +270,7 @@ CREATE TABLE memo_references (
     rev FLOAT
 );
 
--- Main Reports Table
+
 CREATE TABLE reports (
     report_id SERIAL PRIMARY KEY,
     project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
@@ -282,7 +282,7 @@ CREATE TABLE reports (
     reference_document INT REFERENCES plan_documents(document_id) ON DELETE SET NULL
 );
 
--- Observations Table
+
 CREATE TABLE report_observations (
     obs_id SERIAL PRIMARY KEY,
     report_id INT NOT NULL REFERENCES reports(report_id) ON DELETE CASCADE,
@@ -290,3 +290,18 @@ CREATE TABLE report_observations (
     category VARCHAR(10) CHECK (category IN ('major', 'minor')),
     observation TEXT NOT NULL
 );
+
+CREATE TABLE memo_approval (
+    approval_id SERIAL PRIMARY KEY,
+    memo_id INT NOT NULL UNIQUE REFERENCES memos(memo_id) ON DELETE CASCADE,
+    test_date DATE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    comments TEXT,
+    authentication TEXT,
+    attachment_path TEXT,
+    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected'))
+);
+
+
+
+
