@@ -43,14 +43,14 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 CREATE TABLE IF NOT EXISTS projects (
     project_id SERIAL PRIMARY KEY,
     project_name VARCHAR(50) NOT NULL,
-    description TEXT,
     created_by INT NOT NULL REFERENCES users(user_id),
-    created_at TIMESTAMP DEFAULT now()
+    created_at TIMESTAMP DEFAULT now(),
+    project_date DATE NOT NULL
 );
 
-INSERT INTO projects (project_name, description, created_by) VALUES
-('Flight Control System', 'Software for controlling flight systems', 1002),
-('Navigation Module', 'Module for handling GPS and navigation', 1003);
+INSERT INTO projects (project_name, created_by, project_date) VALUES
+('Flight Control System', 1002, '2025-01-01'),
+('Navigation Module', 1003, '2025-01-01');
 
 CREATE TABLE IF NOT EXISTS lrus (
     lru_id SERIAL PRIMARY KEY,
@@ -69,7 +69,7 @@ INSERT INTO lrus (project_id, lru_name) VALUES
 CREATE TABLE IF NOT EXISTS serial_numbers (
     serial_id SERIAL PRIMARY KEY,
     lru_id INT NOT NULL REFERENCES lrus(lru_id),
-    serial_number VARCHAR(50) NOT NULL,
+    serial_number INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
