@@ -74,11 +74,11 @@ CREATE TABLE IF NOT EXISTS serial_numbers (
 );
 
 INSERT INTO serial_numbers (lru_id, serial_number) VALUES
-(1, 'FC-10001'),
-(1, 'FC-10002'),
-(2, 'AP-20001'),
-(3, 'GPS-30001'),
-(4, 'ND-40001');
+(1, 1),
+(1, 2),
+(2, 1),
+(3, 1),
+(4, 1);
 
 CREATE TABLE IF NOT EXISTS plan_documents (
     document_id SERIAL PRIMARY KEY,

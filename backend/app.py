@@ -20,7 +20,7 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Admin",
+    password="thani123",
     host="localhost",
     port="5432"
 )
@@ -166,6 +166,84 @@ def get_project_lrus(project_id):
     except Exception as e:
         print(f"Error fetching LRUs for project {project_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Create project endpoint
+@app.route('/api/projects', methods=['POST'])
+def create_project():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        project_name = data.get('name')
+        project_number = data.get('number')
+        project_date = data.get('date')
+        lrus = data.get('lrus', [])
+        created_by = data.get('createdBy')
+        
+        if not project_name or not project_number or not project_date:
+            return jsonify({"success": False, "message": "Project name, number, and date are required"}), 400
+        
+        if not created_by:
+            return jsonify({"success": False, "message": "User authentication required"}), 400
+        
+        if not lrus or len(lrus) == 0:
+            return jsonify({"success": False, "message": "At least one LRU is required"}), 400
+        
+        # Validate LRUs and serial quantities
+        for i, lru in enumerate(lrus):
+            if not lru.get('name'):
+                return jsonify({"success": False, "message": f"LRU {i+1} name is required"}), 400
+            
+            serial_quantity = lru.get('serialQuantity')
+            if not serial_quantity or not isinstance(serial_quantity, int) or serial_quantity < 1:
+                return jsonify({"success": False, "message": f"Valid serial quantity is required for LRU '{lru['name']}'"}), 400
+        
+        cur = conn.cursor()
+        
+        # Insert project data as specified
+        cur.execute("""
+            INSERT INTO projects (project_name, project_id, project_date, created_by)
+            VALUES (%s, %s, %s, %s)
+            RETURNING project_id
+        """, (project_name, project_number, project_date, created_by))
+        
+        project_id = cur.fetchone()[0]
+        
+        # Insert LRUs with project number as project_id
+        for lru in lrus:
+            # Insert LRU with project number as project_id
+            cur.execute("""
+                INSERT INTO lrus (project_id, lru_name)
+                VALUES (%s, %s)
+                RETURNING lru_id
+            """, (project_number, lru['name']))
+            
+            lru_id = cur.fetchone()[0]
+            
+            # Insert multiple serial numbers based on quantity
+            serial_quantity = lru['serialQuantity']
+            for i in range(1, serial_quantity + 1):
+                cur.execute("""
+                    INSERT INTO serial_numbers (lru_id, serial_number)
+                    VALUES (%s, %s)
+                """, (lru_id, i))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Project created successfully",
+            "project_id": project_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating project: {str(e)}")
+        print(f"Project data received: {data}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

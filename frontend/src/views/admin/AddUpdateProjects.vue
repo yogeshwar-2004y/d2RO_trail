@@ -37,17 +37,36 @@
           <input type="date" v-model="project.date" />
         </div>
 
-        <div class="form-group">
-          <label>LRU</label>
-          <input type="text" v-model="project.lru" placeholder="Enter LRU" />
-        </div>
-
-        <div class="form-group">
-          <label>SL NOS</label>
-          <select v-model="project.slNo">
-            <option disabled value="">Select</option>
-            <option v-for="n in 10" :key="n" :value="n"> {{ n }} </option>
-          </select>
+        <!-- LRUs Section -->
+        <div class="lrus-section">
+          <div class="section-header">
+            <label>LRUs</label>
+            <button type="button" class="add-lru-btn" @click="addLru">+ Add LRU</button>
+          </div>
+          
+          <div v-if="project.lrus.length === 0" class="no-lrus-message">
+            No LRUs added yet. Click "Add LRU" to start.
+          </div>
+          
+          <div v-for="(lru, index) in project.lrus" :key="index" class="lru-item">
+            <div class="lru-header">
+              <h4>LRU {{ index + 1 }}</h4>
+              <button type="button" class="remove-lru-btn" @click="removeLru(index)" v-if="project.lrus.length > 1">×</button>
+            </div>
+            
+            <div class="form-group">
+              <label>LRU Name</label>
+              <input type="text" v-model="lru.name" placeholder="Enter LRU Name" />
+            </div>
+            
+            <div class="form-group">
+              <label>Serial Number Quantity</label>
+              <select v-model="lru.serialQuantity">
+                <option disabled value="">Select Quantity</option>
+                <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         <button type="submit" class="create-btn">CREATE PROJECT</button>
@@ -65,14 +84,99 @@ export default {
         name: "",
         number: "",
         date: "",
-        lru: "",
-        slNo: ""
+        lrus: [
+          {
+            name: "",
+            serialQuantity: ""
+          }
+        ]
       }
     };
   },
   methods: {
-    createProject() {
-      alert("Project Created: " + JSON.stringify(this.project, null, 2));
+    addLru() {
+      this.project.lrus.push({
+        name: "",
+        serialQuantity: ""
+      });
+    },
+    removeLru(index) {
+      if (this.project.lrus.length > 1) {
+        this.project.lrus.splice(index, 1);
+      }
+    },
+
+    validateProject() {
+      if (!this.project.name || !this.project.number || !this.project.date) {
+        alert("Please fill in all project details.");
+        return false;
+      }
+      
+      for (let i = 0; i < this.project.lrus.length; i++) {
+        const lru = this.project.lrus[i];
+        if (!lru.name) {
+          alert(`Please enter a name for LRU ${i + 1}.`);
+          return false;
+        }
+        
+        if (!lru.serialQuantity) {
+          alert(`Please select a serial number quantity for LRU "${lru.name}".`);
+          return false;
+        }
+      }
+      
+      return true;
+    },
+    async createProject() {
+      if (!this.validateProject()) {
+        return;
+      }
+      
+      // Get current user from localStorage
+      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (!currentUser.id) {
+        alert('User session expired. Please login again.');
+        this.$router.push({ name: 'login' });
+        return;
+      }
+      
+      try {
+        const projectData = {
+          ...this.project,
+          createdBy: currentUser.id
+        };
+        
+        const response = await fetch('http://localhost:5000/api/projects', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(projectData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert("Project created successfully!");
+          // Reset form
+          this.project = {
+            name: "",
+            number: "",
+            date: "",
+            lrus: [
+              {
+                name: "",
+                serialQuantity: ""
+              }
+            ]
+          };
+        } else {
+          alert("Error creating project: " + data.message);
+        }
+      } catch (error) {
+        console.error('Error creating project:', error);
+        alert("Error creating project. Please check if the backend is running.");
+      }
     },
     goToManageProjects() {
       this.$router.push({ name: 'ManageProjects' });
@@ -183,5 +287,89 @@ export default {
 
 .create-btn:hover {
   transform: translateY(-2px);
+}
+
+/* LRU Section Styles */
+.lrus-section {
+  margin-bottom: 25px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header label {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.add-lru-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: background 0.2s;
+}
+
+.add-lru-btn:hover {
+  background: #45a049;
+}
+
+.lru-item {
+  background: #e8e8e8;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 15px;
+}
+
+.lru-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.lru-header h4 {
+  margin: 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.remove-lru-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.remove-lru-btn:hover {
+  background: #da190b;
+}
+
+.no-lrus-message {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px dashed #ccc;
 }
 </style>

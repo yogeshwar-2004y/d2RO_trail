@@ -53,6 +53,9 @@ export default {
           console.log('Login successful:', data.user);
           alert(`Welcome ${data.user.name} (${data.user.role})`);
 
+          // Store user data in localStorage for later use
+          localStorage.setItem('currentUser', JSON.stringify(data.user));
+
           // Role-based navigation - handle exact role names from database
           const role = data.user.role.toLowerCase();
           
