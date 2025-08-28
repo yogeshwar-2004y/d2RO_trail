@@ -245,5 +245,96 @@ def create_project():
         print(f"Project data received: {data}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+# Get roles endpoint
+@app.route('/api/roles', methods=['GET'])
+def get_roles():
+    try:
+        cur = conn.cursor()
+        
+        # Fetch all roles from the roles table
+        cur.execute("""
+            SELECT role_id, role_name
+            FROM roles
+            ORDER BY role_name
+        """)
+        
+        roles = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        role_list = []
+        for role in roles:
+            role_list.append({
+                "id": role[0],
+                "name": role[1]
+            })
+        
+        return jsonify({
+            "success": True,
+            "roles": role_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching roles: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Create user endpoint
+@app.route('/api/users', methods=['POST'])
+def create_user():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        user_name = data.get('name')
+        user_id = data.get('id')
+        email = data.get('email')
+        password = data.get('password')
+        role_id = data.get('roleId')
+        
+        if not user_name or not user_id or not email or not password or not role_id:
+            return jsonify({"success": False, "message": "All fields are required"}), 400
+        
+        cur = conn.cursor()
+        
+        # Check if user_id or email already exists
+        cur.execute("""
+            SELECT user_id FROM users WHERE user_id = %s OR email = %s
+        """, (user_id, email))
+        
+        existing_user = cur.fetchone()
+        if existing_user:
+            cur.close()
+            return jsonify({"success": False, "message": "User ID or email already exists"}), 400
+        
+        # Hash the password
+        hashed_password = hash_password(password)
+        
+        # Insert user into users table
+        cur.execute("""
+            INSERT INTO users (user_id, name, email, password_hash)
+            VALUES (%s, %s, %s, %s)
+        """, (user_id, user_name, email, hashed_password))
+        
+        # Insert role assignment into user_roles table
+        cur.execute("""
+            INSERT INTO user_roles (user_id, role_id)
+            VALUES (%s, %s)
+        """, (user_id, role_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "User created successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating user: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)
