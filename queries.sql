@@ -302,6 +302,12 @@ CREATE TABLE memo_approval (
     status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected'))
 );
 
-
+CREATE TABLE project_users (
+    project_user_id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
+);
 
 
