@@ -14,7 +14,7 @@ const designheadRoutes = [
     component: HomePageDesignHead,
   },
   {
-    path: '/projects-for-assigning',
+    path: '/assign-projects',
     name: 'ProjectsForAssigning',
     component: ProjectsForAssigning,
   },
@@ -24,18 +24,18 @@ const designheadRoutes = [
     component: ProjectMembers,
   },
   {
-    path: '/design-head/assign-projects/:projectId/members/add',
+    path: '/assign-projects/:projectId/members/add',
     name: 'AddMember',
     component: AddMember,
   },
   {
-    path: '/design-head/lrus/:lruId/documents/:documentId',
+    path: '/document-viewer',
     name: 'DocumentViewer',
     component: DocumentViewer,
   },
   {
-    path: '/design-head/memos/submit',
-    name: 'SubmitMemo',
+    path: '/memos/submit',
+    name: 'SubmitMemo',             
     component: SubmitMemo,
   },
 ]
