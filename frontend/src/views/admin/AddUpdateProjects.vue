@@ -182,8 +182,7 @@ export default {
       this.$router.push({ name: 'ManageProjects' });
     },
     goToUpdateProject() {
-      alert('Navigating to Update existing project page.');
-      // this.$router.push({ name: 'UpdateProject' });
+      this.$router.push({ name: 'SelectProjectToEdit' });
     },
   },
 };

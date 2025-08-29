@@ -244,6 +244,174 @@ def create_project():
         print(f"Project data received: {data}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+# Update project endpoint
+@app.route('/api/projects/<int:project_id>', methods=['PUT'])
+def update_project(project_id):
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        cur = conn.cursor()
+        
+        # Check if project exists
+        cur.execute("SELECT project_id, project_name FROM projects WHERE project_id = %s", (project_id,))
+        existing_project = cur.fetchone()
+        
+        if not existing_project:
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Update project basic info
+        update_fields = []
+        update_values = []
+        
+        if 'name' in data and data['name']:
+            update_fields.append("project_name = %s")
+            update_values.append(data['name'])
+            
+        if 'date' in data and data['date']:
+            update_fields.append("project_date = %s")
+            update_values.append(data['date'])
+        
+        # Update project table if there are fields to update
+        if update_fields:
+            update_values.append(project_id)
+            update_query = f"UPDATE projects SET {', '.join(update_fields)} WHERE project_id = %s"
+            cur.execute(update_query, update_values)
+        
+        # Handle LRUs updates
+        if 'lrus' in data:
+            existing_lru_ids = []
+            
+            # Process each LRU
+            for lru_data in data['lrus']:
+                if 'lru_id' in lru_data and lru_data['lru_id']:
+                    # Update existing LRU
+                    lru_id = lru_data['lru_id']
+                    existing_lru_ids.append(lru_id)
+                    
+                    if 'lru_name' in lru_data:
+                        cur.execute("""
+                            UPDATE lrus SET lru_name = %s WHERE lru_id = %s
+                        """, (lru_data['lru_name'], lru_id))
+                        
+                else:
+                    # Create new LRU
+                    if lru_data.get('lru_name') and lru_data.get('serialQuantity'):
+                        cur.execute("""
+                            INSERT INTO lrus (project_id, lru_name)
+                            VALUES (%s, %s)
+                            RETURNING lru_id
+                        """, (project_id, lru_data['lru_name']))
+                        
+                        new_lru_id = cur.fetchone()[0]
+                        existing_lru_ids.append(new_lru_id)
+                        
+                        # Add serial numbers for new LRU
+                        serial_quantity = lru_data['serialQuantity']
+                        for i in range(1, serial_quantity + 1):
+                            cur.execute("""
+                                INSERT INTO serial_numbers (lru_id, serial_number)
+                                VALUES (%s, %s)
+                            """, (new_lru_id, i))
+            
+            # Remove LRUs that are no longer in the list (if any were removed)
+            if existing_lru_ids:
+                placeholders = ','.join(['%s'] * len(existing_lru_ids))
+                cur.execute(f"""
+                    DELETE FROM serial_numbers 
+                    WHERE lru_id IN (
+                        SELECT lru_id FROM lrus 
+                        WHERE project_id = %s AND lru_id NOT IN ({placeholders})
+                    )
+                """, [project_id] + existing_lru_ids)
+                
+                cur.execute(f"""
+                    DELETE FROM lrus 
+                    WHERE project_id = %s AND lru_id NOT IN ({placeholders})
+                """, [project_id] + existing_lru_ids)
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Project updated successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating project: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Get single project endpoint
+@app.route('/api/projects/<int:project_id>', methods=['GET'])
+def get_project(project_id):
+    try:
+        cur = conn.cursor()
+        
+        # Fetch project with LRUs and serial numbers
+        cur.execute("""
+            SELECT 
+                p.project_id,
+                p.project_name,
+                p.project_date,
+                p.created_at,
+                l.lru_id,
+                l.lru_name,
+                s.serial_id,
+                s.serial_number
+            FROM projects p
+            LEFT JOIN lrus l ON p.project_id = l.project_id
+            LEFT JOIN serial_numbers s ON l.lru_id = s.lru_id
+            WHERE p.project_id = %s
+            ORDER BY l.lru_id, s.serial_number
+        """, (project_id,))
+        
+        results = cur.fetchall()
+        cur.close()
+        
+        if not results or not results[0][0]:
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Organize data
+        project_info = {
+            "project_id": results[0][0],
+            "project_name": results[0][1],
+            "project_date": results[0][2].isoformat() if results[0][2] else None,
+            "created_at": results[0][3].isoformat() if results[0][3] else None,
+            "lrus": {}
+        }
+        
+        for row in results:
+            if row[4]:  # lru_id exists
+                lru_id = row[4]
+                if lru_id not in project_info["lrus"]:
+                    project_info["lrus"][lru_id] = {
+                        "lru_id": lru_id,
+                        "lru_name": row[5],
+                        "serial_numbers": []
+                    }
+                
+                if row[6]:  # serial_id exists
+                    project_info["lrus"][lru_id]["serial_numbers"].append({
+                        "serial_id": row[6],
+                        "serial_number": row[7]
+                    })
+        
+        # Convert lrus dict to list
+        project_info["lrus"] = list(project_info["lrus"].values())
+        
+        return jsonify({
+            "success": True,
+            "project": project_info
+        })
+        
+    except Exception as e:
+        print(f"Error fetching project: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 # Get roles endpoint
 @app.route('/api/roles', methods=['GET'])
 def get_roles():
@@ -334,6 +502,120 @@ def create_user():
         conn.rollback()
         print(f"Error creating user: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Update user endpoint
+@app.route('/api/users/<user_id>', methods=['PUT'])
+def update_user(user_id):
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        cur = conn.cursor()
+        
+        # Check if user exists
+        cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
+        existing_user = cur.fetchone()
+        
+        if not existing_user:
+            cur.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Build dynamic update query based on provided fields
+        update_fields = []
+        update_values = []
+        
+        # Update user table fields
+        if 'name' in data:
+            update_fields.append("name = %s")
+            update_values.append(data['name'])
+            
+        if 'email' in data:
+            # Check if email is already taken by another user
+            cur.execute("SELECT user_id FROM users WHERE email = %s AND user_id != %s", (data['email'], user_id))
+            if cur.fetchone():
+                cur.close()
+                return jsonify({"success": False, "message": "Email already exists for another user"}), 400
+            update_fields.append("email = %s")
+            update_values.append(data['email'])
+            
+        if 'password' in data and data['password']:
+            hashed_password = hash_password(data['password'])
+            update_fields.append("password_hash = %s")
+            update_values.append(hashed_password)
+        
+        # Update users table if there are fields to update
+        if update_fields:
+            update_fields.append("updated_at = NOW()")
+            update_values.append(user_id)
+            
+            update_query = f"UPDATE users SET {', '.join(update_fields)} WHERE user_id = %s"
+            cur.execute(update_query, update_values)
+        
+        # Update role if provided
+        if 'roleId' in data:
+            # First, delete existing role assignment
+            cur.execute("DELETE FROM user_roles WHERE user_id = %s", (user_id,))
+            
+            # Then insert new role assignment
+            cur.execute("""
+                INSERT INTO user_roles (user_id, role_id)
+                VALUES (%s, %s)
+            """, (user_id, data['roleId']))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "User updated successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating user: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Get single user endpoint
+@app.route('/api/users/<user_id>', methods=['GET'])
+def get_user(user_id):
+    try:
+        cur = conn.cursor()
+        
+        # Fetch user with role information
+        cur.execute("""
+            SELECT 
+                u.user_id,
+                u.name,
+                u.email,
+                r.role_id,
+                r.role_name
+            FROM users u
+            LEFT JOIN user_roles ur ON u.user_id = ur.user_id
+            LEFT JOIN roles r ON ur.role_id = r.role_id
+            WHERE u.user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        cur.close()
+        
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "user": {
+                "user_id": user[0],
+                "name": user[1],
+                "email": user[2],
+                "role_id": user[3],
+                "role_name": user[4] if user[4] else "No Role Assigned"
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error fetching user: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Get projects with LRUs and serial numbers endpoint
 @app.route('/api/projects/manage', methods=['GET'])

@@ -14,6 +14,10 @@ import designerRoutes from './designer'
 import ManageProjects from "@/views/admin/ManageProjects.vue";
 import AddUpdateUser from "@/views/admin/AddUpdateUser.vue";
 import ManageUsers from "@/views/admin/ManageUsers.vue";
+import SelectUserToEdit from "@/views/admin/SelectUserToEdit.vue";
+import EditUser from "@/views/admin/EditUser.vue";
+import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
+import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
 import TestsPage from "@/views/admin/TestsPage.vue";
 
@@ -54,6 +58,28 @@ const router = createRouter({
       path: "/manage-users",
       name: "ManageUsers",
       component: ManageUsers
+    },
+    {
+      path: "/select-user-to-edit",
+      name: "SelectUserToEdit",
+      component: SelectUserToEdit
+    },
+    {
+      path: "/edit-user/:userId",
+      name: "EditUser",
+      component: EditUser,
+      props: true
+    },
+    {
+      path: "/select-project-to-edit",
+      name: "SelectProjectToEdit",
+      component: SelectProjectToEdit
+    },
+    {
+      path: "/edit-project/:projectId",
+      name: "EditProject",
+      component: EditProject,
+      props: true
     },
     {
       path: "/memos",

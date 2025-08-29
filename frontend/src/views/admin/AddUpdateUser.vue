@@ -156,7 +156,7 @@ export default {
       this.$router.push({ name: 'ManageUsers' });
     },
     goToUpdateUser() {
-      alert('Navigating to Update existing user page.');
+      this.$router.push({ name: 'SelectUserToEdit' });
     },
   },
 };
