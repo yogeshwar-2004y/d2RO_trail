@@ -28,9 +28,3 @@ coverage
 *.sw?
 
 *.tsbuildinfo
-
-# Ignore backend app.py
-backend/app.py
-
-# Ignore queries.sql
-queries.sql

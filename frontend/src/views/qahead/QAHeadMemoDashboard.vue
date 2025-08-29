@@ -11,6 +11,17 @@
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
       </div>
       <div class="header-right">
+        <!-- Notification Logo -->
+        <div class="notification-container" @click="openNotifications">
+          <div class="notification-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span v-if="unreadNotifications > 0" class="notification-badge">{{ unreadNotifications }}</span>
+          </div>
+        </div>
+        
         <div class="search-box">
           <input type="text" v-model="searchQuery" placeholder="Search Projects" class="search-input">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -103,6 +114,45 @@ export default {
         { id: 7, project: 'PROJ001', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'TEST NOT CONDUCTED' },
         { id: 8, project: 'PROJ004', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'SUCCESSFULLY COMPLETED' },
       ],
+      // Notification data
+      notifications: [
+        { 
+          id: 1, 
+          project: 'PROJ001', 
+          serialNumber: '15,16', 
+          lru: 'LRU Name', 
+          completedStage: 'stage 1', 
+          requiredStage: 'stage3', 
+          justification: 'justification', 
+          status: 'pending',
+          isRead: false,
+          timestamp: '2025-01-15 10:30:00'
+        },
+        { 
+          id: 2, 
+          project: 'PROJ002', 
+          serialNumber: '17,18', 
+          lru: 'LRU Component', 
+          completedStage: 'stage 2', 
+          requiredStage: 'stage4', 
+          justification: 'Technical review required', 
+          status: 'pending',
+          isRead: false,
+          timestamp: '2025-01-15 09:15:00'
+        },
+        { 
+          id: 3, 
+          project: 'PROJ003', 
+          serialNumber: '19,20', 
+          lru: 'LRU Assembly', 
+          completedStage: 'stage 1', 
+          requiredStage: 'stage3', 
+          justification: 'Quality check needed', 
+          status: 'pending',
+          isRead: true,
+          timestamp: '2025-01-14 16:45:00'
+        }
+      ],
     };
   },
   computed: {
@@ -124,6 +174,9 @@ export default {
 
       return filtered;
     },
+    unreadNotifications() {
+      return this.notifications.filter(notification => !notification.isRead).length;
+    }
   },
   methods: {
     toggleProjectFilter() {
@@ -146,6 +199,11 @@ export default {
       this.$router.push({ 
         name: 'QAHeadMemoForm', 
         params: { memoId: memo.id } 
+      });
+    },
+    openNotifications() {
+      this.$router.push({ 
+        name: 'QAHeadNotifications' 
       });
     }
   }
@@ -190,6 +248,39 @@ export default {
   display: flex;
   align-items: center;
   gap: 20px;
+}
+
+.notification-container {
+  position: relative;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.notification-container:hover {
+  background-color: #f0f0f0;
+}
+
+.notification-icon {
+  position: relative;
+  color: #333;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
 .search-box {
