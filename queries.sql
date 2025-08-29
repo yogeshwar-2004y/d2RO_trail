@@ -166,28 +166,27 @@ INSERT INTO review_comments (review_id, commented_by, comment_text, classificati
 
 CREATE TABLE IF NOT EXISTS tests (
     test_id SERIAL PRIMARY KEY,
-    test_code VARCHAR(20) NOT NULL UNIQUE,
     test_name VARCHAR(50),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO tests (test_code, test_name) VALUES
-('TST-001', 'Initial Integration Test'),
-('TST-002', 'System Performance Test'),
-('TST-003', 'Navigation Accuracy Test');
+INSERT INTO tests (test_name) VALUES
+('Initial Integration Test'),
+('System Performance Test'),
+('Navigation Accuracy Test');
 
 CREATE TABLE IF NOT EXISTS stages (
     stage_id SERIAL PRIMARY KEY,
     stage_name VARCHAR(50) NOT NULL UNIQUE,
-    stage_order INT NOT NULL,
+
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO stages (stage_name, stage_order) VALUES
-('Design Stage', 1),
-('Implementation Stage', 2),
+INSERT INTO stages (stage_name) VALUES
+('Design Stage'),
+('Implementation Stage'),
 ('Testing Stage', 3),
-('Deployment Stage', 4);
+('Deployment Stage');
 
 
 CREATE TABLE IF NOT EXISTS stage_types (
