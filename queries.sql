@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS plan_documents (
 );
 
 
-INSERT INTO plan_documents (lru_id, document_number, vers, revision, doc_ver, uploaded_by, file_path, status) VALUES
+INSERT INTO plan_documents (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status) VALUES
 (1, 'DOC-FC-001', 'v1.0', 'r1', 'A', 1002, '/docs/fc/doc-fc-001-v1.0.pdf', 'not assigned'),
 (2, 'DOC-AP-001', 'v1.0', 'r2', 'B', 1003, '/docs/ap/doc-ap-001-v1.0.pdf', 'assigned and returned'),
 (3, 'DOC-GPS-001', 'v1.1', 'r1', 'C', 1004, '/docs/gps/doc-gps-001-v1.1.pdf', 'cleared'),

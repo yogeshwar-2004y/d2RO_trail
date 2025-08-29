@@ -89,7 +89,7 @@ def get_projects():
         
         # Fetch all projects from the projects table
         cur.execute("""
-            SELECT project_id, project_name, description, created_at
+            SELECT project_id, project_name, created_at
             FROM projects
             ORDER BY project_id
         """)
@@ -103,8 +103,7 @@ def get_projects():
             project_list.append({
                 "id": project[0],
                 "name": project[1],
-                "description": project[2],
-                "created_at": project[3].isoformat() if project[3] else None
+                "created_at": project[2].isoformat() if project[2] else None
             })
         
         return jsonify({
@@ -453,6 +452,261 @@ def get_users_with_roles():
     except Exception as e:
         print(f"Error fetching users with roles: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Plan Documents endpoints
+
+# Get plan documents for a specific LRU
+@app.route('/api/lrus/<int:lru_id>/plan-documents', methods=['GET'])
+def get_lru_plan_documents(lru_id):
+    try:
+        cur = conn.cursor()
+        
+        # First verify the LRU exists
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        lru = cur.fetchone()
+        if not lru:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        # Fetch plan documents for the specific LRU
+        cur.execute("""
+            SELECT 
+                pd.document_id,
+                pd.document_number,
+                pd.version,
+                pd.revision,
+                pd.doc_ver,
+                pd.uploaded_by,
+                pd.upload_date,
+                pd.file_path,
+                pd.status,
+                u.name as uploaded_by_name
+            FROM plan_documents pd
+            JOIN users u ON pd.uploaded_by = u.user_id
+            WHERE pd.lru_id = %s AND pd.is_active = TRUE
+            ORDER BY pd.document_id DESC
+        """, (lru_id,))
+        
+        documents = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        document_list = []
+        for doc in documents:
+            document_list.append({
+                "document_id": doc[0],
+                "document_number": doc[1],
+                "version": doc[2],
+                "revision": doc[3],
+                "doc_ver": doc[4],
+                "uploaded_by": doc[5],
+                "uploaded_by_name": doc[9],
+                "upload_date": doc[6].isoformat() if doc[6] else None,
+                "file_path": doc[7],
+                "status": doc[8]
+            })
+        
+        return jsonify({
+            "success": True,
+            "lru": {
+                "lru_id": lru[0],
+                "lru_name": lru[1],
+                "project_name": lru[2]
+            },
+            "documents": document_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching plan documents for LRU {lru_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get plan documents for a project (all LRUs)
+@app.route('/api/projects/<int:project_id>/plan-documents', methods=['GET'])
+def get_project_plan_documents(project_id):
+    try:
+        cur = conn.cursor()
+        
+        # First verify the project exists
+        cur.execute("""
+            SELECT project_id, project_name
+            FROM projects
+            WHERE project_id = %s
+        """, (project_id,))
+        
+        project = cur.fetchone()
+        if not project:
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Fetch plan documents for all LRUs in the project
+        cur.execute("""
+            SELECT 
+                l.lru_id,
+                l.lru_name,
+                pd.document_id,
+                pd.document_number,
+                pd.version,
+                pd.revision,
+                pd.doc_ver,
+                pd.uploaded_by,
+                pd.upload_date,
+                pd.file_path,
+                pd.status,
+                u.name as uploaded_by_name
+            FROM lrus l
+            LEFT JOIN plan_documents pd ON l.lru_id = pd.lru_id AND pd.is_active = TRUE
+            LEFT JOIN users u ON pd.uploaded_by = u.user_id
+            WHERE l.project_id = %s
+            ORDER BY l.lru_id, pd.document_id DESC
+        """, (project_id,))
+        
+        results = cur.fetchall()
+        cur.close()
+        
+        # Organize data by LRU
+        lrus_dict = {}
+        
+        for row in results:
+            lru_id = row[0]
+            lru_name = row[1]
+            
+            # Initialize LRU if not exists
+            if lru_id not in lrus_dict:
+                lrus_dict[lru_id] = {
+                    "lru_id": lru_id,
+                    "lru_name": lru_name,
+                    "documents": []
+                }
+            
+            # Add document if it exists
+            if row[2]:  # document_id exists
+                lrus_dict[lru_id]["documents"].append({
+                    "document_id": row[2],
+                    "document_number": row[3],
+                    "version": row[4],
+                    "revision": row[5],
+                    "doc_ver": row[6],
+                    "uploaded_by": row[7],
+                    "uploaded_by_name": row[11],
+                    "upload_date": row[8].isoformat() if row[8] else None,
+                    "file_path": row[9],
+                    "status": row[10]
+                })
+        
+        return jsonify({
+            "success": True,
+            "project": {
+                "project_id": project[0],
+                "project_name": project[1]
+            },
+            "lrus": list(lrus_dict.values())
+        })
+        
+    except Exception as e:
+        print(f"Error fetching plan documents for project {project_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Upload plan document
+@app.route('/api/plan-documents', methods=['POST'])
+def upload_plan_document():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        lru_id = data.get('lru_id')
+        document_number = data.get('document_number')
+        version = data.get('version')
+        revision = data.get('revision')
+        doc_ver = data.get('doc_ver')
+        uploaded_by = data.get('uploaded_by')
+        file_path = data.get('file_path')
+        
+        if not all([lru_id, document_number, version, uploaded_by, file_path]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        cur = conn.cursor()
+        
+        # Verify LRU exists
+        cur.execute("SELECT lru_id FROM lrus WHERE lru_id = %s", (lru_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        # Insert plan document
+        cur.execute("""
+            INSERT INTO plan_documents 
+            (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned')
+            RETURNING document_id
+        """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path))
+        
+        document_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Plan document uploaded successfully",
+            "document_id": document_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error uploading plan document: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Update plan document status
+@app.route('/api/plan-documents/<int:document_id>/status', methods=['PUT'])
+def update_plan_document_status(document_id):
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        new_status = data.get('status')
+        if not new_status:
+            return jsonify({"success": False, "message": "Status is required"}), 400
+        
+        # Validate status
+        valid_statuses = ['cleared', 'disapproved', 'assigned and returned', 'moved to next stage', 'not cleared', 'not assigned']
+        if new_status not in valid_statuses:
+            return jsonify({"success": False, "message": "Invalid status"}), 400
+        
+        cur = conn.cursor()
+        
+        # Update document status
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = %s
+            WHERE document_id = %s AND is_active = TRUE
+            RETURNING document_id
+        """, (new_status, document_id))
+        
+        result = cur.fetchone()
+        if not result:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Document status updated successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating plan document status: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
