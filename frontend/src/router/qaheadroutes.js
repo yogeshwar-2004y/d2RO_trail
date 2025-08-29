@@ -10,6 +10,7 @@ import QAHeadViewObservations from '@/views/qahead/QAHeadViewObservations.vue'
 import QAHeadMemoDashboard from '@/views/qahead/QAHeadMemoDashboard.vue'
 import QAHeadMemoForm from '@/views/qahead/QAHeadMemoForm.vue'
 import QAHeadReportDashboard from '@/views/qahead/QAHeadReportDashboard.vue'
+import QAHeadNotifications from '@/views/qahead/QAHeadNotifications.vue'
 
 const qaheadRoutes = [
   {
@@ -61,6 +62,11 @@ const qaheadRoutes = [
     path: '/qahead/reports',
     name: 'QAHeadReportDashboard',
     component: QAHeadReportDashboard,
+  },
+  {
+    path: '/qahead/notifications',
+    name: 'QAHeadNotifications',
+    component: QAHeadNotifications,
   },
 ];
 
