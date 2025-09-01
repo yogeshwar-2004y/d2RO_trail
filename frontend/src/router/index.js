@@ -18,6 +18,7 @@ import ActivityLogs from "@/views/admin/ActivityLogs.vue";
 import TestsPage from "@/views/admin/TestsPage.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
+import DocumentViewer from "@/components/DocumentViewer.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,17 +29,17 @@ const router = createRouter({
       component: LoginPage,
     },
     {
-      path: "/activity-logs",
+      path: "/user-activities/activity-logs",
       name: "ActivityLogs",
       component: ActivityLogs
     },
     {
-      path: "/add-update-projects",
+      path: "/user-activities/add-update-projects",
       name: "AddUpdateProjects",
       component: AddUpdateProjects,
     },
     {
-      path: "/add-update-users",
+      path: "/user-activities/add-update-users",
       name: "AddUpdateUser",
       component: AddUpdateUser
     },
@@ -48,12 +49,12 @@ const router = createRouter({
       component: HomePageAdmin,
     },
     {
-      path: "/manage-projects",
+      path: "/user-activities/manage-projects",
       name: "ManageProjects",
       component: ManageProjects
     },
     {
-      path: "/manage-users",
+      path: "/user-activities/manage-users",
       name: "ManageUsers",
       component: ManageUsers
     },
@@ -78,7 +79,7 @@ const router = createRouter({
       component: ReportDashboard,
     },
     {
-      path: "/tests",
+      path: "/user-activities/tests",
       name: "TestsPage",
       component: TestsPage
     },
@@ -101,6 +102,11 @@ const router = createRouter({
       path: '/memos/:memoId',
       name: 'MemoForm',
       component: MemoForm,
+    },
+    {
+    path: '/document-viewer',
+    name: 'DocumentViewer',
+    component: DocumentViewer,
     },
     ...reviewerRoutes,
     ...qaheadRoutes,

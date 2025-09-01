@@ -121,15 +121,15 @@ export default {
     },
     viewLru(lru) {
       // Navigate to document viewer or LRU detail page
-      alert(`Viewing LRU: ${lru.name}`);
-      // this.$router.push({ 
-      //   name: 'DocumentViewer', 
-      //   params: { 
-      //     lruId: lru.id, 
-      //     lruName: lru.name,
-      //     projectId: this.projectId
-      //   } 
-      // });
+      //alert(`Viewing LRU: ${lru.name}`);
+      this.$router.push({ 
+        name: 'DocumentViewer', 
+        params: { 
+          lruId: lru.id, 
+          lruName: lru.name,
+          projectId: this.projectId
+        } 
+      });
     },
     formatDate(dateString) {
       if (!dateString) return '';
