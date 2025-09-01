@@ -1,8 +1,10 @@
 import { createRouter, createWebHistory } from "vue-router";
+
 import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
 import designheadRoutes from './designhead'
 import designerRoutes from './designer'
+
 import LoginPage from '@/views/LoginPage.vue'
 import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
 import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
@@ -19,6 +21,7 @@ import TestsPage from "@/views/admin/TestsPage.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
 import DocumentViewer from "@/components/DocumentViewer.vue";
+import SubmitMemo from '@/components/SubmitMemo.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -108,11 +111,17 @@ const router = createRouter({
     name: 'DocumentViewer',
     component: DocumentViewer,
     },
+    {
+    path: '/memos/submit',
+    name: 'SubmitMemo',             
+    component: SubmitMemo,
+    },
     ...reviewerRoutes,
     ...qaheadRoutes,
     ...designheadRoutes,
     ...designerRoutes,
   ],
+  
 });
 
 export default router
