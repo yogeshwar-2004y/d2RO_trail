@@ -1,12 +1,10 @@
-// src/router/reviewerroutes.js
+// src/router/reviewerRoutes.js
 
 import HomePageReviewer from '@/views/reviewer/HomePageReviewer.vue'
-/**import ReviewerProjectsDashboard from '@/views/reviewer/ReviewerProjectsDashboard.vue'
-import ReviewerReports from '@/views/reviewer/ReviewerReports.vue'
-import ProjectsDashboard from "@/views/admin/ProjectsDashboard.vue";
-import LruDashboard from "@/views/admin/LruDashboard.vue";
-import MemoDashboard from "@/views/admin/MemoDashboard.vue";
-import ReportDashboard from "@/views/admin/ReportDashboard.vue";*/
+import InspectionMemo from '@/views/reviewer/InspectionMemo.vue';
+import ReviewerMemoDashboard from '@/views/reviewer/ReviewerMemoDashboard.vue';
+import SharedMemoDashboard from '@/views/reviewer/SharedMemoDashboard.vue';
+import SharedMemoView from '@/views/reviewer/SharedMemoView.vue';
 
 const reviewerRoutes = [
   {
@@ -14,41 +12,28 @@ const reviewerRoutes = [
     name: "HomePageReviewer",
     component: HomePageReviewer,
   },
-  /**{
-    path: "/reviewer/projects",
-    name: "ReviewerProjectsDashboard",
-    component: ReviewerProjectsDashboard,
+  {
+    path: "/reviewer/memo-dashboard",
+    name: "ReviewerMemoDashboard",
+    component: ReviewerMemoDashboard,
   },
   {
-    path: "/reviewer/reports",
-    name: "ReviewerReports",
-    component: ReviewerReports,
-  }, 
-  {
-    path: "/memos",
-    name: "MemoDashboard",
-    component: MemoDashboard,
+    path: "/reviewer/InspectionMemo/:id", // Dynamic path with memo ID parameter
+    name: "InspectionMemo",
+    component: InspectionMemo,
+    props: true, // Enable props to pass route params as component props
   },
   {
-    path: "/projects",
-    name: "ProjectsDashboard",
-    component: ProjectsDashboard,
+    path: "/reviewer/shared-memos",
+    name: "SharedMemoDashboard",
+    component: SharedMemoDashboard,
   },
   {
-    path: "/projects/:projectName/lrus",
-    name: "LruDashboard",
-    component: LruDashboard,
+    path: "/reviewer/shared-memo/:id", // Dynamic path for shared memo view
+    name: "SharedMemoView",
+    component: SharedMemoView,
+    props: true, // Enable props to pass route params as component props
   },
-  {
-    path: "/reports",
-    name: "ReportDashboard",
-    component: ReportDashboard,
-  },
-  {
-    path: "/tests",
-    name: "TestsPage",
-    component: TestsPage,
-  },*/
 ];
 
 export default reviewerRoutes
