@@ -1,8 +1,8 @@
 // src/router/reviewerroutes.js
 
 import HomePageReviewer from '@/views/reviewer/HomePageReviewer.vue'
-import InspectionMemo from '@/views/reviewer/InspectionMemo.vue'
-import ReviewerMemoDashboard from '@/views/reviewer/ReviewerMemoDashboard.vue'
+import InspectionMemo from '../../../z-extra/InspectionMemo.vue'
+import ReviewerMemoDashboard from '../../../z-extra/ReviewerMemoDashboard.vue'
 import SharedMemoDashboard from '@/views/reviewer/SharedMemoDashboard.vue'
 import SharedMemoView from '@/views/reviewer/SharedMemoView.vue'
 
