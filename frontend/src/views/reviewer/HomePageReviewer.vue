@@ -53,7 +53,7 @@ export default {
         if (pageName === 'ProjectsDashboard') {
             this.$router.push({ name: 'ProjectsDashboard' });
         } else if (pageName === 'MemoDashboard') {
-            this.$router.push({ name: 'ReviewerMemoDashboard' });
+            this.$router.push({ name: 'MemoDashboard' });
         } else if (pageName === 'ReportDashboard') {
             this.$router.push({ name: 'ReportDashboard' });
         } 
