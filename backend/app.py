@@ -5,7 +5,7 @@ import hashlib
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:5173"]}}, supports_credentials=True)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
 
 
 def hash_password(password):
@@ -20,17 +20,17 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Admin",
+    password="12345",
     host="localhost",
     port="5432"
 )
 
-@app.after_request
-def after_request(response):
-    response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-    return response
+# @app.after_request
+# def after_request(response):
+#     response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
+#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+#     response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+#     return response
 
 
 @app.route('/api')
