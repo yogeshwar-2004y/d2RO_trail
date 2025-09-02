@@ -330,6 +330,61 @@
       </div>
     </div>
 
+    <div 
+      class="form-section test-status" 
+      v-if="currentUserRole === 3"
+    >
+      <h3>TEST STATUS</h3>
+      <div class="status-options">
+        <label>
+          <input 
+            type="radio" 
+            v-model="formData.testStatus" 
+            value="successful"
+          />
+          Successfully completed
+        </label>
+        <label>
+          <input 
+            type="radio" 
+            v-model="formData.testStatus" 
+            value="withObservations"
+          />
+          Completed with observations
+        </label>
+        <label>
+          <input 
+            type="radio" 
+            v-model="formData.testStatus" 
+            value="notConducted"
+          />
+          Test not conducted
+        </label>
+        <label>
+          <input 
+            type="radio" 
+            v-model="formData.testStatus" 
+            value="failed"
+          />
+          Test failed
+        </label>
+      </div>
+    </div>
+
+
+    <!-- ✅ New Section: Remarks by QA Reviewer -->
+    <div 
+      class="form-section reviewer-remarks" 
+      v-if="currentUserRole === 3"
+    >
+      <h3>Remarks by QA Reviewer</h3>
+      <div class="remarks-container">
+        <textarea v-model="formData.qaReviewerRemarks" placeholder="Enter reviewer comments..."></textarea>
+        <div class="signature-box-large"></div>
+        <p>SIGNATURE OF QA REVIEWER</p>
+      </div>
+    </div>
+
     <div
       class="action-buttons"
       v-if="memoData.status === 'Not Assigned' 
@@ -538,6 +593,12 @@
         </div>
       </div>
     </div>
+
+    <div class="submit-section">
+      <button class="submit-button" @click="submitMemo">
+        Submit
+      </button>
+    </div>
   </div>
 </template>
 
@@ -550,7 +611,7 @@ export default {
       memoData: {
         status: 'Not Assigned'
       },
-      currentUserRole: 2,
+      currentUserRole: 3,
       // Overlay visibility
       showAcceptOverlay: false,
       showRejectOverlay: false,
@@ -637,7 +698,9 @@ export default {
         cert6: false,
         logBookDate: '',
         qaInspectionDate: '',
-        dgaqaRemarks: ''
+        dgaqaRemarks: '',
+        testStatus: '',
+        qaReviewerRemarks: ''
       }
     };
   },
@@ -742,6 +805,31 @@ export default {
     
     rejectMemo() {
       this.showRejectOverlay = true;
+    },
+
+    submitMemo() {
+    // Validate that at least one test status is selected
+    const testStatusSelected = Object.values(this.memoData.testStatus).some(status => status);
+      
+      if (!testStatusSelected) {
+        alert('Please select at least one test status.');
+        return;
+      }
+      
+      if (!this.memoData.reviewerComments.trim()) {
+        alert('Please provide reviewer comments.');
+        return;
+      }
+      
+      // Here you would add the logic to submit the memo, for example, making an API call.
+      console.log('Submitting memo:', {
+        memoId: this.id,
+        testStatus: this.memoData.testStatus,
+        reviewerComments: this.memoData.reviewerComments
+      });
+      
+      alert('Memo submitted successfully!');
+      this.goBack(); // Navigate back after successful submission
     }
   }
 };
@@ -1517,5 +1605,90 @@ export default {
     gap: 10px;
     padding: 15px 30px;
   }
+}
+
+/* Test Status Section */
+.test-status .status-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.test-status label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1em;
+  color: #495057;
+}
+
+.test-status input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* QA Reviewer Remarks */
+.reviewer-remarks .remarks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.reviewer-remarks textarea {
+  width: 100%;
+  height: 120px;
+  padding: 12px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font-size: 1em;
+  resize: vertical;
+  font-family: inherit;
+  color: #333;
+}
+
+.reviewer-remarks p {
+  text-align: right;
+  font-weight: bold;
+  color: #000;
+}
+
+.submit-section {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+  background-color: transparent;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.submit-button:hover {
+  background-color: #222;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.submit-button:active {
+  transform: translateY(0);
+}
+
+.submit-button svg {
+  width: 20px;
+  height: 20px;
 }
 </style>

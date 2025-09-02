@@ -1,24 +1,36 @@
 // src/router/reviewerroutes.js
 
 import HomePageReviewer from '@/views/reviewer/HomePageReviewer.vue'
-import ReviewerProjectsDashboard from '@/views/reviewer/ReviewerProjectsDashboard.vue'
-import ReviewerReports from '@/views/reviewer/ReviewerReports.vue'
+import InspectionMemo from '@/views/reviewer/InspectionMemo.vue'
+import ReviewerMemoDashboard from '@/views/reviewer/ReviewerMemoDashboard.vue'
+import SharedMemoDashboard from '@/views/reviewer/SharedMemoDashboard.vue'
+import SharedMemoView from '@/views/reviewer/SharedMemoView.vue'
 
 const reviewerRoutes = [
   {
-    path: '/reviewer/home',
+    path: '/reviewer',
     name: 'HomePageReviewer',
     component: HomePageReviewer,
   },
   {
-    path: '/reviewer/projects',
-    name: 'ReviewerProjectsDashboard',
-    component: ReviewerProjectsDashboard,
+    path: '/inspection-memo',
+    name: 'InspectionMemo',
+    component: InspectionMemo,
   },
   {
-    path: '/reviewer/reports',
-    name: 'ReviewerReports',
-    component: ReviewerReports,
+    path: '/memo-dashboard',
+    name: 'ReviewerMemoDashboard',
+    component: ReviewerMemoDashboard,
+  },
+  {
+    path: '/shared-memos',
+    name: 'SharedMemoDashboard',
+    component: SharedMemoDashboard,
+  },
+    {
+    path: '/shared-memo-view',
+    name: 'SharedMemoView',
+    component: SharedMemoView,
   },
 ]
 
