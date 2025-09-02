@@ -51,11 +51,11 @@ export default {
   methods: {
     goToPage(pageName) {
       if (pageName === 'QAHeadProjectsDashboard') {
-        this.$router.push({ name: 'QAHeadProjectsDashboard' });
+        this.$router.push({ name: 'ProjectsDashboard' }); //QAHeadProjectsDashboard
       } else if (pageName === 'QAHeadMemoDashboard') {
-        this.$router.push({ name: 'QAHeadMemoDashboard' });
+        this.$router.push({ name: 'MemoDashboard' }); //QAHeadMemoDashboard
       } else if (pageName === 'QAHeadReportDashboard') {
-        this.$router.push({ name: 'QAHeadReportDashboard' });
+        this.$router.push({ name: 'ReportDashboard' }); //QAHeadReportDashboard
       }
     },
     logout() {

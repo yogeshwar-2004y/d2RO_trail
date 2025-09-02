@@ -62,11 +62,25 @@
             </div>
           </div>
         </div>
+        <button class="export-all-button" @click="exportAllReports">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          EXPORT ALL
+        </button>
       </div>
     </div>
     
     <div class="report-grid">
-      <div v-for="report in filteredReports" :key="report.id" class="report-card" :class="report.status.toLowerCase().replace(/ /g, '-')">
+      <div 
+        v-for="report in filteredReports" 
+        :key="report.id" 
+        class="report-card" 
+        :class="report.status.toLowerCase().replace(/ /g, '-')"
+        @click="viewReport(report)"
+      >
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -80,8 +94,10 @@
 </template>
 
 <script>
+import jsPDF from 'jspdf';
+
 export default {
-  name: 'ReportDashboard',
+  name: 'QAHeadReportDashboard',
   data() {
     return {
       searchQuery: '',
@@ -152,6 +168,150 @@ export default {
     selectReportStatus(status) {
       this.activeReportFilter = this.activeReportFilter === status ? null : status;
       this.showReportFilter = false;
+    },
+    viewReport(report) {
+      // Navigate to the QAHeadViewObservations form with report data
+      this.$router.push({
+        name: 'QAHeadViewObservations',
+        params: {
+          lruName: report.name,
+          projectName: report.project,
+          reportId: report.id
+        }
+      });
+    },
+    
+    exportAllReports() {
+      try {
+        // Create new PDF document
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        
+        let yPosition = margin;
+        
+        // Set font styles
+        doc.setFont('helvetica');
+        
+        // Header - Reports Summary
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('QA HEAD REPORTS SUMMARY', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Date
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        const currentDate = new Date().toLocaleDateString('en-GB');
+        doc.text(`Generated on: ${currentDate}`, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 20;
+        
+        // Filter information
+        if (this.activeProjectFilter || this.activeReportFilter) {
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold');
+          doc.text('Applied Filters:', margin, yPosition);
+          yPosition += 8;
+          
+          if (this.activeProjectFilter) {
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Project: ${this.activeProjectFilter}`, margin + 10, yPosition);
+            yPosition += 6;
+          }
+          
+          if (this.activeReportFilter) {
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Status: ${this.activeReportFilter}`, margin + 10, yPosition);
+            yPosition += 6;
+          }
+          yPosition += 10;
+        }
+        
+        // Reports table
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('REPORTS LIST', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Table headers
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        const tableStartX = margin;
+        const snoWidth = 15;
+        const projectWidth = 30;
+        const nameWidth = 50;
+        const statusWidth = 60;
+        
+        doc.text('SNO', tableStartX, yPosition);
+        doc.text('Project', tableStartX + snoWidth, yPosition);
+        doc.text('Report Name', tableStartX + snoWidth + projectWidth, yPosition);
+        doc.text('Status', tableStartX + snoWidth + projectWidth + nameWidth, yPosition);
+        yPosition += 8;
+        
+        // Draw table lines
+        doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
+        doc.line(margin, yPosition, pageWidth - margin, yPosition);
+        
+        // Table data
+        doc.setFont('helvetica', 'normal');
+        this.filteredReports.forEach((report, index) => {
+          yPosition += 8;
+          
+          // Check if we need a new page
+          if (yPosition > pageHeight - 40) {
+            doc.addPage();
+            yPosition = margin + 20;
+          }
+          
+          doc.text((index + 1).toString(), tableStartX, yPosition);
+          doc.text(report.project, tableStartX + snoWidth, yPosition);
+          doc.text(report.name, tableStartX + snoWidth + projectWidth, yPosition);
+          doc.text(report.status, tableStartX + snoWidth + projectWidth + nameWidth, yPosition);
+          
+          yPosition += 8;
+        });
+        
+        // Summary statistics
+        yPosition += 15;
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        doc.text('SUMMARY STATISTICS', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        
+        const totalReports = this.filteredReports.length;
+        const statusCounts = {};
+        
+        this.filteredReports.forEach(report => {
+          statusCounts[report.status] = (statusCounts[report.status] || 0) + 1;
+        });
+        
+        doc.text(`Total Reports: ${totalReports}`, margin, yPosition);
+        yPosition += 8;
+        
+        Object.entries(statusCounts).forEach(([status, count]) => {
+          doc.text(`${status}: ${count}`, margin + 10, yPosition);
+          yPosition += 6;
+        });
+        
+        // Save the PDF
+        const fileName = `QA_Head_Reports_Summary_${currentDate.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        
+        // Show success message
+        this.$nextTick(() => {
+          alert('Reports summary exported successfully as PDF!');
+        });
+        
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        this.$nextTick(() => {
+          alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        });
+      }
     }
   }
 };
@@ -254,6 +414,28 @@ export default {
   cursor: pointer;
 }
 
+.export-all-button {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.export-all-button:hover {
+  background: linear-gradient(135deg, #218838, #1ea085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
 .filter-panel {
   position: absolute;
   top: 100%;
@@ -328,6 +510,20 @@ export default {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
+/* Dynamic card colors based on status */
+.report-card.successfully-completed {
+  background-color: #e2fbdc;
+}
+.report-card.assigned {
+  background-color: #c0f4f9;
+}
+.report-card.test-not-conducted {
+  background-color: #e8d0fd;
+}
+.report-card.test-failed {
+  background-color: #ffc4be;
+}
+
 .card-icon {
   margin-bottom: 10px;
 }
@@ -342,5 +538,53 @@ export default {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 20px;
+    padding: 15px 20px;
+  }
+  
+  .header-right {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .filter-dropdown {
+    width: 100%;
+  }
+  
+  .filter-button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .export-all-button {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .report-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px;
+  }
+  
+  .report-card {
+    height: 150px;
+    padding: 15px;
+  }
 }
 </style>

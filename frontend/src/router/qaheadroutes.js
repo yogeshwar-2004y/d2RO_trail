@@ -1,37 +1,31 @@
 // src/router/qaheadroutes.js
 
 import HomePageQAHead from '@/views/qahead/HomePageQAHead.vue'
-import QAHeadProjectsDashboard from '@/views/qahead/QAHeadProjectsDashboard.vue'
-import QAHeadLruDashboard from '@/views/qahead/QAHeadLruDashboard.vue'
-import QAHeadMemoDashboard from '@/views/qahead/QAHeadMemoDashboard.vue'
-import QAHeadReportDashboard from '@/views/qahead/QAHeadReportDashboard.vue'
+import QAHeadDocumentVersionView from '@/views/qahead/QAHeadDocumentVersionView.vue'
+import QAHeadAssignReviewer from '@/views/qahead/QAHeadAssignReviewer.vue'
+import QAHeadNotifications from '@/views/qahead/QAHeadNotifications.vue'
 
 const qaheadRoutes = [
   {
-    path: '/qahead/home',
+    path: '/qahead',
     name: 'HomePageQAHead',
     component: HomePageQAHead,
   },
   {
-    path: '/qahead/projects',
-    name: 'QAHeadProjectsDashboard',
-    component: QAHeadProjectsDashboard,
+    path: '/qahead/projects/:projectName/lrus/:lruName/versions/:versionId',
+    name: 'QAHeadDocumentVersionView',
+    component: QAHeadDocumentVersionView,
   },
   {
-    path: '/qahead/projects/:projectName/lrus',
-    name: 'QAHeadLruDashboard',
-    component: QAHeadLruDashboard,
+    path: '/qahead/assign-reviewer',
+    name: 'QAHeadAssignReviewer',
+    component: QAHeadAssignReviewer,
   },
   {
-    path: '/qahead/memos',
-    name: 'QAHeadMemoDashboard',
-    component: QAHeadMemoDashboard,
+    path: '/memos/notifications',
+    name: 'QAHeadNotifications',
+    component: QAHeadNotifications,
   },
-  {
-    path: '/qahead/reports',
-    name: 'QAHeadReportDashboard',
-    component: QAHeadReportDashboard,
-  },
-]
+];
 
-export default qaheadRoutes
+export default qaheadRoutes;

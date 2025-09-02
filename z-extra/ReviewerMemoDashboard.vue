@@ -18,6 +18,15 @@
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
+        <button class="shared-with-me-button" @click="goToSharedMemos">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+          Shared with Me
+        </button>
         <div class="filter-dropdown">
           <button class="filter-button" @click="toggleProjectFilter">
             Filter By Projects
@@ -54,14 +63,21 @@
     </div>
     
     <div class="memo-list">
-      <div v-for="memo in filteredMemos" :key="memo.id" class="memo-card" :class="memo.status.toLowerCase().replace(/ /g, '-')">
+      <div 
+        v-for="memo in filteredMemos" 
+        :key="memo.id" 
+        class="memo-card" 
+        :class="memo.status.toLowerCase().replace(/ /g, '-')"
+        @click="openMemo(memo.id)"
+      >
         <div class="memo-details">
           <div class="memo-project">{{ memo.project }}</div>
-          <div class="memo-author">FROM - AUTHORISING EMP (DESIGN TEAM)</div>
+          <div class="memo-author">Author: {{ memo.author }}</div>
+          <div v-if="memo.assignedDate" class="memo-assigned">Assigned: {{ memo.assignedDate }}</div>
         </div>
-        <div class="memo-schedule" v-if="memo.assignedDate">
-          <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
-          <div class="memo-scheduled">TEST SCHEDULED ON : {{ memo.scheduledDate }}</div>
+        <div class="memo-schedule">
+          <div v-if="memo.scheduledDate" class="memo-scheduled">TEST SCHEDULED ON: {{ memo.scheduledDate }}</div>
+          <div class="memo-status">{{ memo.status }}</div>
         </div>
       </div>
     </div>
@@ -70,7 +86,7 @@
 
 <script>
 export default {
-  name: 'QAHeadMemoDashboard',
+  name: 'ReviewerMemoDashboard',
   data() {
     return {
       searchQuery: '',
@@ -135,8 +151,16 @@ export default {
     selectMemoStatus(status) {
       this.activeMemoFilter = this.activeMemoFilter === status ? null : status;
       this.showMemoFilter = false;
+    },
+    openMemo(memoId) {
+      // Navigate to the inspection memo page using Vue Router
+      this.$router.push({ name: 'InspectionMemo', params: { id: memoId } });
+    },
+    goToSharedMemos() {
+      // Navigate to the shared memos dashboard
+      this.$router.push({ name: 'SharedMemoDashboard' });
     }
-  }
+ }
 };
 </script>
 
@@ -197,6 +221,31 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   color: #888;
+}
+
+.shared-with-me-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shared-with-me-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.shared-with-me-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .filter-dropdown {
@@ -281,6 +330,12 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   color: #000;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.memo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
 .memo-details {
@@ -301,5 +356,20 @@ export default {
   text-align: right;
   font-size: 0.9em;
   color: #555;
+}
+
+.memo-status {
+  font-weight: bold;
+  margin-top: 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.memo-assigned {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 2px;
 }
 </style>

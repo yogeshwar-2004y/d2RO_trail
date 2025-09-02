@@ -15,13 +15,12 @@ def hash_password(password):
 def verify_password(password, hashed_password):
     """Verify password against hash"""
     return hash_password(password) == hashed_password
-    #return password == hashed_password
 
 # PostgreSQL connection
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="12345",
+    password="Admin",
     host="localhost",
     port="5432"
 )
@@ -83,10 +82,97 @@ def login():
             })
         else:
             cur.close()
+            print(f"Invalid password for user {email} with password as {password}")
             return jsonify({"success": False, "message": "Invalid password"}), 401
             
     except Exception as e:
         print(f"Login error: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Projects endpoint
+@app.route('/api/projects', methods=['GET'])
+def get_projects():
+    try:
+        cur = conn.cursor()
+        
+        # Fetch all projects from the projects table
+        cur.execute("""
+            SELECT project_id, project_name, description, created_at
+            FROM projects
+            ORDER BY project_id
+        """)
+        
+        projects = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        project_list = []
+        for project in projects:
+            project_list.append({
+                "id": project[0],
+                "name": project[1],
+                "description": project[2],
+                "created_at": project[3].isoformat() if project[3] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "projects": project_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching projects: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# LRUs endpoint for a specific project
+@app.route('/api/projects/<int:project_id>/lrus', methods=['GET'])
+def get_project_lrus(project_id):
+    try:
+        cur = conn.cursor()
+        
+        # First verify the project exists
+        cur.execute("""
+            SELECT project_id, project_name
+            FROM projects
+            WHERE project_id = %s
+        """, (project_id,))
+        
+        project = cur.fetchone()
+        if not project:
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Fetch LRUs for the specific project
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, l.created_at
+            FROM lrus l
+            WHERE l.project_id = %s
+            ORDER BY l.lru_id
+        """, (project_id,))
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_list = []
+        for lru in lrus:
+            lru_list.append({
+                "id": lru[0],
+                "name": lru[1],
+                "created_at": lru[2].isoformat() if lru[2] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "project": {
+                "id": project[0],
+                "name": project[1]
+            },
+            "lrus": lru_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching LRUs for project {project_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 if __name__ == '__main__':
