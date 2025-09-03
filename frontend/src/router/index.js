@@ -1,16 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
-import LoginPage from '@/views/LoginPage.vue'
-import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
-import ProjectsDashboard from '@/views/admin/ProjectsDashboard.vue'
-import LruDashboard from '@/views/admin/LruDashboard.vue'
-import MemoDashboard from '@/views/admin/MemoDashboard.vue'
-import ReportDashboard from '@/views/admin/ReportDashboard.vue'
-import UserActivities from '@/views/admin/UserActivities.vue'
-import AddUpdateProjects from "@/views/admin/AddUpdateProjects.vue";
+
 import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
 import designheadRoutes from './designhead'
 import designerRoutes from './designer'
+
+import LoginPage from '@/views/LoginPage.vue'
+import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
+import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
+import LruDashboard from '@/components/LruDashboard.vue'
+import MemoDashboard from '@/components/MemoDashboard.vue'
+import ReportDashboard from '@/components/ReportDashboard.vue'
+import UserActivities from '@/views/admin/UserActivities.vue'
+import AddUpdateProjects from "@/views/admin/AddUpdateProjects.vue";
 import ManageProjects from "@/views/admin/ManageProjects.vue";
 import AddUpdateUser from "@/views/admin/AddUpdateUser.vue";
 import ManageUsers from "@/views/admin/ManageUsers.vue";
@@ -20,6 +22,10 @@ import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
 import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
 import TestsPage from "@/views/admin/TestsPage.vue";
+import ObservationReport from "@/components/ObservationReport.vue";
+import MemoForm from "@/components/MemoForm.vue";
+import DocumentViewer from "@/components/DocumentViewer.vue";
+import SubmitMemo from '@/components/SubmitMemo.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,17 +36,17 @@ const router = createRouter({
       component: LoginPage,
     },
     {
-      path: "/activity-logs",
+      path: "/user-activities/activity-logs",
       name: "ActivityLogs",
       component: ActivityLogs
     },
     {
-      path: "/add-update-projects",
+      path: "/user-activities/add-update-projects",
       name: "AddUpdateProjects",
       component: AddUpdateProjects,
     },
     {
-      path: "/add-update-users",
+      path: "/user-activities/add-update-users",
       name: "AddUpdateUser",
       component: AddUpdateUser
     },
@@ -50,12 +56,12 @@ const router = createRouter({
       component: HomePageAdmin,
     },
     {
-      path: "/manage-projects",
+      path: "/user-activities/manage-projects",
       name: "ManageProjects",
       component: ManageProjects
     },
     {
-      path: "/manage-users",
+      path: "/user-activities/manage-users",
       name: "ManageUsers",
       component: ManageUsers
     },
@@ -102,7 +108,7 @@ const router = createRouter({
       component: ReportDashboard,
     },
     {
-      path: "/tests",
+      path: "/user-activities/tests",
       name: "TestsPage",
       component: TestsPage
     },
@@ -111,23 +117,37 @@ const router = createRouter({
       name: "UserActivities",
       component: UserActivities,
     },
+    {
+      path: "/reports/memo-id/:memoId",
+      name: "TestReports",
+      component: ObservationReport,
+    },
+    {
+    path: '/reports/view-observations',
+    name: 'ObservationReport',
+    component: ObservationReport,
+    },
+    {
+      path: '/memos/:memoId',
+      name: 'MemoForm',
+      component: MemoForm,
+    },
+    {
+    path: '/document-viewer',
+    name: 'DocumentViewer',
+    component: DocumentViewer,
+    },
+    {
+    path: '/memos/submit',
+    name: 'SubmitMemo',             
+    component: SubmitMemo,
+    },
     ...reviewerRoutes,
     ...qaheadRoutes,
     ...designheadRoutes,
     ...designerRoutes,
   ],
+  
 });
 
 export default router
-
-
-
-
-// {
-//   path: '/about',
-//   name: 'about',
-//   // route level code-splitting
-//   // this generates a separate chunk (About.[hash].js) for this route
-//   // which is lazy-loaded when the route is visited.
-//   component: () => import('../views/AboutView.vue'),
-// },

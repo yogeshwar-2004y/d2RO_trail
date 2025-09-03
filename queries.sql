@@ -215,3 +215,98 @@ INSERT INTO test_stage_types (test_id, stage_id, type_id, assigned_by) VALUES
 (1, 2, 2, 1003), -- Implementation stage performance test
 (2, 3, 3, 1004), -- Testing stage regression test
 (3, 4, 4, 1005); -- Deployment stage acceptance test
+
+
+CREATE TABLE plan_doc_assignment (
+    assignment_id SERIAL PRIMARY KEY,
+    document_id INT NOT NULL REFERENCES plan_documents(document_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT now(),
+    UNIQUE (document_id, user_id)
+);
+
+CREATE TABLE memos (
+    memo_id SERIAL PRIMARY KEY,
+    from_person TEXT NOT NULL,
+    to_person TEXT NOT NULL,
+    thru_person TEXT,
+    casdic_ref_no INT,
+    dated DATE,
+    wing_proj_ref_no INT,
+    lru_sru_desc TEXT,
+    part_number INT,
+    slno_units TEXT[],               -- array of checkbox selections
+    qty_offered INT,                 -- derived: count of slno_units
+    manufacturer VARCHAR(255),
+    drawing_no_rev TEXT,
+    source TEXT,
+    unit_identification TEXT,
+    mechanical_inspn TEXT,
+    inspn_test_stage_offered TEXT,
+    stte_status TEXT,
+    test_stage_cleared TEXT,
+    venue TEXT,
+    memo_date DATE,
+    name_designation TEXT,
+    test_facility VARCHAR(255),
+    test_cycle_duration FLOAT,
+    test_start_on TIMESTAMP,
+    test_complete_on TIMESTAMP,
+    calibration_status TEXT,
+    func_check_initial TIMESTAMP,
+    perf_check_during TIMESTAMP,
+    func_check_end TIMESTAMP,
+    certified TEXT[],                -- store a-f checkbox selections
+    remarks TEXT
+);
+
+CREATE TABLE memo_references (
+    ref_id SERIAL PRIMARY KEY,a
+    memo_id INT REFERENCES memos(memo_id) ON DELETE CASCADE,
+    ref_doc VARCHAR(255),
+    ref_no VARCHAR(255),
+    ver FLOAT,
+    rev FLOAT
+);
+
+
+CREATE TABLE reports (
+    report_id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    lru_id INT NOT NULL REFERENCES lrus(lru_id) ON DELETE CASCADE,
+    serial_id INT NOT NULL REFERENCES serial_numbers(serial_id) ON DELETE CASCADE,
+    inspection_stage TEXT,
+    date_of_review DATE,
+    review_venue TEXT,
+    reference_document INT REFERENCES plan_documents(document_id) ON DELETE SET NULL
+);
+
+
+CREATE TABLE report_observations (
+    obs_id SERIAL PRIMARY KEY,
+    report_id INT NOT NULL REFERENCES reports(report_id) ON DELETE CASCADE,
+    s_no INT NOT NULL,
+    category VARCHAR(10) CHECK (category IN ('major', 'minor')),
+    observation TEXT NOT NULL
+);
+
+CREATE TABLE memo_approval (
+    approval_id SERIAL PRIMARY KEY,
+    memo_id INT NOT NULL UNIQUE REFERENCES memos(memo_id) ON DELETE CASCADE,
+    test_date DATE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    comments TEXT,
+    authentication TEXT,
+    attachment_path TEXT,
+    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected'))
+);
+
+CREATE TABLE project_users (
+    project_user_id SERIAL PRIMARY KEY,
+    project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    assigned_at TIMESTAMP DEFAULT now(),
+    CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
+);
+
+

@@ -61,13 +61,13 @@ export default {
   methods: {
     goToPage(pageName) {
       if (pageName === "AddUpdateProjects") {
-        this.$router.push({ path: "/add-update-projects" });
+        this.$router.push({ name: "AddUpdateProjects" });
       } else if (pageName === "AddUpdateUsers") {
-        this.$router.push({ path: "/add-update-users" });
+        this.$router.push({ name: "AddUpdateUser" });
       } else if (pageName === "ActivityLogs") {
-        this.$router.push({ path: "/activity-logs" });
+        this.$router.push({ name: "ActivityLogs" });
       } else if (pageName === "Tests") {
-        this.$router.push({ path: "/tests" });
+        this.$router.push({ name: "TestsPage" });
       }
     },
   },

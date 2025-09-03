@@ -63,17 +63,16 @@ export default {
   methods: {
     navigateToDocuments() {
       // Navigate to documents section
-      console.log('Navigating to Documents');
-      this.$router.push({ name: 'DesignerDocuments' });
+      this.$router.push({ name: 'ProjectsDashboard' });
     },
     navigateToMemo() {
       // Navigate to memo section
       console.log('Navigating to Memo');
-      this.$router.push({ name: 'DesignerMemo' });
+      this.$router.push({ name: 'MemoDashboard' });
     },
     navigateToTestReports() {
       // Navigate to the test reports page
-      this.$router.push({ name: 'DesignerTestReports' });
+      this.$router.push({ name: 'ReportDashboard' });
     }
   }
 };
