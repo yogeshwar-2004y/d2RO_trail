@@ -13,14 +13,14 @@ def hash_password(password):
 
 def verify_password(password, hashed_password):
     """Verify password against hash"""
-    # return hash_password(password) == hashed_password
-    return password == hashed_password
+    return hash_password(password) == hashed_password
+    #return password == hashed_password
 
 # PostgreSQL connection
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Mahadev@2004",
+    password="Admin",
     host="localhost",
     port="5432"
 )
@@ -47,7 +47,7 @@ def login():
         
         # Join users, user_roles, and roles tables to get proper role information
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, u.password_hash, r.role_name
+            SELECT u.user_id, u.name, u.email, u.password_hash, r.role_id, r.role_name
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
@@ -69,7 +69,8 @@ def login():
                     "id": user[0],
                     "name": user[1],
                     "email": user[2],
-                    "role": user[4]  # role_name from roles table
+                    "role_id": user[4],  # role_id from roles table
+                    "role": user[5]  # role_name from roles table
                 }
             })
         else:

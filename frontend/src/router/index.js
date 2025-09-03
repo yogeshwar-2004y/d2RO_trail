@@ -22,6 +22,7 @@ import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
 import DocumentViewer from "@/components/DocumentViewer.vue";
 import SubmitMemo from '@/components/SubmitMemo.vue'
+import RoleTestComponent from '@/components/RoleTestComponent.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -115,6 +116,11 @@ const router = createRouter({
     path: '/memos/submit',
     name: 'SubmitMemo',             
     component: SubmitMemo,
+    },
+    {
+    path: '/test-role-system',
+    name: 'RoleTestComponent',
+    component: RoleTestComponent,
     },
     ...reviewerRoutes,
     ...qaheadRoutes,
