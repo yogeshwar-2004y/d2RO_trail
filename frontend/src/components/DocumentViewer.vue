@@ -269,6 +269,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
 
 
 import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue"
+import { userStore } from '@/stores/userStore'
 
 export default {
   components: { VuePdfEmbed, QAHeadAssignReviewer },
@@ -282,8 +283,7 @@ export default {
       createdDate: new Date('2024-01-15'),
       lastModifiedDate: new Date(),
       
-      // User role - this would come from your auth system
-      currentUserRole: "QA Head", // "QA Head", "Design Head", "Designer", "Admin", "QA Reviewer"
+      // User role will be fetched from global store
       
       // Document viewing
       fileType: null,
@@ -340,6 +340,10 @@ export default {
   },
   
   computed: {
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.roleName()
+    },
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     }

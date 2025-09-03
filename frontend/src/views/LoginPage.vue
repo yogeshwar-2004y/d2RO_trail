@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import { setUser } from '@/stores/userStore'
+
 export default {
   name: 'LoginPage',
   data() {
@@ -53,8 +55,8 @@ export default {
           console.log('Login successful:', data.user);
           alert(`Welcome ${data.user.name} (${data.user.role})`);
 
-          // Store user data in localStorage for later use
-          localStorage.setItem('currentUser', JSON.stringify(data.user));
+          // Store user data in global state
+          setUser(data.user);
 
           // Role-based navigation - handle exact role names from database
           const role = data.user.role.toLowerCase();
