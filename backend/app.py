@@ -5,7 +5,8 @@ import hashlib
 import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+# CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
+CORS(app, origins="*", supports_credentials=True)
 
 
 def hash_password(password):
@@ -92,6 +93,7 @@ def login():
 # Projects endpoint
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
+    print("GET /api/projects hit")  # ✅ Confirm in terminal
     try:
         cur = conn.cursor()
         
@@ -176,4 +178,4 @@ def get_project_lrus(project_id):
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='127.0.0.1', port=8000)
