@@ -111,6 +111,8 @@ export default {
   border: none;
   cursor: pointer;
   color: #000;
+  position: relative;
+  left: -25px;
 }
 
 .logout-button svg {

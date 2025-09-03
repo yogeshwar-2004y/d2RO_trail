@@ -2,6 +2,12 @@
   <div class="projects-dashboard">
     <div class="header">
       <div class="header-left">
+        <button class="back-button" @click="$router.go(-1)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
         <div class="page-title">
           <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -161,7 +167,7 @@ export default {
 }
 
 .search-input {
-  width: 100%;
+  width: 80%;
   padding: 10px 15px;
   padding-right: 40px;
   border: 1px solid #ccc;
@@ -169,6 +175,8 @@ export default {
   font-size: 1em;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  left: -10px;
 }
 
 .search-icon {
@@ -292,5 +300,11 @@ export default {
   text-align: center;
   color: #666;
   font-size: 1.1em;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 </style>
