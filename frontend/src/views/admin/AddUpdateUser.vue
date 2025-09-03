@@ -47,13 +47,15 @@
       </div>
       <div class="form-row">
         <label for="role">ROLE</label>
-        <select id="role" v-model="user.role" class="form-input">
+        <select id="role" v-model="user.roleId" class="form-input">
           <option value="" disabled>Select a role</option>
-          <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+          <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
         </select>
       </div>
 
-      <button class="add-button" @click="addUser">ADD USER</button>
+      <button class="add-button" @click="addUser" :disabled="loading">
+        {{ loading ? 'CREATING USER...' : 'ADD USER' }}
+      </button>
     </div>
   </div>
 </template>
@@ -68,23 +70,93 @@ export default {
         id: '',
         email: '',
         password: '',
-        role: '',
+        roleId: '',
       },
-      roles: ['Admin', 'QA Head', 'QA Reviewer', 'Design Head', 'Design Member'],
+      roles: [],
+      loading: false,
     };
   },
+  async mounted() {
+    await this.fetchRoles();
+  },
   methods: {
-    addUser() {
-      // Logic to send user data to the backend
-      console.log('Adding user:', this.user);
-      alert('User added!');
+    async fetchRoles() {
+      try {
+        this.loading = true;
+        const response = await fetch('http://localhost:5000/api/roles');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.roles = data.roles;
+        } else {
+          alert('Error fetching roles: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching roles:', error);
+        alert('Error fetching roles. Please check if the backend is running.');
+      } finally {
+        this.loading = false;
+      }
+    },
+    validateUser() {
+      if (!this.user.name || !this.user.id || !this.user.email || !this.user.password || !this.user.roleId) {
+        alert('Please fill in all fields.');
+        return false;
+      }
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(this.user.email)) {
+        alert('Please enter a valid email address.');
+        return false;
+      }
+      
+      return true;
+    },
+    async addUser() {
+      if (!this.validateUser()) {
+        return;
+      }
+      
+      try {
+        this.loading = true;
+        
+        const response = await fetch('http://localhost:5000/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(this.user)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('User created successfully!');
+          // Reset form
+          this.user = {
+            name: '',
+            id: '',
+            email: '',
+            password: '',
+            roleId: '',
+          };
+        } else {
+          alert('Error creating user: ' + data.message);
+        }
+      } catch (error) {
+        console.error('Error creating user:', error);
+        alert('Error creating user. Please check if the backend is running.');
+      } finally {
+        this.loading = false;
+      }
     },
     goToManageUsers() {
       // alert('Navigating to Manage Users page.');
       this.$router.push({ name: 'ManageUsers' });
     },
     goToUpdateUser() {
-      alert('Navigating to Update existing user page.');
+      this.$router.push({ name: 'SelectUserToEdit' });
     },
   },
 };
@@ -200,8 +272,14 @@ export default {
   margin-top: 30px;
 }
 
-.add-button:hover {
+.add-button:hover:not(:disabled) {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+
+.add-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

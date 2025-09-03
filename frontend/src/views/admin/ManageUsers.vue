@@ -22,12 +22,24 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(user, index) in users" :key="index">
-            <td>{{ user.userId }}</td>
-            <td>{{ user.userMail }}</td>
-            <td>{{ user.userName }}</td>
-            <td>{{ user.role }}</td>
-          </tr>
+          <template v-if="loading">
+            <tr>
+              <td colspan="4" class="loading-cell">Loading users...</td>
+            </tr>
+          </template>
+          <template v-else-if="users.length === 0">
+            <tr>
+              <td colspan="4" class="no-data-cell">No users found</td>
+            </tr>
+          </template>
+          <template v-else>
+            <tr v-for="user in users" :key="user.user_id">
+              <td>{{ user.user_id }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.name }}</td>
+              <td :class="{ 'no-role': user.role === 'No Role Assigned' }">{{ user.role }}</td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>
@@ -39,15 +51,38 @@ export default {
   name: 'ManageUsers',
   data() {
     return {
-      users: [
-        { userId: 1, userMail: 'user1@email.com', userName: 'User One', role: 'Admin' },
-        { userId: 2, userMail: 'user2@email.com', userName: 'User Two', role: 'QA Head' },
-        { userId: 3, userMail: 'user3@email.com', userName: 'User Three', role: 'Design Head' },
-        { userId: 4, userMail: 'user4@email.com', userName: 'User Four', role: 'QA Reviewer' },
-        { userId: 5, userMail: 'user5@email.com', userName: 'User Five', role: 'Design Member' },
-      ],
+      users: [],
+      loading: false,
+      error: null
     };
   },
+  async mounted() {
+    await this.fetchUsers();
+  },
+  methods: {
+    async fetchUsers() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch('http://localhost:5000/api/users/manage');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.users = data.users;
+        } else {
+          this.error = data.message || 'Failed to fetch users';
+          alert('Error fetching users: ' + this.error);
+        }
+      } catch (err) {
+        console.error('Error fetching users:', err);
+        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        alert(this.error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
 };
 </script>
 
@@ -113,5 +148,35 @@ th, td {
 th {
   background-color: #f8f8f8;
   font-weight: bold;
+}
+
+.loading-cell {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  padding: 30px;
+}
+
+.no-data-cell {
+  text-align: center;
+  color: #999;
+  padding: 30px;
+}
+
+.no-role {
+  color: #ff6b6b;
+  font-style: italic;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f0f0f0;
+}
+
+td {
+  vertical-align: middle;
 }
 </style>
