@@ -27,12 +27,33 @@
           </button>
         </div>
 
+        <div class="filter-dropdown">
+          <button class="filter-button" @click="toggleStatusFilter">
+            Filter by Status
+          </button>
+        </div>
+
         <div class="search-box">
           <input type="text" v-model="searchQuery" placeholder="Search LRUs" class="search-input">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
+        </div>
+      </div>
+      <!-- ✅ Status Filter Overlay -->
+      <div v-if="showStatusFilter" class="status-overlay" @click.self="closeStatusFilter">
+        <div class="status-panel">
+          <h3>Filters</h3>
+          <div 
+            v-for="status in statuses" 
+            :key="status.name" 
+            class="status-option" 
+            :class="[status.color, { 'selected': activeStatusFilter === status.name }]"
+            @click="selectStatus(status.name)"
+          >
+            {{ status.name }}
+          </div>
         </div>
       </div>
       <!-- ✅ Status Filter Overlay -->
@@ -104,6 +125,16 @@ export default {
         { name: 'MOVED TO NEXT STAGE', color: 'moved-next' },
         { name: 'NOT CLEARED', color: 'not-cleared' }
       ]
+      error: null,
+      showStatusFilter: false,
+      activeStatusFilter: null,
+      statuses: [
+        { name: 'CLEARED', color: 'cleared' },
+        { name: 'DISAPPROVED', color: 'disapproved' },
+        { name: 'ASSIGNED & RETURNED', color: 'assigned-returned' },
+        { name: 'MOVED TO NEXT STAGE', color: 'moved-next' },
+        { name: 'NOT CLEARED', color: 'not-cleared' }
+      ]
     };
   },
   computed: {
@@ -115,6 +146,17 @@ export default {
       return userStore.getters.roleName()
     },
     filteredLrus() {
+      let list = this.lrus;
+
+      if (this.activeStatusFilter) {
+        list = list.filter(lru => lru.status === this.activeStatusFilter);
+      }
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        list = list.filter(lru => lru.name.toLowerCase().includes(query));
+      }
+      return list;
+    }
       let list = this.lrus;
 
       if (this.activeStatusFilter) {
@@ -140,6 +182,16 @@ export default {
     }
   },
   methods: {
+    toggleStatusFilter() {
+      this.showStatusFilter = !this.showStatusFilter;
+    },
+    closeStatusFilter() {
+      this.showStatusFilter = false;
+    },
+    selectStatus(status) {
+      this.activeStatusFilter = this.activeStatusFilter === status ? null : status;
+      this.closeStatusFilter();
+    },
     toggleStatusFilter() {
       this.showStatusFilter = !this.showStatusFilter;
     },
@@ -263,6 +315,7 @@ export default {
 
 .search-input {
   width: 80%;
+  width: 80%;
   padding: 10px 15px;
   padding-right: 40px;
   border: 1px solid #ccc;
@@ -270,6 +323,8 @@ export default {
   font-size: 1em;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  position: relative;
+  left: -10px;
   position: relative;
   left: -10px;
 }
@@ -395,6 +450,68 @@ export default {
   font-size: 1.1em;
   grid-column: 1 / -1;
 }
+
+/* Filter Button */
+.filter-button {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Overlay */
+.status-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  z-index: 1000;
+}
+
+.status-panel {
+  background: #fff;
+  width: 250;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  position: relative;
+  right: -960px;
+  top: 35px;
+}
+
+.status-option {
+  padding: 15px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.status-option:hover {
+  transform: scale(1.03);
+}
+
+.status-option.selected {
+  border: 2px solid #000;
+}
+
+/* ✅ Colors (match your screenshot) */
+.cleared { background-color: #ccffcc; }        /* light green */
+.disapproved { background-color: #ffcccc; }    /* light red */
+.assigned-returned { background-color: #ccffff; } /* light cyan */
+.moved-next { background-color: #e6ccff; }     /* light purple */
+.not-cleared { background-color: #ffddaa; }    /* light orange */
+
 
 /* Filter Button */
 .filter-button {
