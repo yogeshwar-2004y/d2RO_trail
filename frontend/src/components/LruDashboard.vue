@@ -83,6 +83,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'LruDashboard',
   data() {
@@ -105,15 +107,13 @@ export default {
     };
   },
   computed: {
-    // filteredLrus() {
-    //   if (!this.searchQuery) {
-    //     return this.lrus;
-    //   }
-    //   const query = this.searchQuery.toLowerCase();
-    //   return this.lrus.filter(lru =>
-    //     lru.name.toLowerCase().includes(query)
-    //   );
-    // },
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
+    roleName() {
+      return userStore.getters.roleName()
+    },
     filteredLrus() {
       let list = this.lrus;
 
