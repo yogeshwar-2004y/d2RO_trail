@@ -257,19 +257,13 @@
 <script>
 import VuePdfEmbed from "vue-pdf-embed"
 import * as mammoth from "mammoth/mammoth.browser"
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf"
 
 // Configure pdf.js worker
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
-
-// Correct way to set worker in Vite
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.js",
-  import.meta.url
-).toString();
-
+import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker?url"
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
 import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue"
-import { userStore } from '@/stores/userStore'
 
 export default {
   components: { VuePdfEmbed, QAHeadAssignReviewer },
@@ -283,7 +277,8 @@ export default {
       createdDate: new Date('2024-01-15'),
       lastModifiedDate: new Date(),
       
-      // User role will be fetched from global store
+      // User role - this would come from your auth system
+      currentUserRole: "Design Head", // "QA Head", "Design Head", "Designer", "Admin", "QA Reviewer"
       
       // Document viewing
       fileType: null,
@@ -340,10 +335,6 @@ export default {
   },
   
   computed: {
-    // Get current user role from global store
-    currentUserRole() {
-      return userStore.getters.roleName()
-    },
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     }
