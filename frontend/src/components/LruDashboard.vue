@@ -125,16 +125,6 @@ export default {
         { name: 'MOVED TO NEXT STAGE', color: 'moved-next' },
         { name: 'NOT CLEARED', color: 'not-cleared' }
       ]
-      error: null,
-      showStatusFilter: false,
-      activeStatusFilter: null,
-      statuses: [
-        { name: 'CLEARED', color: 'cleared' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED & RETURNED', color: 'assigned-returned' },
-        { name: 'MOVED TO NEXT STAGE', color: 'moved-next' },
-        { name: 'NOT CLEARED', color: 'not-cleared' }
-      ]
     };
   },
   computed: {
@@ -146,17 +136,6 @@ export default {
       return userStore.getters.roleName()
     },
     filteredLrus() {
-      let list = this.lrus;
-
-      if (this.activeStatusFilter) {
-        list = list.filter(lru => lru.status === this.activeStatusFilter);
-      }
-      if (this.searchQuery) {
-        const query = this.searchQuery.toLowerCase();
-        list = list.filter(lru => lru.name.toLowerCase().includes(query));
-      }
-      return list;
-    }
       let list = this.lrus;
 
       if (this.activeStatusFilter) {
@@ -182,16 +161,6 @@ export default {
     }
   },
   methods: {
-    toggleStatusFilter() {
-      this.showStatusFilter = !this.showStatusFilter;
-    },
-    closeStatusFilter() {
-      this.showStatusFilter = false;
-    },
-    selectStatus(status) {
-      this.activeStatusFilter = this.activeStatusFilter === status ? null : status;
-      this.closeStatusFilter();
-    },
     toggleStatusFilter() {
       this.showStatusFilter = !this.showStatusFilter;
     },
@@ -315,7 +284,6 @@ export default {
 
 .search-input {
   width: 80%;
-  width: 80%;
   padding: 10px 15px;
   padding-right: 40px;
   border: 1px solid #ccc;
@@ -323,8 +291,6 @@ export default {
   font-size: 1em;
   outline: none;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: relative;
-  left: -10px;
   position: relative;
   left: -10px;
 }
@@ -511,17 +477,6 @@ export default {
 .assigned-returned { background-color: #ccffff; } /* light cyan */
 .moved-next { background-color: #e6ccff; }     /* light purple */
 .not-cleared { background-color: #ffddaa; }    /* light orange */
-
-
-/* Filter Button */
-.filter-button {
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 10px 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
 
 /* Overlay */
 .status-overlay {
