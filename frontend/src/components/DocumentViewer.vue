@@ -283,8 +283,6 @@ export default {
       createdDate: new Date('2024-01-15'),
       lastModifiedDate: new Date(),
       
-      // User role will be fetched from global store
-      
       // Document viewing
       fileType: null,
       pdfUrl: null,
@@ -342,7 +340,7 @@ export default {
   computed: {
     // Get current user role from global store
     currentUserRole() {
-      return userStore.getters.roleName()
+      return userStore.getters.roleName() // Using roleName for string comparison
     },
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';

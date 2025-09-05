@@ -27,12 +27,33 @@
           </button>
         </div>
 
+        <div class="filter-dropdown">
+          <button class="filter-button" @click="toggleStatusFilter">
+            Filter by Status
+          </button>
+        </div>
+
         <div class="search-box">
           <input type="text" v-model="searchQuery" placeholder="Search LRUs" class="search-input">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
+        </div>
+      </div>
+      <!-- ✅ Status Filter Overlay -->
+      <div v-if="showStatusFilter" class="status-overlay" @click.self="closeStatusFilter">
+        <div class="status-panel">
+          <h3>Filters</h3>
+          <div 
+            v-for="status in statuses" 
+            :key="status.name" 
+            class="status-option" 
+            :class="[status.color, { 'selected': activeStatusFilter === status.name }]"
+            @click="selectStatus(status.name)"
+          >
+            {{ status.name }}
+          </div>
         </div>
       </div>
       <!-- ✅ Status Filter Overlay -->
@@ -83,6 +104,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'LruDashboard',
   data() {
@@ -105,15 +128,13 @@ export default {
     };
   },
   computed: {
-    // filteredLrus() {
-    //   if (!this.searchQuery) {
-    //     return this.lrus;
-    //   }
-    //   const query = this.searchQuery.toLowerCase();
-    //   return this.lrus.filter(lru =>
-    //     lru.name.toLowerCase().includes(query)
-    //   );
-    // },
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
+    roleName() {
+      return userStore.getters.roleName()
+    },
     filteredLrus() {
       let list = this.lrus;
 
@@ -405,6 +426,57 @@ export default {
   font-weight: bold;
   cursor: pointer;
 }
+
+/* Overlay */
+.status-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  z-index: 1000;
+}
+
+.status-panel {
+  background: #fff;
+  width: 250;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 50px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  position: relative;
+  right: -960px;
+  top: 35px;
+}
+
+.status-option {
+  padding: 15px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.status-option:hover {
+  transform: scale(1.03);
+}
+
+.status-option.selected {
+  border: 2px solid #000;
+}
+
+/* ✅ Colors (match your screenshot) */
+.cleared { background-color: #ccffcc; }        /* light green */
+.disapproved { background-color: #ffcccc; }    /* light red */
+.assigned-returned { background-color: #ccffff; } /* light cyan */
+.moved-next { background-color: #e6ccff; }     /* light purple */
+.not-cleared { background-color: #ffddaa; }    /* light orange */
 
 /* Overlay */
 .status-overlay {
