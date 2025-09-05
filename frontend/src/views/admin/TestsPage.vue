@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'TestsPage',
   data() {
@@ -94,6 +96,15 @@ export default {
       saving: false,
       error: null
     };
+  },
+  computed: {
+    // Get current user from global store
+    currentUser() {
+      return userStore.getters.currentUser()
+    },
+    isLoggedIn() {
+      return userStore.getters.isLoggedIn()
+    }
   },
   async mounted() {
     await this.loadData();
@@ -312,9 +323,8 @@ export default {
     },
 
     getCurrentUserId() {
-      // Get current user from localStorage or return default
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      return currentUser.id || 1002; // Default fallback
+      // Get current user from global store or return default
+      return this.currentUser?.id || 1002; // Default fallback
     }
   },
 };

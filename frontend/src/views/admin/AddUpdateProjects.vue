@@ -76,6 +76,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: "AddUpdateProjects",
   data() {
@@ -92,6 +94,15 @@ export default {
         ]
       }
     };
+  },
+  computed: {
+    // Get current user from global store
+    currentUser() {
+      return userStore.getters.currentUser()
+    },
+    isLoggedIn() {
+      return userStore.getters.isLoggedIn()
+    }
   },
   methods: {
     addLru() {
@@ -132,9 +143,8 @@ export default {
         return;
       }
       
-      // Get current user from localStorage
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      if (!currentUser.id) {
+      // Check if user is logged in using global store
+      if (!this.isLoggedIn || !this.currentUser?.id) {
         alert('User session expired. Please login again.');
         this.$router.push({ name: 'login' });
         return;
@@ -143,7 +153,7 @@ export default {
       try {
         const projectData = {
           ...this.project,
-          createdBy: currentUser.id
+          createdBy: this.currentUser.id
         };
         
         const response = await fetch('http://localhost:5000/api/projects', {
