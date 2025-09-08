@@ -278,7 +278,7 @@ export default {
       lastModifiedDate: new Date(),
       
       // User role - this would come from your auth system
-      currentUserRole: "QA Head", // "QA Head", "Design Head", "Designer", "Admin", "QA Reviewer"
+      currentUserRole: "Design Head", // "QA Head", "Design Head", "Designer", "Admin", "QA Reviewer"
       
       // Document viewing
       fileType: null,
