@@ -32,16 +32,26 @@
 
       <!-- Design Head / Designer Actions -->
       <template v-if="currentUserRole === 'Design Head' || currentUserRole === 'Designer'">
-        <label for="file-upload" class="upload-btn">
-          Upload Document
-          <input 
-            id="file-upload"
-            type="file" 
-            accept=".pdf,.docx" 
-            @change="handleFileUpload"
-            style="display: none"
-          />
-        </label>
+        <div class="upload-section">
+          <label for="file-upload" class="upload-btn">
+            Choose Document
+            <input 
+              id="file-upload"
+              type="file" 
+              accept=".pdf,.docx,.doc,.txt,.xlsx,.xls" 
+              @change="handleFileSelect"
+              style="display: none"
+            />
+          </label>
+          <button 
+            v-if="selectedFile" 
+            @click="submitDocument" 
+            class="submit-btn"
+            :disabled="isUploading"
+          >
+            {{ isUploading ? 'Uploading...' : 'Submit Document' }}
+          </button>
+        </div>
       </template>
 
       <!-- Admin and QA Reviewer don't need action buttons -->
@@ -286,6 +296,17 @@ export default {
       numPages: 0,
       zoom: 1.0,
       fileName: "",
+      
+      // File upload
+      selectedFile: null,
+      isUploading: false,
+      documentDetails: {
+        lruId: 1,
+        documentNumber: "DOC-001",
+        version: "v1.0",
+        revision: "A",
+        docVer: "v1"
+      },
 
       showAssignReviewerModal: false,
       showTrackVersionsModal: false,
@@ -294,6 +315,7 @@ export default {
       documentVersions: [
         { 
           id: 1, 
+          
           projectId: 'PRJ-2025-078', 
           version: 'A', 
           date: '2025-01-15', 
@@ -350,7 +372,9 @@ export default {
     // this.loadDocumentMetadata(documentId);
     
     // Load existing document if available
-    // this.loadDocumentFromServer(documentId);
+    if (documentId && documentId !== 'DOC-001') {
+      this.loadExistingDocument(documentId);
+    }
   },
   
   methods: {
@@ -362,6 +386,83 @@ export default {
         month: 'short',
         day: 'numeric'
       });
+    },
+
+    // Load existing document from server
+    async loadExistingDocument(documentId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/plan-documents/${documentId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          const doc = result.document;
+          this.documentId = doc.document_id;
+          this.fileName = doc.original_filename || 'Document';
+          this.status = doc.status;
+          this.lastModifiedDate = new Date(doc.upload_date);
+          
+          // Load the file for display
+          if (doc.file_path) {
+            await this.loadFileFromServer(doc.file_path, doc.original_filename);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading document:', error);
+      }
+    },
+
+    // Load file from server for display
+    async loadFileFromServer(filePath, originalFilename) {
+      try {
+        const filename = filePath.split('/').pop();
+        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        
+        // Determine file type from extension
+        const extension = originalFilename.split('.').pop().toLowerCase();
+        
+        if (extension === 'pdf') {
+          this.fileType = 'pdf';
+          this.pdfUrl = fileUrl;
+          this.loadPdfFromUrl(fileUrl);
+        } else if (extension === 'docx') {
+          this.fileType = 'docx';
+          this.loadDocxFromUrl(fileUrl);
+        } else {
+          this.fileType = 'other';
+          this.fileName = originalFilename;
+        }
+      } catch (error) {
+        console.error('Error loading file from server:', error);
+        alert('Failed to load document from server.');
+      }
+    },
+
+    // Load PDF from URL
+    async loadPdfFromUrl(url) {
+      try {
+        this.pdfUrl = url;
+        this.page = 1;
+
+        const loadingTask = pdfjsLib.getDocument(url);
+        const pdf = await loadingTask.promise;
+        this.numPages = pdf.numPages;
+      } catch (err) {
+        console.error("Failed to load PDF from URL", err);
+        alert("Failed to load PDF file from server.");
+      }
+    },
+
+    // Load DOCX from URL
+    async loadDocxFromUrl(url) {
+      try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        this.docxHtml = result.value;
+      } catch (err) {
+        console.error("Failed to load DOCX from URL", err);
+        alert("Failed to load DOCX file from server.");
+      }
     },
 
     assignReviewer() {
@@ -422,28 +523,87 @@ export default {
     },
     
     // File handling
-    handleFileUpload(event) {
+    handleFileSelect(event) {
       const file = event.target.files?.[0];
       if (!file) return;
 
-      this.fileName = file.name;
-      this.clearDocument();
-
+      // Validate file type
       const fileType = file.type;
+      const allowedTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+        "text/plain",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel"
+      ];
+
+      if (!allowedTypes.includes(fileType)) {
+        alert("Unsupported file type. Please upload a PDF, DOCX, DOC, TXT, XLSX, or XLS file.");
+        return;
+      }
+
+      // Validate file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        alert("File too large. Maximum size is 50MB.");
+        return;
+      }
+
+      this.selectedFile = file;
+      this.fileName = file.name;
+      
+      // Preview the file
+      this.clearDocument();
       if (fileType === "application/pdf") {
         this.fileType = "pdf";
         this.loadPdf(file);
-      } else if (
-        fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
+      } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         this.fileType = "docx";
         this.loadDocx(file);
       } else {
-        alert("Unsupported file type. Please upload a PDF or DOCX file.");
+        this.fileType = "other";
+        this.fileName = file.name;
       }
-      
-      // Update modified date
-      this.lastModifiedDate = new Date();
+    },
+
+    async submitDocument() {
+      if (!this.selectedFile) return;
+
+      this.isUploading = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+        formData.append('lru_id', this.documentDetails.lruId);
+        formData.append('document_number', this.documentDetails.documentNumber);
+        formData.append('version', this.documentDetails.version);
+        formData.append('revision', this.documentDetails.revision);
+        formData.append('doc_ver', this.documentDetails.docVer);
+        formData.append('uploaded_by', this.currentUser?.id || 1001);
+
+        const response = await fetch('http://localhost:5000/api/plan-documents', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Document uploaded successfully!');
+          this.selectedFile = null;
+          this.$emit('document-uploaded', result);
+          
+          // Update modified date
+          this.lastModifiedDate = new Date();
+        } else {
+          alert(`Upload failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Failed to upload document. Please try again.');
+      } finally {
+        this.isUploading = false;
+      }
     },
 
     async loadPdf(file) {
@@ -629,6 +789,32 @@ export default {
 
 .action-btn:hover {
   background: #2563eb;
+}
+
+.upload-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.submit-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.submit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
 }
 
 .upload-btn {

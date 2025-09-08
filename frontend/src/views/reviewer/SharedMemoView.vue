@@ -154,7 +154,7 @@ export default {
         lruSruDesc: 'Flight Control Unit',
         refDoc: 'FCU-SPEC-001',
         refNoDocument: 'DOC/FCU/2025/001',
-        version: '1.0',
+        version: 'v1.0',
         revision: 'A',
         partNo: 'FCU-001-REV-A',
         manufacturer: 'Aviation Systems Ltd.',
