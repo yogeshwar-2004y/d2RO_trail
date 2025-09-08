@@ -15,19 +15,43 @@
       <table>
         <thead>
           <tr>
-            <th>ROLL</th>
+            <th>PROJECT ID</th>
             <th>PROJECT NAME</th>
             <th>LRU NAME</th>
-            <th>SERIAL NUMBERS</th>
+            <th>TOTAL SERIAL NUMBERS</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(project, index) in projects" :key="index">
-            <td>{{ project.roll }}</td>
-            <td>{{ project.projectName }}</td>
-            <td>{{ project.lruName }}</td>
-            <td>{{ project.serialNumbers }}</td>
-          </tr>
+          <template v-if="loading">
+            <tr>
+              <td colspan="4" class="loading-cell">Loading projects...</td>
+            </tr>
+          </template>
+          <template v-else-if="projects.length === 0">
+            <tr>
+              <td colspan="4" class="no-data-cell">No projects found</td>
+            </tr>
+          </template>
+          <template v-else>
+            <template v-for="project in projects" :key="project.project_id">
+              <template v-if="project.lrus.length === 0">
+                <tr>
+                  <td>{{ project.project_id }}</td>
+                  <td>{{ project.project_name }}</td>
+                  <td class="no-data">No LRUs</td>
+                  <td class="no-data">0</td>
+                </tr>
+              </template>
+              <template v-else>
+                <tr v-for="(lru, lruIndex) in project.lrus" :key="lru.lru_id">
+                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_id }}</td>
+                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_name }}</td>
+                  <td>{{ lru.lru_name }}</td>
+                  <td>{{ lru.serial_numbers.length }}</td>
+                </tr>
+              </template>
+            </template>
+          </template>
         </tbody>
       </table>
     </div>
@@ -39,14 +63,38 @@ export default {
   name: 'ManageProjects',
   data() {
     return {
-      projects: [
-        { roll: 1, projectName: 'PRJ-2025-078', lruName: 'LRU-A', serialNumbers: 'SNO001' },
-        { roll: 2, projectName: 'PRJ002', lruName: 'LRU-B', serialNumbers: 'SNO002' },
-        { roll: 3, projectName: 'PRJ003', lruName: 'LRU-C', serialNumbers: 'SNO003' },
-        { roll: 4, projectName: 'PRJ004', lruName: 'LRU-D', serialNumbers: 'SNO004' },
-      ],
+      projects: [],
+      loading: false,
+      error: null
     };
   },
+  async mounted() {
+    await this.fetchProjects();
+  },
+  methods: {
+    async fetchProjects() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch('http://localhost:5000/api/projects/manage');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.projects = data.projects;
+        } else {
+          this.error = data.message || 'Failed to fetch projects';
+          alert('Error fetching projects: ' + this.error);
+        }
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        alert(this.error);
+      } finally {
+        this.loading = false;
+      }
+    }
+  }
 };
 </script>
 
@@ -112,5 +160,41 @@ th, td {
 th {
   background-color: #f8f8f8;
   font-weight: bold;
+}
+
+.loading-cell {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  padding: 30px;
+}
+
+.no-data-cell {
+  text-align: center;
+  color: #999;
+  padding: 30px;
+}
+
+.no-data {
+  color: #999;
+  font-style: italic;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f0f0f0;
+}
+
+td {
+  vertical-align: top;
+}
+
+/* Styling for merged cells */
+td[rowspan] {
+  background-color: #f8f8f8;
+  font-weight: 500;
 }
 </style>

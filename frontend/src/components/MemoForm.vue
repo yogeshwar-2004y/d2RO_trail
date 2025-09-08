@@ -603,6 +603,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'QAHeadMemoForm',
   data() {
@@ -611,7 +613,6 @@ export default {
       memoData: {
         status: 'Not Assigned'
       },
-      currentUserRole: 3,
       // Overlay visibility
       showAcceptOverlay: false,
       showRejectOverlay: false,
@@ -705,6 +706,10 @@ export default {
     };
   },
   computed: {
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
     canApproveMemo() {
       // The role '2' corresponds to the QA Head/Manager based on the SRS document.
       // This ensures only authorized users see the accept/reject buttons.

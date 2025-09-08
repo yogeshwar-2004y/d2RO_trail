@@ -43,14 +43,14 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 CREATE TABLE IF NOT EXISTS projects (
     project_id SERIAL PRIMARY KEY,
     project_name VARCHAR(50) NOT NULL,
-    description TEXT,
     created_by INT NOT NULL REFERENCES users(user_id),
-    created_at TIMESTAMP DEFAULT now()
+    created_at TIMESTAMP DEFAULT now(),
+    project_date DATE NOT NULL
 );
 
-INSERT INTO projects (project_name, description, created_by) VALUES
-('Flight Control System', 'Software for controlling flight systems', 1002),
-('Navigation Module', 'Module for handling GPS and navigation', 1003);
+INSERT INTO projects (project_name, created_by, project_date) VALUES
+('Flight Control System', 1002, '2025-01-01'),
+('Navigation Module', 1003, '2025-01-01');
 
 CREATE TABLE IF NOT EXISTS lrus (
     lru_id SERIAL PRIMARY KEY,
@@ -69,16 +69,16 @@ INSERT INTO lrus (project_id, lru_name) VALUES
 CREATE TABLE IF NOT EXISTS serial_numbers (
     serial_id SERIAL PRIMARY KEY,
     lru_id INT NOT NULL REFERENCES lrus(lru_id),
-    serial_number VARCHAR(50) NOT NULL,
+    serial_number INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 INSERT INTO serial_numbers (lru_id, serial_number) VALUES
-(1, 'FC-10001'),
-(1, 'FC-10002'),
-(2, 'AP-20001'),
-(3, 'GPS-30001'),
-(4, 'ND-40001');
+(1, 1),
+(1, 2),
+(2, 1),
+(3, 1),
+(4, 1);
 
 CREATE TABLE IF NOT EXISTS plan_documents (
     document_id SERIAL PRIMARY KEY,
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS plan_documents (
 );
 
 
-INSERT INTO plan_documents (lru_id, document_number, vers, revision, doc_ver, uploaded_by, file_path, status) VALUES
+INSERT INTO plan_documents (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status) VALUES
 (1, 'DOC-FC-001', 'v1.0', 'r1', 'A', 1002, '/docs/fc/doc-fc-001-v1.0.pdf', 'not assigned'),
 (2, 'DOC-AP-001', 'v1.0', 'r2', 'B', 1003, '/docs/ap/doc-ap-001-v1.0.pdf', 'assigned and returned'),
 (3, 'DOC-GPS-001', 'v1.1', 'r1', 'C', 1004, '/docs/gps/doc-gps-001-v1.1.pdf', 'cleared'),
@@ -166,28 +166,27 @@ INSERT INTO review_comments (review_id, commented_by, comment_text, classificati
 
 CREATE TABLE IF NOT EXISTS tests (
     test_id SERIAL PRIMARY KEY,
-    test_code VARCHAR(20) NOT NULL UNIQUE,
     test_name VARCHAR(50),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO tests (test_code, test_name) VALUES
-('TST-001', 'Initial Integration Test'),
-('TST-002', 'System Performance Test'),
-('TST-003', 'Navigation Accuracy Test');
+INSERT INTO tests (test_name) VALUES
+('Initial Integration Test'),
+('System Performance Test'),
+('Navigation Accuracy Test');
 
 CREATE TABLE IF NOT EXISTS stages (
     stage_id SERIAL PRIMARY KEY,
     stage_name VARCHAR(50) NOT NULL UNIQUE,
-    stage_order INT NOT NULL,
+
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-INSERT INTO stages (stage_name, stage_order) VALUES
-('Design Stage', 1),
-('Implementation Stage', 2),
+INSERT INTO stages (stage_name) VALUES
+('Design Stage'),
+('Implementation Stage'),
 ('Testing Stage', 3),
-('Deployment Stage', 4);
+('Deployment Stage');
 
 
 CREATE TABLE IF NOT EXISTS stage_types (
