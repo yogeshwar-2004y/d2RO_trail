@@ -592,14 +592,157 @@ export default {
     },
 
     async loadDocx(file) {
+      console.log('Starting DOCX file loading...', { fileName: file.name, fileSize: file.size });
+      
       try {
+        console.log('Reading file as ArrayBuffer...');
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        this.docxHtml = result.value;
+        console.log('File successfully read as ArrayBuffer');
+
+        console.log('Converting DOCX to HTML with page markers...');
+        const options = {
+          styleMap: [
+            "p[style-name='Page Break'] => div.page-break"
+          ]
+        };
+
+        // First convert to get the basic HTML
+        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+        console.log('Initial HTML conversion complete', { 
+          resultLength: result.value.length,
+          messages: result.messages 
+        });
+
+        // Process the HTML to add page markers
+        const processedHtml = this.processDocxHtml(result.value);
+        console.log('HTML processing complete', { 
+          finalLength: processedHtml.length,
+          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
+        });
+
+        // Set the processed HTML
+        this.docxHtml = processedHtml;
+        
+        // Calculate number of pages
+        this.$nextTick(() => {
+          const pages = document.querySelectorAll('.docx-content .page');
+          this.numPages = pages.length || 1;
+          console.log('Page calculation complete', { totalPages: this.numPages });
+        });
+
       } catch (err) {
-        alert("Failed to render DOCX file.");
-        console.error(err);
+        console.error('Error in loadDocx:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        alert("Failed to render DOCX file. Check console for details.");
       }
+    },
+
+    processDocxHtml(html) {
+      console.log('Processing DOCX HTML...');
+      try {
+        // Create a temporary container
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        
+        // Get approximate content per page (A4 size)
+        const CHARS_PER_PAGE = 3000; // Rough estimate of characters per page
+        const totalContent = temp.textContent;
+        const estimatedPages = Math.max(Math.ceil(totalContent.length / CHARS_PER_PAGE), 1);
+        console.log('Estimated pages:', { 
+          totalChars: totalContent.length, 
+          estimatedPages 
+        });
+
+        // Initialize result container
+        const result = document.createElement('div');
+        let pageCount = 0;
+        let currentPage = null;
+        let currentChars = 0;
+
+        function startNewPage() {
+          if (currentPage && currentPage.children.length > 0) {
+            result.appendChild(currentPage);
+          }
+          pageCount++;
+          currentPage = document.createElement('div');
+          currentPage.className = 'page';
+          currentPage.setAttribute('data-page', pageCount.toString());
+          currentChars = 0;
+        }
+
+        // Start first page
+        startNewPage();
+
+        // Process each element
+        const elements = Array.from(temp.children);
+        console.log('Processing elements:', { totalElements: elements.length });
+
+        elements.forEach((element, index) => {
+          // Check for explicit page breaks
+          const style = window.getComputedStyle(element);
+          const hasPageBreak = style.pageBreakBefore === 'always' || 
+                              style.pageBreakAfter === 'always' ||
+                              element.tagName === 'HR';
+
+          // Force a new page on headings for better content organization
+          const isHeading = /^H[1-6]$/.test(element.tagName);
+          const elementContent = element.textContent;
+          
+          // Start new page if:
+          // 1. There's an explicit page break, or
+          // 2. Current page has enough content and we're at a good break point, or
+          // 3. We're at a heading and current page has some content
+          if (hasPageBreak || 
+              (currentChars > CHARS_PER_PAGE && (isHeading || element.tagName === 'P')) ||
+              (isHeading && currentChars > CHARS_PER_PAGE * 0.5)) {
+            startNewPage();
+          }
+
+          // Add element to current page
+          currentPage.appendChild(element.cloneNode(true));
+          currentChars += elementContent.length;
+        });
+
+        // Append the last page
+        if (currentPage && currentPage.children.length > 0) {
+          result.appendChild(currentPage);
+        }
+
+        console.log('HTML processing complete', { 
+          actualPages: pageCount,
+          estimatedPages,
+          finalHtmlLength: result.innerHTML.length 
+        });
+
+        // Add page numbers
+        result.querySelectorAll('.page').forEach((page, index) => {
+          const pageNum = document.createElement('div');
+          pageNum.className = 'page-number';
+          pageNum.textContent = `Page ${index + 1} of ${pageCount}`;
+          page.appendChild(pageNum);
+        });
+
+        return result.innerHTML;
+      } catch (err) {
+        console.error('Error in processDocxHtml:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        // Return original HTML if processing fails
+        return html;
+      }
+    },
+
+    shouldStartNewPage(pageDiv) {
+      // Estimate if current page content exceeds A4 height
+      const ESTIMATED_PAGE_HEIGHT = 1056; // A4 height in pixels at 96 DPI
+      return pageDiv.offsetHeight > ESTIMATED_PAGE_HEIGHT;
     },
 
     // Zoom controls
@@ -635,10 +778,30 @@ export default {
     },
 
     scrollToPage(pageNum) {
+      console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
+      
       this.$nextTick(() => {
-        const pageEl = this.$refs.pdfPages?.[pageNum - 1]?.$el;
-        if (pageEl) {
-          pageEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (this.fileType === 'pdf' && this.$refs.pdfPages) {
+          const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
+          if (pageEl) {
+            console.log('Scrolling to PDF page element:', pageEl);
+            pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
+          }
+        } else if (this.fileType === 'docx') {
+          const docContainer = document.querySelector('.docx-content');
+          if (docContainer) {
+            const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
+            if (targetPage) {
+              console.log('Scrolling to DOCX page element:', targetPage);
+              targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
+            }
+          } else {
+            console.warn('DOCX container not found');
+          }
         }
       });
     },
@@ -880,6 +1043,34 @@ export default {
 .docx-content {
   line-height: 1.6;
   color: #333;
+  padding: 1rem;
+  width: 100%;
+  max-width: 100%;
+  background: #f8fafc;
+}
+
+.docx-content .page {
+  background: white;
+  padding: 2rem;
+  margin: 1rem auto;
+  max-width: 816px; /* A4 width at 96 DPI */
+  min-height: 1056px; /* A4 height at 96 DPI */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  position: relative;
+}
+
+.docx-content .page::after {
+  content: attr(data-page);
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
 .docx-content h1,
@@ -889,8 +1080,24 @@ export default {
   color: #111;
 }
 
+.docx-content h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.docx-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.docx-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .docx-content p {
   margin: 0.75rem 0;
+  line-height: 1.6;
 }
 
 /* Empty State */
