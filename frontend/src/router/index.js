@@ -144,13 +144,6 @@ const router = createRouter({
     name: 'SubmitMemo',             
     component: SubmitMemo,
     },
-<<<<<<< HEAD
-    {
-    path: '/test-role-system',
-    name: 'RoleTestComponent',
-    component: RoleTestComponent,
-    },
-=======
           {
         path: '/test-role-system',
         name: 'RoleTestComponent',
@@ -161,7 +154,6 @@ const router = createRouter({
         name: 'PlanDocsTestComponent',
         component: PlanDocsTestComponent,
       },
->>>>>>> 15d68c0eae6b589b182709fc40f8eb464cd99b34
     ...reviewerRoutes,
     ...qaheadRoutes,
     ...designheadRoutes,

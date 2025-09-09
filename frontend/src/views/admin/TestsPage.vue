@@ -97,8 +97,6 @@ export default {
       error: null
     };
   },
-<<<<<<< HEAD
-=======
   computed: {
     // Get current user from global store
     currentUser() {
@@ -108,7 +106,6 @@ export default {
       return userStore.getters.isLoggedIn()
     }
   },
->>>>>>> 15d68c0eae6b589b182709fc40f8eb464cd99b34
   async mounted() {
     await this.loadData();
   },
@@ -326,14 +323,8 @@ export default {
     },
 
     getCurrentUserId() {
-<<<<<<< HEAD
-      // Get current user from localStorage or return default
-      const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      return currentUser.id || 1002; // Default fallback
-=======
       // Get current user from global store or return default
       return this.currentUser?.id || 1002; // Default fallback
->>>>>>> 15d68c0eae6b589b182709fc40f8eb464cd99b34
     }
   },
 };
