@@ -43,14 +43,49 @@
               style="display: none"
             />
           </label>
-          <button 
-            v-if="selectedFile" 
-            @click="submitDocument" 
-            class="submit-btn"
-            :disabled="isUploading"
-          >
-            {{ isUploading ? 'Uploading...' : 'Submit Document' }}
-          </button>
+          
+          <!-- Document Details Form - Show when file is selected -->
+          <div v-if="selectedFile" class="document-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Document Number:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.documentNumber" 
+                  placeholder="e.g., DOC-001"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Version:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.version" 
+                  placeholder="e.g., v1.0"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Revision:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.revision" 
+                  placeholder="e.g., A"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+            <button 
+              @click="submitDocument" 
+              class="submit-btn"
+              :disabled="isUploading || !isFormValid"
+            >
+              {{ isUploading ? 'Uploading...' : 'Submit Document' }}
+            </button>
+          </div>
         </div>
       </template>
 
@@ -274,21 +309,22 @@ import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
 import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue"
+import { userStore } from '@/stores/userStore'
 
 export default {
   components: { VuePdfEmbed, QAHeadAssignReviewer },
   data() {
     return {
-      // Document metadata
-      lruName: "LRU-2024-001",
-      projectName: "Project Alpha",
-      documentId: "DOC-001",
+      // Document metadata - will be loaded dynamically
+      lruName: "",
+      projectName: "",
+      documentId: "",
       status: "pending", // pending, approved, rejected, review
-      createdDate: new Date('2024-01-15'),
+      createdDate: null,
       lastModifiedDate: new Date(),
       
-      // User role - this would come from your auth system
-      currentUserRole: "Design Head", // "QA Head", "Design Head", "Designer", "Admin", "QA Reviewer"
+      // User role - from user store
+      currentUserRole: userStore.getters.roleName() || "Guest",
       
       // Document viewing
       fileType: null,
@@ -304,51 +340,17 @@ export default {
       isUploading: false,
       documentDetails: {
         lruId: 1,
-        documentNumber: "DOC-001",
-        version: "v1.0",
-        revision: "A",
-        docVer: "v1"
+        documentNumber: "",
+        version: "",
+        revision: "",
+        docVer: 1
       },
 
       showAssignReviewerModal: false,
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
-      documentVersions: [
-        { 
-          id: 1, 
-          
-          projectId: 'PRJ-2025-078', 
-          version: 'A', 
-          date: '2025-01-15', 
-          isFavorite: true, 
-          deleted: false 
-        },
-        { 
-          id: 2, 
-          projectId: 'PRJ-2025-078', 
-          version: 'B', 
-          date: '2025-01-20', 
-          isFavorite: false, 
-          deleted: false 
-        },
-        { 
-          id: 3, 
-          projectId: 'PRJ-2025-078', 
-          version: 'C', 
-          date: '2025-01-25', 
-          isFavorite: false, 
-          deleted: false 
-        },
-        { 
-          id: 4, 
-          projectId: 'PRJ-2025-078', 
-          version: 'D', 
-          date: '2025-01-30', 
-          isFavorite: true, 
-          deleted: false 
-        }
-      ],
+      documentVersions: [], // Will be loaded dynamically
       
       // Comments
       comments: [],
@@ -359,6 +361,12 @@ export default {
   computed: {
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
+    },
+    
+    isFormValid() {
+      return this.documentDetails.documentNumber.trim() && 
+             this.documentDetails.version.trim() && 
+             this.documentDetails.revision.trim();
     }
   },
   
@@ -366,16 +374,107 @@ export default {
     const { lruId, documentId, projectId } = this.$route.params;
     console.log('Document Viewer initialized:', { lruId, documentId, projectId });
     
-    // Load document metadata from server
-    // this.loadDocumentMetadata(documentId);
+    // Set the correct LRU ID from route params
+    if (lruId) {
+      this.documentDetails.lruId = parseInt(lruId);
+      // Load LRU metadata, next doc_ver, and document versions
+      this.loadLruMetadata(parseInt(lruId));
+      this.loadNextDocVer(parseInt(lruId));
+      this.loadDocumentVersions(parseInt(lruId));
+    }
     
     // Load existing document if available
-    if (documentId && documentId !== 'DOC-001') {
+    if (documentId && documentId !== 'new') {
       this.loadExistingDocument(documentId);
     }
   },
   
   methods: {
+    // Load LRU metadata
+    async loadLruMetadata(lruId) {
+      try {
+        console.log(`Attempting to load metadata for LRU ${lruId}...`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/metadata`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('API response:', result);
+        
+        if (result.success) {
+          this.lruName = result.lru.lru_name;
+          this.projectName = result.lru.project_name;
+          console.log(`✅ Loaded metadata for LRU ${lruId}:`, result.lru);
+        } else {
+          console.warn('❌ Failed to load LRU metadata:', result.message);
+          // Set fallback values
+          this.lruName = `LRU-${lruId}`;
+          this.projectName = "Unknown Project";
+        }
+      } catch (error) {
+        console.error('❌ Error loading LRU metadata:', error);
+        // Set fallback values when API is not available
+        this.lruName = `LRU-${lruId}`;
+        this.projectName = "Unknown Project";
+      }
+    },
+
+    // Load next doc_ver for LRU
+    async loadNextDocVer(lruId) {
+      try {
+        console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
+        const response = await fetch(`http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Next doc_ver API response:', result);
+        
+        if (result.success) {
+          this.documentDetails.docVer = result.nextDocVer;
+          console.log(`✅ Next doc_ver for LRU ${lruId}: ${result.nextDocVer}`);
+        } else {
+          // If no documents exist for this LRU, start with 1
+          this.documentDetails.docVer = 1;
+          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = 1`);
+        }
+      } catch (error) {
+        console.error('❌ Error loading next doc_ver:', error);
+        // Default to 1 if there's an error
+        this.documentDetails.docVer = 1;
+        console.log(`⚠️ Error occurred, defaulting to doc_ver = 1`);
+      }
+    },
+
+    // Load document versions for LRU
+    async loadDocumentVersions(lruId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const result = await response.json();
+        
+        if (result.success) {
+          // Transform the data to match the expected format
+          this.documentVersions = result.documents.map(doc => ({
+            id: doc.document_id,
+            projectId: `${doc.document_number}`,
+            version: doc.revision,
+            date: new Date(doc.upload_date).toLocaleDateString(),
+            isFavorite: false, // You can add a favorite flag to your database later
+            deleted: false
+          }));
+          console.log(`Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`);
+        } else {
+          console.warn('Failed to load document versions:', result.message);
+        }
+      } catch (error) {
+        console.error('Error loading document versions:', error);
+      }
+    },
+
     // Date formatting
     formatDate(date) {
       if (!date) return 'N/A';
@@ -577,7 +676,7 @@ export default {
         formData.append('version', this.documentDetails.version);
         formData.append('revision', this.documentDetails.revision);
         formData.append('doc_ver', this.documentDetails.docVer);
-        formData.append('uploaded_by', this.currentUser?.id || 1001);
+        formData.append('uploaded_by', userStore.getters.currentUser()?.id || userStore.getters.currentUser()?.user_id || 1001);
 
         const response = await fetch('http://localhost:5000/api/plan-documents', {
           method: 'POST',
@@ -591,8 +690,17 @@ export default {
           this.selectedFile = null;
           this.$emit('document-uploaded', result);
           
-          // Update modified date
+          // Update modified date and reload data
           this.lastModifiedDate = new Date();
+          
+          // Reload the next doc_ver and document versions
+          this.loadNextDocVer(this.documentDetails.lruId);
+          this.loadDocumentVersions(this.documentDetails.lruId);
+          
+          // Clear the form
+          this.documentDetails.documentNumber = "";
+          this.documentDetails.version = "";
+          this.documentDetails.revision = "";
         } else {
           alert(`Upload failed: ${result.message}`);
         }
@@ -828,6 +936,54 @@ export default {
 
 .upload-btn:hover {
   background: #059669;
+}
+
+/* Document Form */
+.document-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-input::placeholder {
+  color: #6c757d;
 }
 
 /* Control Bar */

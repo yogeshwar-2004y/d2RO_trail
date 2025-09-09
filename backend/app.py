@@ -1097,6 +1097,74 @@ def get_plan_document(document_id):
         print(f"Error fetching document {document_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+# Get next doc_ver for an LRU
+@app.route('/api/plan-documents/next-doc-ver/<int:lru_id>', methods=['GET'])
+def get_next_doc_ver(lru_id):
+    """Get the next doc_ver number for a specific LRU"""
+    try:
+        cur = conn.cursor()
+        
+        # Get the highest doc_ver for this LRU
+        cur.execute("""
+            SELECT MAX(CAST(doc_ver AS INTEGER)) 
+            FROM plan_documents 
+            WHERE lru_id = %s
+        """, (lru_id,))
+        
+        result = cur.fetchone()
+        cur.close()
+        
+        # If no documents exist for this LRU, start with 1
+        max_doc_ver = result[0] if result[0] is not None else 0
+        next_doc_ver = max_doc_ver + 1
+        
+        return jsonify({
+            "success": True,
+            "nextDocVer": next_doc_ver,
+            "lruId": lru_id
+        })
+        
+    except Exception as e:
+        print(f"Error getting next doc_ver for LRU {lru_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get LRU and project metadata
+@app.route('/api/lrus/<int:lru_id>/metadata', methods=['GET'])
+def get_lru_metadata(lru_id):
+    """Get LRU and associated project metadata"""
+    try:
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, l.description, l.project_id,
+                   p.project_name, p.description as project_description
+            FROM lrus l
+            LEFT JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        result = cur.fetchone()
+        cur.close()
+        
+        if not result:
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "lru": {
+                "lru_id": result[0],
+                "lru_name": result[1],
+                "lru_description": result[2],
+                "project_id": result[3],
+                "project_name": result[4],
+                "project_description": result[5]
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error getting LRU metadata for {lru_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 # Tests and Stages endpoints
 
 # Get all tests
