@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuration for file uploads
-UPLOAD_FOLDER = 'uploads/plan_documents'
+UPLOAD_FOLDER = 'plan_doc_uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt', 'xlsx', 'xls'}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
