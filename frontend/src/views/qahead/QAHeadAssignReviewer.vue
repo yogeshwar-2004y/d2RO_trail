@@ -191,7 +191,7 @@ export default {
       this.formData.projectName = this.projectName;
       this.formData.projectNumber = 'PRJ-2025-078'; // Sample data
       this.formData.projectDate = '2025-07-01'; // Sample data
-      this.formData.version = '1.0'; // Sample data
+      this.formData.version = 'v1.0'; // Sample data
       this.formData.revision = '0'; // Sample data
     },
     
