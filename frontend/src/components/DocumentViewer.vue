@@ -114,29 +114,74 @@
         </div>
       </div>
 
-      <!-- Simplified Comments Sidebar -->
-      <aside class="sidebar">
-        <h3>Comments</h3>
-        <div class="comments-container">
-          <ul class="comments-list" v-if="comments.length > 0">
-            <li v-for="(comment, index) in comments" :key="index" class="comment-item">
-              <span class="comment-text">{{ comment }}</span>
-              <button @click="removeComment(index)" class="remove-btn">×</button>
-            </li>
-          </ul>
-          <p v-else class="no-comments">No comments yet</p>
+      <!-- Comments Section -->
+      <div class="comments-section" v-if="docContent && comments.length > 0">
+        <div class="comments-header">
+          <h3>Comments</h3>
+          <span class="comment-count">{{ comments.length }} comments</span>
         </div>
-        <div class="add-comment">
-          <input
-            type="text"
-            v-model="newComment"
-            placeholder="Add a comment..."
-            @keyup.enter="addComment"
-            class="comment-input"
-          />
-          <button @click="addComment" class="comment-btn">Add</button>
+        
+        <div class="comments-list">
+          <div v-for="comment in comments" 
+               :key="comment.id" 
+               class="comment-item"
+               :class="{ 'comment-resolved': comment.status === 'accepted' }">
+            <div class="comment-header">
+              <div class="comment-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              </div>
+              <div class="comment-info">
+                <div class="comment-author">{{ comment.author }}</div>
+                <div class="comment-meta">
+                  <span class="comment-date">{{ formatDate(comment.date) }}</span>
+                  <span class="comment-page" @click="scrollToPage(comment.page)">
+                    Page {{ comment.page }}
+                  </span>
+                </div>
+              </div>
+              <div class="comment-status" v-if="comment.status" :class="'status-' + comment.status">
+                {{ comment.status }}
+              </div>
+            </div>
+            
+            <div class="comment-content">
+              {{ comment.content }}
+            </div>
+            
+            <div class="comment-actions" v-if="!comment.status && (isDesigner || isDesignHead)">
+              <button class="action-btn accept" @click="handleAccept(comment)">
+                Accept
+              </button>
+              <button class="action-btn reject" @click="handleReject(comment)">
+                Reject
+              </button>
+            </div>
+            
+            <div class="comment-response" v-if="comment.response">
+              <div class="response-header">Response:</div>
+              <div class="response-content">{{ comment.response }}</div>
+            </div>
+          </div>
         </div>
-      </aside>
+      </div>
+      
+      <!-- Reject Comment Modal -->
+      <div class="modal" v-if="showRejectModal">
+        <div class="modal-content">
+          <h3>Reject Comment</h3>
+          <textarea 
+            v-model="rejectJustification"
+            placeholder="Please provide justification for rejecting this comment"
+            rows="4"
+          ></textarea>
+          <div class="modal-actions">
+            <button @click="confirmReject">Submit</button>
+            <button @click="cancelReject">Cancel</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Assign Reviewer Modal -->
@@ -327,8 +372,38 @@ export default {
       ],
       
       // Comments
-      comments: [],
-      newComment: "",
+      comments: [
+        {
+          id: 1,
+          author: 'John Smith (QA Reviewer)',
+          date: '2025-09-08',
+          page: 1,
+          content: 'Section 3.2: The technical specifications for the power supply need to be updated according to the latest standards.',
+          status: null,
+          response: null
+        },
+        {
+          id: 2,
+          author: 'Sarah Wilson (QA Reviewer)',
+          date: '2025-09-08',
+          page: 2,
+          content: 'The maintenance procedures need more detailed steps for troubleshooting common issues.',
+          status: 'accepted',
+          response: 'Updates will be made in the next revision'
+        },
+        {
+          id: 3,
+          author: 'Mike Johnson (QA Reviewer)',
+          date: '2025-09-07',
+          page: 4,
+          content: 'The diagrams in this section need to be updated to match the current hardware configuration.',
+          status: 'rejected',
+          response: 'Current diagrams are correct according to the latest hardware specifications (Rev 2.1)'
+        }
+      ],
+      showRejectModal: false,
+      rejectJustification: '',
+      selectedComment: null,
     }
   },
   
@@ -339,6 +414,21 @@ export default {
     },
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
+    },
+    isDesigner() {
+      return this.currentUserRole === 'Designer';
+    },
+    isDesignHead() {
+      return this.currentUserRole === 'Design Head';
+    },
+    isQAHead() {
+      return this.currentUserRole === 'QA Head';
+    },
+    isReviewer() {
+      return this.currentUserRole === 'Reviewer';
+    },
+    docContent() {
+      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxHtml);
     }
   },
   
@@ -360,8 +450,46 @@ export default {
       return new Date(date).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
       });
+    },
+
+    // Comment handling
+    handleAccept(comment) {
+      comment.status = 'accepted';
+      comment.response = 'Comment accepted and changes will be implemented.';
+      // TODO: Update on server
+    },
+
+    handleReject(comment) {
+      this.selectedComment = comment;
+      this.showRejectModal = true;
+    },
+
+    confirmReject() {
+      if (this.selectedComment && this.rejectJustification) {
+        this.selectedComment.status = 'rejected';
+        this.selectedComment.response = this.rejectJustification;
+        // TODO: Update on server
+        this.cancelReject();
+      }
+    },
+
+    cancelReject() {
+      this.showRejectModal = false;
+      this.rejectJustification = '';
+      this.selectedComment = null;
+    },
+
+    scrollToPage(pageNum) {
+      if (this.fileType === 'pdf' && this.$refs.pdfScroll && this.$refs.pdfPages) {
+        const targetPage = this.$refs.pdfPages[pageNum - 1];
+        if (targetPage && targetPage.$el) {
+          targetPage.$el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     },
 
     assignReviewer() {
@@ -613,7 +741,9 @@ export default {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
-  gap: 1rem;
+  justify-content: center; /* Center the items horizontally */
+  align-items: center;     /* Align items vertically in the center */
+  gap: 1rem;               /* Space between buttons */
 }
 
 .action-btn {
@@ -625,6 +755,7 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  text-align: center;
 }
 
 .action-btn:hover {
@@ -640,6 +771,11 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  
+  /* Center horizontally */
+  display: block;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .upload-btn:hover {
@@ -713,16 +849,18 @@ export default {
   flex: 1;
   display: flex;
   overflow: hidden;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 .document-area {
-  flex: 1;
+  flex: 3; /* Takes up 3 parts of the 5 total parts */
   display: flex;
   background: white;
-  margin: 1rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  min-width: 0; /* Prevents flex child from overflowing */
 }
 
 .doc-container {
@@ -814,21 +952,28 @@ export default {
 }
 
 .comment-item {
-  background: #f9fafb;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
   display: flex;
-  justify-content: space-between;
-  align-items: start;
+  flex-direction: column;
+}
+
+.comment-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
 }
 
 .comment-text {
   flex: 1;
-  color: #4b5563;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: #1f2937;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
 }
 
 .remove-btn {
@@ -1017,54 +1162,225 @@ export default {
   transform: scale(1.2);
 }
 
-/* Star styles */
-.star-button svg {
-  stroke: #888;
-  fill: none;
-}
-.star-button.starred svg {
-  stroke: #f59e0b;
-  fill: #f59e0b;
-}
-
-/* Delete styles */
-.delete-button svg {
-  stroke: #d33;
+/* Comments Section Styles */
+.comments-section {
+  flex: 2; /* Takes up 2 parts of the 5 total parts */
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow-y: auto;
+  padding: 1.75rem;
+  min-width: 0; /* Prevents flex child from overflowing */
+  max-height: calc(100vh - 200px); /* Accounts for header and controls */
+  position: relative;
 }
 
-/* Delete confirmation modal */
-.delete-confirm-overlay {
+.comments-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #3b82f6, #10b981);
+  border-radius: 16px 16px 0 0;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #f3f4f6;
+  position: relative;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.comments-header h3::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.comment-count {
+  background: linear-gradient(to right, #dbeafe, #e0f2fe);
+  color: #1e40af;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+  background: #f3f4f6;
+}
+
+.comment-item.comment-resolved {
+  border-left: 4px solid #10b981;
+}
+
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment-icon {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.comment-info {
+  flex: 1;
+}
+
+.comment-author {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.comment-page {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-accepted {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.comment-content {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Reject Comment Modal */
+.modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.delete-confirm-modal {
-  background: #fff;
+.modal-content {
+  background: white;
   border-radius: 8px;
-  width: 450px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease;
 }
 
-.confirm-message {
-  text-align: center;
-  padding: 1rem;
+.modal-content h3 {
+  margin: 0 0 1rem 0;
 }
 
-.warning-icon {
-  color: #e63946;
+.modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  resize: vertical;
   margin-bottom: 1rem;
-}
-
-.warning-text {
-  color: #d33;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
 }
 
 .modal-actions {
@@ -1098,6 +1414,216 @@ export default {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Comments Section Styles */
+.comments-section {
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  width: 360px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.comment-count {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+  background: #f3f4f6;
+}
+
+.comment-item.comment-resolved {
+  border-left: 4px solid #10b981;
+}
+
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment-icon {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.comment-info {
+  flex: 1;
+}
+
+.comment-author {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.comment-page {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-accepted {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.comment-content {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  padding: 0.4rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.2s;
+}
+
+.action-btn:hover {
+  opacity: 0.9;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Reject Comment Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content h3 {
+  margin: 0 0 1rem 0;
+}
+
+.modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.modal-actions button {
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.modal-actions button:first-child {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: #e5e7eb;
+  color: #1f2937;
 }
 
 </style>
