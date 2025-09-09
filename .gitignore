@@ -1,1 +1,32 @@
 /extra
+.vscode/
+.env
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# VS Code settings
+.vscode/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Logs and local state
+*.log
+*.sqlite3
+
+# Test cache
+.pytest_cache/
+
+# Mac/Windows system files
+.DS_Store
+Thumbs.db

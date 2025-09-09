@@ -129,6 +129,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'MemoDashboard',
   data() {
@@ -157,8 +159,6 @@ export default {
         { id: 7, project: 'PROJ001', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'TEST NOT CONDUCTED' },
         { id: 8, project: 'PROJ004', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'SUCCESSFULLY COMPLETED' },
       ],
-      // roles: 1-Admin, 2-QA Head, 3-QA Reviewer, 4-Design Head, 5-Designer
-      currentUserRole: 3, // change this for testing (1-5)
       notifications: [
         { id: 1, project: 'PROJ001', serialNumber: '15,16', lru: 'LRU Name', completedStage: 'stage 1', requiredStage: 'stage3', justification: 'justification', status: 'pending', isRead: false },
         { id: 2, project: 'PROJ002', serialNumber: '17,18', lru: 'LRU Component', completedStage: 'stage 2', requiredStage: 'stage4', justification: 'Technical review required', status: 'pending', isRead: false },
@@ -167,6 +167,10 @@ export default {
     };
   },
   computed: {
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
     filteredMemos() {
       let filtered = this.memos;
 

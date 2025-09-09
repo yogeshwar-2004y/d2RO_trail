@@ -1,5 +1,5 @@
 <template>
-  <div class="manage-projects-page">
+  <div class="select-project-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -8,7 +8,7 @@
         </svg>
       </button>
       <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-      <span class="page-title">PROJECTS</span>
+      <span class="page-title">SELECT PROJECT TO EDIT</span>
     </div>
 
     <div class="table-container">
@@ -17,40 +17,37 @@
           <tr>
             <th>PROJECT ID</th>
             <th>PROJECT NAME</th>
-            <th>LRU NAME</th>
-            <th>TOTAL SERIAL NUMBERS</th>
+            <th>DATE CREATED</th>
+            <th>LRUs COUNT</th>
+            <th>ACTION</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="4" class="loading-cell">Loading projects...</td>
+              <td colspan="5" class="loading-cell">Loading projects...</td>
             </tr>
           </template>
           <template v-else-if="projects.length === 0">
             <tr>
-              <td colspan="4" class="no-data-cell">No projects found</td>
+              <td colspan="5" class="no-data-cell">No projects found</td>
             </tr>
           </template>
           <template v-else>
-            <template v-for="project in projects" :key="project.project_id">
-              <template v-if="project.lrus.length === 0">
-                <tr>
-                  <td>{{ project.project_id }}</td>
-                  <td>{{ project.project_name }}</td>
-                  <td class="no-data">No LRUs</td>
-                  <td class="no-data">0</td>
-                </tr>
-              </template>
-              <template v-else>
-                <tr v-for="(lru, lruIndex) in project.lrus" :key="lru.lru_id">
-                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_id }}</td>
-                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_name }}</td>
-                  <td>{{ lru.lru_name }}</td>
-                  <td>{{ lru.serial_numbers.length }}</td>
-                </tr>
-              </template>
-            </template>
+            <tr v-for="project in projects" :key="project.project_id" class="project-row">
+              <td>{{ project.project_id }}</td>
+              <td>{{ project.project_name }}</td>
+              <td>{{ formatDate(project.created_at) }}</td>
+              <td>{{ project.lrus ? project.lrus.length : 0 }}</td>
+              <td>
+                <button class="edit-button" @click="editProject(project)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                  Edit
+                </button>
+              </td>
+            </tr>
           </template>
         </tbody>
       </table>
@@ -60,7 +57,7 @@
 
 <script>
 export default {
-  name: 'ManageProjects',
+  name: 'SelectProjectToEdit',
   data() {
     return {
       projects: [],
@@ -93,13 +90,29 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+    editProject(project) {
+      // Navigate to edit project form with project data
+      this.$router.push({ 
+        name: 'EditProject', 
+        params: { projectId: project.project_id },
+        query: {
+          name: project.project_name,
+          created_at: project.created_at,
+          lrusData: JSON.stringify(project.lrus || [])
+        }
+      });
+    },
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      return new Date(dateString).toLocaleDateString();
     }
   }
 };
 </script>
 
 <style scoped>
-.manage-projects-page {
+.select-project-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   background-color: #f0f0f0;
@@ -114,7 +127,7 @@ export default {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   margin-bottom: 30px;
 }
 
@@ -139,7 +152,7 @@ export default {
 
 .table-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -175,26 +188,37 @@ th {
   padding: 30px;
 }
 
-.no-data {
-  color: #999;
-  font-style: italic;
-}
-
-tr:nth-child(even) {
+.project-row:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-tr:hover {
+.project-row:hover {
   background-color: #f0f0f0;
 }
 
 td {
-  vertical-align: top;
+  vertical-align: middle;
 }
 
-/* Styling for merged cells */
-td[rowspan] {
-  background-color: #f8f8f8;
-  font-weight: 500;
+.edit-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.edit-button svg {
+  stroke: white;
 }
 </style>

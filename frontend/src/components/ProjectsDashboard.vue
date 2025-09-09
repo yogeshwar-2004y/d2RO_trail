@@ -62,6 +62,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'ProjectsDashboard',
   data() {
@@ -73,6 +75,13 @@ export default {
     };
   },
   computed: {
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
+    roleName() {
+      return userStore.getters.roleName()
+    },
     filteredProjects() {
       if (!this.searchQuery) {
         return this.projects;

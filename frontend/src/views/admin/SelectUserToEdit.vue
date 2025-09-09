@@ -1,5 +1,5 @@
 <template>
-  <div class="manage-projects-page">
+  <div class="select-user-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -8,49 +8,46 @@
         </svg>
       </button>
       <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-      <span class="page-title">PROJECTS</span>
+      <span class="page-title">SELECT USER TO EDIT</span>
     </div>
 
     <div class="table-container">
       <table>
         <thead>
           <tr>
-            <th>PROJECT ID</th>
-            <th>PROJECT NAME</th>
-            <th>LRU NAME</th>
-            <th>TOTAL SERIAL NUMBERS</th>
+            <th>USER ID</th>
+            <th>USER MAIL</th>
+            <th>USER NAME</th>
+            <th>ROLE</th>
+            <th>ACTION</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="4" class="loading-cell">Loading projects...</td>
+              <td colspan="5" class="loading-cell">Loading users...</td>
             </tr>
           </template>
-          <template v-else-if="projects.length === 0">
+          <template v-else-if="users.length === 0">
             <tr>
-              <td colspan="4" class="no-data-cell">No projects found</td>
+              <td colspan="5" class="no-data-cell">No users found</td>
             </tr>
           </template>
           <template v-else>
-            <template v-for="project in projects" :key="project.project_id">
-              <template v-if="project.lrus.length === 0">
-                <tr>
-                  <td>{{ project.project_id }}</td>
-                  <td>{{ project.project_name }}</td>
-                  <td class="no-data">No LRUs</td>
-                  <td class="no-data">0</td>
-                </tr>
-              </template>
-              <template v-else>
-                <tr v-for="(lru, lruIndex) in project.lrus" :key="lru.lru_id">
-                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_id }}</td>
-                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">{{ project.project_name }}</td>
-                  <td>{{ lru.lru_name }}</td>
-                  <td>{{ lru.serial_numbers.length }}</td>
-                </tr>
-              </template>
-            </template>
+            <tr v-for="user in users" :key="user.user_id" class="user-row">
+              <td>{{ user.user_id }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.name }}</td>
+              <td :class="{ 'no-role': user.role === 'No Role Assigned' }">{{ user.role }}</td>
+              <td>
+                <button class="edit-button" @click="editUser(user)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  </svg>
+                  Edit
+                </button>
+              </td>
+            </tr>
           </template>
         </tbody>
       </table>
@@ -60,46 +57,58 @@
 
 <script>
 export default {
-  name: 'ManageProjects',
+  name: 'SelectUserToEdit',
   data() {
     return {
-      projects: [],
+      users: [],
       loading: false,
       error: null
     };
   },
   async mounted() {
-    await this.fetchProjects();
+    await this.fetchUsers();
   },
   methods: {
-    async fetchProjects() {
+    async fetchUsers() {
       try {
         this.loading = true;
         this.error = null;
         
-        const response = await fetch('http://localhost:5000/api/projects/manage');
+        const response = await fetch('http://localhost:5000/api/users/manage');
         const data = await response.json();
         
         if (data.success) {
-          this.projects = data.projects;
+          this.users = data.users;
         } else {
-          this.error = data.message || 'Failed to fetch projects';
-          alert('Error fetching projects: ' + this.error);
+          this.error = data.message || 'Failed to fetch users';
+          alert('Error fetching users: ' + this.error);
         }
       } catch (err) {
-        console.error('Error fetching projects:', err);
+        console.error('Error fetching users:', err);
         this.error = 'Failed to connect to server. Please check if the backend is running.';
         alert(this.error);
       } finally {
         this.loading = false;
       }
+    },
+    editUser(user) {
+      // Navigate to edit user form with user data
+      this.$router.push({ 
+        name: 'EditUser', 
+        params: { userId: user.user_id },
+        query: {
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
     }
   }
 };
 </script>
 
 <style scoped>
-.manage-projects-page {
+.select-user-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   background-color: #f0f0f0;
@@ -114,7 +123,7 @@ export default {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   margin-bottom: 30px;
 }
 
@@ -139,7 +148,7 @@ export default {
 
 .table-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1000px;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -175,26 +184,42 @@ th {
   padding: 30px;
 }
 
-.no-data {
-  color: #999;
+.no-role {
+  color: #ff6b6b;
   font-style: italic;
 }
 
-tr:nth-child(even) {
+.user-row:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-tr:hover {
+.user-row:hover {
   background-color: #f0f0f0;
 }
 
 td {
-  vertical-align: top;
+  vertical-align: middle;
 }
 
-/* Styling for merged cells */
-td[rowspan] {
-  background-color: #f8f8f8;
-  font-weight: 500;
+.edit-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+  transition: background-color 0.3s ease;
+}
+
+.edit-button:hover {
+  background-color: #0056b3;
+}
+
+.edit-button svg {
+  stroke: white;
 }
 </style>
