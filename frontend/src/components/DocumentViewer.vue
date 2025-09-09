@@ -123,7 +123,49 @@
 
     <!-- Main Content Area -->
     <div class="content">
-      <!-- Document Container -->
+      <!-- Left Panel: Existing Documents List -->
+      <div class="documents-list-panel">
+        <h3>Uploaded Documents</h3>
+        <div class="documents-container">
+          <div v-if="loading" class="loading-state">
+            <p>Loading documents...</p>
+          </div>
+          <div v-else-if="existingDocuments.length === 0" class="no-documents">
+            <div class="no-docs-icon">📋</div>
+            <p>No documents uploaded yet</p>
+          </div>
+          <div v-else class="documents-list">
+            <div 
+              v-for="doc in existingDocuments" 
+              :key="doc.document_id"
+              class="document-item"
+              @click="viewDocument(doc)"
+            >
+              <div class="doc-icon">
+                <span v-if="doc.file_path.toLowerCase().includes('.pdf')">📄</span>
+                <span v-else-if="doc.file_path.toLowerCase().includes('.docx')">📝</span>
+                <span v-else>📄</span>
+              </div>
+              <div class="doc-info">
+                <div class="doc-title">{{ doc.document_number }}</div>
+                <div class="doc-meta">
+                  <span class="doc-version">{{ doc.version }} ({{ doc.revision }})</span>
+                  <span class="doc-ver">v{{ doc.doc_ver }}</span>
+                </div>
+                <div class="doc-details">
+                  <span class="uploaded-by">{{ doc.uploaded_by_name }}</span>
+                  <span class="upload-date">{{ formatDate(doc.upload_date) }}</span>
+                </div>
+                <div class="doc-status" :class="'status-' + doc.status.replace(' ', '-')">
+                  {{ doc.status }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Document Viewer -->
       <div class="document-area">
         <!-- PDF Viewer -->
         <div
@@ -154,8 +196,8 @@
         <!-- Empty state -->
         <div v-if="!fileType" class="empty-state">
           <div class="empty-icon">📄</div>
-          <p class="empty-msg">No document present</p>
-          <p class="empty-sub" v-if="canUpload">Please upload a PDF or DOCX file</p>
+          <p class="empty-msg">Select a document to view</p>
+          <p class="empty-sub" v-if="canUpload">Or upload a new PDF or DOCX file</p>
         </div>
       </div>
 
@@ -351,6 +393,8 @@ export default {
       showDeleteConfirmModal: false,
       versionToDelete: null,
       documentVersions: [], // Will be loaded dynamically
+      existingDocuments: [], // List of uploaded documents for this LRU
+      loading: false, // Loading state for documents
       
       // Comments
       comments: [],
@@ -377,10 +421,11 @@ export default {
     // Set the correct LRU ID from route params
     if (lruId) {
       this.documentDetails.lruId = parseInt(lruId);
-      // Load LRU metadata, next doc_ver, and document versions
+      // Load LRU metadata, next doc_ver, document versions, and existing documents
       this.loadLruMetadata(parseInt(lruId));
       this.loadNextDocVer(parseInt(lruId));
       this.loadDocumentVersions(parseInt(lruId));
+      this.loadExistingDocuments(parseInt(lruId));
     }
     
     // Load existing document if available
@@ -450,14 +495,44 @@ export default {
       }
     },
 
-    // Load document versions for LRU
+    // Load existing documents for LRU  
+    async loadExistingDocuments(lruId) {
+      try {
+        this.loading = true;
+        console.log(`Loading existing documents for LRU ${lruId}...`);
+        
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Existing documents API response:', result);
+        
+        if (result.success) {
+          this.existingDocuments = result.documents;
+          console.log(`✅ Loaded ${this.existingDocuments.length} existing documents for LRU ${lruId}`);
+        } else {
+          console.warn('❌ Failed to load existing documents:', result.message);
+          this.existingDocuments = [];
+        }
+      } catch (error) {
+        console.error('❌ Error loading existing documents:', error);
+        this.existingDocuments = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Load document versions for LRU (used for track versions modal)
     async loadDocumentVersions(lruId) {
       try {
         const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
         const result = await response.json();
         
         if (result.success) {
-          // Transform the data to match the expected format
+          // Transform the data to match the expected format for the modal
           this.documentVersions = result.documents.map(doc => ({
             id: doc.document_id,
             projectId: `${doc.document_number}`,
@@ -472,6 +547,68 @@ export default {
         }
       } catch (error) {
         console.error('Error loading document versions:', error);
+      }
+    },
+
+    // View a specific document
+    async viewDocument(doc) {
+      try {
+        console.log('🔍 Viewing document:', doc);
+        console.log('📁 File path from DB:', doc.file_path);
+        
+        // Extract filename from file_path - handle both Windows (\) and Unix (/) paths
+        let filename = doc.file_path.split('\\').pop(); // Handle Windows paths
+        filename = filename.split('/').pop(); // Handle Unix paths
+        
+        console.log('📄 Extracted filename:', filename);
+        
+        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        console.log('🌐 File URL:', fileUrl);
+        
+        // Test if file is accessible
+        try {
+          const testResponse = await fetch(fileUrl, { method: 'HEAD' });
+          console.log('🔗 File accessibility test:', testResponse.status, testResponse.statusText);
+          
+          if (!testResponse.ok) {
+            throw new Error(`File not accessible: ${testResponse.status} ${testResponse.statusText}`);
+          }
+        } catch (fetchError) {
+          console.error('❌ File accessibility test failed:', fetchError);
+          alert(`Failed to access file: ${filename}. Please check if the file exists in plan_doc_uploads folder.`);
+          return;
+        }
+        
+        // Set document metadata
+        this.documentId = doc.document_number;
+        this.status = doc.status;
+        this.lastModifiedDate = new Date(doc.upload_date);
+        
+        // Load the file for display based on file extension
+        const extension = filename.split('.').pop().toLowerCase();
+        console.log('📋 File extension:', extension);
+        
+        if (extension === 'pdf') {
+          this.fileType = 'pdf';
+          this.fileName = filename;
+          console.log('📄 Loading PDF...');
+          await this.loadPdfFromUrl(fileUrl);
+        } else if (extension === 'docx') {
+          this.fileType = 'docx';
+          this.fileName = filename;
+          console.log('📝 Loading DOCX...');
+          await this.loadDocxFromUrl(fileUrl);
+        } else {
+          this.fileType = 'other';
+          this.fileName = filename;
+          console.log('📄 Other file type, showing filename only');
+        }
+        
+        console.log(`✅ Document ${doc.document_number} loaded successfully`);
+        
+      } catch (error) {
+        console.error('❌ Error viewing document:', error);
+        alert(`Failed to load document: ${error.message}`);
       }
     },
 
@@ -693,9 +830,10 @@ export default {
           // Update modified date and reload data
           this.lastModifiedDate = new Date();
           
-          // Reload the next doc_ver and document versions
+          // Reload the next doc_ver, document versions, and existing documents list
           this.loadNextDocVer(this.documentDetails.lruId);
           this.loadDocumentVersions(this.documentDetails.lruId);
+          this.loadExistingDocuments(this.documentDetails.lruId);
           
           // Clear the form
           this.documentDetails.documentNumber = "";
@@ -1053,6 +1191,170 @@ export default {
   flex: 1;
   display: flex;
   overflow: hidden;
+}
+
+/* Documents List Panel */
+.documents-list-panel {
+  width: 350px;
+  background: white;
+  margin: 1rem 0 1rem 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.documents-list-panel h3 {
+  margin: 0;
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  color: #495057;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.documents-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+}
+
+.no-documents {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #6c757d;
+}
+
+.no-docs-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.document-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.document-item:hover {
+  border-color: #007bff;
+  background: #f8f9ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+}
+
+.doc-icon {
+  margin-right: 0.75rem;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-title {
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.doc-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.doc-version {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.doc-ver {
+  background: #e9ecef;
+  color: #495057;
+  padding: 0.125rem 0.375rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.doc-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.uploaded-by {
+  font-weight: 500;
+}
+
+.upload-date {
+  font-style: italic;
+}
+
+.doc-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.doc-status.status-not-assigned {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.doc-status.status-assigned-and-returned {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.doc-status.status-cleared {
+  background: #d4edda;
+  color: #155724;
+}
+
+.doc-status.status-disapproved {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.doc-status.status-moved-to-next-stage {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.doc-status.status-not-cleared {
+  background: #f5c6cb;
+  color: #721c24;
 }
 
 .document-area {

@@ -783,6 +783,7 @@ def get_lru_plan_documents(lru_id):
                 pd.upload_date,
                 pd.file_path,
                 pd.status,
+                pd.original_filename,
                 u.name as uploaded_by_name
             FROM plan_documents pd
             JOIN users u ON pd.uploaded_by = u.user_id
@@ -803,10 +804,11 @@ def get_lru_plan_documents(lru_id):
                 "revision": doc[3],
                 "doc_ver": doc[4],
                 "uploaded_by": doc[5],
-                "uploaded_by_name": doc[9],
+                "uploaded_by_name": doc[10],
                 "upload_date": doc[6].isoformat() if doc[6] else None,
                 "file_path": doc[7],
-                "status": doc[8]
+                "status": doc[8],
+                "original_filename": doc[9]
             })
         
         return jsonify({
@@ -1038,17 +1040,44 @@ def update_plan_document_status(document_id):
 def serve_plan_document(filename):
     """Serve uploaded plan document files"""
     try:
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        print(f"📁 Request to serve file: {filename}")
+        print(f"📂 Upload folder: {UPLOAD_FOLDER}")
+        
+        # Clean the filename - remove any path separators
+        clean_filename = os.path.basename(filename)
+        file_path = os.path.join(UPLOAD_FOLDER, clean_filename)
+        
+        print(f"🔍 Looking for file at: {file_path}")
+        print(f"📄 File exists: {os.path.exists(file_path)}")
+        
+        if os.path.exists(file_path):
+            print(f"📊 File size: {os.path.getsize(file_path)} bytes")
+        
+        # List files in upload directory for debugging
+        try:
+            files_in_dir = os.listdir(UPLOAD_FOLDER)
+            print(f"📋 Files in upload directory: {files_in_dir}")
+        except Exception as list_error:
+            print(f"❌ Error listing directory: {list_error}")
         
         # Security check - ensure file is within upload directory
-        if not os.path.exists(file_path) or not file_path.startswith(os.path.abspath(UPLOAD_FOLDER)):
-            return jsonify({"success": False, "message": "File not found"}), 404
+        abs_upload_folder = os.path.abspath(UPLOAD_FOLDER)
+        abs_file_path = os.path.abspath(file_path)
         
+        if not abs_file_path.startswith(abs_upload_folder):
+            print(f"🚫 Security violation: File path outside upload directory")
+            return jsonify({"success": False, "message": "Invalid file path"}), 403
+        
+        if not os.path.exists(file_path):
+            print(f"❌ File not found: {file_path}")
+            return jsonify({"success": False, "message": f"File not found: {clean_filename}"}), 404
+        
+        print(f"✅ Serving file: {file_path}")
         return send_file(file_path, as_attachment=False)
         
     except Exception as e:
-        print(f"Error serving file {filename}: {str(e)}")
-        return jsonify({"success": False, "message": "Error serving file"}), 500
+        print(f"❌ Error serving file {filename}: {str(e)}")
+        return jsonify({"success": False, "message": f"Error serving file: {str(e)}"}), 500
 
 # Get document details for display
 @app.route('/api/plan-documents/<int:document_id>', methods=['GET'])
@@ -1126,6 +1155,11 @@ def get_next_doc_ver(lru_id):
         
     except Exception as e:
         print(f"Error getting next doc_ver for LRU {lru_id}: {str(e)}")
+        # Rollback the transaction to clear the error state
+        try:
+            conn.rollback()
+        except:
+            pass
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Get LRU and project metadata
@@ -1136,8 +1170,8 @@ def get_lru_metadata(lru_id):
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT l.lru_id, l.lru_name, l.description, l.project_id,
-                   p.project_name, p.description as project_description
+            SELECT l.lru_id, l.lru_name, l.project_id,
+                   p.project_name
             FROM lrus l
             LEFT JOIN projects p ON l.project_id = p.project_id
             WHERE l.lru_id = %s
@@ -1154,15 +1188,18 @@ def get_lru_metadata(lru_id):
             "lru": {
                 "lru_id": result[0],
                 "lru_name": result[1],
-                "lru_description": result[2],
-                "project_id": result[3],
-                "project_name": result[4],
-                "project_description": result[5]
+                "project_id": result[2],
+                "project_name": result[3]
             }
         })
         
     except Exception as e:
         print(f"Error getting LRU metadata for {lru_id}: {str(e)}")
+        # Rollback the transaction to clear the error state
+        try:
+            conn.rollback()
+        except:
+            pass
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Tests and Stages endpoints
