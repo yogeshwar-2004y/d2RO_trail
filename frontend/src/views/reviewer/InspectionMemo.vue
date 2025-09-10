@@ -17,14 +17,16 @@
         <span class="logo-text">AVIATRAX</span>
         <span class="memo-id">Memo ID: {{ id }}</span>
       </div>
-      <div class="share-section">
+          <!--<div class="share-section">
         <button class="share-btn" @click="toggleShareModal">
           <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
           </svg>
           <span class="share-text">share</span>
         </button>
-      </div>
+      </div>  -->
+
+      
     </header>
 
     <div class="form-content">
@@ -140,8 +142,8 @@
         </div>
       </div>
     </div>
-
-    <div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
+<!-- 
+<div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
       <div class="share-modal-content">
         <h2>Share via Email</h2>
         <p>Enter email addresses separated by commas.</p>
@@ -150,7 +152,9 @@
           <button @click="sendEmails" class="send-btn">Send</button>
         </div>
       </div>
-    </div>
+    </div>    
+-->
+    
 
     <!-- Submit Button -->
     <div class="submit-section">
@@ -241,7 +245,7 @@ export default {
       // You can replace this with actual API call
       // this.memoData = await api.getMemo(this.id);
     },
-    toggleShareModal() {
+   /** toggleShareModal() {
       this.showShareModal = !this.showShareModal;
       if (!this.showShareModal) {
         this.emailAddresses = ''; // Clear input on close
@@ -259,7 +263,7 @@ export default {
       
       alert(`Memo sent successfully to: ${emails.join(', ')}`);
       this.toggleShareModal(); // Close the modal after "sending"
-    },
+    },*/ 
     submitMemo() {
       // Validate that at least one test status is selected
       const testStatusSelected = Object.values(this.memoData.testStatus).some(status => status);

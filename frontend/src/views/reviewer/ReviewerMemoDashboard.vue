@@ -79,6 +79,31 @@
           <div v-if="memo.scheduledDate" class="memo-scheduled">TEST SCHEDULED ON: {{ memo.scheduledDate }}</div>
           <div class="memo-status">{{ memo.status }}</div>
         </div>
+        <div class="memo-actions">
+          <button class="share-btn" @click.stop="shareMemo(memo)" title="Share memo">
+            <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+            </svg>
+            <span class="share-text">Share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
+      <div class="share-modal-content">
+        <h2>Share Memo</h2>
+        <p>Enter email addresses separated by commas to share this memo.</p>
+        <div class="memo-info">
+          <strong>Project:</strong> {{ selectedMemo?.project }}<br>
+          <strong>Author:</strong> {{ selectedMemo?.author }}
+        </div>
+        <input type="text" v-model="emailAddresses" placeholder="e.g., mail1@example.com, mail2@example.com" class="email-input" />
+        <div class="modal-actions">
+          <button @click="sendEmails" class="send-btn">Send</button>
+          <button @click="toggleShareModal" class="cancel-btn">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -94,6 +119,9 @@ export default {
       showMemoFilter: false,
       activeProjectFilter: null,
       activeMemoFilter: null,
+      showShareModal: false,
+      emailAddresses: '',
+      selectedMemo: null,
       projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
       memoStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
@@ -159,6 +187,29 @@ export default {
     goToSharedMemos() {
       // Navigate to the shared memos dashboard
       this.$router.push({ name: 'SharedMemoDashboard' });
+    },
+    shareMemo(memo) {
+      this.selectedMemo = memo;
+      this.showShareModal = true;
+    },
+    toggleShareModal() {
+      this.showShareModal = !this.showShareModal;
+      if (!this.showShareModal) {
+        this.emailAddresses = '';
+        this.selectedMemo = null;
+      }
+    },
+    sendEmails() {
+      if (this.emailAddresses.trim() === '') {
+        alert('Please enter at least one email address.');
+        return;
+      }
+      
+      const emails = this.emailAddresses.split(',').map(email => email.trim());
+      console.log('Sharing memo:', this.selectedMemo, 'to:', emails);
+      
+      alert(`Memo "${this.selectedMemo.project}" shared successfully with: ${emails.join(', ')}`);
+      this.toggleShareModal();
     }
  }
 };
@@ -371,5 +422,151 @@ export default {
   font-size: 0.8em;
   color: #666;
   margin-top: 2px;
+}
+
+/* Memo Actions */
+.memo-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.share-btn:hover {
+  background-color: #333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.share-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.share-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Share Modal Styles */
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.share-modal-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+}
+
+.share-modal-content h2 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.share-modal-content p {
+  margin: 0 0 20px 0;
+  color: #666;
+  text-align: center;
+}
+
+.memo-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.memo-info strong {
+  color: #333;
+}
+
+.email-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  margin-bottom: 20px;
+  box-sizing: border-box;
+}
+
+.email-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.send-btn {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.send-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.cancel-btn {
+  padding: 12px 24px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #545b62;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
 }
 </style>
