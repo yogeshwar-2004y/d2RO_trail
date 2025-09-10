@@ -229,7 +229,6 @@
     <!-- Assign Reviewer Modal -->
     <QAHeadAssignReviewer 
       v-if="showAssignReviewerModal"
-      :documentId="documentId"
       :currentLruName="lruName"
       :currentProjectName="projectName"
       @close="showAssignReviewerModal = false"

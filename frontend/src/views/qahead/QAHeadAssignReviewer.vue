@@ -76,7 +76,7 @@
                       :disabled="!reviewer.available"
                       :class="{ 'disabled-option': !reviewer.available }"
                     >
-                      {{ reviewer.name }} ({{ reviewer.role }}) {{ !reviewer.available ? '(Not Available)' : '' }}
+                      {{ reviewer.name }} {{ !reviewer.available ? '(Not Available)' : '' }}
                     </option>
                   </select>
                   <div class="dropdown-arrow">
@@ -143,10 +143,6 @@
 export default {
   name: 'QAHeadAssignReviewer',
   props: {
-    documentId: {
-      type: Number,
-      required: true
-    },
     currentLruName: {
       type: String,
       default: ''
@@ -282,12 +278,9 @@ export default {
         }
       } catch (error) {
         console.error('Error loading available reviewers:', error);
-        // Fallback to sample data if API fails
+        // Fallback to sample data if API fails - only QA Reviewers (role_id = 3)
         this.availableReviewers = [
-          { id: 1001, name: 'Avanthika PG', email: 'avanthikapg22@gmail.com', role: 'QA Reviewer', available: true },
-          { id: 1002, name: 'Sudhiksha M K', email: 'sudhikshamk06@gmail.com', role: 'Admin', available: true },
-          { id: 1003, name: 'Mahadev M', email: 'mahadevmanohar07@gmail.com', role: 'Design Head', available: true },
-          { id: 1004, name: 'Mohan', email: 'mohan@gmail.com', role: 'QA Head', available: true }
+          { id: 1001, name: 'Avanthika PG', email: 'avanthikapg22@gmail.com', role: 'QA Reviewer', available: true }
         ];
       }
     },
@@ -298,6 +291,7 @@ export default {
         const selectedReviewer = this.availableReviewers.find(r => r.id === this.formData.reviewerId);
         if (selectedReviewer) {
           this.formData.reviewerName = selectedReviewer.name;
+          // The reviewerId is already set to the user_id from the dropdown value
         }
       } else {
         this.formData.reviewerName = '';
@@ -318,7 +312,8 @@ export default {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            document_id: this.documentId,
+            lru_name: this.formData.lruName,
+            project_name: this.formData.projectName,
             reviewer_id: this.formData.reviewerId,
             assigned_by: 1002 // TODO: Get from user store
           })

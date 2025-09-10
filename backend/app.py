@@ -1688,35 +1688,67 @@ def get_lru_options():
 # Assign reviewer endpoint
 @app.route('/api/assign-reviewer', methods=['POST'])
 def assign_reviewer():
-    """Assign a reviewer to a document"""
+    """Assign a reviewer to a document based on LRU context"""
     try:
         data = request.json
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        document_id = data.get('document_id')
+        lru_name = data.get('lru_name')
+        project_name = data.get('project_name')
         reviewer_id = data.get('reviewer_id')
-        assigned_by = data.get('assigned_by')
+        assigned_by = data.get('assigned_by', 1002)  # Default assigned_by
         
-        if not all([document_id, reviewer_id, assigned_by]):
-            return jsonify({"success": False, "message": "Missing required fields: document_id, reviewer_id, assigned_by"}), 400
+        if not all([lru_name, project_name, reviewer_id]):
+            return jsonify({"success": False, "message": "Missing required fields: lru_name, project_name, reviewer_id"}), 400
         
         cur = conn.cursor()
         
-        # Check if document exists
-        cur.execute("SELECT document_id FROM plan_documents WHERE document_id = %s", (document_id,))
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Check if reviewer exists and has QA Reviewer role
+        cur.execute("""
+            SELECT u.user_id 
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            WHERE u.user_id = %s AND ur.role_id = 3
+        """, (reviewer_id,))
+        
         if not cur.fetchone():
             cur.close()
-            return jsonify({"success": False, "message": "Document not found"}), 404
+            return jsonify({"success": False, "message": "Reviewer not found or not a QA Reviewer"}), 404
         
-        # Check if reviewer exists
-        cur.execute("SELECT user_id FROM users WHERE user_id = %s", (reviewer_id,))
-        if not cur.fetchone():
-            cur.close()
-            return jsonify({"success": False, "message": "Reviewer not found"}), 404
-        
-        # Check if assignment already exists
+        # Check if assignment already exists for this document
         cur.execute("""
             SELECT assignment_id FROM plan_doc_assignment 
             WHERE document_id = %s AND user_id = %s
@@ -1726,7 +1758,7 @@ def assign_reviewer():
         
         if existing_assignment:
             cur.close()
-            return jsonify({"success": False, "message": "Reviewer is already assigned to this document"}), 400
+            return jsonify({"success": False, "message": "This reviewer is already assigned to the active document for this LRU"}), 400
         
         # Insert new assignment
         cur.execute("""
@@ -1750,7 +1782,9 @@ def assign_reviewer():
         return jsonify({
             "success": True,
             "message": "Reviewer assigned successfully",
-            "assignment_id": assignment_id
+            "assignment_id": assignment_id,
+            "document_id": document_id,
+            "lru_id": lru_id
         })
         
     except Exception as e:
@@ -1765,13 +1799,13 @@ def get_available_reviewers():
     try:
         cur = conn.cursor()
         
-        # Fetch users with reviewer role
+        # Fetch users with QA Reviewer role (role_id = 3)
         cur.execute("""
             SELECT u.user_id, u.name, u.email, r.role_name
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
-            WHERE r.role_name IN ('Reviewer', 'QA Head', 'Design Head')
+            WHERE ur.role_id = 3
             ORDER BY u.name
         """)
         
@@ -1797,6 +1831,104 @@ def get_available_reviewers():
     except Exception as e:
         print(f"Error fetching available reviewers: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Test assignments endpoint
+@app.route('/api/test-assignments', methods=['GET'])
+def test_assignments():
+    """Test endpoint to view all assignments"""
+    try:
+        cur = conn.cursor()
+        
+        # Show all assignments with details
+        cur.execute("""
+            SELECT 
+                pda.assignment_id,
+                pda.document_id,
+                pda.user_id,
+                pda.assigned_at,
+                u.name as reviewer_name,
+                pd.document_number,
+                pd.status as doc_status,
+                l.lru_name,
+                p.project_name
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            ORDER BY pda.assigned_at DESC
+        """)
+        assignments = cur.fetchall()
+        
+        cur.close()
+        
+        assignment_list = []
+        for assignment in assignments:
+            assignment_list.append({
+                "assignment_id": assignment[0],
+                "document_id": assignment[1],
+                "user_id": assignment[2],
+                "assigned_at": assignment[3].isoformat() if assignment[3] else None,
+                "reviewer_name": assignment[4],
+                "document_number": assignment[5],
+                "doc_status": assignment[6],
+                "lru_name": assignment[7],
+                "project_name": assignment[8]
+            })
+        
+        return jsonify({
+            "success": True,
+            "assignments": assignment_list
+        })
+        
+    except Exception as e:
+        print(f"Test assignments error: {str(e)}")
+        return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
+
+# Test QA Reviewers endpoint
+@app.route('/api/test-qa-reviewers', methods=['GET'])
+def test_qa_reviewers():
+    """Test endpoint to verify QA Reviewer data"""
+    try:
+        cur = conn.cursor()
+        
+        # Show all roles
+        cur.execute("SELECT role_id, role_name FROM roles ORDER BY role_id")
+        roles = cur.fetchall()
+        
+        # Show all user-role assignments
+        cur.execute("""
+            SELECT u.user_id, u.name, ur.role_id, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            ORDER BY u.user_id
+        """)
+        user_roles = cur.fetchall()
+        
+        # Show only QA Reviewers (role_id = 3)
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE ur.role_id = 3
+            ORDER BY u.name
+        """)
+        qa_reviewers = cur.fetchall()
+        
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "roles": [{"role_id": r[0], "role_name": r[1]} for r in roles],
+            "user_roles": [{"user_id": ur[0], "name": ur[1], "role_id": ur[2], "role_name": ur[3]} for ur in user_roles],
+            "qa_reviewers": [{"user_id": qr[0], "name": qr[1], "email": qr[2], "role_name": qr[3]} for qr in qa_reviewers]
+        })
+        
+    except Exception as e:
+        print(f"Test QA Reviewers error: {str(e)}")
+        return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
 
 # Diagnostic endpoint to check database contents
 @app.route('/api/tests-debug', methods=['GET'])
