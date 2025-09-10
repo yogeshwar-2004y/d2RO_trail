@@ -261,7 +261,7 @@ CREATE TABLE memos (
 );
 
 CREATE TABLE memo_references (
-    ref_id SERIAL PRIMARY KEY,a
+    ref_id SERIAL PRIMARY KEY,
     memo_id INT REFERENCES memos(memo_id) ON DELETE CASCADE,
     ref_doc VARCHAR(255),
     ref_no VARCHAR(255),

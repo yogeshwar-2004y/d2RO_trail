@@ -1,8 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import psycopg2
 import hashlib
 import os
+import uuid
+from werkzeug.utils import secure_filename
+from datetime import datetime
 
 app = Flask(__name__)
 # CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
@@ -779,6 +782,7 @@ def get_lru_plan_documents(lru_id):
                 pd.upload_date,
                 pd.file_path,
                 pd.status,
+                pd.original_filename,
                 u.name as uploaded_by_name
             FROM plan_documents pd
             JOIN users u ON pd.uploaded_by = u.user_id
@@ -799,10 +803,11 @@ def get_lru_plan_documents(lru_id):
                 "revision": doc[3],
                 "doc_ver": doc[4],
                 "uploaded_by": doc[5],
-                "uploaded_by_name": doc[9],
+                "uploaded_by_name": doc[10],
                 "upload_date": doc[6].isoformat() if doc[6] else None,
                 "file_path": doc[7],
-                "status": doc[8]
+                "status": doc[8],
+                "original_filename": doc[9]
             })
         
         return jsonify({
@@ -909,21 +914,36 @@ def get_project_plan_documents(project_id):
 @app.route('/api/plan-documents', methods=['POST'])
 def upload_plan_document():
     try:
-        data = request.json
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
+        # Check if file is present in request
+        if 'file' not in request.files:
+            return jsonify({"success": False, "message": "No file provided"}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"success": False, "message": "No file selected"}), 400
+        
+        # Get form data
+        lru_id = request.form.get('lru_id')
+        document_number = request.form.get('document_number')
+        version = request.form.get('version')
+        revision = request.form.get('revision')
+        doc_ver = request.form.get('doc_ver')
+        uploaded_by = request.form.get('uploaded_by')
         
         # Validate required fields
-        lru_id = data.get('lru_id')
-        document_number = data.get('document_number')
-        version = data.get('version')
-        revision = data.get('revision')
-        doc_ver = data.get('doc_ver')
-        uploaded_by = data.get('uploaded_by')
-        file_path = data.get('file_path')
-        
-        if not all([lru_id, document_number, version, uploaded_by, file_path]):
+        if not all([lru_id, document_number, version, uploaded_by]):
             return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        # Validate file
+        if not allowed_file(file.filename):
+            return jsonify({"success": False, "message": "File type not allowed"}), 400
+        
+        # Check file size
+        file.seek(0, 2)  # Seek to end
+        file_size = file.tell()
+        file.seek(0)  # Reset to beginning
+        if file_size > MAX_FILE_SIZE:
+            return jsonify({"success": False, "message": "File too large. Maximum size is 50MB"}), 400
         
         cur = conn.cursor()
         
@@ -933,13 +953,21 @@ def upload_plan_document():
             cur.close()
             return jsonify({"success": False, "message": "LRU not found"}), 404
         
-        # Insert plan document
+        # Generate unique filename
+        file_extension = file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        file_path = os.path.join(UPLOAD_FOLDER, unique_filename)
+        
+        # Save file to local storage
+        file.save(file_path)
+        
+        # Insert plan document with actual file path
         cur.execute("""
             INSERT INTO plan_documents 
-            (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned')
+            (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status, original_filename, file_size, upload_date)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned', %s, %s, %s)
             RETURNING document_id
-        """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path))
+        """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, file.filename, file_size, datetime.now()))
         
         document_id = cur.fetchone()[0]
         conn.commit()
@@ -948,11 +976,16 @@ def upload_plan_document():
         return jsonify({
             "success": True,
             "message": "Plan document uploaded successfully",
-            "document_id": document_id
+            "document_id": document_id,
+            "file_path": file_path,
+            "original_filename": file.filename
         })
         
     except Exception as e:
         conn.rollback()
+        # Clean up file if database insert failed
+        if 'file_path' in locals() and os.path.exists(file_path):
+            os.remove(file_path)
         print(f"Error uploading plan document: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
@@ -1000,6 +1033,173 @@ def update_plan_document_status(document_id):
         conn.rollback()
         print(f"Error updating plan document status: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Serve uploaded files
+@app.route('/api/files/plan-documents/<path:filename>', methods=['GET'])
+def serve_plan_document(filename):
+    """Serve uploaded plan document files"""
+    try:
+        print(f"📁 Request to serve file: {filename}")
+        print(f"📂 Upload folder: {UPLOAD_FOLDER}")
+        
+        # Clean the filename - remove any path separators
+        clean_filename = os.path.basename(filename)
+        file_path = os.path.join(UPLOAD_FOLDER, clean_filename)
+        
+        print(f"🔍 Looking for file at: {file_path}")
+        print(f"📄 File exists: {os.path.exists(file_path)}")
+        
+        if os.path.exists(file_path):
+            print(f"📊 File size: {os.path.getsize(file_path)} bytes")
+        
+        # List files in upload directory for debugging
+        try:
+            files_in_dir = os.listdir(UPLOAD_FOLDER)
+            print(f"📋 Files in upload directory: {files_in_dir}")
+        except Exception as list_error:
+            print(f"❌ Error listing directory: {list_error}")
+        
+        # Security check - ensure file is within upload directory
+        abs_upload_folder = os.path.abspath(UPLOAD_FOLDER)
+        abs_file_path = os.path.abspath(file_path)
+        
+        if not abs_file_path.startswith(abs_upload_folder):
+            print(f"🚫 Security violation: File path outside upload directory")
+            return jsonify({"success": False, "message": "Invalid file path"}), 403
+        
+        if not os.path.exists(file_path):
+            print(f"❌ File not found: {file_path}")
+            return jsonify({"success": False, "message": f"File not found: {clean_filename}"}), 404
+        
+        print(f"✅ Serving file: {file_path}")
+        return send_file(file_path, as_attachment=False)
+        
+    except Exception as e:
+        print(f"❌ Error serving file {filename}: {str(e)}")
+        return jsonify({"success": False, "message": f"Error serving file: {str(e)}"}), 500
+
+# Get document details for display
+@app.route('/api/plan-documents/<int:document_id>', methods=['GET'])
+def get_plan_document(document_id):
+    """Get plan document details including file path"""
+    try:
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT pd.document_id, pd.lru_id, pd.document_number, pd.version, pd.revision, 
+                   pd.doc_ver, pd.uploaded_by, pd.file_path, pd.status, pd.original_filename, 
+                   pd.file_size, pd.upload_date, u.name as uploaded_by_name, l.lru_name
+            FROM plan_documents pd
+            LEFT JOIN users u ON pd.uploaded_by = u.user_id
+            LEFT JOIN lrus l ON pd.lru_id = l.lru_id
+            WHERE pd.document_id = %s
+        """, (document_id,))
+        
+        document = cur.fetchone()
+        cur.close()
+        
+        if not document:
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "document": {
+                "document_id": document[0],
+                "lru_id": document[1],
+                "document_number": document[2],
+                "version": document[3],
+                "revision": document[4],
+                "doc_ver": document[5],
+                "uploaded_by": document[6],
+                "file_path": document[7],
+                "status": document[8],
+                "original_filename": document[9],
+                "file_size": document[10],
+                "upload_date": document[11].isoformat() if document[11] else None,
+                "uploaded_by_name": document[12],
+                "lru_name": document[13]
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error fetching document {document_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get next doc_ver for an LRU
+@app.route('/api/plan-documents/next-doc-ver/<int:lru_id>', methods=['GET'])
+def get_next_doc_ver(lru_id):
+    """Get the next doc_ver number for a specific LRU"""
+    try:
+        cur = conn.cursor()
+        
+        # Get the highest doc_ver for this LRU
+        cur.execute("""
+            SELECT MAX(CAST(doc_ver AS INTEGER)) 
+            FROM plan_documents 
+            WHERE lru_id = %s
+        """, (lru_id,))
+        
+        result = cur.fetchone()
+        cur.close()
+        
+        # If no documents exist for this LRU, start with 1
+        max_doc_ver = result[0] if result[0] is not None else 0
+        next_doc_ver = max_doc_ver + 1
+        
+        return jsonify({
+            "success": True,
+            "nextDocVer": next_doc_ver,
+            "lruId": lru_id
+        })
+        
+    except Exception as e:
+        print(f"Error getting next doc_ver for LRU {lru_id}: {str(e)}")
+        # Rollback the transaction to clear the error state
+        try:
+            conn.rollback()
+        except:
+            pass
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get LRU and project metadata
+@app.route('/api/lrus/<int:lru_id>/metadata', methods=['GET'])
+def get_lru_metadata(lru_id):
+    """Get LRU and associated project metadata"""
+    try:
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, l.project_id,
+                   p.project_name
+            FROM lrus l
+            LEFT JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        result = cur.fetchone()
+        cur.close()
+        
+        if not result:
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "lru": {
+                "lru_id": result[0],
+                "lru_name": result[1],
+                "project_id": result[2],
+                "project_name": result[3]
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error getting LRU metadata for {lru_id}: {str(e)}")
+        # Rollback the transaction to clear the error state
+        try:
+            conn.rollback()
+        except:
+            pass
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Tests and Stages endpoints
 
