@@ -229,8 +229,9 @@
     <!-- Assign Reviewer Modal -->
     <QAHeadAssignReviewer 
       v-if="showAssignReviewerModal"
-      :lruName="lruName"
-      :projectName="projectName"
+      :documentId="documentId"
+      :currentLruName="lruName"
+      :currentProjectName="projectName"
       @close="showAssignReviewerModal = false"
     />
 
@@ -360,7 +361,7 @@ export default {
       // Document metadata - will be loaded dynamically
       lruName: "",
       projectName: "",
-      documentId: "",
+      documentId: null,
       status: "pending", // pending, approved, rejected, review
       createdDate: null,
       lastModifiedDate: new Date(),

@@ -1615,6 +1615,189 @@ def delete_stage(stage_id):
         print(f"Error deleting stage: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+# Get project options for assign reviewer dropdown
+@app.route('/api/project-options', methods=['GET'])
+def get_project_options():
+    """Get project name and project number for assign reviewer form"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch project name and project number from projects table
+        cur.execute("""
+            SELECT project_name, project_id
+            FROM projects
+            ORDER BY project_name
+        """)
+        
+        projects = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        project_options = []
+        for project in projects:
+            project_options.append({
+                "project_name": project[0],
+                "project_id": project[1]
+            })
+        
+        return jsonify({
+            "success": True,
+            "project_options": project_options
+        })
+        
+    except Exception as e:
+        print(f"Error fetching project options: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get LRU options for assign reviewer dropdown
+@app.route('/api/lru-options', methods=['GET'])
+def get_lru_options():
+    """Get LRU names for assign reviewer form"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch LRU names from lrus table
+        cur.execute("""
+            SELECT l.lru_name, l.project_id, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            ORDER BY l.lru_name
+        """)
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_options = []
+        for lru in lrus:
+            lru_options.append({
+                "lru_name": lru[0],
+                "project_id": lru[1],
+                "project_name": lru[2]
+            })
+        
+        return jsonify({
+            "success": True,
+            "lru_options": lru_options
+        })
+        
+    except Exception as e:
+        print(f"Error fetching LRU options: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Assign reviewer endpoint
+@app.route('/api/assign-reviewer', methods=['POST'])
+def assign_reviewer():
+    """Assign a reviewer to a document"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        document_id = data.get('document_id')
+        reviewer_id = data.get('reviewer_id')
+        assigned_by = data.get('assigned_by')
+        
+        if not all([document_id, reviewer_id, assigned_by]):
+            return jsonify({"success": False, "message": "Missing required fields: document_id, reviewer_id, assigned_by"}), 400
+        
+        cur = conn.cursor()
+        
+        # Check if document exists
+        cur.execute("SELECT document_id FROM plan_documents WHERE document_id = %s", (document_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        # Check if reviewer exists
+        cur.execute("SELECT user_id FROM users WHERE user_id = %s", (reviewer_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Reviewer not found"}), 404
+        
+        # Check if assignment already exists
+        cur.execute("""
+            SELECT assignment_id FROM plan_doc_assignment 
+            WHERE document_id = %s AND user_id = %s
+        """, (document_id, reviewer_id))
+        
+        existing_assignment = cur.fetchone()
+        
+        if existing_assignment:
+            cur.close()
+            return jsonify({"success": False, "message": "Reviewer is already assigned to this document"}), 400
+        
+        # Insert new assignment
+        cur.execute("""
+            INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+            VALUES (%s, %s, NOW())
+            RETURNING assignment_id
+        """, (document_id, reviewer_id))
+        
+        assignment_id = cur.fetchone()[0]
+        
+        # Update document status to 'assigned'
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = 'assigned'
+            WHERE document_id = %s
+        """, (document_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Reviewer assigned successfully",
+            "assignment_id": assignment_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error assigning reviewer: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Get available reviewers (users with reviewer role)
+@app.route('/api/available-reviewers', methods=['GET'])
+def get_available_reviewers():
+    """Get list of users who can be assigned as reviewers"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch users with reviewer role
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE r.role_name IN ('Reviewer', 'QA Head', 'Design Head')
+            ORDER BY u.name
+        """)
+        
+        reviewers = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        reviewer_list = []
+        for reviewer in reviewers:
+            reviewer_list.append({
+                "id": reviewer[0],
+                "name": reviewer[1],
+                "email": reviewer[2],
+                "role": reviewer[3],
+                "available": True  # For now, assume all are available
+            })
+        
+        return jsonify({
+            "success": True,
+            "reviewers": reviewer_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching available reviewers: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 # Diagnostic endpoint to check database contents
 @app.route('/api/tests-debug', methods=['GET'])
 def get_tests_debug():
