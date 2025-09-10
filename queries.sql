@@ -178,7 +178,6 @@ INSERT INTO tests (test_name) VALUES
 CREATE TABLE IF NOT EXISTS stages (
     stage_id SERIAL PRIMARY KEY,
     stage_name VARCHAR(50) NOT NULL UNIQUE,
-
     created_at TIMESTAMP DEFAULT NOW()
 );
 
