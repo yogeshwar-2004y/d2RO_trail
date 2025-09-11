@@ -144,18 +144,47 @@
           </button>
         </div>
         
-        <div class="modal-body">
-          <div v-if="loadingAllNews" class="loading-container">
-            <div class="loading-spinner"></div>
-            <p>Loading all news...</p>
-          </div>
-          
-          <div v-else-if="allNews.length === 0" class="no-data-message">
-            <p>No news updates found in the database.</p>
-          </div>
-          
-          <div v-else class="news-list modal-news-list">
-             <div v-for="news in allNews" :key="news.id" class="news-card">
+         <div class="modal-body">
+           <!-- Filter Tabs -->
+           <div class="filter-tabs">
+             <button 
+               @click="setNewsFilter('all')" 
+               :class="['filter-tab', { active: newsFilter === 'all' }]"
+             >
+               All News ({{ allNews.length }})
+             </button>
+             <button 
+               @click="setNewsFilter('active')" 
+               :class="['filter-tab', { active: newsFilter === 'active' }]"
+             >
+               Active ({{ activeNewsCount }})
+             </button>
+             <button 
+               @click="setNewsFilter('expired')" 
+               :class="['filter-tab', { active: newsFilter === 'expired' }]"
+             >
+               Expired ({{ expiredNewsCount }})
+             </button>
+             <button 
+               @click="setNewsFilter('hidden')" 
+               :class="['filter-tab', { active: newsFilter === 'hidden' }]"
+             >
+               Hidden ({{ hiddenNewsCount }})
+             </button>
+           </div>
+           
+           <div v-if="loadingAllNews" class="loading-container">
+             <div class="loading-spinner"></div>
+             <p>Loading all news...</p>
+           </div>
+           
+           <div v-else-if="filteredNews.length === 0" class="no-data-message">
+             <p v-if="allNews.length === 0">No news updates found in the database.</p>
+             <p v-else>No {{ newsFilter }} news items found.</p>
+           </div>
+           
+           <div v-else class="news-list modal-news-list">
+             <div v-for="news in filteredNews" :key="news.id" class="news-card enhanced-news-card">
                <div class="news-card-header">
                  <div class="news-info">
                    <span class="news-title">News Update</span>
@@ -190,9 +219,22 @@
                  {{ news.news_text }}
                </div>
                <div class="news-meta">
-                 <div>Created: {{ formatDateTime(news.created_at) }}</div>
-                 <div v-if="news.updated_at && news.updated_at !== news.created_at">
-                   Last Updated: {{ formatDateTime(news.updated_at) }}
+                 <div class="meta-row">
+                   <span class="meta-label">Created:</span>
+                   <span class="meta-value">{{ formatDateTime(news.created_at) }}</span>
+                 </div>
+                 <div v-if="news.updated_at && news.updated_at !== news.created_at" class="meta-row">
+                   <span class="meta-label">Last Updated:</span>
+                   <span class="meta-value">{{ formatDateTime(news.updated_at) }}</span>
+                 </div>
+                 <div class="meta-row">
+                   <span class="meta-label">Status:</span>
+                   <span class="meta-value status-indicator">
+                     <span v-if="isNewsActive(news)" class="status-dot active"></span>
+                     <span v-else-if="isNewsExpired(news)" class="status-dot expired"></span>
+                     <span v-else-if="news.hidden" class="status-dot hidden"></span>
+                     {{ getNewsStatusText(news) }}
+                   </span>
                  </div>
                </div>
              </div>
@@ -233,6 +275,7 @@ export default {
        loadingNews: false,
        loadingAllNews: false,
        showManageModal: false,
+       newsFilter: 'all',
        nextId: 1
      };
    },
@@ -245,6 +288,31 @@ export default {
         const newsDate = new Date(news.updated_at || news.created_at);
         return newsDate >= twentyFourHoursAgo && !news.hidden;
       });
+    },
+    
+    filteredNews() {
+      if (this.newsFilter === 'all') {
+        return this.allNews;
+      } else if (this.newsFilter === 'active') {
+        return this.allNews.filter(news => this.isNewsActive(news));
+      } else if (this.newsFilter === 'expired') {
+        return this.allNews.filter(news => this.isNewsExpired(news));
+      } else if (this.newsFilter === 'hidden') {
+        return this.allNews.filter(news => news.hidden);
+      }
+      return this.allNews;
+    },
+    
+    activeNewsCount() {
+      return this.allNews.filter(news => this.isNewsActive(news)).length;
+    },
+    
+    expiredNewsCount() {
+      return this.allNews.filter(news => this.isNewsExpired(news)).length;
+    },
+    
+    hiddenNewsCount() {
+      return this.allNews.filter(news => news.hidden).length;
     }
   },
   mounted() {
@@ -439,6 +507,26 @@ export default {
        const newsDate = new Date(news.updated_at);
        return newsDate < twentyFourHoursAgo && !news.hidden;
      },
+     
+     isNewsActive(news) {
+       if (news.hidden) return false;
+       if (!news.updated_at) return false;
+       const twentyFourHoursAgo = new Date();
+       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+       const newsDate = new Date(news.updated_at);
+       return newsDate >= twentyFourHoursAgo;
+     },
+     
+     setNewsFilter(filter) {
+       this.newsFilter = filter;
+     },
+     
+     getNewsStatusText(news) {
+       if (news.hidden) return 'Hidden';
+       if (this.isNewsActive(news)) return 'Active';
+       if (this.isNewsExpired(news)) return 'Expired';
+       return 'Inactive';
+     },
     
     formatDate(dateString) {
       if (!dateString) return '';
@@ -467,9 +555,10 @@ export default {
       await this.loadAllNews();
     },
     
-    closeManageNewsModal() {
-      this.showManageModal = false;
-    },
+     closeManageNewsModal() {
+       this.showManageModal = false;
+       this.newsFilter = 'all'; // Reset filter when closing modal
+     },
     
     async loadAllNews() {
       this.loadingAllNews = true;
@@ -905,9 +994,105 @@ export default {
 }
 
 .news-meta {
-  font-size: 0.8em;
+  font-size: 0.85em;
   color: #6c757d;
-  font-style: italic;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e9ecef;
+}
+
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta-label {
+  font-weight: 600;
+  color: #495057;
+  min-width: 120px;
+}
+
+.meta-value {
+  text-align: right;
+  flex: 1;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-dot.active {
+  background-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+}
+
+.status-dot.expired {
+  background-color: #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+}
+
+.status-dot.hidden {
+  background-color: #6c757d;
+  box-shadow: 0 0 0 2px rgba(108, 117, 125, 0.3);
+}
+
+.enhanced-news-card {
+  border-left: 4px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.enhanced-news-card:hover {
+  border-left-color: #007bff;
+  transform: translateX(4px);
+}
+
+/* Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.filter-tab {
+  padding: 12px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6c757d;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.filter-tab.active {
+  background: #007bff;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
 }
 
 /* Modal Styles */
@@ -998,6 +1183,45 @@ export default {
   }
   
   .form-actions {
+    justify-content: center;
+  }
+  
+  /* Responsive Filter Tabs */
+  .filter-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .filter-tab {
+    padding: 10px 12px;
+    font-size: 13px;
+    flex: 1;
+    min-width: calc(50% - 3px);
+  }
+  
+  /* Responsive News Cards */
+  .meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .meta-label {
+    min-width: auto;
+  }
+  
+  .meta-value {
+    text-align: left;
+  }
+  
+  .news-actions {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  
+  .btn-repost-small {
+    margin-right: 0;
     justify-content: center;
   }
   
