@@ -92,7 +92,6 @@ CREATE TABLE IF NOT EXISTS plan_documents (
     file_path VARCHAR(255) NOT NULL,
     status VARCHAR(50) DEFAULT 'not assigned' CHECK (
         status IN (
-            'cleared',
             'disapproved',
             'assigned and returned',
             'moved to next stage',

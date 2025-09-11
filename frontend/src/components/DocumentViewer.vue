@@ -19,9 +19,26 @@
     <div class="action-bar" v-if="currentUserRole">
       <!-- QA Head Actions -->
       <template v-if="currentUserRole === 'QA Head'">
-        <button @click="assignReviewer" class="action-btn">
-          Assign Reviewer
+        <button 
+          v-if="!hasAssignedReviewer" 
+          @click="assignReviewer" 
+          class="action-btn"
+          :disabled="loadingReviewerStatus"
+        >
+          {{ loadingReviewerStatus ? 'Loading...' : 'Assign Reviewer' }}
         </button>
+        <button 
+          v-if="hasAssignedReviewer" 
+          @click="editReviewer" 
+          class="action-btn action-btn-edit"
+          :disabled="loadingReviewerStatus"
+        >
+          {{ loadingReviewerStatus ? 'Loading...' : 'Edit Reviewer' }}
+        </button>
+        <div v-if="hasAssignedReviewer" class="reviewer-info">
+          <span class="reviewer-label">Current Reviewer:</span>
+          <span class="reviewer-name">{{ assignedReviewer?.name || 'Unknown' }}</span>
+        </div>
         <button @click="viewObservations" class="action-btn">
           View Observations
         </button>
@@ -231,7 +248,10 @@
       v-if="showAssignReviewerModal"
       :currentLruName="lruName"
       :currentProjectName="projectName"
-      @close="showAssignReviewerModal = false"
+      :isEditMode="isEditReviewerMode"
+      :currentReviewer="assignedReviewer"
+      @close="closeReviewerModal"
+      @reviewerUpdated="onReviewerUpdated"
     />
 
     <!-- Track Versions Modal -->
@@ -389,12 +409,18 @@ export default {
       },
 
       showAssignReviewerModal: false,
+      isEditReviewerMode: false,
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
       documentVersions: [], // Will be loaded dynamically
       existingDocuments: [], // List of uploaded documents for this LRU
       loading: false, // Loading state for documents
+      
+      // Reviewer assignment
+      hasAssignedReviewer: false,
+      assignedReviewer: null,
+      loadingReviewerStatus: false,
       
       // Comments
       comments: [],
@@ -431,6 +457,14 @@ export default {
     // Load existing document if available
     if (documentId && documentId !== 'new') {
       this.loadExistingDocument(documentId);
+    }
+    
+    // Check reviewer assignment status for QA Head
+    if (this.currentUserRole === 'QA Head') {
+      // Add a delay to ensure LRU metadata is loaded first
+      setTimeout(() => {
+        this.checkReviewerAssignment();
+      }, 1000);
     }
   },
   
@@ -699,8 +733,52 @@ export default {
       }
     },
 
-    assignReviewer() {
+    async assignReviewer() {
+      this.isEditReviewerMode = false;
       this.showAssignReviewerModal = true;
+    },
+    
+    async editReviewer() {
+      this.isEditReviewerMode = true;
+      this.showAssignReviewerModal = true;
+    },
+    
+    async checkReviewerAssignment() {
+      if (!this.lruName || !this.projectName) {
+        return;
+      }
+      
+      try {
+        this.loadingReviewerStatus = true;
+        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.hasAssignedReviewer = data.has_reviewer;
+          this.assignedReviewer = data.reviewer;
+        } else {
+          console.error('Error checking reviewer assignment:', data.message);
+          this.hasAssignedReviewer = false;
+          this.assignedReviewer = null;
+        }
+      } catch (error) {
+        console.error('Error checking reviewer assignment:', error);
+        this.hasAssignedReviewer = false;
+        this.assignedReviewer = null;
+      } finally {
+        this.loadingReviewerStatus = false;
+      }
+    },
+    
+    closeReviewerModal() {
+      this.showAssignReviewerModal = false;
+      this.isEditReviewerMode = false;
+    },
+    
+    onReviewerUpdated() {
+      // Refresh reviewer status after assignment/update
+      this.checkReviewerAssignment();
+      this.closeReviewerModal();
     },
     viewObservations() {
       this.$router.push({ 
@@ -1033,6 +1111,41 @@ export default {
 
 .action-btn:hover {
   background: #2563eb;
+}
+
+.action-btn-edit {
+  background-color: #3182ce;
+}
+
+.action-btn-edit:hover {
+  background-color: #2c5aa0;
+}
+
+.action-btn:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  padding: 8px 12px;
+  background-color: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.reviewer-label {
+  font-weight: 600;
+  color: #4a5568;
+  margin-right: 8px;
+}
+
+.reviewer-name {
+  color: #2d3748;
+  font-weight: 500;
 }
 
 .upload-section {

@@ -34,7 +34,7 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="thani123",
+    password="Admin",
     host="localhost",
     port="5432"
 )
@@ -1884,6 +1884,211 @@ def test_assignments():
     except Exception as e:
         print(f"Test assignments error: {str(e)}")
         return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
+
+# Get assigned reviewer for a document/LRU
+@app.route('/api/assigned-reviewer', methods=['GET'])
+def get_assigned_reviewer():
+    """Get the assigned reviewer for a document based on LRU and project context"""
+    try:
+        lru_name = request.args.get('lru_name')
+        project_name = request.args.get('project_name')
+        
+        if not all([lru_name, project_name]):
+            return jsonify({"success": False, "message": "Missing required parameters: lru_name, project_name"}), 400
+        
+        cur = conn.cursor()
+        
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Get assigned reviewer information
+        cur.execute("""
+            SELECT 
+                pda.assignment_id,
+                pda.user_id,
+                pda.assigned_at,
+                u.name as reviewer_name,
+                u.email as reviewer_email
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pda.document_id = %s
+            ORDER BY pda.assigned_at DESC
+            LIMIT 1
+        """, (document_id,))
+        
+        assignment = cur.fetchone()
+        cur.close()
+        
+        if assignment:
+            return jsonify({
+                "success": True,
+                "has_reviewer": True,
+                "reviewer": {
+                    "assignment_id": assignment[0],
+                    "user_id": assignment[1],
+                    "assigned_at": assignment[2].isoformat() if assignment[2] else None,
+                    "name": assignment[3],
+                    "email": assignment[4]
+                },
+                "document_id": document_id,
+                "lru_id": lru_id
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "has_reviewer": False,
+                "reviewer": None,
+                "document_id": document_id,
+                "lru_id": lru_id
+            })
+        
+    except Exception as e:
+        print(f"Error getting assigned reviewer: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Update reviewer assignment endpoint
+@app.route('/api/update-reviewer', methods=['PUT'])
+def update_reviewer():
+    """Update/edit reviewer assignment for a document"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        lru_name = data.get('lru_name')
+        project_name = data.get('project_name')
+        new_reviewer_id = data.get('reviewer_id')
+        assigned_by = data.get('assigned_by', 1002)  # Default assigned_by
+        
+        if not all([lru_name, project_name, new_reviewer_id]):
+            return jsonify({"success": False, "message": "Missing required fields: lru_name, project_name, reviewer_id"}), 400
+        
+        cur = conn.cursor()
+        
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Check if new reviewer exists and has QA Reviewer role
+        cur.execute("""
+            SELECT u.user_id 
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            WHERE u.user_id = %s AND ur.role_id = 3
+        """, (new_reviewer_id,))
+        
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "New reviewer not found or not a QA Reviewer"}), 404
+        
+        # Check if there's an existing assignment to update
+        cur.execute("""
+            SELECT assignment_id FROM plan_doc_assignment 
+            WHERE document_id = %s
+            ORDER BY assigned_at DESC
+            LIMIT 1
+        """, (document_id,))
+        
+        existing_assignment = cur.fetchone()
+        
+        if existing_assignment:
+            # Update existing assignment
+            cur.execute("""
+                UPDATE plan_doc_assignment 
+                SET user_id = %s, assigned_at = NOW()
+                WHERE assignment_id = %s
+                RETURNING assignment_id
+            """, (new_reviewer_id, existing_assignment[0]))
+            
+            assignment_id = existing_assignment[0]
+        else:
+            # Create new assignment if none exists
+            cur.execute("""
+                INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+                VALUES (%s, %s, NOW())
+                RETURNING assignment_id
+            """, (document_id, new_reviewer_id))
+            
+            assignment_id = cur.fetchone()[0]
+        
+        # Update document status to 'assigned'
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = 'assigned'
+            WHERE document_id = %s
+        """, (document_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Reviewer updated successfully",
+            "assignment_id": assignment_id,
+            "document_id": document_id,
+            "lru_id": lru_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating reviewer: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Test QA Reviewers endpoint
 @app.route('/api/test-qa-reviewers', methods=['GET'])

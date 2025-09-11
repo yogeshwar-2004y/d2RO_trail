@@ -12,7 +12,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </div>
-          <h2 class="modal-title">ASSIGN REVIEWER</h2>
+          <h2 class="modal-title">{{ isEditMode ? 'EDIT REVIEWER' : 'ASSIGN REVIEWER' }}</h2>
         </div>
         <button class="close-button" @click="closeOverlay">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -24,7 +24,7 @@
 
       <!-- Form Content -->
       <div class="modal-content">
-        <form @submit.prevent="assignReviewer" class="assign-form">
+        <form @submit.prevent="submitReviewer" class="assign-form">
           <!-- Project Details (Auto-filled) -->
           <div class="form-section">
             <h3 class="section-title">
@@ -110,7 +110,7 @@
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
               <div v-if="loading" class="loading-spinner"></div>
-              {{ loading ? 'ASSIGNING...' : 'ASSIGN REVIEWER' }}
+              {{ loading ? (isEditMode ? 'UPDATING...' : 'ASSIGNING...') : (isEditMode ? 'UPDATE REVIEWER' : 'ASSIGN REVIEWER') }}
             </button>
           </div>
         </form>
@@ -126,8 +126,8 @@
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
-        <h3>Reviewer Assigned Successfully!</h3>
-        <p>{{ formData.reviewerName }} has been assigned as reviewer for <strong>{{ formData.lruName }}</strong> in project <strong>{{ formData.projectName }}</strong></p>
+        <h3>{{ isEditMode ? 'Reviewer Updated Successfully!' : 'Reviewer Assigned Successfully!' }}</h3>
+        <p>{{ formData.reviewerName }} has been {{ isEditMode ? 'updated as' : 'assigned as' }} reviewer for <strong>{{ formData.lruName }}</strong> in project <strong>{{ formData.projectName }}</strong></p>
         <button @click="closeSuccessOverlay" class="btn btn-success">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20,6 9,17 4,12"></polyline>
@@ -150,6 +150,14 @@ export default {
     currentProjectName: {
       type: String,
       default: ''
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
+    },
+    currentReviewer: {
+      type: Object,
+      default: null
     }
   },
   data() {
@@ -183,6 +191,12 @@ export default {
         
         // Auto-fill current project and LRU information
         this.autoFillProjectAndLruData();
+        
+        // If in edit mode, pre-populate current reviewer
+        if (this.isEditMode && this.currentReviewer) {
+          this.formData.reviewerId = this.currentReviewer.user_id;
+          this.formData.reviewerName = this.currentReviewer.name;
+        }
         
       } catch (error) {
         console.error('Error initializing form:', error);
@@ -298,6 +312,14 @@ export default {
       }
     },
     
+    async submitReviewer() {
+      if (this.isEditMode) {
+        await this.updateReviewer();
+      } else {
+        await this.assignReviewer();
+      }
+    },
+    
     async assignReviewer() {
       if (!this.formData.reviewerId) {
         alert('Please select a reviewer');
@@ -323,12 +345,50 @@ export default {
         
         if (data.success) {
           this.showSuccessOverlay = true;
+          this.$emit('reviewerUpdated');
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
         console.error('Error assigning reviewer:', error);
         alert('Error assigning reviewer: ' + error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async updateReviewer() {
+      if (!this.formData.reviewerId) {
+        alert('Please select a reviewer');
+        return;
+      }
+      
+      this.loading = true;
+      try {
+        const response = await fetch('http://localhost:5000/api/update-reviewer', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lru_name: this.formData.lruName,
+            project_name: this.formData.projectName,
+            reviewer_id: this.formData.reviewerId,
+            assigned_by: 1002 // TODO: Get from user store
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showSuccessOverlay = true;
+          this.$emit('reviewerUpdated');
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error updating reviewer:', error);
+        alert('Error updating reviewer: ' + error.message);
       } finally {
         this.loading = false;
       }
