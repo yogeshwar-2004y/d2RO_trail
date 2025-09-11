@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <div class="login-left-panel"></div>
+    <div class="login-left-panel" :style="{ backgroundImage: `url(${backgroundImageUrl})` }"></div>
     <div class="login-right-panel">
       <div class="login-container">
         <div class="logos-container">
@@ -45,6 +45,7 @@ export default {
     return {
       email: '',
       password: '',
+      backgroundImageUrl: '/src/assets/images/login-background.png'
     };
   },
   methods: {
@@ -98,7 +99,25 @@ export default {
         alert("Server error. Please try again later.");
       }
     },
+    
+    async loadBackgroundImage() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/get-current-background');
+        const data = await response.json();
+        
+        if (data.success && data.background_url) {
+          this.backgroundImageUrl = data.background_url;
+        }
+      } catch (error) {
+        console.error('Error loading background:', error);
+        // Keep default background on error
+      }
+    }
   },
+  
+  async mounted() {
+    await this.loadBackgroundImage();
+  }
 };
 </script>
 
@@ -113,7 +132,6 @@ export default {
 
 .login-left-panel {
   flex: 1;
-  background-image: url('@/assets/images/login-background.png');
   background-size: cover;
   background-position: center;
   border-top-left-radius: 20px;

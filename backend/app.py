@@ -15,11 +15,20 @@ UPLOAD_FOLDER = 'plan_doc_uploads'
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt', 'xlsx', 'xls'}
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
 
-# Create upload directory if it doesn't exist
+# Configuration for login background uploads
+LOGIN_BACKGROUND_FOLDER = 'login_background_uploads'
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Create upload directories if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(LOGIN_BACKGROUND_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_image_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 def hash_password(password):
     """Hash password using SHA-256"""
@@ -34,7 +43,7 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Admin",
+    password="thani123",
     host="localhost",
     port="5432"
 )
@@ -2537,6 +2546,113 @@ def get_tests_debug():
     except Exception as e:
         print(f"Debug error: {str(e)}")
         return jsonify({"success": False, "message": f"Debug error: {str(e)}"}), 500
+
+# Login Background Management APIs
+@app.route('/api/upload-login-background', methods=['POST'])
+def upload_login_background():
+    try:
+        if 'background_image' not in request.files:
+            return jsonify({"success": False, "message": "No file provided"}), 400
+        
+        file = request.files['background_image']
+        
+        if file.filename == '':
+            return jsonify({"success": False, "message": "No file selected"}), 400
+        
+        if not allowed_image_file(file.filename):
+            return jsonify({"success": False, "message": "Invalid file type. Only PNG, JPG, and JPEG files are allowed"}), 400
+        
+        # Check file size
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        
+        if file_size > MAX_IMAGE_SIZE:
+            return jsonify({"success": False, "message": "File size too large. Maximum size is 10MB"}), 400
+        
+        # Generate unique filename
+        file_extension = file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"login_background.{file_extension}"
+        file_path = os.path.join(LOGIN_BACKGROUND_FOLDER, unique_filename)
+        
+        # Remove existing background files
+        for existing_file in os.listdir(LOGIN_BACKGROUND_FOLDER):
+            if existing_file.startswith('login_background.'):
+                os.remove(os.path.join(LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        # Save new file
+        file.save(file_path)
+        
+        # Return the URL for the uploaded background
+        background_url = f"http://127.0.0.1:5000/api/login-background/{unique_filename}"
+        
+        return jsonify({
+            "success": True,
+            "message": "Background uploaded successfully",
+            "background_url": background_url
+        })
+        
+    except Exception as e:
+        print(f"Upload error: {str(e)}")
+        return jsonify({"success": False, "message": f"Upload error: {str(e)}"}), 500
+
+@app.route('/api/login-background/<filename>')
+def serve_login_background(filename):
+    try:
+        file_path = os.path.join(LOGIN_BACKGROUND_FOLDER, filename)
+        if os.path.exists(file_path):
+            return send_file(file_path)
+        else:
+            # Fallback to default background
+            default_path = os.path.join('..', 'frontend', 'src', 'assets', 'images', 'login-background.png')
+            if os.path.exists(default_path):
+                return send_file(default_path)
+            return jsonify({"success": False, "message": "Background not found"}), 404
+    except Exception as e:
+        print(f"Serve background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error serving background: {str(e)}"}), 500
+
+@app.route('/api/get-current-background')
+def get_current_background():
+    try:
+        # Check if custom background exists
+        for ext in ALLOWED_IMAGE_EXTENSIONS:
+            custom_background = os.path.join(LOGIN_BACKGROUND_FOLDER, f"login_background.{ext}")
+            if os.path.exists(custom_background):
+                background_url = f"http://127.0.0.1:5000/api/login-background/login_background.{ext}"
+                return jsonify({
+                    "success": True,
+                    "background_url": background_url,
+                    "is_custom": True
+                })
+        
+        # Return default background URL
+        return jsonify({
+            "success": True,
+            "background_url": "/src/assets/images/login-background.png",
+            "is_custom": False
+        })
+        
+    except Exception as e:
+        print(f"Get background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error getting background: {str(e)}"}), 500
+
+@app.route('/api/reset-login-background', methods=['POST'])
+def reset_login_background():
+    try:
+        # Remove all custom background files
+        for existing_file in os.listdir(LOGIN_BACKGROUND_FOLDER):
+            if existing_file.startswith('login_background.'):
+                os.remove(os.path.join(LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        return jsonify({
+            "success": True,
+            "message": "Background reset to default successfully"
+        })
+        
+    except Exception as e:
+        print(f"Reset background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error resetting background: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
