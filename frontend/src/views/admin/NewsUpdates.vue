@@ -13,6 +13,12 @@
         <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
       </div>
       <span class="page-title">NEWS UPDATES</span>
+      <button @click="openManageNewsModal" class="btn btn-manage">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+        Manage News
+      </button>
     </div>
 
     <!-- Main Content -->
@@ -58,27 +64,6 @@
               </button>
             </div>
             
-            <div class="form-row">
-              <div class="form-group">
-                <label>Date *</label>
-                <input 
-                  type="date" 
-                  v-model="item.date" 
-                  class="form-input"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label>Day</label>
-                <input 
-                  type="text" 
-                  v-model="item.day" 
-                  class="form-input"
-                  readonly
-                  placeholder="Auto-calculated"
-                />
-              </div>
-            </div>
             
             <div class="form-group">
               <label>News Text *</label>
@@ -97,12 +82,12 @@
       <!-- Existing News List -->
       <div class="existing-news-section">
         <div class="section-header">
-          <h2>Existing News Updates</h2>
+          <h2>Recent News Updates (Last 24 Hours)</h2>
           <button 
             @click="deleteAllNews" 
             class="btn btn-delete-all" 
-            :disabled="existingNews.length === 0 || deleting"
-            v-if="existingNews.length > 0"
+            :disabled="recentNews.length === 0 || deleting"
+            v-if="recentNews.length > 0"
           >
             <svg v-if="!deleting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="3,6 5,6 21,6"></polyline>
@@ -118,16 +103,15 @@
           <p>Loading news...</p>
         </div>
 
-        <div v-else-if="existingNews.length === 0" class="no-data-message">
-          <p>No existing news updates found.</p>
+        <div v-else-if="recentNews.length === 0" class="no-data-message">
+          <p>No news updates found in the last 24 hours.</p>
         </div>
 
         <div v-else class="news-list">
-          <div v-for="news in existingNews" :key="news.id" class="news-card">
+          <div v-for="news in recentNews" :key="news.id" class="news-card">
             <div class="news-card-header">
-              <div class="news-date">
-                <span class="date">{{ formatDate(news.date) }}</span>
-                <span class="day">{{ news.day }}</span>
+              <div class="news-info">
+                <span class="news-title">News Update</span>
               </div>
               <button @click="deleteNewsItem(news.id)" class="btn btn-delete-small">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -146,6 +130,70 @@
         </div>
       </div>
     </div>
+
+    <!-- Manage News Modal -->
+    <div v-if="showManageModal" class="modal-overlay" @click="closeManageNewsModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h2>Manage All News</h2>
+          <button @click="closeManageNewsModal" class="btn-close">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="modal-body">
+          <div v-if="loadingAllNews" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading all news...</p>
+          </div>
+          
+          <div v-else-if="allNews.length === 0" class="no-data-message">
+            <p>No news updates found in the database.</p>
+          </div>
+          
+          <div v-else class="news-list modal-news-list">
+            <div v-for="news in allNews" :key="news.id" class="news-card">
+              <div class="news-card-header">
+                <div class="news-info">
+                  <span class="news-title">News Update</span>
+                </div>
+                <button @click="deleteNewsItem(news.id)" class="btn btn-delete-small">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3,6 5,6 21,6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="news-content">
+                {{ news.news_text }}
+              </div>
+              <div class="news-meta">
+                Created: {{ formatDateTime(news.created_at) }}
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button 
+            @click="deleteAllNewsFromModal" 
+            class="btn btn-delete-all" 
+            :disabled="allNews.length === 0 || deleting"
+            v-if="allNews.length > 0"
+          >
+            <svg v-if="!deleting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3,6 5,6 21,6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+            <div v-if="deleting" class="loading-spinner"></div>
+            {{ deleting ? 'Deleting...' : 'Delete All News' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -156,25 +204,24 @@ export default {
     return {
       newsItems: [],
       existingNews: [],
+      allNews: [],
       saving: false,
       deleting: false,
       loadingNews: false,
+      loadingAllNews: false,
+      showManageModal: false,
       nextId: 1
     };
   },
-  watch: {
-    newsItems: {
-      handler() {
-        // Auto-calculate day when date changes
-        this.newsItems.forEach(item => {
-          if (item.date) {
-            const date = new Date(item.date);
-            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            item.day = days[date.getDay()];
-          }
-        });
-      },
-      deep: true
+  computed: {
+    recentNews() {
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      
+      return this.existingNews.filter(news => {
+        const newsDate = new Date(news.created_at);
+        return newsDate >= twentyFourHoursAgo;
+      });
     }
   },
   mounted() {
@@ -182,11 +229,8 @@ export default {
   },
   methods: {
     addNewsItem() {
-      const today = new Date().toISOString().split('T')[0];
       const newItem = {
         id: this.nextId++,
-        date: today,
-        day: '',
         newsText: ''
       };
       this.newsItems.push(newItem);
@@ -205,8 +249,8 @@ export default {
       // Validate required fields
       for (let i = 0; i < this.newsItems.length; i++) {
         const item = this.newsItems[i];
-        if (!item.date || !item.newsText.trim()) {
-          alert(`Please fill in all required fields for News Item ${i + 1}`);
+        if (!item.newsText.trim()) {
+          alert(`Please enter news text for News Item ${i + 1}`);
           return;
         }
       }
@@ -220,8 +264,6 @@ export default {
           },
           body: JSON.stringify({
             news_items: this.newsItems.map(item => ({
-              date: item.date,
-              day: item.day,
               news_text: item.newsText
             }))
           })
@@ -304,6 +346,7 @@ export default {
         
         if (data.success) {
           this.existingNews = this.existingNews.filter(news => news.id !== newsId);
+          this.allNews = this.allNews.filter(news => news.id !== newsId);
           alert('News item deleted successfully!');
         } else {
           throw new Error(data.message);
@@ -334,6 +377,62 @@ export default {
         hour: '2-digit',
         minute: '2-digit'
       });
+    },
+    
+    async openManageNewsModal() {
+      this.showManageModal = true;
+      await this.loadAllNews();
+    },
+    
+    closeManageNewsModal() {
+      this.showManageModal = false;
+    },
+    
+    async loadAllNews() {
+      this.loadingAllNews = true;
+      try {
+        const response = await fetch('http://localhost:5000/api/news');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.allNews = data.news;
+        } else {
+          console.error('Error loading all news:', data.message);
+        }
+      } catch (error) {
+        console.error('Error loading all news:', error);
+      } finally {
+        this.loadingAllNews = false;
+      }
+    },
+    
+    async deleteAllNewsFromModal() {
+      if (!confirm('Are you sure you want to delete ALL news records? This action cannot be undone.')) {
+        return;
+      }
+      
+      this.deleting = true;
+      try {
+        const response = await fetch('http://localhost:5000/api/news/all', {
+          method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('All news records deleted successfully!');
+          this.allNews = [];
+          this.existingNews = [];
+          this.closeManageNewsModal();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error deleting all news:', error);
+        alert('Error deleting news records: ' + error.message);
+      } finally {
+        this.deleting = false;
+      }
     }
   }
 };
@@ -350,6 +449,7 @@ export default {
 .header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 20px 30px;
   background: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -387,6 +487,17 @@ export default {
   font-size: 1.8em;
   font-weight: bold;
   color: #333;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.btn-manage {
+  background: #17a2b8;
+  color: white;
+}
+
+.btn-manage:hover:not(:disabled) {
+  background: #138496;
 }
 
 /* Main Content */
@@ -638,20 +749,15 @@ export default {
   margin-bottom: 15px;
 }
 
-.news-date {
+.news-info {
   display: flex;
   flex-direction: column;
 }
 
-.date {
+.news-title {
   font-weight: 600;
   color: #495057;
   font-size: 1.1em;
-}
-
-.day {
-  color: #6c757d;
-  font-size: 0.9em;
 }
 
 .news-content {
@@ -664,6 +770,76 @@ export default {
   font-size: 0.8em;
   color: #6c757d;
   font-style: italic;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 30px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.btn-close:hover {
+  background-color: #f8f9fa;
+}
+
+.modal-body {
+  padding: 30px;
+  flex-grow: 1;
+  overflow-y: auto;
+}
+
+.modal-news-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 20px 30px;
+  border-top: 1px solid #e9ecef;
+  display: flex;
+  justify-content: flex-end;
 }
 
 /* Responsive */
@@ -685,6 +861,18 @@ export default {
   
   .form-actions {
     justify-content: center;
+  }
+  
+  /* Responsive Modal */
+  .modal-content {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 15px 20px;
   }
 }
 </style>

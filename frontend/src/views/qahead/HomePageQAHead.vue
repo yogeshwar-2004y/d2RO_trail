@@ -45,12 +45,25 @@
         <div class="card-title">REPORTS</div>
       </div>
     </div>
+    
+    <!-- News Ticker at the bottom -->
+    <NewsTicker 
+      height="60px" 
+      backgroundColor="#34495e" 
+      textColor="#ffffff"
+      class="dashboard-news-ticker"
+    />
   </div>
 </template>
 
 <script>
+import NewsTicker from '@/components/NewsTicker.vue'
+
 export default {
   name: 'HomePageQAHead',
+  components: {
+    NewsTicker
+  },
   methods: {
     goToPage(pageName) {
       if (pageName === 'QAHeadProjectsDashboard') {
@@ -175,5 +188,11 @@ export default {
     width: 220px;
     height: 220px;
   }
+}
+
+.dashboard-news-ticker {
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
 }
 </style>

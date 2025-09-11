@@ -34,10 +34,30 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="Admin",
+    password="thani123",
     host="localhost",
     port="5432"
 )
+
+# Create news_updates table if it doesn't exist
+def create_news_table():
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS news_updates (
+                id SERIAL PRIMARY KEY,
+                news_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.commit()
+        cur.close()
+        print("News updates table created/verified successfully")
+    except Exception as e:
+        print(f"Error creating news table: {str(e)}")
+
+# Create the table on startup
+create_news_table()
 
 @app.route('/api')
 def hello_world():
@@ -2097,12 +2117,13 @@ def update_reviewer():
 def get_news():
     """Get all news updates"""
     try:
+        conn.rollback()  # Clear any previous transaction errors
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT id, date, day, news_text, created_at, updated_at
+            SELECT id, news_text, created_at
             FROM news_updates
-            ORDER BY date DESC, created_at DESC
+            ORDER BY created_at DESC
         """)
         
         news = cur.fetchall()
@@ -2112,11 +2133,8 @@ def get_news():
         for item in news:
             news_list.append({
                 "id": item[0],
-                "date": item[1].isoformat() if item[1] else None,
-                "day": item[2],
-                "news_text": item[3],
-                "created_at": item[4].isoformat() if item[4] else None,
-                "updated_at": item[5].isoformat() if item[5] else None
+                "news_text": item[1],
+                "created_at": item[2].isoformat() if item[2] else None
             })
         
         return jsonify({
@@ -2125,6 +2143,7 @@ def get_news():
         })
         
     except Exception as e:
+        conn.rollback()
         print(f"Error getting news: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
@@ -2146,19 +2165,19 @@ def create_news():
         # Insert each news item
         inserted_ids = []
         for item in news_items:
-            if not all(key in item for key in ['date', 'day', 'news_text']):
+            if 'news_text' not in item:
                 cur.close()
-                return jsonify({"success": False, "message": "Missing required fields in news item"}), 400
+                return jsonify({"success": False, "message": "Missing news_text field in news item"}), 400
             
             if not item['news_text'].strip():
                 cur.close()
                 return jsonify({"success": False, "message": "News text cannot be empty"}), 400
             
             cur.execute("""
-                INSERT INTO news_updates (date, day, news_text)
-                VALUES (%s, %s, %s)
+                INSERT INTO news_updates (news_text)
+                VALUES (%s)
                 RETURNING id
-            """, (item['date'], item['day'], item['news_text'].strip()))
+            """, (item['news_text'].strip(),))
             
             inserted_id = cur.fetchone()[0]
             inserted_ids.append(inserted_id)

@@ -56,12 +56,25 @@
         <div class="card-title">USER ACTIVITIES</div>
       </div>
     </div>
+    
+    <!-- News Ticker at the bottom -->
+    <NewsTicker 
+      height="60px" 
+      backgroundColor="#34495e" 
+      textColor="#ffffff"
+      class="dashboard-news-ticker"
+    />
   </div>
 </template>
 
 <script>
+import NewsTicker from '@/components/NewsTicker.vue'
+
 export default {
   name: 'HomePageAdmin',
+  components: {
+    NewsTicker
+  },
   methods: {
     goToPage(pageName) {
         if (pageName === 'ProjectsDashboard') {
@@ -170,5 +183,11 @@ export default {
   font-weight: bold;
   text-align: center;
   color: #333;
+}
+
+.dashboard-news-ticker {
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
 }
 </style>

@@ -57,12 +57,25 @@
         </div>
       </div>
     </main>
+    
+    <!-- News Ticker at the bottom -->
+    <NewsTicker 
+      height="60px" 
+      backgroundColor="#34495e" 
+      textColor="#ffffff"
+      class="dashboard-news-ticker"
+    />
   </div>
 </template>
 
 <script>
+import NewsTicker from '@/components/NewsTicker.vue'
+
 export default {
   name: "HomePageDesigner",
+  components: {
+    NewsTicker
+  },
   methods: {
     navigateToDocuments() {
       // Navigate to documents section
@@ -194,5 +207,11 @@ export default {
     width: 220px;
     height: 220px;
   }
+}
+
+.dashboard-news-ticker {
+  margin-top: auto;
+  position: sticky;
+  bottom: 0;
 }
 </style>

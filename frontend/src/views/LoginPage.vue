@@ -21,14 +21,26 @@
         <button @click="login" class="login-button">LOGIN</button>
       </div>
     </div>
+    
+    <!-- News Ticker -->
+    <NewsTicker 
+      height="60px" 
+      backgroundColor="#2c3e50" 
+      textColor="#ffffff"
+      class="login-news-ticker"
+    />
   </div>
 </template>
 
 <script>
 import { setUser } from '@/stores/userStore'
+import NewsTicker from '@/components/NewsTicker.vue'
 
 export default {
   name: 'LoginPage',
+  components: {
+    NewsTicker
+  },
   data() {
     return {
       email: '',
@@ -184,5 +196,13 @@ export default {
 .login-button:hover {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+
+.login-news-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 </style>
