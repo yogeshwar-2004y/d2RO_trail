@@ -54,6 +54,17 @@
         </div>
         <span class="card-title">TESTS</span>
       </div>
+      <div class="card" @click="goToPage('NewsUpdates')">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2z"></path>
+            <path d="M6 12h8"></path>
+            <path d="M6 16h8"></path>
+            <path d="M6 8h8"></path>
+          </svg>
+        </div>
+        <span class="card-title">NEWS UPDATES</span>
+      </div>
     </div>
   </div>
 </template>
@@ -71,6 +82,8 @@ export default {
         this.$router.push({ name: "ActivityLogs" });
       } else if (pageName === "Tests") {
         this.$router.push({ name: "TestsPage" });
+      } else if (pageName === "NewsUpdates") {
+        this.$router.push({ name: "NewsUpdates" });
       }
     },
   },
@@ -104,8 +117,18 @@ export default {
   margin-right: 20px;
 }
 
+.logos-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .logo {
   width: 150px;
+}
+
+.vista-logo {
+  width: 120px;
 }
 
 .card-grid {

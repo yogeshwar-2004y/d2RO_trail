@@ -2090,6 +2090,153 @@ def update_reviewer():
         print(f"Error updating reviewer: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+# News Updates Management Endpoints
+
+# Get all news updates
+@app.route('/api/news', methods=['GET'])
+def get_news():
+    """Get all news updates"""
+    try:
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, date, day, news_text, created_at, updated_at
+            FROM news_updates
+            ORDER BY date DESC, created_at DESC
+        """)
+        
+        news = cur.fetchall()
+        cur.close()
+        
+        news_list = []
+        for item in news:
+            news_list.append({
+                "id": item[0],
+                "date": item[1].isoformat() if item[1] else None,
+                "day": item[2],
+                "news_text": item[3],
+                "created_at": item[4].isoformat() if item[4] else None,
+                "updated_at": item[5].isoformat() if item[5] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "news": news_list
+        })
+        
+    except Exception as e:
+        print(f"Error getting news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Create multiple news updates
+@app.route('/api/news', methods=['POST'])
+def create_news():
+    """Create multiple news updates"""
+    try:
+        data = request.json
+        if not data or 'news_items' not in data:
+            return jsonify({"success": False, "message": "No news items provided"}), 400
+        
+        news_items = data['news_items']
+        if not news_items:
+            return jsonify({"success": False, "message": "News items list is empty"}), 400
+        
+        cur = conn.cursor()
+        
+        # Insert each news item
+        inserted_ids = []
+        for item in news_items:
+            if not all(key in item for key in ['date', 'day', 'news_text']):
+                cur.close()
+                return jsonify({"success": False, "message": "Missing required fields in news item"}), 400
+            
+            if not item['news_text'].strip():
+                cur.close()
+                return jsonify({"success": False, "message": "News text cannot be empty"}), 400
+            
+            cur.execute("""
+                INSERT INTO news_updates (date, day, news_text)
+                VALUES (%s, %s, %s)
+                RETURNING id
+            """, (item['date'], item['day'], item['news_text'].strip()))
+            
+            inserted_id = cur.fetchone()[0]
+            inserted_ids.append(inserted_id)
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully created {len(inserted_ids)} news items",
+            "inserted_ids": inserted_ids
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Delete a single news item
+@app.route('/api/news/<int:news_id>', methods=['DELETE'])
+def delete_news_item(news_id):
+    """Delete a single news item"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Delete the news item
+        cur.execute("DELETE FROM news_updates WHERE id = %s", (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item deleted successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting news item: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Delete all news updates
+@app.route('/api/news/all', methods=['DELETE'])
+def delete_all_news():
+    """Delete all news updates"""
+    try:
+        cur = conn.cursor()
+        
+        # Count existing news items
+        cur.execute("SELECT COUNT(*) FROM news_updates")
+        count = cur.fetchone()[0]
+        
+        if count == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "No news items to delete"}), 400
+        
+        # Delete all news items
+        cur.execute("DELETE FROM news_updates")
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully deleted {count} news items"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting all news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 # Test QA Reviewers endpoint
 @app.route('/api/test-qa-reviewers', methods=['GET'])
 def test_qa_reviewers():
