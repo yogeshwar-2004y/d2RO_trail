@@ -34,7 +34,7 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="thani123",
+    password="Admin",
     host="localhost",
     port="5432"
 )
