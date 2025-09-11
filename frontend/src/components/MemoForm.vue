@@ -9,7 +9,10 @@
         </svg>
       </button>
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+      <div class="logos-container">
+        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
     </div>
 
     <!-- Requisition Details Section -->

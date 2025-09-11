@@ -3,7 +3,10 @@
     <div class="login-left-panel"></div>
     <div class="login-right-panel">
       <div class="login-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <div class="logos-container">
+          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        </div>
         
         <div class="input-group">
           <span class="input-icon">✉</span>
@@ -122,9 +125,20 @@ export default {
   text-align: center;
 }
 
+.logos-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 50px;
+}
+
 .logo {
   width: 180px;
-  margin-bottom: 50px;
+}
+
+.vista-logo {
+  width: 150px;
 }
 
 .input-group {

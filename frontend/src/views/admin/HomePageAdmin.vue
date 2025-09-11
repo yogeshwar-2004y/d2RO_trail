@@ -1,7 +1,10 @@
 <template>
   <div class="home-page">
     <header class="app-header">
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+      <div class="logos-container">
+        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
       <button class="logout-button" @click="logout">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -100,8 +103,18 @@ export default {
   padding: 0 20px;
 }
 
+.logos-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .logo {
   width: 150px; /* Adjust size as needed */
+}
+
+.vista-logo {
+  width: 120px;
 }
 
 .logout-button {
