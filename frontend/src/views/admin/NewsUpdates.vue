@@ -155,25 +155,47 @@
           </div>
           
           <div v-else class="news-list modal-news-list">
-            <div v-for="news in allNews" :key="news.id" class="news-card">
-              <div class="news-card-header">
-                <div class="news-info">
-                  <span class="news-title">News Update</span>
-                </div>
-                <button @click="deleteNewsItem(news.id)" class="btn btn-delete-small">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="3,6 5,6 21,6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                  </svg>
-                </button>
-              </div>
-              <div class="news-content">
-                {{ news.news_text }}
-              </div>
-              <div class="news-meta">
-                Created: {{ formatDateTime(news.created_at) }}
-              </div>
-            </div>
+             <div v-for="news in allNews" :key="news.id" class="news-card">
+               <div class="news-card-header">
+                 <div class="news-info">
+                   <span class="news-title">News Update</span>
+                   <span v-if="isNewsExpired(news)" class="news-status expired">Expired</span>
+                   <span v-else-if="news.hidden" class="news-status hidden">Hidden</span>
+                   <span v-else class="news-status active">Active</span>
+                 </div>
+                 <div class="news-actions">
+                   <button 
+                     v-if="isNewsExpired(news) || news.hidden" 
+                     @click="repostNewsItem(news.id)" 
+                     class="btn btn-repost-small"
+                     :disabled="reposting"
+                   >
+                     <svg v-if="!reposting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                       <polyline points="23,4 23,10 17,10"></polyline>
+                       <polyline points="1,20 1,14 7,14"></polyline>
+                       <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"></path>
+                     </svg>
+                     <div v-if="reposting" class="loading-spinner-small"></div>
+                     Repost
+                   </button>
+                   <button @click="permanentlyDeleteNewsItem(news.id)" class="btn btn-delete-small">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                       <polyline points="3,6 5,6 21,6"></polyline>
+                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                     </svg>
+                   </button>
+                 </div>
+               </div>
+               <div class="news-content">
+                 {{ news.news_text }}
+               </div>
+               <div class="news-meta">
+                 <div>Created: {{ formatDateTime(news.created_at) }}</div>
+                 <div v-if="news.updated_at && news.updated_at !== news.created_at">
+                   Last Updated: {{ formatDateTime(news.updated_at) }}
+                 </div>
+               </div>
+             </div>
           </div>
         </div>
         
@@ -200,27 +222,28 @@
 <script>
 export default {
   name: 'NewsUpdates',
-  data() {
-    return {
-      newsItems: [],
-      existingNews: [],
-      allNews: [],
-      saving: false,
-      deleting: false,
-      loadingNews: false,
-      loadingAllNews: false,
-      showManageModal: false,
-      nextId: 1
-    };
-  },
+   data() {
+     return {
+       newsItems: [],
+       existingNews: [],
+       allNews: [],
+       saving: false,
+       deleting: false,
+       reposting: false,
+       loadingNews: false,
+       loadingAllNews: false,
+       showManageModal: false,
+       nextId: 1
+     };
+   },
   computed: {
     recentNews() {
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
       
       return this.existingNews.filter(news => {
-        const newsDate = new Date(news.created_at);
-        return newsDate >= twentyFourHoursAgo;
+        const newsDate = new Date(news.updated_at || news.created_at);
+        return newsDate >= twentyFourHoursAgo && !news.hidden;
       });
     }
   },
@@ -332,30 +355,90 @@ export default {
       }
     },
     
-    async deleteNewsItem(newsId) {
-      if (!confirm('Are you sure you want to delete this news item?')) {
-        return;
-      }
-      
-      try {
-        const response = await fetch(`http://localhost:5000/api/news/${newsId}`, {
-          method: 'DELETE'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          this.existingNews = this.existingNews.filter(news => news.id !== newsId);
-          this.allNews = this.allNews.filter(news => news.id !== newsId);
-          alert('News item deleted successfully!');
-        } else {
-          throw new Error(data.message);
-        }
-      } catch (error) {
-        console.error('Error deleting news item:', error);
-        alert('Error deleting news item: ' + error.message);
-      }
-    },
+     async deleteNewsItem(newsId) {
+       if (!confirm('Are you sure you want to hide this news item from the frontend? It will remain stored in the database.')) {
+         return;
+       }
+       
+       try {
+         const response = await fetch(`http://localhost:5000/api/news/${newsId}`, {
+           method: 'DELETE'
+         });
+         
+         const data = await response.json();
+         
+         if (data.success) {
+           this.existingNews = this.existingNews.filter(news => news.id !== newsId);
+           alert('News item hidden successfully!');
+         } else {
+           throw new Error(data.message);
+         }
+       } catch (error) {
+         console.error('Error hiding news item:', error);
+         alert('Error hiding news item: ' + error.message);
+       }
+     },
+     
+     async permanentlyDeleteNewsItem(newsId) {
+       if (!confirm('Are you sure you want to PERMANENTLY DELETE this news item? This action cannot be undone.')) {
+         return;
+       }
+       
+       try {
+         const response = await fetch(`http://localhost:5000/api/news/${newsId}/permanent`, {
+           method: 'DELETE'
+         });
+         
+         const data = await response.json();
+         
+         if (data.success) {
+           this.existingNews = this.existingNews.filter(news => news.id !== newsId);
+           this.allNews = this.allNews.filter(news => news.id !== newsId);
+           alert('News item permanently deleted!');
+         } else {
+           throw new Error(data.message);
+         }
+       } catch (error) {
+         console.error('Error permanently deleting news item:', error);
+         alert('Error permanently deleting news item: ' + error.message);
+       }
+     },
+     
+     async repostNewsItem(newsId) {
+       if (!confirm('Are you sure you want to repost this news item? It will be visible for another 24 hours.')) {
+         return;
+       }
+       
+       this.reposting = true;
+       try {
+         const response = await fetch(`http://localhost:5000/api/news/${newsId}/repost`, {
+           method: 'PUT'
+         });
+         
+         const data = await response.json();
+         
+         if (data.success) {
+           alert('News item reposted successfully!');
+           await this.loadExistingNews();
+           await this.loadAllNews();
+         } else {
+           throw new Error(data.message);
+         }
+       } catch (error) {
+         console.error('Error reposting news item:', error);
+         alert('Error reposting news item: ' + error.message);
+       } finally {
+         this.reposting = false;
+       }
+     },
+     
+     isNewsExpired(news) {
+       if (!news.updated_at) return false;
+       const twentyFourHoursAgo = new Date();
+       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+       const newsDate = new Date(news.updated_at);
+       return newsDate < twentyFourHoursAgo && !news.hidden;
+     },
     
     formatDate(dateString) {
       if (!dateString) return '';
@@ -406,34 +489,34 @@ export default {
       }
     },
     
-    async deleteAllNewsFromModal() {
-      if (!confirm('Are you sure you want to delete ALL news records? This action cannot be undone.')) {
-        return;
-      }
-      
-      this.deleting = true;
-      try {
-        const response = await fetch('http://localhost:5000/api/news/all', {
-          method: 'DELETE'
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('All news records deleted successfully!');
-          this.allNews = [];
-          this.existingNews = [];
-          this.closeManageNewsModal();
-        } else {
-          throw new Error(data.message);
-        }
-      } catch (error) {
-        console.error('Error deleting all news:', error);
-        alert('Error deleting news records: ' + error.message);
-      } finally {
-        this.deleting = false;
-      }
-    }
+     async deleteAllNewsFromModal() {
+       if (!confirm('Are you sure you want to PERMANENTLY DELETE ALL news records? This action cannot be undone.')) {
+         return;
+       }
+       
+       this.deleting = true;
+       try {
+         const response = await fetch('http://localhost:5000/api/news/permanent/all', {
+           method: 'DELETE'
+         });
+         
+         const data = await response.json();
+         
+         if (data.success) {
+           alert('All news records permanently deleted!');
+           this.allNews = [];
+           this.existingNews = [];
+           this.closeManageNewsModal();
+         } else {
+           throw new Error(data.message);
+         }
+       } catch (error) {
+         console.error('Error permanently deleting all news:', error);
+         alert('Error deleting news records: ' + error.message);
+       } finally {
+         this.deleting = false;
+       }
+     }
   }
 };
 </script>
@@ -584,16 +667,28 @@ export default {
   background: #c82333;
 }
 
-.btn-delete-small {
-  background: #dc3545;
-  color: white;
-  padding: 8px;
-  border-radius: 6px;
-}
-
-.btn-delete-small:hover {
-  background: #c82333;
-}
+ .btn-delete-small {
+   background: #dc3545;
+   color: white;
+   padding: 8px;
+   border-radius: 6px;
+ }
+ 
+ .btn-delete-small:hover {
+   background: #c82333;
+ }
+ 
+ .btn-repost-small {
+   background: #28a745;
+   color: white;
+   padding: 8px 12px;
+   border-radius: 6px;
+   margin-right: 8px;
+ }
+ 
+ .btn-repost-small:hover:not(:disabled) {
+   background: #218838;
+ }
 
 /* News Items */
 .news-items-container {
@@ -752,12 +847,55 @@ export default {
 .news-info {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .news-title {
   font-weight: 600;
   color: #495057;
   font-size: 1.1em;
+}
+
+.news-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.news-status.active {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.news-status.expired {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.news-status.hidden {
+  background-color: #e2e3e5;
+  color: #383d41;
+  border: 1px solid #d6d8db;
+}
+
+.news-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loading-spinner-small {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 .news-content {

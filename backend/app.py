@@ -47,9 +47,34 @@ def create_news_table():
             CREATE TABLE IF NOT EXISTS news_updates (
                 id SERIAL PRIMARY KEY,
                 news_text TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                hidden BOOLEAN DEFAULT FALSE
             )
         """)
+        
+        # Add updated_at column if it doesn't exist (for existing tables)
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                              WHERE table_name='news_updates' AND column_name='updated_at') THEN
+                    ALTER TABLE news_updates ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+                END IF;
+            END $$;
+        """)
+        
+        # Add hidden column if it doesn't exist (for existing tables)
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                              WHERE table_name='news_updates' AND column_name='hidden') THEN
+                    ALTER TABLE news_updates ADD COLUMN hidden BOOLEAN DEFAULT FALSE;
+                END IF;
+            END $$;
+        """)
+        
         conn.commit()
         cur.close()
         print("News updates table created/verified successfully")
@@ -2112,18 +2137,20 @@ def update_reviewer():
 
 # News Updates Management Endpoints
 
-# Get all news updates
+# Get news updates for frontend display (last 24 hours, not hidden)
 @app.route('/api/news', methods=['GET'])
 def get_news():
-    """Get all news updates"""
+    """Get news updates for frontend display (last 24 hours, not hidden)"""
     try:
         conn.rollback()  # Clear any previous transaction errors
         cur = conn.cursor()
         
         cur.execute("""
-            SELECT id, news_text, created_at
+            SELECT id, news_text, created_at, updated_at, hidden
             FROM news_updates
-            ORDER BY created_at DESC
+            WHERE updated_at >= NOW() - INTERVAL '24 hours'
+            AND hidden = FALSE
+            ORDER BY updated_at DESC
         """)
         
         news = cur.fetchall()
@@ -2134,7 +2161,9 @@ def get_news():
             news_list.append({
                 "id": item[0],
                 "news_text": item[1],
-                "created_at": item[2].isoformat() if item[2] else None
+                "created_at": item[2].isoformat() if item[2] else None,
+                "updated_at": item[3].isoformat() if item[3] else None,
+                "hidden": item[4]
             })
         
         return jsonify({
@@ -2145,6 +2174,43 @@ def get_news():
     except Exception as e:
         conn.rollback()
         print(f"Error getting news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get all news updates for management (including hidden)
+@app.route('/api/news/all', methods=['GET'])
+def get_all_news():
+    """Get all news updates for management interface"""
+    try:
+        conn.rollback()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, news_text, created_at, updated_at, hidden
+            FROM news_updates
+            ORDER BY updated_at DESC
+        """)
+        
+        news = cur.fetchall()
+        cur.close()
+        
+        news_list = []
+        for item in news:
+            news_list.append({
+                "id": item[0],
+                "news_text": item[1],
+                "created_at": item[2].isoformat() if item[2] else None,
+                "updated_at": item[3].isoformat() if item[3] else None,
+                "hidden": item[4]
+            })
+        
+        return jsonify({
+            "success": True,
+            "news": news_list
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error getting all news: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Create multiple news updates
@@ -2196,10 +2262,10 @@ def create_news():
         print(f"Error creating news: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
-# Delete a single news item
+# Hide a single news item (soft delete for frontend)
 @app.route('/api/news/<int:news_id>', methods=['DELETE'])
 def delete_news_item(news_id):
-    """Delete a single news item"""
+    """Hide a single news item from frontend display (soft delete)"""
     try:
         cur = conn.cursor()
         
@@ -2209,7 +2275,36 @@ def delete_news_item(news_id):
             cur.close()
             return jsonify({"success": False, "message": "News item not found"}), 404
         
-        # Delete the news item
+        # Hide the news item (soft delete)
+        cur.execute("UPDATE news_updates SET hidden = TRUE WHERE id = %s", (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item hidden successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error hiding news item: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Permanently delete a single news item (for management)
+@app.route('/api/news/<int:news_id>/permanent', methods=['DELETE'])
+def permanently_delete_news_item(news_id):
+    """Permanently delete a single news item (hard delete from management)"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Delete the news item permanently
         cur.execute("DELETE FROM news_updates WHERE id = %s", (news_id,))
         
         conn.commit()
@@ -2217,18 +2312,91 @@ def delete_news_item(news_id):
         
         return jsonify({
             "success": True,
-            "message": "News item deleted successfully"
+            "message": "News item deleted permanently"
         })
         
     except Exception as e:
         conn.rollback()
-        print(f"Error deleting news item: {str(e)}")
+        print(f"Error deleting news item permanently: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
-# Delete all news updates
+# Repost a news item
+@app.route('/api/news/<int:news_id>/repost', methods=['PUT'])
+def repost_news_item(news_id):
+    """Repost a news item by updating its timestamp and making it visible"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Update the news item: set updated_at to current time and make it visible
+        cur.execute("""
+            UPDATE news_updates 
+            SET updated_at = NOW(), hidden = FALSE 
+            WHERE id = %s
+        """, (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item reposted successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error reposting news item: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Hide all visible news updates (soft delete for frontend)
 @app.route('/api/news/all', methods=['DELETE'])
 def delete_all_news():
-    """Delete all news updates"""
+    """Hide all visible news updates from frontend display"""
+    try:
+        cur = conn.cursor()
+        
+        # Count visible news items in last 24 hours
+        cur.execute("""
+            SELECT COUNT(*) FROM news_updates 
+            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
+            AND hidden = FALSE
+        """)
+        count = cur.fetchone()[0]
+        
+        if count == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "No visible news items to hide"}), 400
+        
+        # Hide all visible news items from last 24 hours
+        cur.execute("""
+            UPDATE news_updates 
+            SET hidden = TRUE 
+            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
+            AND hidden = FALSE
+        """)
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully hidden {count} news items"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error hiding all news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Permanently delete all news updates (for management)
+@app.route('/api/news/permanent/all', methods=['DELETE'])
+def permanently_delete_all_news():
+    """Permanently delete all news updates (hard delete from management)"""
     try:
         cur = conn.cursor()
         
@@ -2240,7 +2408,7 @@ def delete_all_news():
             cur.close()
             return jsonify({"success": False, "message": "No news items to delete"}), 400
         
-        # Delete all news items
+        # Delete all news items permanently
         cur.execute("DELETE FROM news_updates")
         
         conn.commit()
@@ -2248,12 +2416,12 @@ def delete_all_news():
         
         return jsonify({
             "success": True,
-            "message": f"Successfully deleted {count} news items"
+            "message": f"Successfully deleted {count} news items permanently"
         })
         
     except Exception as e:
         conn.rollback()
-        print(f"Error deleting all news: {str(e)}")
+        print(f"Error deleting all news permanently: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Test QA Reviewers endpoint

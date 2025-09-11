@@ -260,11 +260,10 @@ CREATE TABLE memos (
 
 CREATE TABLE IF NOT EXISTS news_updates (
     id SERIAL PRIMARY KEY,
-    date DATE NOT NULL,
-    day VARCHAR(20) NOT NULL,
     news_text TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    hidden BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE memo_references (
