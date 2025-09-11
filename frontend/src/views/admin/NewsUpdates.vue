@@ -184,7 +184,13 @@
            </div>
            
            <div v-else class="news-list modal-news-list">
-             <div v-for="news in filteredNews" :key="news.id" class="news-card enhanced-news-card">
+             <div v-for="news in filteredNews" :key="news.id" 
+                  :class="['news-card', 'enhanced-news-card', {
+                    'news-card-active': isNewsActive(news),
+                    'news-card-expired': isNewsExpired(news),
+                    'news-card-hidden': news.hidden,
+                    'news-card-repostable': !isNewsActive(news)
+                  }]">
                <div class="news-card-header">
                  <div class="news-info">
                    <span class="news-title">News Update</span>
@@ -194,10 +200,11 @@
                  </div>
                  <div class="news-actions">
                    <button 
-                     v-if="isNewsExpired(news) || news.hidden" 
+                     v-if="!isNewsActive(news)" 
                      @click="repostNewsItem(news.id)" 
                      class="btn btn-repost-small"
                      :disabled="reposting"
+                     :title="news.hidden ? 'Repost hidden news' : 'Repost expired news'"
                    >
                      <svg v-if="!reposting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                        <polyline points="23,4 23,10 17,10"></polyline>
@@ -207,7 +214,11 @@
                      <div v-if="reposting" class="loading-spinner-small"></div>
                      Repost
                    </button>
-                   <button @click="permanentlyDeleteNewsItem(news.id)" class="btn btn-delete-small">
+                   <button 
+                     @click="permanentlyDeleteNewsItem(news.id)" 
+                     class="btn btn-delete-small"
+                     title="Permanently delete this news item"
+                   >
                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                        <polyline points="3,6 5,6 21,6"></polyline>
                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -235,6 +246,10 @@
                      <span v-else-if="news.hidden" class="status-dot hidden"></span>
                      {{ getNewsStatusText(news) }}
                    </span>
+                 </div>
+                 <div v-if="isNewsActive(news)" class="meta-row">
+                   <span class="meta-label">Expires:</span>
+                   <span class="meta-value expiry-time">{{ getTimeUntilExpiry(news) }}</span>
                  </div>
                </div>
              </div>
@@ -486,9 +501,12 @@ export default {
          const data = await response.json();
          
          if (data.success) {
-           alert('News item reposted successfully!');
-           await this.loadExistingNews();
-           await this.loadAllNews();
+           alert('News item reposted successfully! It will be visible for 24 hours.');
+           // Refresh both the main news and all news data
+           await Promise.all([
+             this.loadExistingNews(),
+             this.loadAllNews()
+           ]);
          } else {
            throw new Error(data.message);
          }
@@ -527,6 +545,25 @@ export default {
        if (this.isNewsExpired(news)) return 'Expired';
        return 'Inactive';
      },
+     
+     getTimeUntilExpiry(news) {
+       if (!news.updated_at) return '';
+       const expiryTime = new Date(news.updated_at);
+       expiryTime.setHours(expiryTime.getHours() + 24);
+       const now = new Date();
+       const timeDiff = expiryTime - now;
+       
+       if (timeDiff <= 0) return 'Expired';
+       
+       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+       
+       if (hours > 0) {
+         return `${hours}h ${minutes}m remaining`;
+       } else {
+         return `${minutes}m remaining`;
+       }
+     },
     
     formatDate(dateString) {
       if (!dateString) return '';
@@ -563,7 +600,7 @@ export default {
     async loadAllNews() {
       this.loadingAllNews = true;
       try {
-        const response = await fetch('http://localhost:5000/api/news');
+        const response = await fetch('http://localhost:5000/api/news/all');
         const data = await response.json();
         
         if (data.success) {
@@ -1028,6 +1065,12 @@ export default {
   font-weight: 500;
 }
 
+.expiry-time {
+  color: #28a745;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
 .status-dot {
   width: 8px;
   height: 8px;
@@ -1053,11 +1096,44 @@ export default {
 .enhanced-news-card {
   border-left: 4px solid #e9ecef;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .enhanced-news-card:hover {
   border-left-color: #007bff;
   transform: translateX(4px);
+}
+
+/* News Card States */
+.news-card-active {
+  border-left-color: #28a745;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fff9 100%);
+}
+
+.news-card-expired {
+  border-left-color: #dc3545;
+  background: linear-gradient(135deg, #ffffff 0%, #fff8f8 100%);
+}
+
+.news-card-hidden {
+  border-left-color: #6c757d;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  opacity: 0.85;
+}
+
+.news-card-repostable::before {
+  content: "📮";
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 18px;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.news-card-repostable:hover::before {
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* Filter Tabs */
