@@ -965,6 +965,68 @@ def get_project_plan_documents(project_id):
         print(f"Error fetching plan documents for project {project_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+# Get all plan documents
+@app.route('/api/plan-documents', methods=['GET'])
+def get_all_plan_documents():
+    """Get all plan documents across all LRUs"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch all plan documents with LRU and project information
+        cur.execute("""
+            SELECT 
+                pd.document_id,
+                pd.document_number,
+                pd.version,
+                pd.revision,
+                pd.doc_ver,
+                pd.uploaded_by,
+                pd.upload_date,
+                pd.file_path,
+                pd.status,
+                pd.original_filename,
+                u.name as uploaded_by_name,
+                l.lru_name,
+                p.project_name
+            FROM plan_documents pd
+            LEFT JOIN users u ON pd.uploaded_by = u.user_id
+            LEFT JOIN lrus l ON pd.lru_id = l.lru_id
+            LEFT JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.is_active = TRUE
+            ORDER BY pd.upload_date DESC
+        """)
+        
+        documents = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        document_list = []
+        for doc in documents:
+            document_list.append({
+                "document_id": doc[0],
+                "document_number": doc[1],
+                "version": doc[2],
+                "revision": doc[3],
+                "doc_ver": doc[4],
+                "uploaded_by": doc[5],
+                "uploaded_by_name": doc[10],
+                "upload_date": doc[6].isoformat() if doc[6] else None,
+                "file_path": doc[7],
+                "status": doc[8],
+                "original_filename": doc[9],
+                "lru_name": doc[11],
+                "project_name": doc[12]
+            })
+        
+        return jsonify({
+            "success": True,
+            "documents": document_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching all plan documents: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 # Upload plan document
 @app.route('/api/plan-documents', methods=['POST'])
 def upload_plan_document():
@@ -1187,19 +1249,28 @@ def get_next_doc_ver(lru_id):
     try:
         cur = conn.cursor()
         
-        # Get the highest doc_ver for this LRU
+        # Get the highest doc_ver for this LRU (convert letters to numbers for comparison)
         cur.execute("""
-            SELECT MAX(CAST(doc_ver AS INTEGER)) 
+            SELECT MAX(ASCII(doc_ver) - ASCII('A') + 1) 
             FROM plan_documents 
-            WHERE lru_id = %s
+            WHERE lru_id = %s AND doc_ver ~ '^[A-Z]{1,2}$'
         """, (lru_id,))
         
         result = cur.fetchone()
         cur.close()
         
-        # If no documents exist for this LRU, start with 1
-        max_doc_ver = result[0] if result[0] is not None else 0
-        next_doc_ver = max_doc_ver + 1
+        # If no documents exist for this LRU, start with A
+        max_doc_ver_num = result[0] if result[0] is not None else 0
+        next_doc_ver_num = max_doc_ver_num + 1
+        
+        # Convert number to letter (1=A, 2=B, etc.)
+        if next_doc_ver_num <= 26:
+            next_doc_ver = chr(ord('A') + next_doc_ver_num - 1)
+        else:
+            # For numbers > 26, use AA, AB, etc.
+            first_letter = chr(ord('A') + (next_doc_ver_num - 1) // 26 - 1)
+            second_letter = chr(ord('A') + (next_doc_ver_num - 1) % 26)
+            next_doc_ver = first_letter + second_letter
         
         return jsonify({
             "success": True,

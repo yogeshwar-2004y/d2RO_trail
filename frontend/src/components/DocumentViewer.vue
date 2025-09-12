@@ -405,7 +405,7 @@ export default {
         documentNumber: "",
         version: "",
         revision: "",
-        docVer: 1
+        docVer: "A"
       },
 
       showAssignReviewerModal: false,
@@ -517,15 +517,15 @@ export default {
           this.documentDetails.docVer = result.nextDocVer;
           console.log(`✅ Next doc_ver for LRU ${lruId}: ${result.nextDocVer}`);
         } else {
-          // If no documents exist for this LRU, start with 1
-          this.documentDetails.docVer = 1;
-          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = 1`);
+          // If no documents exist for this LRU, start with A
+          this.documentDetails.docVer = "A";
+          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = A`);
         }
       } catch (error) {
         console.error('❌ Error loading next doc_ver:', error);
-        // Default to 1 if there's an error
-        this.documentDetails.docVer = 1;
-        console.log(`⚠️ Error occurred, defaulting to doc_ver = 1`);
+        // Default to A if there's an error
+        this.documentDetails.docVer = "A";
+        console.log(`⚠️ Error occurred, defaulting to doc_ver = A`);
       }
     },
 
