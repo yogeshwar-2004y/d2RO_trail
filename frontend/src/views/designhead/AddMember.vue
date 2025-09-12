@@ -49,6 +49,10 @@
           </option>
         </select>
       </div>
+      <div class="form-row">
+        <label for="displayUserId">USER ID</label>
+        <input type="text" id="displayUserId" v-model="displayUserId" class="form-input" readonly>
+      </div>
 
       <button class="assign-button" @click="assignMember" :disabled="!selectedUserId || assigning">
         {{ assigning ? 'ASSIGNING...' : 'ASSIGN PROJECT' }}
@@ -69,6 +73,7 @@ export default {
         date: ''
       },
       selectedUserId: '',
+      displayUserId: '',
       availableDesigners: [],
       loading: true,
       error: null,
@@ -121,7 +126,13 @@ export default {
     
     updateUserName() {
       // This method is called when user selection changes
-      // The selected user name is automatically displayed in the dropdown
+      // Auto-fetch and display the user ID when a user is selected
+      if (this.selectedUserId) {
+        const selectedDesigner = this.availableDesigners.find(designer => designer.user_id === this.selectedUserId);
+        this.displayUserId = selectedDesigner ? selectedDesigner.user_id : '';
+      } else {
+        this.displayUserId = '';
+      }
     },
     
     async assignMember() {
