@@ -1,3 +1,18 @@
+"""
+LEGACY VERSION - This file has been refactored into modular components.
+See the routes/ directory for the organized structure.
+
+This file is kept as backup for reference.
+"""
+
+# This is the old monolithic version - use the new modular structure instead
+# The new structure is organized as follows:
+# - config.py: Configuration and database connection
+# - utils/: Utility functions and database initialization
+# - routes/: Modular route blueprints
+# - models/: Data models and schemas
+# - app_new.py: New modular application entry point
+
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import psycopg2
@@ -43,7 +58,7 @@ def verify_password(password, hashed_password):
 conn = psycopg2.connect(
     dbname="ERP",
     user="postgres",
-    password="thani123",
+    password="Admin",
     host="localhost",
     port="5432"
 )
