@@ -125,7 +125,7 @@
     <div class="content">
       <!-- Left Panel: Existing Documents List -->
       <div class="documents-list-panel">
-        <h3>Uploaded Documents</h3>
+        <h3>Uploaded Document Versions</h3>
         <div class="documents-container">
           <div v-if="loading" class="loading-state">
             <p>Loading documents...</p>
@@ -439,7 +439,7 @@ export default {
     async loadLruMetadata(lruId) {
       try {
         console.log(`Attempting to load metadata for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/metadata`);
+        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/metadata`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -470,7 +470,7 @@ export default {
     async loadNextDocVer(lruId) {
       try {
         console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`);
+        const response = await fetch(`http://localhost:8000/api/plan-documents/next-doc-ver/${lruId}`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -501,7 +501,7 @@ export default {
         this.loading = true;
         console.log(`Loading existing documents for LRU ${lruId}...`);
         
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -528,7 +528,7 @@ export default {
     // Load document versions for LRU (used for track versions modal)
     async loadDocumentVersions(lruId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
         const result = await response.json();
         
         if (result.success) {
@@ -562,7 +562,7 @@ export default {
         
         console.log('📄 Extracted filename:', filename);
         
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         console.log('🌐 File URL:', fileUrl);
         
         // Test if file is accessible
@@ -625,7 +625,7 @@ export default {
     // Load existing document from server
     async loadExistingDocument(documentId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/plan-documents/${documentId}`);
+        const response = await fetch(`http://localhost:8000/api/plan-documents/${documentId}`);
         const result = await response.json();
         
         if (result.success) {
@@ -649,7 +649,7 @@ export default {
     async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         
         // Determine file type from extension
         const extension = originalFilename.split('.').pop().toLowerCase();
@@ -815,7 +815,7 @@ export default {
         formData.append('doc_ver', this.documentDetails.docVer);
         formData.append('uploaded_by', userStore.getters.currentUser()?.id || userStore.getters.currentUser()?.user_id || 1001);
 
-        const response = await fetch('http://localhost:5000/api/plan-documents', {
+        const response = await fetch('http://localhost:8000/api/plan-documents', {
           method: 'POST',
           body: formData
         });
