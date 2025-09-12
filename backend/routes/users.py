@@ -294,6 +294,45 @@ def get_available_reviewers():
         print(f"Error fetching available reviewers: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@users_bp.route('/api/available-designers', methods=['GET'])
+def get_available_designers():
+    """Get list of users with Designer role for project assignment"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch users with Designer role (role_id = 5)
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE ur.role_id = 5
+            ORDER BY u.name
+        """)
+        
+        designers = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        designer_list = []
+        for designer in designers:
+            designer_list.append({
+                "user_id": designer[0],
+                "name": designer[1],
+                "email": designer[2],
+                "role": designer[3]
+            })
+        
+        return jsonify({
+            "success": True,
+            "designers": designer_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching available designers: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/test-qa-reviewers', methods=['GET'])
 def test_qa_reviewers():
     """Test endpoint to verify QA Reviewer data"""

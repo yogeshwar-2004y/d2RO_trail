@@ -525,3 +525,184 @@ def get_lru_metadata(lru_id):
         except:
             pass
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/projects/<int:project_id>/members', methods=['GET'])
+def get_project_members(project_id):
+    """Get all members assigned to a specific project"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verify project exists
+        cur.execute("""
+            SELECT project_id, project_name FROM projects WHERE project_id = %s
+        """, (project_id,))
+        
+        project = cur.fetchone()
+        if not project:
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Get all members assigned to this project
+        cur.execute("""
+            SELECT 
+                pu.project_user_id,
+                pu.user_id,
+                u.name,
+                pu.assigned_at
+            FROM project_users pu
+            JOIN users u ON pu.user_id = u.user_id
+            WHERE pu.project_id = %s
+            ORDER BY pu.assigned_at
+        """, (project_id,))
+        
+        members = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        member_list = []
+        for member in members:
+            member_list.append({
+                "project_user_id": member[0],
+                "user_id": member[1],
+                "user_name": member[2],
+                "assigned_at": member[3].isoformat() if member[3] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "project": {
+                "project_id": project[0],
+                "project_name": project[1]
+            },
+            "members": member_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching project members for project {project_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/projects/<int:project_id>/members', methods=['POST'])
+def add_project_member(project_id):
+    """Add a member to a project"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        user_id = data.get('user_id')
+        if not user_id:
+            return jsonify({"success": False, "message": "User ID is required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if project exists
+        cur.execute("SELECT project_id FROM projects WHERE project_id = %s", (project_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Check if user exists
+        cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Check if user is already assigned to this project
+        cur.execute("""
+            SELECT project_user_id FROM project_users 
+            WHERE project_id = %s AND user_id = %s
+        """, (project_id, user_id))
+        
+        if cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "User is already assigned to this project"}), 400
+        
+        # Add user to project
+        cur.execute("""
+            INSERT INTO project_users (project_id, user_id)
+            VALUES (%s, %s)
+            RETURNING project_user_id
+        """, (project_id, user_id))
+        
+        project_user_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Member added to project successfully",
+            "project_user_id": project_user_id
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error adding member to project: {str(e)}")
+
+@projects_bp.route('/api/projects/<int:project_id>/members/<int:user_id>', methods=['DELETE'])
+def remove_project_member(project_id, user_id):
+    """Remove a member from a project"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if the assignment exists
+        cur.execute("""
+            SELECT project_user_id FROM project_users 
+            WHERE project_id = %s AND user_id = %s
+        """, (project_id, user_id))
+        
+        assignment = cur.fetchone()
+        if not assignment:
+            cur.close()
+            return jsonify({"success": False, "message": "User is not assigned to this project"}), 404
+        
+        # Remove the assignment
+        cur.execute("""
+            DELETE FROM project_users 
+            WHERE project_id = %s AND user_id = %s
+        """, (project_id, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Member removed from project successfully"
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error removing member from project: {str(e)}")
+
+@projects_bp.route('/api/projects/<int:project_id>/details', methods=['GET'])
+def get_project_details(project_id):
+    """Get project details for assignment form"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get project details
+        cur.execute("""
+            SELECT project_id, project_name, project_date
+            FROM projects
+            WHERE project_id = %s
+        """, (project_id,))
+        
+        project = cur.fetchone()
+        cur.close()
+        
+        if not project:
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "project": {
+                "project_id": project[0],
+                "project_name": project[1],
+                "project_date": project[2].isoformat() if project[2] else None
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error fetching project details for project {project_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
