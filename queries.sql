@@ -92,7 +92,6 @@ CREATE TABLE IF NOT EXISTS plan_documents (
     file_path VARCHAR(255) NOT NULL,
     status VARCHAR(50) DEFAULT 'not assigned' CHECK (
         status IN (
-            'cleared',
             'disapproved',
             'assigned and returned',
             'moved to next stage',
@@ -178,7 +177,6 @@ INSERT INTO tests (test_name) VALUES
 CREATE TABLE IF NOT EXISTS stages (
     stage_id SERIAL PRIMARY KEY,
     stage_name VARCHAR(50) NOT NULL UNIQUE,
-
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -258,6 +256,14 @@ CREATE TABLE memos (
     func_check_end TIMESTAMP,
     certified TEXT[],                -- store a-f checkbox selections
     remarks TEXT
+);
+
+CREATE TABLE IF NOT EXISTS news_updates (
+    id SERIAL PRIMARY KEY,
+    news_text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    hidden BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE memo_references (

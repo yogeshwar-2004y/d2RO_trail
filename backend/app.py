@@ -8,9 +8,27 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 
 app = Flask(__name__)
-# CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}}, supports_credentials=True)
-CORS(app, origins="*", supports_credentials=True)
+CORS(app)
 
+# Configuration for file uploads
+UPLOAD_FOLDER = 'plan_doc_uploads'
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx', 'txt', 'xlsx', 'xls'}
+MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
+
+# Configuration for login background uploads
+LOGIN_BACKGROUND_FOLDER = 'login_background_uploads'
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Create upload directories if they don't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(LOGIN_BACKGROUND_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def allowed_image_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
 
 def hash_password(password):
     """Hash password using SHA-256"""
@@ -29,13 +47,50 @@ conn = psycopg2.connect(
     port="5432"
 )
 
-# @app.after_request
-# def after_request(response):
-#     response.headers.add("Access-Control-Allow-Origin", "http://localhost:5173")
-#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-#     response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
-#     return response
+# Create news_updates table if it doesn't exist
+def create_news_table():
+    try:
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS news_updates (
+                id SERIAL PRIMARY KEY,
+                news_text TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                hidden BOOLEAN DEFAULT FALSE
+            )
+        """)
+        
+        # Add updated_at column if it doesn't exist (for existing tables)
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                              WHERE table_name='news_updates' AND column_name='updated_at') THEN
+                    ALTER TABLE news_updates ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+                END IF;
+            END $$;
+        """)
+        
+        # Add hidden column if it doesn't exist (for existing tables)
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                              WHERE table_name='news_updates' AND column_name='hidden') THEN
+                    ALTER TABLE news_updates ADD COLUMN hidden BOOLEAN DEFAULT FALSE;
+                END IF;
+            END $$;
+        """)
+        
+        conn.commit()
+        cur.close()
+        print("News updates table created/verified successfully")
+    except Exception as e:
+        print(f"Error creating news table: {str(e)}")
 
+# Create the table on startup
+create_news_table()
 
 @app.route('/api')
 def hello_world():
@@ -1614,6 +1669,815 @@ def delete_stage(stage_id):
         print(f"Error deleting stage: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+# Get project options for assign reviewer dropdown
+@app.route('/api/project-options', methods=['GET'])
+def get_project_options():
+    """Get project name and project number for assign reviewer form"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch project name and project number from projects table
+        cur.execute("""
+            SELECT project_name, project_id
+            FROM projects
+            ORDER BY project_name
+        """)
+        
+        projects = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        project_options = []
+        for project in projects:
+            project_options.append({
+                "project_name": project[0],
+                "project_id": project[1]
+            })
+        
+        return jsonify({
+            "success": True,
+            "project_options": project_options
+        })
+        
+    except Exception as e:
+        print(f"Error fetching project options: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get LRU options for assign reviewer dropdown
+@app.route('/api/lru-options', methods=['GET'])
+def get_lru_options():
+    """Get LRU names for assign reviewer form"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch LRU names from lrus table
+        cur.execute("""
+            SELECT l.lru_name, l.project_id, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            ORDER BY l.lru_name
+        """)
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_options = []
+        for lru in lrus:
+            lru_options.append({
+                "lru_name": lru[0],
+                "project_id": lru[1],
+                "project_name": lru[2]
+            })
+        
+        return jsonify({
+            "success": True,
+            "lru_options": lru_options
+        })
+        
+    except Exception as e:
+        print(f"Error fetching LRU options: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Assign reviewer endpoint
+@app.route('/api/assign-reviewer', methods=['POST'])
+def assign_reviewer():
+    """Assign a reviewer to a document based on LRU context"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        lru_name = data.get('lru_name')
+        project_name = data.get('project_name')
+        reviewer_id = data.get('reviewer_id')
+        assigned_by = data.get('assigned_by', 1002)  # Default assigned_by
+        
+        if not all([lru_name, project_name, reviewer_id]):
+            return jsonify({"success": False, "message": "Missing required fields: lru_name, project_name, reviewer_id"}), 400
+        
+        cur = conn.cursor()
+        
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Check if reviewer exists and has QA Reviewer role
+        cur.execute("""
+            SELECT u.user_id 
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            WHERE u.user_id = %s AND ur.role_id = 3
+        """, (reviewer_id,))
+        
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Reviewer not found or not a QA Reviewer"}), 404
+        
+        # Check if assignment already exists for this document
+        cur.execute("""
+            SELECT assignment_id FROM plan_doc_assignment 
+            WHERE document_id = %s AND user_id = %s
+        """, (document_id, reviewer_id))
+        
+        existing_assignment = cur.fetchone()
+        
+        if existing_assignment:
+            cur.close()
+            return jsonify({"success": False, "message": "This reviewer is already assigned to the active document for this LRU"}), 400
+        
+        # Insert new assignment
+        cur.execute("""
+            INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+            VALUES (%s, %s, NOW())
+            RETURNING assignment_id
+        """, (document_id, reviewer_id))
+        
+        assignment_id = cur.fetchone()[0]
+        
+        # Update document status to 'assigned'
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = 'assigned'
+            WHERE document_id = %s
+        """, (document_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Reviewer assigned successfully",
+            "assignment_id": assignment_id,
+            "document_id": document_id,
+            "lru_id": lru_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error assigning reviewer: {str(e)}")
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+
+# Get available reviewers (users with reviewer role)
+@app.route('/api/available-reviewers', methods=['GET'])
+def get_available_reviewers():
+    """Get list of users who can be assigned as reviewers"""
+    try:
+        cur = conn.cursor()
+        
+        # Fetch users with QA Reviewer role (role_id = 3)
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE ur.role_id = 3
+            ORDER BY u.name
+        """)
+        
+        reviewers = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        reviewer_list = []
+        for reviewer in reviewers:
+            reviewer_list.append({
+                "id": reviewer[0],
+                "name": reviewer[1],
+                "email": reviewer[2],
+                "role": reviewer[3],
+                "available": True  # For now, assume all are available
+            })
+        
+        return jsonify({
+            "success": True,
+            "reviewers": reviewer_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching available reviewers: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Test assignments endpoint
+@app.route('/api/test-assignments', methods=['GET'])
+def test_assignments():
+    """Test endpoint to view all assignments"""
+    try:
+        cur = conn.cursor()
+        
+        # Show all assignments with details
+        cur.execute("""
+            SELECT 
+                pda.assignment_id,
+                pda.document_id,
+                pda.user_id,
+                pda.assigned_at,
+                u.name as reviewer_name,
+                pd.document_number,
+                pd.status as doc_status,
+                l.lru_name,
+                p.project_name
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            ORDER BY pda.assigned_at DESC
+        """)
+        assignments = cur.fetchall()
+        
+        cur.close()
+        
+        assignment_list = []
+        for assignment in assignments:
+            assignment_list.append({
+                "assignment_id": assignment[0],
+                "document_id": assignment[1],
+                "user_id": assignment[2],
+                "assigned_at": assignment[3].isoformat() if assignment[3] else None,
+                "reviewer_name": assignment[4],
+                "document_number": assignment[5],
+                "doc_status": assignment[6],
+                "lru_name": assignment[7],
+                "project_name": assignment[8]
+            })
+        
+        return jsonify({
+            "success": True,
+            "assignments": assignment_list
+        })
+        
+    except Exception as e:
+        print(f"Test assignments error: {str(e)}")
+        return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
+
+# Get assigned reviewer for a document/LRU
+@app.route('/api/assigned-reviewer', methods=['GET'])
+def get_assigned_reviewer():
+    """Get the assigned reviewer for a document based on LRU and project context"""
+    try:
+        lru_name = request.args.get('lru_name')
+        project_name = request.args.get('project_name')
+        
+        if not all([lru_name, project_name]):
+            return jsonify({"success": False, "message": "Missing required parameters: lru_name, project_name"}), 400
+        
+        cur = conn.cursor()
+        
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Get assigned reviewer information
+        cur.execute("""
+            SELECT 
+                pda.assignment_id,
+                pda.user_id,
+                pda.assigned_at,
+                u.name as reviewer_name,
+                u.email as reviewer_email
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pda.document_id = %s
+            ORDER BY pda.assigned_at DESC
+            LIMIT 1
+        """, (document_id,))
+        
+        assignment = cur.fetchone()
+        cur.close()
+        
+        if assignment:
+            return jsonify({
+                "success": True,
+                "has_reviewer": True,
+                "reviewer": {
+                    "assignment_id": assignment[0],
+                    "user_id": assignment[1],
+                    "assigned_at": assignment[2].isoformat() if assignment[2] else None,
+                    "name": assignment[3],
+                    "email": assignment[4]
+                },
+                "document_id": document_id,
+                "lru_id": lru_id
+            })
+        else:
+            return jsonify({
+                "success": True,
+                "has_reviewer": False,
+                "reviewer": None,
+                "document_id": document_id,
+                "lru_id": lru_id
+            })
+        
+    except Exception as e:
+        print(f"Error getting assigned reviewer: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Update reviewer assignment endpoint
+@app.route('/api/update-reviewer', methods=['PUT'])
+def update_reviewer():
+    """Update/edit reviewer assignment for a document"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        lru_name = data.get('lru_name')
+        project_name = data.get('project_name')
+        new_reviewer_id = data.get('reviewer_id')
+        assigned_by = data.get('assigned_by', 1002)  # Default assigned_by
+        
+        if not all([lru_name, project_name, new_reviewer_id]):
+            return jsonify({"success": False, "message": "Missing required fields: lru_name, project_name, reviewer_id"}), 400
+        
+        cur = conn.cursor()
+        
+        # Find the LRU ID based on LRU name and project name
+        cur.execute("""
+            SELECT l.lru_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_result = cur.fetchone()
+        if not lru_result:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found for the specified project"}), 404
+        
+        lru_id = lru_result[0]
+        
+        # Find the active document for this LRU
+        cur.execute("""
+            SELECT document_id
+            FROM plan_documents
+            WHERE lru_id = %s AND is_active = TRUE
+            ORDER BY upload_date DESC
+            LIMIT 1
+        """, (lru_id,))
+        
+        doc_result = cur.fetchone()
+        if not doc_result:
+            cur.close()
+            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
+        
+        document_id = doc_result[0]
+        
+        # Check if new reviewer exists and has QA Reviewer role
+        cur.execute("""
+            SELECT u.user_id 
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            WHERE u.user_id = %s AND ur.role_id = 3
+        """, (new_reviewer_id,))
+        
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "New reviewer not found or not a QA Reviewer"}), 404
+        
+        # Check if there's an existing assignment to update
+        cur.execute("""
+            SELECT assignment_id FROM plan_doc_assignment 
+            WHERE document_id = %s
+            ORDER BY assigned_at DESC
+            LIMIT 1
+        """, (document_id,))
+        
+        existing_assignment = cur.fetchone()
+        
+        if existing_assignment:
+            # Update existing assignment
+            cur.execute("""
+                UPDATE plan_doc_assignment 
+                SET user_id = %s, assigned_at = NOW()
+                WHERE assignment_id = %s
+                RETURNING assignment_id
+            """, (new_reviewer_id, existing_assignment[0]))
+            
+            assignment_id = existing_assignment[0]
+        else:
+            # Create new assignment if none exists
+            cur.execute("""
+                INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+                VALUES (%s, %s, NOW())
+                RETURNING assignment_id
+            """, (document_id, new_reviewer_id))
+            
+            assignment_id = cur.fetchone()[0]
+        
+        # Update document status to 'assigned'
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = 'assigned'
+            WHERE document_id = %s
+        """, (document_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Reviewer updated successfully",
+            "assignment_id": assignment_id,
+            "document_id": document_id,
+            "lru_id": lru_id
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error updating reviewer: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# News Updates Management Endpoints
+
+# Get news updates for frontend display (last 24 hours, not hidden)
+@app.route('/api/news', methods=['GET'])
+def get_news():
+    """Get news updates for frontend display (last 24 hours, not hidden)"""
+    try:
+        conn.rollback()  # Clear any previous transaction errors
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, news_text, created_at, updated_at, hidden
+            FROM news_updates
+            WHERE updated_at >= NOW() - INTERVAL '24 hours'
+            AND hidden = FALSE
+            ORDER BY updated_at DESC
+        """)
+        
+        news = cur.fetchall()
+        cur.close()
+        
+        news_list = []
+        for item in news:
+            news_list.append({
+                "id": item[0],
+                "news_text": item[1],
+                "created_at": item[2].isoformat() if item[2] else None,
+                "updated_at": item[3].isoformat() if item[3] else None,
+                "hidden": item[4]
+            })
+        
+        return jsonify({
+            "success": True,
+            "news": news_list
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error getting news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Get all news updates for management (including hidden)
+@app.route('/api/news/all', methods=['GET'])
+def get_all_news():
+    """Get all news updates for management interface"""
+    try:
+        conn.rollback()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, news_text, created_at, updated_at, hidden
+            FROM news_updates
+            ORDER BY updated_at DESC
+        """)
+        
+        news = cur.fetchall()
+        cur.close()
+        
+        news_list = []
+        for item in news:
+            news_list.append({
+                "id": item[0],
+                "news_text": item[1],
+                "created_at": item[2].isoformat() if item[2] else None,
+                "updated_at": item[3].isoformat() if item[3] else None,
+                "hidden": item[4]
+            })
+        
+        return jsonify({
+            "success": True,
+            "news": news_list
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error getting all news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Create multiple news updates
+@app.route('/api/news', methods=['POST'])
+def create_news():
+    """Create multiple news updates"""
+    try:
+        data = request.json
+        if not data or 'news_items' not in data:
+            return jsonify({"success": False, "message": "No news items provided"}), 400
+        
+        news_items = data['news_items']
+        if not news_items:
+            return jsonify({"success": False, "message": "News items list is empty"}), 400
+        
+        cur = conn.cursor()
+        
+        # Insert each news item
+        inserted_ids = []
+        for item in news_items:
+            if 'news_text' not in item:
+                cur.close()
+                return jsonify({"success": False, "message": "Missing news_text field in news item"}), 400
+            
+            if not item['news_text'].strip():
+                cur.close()
+                return jsonify({"success": False, "message": "News text cannot be empty"}), 400
+            
+            cur.execute("""
+                INSERT INTO news_updates (news_text)
+                VALUES (%s)
+                RETURNING id
+            """, (item['news_text'].strip(),))
+            
+            inserted_id = cur.fetchone()[0]
+            inserted_ids.append(inserted_id)
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully created {len(inserted_ids)} news items",
+            "inserted_ids": inserted_ids
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error creating news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Hide a single news item (soft delete for frontend)
+@app.route('/api/news/<int:news_id>', methods=['DELETE'])
+def delete_news_item(news_id):
+    """Hide a single news item from frontend display (soft delete)"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Hide the news item (soft delete)
+        cur.execute("UPDATE news_updates SET hidden = TRUE WHERE id = %s", (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item hidden successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error hiding news item: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Permanently delete a single news item (for management)
+@app.route('/api/news/<int:news_id>/permanent', methods=['DELETE'])
+def permanently_delete_news_item(news_id):
+    """Permanently delete a single news item (hard delete from management)"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Delete the news item permanently
+        cur.execute("DELETE FROM news_updates WHERE id = %s", (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item deleted permanently"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting news item permanently: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Repost a news item
+@app.route('/api/news/<int:news_id>/repost', methods=['PUT'])
+def repost_news_item(news_id):
+    """Repost a news item by updating its timestamp and making it visible"""
+    try:
+        cur = conn.cursor()
+        
+        # Check if news item exists
+        cur.execute("SELECT id FROM news_updates WHERE id = %s", (news_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "News item not found"}), 404
+        
+        # Update the news item: set updated_at to current time and make it visible
+        cur.execute("""
+            UPDATE news_updates 
+            SET updated_at = NOW(), hidden = FALSE 
+            WHERE id = %s
+        """, (news_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "News item reposted successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error reposting news item: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Hide all visible news updates (soft delete for frontend)
+@app.route('/api/news/all', methods=['DELETE'])
+def delete_all_news():
+    """Hide all visible news updates from frontend display"""
+    try:
+        cur = conn.cursor()
+        
+        # Count visible news items in last 24 hours
+        cur.execute("""
+            SELECT COUNT(*) FROM news_updates 
+            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
+            AND hidden = FALSE
+        """)
+        count = cur.fetchone()[0]
+        
+        if count == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "No visible news items to hide"}), 400
+        
+        # Hide all visible news items from last 24 hours
+        cur.execute("""
+            UPDATE news_updates 
+            SET hidden = TRUE 
+            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
+            AND hidden = FALSE
+        """)
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully hidden {count} news items"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error hiding all news: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Permanently delete all news updates (for management)
+@app.route('/api/news/permanent/all', methods=['DELETE'])
+def permanently_delete_all_news():
+    """Permanently delete all news updates (hard delete from management)"""
+    try:
+        cur = conn.cursor()
+        
+        # Count existing news items
+        cur.execute("SELECT COUNT(*) FROM news_updates")
+        count = cur.fetchone()[0]
+        
+        if count == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "No news items to delete"}), 400
+        
+        # Delete all news items permanently
+        cur.execute("DELETE FROM news_updates")
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Successfully deleted {count} news items permanently"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error deleting all news permanently: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Test QA Reviewers endpoint
+@app.route('/api/test-qa-reviewers', methods=['GET'])
+def test_qa_reviewers():
+    """Test endpoint to verify QA Reviewer data"""
+    try:
+        cur = conn.cursor()
+        
+        # Show all roles
+        cur.execute("SELECT role_id, role_name FROM roles ORDER BY role_id")
+        roles = cur.fetchall()
+        
+        # Show all user-role assignments
+        cur.execute("""
+            SELECT u.user_id, u.name, ur.role_id, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            ORDER BY u.user_id
+        """)
+        user_roles = cur.fetchall()
+        
+        # Show only QA Reviewers (role_id = 3)
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE ur.role_id = 3
+            ORDER BY u.name
+        """)
+        qa_reviewers = cur.fetchall()
+        
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "roles": [{"role_id": r[0], "role_name": r[1]} for r in roles],
+            "user_roles": [{"user_id": ur[0], "name": ur[1], "role_id": ur[2], "role_name": ur[3]} for ur in user_roles],
+            "qa_reviewers": [{"user_id": qr[0], "name": qr[1], "email": qr[2], "role_name": qr[3]} for qr in qa_reviewers]
+        })
+        
+    except Exception as e:
+        print(f"Test QA Reviewers error: {str(e)}")
+        return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
+
 # Diagnostic endpoint to check database contents
 @app.route('/api/tests-debug', methods=['GET'])
 def get_tests_debug():
@@ -1682,6 +2546,113 @@ def get_tests_debug():
     except Exception as e:
         print(f"Debug error: {str(e)}")
         return jsonify({"success": False, "message": f"Debug error: {str(e)}"}), 500
+
+# Login Background Management APIs
+@app.route('/api/upload-login-background', methods=['POST'])
+def upload_login_background():
+    try:
+        if 'background_image' not in request.files:
+            return jsonify({"success": False, "message": "No file provided"}), 400
+        
+        file = request.files['background_image']
+        
+        if file.filename == '':
+            return jsonify({"success": False, "message": "No file selected"}), 400
+        
+        if not allowed_image_file(file.filename):
+            return jsonify({"success": False, "message": "Invalid file type. Only PNG, JPG, and JPEG files are allowed"}), 400
+        
+        # Check file size
+        file.seek(0, os.SEEK_END)
+        file_size = file.tell()
+        file.seek(0)
+        
+        if file_size > MAX_IMAGE_SIZE:
+            return jsonify({"success": False, "message": "File size too large. Maximum size is 10MB"}), 400
+        
+        # Generate unique filename
+        file_extension = file.filename.rsplit('.', 1)[1].lower()
+        unique_filename = f"login_background.{file_extension}"
+        file_path = os.path.join(LOGIN_BACKGROUND_FOLDER, unique_filename)
+        
+        # Remove existing background files
+        for existing_file in os.listdir(LOGIN_BACKGROUND_FOLDER):
+            if existing_file.startswith('login_background.'):
+                os.remove(os.path.join(LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        # Save new file
+        file.save(file_path)
+        
+        # Return the URL for the uploaded background
+        background_url = f"http://127.0.0.1:8000/api/login-background/{unique_filename}"
+        
+        return jsonify({
+            "success": True,
+            "message": "Background uploaded successfully",
+            "background_url": background_url
+        })
+        
+    except Exception as e:
+        print(f"Upload error: {str(e)}")
+        return jsonify({"success": False, "message": f"Upload error: {str(e)}"}), 500
+
+@app.route('/api/login-background/<filename>')
+def serve_login_background(filename):
+    try:
+        file_path = os.path.join(LOGIN_BACKGROUND_FOLDER, filename)
+        if os.path.exists(file_path):
+            return send_file(file_path)
+        else:
+            # Fallback to default background
+            default_path = os.path.join('..', 'frontend', 'src', 'assets', 'images', 'login-background.png')
+            if os.path.exists(default_path):
+                return send_file(default_path)
+            return jsonify({"success": False, "message": "Background not found"}), 404
+    except Exception as e:
+        print(f"Serve background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error serving background: {str(e)}"}), 500
+
+@app.route('/api/get-current-background')
+def get_current_background():
+    try:
+        # Check if custom background exists
+        for ext in ALLOWED_IMAGE_EXTENSIONS:
+            custom_background = os.path.join(LOGIN_BACKGROUND_FOLDER, f"login_background.{ext}")
+            if os.path.exists(custom_background):
+                background_url = f"http://127.0.0.1:8000/api/login-background/login_background.{ext}"
+                return jsonify({
+                    "success": True,
+                    "background_url": background_url,
+                    "is_custom": True
+                })
+        
+        # Return default background URL
+        return jsonify({
+            "success": True,
+            "background_url": "/src/assets/images/login-background.png",
+            "is_custom": False
+        })
+        
+    except Exception as e:
+        print(f"Get background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error getting background: {str(e)}"}), 500
+
+@app.route('/api/reset-login-background', methods=['POST'])
+def reset_login_background():
+    try:
+        # Remove all custom background files
+        for existing_file in os.listdir(LOGIN_BACKGROUND_FOLDER):
+            if existing_file.startswith('login_background.'):
+                os.remove(os.path.join(LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        return jsonify({
+            "success": True,
+            "message": "Background reset to default successfully"
+        })
+        
+    except Exception as e:
+        print(f"Reset background error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error resetting background: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=8000)

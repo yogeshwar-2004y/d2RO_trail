@@ -12,7 +12,7 @@
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </div>
-          <h2 class="modal-title">ASSIGN REVIEWER</h2>
+          <h2 class="modal-title">{{ isEditMode ? 'EDIT REVIEWER' : 'ASSIGN REVIEWER' }}</h2>
         </div>
         <button class="close-button" @click="closeOverlay">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -24,7 +24,7 @@
 
       <!-- Form Content -->
       <div class="modal-content">
-        <form @submit.prevent="assignReviewer" class="assign-form">
+        <form @submit.prevent="submitReviewer" class="assign-form">
           <!-- Project Details (Auto-filled) -->
           <div class="form-section">
             <h3 class="section-title">
@@ -40,24 +40,14 @@
                 <input type="text" v-model="formData.projectName" readonly class="readonly-input">
               </div>
               <div class="form-group">
-                <label>PROJECT NUMBER</label>
-                <input type="text" v-model="formData.projectNumber" readonly class="readonly-input">
+                <label>PROJECT ID</label>
+                <input type="text" v-model="formData.projectId" readonly class="readonly-input">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label>PROJECT DATE</label>
-                <input type="text" v-model="formData.projectDate" readonly class="readonly-input">
-              </div>
-              <div class="form-group">
-                <label>VERSION</label>
-                <input type="text" v-model="formData.version" readonly class="readonly-input">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>REVISION</label>
-                <input type="text" v-model="formData.revision" readonly class="readonly-input">
+                <label>LRU NAME</label>
+                <input type="text" v-model="formData.lruName" readonly class="readonly-input">
               </div>
             </div>
           </div>
@@ -75,7 +65,7 @@
             </h3>
             <div class="form-row">
               <div class="form-group">
-                <label>REVIEWER ID *</label>
+                <label>SELECT REVIEWER *</label>
                 <div class="dropdown-container">
                   <select v-model="formData.reviewerId" @change="onReviewerChange" required class="form-select">
                     <option value="">Select Reviewer</option>
@@ -86,7 +76,7 @@
                       :disabled="!reviewer.available"
                       :class="{ 'disabled-option': !reviewer.available }"
                     >
-                      {{ reviewer.id }} {{ !reviewer.available ? '(Not Available)' : '' }}
+                      {{ reviewer.name }} {{ !reviewer.available ? '(Not Available)' : '' }}
                     </option>
                   </select>
                   <div class="dropdown-arrow">
@@ -97,8 +87,8 @@
                 </div>
               </div>
               <div class="form-group">
-                <label>REVIEWER NAME</label>
-                <input type="text" v-model="formData.reviewerName" readonly class="readonly-input">
+                <label>REVIEWER ID</label>
+                <input type="text" v-model="formData.reviewerId" readonly class="readonly-input">
               </div>
             </div>
           </div>
@@ -112,14 +102,15 @@
               </svg>
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary" :disabled="!formData.reviewerId">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button type="submit" class="btn btn-primary" :disabled="!formData.reviewerId || loading">
+              <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
-              ASSIGN REVIEWER
+              <div v-if="loading" class="loading-spinner"></div>
+              {{ loading ? (isEditMode ? 'UPDATING...' : 'ASSIGNING...') : (isEditMode ? 'UPDATE REVIEWER' : 'ASSIGN REVIEWER') }}
             </button>
           </div>
         </form>
@@ -135,8 +126,8 @@
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
-        <h3>Reviewer Assigned Successfully!</h3>
-        <p>Reviewer {{ formData.reviewerName }} has been assigned to {{ formData.projectName }}</p>
+        <h3>{{ isEditMode ? 'Reviewer Updated Successfully!' : 'Reviewer Assigned Successfully!' }}</h3>
+        <p>{{ formData.reviewerName }} has been {{ isEditMode ? 'updated as' : 'assigned as' }} reviewer for <strong>{{ formData.lruName }}</strong> in project <strong>{{ formData.projectName }}</strong></p>
         <button @click="closeSuccessOverlay" class="btn btn-success">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20,6 9,17 4,12"></polyline>
@@ -152,33 +143,36 @@
 export default {
   name: 'QAHeadAssignReviewer',
   props: {
-    lruName: {
+    currentLruName: {
       type: String,
-      required: true
+      default: ''
     },
-    projectName: {
+    currentProjectName: {
       type: String,
-      required: true
+      default: ''
+    },
+    isEditMode: {
+      type: Boolean,
+      default: false
+    },
+    currentReviewer: {
+      type: Object,
+      default: null
     }
   },
   data() {
     return {
       formData: {
         projectName: '',
-        projectNumber: '',
-        projectDate: '',
-        version: '',
-        revision: '',
+        projectId: '',
+        lruName: '',
         reviewerId: '',
         reviewerName: ''
       },
-      availableReviewers: [
-        { id: 'EMP1234', name: 'John Smith', available: true },
-        { id: 'EMP1235', name: 'Sarah Johnson', available: false },
-        { id: 'EMP1236', name: 'Michael Brown', available: true },
-        { id: 'EMP1237', name: 'Emily Davis', available: true },
-        { id: 'EMP1238', name: 'David Wilson', available: false }
-      ],
+      availableProjects: [],
+      availableLrus: [],
+      availableReviewers: [],
+      loading: false,
       showSuccessOverlay: false
     };
   },
@@ -186,37 +180,218 @@ export default {
     this.initializeForm();
   },
   methods: {
-    initializeForm() {
-      // Auto-fill project details
-      this.formData.projectName = this.projectName;
-      this.formData.projectNumber = 'PRJ-2025-078'; // Sample data
-      this.formData.projectDate = '2025-07-01'; // Sample data
-      this.formData.version = 'v1.0'; // Sample data
-      this.formData.revision = '0'; // Sample data
+    async initializeForm() {
+      this.loading = true;
+      try {
+        // Load reviewers and get project/LRU data
+        await Promise.allSettled([
+          this.loadAvailableReviewers(),
+          this.loadProjectAndLruData()
+        ]);
+        
+        // Auto-fill current project and LRU information
+        this.autoFillProjectAndLruData();
+        
+        // If in edit mode, pre-populate current reviewer
+        if (this.isEditMode && this.currentReviewer) {
+          this.formData.reviewerId = this.currentReviewer.user_id;
+          this.formData.reviewerName = this.currentReviewer.name;
+        }
+        
+      } catch (error) {
+        console.error('Error initializing form:', error);
+        // Continue with fallback data that was loaded in catch blocks
+        console.log('Using fallback data for form initialization');
+      } finally {
+        this.loading = false;
+      }
     },
+    
+    async loadProjectAndLruData() {
+      try {
+        // Load both project and LRU data in parallel
+        const [projectResponse, lruResponse] = await Promise.allSettled([
+          fetch('http://localhost:5000/api/project-options'),
+          fetch('http://localhost:5000/api/lru-options')
+        ]);
+        
+        // Process project data
+        if (projectResponse.status === 'fulfilled') {
+          const projectData = await projectResponse.value.json();
+          if (projectData.success) {
+            this.availableProjects = projectData.project_options;
+          }
+        }
+        
+        // Process LRU data
+        if (lruResponse.status === 'fulfilled') {
+          const lruData = await lruResponse.value.json();
+          if (lruData.success) {
+            this.availableLrus = lruData.lru_options;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading project and LRU data:', error);
+        // Set fallback data
+        this.availableProjects = [
+          { project_name: 'Flight Control System', project_id: 1 },
+          { project_name: 'Navigation Module', project_id: 2 }
+        ];
+        this.availableLrus = [
+          { lru_name: 'Flight Computer', project_id: 1, project_name: 'Flight Control System' },
+          { lru_name: 'Autopilot System', project_id: 1, project_name: 'Flight Control System' },
+          { lru_name: 'GPS Receiver', project_id: 2, project_name: 'Navigation Module' },
+          { lru_name: 'Navigation Display', project_id: 2, project_name: 'Navigation Module' }
+        ];
+      }
+    },
+    
+    autoFillProjectAndLruData() {
+      // Auto-fill project information
+      if (this.currentProjectName) {
+        this.formData.projectName = this.currentProjectName;
+        
+        // Find the project ID from the available projects
+        const project = this.availableProjects.find(p => p.project_name === this.currentProjectName);
+        if (project) {
+          this.formData.projectId = project.project_id;
+        }
+      }
+      
+      // Auto-fill LRU information
+      if (this.currentLruName) {
+        this.formData.lruName = this.currentLruName;
+      }
+      
+      // If no current data provided, try to use fallback values for demo
+      if (!this.formData.projectName && this.availableProjects.length > 0) {
+        this.formData.projectName = this.availableProjects[0].project_name;
+        this.formData.projectId = this.availableProjects[0].project_id;
+      }
+      
+      if (!this.formData.lruName && this.availableLrus.length > 0) {
+        // Find an LRU that matches the current project
+        const matchingLru = this.availableLrus.find(lru => 
+          lru.project_name === this.formData.projectName
+        );
+        if (matchingLru) {
+          this.formData.lruName = matchingLru.lru_name;
+        }
+      }
+    },
+    
+    async loadAvailableReviewers() {
+      try {
+        const response = await fetch('http://localhost:5000/api/available-reviewers');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.availableReviewers = data.reviewers;
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error loading available reviewers:', error);
+        // Fallback to sample data if API fails - only QA Reviewers (role_id = 3)
+        this.availableReviewers = [
+          { id: 1001, name: 'Avanthika PG', email: 'avanthikapg22@gmail.com', role: 'QA Reviewer', available: true }
+        ];
+      }
+    },
+    
     
     onReviewerChange() {
       if (this.formData.reviewerId) {
         const selectedReviewer = this.availableReviewers.find(r => r.id === this.formData.reviewerId);
         if (selectedReviewer) {
           this.formData.reviewerName = selectedReviewer.name;
+          // The reviewerId is already set to the user_id from the dropdown value
         }
       } else {
         this.formData.reviewerName = '';
       }
     },
     
-    assignReviewer() {
+    async submitReviewer() {
+      if (this.isEditMode) {
+        await this.updateReviewer();
+      } else {
+        await this.assignReviewer();
+      }
+    },
+    
+    async assignReviewer() {
       if (!this.formData.reviewerId) {
         alert('Please select a reviewer');
         return;
       }
       
-      // Here you would typically make an API call to assign the reviewer
-      console.log('Assigning reviewer:', this.formData);
+      this.loading = true;
+      try {
+        const response = await fetch('http://localhost:5000/api/assign-reviewer', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lru_name: this.formData.lruName,
+            project_name: this.formData.projectName,
+            reviewer_id: this.formData.reviewerId,
+            assigned_by: 1002 // TODO: Get from user store
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showSuccessOverlay = true;
+          this.$emit('reviewerUpdated');
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error assigning reviewer:', error);
+        alert('Error assigning reviewer: ' + error.message);
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async updateReviewer() {
+      if (!this.formData.reviewerId) {
+        alert('Please select a reviewer');
+        return;
+      }
       
-      // Show success overlay
-      this.showSuccessOverlay = true;
+      this.loading = true;
+      try {
+        const response = await fetch('http://localhost:5000/api/update-reviewer', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            lru_name: this.formData.lruName,
+            project_name: this.formData.projectName,
+            reviewer_id: this.formData.reviewerId,
+            assigned_by: 1002 // TODO: Get from user store
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.showSuccessOverlay = true;
+          this.$emit('reviewerUpdated');
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error('Error updating reviewer:', error);
+        alert('Error updating reviewer: ' + error.message);
+      } finally {
+        this.loading = false;
+      }
     },
     
     closeOverlay() {
@@ -580,5 +755,19 @@ export default {
   .success-modal {
     padding: 30px 25px;
   }
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
