@@ -8,8 +8,9 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig({
   plugins: [
     vue(),
-    vueDevTools(),
-  ],
+    // Disable devtools in test environment to avoid conflicts
+    process.env.NODE_ENV !== 'test' && vueDevTools(),
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
@@ -19,9 +20,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     coverage: {
-      provider: 'c8',
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      reportsDirectory: '../reports/frontend/coverage',
+      reportsDirectory: './coverage',
       exclude: [
         'node_modules/',
         'dist/',
