@@ -14,11 +14,12 @@ echo.
 echo === FRONTEND REPORTS ===
 echo 5. Frontend Test Report (HTML)
 echo 6. Frontend Coverage Summary (HTML)
+echo 7. Formal Comprehensive Test Report (HTML)
 echo.
 echo === OTHER ===
-echo 7. Open Reports Folder
+echo 8. Open Reports Folder
 echo.
-set /p choice="Enter your choice (1-7): "
+set /p choice="Enter your choice (1-8): "
 
 if "%choice%"=="1" (
     echo Opening Backend Test Results...
@@ -39,6 +40,9 @@ if "%choice%"=="1" (
     echo Opening Frontend Coverage Summary...
     start frontend\coverage-summary.html
 ) else if "%choice%"=="7" (
+    echo Opening Formal Comprehensive Test Report...
+    start frontend\comprehensive-test-report.html
+) else if "%choice%"=="8" (
     echo Opening Reports Folder...
     start .
 ) else (

@@ -35,6 +35,7 @@ start reports\backend\coverage\index.html
 # Frontend Reports
 start reports\frontend\test-report.html
 start reports\frontend\coverage-summary.html
+start reports\frontend\comprehensive-test-report.html
 ```
 
 ### Regenerate Backend Reports
