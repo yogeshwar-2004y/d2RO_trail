@@ -22,6 +22,8 @@ import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
 import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
 import TestsPage from "@/views/admin/TestsPage.vue";
+import NewsUpdates from "@/views/admin/NewsUpdates.vue";
+import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
 import DocumentViewer from "@/components/DocumentViewer.vue";
@@ -115,6 +117,16 @@ const router = createRouter({
       component: TestsPage
     },
     {
+      path: "/user-activities/news-updates",
+      name: "NewsUpdates",
+      component: NewsUpdates
+    },
+    {
+      path: "/user-activities/customise-background",
+      name: "CustomiseBackground",
+      component: CustomiseBackground
+    },
+    {
       path: "/user-activities",
       name: "UserActivities",
       component: UserActivities,
@@ -135,7 +147,7 @@ const router = createRouter({
       component: MemoForm,
     },
     {
-    path: '/document-viewer/:lruId/:lruName/:projectId',
+    path: '/document-viewer/:projectId/:lruName/:lruId',
     name: 'DocumentViewer',
     component: DocumentViewer,
     },

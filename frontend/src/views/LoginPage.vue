@@ -1,9 +1,12 @@
 <template>
   <div class="login-page">
-    <div class="login-left-panel"></div>
+    <div class="login-left-panel" :style="{ backgroundImage: `url(${backgroundImageUrl})` }"></div>
     <div class="login-right-panel">
       <div class="login-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <div class="logos-container">
+          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        </div>
         
         <div class="input-group">
           <span class="input-icon">✉</span>
@@ -18,18 +21,31 @@
         <button @click="login" class="login-button">LOGIN</button>
       </div>
     </div>
+    
+    <!-- News Ticker -->
+    <NewsTicker 
+      height="60px" 
+      backgroundColor="#2c3e50" 
+      textColor="#ffffff"
+      class="login-news-ticker"
+    />
   </div>
 </template>
 
 <script>
 import { setUser } from '@/stores/userStore'
+import NewsTicker from '@/components/NewsTicker.vue'
 
 export default {
   name: 'LoginPage',
+  components: {
+    NewsTicker
+  },
   data() {
     return {
       email: '',
       password: '',
+      backgroundImageUrl: '/src/assets/images/login-background.png'
     };
   },
   methods: {
@@ -87,7 +103,25 @@ export default {
         alert("Server error. Please try again later.");
       }
     },
+    
+    async loadBackgroundImage() {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/api/get-current-background');
+        const data = await response.json();
+        
+        if (data.success && data.background_url) {
+          this.backgroundImageUrl = data.background_url;
+        }
+      } catch (error) {
+        console.error('Error loading background:', error);
+        // Keep default background on error
+      }
+    }
   },
+  
+  async mounted() {
+    await this.loadBackgroundImage();
+  }
 };
 </script>
 
@@ -102,7 +136,6 @@ export default {
 
 .login-left-panel {
   flex: 1;
-  background-image: url('@/assets/images/login-background.png');
   background-size: cover;
   background-position: center;
   border-top-left-radius: 20px;
@@ -126,9 +159,20 @@ export default {
   text-align: center;
 }
 
+.logos-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 50px;
+}
+
 .logo {
   width: 180px;
-  margin-bottom: 50px;
+}
+
+.vista-logo {
+  width: 150px;
 }
 
 .input-group {
@@ -174,5 +218,13 @@ export default {
 .login-button:hover {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+
+.login-news-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 </style>

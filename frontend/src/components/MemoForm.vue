@@ -15,7 +15,10 @@
             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
           </svg>
         </button>
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+      <div class="logos-container">
+        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
     </div>
 
     <!-- Share Overlay -->

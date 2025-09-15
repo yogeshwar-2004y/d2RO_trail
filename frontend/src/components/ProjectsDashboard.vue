@@ -8,7 +8,10 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <div class="logos-container">
+          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        </div>
         <div class="page-title">
           <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>

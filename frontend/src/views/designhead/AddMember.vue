@@ -7,44 +7,56 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+      <div class="logos-container">
+        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
       <span class="page-title">ASSIGN PROJECT</span>
     </div>
 
-    <div class="form-container">
+    <!-- Loading state -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading project data...</p>
+    </div>
+
+    <!-- Error state -->
+    <div v-else-if="error" class="error-container">
+      <p class="error-message">{{ error }}</p>
+      <button @click="loadInitialData" class="retry-button">Retry</button>
+    </div>
+
+    <!-- Form -->
+    <div v-else class="form-container">
       <div class="form-row">
         <label for="projectName">PROJECT NAME</label>
         <input type="text" id="projectName" v-model="project.name" class="form-input" readonly>
       </div>
       <div class="form-row">
-        <label for="projectNumber">PROJECT NUMBER</label>
-        <input type="text" id="projectNumber" v-model="project.number" class="form-input" readonly>
+        <label for="projectNumber">PROJECT ID</label>
+        <input type="text" id="projectNumber" v-model="project.id" class="form-input" readonly>
       </div>
       <div class="form-row">
         <label for="projectDate">PROJECT DATE</label>
         <input type="date" id="projectDate" v-model="project.date" class="form-input" readonly>
       </div>
       <div class="form-row">
-        <label for="version">VERSION</label>
-        <input type="text" id="version" v-model="project.version" class="form-input" readonly>
-      </div>
-      <div class="form-row">
-        <label for="revision">REVISION</label>
-        <input type="text" id="revision" v-model="project.revision" class="form-input" readonly>
-      </div>
-      <div class="form-row">
         <label for="userName">USER NAME</label>
-        <input type="text" id="userName" v-model="user.name" class="form-input">
-      </div>
-      <div class="form-row">
-        <label for="userId">USER ID</label>
-        <select id="userId" v-model="user.id" class="form-input">
-          <option value="" disabled>Select User ID</option>
-          <option v-for="user in availableUsers" :key="user.id" :value="user.id">{{ user.id }}</option>
+        <select id="userName" v-model="selectedUserId" class="form-input" @change="updateUserName">
+          <option value="" disabled>Select User</option>
+          <option v-for="designer in availableDesigners" :key="designer.user_id" :value="designer.user_id">
+            {{ designer.name }}
+          </option>
         </select>
       </div>
+      <div class="form-row">
+        <label for="displayUserId">USER ID</label>
+        <input type="text" id="displayUserId" v-model="displayUserId" class="form-input" readonly>
+      </div>
 
-      <button class="assign-button" @click="assignMember">ASSIGN PROJECT</button>
+      <button class="assign-button" @click="assignMember" :disabled="!selectedUserId || assigning">
+        {{ assigning ? 'ASSIGNING...' : 'ASSIGN PROJECT' }}
+      </button>
     </div>
   </div>
 </template>
@@ -54,36 +66,113 @@ export default {
   name: 'AddMember',
   data() {
     return {
+      projectId: this.$route.params.projectId,
       project: {
-        name: 'ERP QA Automation Tool',
-        number: 'PRJ-001',
-        date: '2025-07-01',
-        version: 'v1.0',
-        revision: '0',
-      },
-      user: {
-        name: '',
         id: '',
+        name: '',
+        date: ''
       },
-      availableUsers: [
-        { id: 'EMP0002', name: 'User A' },
-        { id: 'EMP0003', name: 'User B' },
-        { id: 'EMP0004', name: 'User C' },
-      ],
+      selectedUserId: '',
+      displayUserId: '',
+      availableDesigners: [],
+      loading: true,
+      error: null,
+      assigning: false
     };
   },
-  watch: {
-    'user.id'(newId) {
-      const selectedUser = this.availableUsers.find(user => user.id === newId);
-      this.user.name = selectedUser ? selectedUser.name : '';
-    },
+  async mounted() {
+    await this.loadInitialData();
   },
   methods: {
-    assignMember() {
-      // Logic to assign the user to the project
-      console.log('Assigning user:', this.user.id, 'to project:', this.project.number);
-      alert(`User ${this.user.name} assigned to project ${this.project.number}`);
+    async loadInitialData() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        // Load project details and designers in parallel
+        const [projectResponse, designersResponse] = await Promise.all([
+          fetch(`http://localhost:5000/api/projects/${this.projectId}/details`),
+          fetch('http://localhost:5000/api/available-designers')
+        ]);
+        
+        const projectData = await projectResponse.json();
+        const designersData = await designersResponse.json();
+        
+        if (!projectData.success) {
+          throw new Error(projectData.message || 'Failed to load project details');
+        }
+        
+        if (!designersData.success) {
+          throw new Error(designersData.message || 'Failed to load available designers');
+        }
+        
+        // Set project data
+        this.project = {
+          id: projectData.project.project_id,
+          name: projectData.project.project_name,
+          date: projectData.project.project_date
+        };
+        
+        // Set available designers
+        this.availableDesigners = designersData.designers;
+        
+      } catch (err) {
+        console.error('Error loading initial data:', err);
+        this.error = err.message || 'Failed to load data. Please try again.';
+      } finally {
+        this.loading = false;
+      }
     },
+    
+    updateUserName() {
+      // This method is called when user selection changes
+      // Auto-fetch and display the user ID when a user is selected
+      if (this.selectedUserId) {
+        const selectedDesigner = this.availableDesigners.find(designer => designer.user_id === this.selectedUserId);
+        this.displayUserId = selectedDesigner ? selectedDesigner.user_id : '';
+      } else {
+        this.displayUserId = '';
+      }
+    },
+    
+    async assignMember() {
+      if (!this.selectedUserId) {
+        alert('Please select a user to assign to the project.');
+        return;
+      }
+      
+      try {
+        this.assigning = true;
+        
+        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}/members`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user_id: this.selectedUserId
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const selectedDesigner = this.availableDesigners.find(d => d.user_id === this.selectedUserId);
+          alert(`${selectedDesigner.name} has been successfully assigned to project ${this.project.name}`);
+          
+          // Navigate back to project members page
+          this.$router.push({ name: 'ProjectMembers', params: { projectId: this.projectId } });
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+        
+      } catch (err) {
+        console.error('Error assigning member:', err);
+        alert('Failed to assign member. Please try again.');
+      } finally {
+        this.assigning = false;
+      }
+    }
   },
 };
 </script>
@@ -184,5 +273,69 @@ export default {
 .assign-button:hover {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
   transform: translateY(-2px);
+}
+.assign-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.assign-button:disabled:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  transform: none;
+}
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 700px;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 0 auto;
+  max-width: 700px;
+}
+.error-message {
+  color: #ff4d4f;
+  font-size: 1.1em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.retry-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1em;
+}
+.retry-button:hover {
+  background: #0056b3;
 }
 </style>

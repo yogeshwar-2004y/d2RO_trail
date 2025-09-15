@@ -19,9 +19,26 @@
     <div class="action-bar" v-if="currentUserRole">
       <!-- QA Head Actions -->
       <template v-if="currentUserRole === 'QA Head'">
-        <button @click="assignReviewer" class="action-btn">
-          Assign Reviewer
+        <button 
+          v-if="!hasAssignedReviewer" 
+          @click="assignReviewer" 
+          class="action-btn"
+          :disabled="loadingReviewerStatus"
+        >
+          {{ loadingReviewerStatus ? 'Loading...' : 'Assign Reviewer' }}
         </button>
+        <button 
+          v-if="hasAssignedReviewer" 
+          @click="editReviewer" 
+          class="action-btn action-btn-edit"
+          :disabled="loadingReviewerStatus"
+        >
+          {{ loadingReviewerStatus ? 'Loading...' : 'Edit Reviewer' }}
+        </button>
+        <div v-if="hasAssignedReviewer" class="reviewer-info">
+          <span class="reviewer-label">Current Reviewer:</span>
+          <span class="reviewer-name">{{ assignedReviewer?.name || 'Unknown' }}</span>
+        </div>
         <button @click="viewObservations" class="action-btn">
           View Observations
         </button>
@@ -274,9 +291,12 @@
     <!-- Assign Reviewer Modal -->
     <QAHeadAssignReviewer 
       v-if="showAssignReviewerModal"
-      :lruName="lruName"
-      :projectName="projectName"
-      @close="showAssignReviewerModal = false"
+      :currentLruName="lruName"
+      :currentProjectName="projectName"
+      :isEditMode="isEditReviewerMode"
+      :currentReviewer="assignedReviewer"
+      @close="closeReviewerModal"
+      @reviewerUpdated="onReviewerUpdated"
     />
 
     <!-- Track Versions Modal -->
@@ -405,7 +425,7 @@ export default {
       // Document metadata - will be loaded dynamically
       lruName: "",
       projectName: "",
-      documentId: "",
+      documentId: null,
       status: "pending", // pending, approved, rejected, review
       createdDate: null,
       lastModifiedDate: new Date(),
@@ -434,6 +454,7 @@ export default {
       },
 
       showAssignReviewerModal: false,
+      isEditReviewerMode: false,
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
@@ -475,6 +496,11 @@ export default {
           deleted: false 
         }
       ],
+      
+      // Reviewer assignment
+      hasAssignedReviewer: false,
+      assignedReviewer: null,
+      loadingReviewerStatus: false,
       
       // Comments
       comments: [
@@ -555,6 +581,14 @@ export default {
     // Load existing document if available
     if (documentId && documentId !== 'new') {
       this.loadExistingDocument(documentId);
+    }
+    
+    // Check reviewer assignment status for QA Head
+    if (this.currentUserRole === 'QA Head') {
+      // Add a delay to ensure LRU metadata is loaded first
+      setTimeout(() => {
+        this.checkReviewerAssignment();
+      }, 1000);
     }
   },
   
@@ -748,6 +782,98 @@ export default {
       }
     },
 
+    // Load a PDF directly from a URL (used when viewing existing documents)
+    async loadPdfFromUrl(fileUrl) {
+      try {
+        // Reset previous document state and set up for PDF
+        this.clearDocument();
+        this.fileType = 'pdf';
+        this.pdfUrl = fileUrl;
+        this.page = 1;
+
+        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+        const pdf = await loadingTask.promise;
+        this.numPages = pdf.numPages;
+      } catch (err) {
+        console.error('Failed to load PDF from URL', err);
+        alert('Failed to load PDF file.');
+      }
+    },
+
+    // Load a DOCX directly from a URL (used when viewing existing documents)
+    async loadDocxFromUrl(fileUrl) {
+      try {
+        // Reset previous document state and set up for DOCX
+        this.clearDocument();
+        this.fileType = 'docx';
+
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+
+        const options = {
+          styleMap: [
+            "p[style-name='Page Break'] => div.page-break"
+          ]
+        };
+
+        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+        const processedHtml = this.processDocxHtml(result.value);
+        this.docxHtml = processedHtml;
+
+        this.$nextTick(() => {
+          const pages = document.querySelectorAll('.docx-content .page');
+          this.numPages = pages.length || 1;
+        });
+      } catch (err) {
+        console.error('Failed to load DOCX from URL', err);
+        alert('Failed to render DOCX file.');
+      }
+    },
+
+    // Load an existing document either by object or by id/number
+    async loadExistingDocument(input) {
+      try {
+        // If a full document object was passed, delegate to viewDocument
+        if (input && typeof input === 'object' && input.file_path) {
+          await this.viewDocument(input);
+          return;
+        }
+
+        // Otherwise, fetch list and find by document_number or document_id
+        const lruId = this.documentDetails.lruId;
+        if (!lruId) {
+          console.warn('loadExistingDocument called without LRU ID');
+          return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (!data.success) {
+          console.warn('Failed to load documents for selecting existing document:', data.message);
+          return;
+        }
+
+        const targetIdNum = Number(input);
+        const doc = (data.documents || []).find(d =>
+          d.document_number === input || d.document_id === targetIdNum
+        );
+
+        if (doc) {
+          await this.viewDocument(doc);
+        } else {
+          console.warn('Requested document not found among existing documents:', input);
+        }
+      } catch (err) {
+        console.error('Error in loadExistingDocument:', err);
+      }
+    },
+
     // Date formatting
     formatDate(date) {
       if (!date) return 'N/A';
@@ -796,8 +922,52 @@ export default {
       }
     },
 
-    assignReviewer() {
+    async assignReviewer() {
+      this.isEditReviewerMode = false;
       this.showAssignReviewerModal = true;
+    },
+    
+    async editReviewer() {
+      this.isEditReviewerMode = true;
+      this.showAssignReviewerModal = true;
+    },
+    
+    async checkReviewerAssignment() {
+      if (!this.lruName || !this.projectName) {
+        return;
+      }
+      
+      try {
+        this.loadingReviewerStatus = true;
+        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.hasAssignedReviewer = data.has_reviewer;
+          this.assignedReviewer = data.reviewer;
+        } else {
+          console.error('Error checking reviewer assignment:', data.message);
+          this.hasAssignedReviewer = false;
+          this.assignedReviewer = null;
+        }
+      } catch (error) {
+        console.error('Error checking reviewer assignment:', error);
+        this.hasAssignedReviewer = false;
+        this.assignedReviewer = null;
+      } finally {
+        this.loadingReviewerStatus = false;
+      }
+    },
+    
+    closeReviewerModal() {
+      this.showAssignReviewerModal = false;
+      this.isEditReviewerMode = false;
+    },
+    
+    onReviewerUpdated() {
+      // Refresh reviewer status after assignment/update
+      this.checkReviewerAssignment();
+      this.closeReviewerModal();
     },
     viewObservations() {
       this.$router.push({ 
@@ -1221,27 +1391,7 @@ export default {
       this.fileType = null;
     },
 
-    // Load existing documents for an LRU
-    async loadExistingDocuments(lruId) {
-      this.loading = true;
-      try {
-        const response = await fetch(`/api/lru/${lruId}/documents`);
-        const data = await response.json();
-        
-        if (data.success) {
-          this.existingDocuments = data.documents || [];
-          console.log('✅ Loaded existing documents:', this.existingDocuments);
-        } else {
-          console.warn('❌ Failed to load documents:', data.message);
-          this.existingDocuments = [];x
-        }
-      } catch (error) {
-        console.error('❌ Error loading documents:', error);
-        this.existingDocuments = [];
-      } finally {
-        this.loading = false;
-      }
-    },
+    // (duplicate removed) loadExistingDocuments is defined earlier
   },
   
   beforeUnmount() {
@@ -1318,6 +1468,41 @@ export default {
 
 .action-btn:hover {
   background: #2563eb;
+}
+
+.action-btn-edit {
+  background-color: #3182ce;
+}
+
+.action-btn-edit:hover {
+  background-color: #2c5aa0;
+}
+
+.action-btn:disabled {
+  background-color: #a0aec0;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  padding: 8px 12px;
+  background-color: #f7fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.reviewer-label {
+  font-weight: 600;
+  color: #4a5568;
+  margin-right: 8px;
+}
+
+.reviewer-name {
+  color: #2d3748;
+  font-weight: 500;
 }
 
 .upload-section {
