@@ -188,27 +188,69 @@
         <div
           v-if="fileType === 'pdf' && pdfUrl"
           class="doc-container"
+          :class="{ 'annotation-mode': isAnnotationMode }"
           ref="pdfScroll"
           @scroll="onScroll"
+          @click="handleDocumentClick"
         >
-          <vue-pdf-embed
+          <div
             v-for="p in numPages"
             :key="p"
-            :source="pdfUrl"
-            :page="p"
-            :scale="zoom"
-            ref="pdfPages"
-            class="pdf-page"
-          />
+            class="pdf-page-wrapper"
+            :data-page="p"
+          >
+            <vue-pdf-embed
+              :source="pdfUrl"
+              :page="p"
+              :scale="zoom"
+              :ref="`pdfPage${p}`"
+              class="pdf-page"
+            />
+            <!-- Annotation overlays for this page -->
+            <div class="annotation-overlay" :data-page="p">
+              <div
+                v-for="annotation in getAnnotationsForPage(p)"
+                :key="annotation.id"
+                class="annotation-marker"
+                :style="{
+                  left: annotation.x + '%',
+                  top: annotation.y + '%'
+                }"
+                @click="showAnnotationDetails(annotation)"
+                :title="annotation.description"
+              >
+                <div class="annotation-circle">C</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- DOCX Viewer -->
         <div
           v-if="fileType === 'docx'"
-          v-html="docxHtml"
           class="doc-container docx-content"
+          :class="{ 'annotation-mode': isAnnotationMode }"
           :style="{ fontSize: zoom * 16 + 'px' }"
-        ></div>
+          @click="handleDocumentClick"
+        >
+          <div v-html="docxHtml"></div>
+          <!-- Annotation overlays for DOCX -->
+          <div class="annotation-overlay">
+            <div
+              v-for="annotation in annotations"
+              :key="annotation.id"
+              class="annotation-marker"
+              :style="{
+                left: annotation.x + '%',
+                top: annotation.y + '%'
+              }"
+              @click="showAnnotationDetails(annotation)"
+              :title="annotation.description"
+            >
+              <div class="annotation-circle">C</div>
+            </div>
+          </div>
+        </div>
 
         <!-- Empty state -->
         <div v-if="!fileType" class="empty-state">
@@ -218,27 +260,99 @@
         </div>
       </div>
 
-      <!-- Simplified Comments Sidebar -->
+      <!-- Enhanced Comments Sidebar -->
       <aside class="sidebar">
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item">
-              <span class="comment-text">{{ comment }}</span>
+              <div class="comment-header">
+                <span class="comment-author">{{ comment.author || 'Anonymous' }}</span>
+                <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+              </div>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <span v-if="comment.page_no">Page: {{ comment.page_no }}</span>
+                  <span v-if="comment.section">Section: {{ comment.section }}</span>
+                </div>
+                <p class="comment-text">{{ comment.description }}</p>
+                <div v-if="comment.annotation" class="annotation-info">
+                  <span class="annotation-marker">C Annotation</span>
+                </div>
+              </div>
               <button @click="removeComment(index)" class="remove-btn">×</button>
             </li>
           </ul>
           <p v-else class="no-comments">No comments yet</p>
         </div>
-        <div class="add-comment">
-          <input
-            type="text"
-            v-model="newComment"
-            placeholder="Add a comment..."
-            @keyup.enter="addComment"
-            class="comment-input"
-          />
-          <button @click="addComment" class="comment-btn">Add</button>
+        
+        <!-- Add Comment Button -->
+        <div class="add-comment-section">
+          <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
+            Add Comment
+          </button>
+        </div>
+
+        <!-- Annotation Mode Indicator -->
+        <div v-if="isAnnotationMode" class="annotation-mode-indicator">
+          <div class="annotation-instruction">
+            <span class="annotation-icon">📍</span>
+            <span>Click on the document to place your annotation</span>
+            <button @click="cancelAnnotation" class="cancel-annotation-btn">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Comment Form Modal - Shows after annotation is placed -->
+        <div v-if="showCommentForm" class="comment-form-overlay" @click="closeCommentForm">
+          <div class="comment-form-container" @click.stop>
+            <div class="comment-form-header">
+              <h4>Add Comment</h4>
+              <button @click="closeCommentForm" class="close-btn">×</button>
+            </div>
+            
+            <div class="comment-form-body">
+              <!-- Document Details Flex Box -->
+              <div class="document-details-box">
+                <h5>Document Details</h5>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <span class="detail-label">Document ID:</span>
+                    <span class="detail-value">{{ commentForm.document_id }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Version:</span>
+                    <span class="detail-value">{{ commentForm.version }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Revision:</span>
+                    <span class="detail-value">{{ commentForm.revision }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Page:</span>
+                    <span class="detail-value">{{ commentForm.page_no }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Description Input -->
+              <div class="form-group">
+                <label>Comment Description</label>
+                <textarea 
+                  v-model="commentForm.description" 
+                  placeholder="Enter your comment description..."
+                  rows="4"
+                  class="comment-description"
+                ></textarea>
+              </div>
+            </div>
+            
+            <div class="comment-form-footer">
+              <button @click="closeCommentForm" class="cancel-btn">Cancel</button>
+              <button @click="submitComment" class="submit-btn" :disabled="!commentForm.description.trim()">
+                Submit Comment
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
     </div>
@@ -425,6 +539,21 @@ export default {
       // Comments
       comments: [],
       newComment: "",
+      showCommentForm: false,
+      commentForm: {
+        document_name: '',
+        document_id: '',
+        version: '',
+        revision: '',
+        page_no: 1,
+        section: '',
+        description: ''
+      },
+      
+      // Annotations
+      annotations: [],
+      isAnnotationMode: false,
+      currentAnnotation: null,
     }
   },
   
@@ -434,9 +563,7 @@ export default {
     },
     
     isFormValid() {
-      return this.documentDetails.documentNumber.trim() && 
-             this.documentDetails.version.trim() && 
-             this.documentDetails.revision.trim();
+      return this.commentForm.description.trim();
     }
   },
   
@@ -617,6 +744,9 @@ export default {
         this.documentId = doc.document_number;
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
+        
+        // Load existing comments and annotations
+        this.loadCommentsFromBackend();
         
         // Load the file for display based on file extension
         const extension = filename.split('.').pop().toLowerCase();
@@ -1024,6 +1154,241 @@ export default {
     
     removeComment(index) {
       this.comments.splice(index, 1);
+    },
+
+    // Enhanced Comment System
+    startAnnotationMode() {
+      this.isAnnotationMode = true;
+      this.showCommentForm = false;
+    },
+
+    closeCommentForm() {
+      this.showCommentForm = false;
+      this.isAnnotationMode = false;
+      this.commentForm = {
+        document_name: this.fileName || '',
+        document_id: this.documentId || '',
+        version: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '',
+        revision: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '',
+        page_no: this.page || 1,
+        section: '',
+        description: ''
+      };
+    },
+
+    cancelAnnotation() {
+      this.isAnnotationMode = false;
+      this.showCommentForm = false;
+    },
+
+    submitComment() {
+      console.log('Submit button clicked!');
+      console.log('Form data:', this.commentForm);
+      
+      // Validate required fields
+      if (!this.commentForm.description.trim()) {
+        alert('Please enter description');
+        return;
+      }
+      
+      // Get current user info
+      let currentUser = 'Anonymous';
+      try {
+        if (userStore && userStore.getters && userStore.getters.userName) {
+          currentUser = userStore.getters.userName() || 'Anonymous';
+        }
+      } catch (error) {
+        console.log('Error getting user name:', error);
+      }
+      console.log('Current user:', currentUser);
+      
+      // Create comment with annotation data
+      const comment = {
+        id: Date.now(),
+        ...this.commentForm,
+        author: currentUser,
+        created_at: new Date().toISOString(),
+        annotation: true
+      };
+      
+      console.log('Created comment object:', comment);
+      
+      // Create annotation if we have position data
+      if (this.currentAnnotation) {
+        const annotation = {
+          id: Date.now(),
+          x: this.currentAnnotation.x,
+          y: this.currentAnnotation.y,
+          page: this.currentAnnotation.page,
+          description: this.commentForm.description,
+          document_id: this.documentId
+        };
+        
+        this.annotations.push(annotation);
+        comment.x = this.currentAnnotation.x;
+        comment.y = this.currentAnnotation.y;
+        
+        console.log('Annotation created:', annotation);
+        console.log('Total annotations:', this.annotations.length);
+        
+        // Clear current annotation after creating it
+        this.currentAnnotation = null;
+      }
+      
+      // Add comment to the comments array
+      this.comments.push(comment);
+      console.log('Comment added to comments array:', comment);
+      console.log('Total comments now:', this.comments.length);
+      console.log('Comments array:', this.comments);
+      
+      // Close the form
+      this.closeCommentForm();
+      
+      // Save to backend
+      this.saveCommentToBackend(comment);
+      
+      // Show success message
+      console.log('Comment submitted successfully with annotation');
+      alert('Comment submitted successfully!');
+      
+      // Show user feedback
+      this.$nextTick(() => {
+        console.log('Comment and annotation added successfully!');
+        console.log('Comments in panel:', this.comments);
+        console.log('Annotations on document:', this.annotations);
+      });
+    },
+
+    // Annotation System
+    handleDocumentClick(event) {
+      if (!this.isAnnotationMode) return;
+      
+      const rect = event.currentTarget.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * 100;
+      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      
+      // Update comment form with click position and document details
+      this.commentForm.page_no = this.fileType === 'pdf' ? this.page : 1;
+      this.commentForm.document_name = this.fileName || '';
+      this.commentForm.document_id = this.documentId || '';
+      this.commentForm.version = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '';
+      this.commentForm.revision = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '';
+      
+      // Store annotation position for later use
+      this.currentAnnotation = {
+        x: x,
+        y: y,
+        page: this.fileType === 'pdf' ? this.page : 1
+      };
+      
+      // Exit annotation mode and show comment form
+      this.isAnnotationMode = false;
+      this.showCommentForm = true;
+    },
+
+    getAnnotationsForPage(pageNum) {
+      const pageAnnotations = this.annotations.filter(ann => ann.page === pageNum);
+      console.log(`Annotations for page ${pageNum}:`, pageAnnotations);
+      return pageAnnotations;
+    },
+
+    showAnnotationDetails(annotation) {
+      // Show annotation details in a tooltip or modal
+      alert(`Annotation: ${annotation.description}`);
+    },
+
+    async saveCommentToBackend(comment) {
+      try {
+        const response = await fetch('http://localhost:8000/api/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(comment)
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to save comment');
+        }
+        
+        console.log('Comment saved successfully');
+      } catch (error) {
+        console.error('Error saving comment:', error);
+      }
+    },
+
+    async loadCommentsFromBackend() {
+      try {
+        const response = await fetch(`http://localhost:8000/api/comments?document_id=${this.documentId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          this.comments = data.comments || [];
+          this.annotations = data.annotations || [];
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
+      }
+    },
+
+
+    // Test method - can be called from browser console
+    testCommentAndAnnotation() {
+      console.log('Testing comment and annotation functionality...');
+      
+      // Create a test comment
+      const testComment = {
+        id: Date.now(),
+        document_name: 'test-document.pdf',
+        document_id: 'TEST-001',
+        version: '1.0',
+        revision: 'A',
+        page_no: 1,
+        section: 'Test Section',
+        description: 'This is a test comment with annotation',
+        author: 'Test User',
+        created_at: new Date().toISOString(),
+        annotation: true
+      };
+      
+      // Create a test annotation
+      const testAnnotation = {
+        id: Date.now(),
+        x: 50,
+        y: 30,
+        page: 1,
+        description: 'This is a test comment with annotation',
+        document_id: 'TEST-001'
+      };
+      
+      this.comments.push(testComment);
+      this.annotations.push(testAnnotation);
+      
+      console.log('Test comment added:', testComment);
+      console.log('Test annotation added:', testAnnotation);
+      console.log('Total comments:', this.comments.length);
+      console.log('Total annotations:', this.annotations.length);
+    },
+
+    // Simple test method to add a comment directly
+    addTestComment() {
+      const testComment = {
+        id: Date.now(),
+        document_name: 'test-document.pdf',
+        document_id: 'TEST-001',
+        version: '1.0',
+        revision: 'A',
+        page_no: 1,
+        section: 'Test Section',
+        description: 'This is a simple test comment',
+        author: 'Test User',
+        created_at: new Date().toISOString(),
+        annotation: false
+      };
+      
+      this.comments.push(testComment);
+      console.log('Simple test comment added:', testComment);
+      console.log('Comments array length:', this.comments.length);
     },
 
     // Cleanup
@@ -1641,6 +2006,391 @@ export default {
 
 .comment-btn:hover {
   background: #2563eb;
+}
+
+/* Enhanced Comment System Styles */
+.add-comment-section {
+  margin-top: 1rem;
+}
+
+.add-comment-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.add-comment-btn:hover {
+  background: #2563eb;
+}
+
+/* Comment Form Modal */
+.comment-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.comment-form-container {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.comment-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comment-form-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #374151;
+}
+
+.comment-form-body {
+  padding: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-select {
+  background-color: white;
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input[readonly] {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.comment-form-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancel-btn,
+.annotation-btn,
+.submit-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.annotation-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.annotation-btn:hover {
+  background: #d97706;
+}
+
+.submit-btn {
+  background: #10b981;
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.submit-btn:disabled,
+.annotation-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* Enhanced Comment Display */
+.comment-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.comment-author {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.comment-date {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.comment-content {
+  margin-bottom: 0.5rem;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.comment-text {
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.annotation-info {
+  margin-top: 0.5rem;
+}
+
+.annotation-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Annotation System Styles */
+.pdf-page-wrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.annotation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.annotation-marker {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.annotation-circle {
+  width: 24px;
+  height: 24px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.annotation-circle:hover {
+  transform: scale(1.2);
+}
+
+/* Annotation mode indicator */
+.doc-container.annotation-mode {
+  cursor: crosshair;
+}
+
+.annotation-mode-indicator {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.annotation-instruction {
+  background: #3b82f6;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.annotation-icon {
+  font-size: 1.2rem;
+}
+
+.cancel-annotation-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  pointer-events: all;
+  transition: background 0.2s;
+}
+
+.cancel-annotation-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Document Details Box */
+.document-details-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.document-details-box h5 {
+  margin: 0 0 1rem 0;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  color: #1e293b;
+  font-weight: 600;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.comment-description {
+  resize: vertical;
+  min-height: 100px;
 }
 
 /* Overlay for track versions modal */
