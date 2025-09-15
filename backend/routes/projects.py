@@ -486,6 +486,162 @@ def get_lru_options():
         print(f"Error fetching LRU options: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@projects_bp.route('/api/reviewer/<int:reviewer_id>/assigned-projects', methods=['GET'])
+def get_reviewer_assigned_projects(reviewer_id):
+    """Get projects that contain LRUs with plan documents assigned to a specific reviewer"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get projects that have LRUs with plan documents assigned to this reviewer
+        cur.execute("""
+            SELECT DISTINCT p.project_id, p.project_name, p.created_at
+            FROM projects p
+            JOIN lrus l ON p.project_id = l.project_id
+            JOIN plan_documents pd ON l.lru_id = pd.lru_id
+            JOIN plan_doc_assignment pda ON pd.document_id = pda.document_id
+            WHERE pda.user_id = %s AND pd.is_active = TRUE
+            ORDER BY p.project_name
+        """, (reviewer_id,))
+        
+        projects = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        project_list = []
+        for project in projects:
+            project_list.append({
+                "id": project[0],
+                "name": project[1],
+                "created_at": project[2].isoformat() if project[2] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "projects": project_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching assigned projects for reviewer {reviewer_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/reviewer/<int:reviewer_id>/assigned-lrus/<int:project_id>', methods=['GET'])
+def get_reviewer_assigned_lrus_in_project(reviewer_id, project_id):
+    """Get LRUs in a specific project that have plan documents assigned to a specific reviewer"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First verify the project exists
+        cur.execute("""
+            SELECT project_id, project_name
+            FROM projects
+            WHERE project_id = %s
+        """, (project_id,))
+        
+        project = cur.fetchone()
+        if not project:
+            cur.close()
+            return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        # Get LRUs in this project that have plan documents assigned to this reviewer
+        cur.execute("""
+            SELECT DISTINCT l.lru_id, l.lru_name, l.created_at
+            FROM lrus l
+            JOIN plan_documents pd ON l.lru_id = pd.lru_id
+            JOIN plan_doc_assignment pda ON pd.document_id = pda.document_id
+            WHERE l.project_id = %s AND pda.user_id = %s AND pd.is_active = TRUE
+            ORDER BY l.lru_name
+        """, (project_id, reviewer_id))
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_list = []
+        for lru in lrus:
+            lru_list.append({
+                "id": lru[0],
+                "name": lru[1],
+                "created_at": lru[2].isoformat() if lru[2] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "project": {
+                "id": project[0],
+                "name": project[1]
+            },
+            "lrus": lru_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching assigned LRUs for reviewer {reviewer_id} in project {project_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/test-reviewer-assignments', methods=['GET'])
+def test_reviewer_assignments():
+    """Test endpoint to view all reviewer assignments and check our filtering logic"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Show all current assignments with full details
+        cur.execute("""
+            SELECT 
+                pda.assignment_id,
+                pda.user_id,
+                u.name as reviewer_name,
+                u.email as reviewer_email,
+                p.project_id,
+                p.project_name,
+                l.lru_id,
+                l.lru_name,
+                pd.document_id,
+                pd.document_number,
+                pd.status,
+                pda.assigned_at
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.is_active = TRUE
+            ORDER BY pda.assigned_at DESC
+        """)
+        
+        assignments = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        assignment_list = []
+        for assignment in assignments:
+            assignment_list.append({
+                "assignment_id": assignment[0],
+                "user_id": assignment[1],
+                "reviewer_name": assignment[2],
+                "reviewer_email": assignment[3],
+                "project_id": assignment[4],
+                "project_name": assignment[5],
+                "lru_id": assignment[6],
+                "lru_name": assignment[7],
+                "document_id": assignment[8],
+                "document_number": assignment[9],
+                "status": assignment[10],
+                "assigned_at": assignment[11].isoformat() if assignment[11] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "message": "All active reviewer assignments",
+            "total_assignments": len(assignment_list),
+            "assignments": assignment_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching test assignments: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @projects_bp.route('/api/lrus/<int:lru_id>/metadata', methods=['GET'])
 def get_lru_metadata(lru_id):
     """Get LRU and associated project metadata"""
