@@ -32,16 +32,61 @@
 
       <!-- Design Head / Designer Actions -->
       <template v-if="currentUserRole === 'Design Head' || currentUserRole === 'Designer'">
-        <label for="file-upload" class="upload-btn">
-          Upload Document
-          <input 
-            id="file-upload"
-            type="file" 
-            accept=".pdf,.docx" 
-            @change="handleFileUpload"
-            style="display: none"
-          />
-        </label>
+        <div class="upload-section">
+          <label for="file-upload" class="upload-btn">
+            Choose Document
+            <input 
+              id="file-upload"
+              type="file" 
+              accept=".pdf,.docx,.doc,.txt,.xlsx,.xls" 
+              @change="handleFileSelect"
+              style="display: none"
+            />
+          </label>
+          
+          <!-- Document Details Form - Show when file is selected -->
+          <div v-if="selectedFile" class="document-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Document Number:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.documentNumber" 
+                  placeholder="e.g., DOC-001"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Version:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.version" 
+                  placeholder="e.g., v1.0"
+                  class="form-input"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Revision:</label>
+                <input 
+                  type="text" 
+                  v-model="documentDetails.revision" 
+                  placeholder="e.g., A"
+                  class="form-input"
+                  required
+                />
+              </div>
+            </div>
+            <button 
+              @click="submitDocument" 
+              class="submit-btn"
+              :disabled="isUploading || !isFormValid"
+            >
+              {{ isUploading ? 'Uploading...' : 'Submit Document' }}
+            </button>
+          </div>
+        </div>
       </template>
 
       <!-- Admin and QA Reviewer don't need action buttons -->
@@ -78,7 +123,49 @@
 
     <!-- Main Content Area -->
     <div class="content">
-      <!-- Document Container -->
+      <!-- Left Panel: Existing Documents List -->
+      <div class="documents-list-panel">
+        <h3>Uploaded Documents</h3>
+        <div class="documents-container">
+          <div v-if="loading" class="loading-state">
+            <p>Loading documents...</p>
+          </div>
+          <div v-else-if="existingDocuments.length === 0" class="no-documents">
+            <div class="no-docs-icon">📋</div>
+            <p>No documents uploaded yet</p>
+          </div>
+          <div v-else class="documents-list">
+            <div 
+              v-for="doc in existingDocuments" 
+              :key="doc.document_id"
+              class="document-item"
+              @click="viewDocument(doc)"
+            >
+              <div class="doc-icon">
+                <span v-if="doc.file_path.toLowerCase().includes('.pdf')">📄</span>
+                <span v-else-if="doc.file_path.toLowerCase().includes('.docx')">📝</span>
+                <span v-else>📄</span>
+              </div>
+              <div class="doc-info">
+                <div class="doc-title">{{ doc.document_number }}</div>
+                <div class="doc-meta">
+                  <span class="doc-version">{{ doc.version }} ({{ doc.revision }})</span>
+                  <span class="doc-ver">v{{ doc.doc_ver }}</span>
+                </div>
+                <div class="doc-details">
+                  <span class="uploaded-by">{{ doc.uploaded_by_name }}</span>
+                  <span class="upload-date">{{ formatDate(doc.upload_date) }}</span>
+                </div>
+                <div class="doc-status" :class="'status-' + doc.status.replace(' ', '-')">
+                  {{ doc.status }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Document Viewer -->
       <div class="document-area">
         <!-- PDF Viewer -->
         <div
@@ -109,8 +196,8 @@
         <!-- Empty state -->
         <div v-if="!fileType" class="empty-state">
           <div class="empty-icon">📄</div>
-          <p class="empty-msg">No document present</p>
-          <p class="empty-sub" v-if="canUpload">Please upload a PDF or DOCX file</p>
+          <p class="empty-msg">Select a document to view</p>
+          <p class="empty-sub" v-if="canUpload">Or upload a new PDF or DOCX file</p>
         </div>
       </div>
 
@@ -302,10 +389,10 @@
 <script>
 import VuePdfEmbed from "vue-pdf-embed"
 import * as mammoth from "mammoth/mammoth.browser"
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf"
+import * as pdfjsLib from "pdfjs-dist/build/pdf"
 
 // Configure pdf.js worker
-import pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker?url"
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
 
 import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue"
@@ -315,13 +402,16 @@ export default {
   components: { VuePdfEmbed, QAHeadAssignReviewer },
   data() {
     return {
-      // Document metadata
-      lruName: "LRU-2024-001",
-      projectName: "Project Alpha",
-      documentId: "DOC-001",
+      // Document metadata - will be loaded dynamically
+      lruName: "",
+      projectName: "",
+      documentId: "",
       status: "pending", // pending, approved, rejected, review
-      createdDate: new Date('2024-01-15'),
+      createdDate: null,
       lastModifiedDate: new Date(),
+      
+      // User role - from user store
+      currentUserRole: userStore.getters.roleName() || "Guest",
       
       // Document viewing
       fileType: null,
@@ -331,11 +421,26 @@ export default {
       numPages: 0,
       zoom: 1.0,
       fileName: "",
+      
+      // File upload
+      selectedFile: null,
+      isUploading: false,
+      documentDetails: {
+        lruId: 1,
+        documentNumber: "",
+        version: "",
+        revision: "",
+        docVer: 1
+      },
 
       showAssignReviewerModal: false,
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
+      // Document list
+      loading: false,
+      existingDocuments: [],
+      
       documentVersions: [
         { 
           id: 1, 
@@ -408,10 +513,6 @@ export default {
   },
   
   computed: {
-    // Get current user role from global store
-    currentUserRole() {
-      return userStore.getters.roleName() // Using roleName for string comparison
-    },
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     },
@@ -429,6 +530,11 @@ export default {
     },
     docContent() {
       return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxHtml);
+    },
+    isFormValid() {
+      return this.documentDetails.documentNumber.trim() !== '' &&
+             this.documentDetails.version.trim() !== '' &&
+             this.documentDetails.revision.trim() !== '';
     }
   },
   
@@ -436,14 +542,212 @@ export default {
     const { lruId, documentId, projectId } = this.$route.params;
     console.log('Document Viewer initialized:', { lruId, documentId, projectId });
     
-    // Load document metadata from server
-    // this.loadDocumentMetadata(documentId);
+    // Set the correct LRU ID from route params
+    if (lruId) {
+      this.documentDetails.lruId = parseInt(lruId);
+      // Load LRU metadata, next doc_ver, document versions, and existing documents
+      this.loadLruMetadata(parseInt(lruId));
+      this.loadNextDocVer(parseInt(lruId));
+      this.loadDocumentVersions(parseInt(lruId));
+      this.loadExistingDocuments(parseInt(lruId));
+    }
     
     // Load existing document if available
-    // this.loadDocumentFromServer(documentId);
+    if (documentId && documentId !== 'new') {
+      this.loadExistingDocument(documentId);
+    }
   },
   
   methods: {
+    // Load LRU metadata
+    async loadLruMetadata(lruId) {
+      try {
+        console.log(`Attempting to load metadata for LRU ${lruId}...`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/metadata`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('API response:', result);
+        
+        if (result.success) {
+          this.lruName = result.lru.lru_name;
+          this.projectName = result.lru.project_name;
+          console.log(`✅ Loaded metadata for LRU ${lruId}:`, result.lru);
+        } else {
+          console.warn('❌ Failed to load LRU metadata:', result.message);
+          // Set fallback values
+          this.lruName = `LRU-${lruId}`;
+          this.projectName = "Unknown Project";
+        }
+      } catch (error) {
+        console.error('❌ Error loading LRU metadata:', error);
+        // Set fallback values when API is not available
+        this.lruName = `LRU-${lruId}`;
+        this.projectName = "Unknown Project";
+      }
+    },
+
+    // Load next doc_ver for LRU
+    async loadNextDocVer(lruId) {
+      try {
+        console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
+        const response = await fetch(`http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Next doc_ver API response:', result);
+        
+        if (result.success) {
+          this.documentDetails.docVer = result.nextDocVer;
+          console.log(`✅ Next doc_ver for LRU ${lruId}: ${result.nextDocVer}`);
+        } else {
+          // If no documents exist for this LRU, start with 1
+          this.documentDetails.docVer = 1;
+          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = 1`);
+        }
+      } catch (error) {
+        console.error('❌ Error loading next doc_ver:', error);
+        // Default to 1 if there's an error
+        this.documentDetails.docVer = 1;
+        console.log(`⚠️ Error occurred, defaulting to doc_ver = 1`);
+      }
+    },
+
+    // Load existing documents for LRU  
+    async loadExistingDocuments(lruId) {
+      try {
+        this.loading = true;
+        console.log(`Loading existing documents for LRU ${lruId}...`);
+        
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Existing documents API response:', result);
+        
+        if (result.success) {
+          this.existingDocuments = result.documents;
+          console.log(`✅ Loaded ${this.existingDocuments.length} existing documents for LRU ${lruId}`);
+        } else {
+          console.warn('❌ Failed to load existing documents:', result.message);
+          this.existingDocuments = [];
+        }
+      } catch (error) {
+        console.error('❌ Error loading existing documents:', error);
+        this.existingDocuments = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Load document versions for LRU and display the latest one
+    async loadDocumentVersions(lruId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const result = await response.json();
+        
+        if (result.success) {
+          // Transform the data to match the expected format
+          this.documentVersions = result.documents.map(doc => ({
+            id: doc.document_id,
+            projectId: `${doc.document_number}`,
+            version: doc.version,
+            docVer: doc.doc_ver,
+            revision: doc.revision,
+            date: new Date(doc.upload_date).toLocaleDateString(),
+            filePath: doc.file_path,
+            originalFilename: doc.original_filename,
+            fileSize: doc.file_size,
+            isFavorite: false,
+            deleted: false
+          })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
+          console.log(`Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`);
+          
+          // If there are existing documents, load the latest one
+          if (this.documentVersions.length > 0) {
+            const latestDoc = this.documentVersions[0];
+            this.loadExistingDocument(latestDoc);
+          }
+        } else {
+          console.warn('Failed to load document versions:', result.message);
+        }
+      } catch (error) {
+        console.error('Error loading document versions:', error);
+      }
+    },
+
+    // View a specific document
+    async viewDocument(doc) {
+      try {
+        console.log('🔍 Viewing document:', doc);
+        console.log('📁 File path from DB:', doc.file_path);
+        
+        // Extract filename from file_path - handle both Windows (\) and Unix (/) paths
+        let filename = doc.file_path.split('\\').pop(); // Handle Windows paths
+        filename = filename.split('/').pop(); // Handle Unix paths
+        
+        console.log('📄 Extracted filename:', filename);
+        
+        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        console.log('🌐 File URL:', fileUrl);
+        
+        // Test if file is accessible
+        try {
+          const testResponse = await fetch(fileUrl, { method: 'HEAD' });
+          console.log('🔗 File accessibility test:', testResponse.status, testResponse.statusText);
+          
+          if (!testResponse.ok) {
+            throw new Error(`File not accessible: ${testResponse.status} ${testResponse.statusText}`);
+          }
+        } catch (fetchError) {
+          console.error('❌ File accessibility test failed:', fetchError);
+          alert(`Failed to access file: ${filename}. Please check if the file exists in plan_doc_uploads folder.`);
+          return;
+        }
+        
+        // Set document metadata
+        this.documentId = doc.document_number;
+        this.status = doc.status;
+        this.lastModifiedDate = new Date(doc.upload_date);
+        
+        // Load the file for display based on file extension
+        const extension = filename.split('.').pop().toLowerCase();
+        console.log('📋 File extension:', extension);
+        
+        if (extension === 'pdf') {
+          this.fileType = 'pdf';
+          this.fileName = filename;
+          console.log('📄 Loading PDF...');
+          await this.loadPdfFromUrl(fileUrl);
+        } else if (extension === 'docx') {
+          this.fileType = 'docx';
+          this.fileName = filename;
+          console.log('📝 Loading DOCX...');
+          await this.loadDocxFromUrl(fileUrl);
+        } else {
+          this.fileType = 'other';
+          this.fileName = filename;
+          console.log('📄 Other file type, showing filename only');
+        }
+        
+        console.log(`✅ Document ${doc.document_number} loaded successfully`);
+        
+      } catch (error) {
+        console.error('❌ Error viewing document:', error);
+        alert(`Failed to load document: ${error.message}`);
+      }
+    },
+
     // Date formatting
     formatDate(date) {
       if (!date) return 'N/A';
@@ -550,28 +854,97 @@ export default {
     },
     
     // File handling
-    handleFileUpload(event) {
+    handleFileSelect(event) {
       const file = event.target.files?.[0];
       if (!file) return;
 
-      this.fileName = file.name;
-      this.clearDocument();
-
+      // Validate file type
       const fileType = file.type;
+      const allowedTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+        "text/plain",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-excel"
+      ];
+
+      if (!allowedTypes.includes(fileType)) {
+        alert("Unsupported file type. Please upload a PDF, DOCX, DOC, TXT, XLSX, or XLS file.");
+        return;
+      }
+
+      // Validate file size (50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        alert("File too large. Maximum size is 50MB.");
+        return;
+      }
+
+      this.selectedFile = file;
+      this.fileName = file.name;
+      
+      // Preview the file
+      this.clearDocument();
       if (fileType === "application/pdf") {
         this.fileType = "pdf";
         this.loadPdf(file);
-      } else if (
-        fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
+      } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
         this.fileType = "docx";
         this.loadDocx(file);
       } else {
-        alert("Unsupported file type. Please upload a PDF or DOCX file.");
+        this.fileType = "other";
+        this.fileName = file.name;
       }
-      
-      // Update modified date
-      this.lastModifiedDate = new Date();
+    },
+
+    async submitDocument() {
+      if (!this.selectedFile) return;
+
+      this.isUploading = true;
+
+      try {
+        const formData = new FormData();
+        formData.append('file', this.selectedFile);
+        formData.append('lru_id', this.documentDetails.lruId);
+        formData.append('document_number', this.documentDetails.documentNumber);
+        formData.append('version', this.documentDetails.version);
+        formData.append('revision', this.documentDetails.revision);
+        formData.append('doc_ver', this.documentDetails.docVer);
+        formData.append('uploaded_by', userStore.getters.currentUser()?.id || userStore.getters.currentUser()?.user_id || 1001);
+
+        const response = await fetch('http://localhost:5000/api/plan-documents', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Document uploaded successfully!');
+          this.selectedFile = null;
+          this.$emit('document-uploaded', result);
+          
+          // Update modified date and reload data
+          this.lastModifiedDate = new Date();
+          
+          // Reload the next doc_ver, document versions, and existing documents list
+          this.loadNextDocVer(this.documentDetails.lruId);
+          this.loadDocumentVersions(this.documentDetails.lruId);
+          this.loadExistingDocuments(this.documentDetails.lruId);
+          
+          // Clear the form
+          this.documentDetails.documentNumber = "";
+          this.documentDetails.version = "";
+          this.documentDetails.revision = "";
+        } else {
+          alert(`Upload failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Upload error:', error);
+        alert('Failed to upload document. Please try again.');
+      } finally {
+        this.isUploading = false;
+      }
     },
 
     async loadPdf(file) {
@@ -847,6 +1220,28 @@ export default {
       this.zoom = 1.0;
       this.fileType = null;
     },
+
+    // Load existing documents for an LRU
+    async loadExistingDocuments(lruId) {
+      this.loading = true;
+      try {
+        const response = await fetch(`/api/lru/${lruId}/documents`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.existingDocuments = data.documents || [];
+          console.log('✅ Loaded existing documents:', this.existingDocuments);
+        } else {
+          console.warn('❌ Failed to load documents:', data.message);
+          this.existingDocuments = [];x
+        }
+      } catch (error) {
+        console.error('❌ Error loading documents:', error);
+        this.existingDocuments = [];
+      } finally {
+        this.loading = false;
+      }
+    },
   },
   
   beforeUnmount() {
@@ -925,6 +1320,32 @@ export default {
   background: #2563eb;
 }
 
+.upload-section {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.submit-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.submit-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
 .upload-btn {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -943,6 +1364,54 @@ export default {
 
 .upload-btn:hover {
   background: #059669;
+}
+
+/* Document Form */
+.document-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 150px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-input::placeholder {
+  color: #6c757d;
 }
 
 /* Control Bar */
@@ -1011,14 +1480,29 @@ export default {
 .content {
   flex: 1;
   display: flex;
-  overflow: hidden;
   gap: 1rem;
   padding: 1rem;
+  min-height: 0; /* Allow container to shrink */
+  position: relative; /* For absolute positioning if needed */
 }
 
 .document-area {
   flex: 3; /* Takes up 3 parts of the 5 total parts */
   display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0; /* Allow container to shrink */
+  overflow: auto; /* Add scroll to document area */
+}
+
+.document-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
   background: white;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -1045,8 +1529,9 @@ export default {
   color: #333;
   padding: 1rem;
   width: 100%;
-  max-width: 100%;
+  height: 100%;
   background: #f8fafc;
+  overflow-y: auto; /* Enable scrolling for DOCX content */
 }
 
 .docx-content .page {
@@ -1054,6 +1539,7 @@ export default {
   padding: 2rem;
   margin: 1rem auto;
   max-width: 816px; /* A4 width at 96 DPI */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Match PDF page shadow */
   min-height: 1056px; /* A4 height at 96 DPI */
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   border: 1px solid #e5e7eb;
@@ -1371,15 +1857,18 @@ export default {
 
 /* Comments Section Styles */
 .comments-section {
-  flex: 2; /* Takes up 2 parts of the 5 total parts */
+  flex: 2;
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   padding: 1.75rem;
-  min-width: 0; /* Prevents flex child from overflowing */
-  max-height: calc(100vh - 200px); /* Accounts for header and controls */
-  position: relative;
+  min-width: 300px;
+  max-width: 450px;
+  height: calc(100vh - 200px);
+  align-self: flex-start;
+  position: sticky;
+  top: 1rem;
 }
 
 .comments-section::before {
@@ -1393,6 +1882,7 @@ export default {
   border-radius: 16px 16px 0 0;
 }
 
+/* Comments Header */
 .comments-header {
   display: flex;
   justify-content: space-between;
@@ -1400,7 +1890,6 @@ export default {
   margin-bottom: 2rem;
   padding-bottom: 1.25rem;
   border-bottom: 2px solid #f3f4f6;
-  position: relative;
 }
 
 .comments-header h3 {
@@ -1433,6 +1922,7 @@ export default {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Comments List */
 .comments-list {
   display: flex;
   flex-direction: column;
@@ -1454,6 +1944,7 @@ export default {
   border-left: 4px solid #10b981;
 }
 
+/* Comment Components */
 .comment-header {
   display: flex;
   align-items: flex-start;
@@ -1487,6 +1978,7 @@ export default {
   text-decoration: underline;
 }
 
+/* Status Styles */
 .comment-status {
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -1504,6 +1996,7 @@ export default {
   color: #dc2626;
 }
 
+/* Comment Content and Actions */
 .comment-content {
   color: #1f2937;
   margin-bottom: 1rem;
@@ -1513,20 +2006,6 @@ export default {
 .comment-actions {
   display: flex;
   gap: 0.5rem;
-}
-
-.action-btn {
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
-}
-
-.action-btn:hover {
-  opacity: 0.9;
 }
 
 .action-btn.accept {
@@ -1539,6 +2018,7 @@ export default {
   color: white;
 }
 
+/* Comment Response */
 .comment-response {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -1557,226 +2037,7 @@ export default {
   line-height: 1.5;
 }
 
-/* Reject Comment Modal */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  width: 90%;
-  max-width: 500px;
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content h3 {
-  margin: 0 0 1rem 0;
-}
-
-.modal-content textarea {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  resize: vertical;
-  margin-bottom: 1rem;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
-}
-
-.btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.btn-secondary {
-  background: #e5e7eb;
-  border: none;
-}
-.btn-danger {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-}
-.btn:hover {
-  opacity: 0.9;
-}
-
-/* Smooth modal animation */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Comments Section Styles */
-.comments-section {
-  background: #fff;
-  border-left: 1px solid #e5e7eb;
-  width: 360px;
-  height: 100%;
-  overflow-y: auto;
-  padding: 1rem;
-}
-
-.comments-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.comments-header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.comment-count {
-  color: #6b7280;
-  font-size: 0.9rem;
-}
-
-.comments-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.comment-item {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 1rem;
-  transition: all 0.2s ease;
-}
-
-.comment-item:hover {
-  background: #f3f4f6;
-}
-
-.comment-item.comment-resolved {
-  border-left: 4px solid #10b981;
-}
-
-.comment-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.comment-icon {
-  flex-shrink: 0;
-  color: #6b7280;
-}
-
-.comment-info {
-  flex: 1;
-}
-
-.comment-author {
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-.comment-meta {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-
-.comment-page {
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.comment-status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.status-accepted {
-  background: #d1fae5;
-  color: #059669;
-}
-
-.status-rejected {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.comment-content {
-  color: #1f2937;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-.comment-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.action-btn {
-  padding: 0.4rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-  transition: opacity 0.2s;
-}
-
-.action-btn:hover {
-  opacity: 0.9;
-}
-
-.action-btn.accept {
-  background: #10b981;
-  color: white;
-}
-
-.action-btn.reject {
-  background: #ef4444;
-  color: white;
-}
-
-.comment-response {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-.response-header {
-  font-weight: 500;
-  color: #4b5563;
-  margin-bottom: 0.5rem;
-}
-
-.response-content {
-  color: #6b7280;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-/* Reject Comment Modal */
+/* Modal Styles */
 .modal {
   position: fixed;
   inset: 0;
@@ -1831,6 +2092,12 @@ export default {
 .modal-actions button:last-child {
   background: #e5e7eb;
   color: #1f2937;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 </style>

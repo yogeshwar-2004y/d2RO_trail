@@ -135,7 +135,7 @@ const router = createRouter({
       component: MemoForm,
     },
     {
-    path: '/document-viewer',
+    path: '/document-viewer/:lruId/:lruName/:projectId',
     name: 'DocumentViewer',
     component: DocumentViewer,
     },

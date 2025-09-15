@@ -18,14 +18,6 @@
         <span class="memo-id">Shared Memo ID: {{ id }}</span>
         <span class="view-only-indicator">VIEW ONLY</span>
       </div>
-      <div class="share-section">
-        <button class="share-btn" @click="toggleShareModal">
-          <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
-          </svg>
-          <span class="share-text">share</span>
-        </button>
-      </div>
     </header>
 
     <div class="form-content">
@@ -115,17 +107,6 @@
       </div>
     </div>
 
-    <!-- Share Modal -->
-    <div v-if="showShareModal" class="share-modal-overlay" @click="toggleShareModal">
-      <div class="share-modal-content" @click.stop>
-        <h2>Share via Email</h2>
-        <p>Enter email addresses separated by commas.</p>
-        <input type="text" v-model="emailAddresses" placeholder="e.g., mail1@example.com, mail2@example.com" class="email-input" />
-        <div class="modal-actions">
-          <button @click="sendEmails" class="send-btn">Send</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -140,8 +121,6 @@ export default {
   },
   data() {
     return {
-      showShareModal: false,
-      emailAddresses: '',
       memoData: {
         from: 'CASCIC Design Team',
         cascicRefNo: 'CASCIC/2025/001',
@@ -154,7 +133,7 @@ export default {
         lruSruDesc: 'Flight Control Unit',
         refDoc: 'FCU-SPEC-001',
         refNoDocument: 'DOC/FCU/2025/001',
-        version: '1.0',
+        version: 'v1.0',
         revision: 'A',
         partNo: 'FCU-001-REV-A',
         manufacturer: 'Aviation Systems Ltd.',
@@ -207,24 +186,6 @@ export default {
       // You can replace this with actual API call
       // this.memoData = await api.getSharedMemo(this.id);
     },
-    toggleShareModal() {
-      this.showShareModal = !this.showShareModal;
-      if (!this.showShareModal) {
-        this.emailAddresses = '';
-      }
-    },
-    sendEmails() {
-      if (this.emailAddresses.trim() === '') {
-        alert('Please enter at least one email address.');
-        return;
-      }
-      
-      const emails = this.emailAddresses.split(',').map(email => email.trim());
-      console.log('Sharing memo to:', emails);
-      
-      alert(`Memo shared successfully to: ${emails.join(', ')}`);
-      this.toggleShareModal();
-    }
   }
 };
 </script>
@@ -420,62 +381,4 @@ export default {
   margin-top: 2px;
 }
 
-.share-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.share-modal-content {
-  background-color: white;
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  width: 90%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.share-modal-content h2 {
-  margin: 0;
-  font-size: 1.5em;
-  text-align: center;
-}
-
-.share-modal-content p {
-  margin: 0;
-  font-size: 0.9em;
-  color: #666;
-}
-
-.email-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.send-btn {
-  padding: 10px 20px;
-  background-color: var(--button-bg);
-  color: var(--button-text);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
 </style>

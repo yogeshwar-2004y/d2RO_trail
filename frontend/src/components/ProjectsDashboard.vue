@@ -100,8 +100,11 @@ export default {
       try {
         this.loading = true;
         this.error = null;
+        console.log('before fetching');
         
         const response = await fetch('http://localhost:5000/api/projects');
+        console.log('after fetching');
+        
         const data = await response.json();
         
         if (data.success) {

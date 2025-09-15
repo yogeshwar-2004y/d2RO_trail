@@ -58,7 +58,7 @@ export default {
         name: 'ERP QA Automation Tool',
         number: 'PRJ-001',
         date: '2025-07-01',
-        version: '1.0',
+        version: 'v1.0',
         revision: '0',
       },
       user: {
