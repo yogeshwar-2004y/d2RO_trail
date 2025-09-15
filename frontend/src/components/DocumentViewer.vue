@@ -266,6 +266,9 @@
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item">
+              <button @click="deleteComment(index)" class="delete-btn" title="Delete comment">
+                🗑️
+              </button>
               <div class="comment-header">
                 <span class="comment-author">{{ comment.author || 'Anonymous' }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
@@ -280,7 +283,6 @@
                   <span class="annotation-marker">C Annotation</span>
                 </div>
               </div>
-              <button @click="removeComment(index)" class="remove-btn">×</button>
             </li>
           </ul>
           <p v-else class="no-comments">No comments yet</p>
@@ -355,6 +357,35 @@
           </div>
         </div>
       </aside>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteConfirm" class="delete-confirm-overlay" @click="cancelDelete">
+      <div class="delete-confirm-modal" @click.stop>
+        <div class="delete-confirm-header">
+          <h4>Delete Comment</h4>
+          <button @click="cancelDelete" class="close-btn">×</button>
+        </div>
+        
+        <div class="delete-confirm-body">
+          <div class="warning-icon">⚠️</div>
+          <p>Are you sure you want to delete this comment?</p>
+          <div class="comment-preview" v-if="commentToDelete">
+            <strong>Comment:</strong>
+            <p class="comment-text-preview">"{{ commentToDelete.comment.description }}"</p>
+            <div class="comment-meta-preview">
+              <span>By: {{ commentToDelete.comment.author }}</span>
+              <span>Page: {{ commentToDelete.comment.page_no }}</span>
+            </div>
+          </div>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+        
+        <div class="delete-confirm-footer">
+          <button @click="cancelDelete" class="cancel-btn">Cancel</button>
+          <button @click="confirmDelete" class="delete-confirm-btn">Delete Comment</button>
+        </div>
+      </div>
     </div>
 
     <!-- Assign Reviewer Modal -->
@@ -554,6 +585,10 @@ export default {
       annotations: [],
       isAnnotationMode: false,
       currentAnnotation: null,
+      
+      // Delete confirmation
+      showDeleteConfirm: false,
+      commentToDelete: null,
     }
   },
   
@@ -1154,6 +1189,76 @@ export default {
     
     removeComment(index) {
       this.comments.splice(index, 1);
+    },
+
+    deleteComment(index) {
+      const comment = this.comments[index];
+      if (!comment) return;
+      
+      // Store comment to delete and show confirmation modal
+      this.commentToDelete = { comment, index };
+      this.showDeleteConfirm = true;
+    },
+
+    confirmDelete() {
+      if (!this.commentToDelete) return;
+      
+      const { comment, index } = this.commentToDelete;
+      
+      // Delete comment from local array
+      this.comments.splice(index, 1);
+      
+      // If comment has annotation, also delete the annotation
+      if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+        this.deleteAnnotationForComment(comment);
+      }
+      
+      // Delete from backend if comment has an ID
+      if (comment.id) {
+        this.deleteCommentFromBackend(comment.id);
+      }
+      
+      console.log('Comment deleted:', comment);
+      console.log('Remaining comments:', this.comments.length);
+      
+      // Close confirmation modal
+      this.showDeleteConfirm = false;
+      this.commentToDelete = null;
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirm = false;
+      this.commentToDelete = null;
+    },
+
+    deleteAnnotationForComment(comment) {
+      // Find and remove the corresponding annotation
+      const annotationIndex = this.annotations.findIndex(ann => 
+        ann.description === comment.description && 
+        ann.x === comment.x && 
+        ann.y === comment.y
+      );
+      
+      if (annotationIndex !== -1) {
+        this.annotations.splice(annotationIndex, 1);
+        console.log('Annotation deleted for comment:', comment);
+      }
+    },
+
+    async deleteCommentFromBackend(commentId) {
+      try {
+        const response = await fetch(`http://localhost:8000/api/comments/${commentId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          console.log('Comment deleted from backend successfully');
+        } else {
+          console.error('Failed to delete comment from backend');
+        }
+      } catch (error) {
+        console.error('Error deleting comment from backend:', error);
+      }
     },
 
     // Enhanced Comment System
@@ -2197,13 +2302,17 @@ export default {
   padding: 1rem;
   margin-bottom: 0.75rem;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .comment-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 0.25rem;
   margin-bottom: 0.5rem;
+  padding-right: 2rem; /* Space for delete button */
 }
 
 .comment-author {
@@ -2250,6 +2359,154 @@ export default {
   border-radius: 4px;
   font-size: 0.8rem;
   font-weight: 500;
+}
+
+/* Delete Button - Absolute Position in Top Right Corner */
+.delete-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.375rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  z-index: 10;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  transform: scale(1.05);
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.delete-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.delete-confirm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fef2f2;
+}
+
+.delete-confirm-header h4 {
+  margin: 0;
+  color: #dc2626;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.delete-confirm-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.warning-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.delete-confirm-body p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.comment-preview {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.comment-text-preview {
+  font-style: italic;
+  color: #6b7280;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.comment-meta-preview {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.warning-text {
+  color: #dc2626;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-confirm-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.delete-confirm-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.delete-confirm-btn:hover {
+  background: #b91c1c;
+}
+
+.delete-confirm-btn:active {
+  transform: scale(0.98);
 }
 
 /* Annotation System Styles */
