@@ -1,8 +1,9 @@
 /extra
 .vscode/
 .env
+
 # Byte-compiled / optimized / DLL files
-_pycache_/
+__pycache__/
 *.py[cod]
 *$py.class
 
@@ -30,5 +31,23 @@ dist/
 # Mac/Windows system files
 .DS_Store
 Thumbs.db
+
+# Node modules
 node_modules/
-node_modules/
+
+# Backend test files and documentation
+backend/tests/
+backend/conftest.py
+backend/README_LOGIN.md
+backend/README_MODULAR_STRUCTURE.md
+backend/test_login.py
+
+# Frontend test files and configuration
+frontend/tests/
+frontend/cypress.config.js
+frontend/test-results.json
+
+# Root directory reports and documentation
+reports/
+TEST_FIXES_SUMMARY.md
+TEST_SETUP_SUMMARY.md
