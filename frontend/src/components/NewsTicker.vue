@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <div class="news-ticker-container" v-if="hasNews">
     <div class="news-ticker">
       <div class="news-content" :style="animationStyle">
@@ -8,7 +8,31 @@
       </div>
     </div>
   </div>
+</template> -->
+
+<template>
+  <div 
+    class="news-ticker-container" 
+    v-if="hasNews || showWhenEmpty"
+    :style="{ height, backgroundColor }"
+  >
+    <div class="news-ticker">
+      <div 
+        class="news-content" 
+        :style="[animationStyle, { color: textColor }]"
+      >
+        <span 
+          v-for="(newsItem, index) in displayNews" 
+          :key="index" 
+          class="news-item"
+        >
+          📰 {{ typeof newsItem === 'string' ? newsItem : newsItem.news_text }}
+        </span>
+      </div>
+    </div>
+  </div>
 </template>
+
 
 <script>
 export default {
@@ -29,6 +53,14 @@ export default {
     textColor: {
       type: String,
       default: '#ffffff'
+    },
+    showWhenEmpty: {
+      type: Boolean,
+      default: true
+    },
+    fallbackText: {
+      type: String,
+      default: 'Welcome to Aviatrax'
     }
   },
   data() {
@@ -43,8 +75,11 @@ export default {
       return this.news.length > 0;
     },
     displayNews() {
-      // Repeat news items for continuous scrolling
-      return this.news.length > 0 ? [...this.news, ...this.news, ...this.news] : [];
+      // Repeat news items for continuous scrolling; if empty and allowed, show fallback
+      if (this.news.length > 0) {
+        return [...this.news, ...this.news, ...this.news];
+      }
+      return this.showWhenEmpty ? [this.fallbackText, this.fallbackText] : [];
     },
     animationStyle() {
       return {
@@ -94,8 +129,6 @@ export default {
 <style scoped>
 .news-ticker-container {
   width: 100%;
-  height: v-bind(height);
-  background-color: v-bind(backgroundColor);
   overflow: hidden;
   position: relative;
   border-top: 2px solid #34495e;
@@ -113,7 +146,6 @@ export default {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  color: v-bind(textColor);
   font-weight: 500;
   font-size: 16px;
   animation-name: scroll;
@@ -136,7 +168,6 @@ export default {
   }
 }
 
-/* Breaking news effect */
 @keyframes flash {
   0%, 50% { opacity: 1; }
   25%, 75% { opacity: 0.7; }
@@ -159,4 +190,5 @@ export default {
   z-index: 1;
   box-shadow: 2px 0 5px rgba(0,0,0,0.3);
 }
+
 </style>
