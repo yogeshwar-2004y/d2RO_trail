@@ -1,40 +1,12 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
   <RouterView />
 </template>
 
-<style scoped> </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<style scoped></style>
 
 <!-- simple flask connection -->
 <!-- <template>
@@ -54,7 +26,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:5000/api')
+    axios.get('http://127.0.0.1:8000/api')
       .then(response => {
         this.message = response.data.message;
       })
@@ -71,4 +43,3 @@ export default {
   color: #5595d4;
 }
 </style> -->
-

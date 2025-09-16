@@ -2,19 +2,50 @@
   <div class="lru-dashboard">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="header-center">
         <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+          <img
+            src="@/assets/images/aviatrax-logo.png"
+            alt="Aviatrax Logo"
+            class="logo"
+          />
+          <img
+            src="@/assets/images/vista_logo.png"
+            alt="Vista Logo"
+            class="logo vista-logo"
+          />
         </div>
         <div class="page-title">
-          <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            class="title-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -37,22 +68,45 @@
         </div>
 
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search LRUs" class="search-input">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search LRUs"
+            class="search-input"
+          />
+          <svg
+            class="search-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
       </div>
       <!-- ✅ Status Filter Overlay -->
-      <div v-if="showStatusFilter" class="status-overlay" @click.self="closeStatusFilter">
+      <div
+        v-if="showStatusFilter"
+        class="status-overlay"
+        @click.self="closeStatusFilter"
+      >
         <div class="status-panel">
           <h3>Filters</h3>
-          <div 
-            v-for="status in statuses" 
-            :key="status.name" 
-            class="status-option" 
-            :class="[status.color, { 'selected': activeStatusFilter === status.name }]"
+          <div
+            v-for="status in statuses"
+            :key="status.name"
+            class="status-option"
+            :class="[
+              status.color,
+              { selected: activeStatusFilter === status.name },
+            ]"
             @click="selectStatus(status.name)"
           >
             {{ status.name }}
@@ -60,14 +114,21 @@
         </div>
       </div>
       <!-- ✅ Status Filter Overlay -->
-      <div v-if="showStatusFilter" class="status-overlay" @click.self="closeStatusFilter">
+      <div
+        v-if="showStatusFilter"
+        class="status-overlay"
+        @click.self="closeStatusFilter"
+      >
         <div class="status-panel">
           <h3>Filters</h3>
-          <div 
-            v-for="status in statuses" 
-            :key="status.name" 
-            class="status-option" 
-            :class="[status.color, { 'selected': activeStatusFilter === status.name }]"
+          <div
+            v-for="status in statuses"
+            :key="status.name"
+            class="status-option"
+            :class="[
+              status.color,
+              { selected: activeStatusFilter === status.name },
+            ]"
             @click="selectStatus(status.name)"
           >
             {{ status.name }}
@@ -93,10 +154,28 @@
       <div v-if="filteredLrus.length === 0" class="no-lrus">
         <p>No LRUs found for this project.</p>
       </div>
-      <div v-else v-for="lru in filteredLrus" :key="lru.id" class="lru-card" @click="viewLru(lru)">
+      <div
+        v-else
+        v-for="lru in filteredLrus"
+        :key="lru.id"
+        class="lru-card"
+        @click="viewLru(lru)"
+      >
         <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
@@ -107,59 +186,59 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'LruDashboard',
+  name: "LruDashboard",
   data() {
     return {
       projectId: null,
-      projectName: '',
-      searchQuery: '',
+      projectName: "",
+      searchQuery: "",
       lrus: [],
       loading: true,
       error: null,
       showStatusFilter: false,
       activeStatusFilter: null,
       statuses: [
-        { name: 'CLEARED', color: 'cleared' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED & RETURNED', color: 'assigned-returned' },
-        { name: 'MOVED TO NEXT STAGE', color: 'moved-next' },
-        { name: 'NOT CLEARED', color: 'not-cleared' }
-      ]
+        { name: "CLEARED", color: "cleared" },
+        { name: "DISAPPROVED", color: "disapproved" },
+        { name: "ASSIGNED & RETURNED", color: "assigned-returned" },
+        { name: "MOVED TO NEXT STAGE", color: "moved-next" },
+        { name: "NOT CLEARED", color: "not-cleared" },
+      ],
     };
   },
   computed: {
     // Get current user role from global store
     currentUserRole() {
-      return userStore.getters.currentUserRole()
+      return userStore.getters.currentUserRole();
     },
     roleName() {
-      return userStore.getters.roleName()
+      return userStore.getters.roleName();
     },
     filteredLrus() {
       let list = this.lrus;
 
       if (this.activeStatusFilter) {
-        list = list.filter(lru => lru.status === this.activeStatusFilter);
+        list = list.filter((lru) => lru.status === this.activeStatusFilter);
       }
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        list = list.filter(lru => lru.name.toLowerCase().includes(query));
+        list = list.filter((lru) => lru.name.toLowerCase().includes(query));
       }
       return list;
-    }
+    },
   },
   async mounted() {
     // Get project ID and name from route params
     this.projectId = parseInt(this.$route.params.projectId);
-    this.projectName = this.$route.params.projectName || 'Project';
-    
+    this.projectName = this.$route.params.projectName || "Project";
+
     if (this.projectId) {
       await this.fetchLrus();
     } else {
-      this.error = 'Project ID not found';
+      this.error = "Project ID not found";
       this.loading = false;
     }
   },
@@ -171,26 +250,30 @@ export default {
       this.showStatusFilter = false;
     },
     selectStatus(status) {
-      this.activeStatusFilter = this.activeStatusFilter === status ? null : status;
+      this.activeStatusFilter =
+        this.activeStatusFilter === status ? null : status;
       this.closeStatusFilter();
     },
     async fetchLrus() {
       try {
         this.loading = true;
         this.error = null;
-        
-        const response = await fetch(`http://localhost:8000/api/projects/${this.projectId}/lrus`);
+
+        const response = await fetch(
+          `http://localhost:8000/api/projects/${this.projectId}/lrus`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.lrus = data.lrus;
           this.projectName = data.project.name;
         } else {
-          this.error = data.message || 'Failed to fetch LRUs';
+          this.error = data.message || "Failed to fetch LRUs";
         }
       } catch (err) {
-        console.error('Error fetching LRUs:', err);
-        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        console.error("Error fetching LRUs:", err);
+        this.error =
+          "Failed to connect to server. Please check if the backend is running.";
       } finally {
         this.loading = false;
       }
@@ -198,20 +281,20 @@ export default {
     viewLru(lru) {
       // Navigate to document viewer or LRU detail page
       //alert(`Viewing LRU: ${lru.name}`);
-      this.$router.push({ 
-        name: 'DocumentViewer', 
-        params: { 
-          lruId: lru.id, 
+      this.$router.push({
+        name: "DocumentViewer",
+        params: {
+          lruId: lru.id,
           lruName: lru.name,
-          projectId: this.projectId
-        } 
+          projectId: this.projectId,
+        },
       });
     },
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return "";
       const date = new Date(dateString);
       return date.toLocaleDateString();
-    }
+    },
   },
 };
 </script>
@@ -326,8 +409,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -437,7 +524,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -450,7 +537,7 @@ export default {
   padding: 20px;
   border-radius: 10px;
   margin: 50px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
   right: -960px;
   top: 35px;
@@ -475,11 +562,21 @@ export default {
 }
 
 /* ✅ Colors (match your screenshot) */
-.cleared { background-color: #ccffcc; }        /* light green */
-.disapproved { background-color: #ffcccc; }    /* light red */
-.assigned-returned { background-color: #ccffff; } /* light cyan */
-.moved-next { background-color: #e6ccff; }     /* light purple */
-.not-cleared { background-color: #ffddaa; }    /* light orange */
+.cleared {
+  background-color: #ccffcc;
+} /* light green */
+.disapproved {
+  background-color: #ffcccc;
+} /* light red */
+.assigned-returned {
+  background-color: #ccffff;
+} /* light cyan */
+.moved-next {
+  background-color: #e6ccff;
+} /* light purple */
+.not-cleared {
+  background-color: #ffddaa;
+} /* light orange */
 
 /* Overlay */
 .status-overlay {
@@ -488,7 +585,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -501,7 +598,7 @@ export default {
   padding: 20px;
   border-radius: 10px;
   margin: 50px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
   right: -960px;
   top: 35px;
@@ -526,10 +623,19 @@ export default {
 }
 
 /* ✅ Colors (match your screenshot) */
-.cleared { background-color: #ccffcc; }        /* light green */
-.disapproved { background-color: #ffcccc; }    /* light red */
-.assigned-returned { background-color: #ccffff; } /* light cyan */
-.moved-next { background-color: #e6ccff; }     /* light purple */
-.not-cleared { background-color: #ffddaa; }    /* light orange */
-
+.cleared {
+  background-color: #ccffcc;
+} /* light green */
+.disapproved {
+  background-color: #ffcccc;
+} /* light red */
+.assigned-returned {
+  background-color: #ccffff;
+} /* light cyan */
+.moved-next {
+  background-color: #e6ccff;
+} /* light purple */
+.not-cleared {
+  background-color: #ffddaa;
+} /* light orange */
 </style>

@@ -2,14 +2,32 @@
   <div class="edit-project-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">EDIT PROJECT</span>
     </div>
@@ -17,13 +35,19 @@
     <div class="form-card">
       <div class="project-info">
         <h3>Editing Project ID: {{ projectId }}</h3>
-        <p class="created-date">Created: {{ formatDate(originalData.created_at) }}</p>
+        <p class="created-date">
+          Created: {{ formatDate(originalData.created_at) }}
+        </p>
       </div>
-      
+
       <form @submit.prevent="updateProject">
         <div class="form-group">
           <label>PROJECT NAME</label>
-          <input type="text" v-model="project.name" placeholder="Enter Project Name" />
+          <input
+            type="text"
+            v-model="project.name"
+            placeholder="Enter Project Name"
+          />
         </div>
 
         <div class="form-group">
@@ -35,35 +59,66 @@
         <div class="lrus-section">
           <div class="section-header">
             <label>LRUs</label>
-            <button type="button" class="add-lru-btn" @click="addLru">+ Add LRU</button>
+            <button type="button" class="add-lru-btn" @click="addLru">
+              + Add LRU
+            </button>
           </div>
-          
+
           <div v-if="project.lrus.length === 0" class="no-lrus-message">
             No LRUs added yet. Click "Add LRU" to start.
           </div>
-          
-          <div v-for="(lru, index) in project.lrus" :key="index" class="lru-item">
+
+          <div
+            v-for="(lru, index) in project.lrus"
+            :key="index"
+            class="lru-item"
+          >
             <div class="lru-header">
               <h4>
-                {{ lru.lru_id ? `LRU ${index + 1} (ID: ${lru.lru_id})` : `New LRU ${index + 1}` }}
+                {{
+                  lru.lru_id
+                    ? `LRU ${index + 1} (ID: ${lru.lru_id})`
+                    : `New LRU ${index + 1}`
+                }}
               </h4>
-              <button type="button" class="remove-lru-btn" @click="removeLru(index)" v-if="project.lrus.length > 1">×</button>
+              <button
+                type="button"
+                class="remove-lru-btn"
+                @click="removeLru(index)"
+                v-if="project.lrus.length > 1"
+              >
+                ×
+              </button>
             </div>
-            
+
             <div class="form-group">
               <label>LRU Name</label>
-              <input type="text" v-model="lru.lru_name" placeholder="Enter LRU Name" />
+              <input
+                type="text"
+                v-model="lru.lru_name"
+                placeholder="Enter LRU Name"
+              />
             </div>
-            
-            <div v-if="lru.serial_numbers && lru.serial_numbers.length > 0" class="serial-numbers-info">
-              <p><strong>Existing Serial Numbers:</strong> {{ lru.serial_numbers.length }}</p>
+
+            <div
+              v-if="lru.serial_numbers && lru.serial_numbers.length > 0"
+              class="serial-numbers-info"
+            >
+              <p>
+                <strong>Existing Serial Numbers:</strong>
+                {{ lru.serial_numbers.length }}
+              </p>
               <div class="serial-list">
-                <span v-for="serial in lru.serial_numbers" :key="serial.serial_id" class="serial-number">
+                <span
+                  v-for="serial in lru.serial_numbers"
+                  :key="serial.serial_id"
+                  class="serial-number"
+                >
                   {{ serial.serial_number }}
                 </span>
               </div>
             </div>
-            
+
             <div class="form-group" v-if="!lru.lru_id">
               <label>Serial Number Quantity (New LRU)</label>
               <select v-model="lru.serialQuantity">
@@ -79,7 +134,7 @@
             CANCEL
           </button>
           <button type="submit" class="update-button" :disabled="loading">
-            {{ loading ? 'UPDATING PROJECT...' : 'UPDATE PROJECT' }}
+            {{ loading ? "UPDATING PROJECT..." : "UPDATE PROJECT" }}
           </button>
         </div>
       </form>
@@ -89,17 +144,17 @@
 
 <script>
 export default {
-  name: 'EditProject',
+  name: "EditProject",
   data() {
     return {
       projectId: this.$route.params.projectId,
       project: {
-        name: '',
-        date: '',
-        lrus: []
+        name: "",
+        date: "",
+        lrus: [],
       },
       loading: false,
-      originalData: {}
+      originalData: {},
     };
   },
   async mounted() {
@@ -110,56 +165,60 @@ export default {
       try {
         // Get project data from query parameters passed from the previous page
         const query = this.$route.query;
-        this.project.name = query.name || '';
+        this.project.name = query.name || "";
         this.originalData.created_at = query.created_at;
-        
+
         // Parse LRUs data
         if (query.lrusData) {
           try {
             const lrusData = JSON.parse(query.lrusData);
-            this.project.lrus = lrusData.map(lru => ({
+            this.project.lrus = lrusData.map((lru) => ({
               lru_id: lru.lru_id,
               lru_name: lru.lru_name,
-              serial_numbers: lru.serial_numbers || []
+              serial_numbers: lru.serial_numbers || [],
             }));
           } catch (e) {
-            console.error('Error parsing LRUs data:', e);
+            console.error("Error parsing LRUs data:", e);
             this.project.lrus = [];
           }
         }
-        
+
         // If no LRUs, add a default empty one
         if (this.project.lrus.length === 0) {
           this.project.lrus.push({
-            lru_name: '',
-            serialQuantity: ''
+            lru_name: "",
+            serialQuantity: "",
           });
         }
-        
+
         // Store original data for comparison
         this.originalData = {
           ...this.originalData,
           name: this.project.name,
-          lrus: JSON.parse(JSON.stringify(this.project.lrus))
+          lrus: JSON.parse(JSON.stringify(this.project.lrus)),
         };
       } catch (error) {
-        console.error('Error loading project data:', error);
-        alert('Error loading project data');
+        console.error("Error loading project data:", error);
+        alert("Error loading project data");
       }
     },
-    
+
     addLru() {
       this.project.lrus.push({
-        lru_name: '',
-        serialQuantity: ''
+        lru_name: "",
+        serialQuantity: "",
       });
     },
-    
+
     removeLru(index) {
       if (this.project.lrus.length > 1) {
         const lru = this.project.lrus[index];
         if (lru.lru_id && lru.serial_numbers && lru.serial_numbers.length > 0) {
-          if (!confirm(`This LRU has ${lru.serial_numbers.length} serial numbers. Are you sure you want to remove it?`)) {
+          if (
+            !confirm(
+              `This LRU has ${lru.serial_numbers.length} serial numbers. Are you sure you want to remove it?`
+            )
+          ) {
             return;
           }
         }
@@ -169,82 +228,91 @@ export default {
 
     validateProject() {
       if (!this.project.name) {
-        alert('Please enter a project name.');
+        alert("Please enter a project name.");
         return false;
       }
-      
+
       for (let i = 0; i < this.project.lrus.length; i++) {
         const lru = this.project.lrus[i];
         if (!lru.lru_name) {
           alert(`Please enter a name for LRU ${i + 1}.`);
           return false;
         }
-        
+
         // For new LRUs, require serial quantity
         if (!lru.lru_id && !lru.serialQuantity) {
-          alert(`Please select a serial number quantity for new LRU "${lru.lru_name}".`);
+          alert(
+            `Please select a serial number quantity for new LRU "${lru.lru_name}".`
+          );
           return false;
         }
       }
-      
+
       return true;
     },
-    
+
     async updateProject() {
       if (!this.validateProject()) {
         return;
       }
-      
+
       try {
         this.loading = true;
-        
+
         // Prepare update data
         const updateData = {
           project_id: this.projectId,
           name: this.project.name,
           date: this.project.date,
-          lrus: this.project.lrus.map(lru => ({
+          lrus: this.project.lrus.map((lru) => ({
             lru_id: lru.lru_id,
             lru_name: lru.lru_name,
-            serialQuantity: lru.serialQuantity || null
-          }))
+            serialQuantity: lru.serialQuantity || null,
+          })),
         };
-        
-        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updateData)
-        });
-        
+
+        const response = await fetch(
+          `http://localhost:8000/api/projects/${this.projectId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
         const data = await response.json();
-        
+
         if (data.success) {
-          alert('Project updated successfully!');
-          this.$router.push({ name: 'SelectProjectToEdit' });
+          alert("Project updated successfully!");
+          this.$router.push({ name: "SelectProjectToEdit" });
         } else {
-          alert('Error updating project: ' + data.message);
+          alert("Error updating project: " + data.message);
         }
       } catch (error) {
-        console.error('Error updating project:', error);
-        alert('Error updating project. Please check if the backend is running.');
+        console.error("Error updating project:", error);
+        alert(
+          "Error updating project. Please check if the backend is running."
+        );
       } finally {
         this.loading = false;
       }
     },
-    
+
     cancelEdit() {
-      if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
-        this.$router.push({ name: 'SelectProjectToEdit' });
+      if (
+        confirm("Are you sure you want to cancel? All changes will be lost.")
+      ) {
+        this.$router.push({ name: "SelectProjectToEdit" });
       }
     },
-    
+
     formatDate(dateString) {
-      if (!dateString) return 'N/A';
+      if (!dateString) return "N/A";
       return new Date(dateString).toLocaleDateString();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -290,7 +358,7 @@ export default {
   padding: 30px 40px;
   border-radius: 15px;
   max-width: 700px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .project-info {
@@ -348,7 +416,8 @@ export default {
   margin-top: 30px;
 }
 
-.cancel-button, .update-button {
+.cancel-button,
+.update-button {
   padding: 12px 30px;
   border: none;
   border-radius: 20px;
@@ -371,7 +440,7 @@ export default {
 .update-button {
   background: linear-gradient(90deg, #28a745, #20c997);
   color: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .update-button:hover:not(:disabled) {
@@ -403,7 +472,7 @@ export default {
 }
 
 .add-lru-btn {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   padding: 6px 12px;

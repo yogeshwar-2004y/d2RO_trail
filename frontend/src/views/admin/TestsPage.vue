@@ -2,14 +2,32 @@
   <div class="tests-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">TESTS</span>
     </div>
@@ -18,14 +36,24 @@
       <div v-if="loading" class="loading-message">
         Loading tests and stages...
       </div>
-      
-            <div v-else>
+
+      <div v-else>
         <div class="data-summary">
-          <p><strong>Tests:</strong> {{ tests.length }} | <strong>Stages:</strong> {{ stages.length }} | <strong>Stage Types:</strong> {{ stageTypes.length }}</p>
+          <p>
+            <strong>Tests:</strong> {{ tests.length }} |
+            <strong>Stages:</strong> {{ stages.length }} |
+            <strong>Stage Types:</strong> {{ stageTypes.length }}
+          </p>
         </div>
 
-        <div v-if="tests.length === 0 && stages.length === 0" class="empty-state">
-          <p>No tests or stages found. Start by adding some tests and stages to configure your testing matrix.</p>
+        <div
+          v-if="tests.length === 0 && stages.length === 0"
+          class="empty-state"
+        >
+          <p>
+            No tests or stages found. Start by adding some tests and stages to
+            configure your testing matrix.
+          </p>
         </div>
 
         <div v-else class="table-container">
@@ -38,7 +66,12 @@
                 </th>
                 <th v-for="stage in stages" :key="stage.stage_id">
                   {{ stage.stage_name }}
-                  <button @click="removeStage(stage.stage_id)" class="remove-stage-button">×</button>
+                  <button
+                    @click="removeStage(stage.stage_id)"
+                    class="remove-stage-button"
+                  >
+                    ×
+                  </button>
                 </th>
                 <th></th>
               </tr>
@@ -52,15 +85,29 @@
               <tr v-for="test in tests" :key="test.test_id">
                 <td>
                   <span class="test-name">{{ test.test_name }}</span>
-                  <button @click="removeTest(test.test_id)" class="remove-test-button">×</button>
+                  <button
+                    @click="removeTest(test.test_id)"
+                    class="remove-test-button"
+                  >
+                    ×
+                  </button>
                 </td>
                 <td v-if="stages.length === 0" class="empty-cell">
                   Add stages to configure
                 </td>
                 <td v-for="stage in stages" :key="stage.stage_id">
-                  <select v-model="testStageConfigs[test.test_id + '_' + stage.stage_id]" class="stage-select">
+                  <select
+                    v-model="
+                      testStageConfigs[test.test_id + '_' + stage.stage_id]
+                    "
+                    class="stage-select"
+                  >
                     <option value="">Select Type</option>
-                    <option v-for="type in stageTypes" :key="type.type_id" :value="type.type_id">
+                    <option
+                      v-for="type in stageTypes"
+                      :key="type.type_id"
+                      :value="type.type_id"
+                    >
                       {{ type.type_name }}
                     </option>
                   </select>
@@ -75,9 +122,9 @@
           <button class="add-button" @click="addTest">+ Add Test</button>
           <button class="add-button" @click="addStage">+ Add Stage</button>
         </div>
-        
+
         <button class="save-button" @click="saveChanges" :disabled="saving">
-          {{ saving ? 'SAVING...' : 'SAVE CHANGES' }}
+          {{ saving ? "SAVING..." : "SAVE CHANGES" }}
         </button>
       </div>
     </div>
@@ -85,10 +132,10 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'TestsPage',
+  name: "TestsPage",
   data() {
     return {
       tests: [],
@@ -97,17 +144,17 @@ export default {
       testStageConfigs: {}, // Maps test_id_stage_id to type_id
       loading: false,
       saving: false,
-      error: null
+      error: null,
     };
   },
   computed: {
     // Get current user from global store
     currentUser() {
-      return userStore.getters.currentUser()
+      return userStore.getters.currentUser();
     },
     isLoggedIn() {
-      return userStore.getters.isLoggedIn()
-    }
+      return userStore.getters.isLoggedIn();
+    },
   },
   async mounted() {
     await this.loadData();
@@ -119,7 +166,9 @@ export default {
         this.error = null;
 
         // Fetch complete configuration matrix from the new endpoint
-        const response = await fetch('http://localhost:5000/api/tests-configuration');
+        const response = await fetch(
+          "http://localhost:8000/api/tests-configuration"
+        );
         const data = await response.json();
 
         if (data.success) {
@@ -131,27 +180,26 @@ export default {
           // Map configurations to the format expected by the UI
           this.testStageConfigs = {};
           if (data.configurations) {
-            data.configurations.forEach(config => {
-              const key = config.test_id + '_' + config.stage_id;
+            data.configurations.forEach((config) => {
+              const key = config.test_id + "_" + config.stage_id;
               this.testStageConfigs[key] = config.type_id;
             });
           }
 
-          console.log('Loaded data:', {
+          console.log("Loaded data:", {
             tests: this.tests.length,
             stages: this.stages.length,
             stageTypes: this.stageTypes.length,
-            configurations: Object.keys(this.testStageConfigs).length
+            configurations: Object.keys(this.testStageConfigs).length,
           });
-
         } else {
-          this.error = data.message || 'Failed to load data';
-          alert('Error loading data: ' + this.error);
+          this.error = data.message || "Failed to load data";
+          alert("Error loading data: " + this.error);
         }
-
       } catch (error) {
-        console.error('Error loading data:', error);
-        this.error = 'Failed to load data. Please check if the backend is running.';
+        console.error("Error loading data:", error);
+        this.error =
+          "Failed to load data. Please check if the backend is running.";
         alert(this.error);
       } finally {
         this.loading = false;
@@ -159,18 +207,18 @@ export default {
     },
 
     async addTest() {
-      const newTestName = prompt('Enter new test name:');
-      if (!newTestName || newTestName.trim() === '') {
+      const newTestName = prompt("Enter new test name:");
+      if (!newTestName || newTestName.trim() === "") {
         return;
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/tests', {
-          method: 'POST',
+        const response = await fetch("http://localhost:8000/api/tests", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ test_name: newTestName.trim() })
+          body: JSON.stringify({ test_name: newTestName.trim() }),
         });
 
         const data = await response.json();
@@ -178,57 +226,62 @@ export default {
         if (data.success) {
           // Reload data to get the new test
           await this.loadData();
-          alert('Test added successfully!');
+          alert("Test added successfully!");
         } else {
-          alert('Error adding test: ' + data.message);
+          alert("Error adding test: " + data.message);
         }
       } catch (error) {
-        console.error('Error adding test:', error);
-        alert('Error adding test. Please check if the backend is running.');
+        console.error("Error adding test:", error);
+        alert("Error adding test. Please check if the backend is running.");
       }
     },
 
     async removeTest(testId) {
-      const test = this.tests.find(t => t.test_id === testId);
+      const test = this.tests.find((t) => t.test_id === testId);
       if (!test) return;
 
-      if (!confirm(`Are you sure you want to remove test "${test.test_name}"?`)) {
+      if (
+        !confirm(`Are you sure you want to remove test "${test.test_name}"?`)
+      ) {
         return;
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/tests/${testId}`, {
-          method: 'DELETE'
-        });
+        const response = await fetch(
+          `http://localhost:8000/api/tests/${testId}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         const data = await response.json();
 
         if (data.success) {
           // Reload data to reflect the deletion
           await this.loadData();
-          alert('Test removed successfully!');
+          alert("Test removed successfully!");
         } else {
-          alert('Error removing test: ' + data.message);
+          alert("Error removing test: " + data.message);
         }
       } catch (error) {
-        console.error('Error removing test:', error);
-        alert('Error removing test. Please check if the backend is running.');
+        console.error("Error removing test:", error);
+        alert("Error removing test. Please check if the backend is running.");
       }
     },
 
     async addStage() {
-      const newStageName = prompt('Enter new stage name:');
-      if (!newStageName || newStageName.trim() === '') {
+      const newStageName = prompt("Enter new stage name:");
+      if (!newStageName || newStageName.trim() === "") {
         return;
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/stages', {
-          method: 'POST',
+        const response = await fetch("http://localhost:8000/api/stages", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify({ stage_name: newStageName.trim() })
+          body: JSON.stringify({ stage_name: newStageName.trim() }),
         });
 
         const data = await response.json();
@@ -236,41 +289,46 @@ export default {
         if (data.success) {
           // Reload data to get the new stage
           await this.loadData();
-          alert('Stage added successfully!');
+          alert("Stage added successfully!");
         } else {
-          alert('Error adding stage: ' + data.message);
+          alert("Error adding stage: " + data.message);
         }
       } catch (error) {
-        console.error('Error adding stage:', error);
-        alert('Error adding stage. Please check if the backend is running.');
+        console.error("Error adding stage:", error);
+        alert("Error adding stage. Please check if the backend is running.");
       }
     },
 
     async removeStage(stageId) {
-      const stage = this.stages.find(s => s.stage_id === stageId);
+      const stage = this.stages.find((s) => s.stage_id === stageId);
       if (!stage) return;
 
-      if (!confirm(`Are you sure you want to remove stage "${stage.stage_name}"?`)) {
+      if (
+        !confirm(`Are you sure you want to remove stage "${stage.stage_name}"?`)
+      ) {
         return;
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/stages/${stageId}`, {
-          method: 'DELETE'
-        });
+        const response = await fetch(
+          `http://localhost:8000/api/stages/${stageId}`,
+          {
+            method: "DELETE",
+          }
+        );
 
         const data = await response.json();
 
         if (data.success) {
           // Reload data to reflect the deletion
           await this.loadData();
-          alert('Stage removed successfully!');
+          alert("Stage removed successfully!");
         } else {
-          alert('Error removing stage: ' + data.message);
+          alert("Error removing stage: " + data.message);
         }
       } catch (error) {
-        console.error('Error removing stage:', error);
-        alert('Error removing stage. Please check if the backend is running.');
+        console.error("Error removing stage:", error);
+        alert("Error removing stage. Please check if the backend is running.");
       }
     },
 
@@ -280,46 +338,48 @@ export default {
 
         // Build configurations from current UI state
         const configurations = [];
-        
+
         for (const test of this.tests) {
           for (const stage of this.stages) {
-            const key = test.test_id + '_' + stage.stage_id;
+            const key = test.test_id + "_" + stage.stage_id;
             const typeId = this.testStageConfigs[key];
-            
-            if (typeId && typeId !== '') {
+
+            if (typeId && typeId !== "") {
               configurations.push({
                 test_id: test.test_id,
                 stage_id: stage.stage_id,
-                type_id: typeId
+                type_id: typeId,
               });
             }
           }
         }
 
-        const response = await fetch('http://localhost:5000/api/test-stage-types', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            configurations: configurations,
-            assigned_by: this.getCurrentUserId()
-          })
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/test-stage-types",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              configurations: configurations,
+              assigned_by: this.getCurrentUserId(),
+            }),
+          }
+        );
 
         const data = await response.json();
 
         if (data.success) {
-      alert('Changes saved successfully!');
+          alert("Changes saved successfully!");
           // Reload data to ensure consistency
           await this.loadData();
         } else {
-          alert('Error saving changes: ' + data.message);
+          alert("Error saving changes: " + data.message);
         }
-
       } catch (error) {
-        console.error('Error saving changes:', error);
-        alert('Error saving changes. Please check if the backend is running.');
+        console.error("Error saving changes:", error);
+        alert("Error saving changes. Please check if the backend is running.");
       } finally {
         this.saving = false;
       }
@@ -328,7 +388,7 @@ export default {
     getCurrentUserId() {
       // Get current user from global store or return default
       return this.currentUser?.id || 1002; // Default fallback
-    }
+    },
   },
 };
 </script>
@@ -395,7 +455,8 @@ table {
   margin-bottom: 20px;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ccc;
   padding: 10px;
   text-align: center;
@@ -420,7 +481,8 @@ th {
   font-size: 1em;
 }
 
-.remove-test-button, .remove-stage-button {
+.remove-test-button,
+.remove-stage-button {
   position: absolute;
   top: 50%;
   right: -10px;
@@ -524,7 +586,8 @@ th {
   font-size: 1.1em;
 }
 
-.no-stages-message, .no-tests-message {
+.no-stages-message,
+.no-tests-message {
   color: #6c757d;
   font-style: italic;
   text-align: center;

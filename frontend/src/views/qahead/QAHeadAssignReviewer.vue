@@ -5,17 +5,39 @@
       <div class="modal-header">
         <div class="header-content">
           <div class="header-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
               <circle cx="9" cy="7" r="4"></circle>
               <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
               <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
           </div>
-          <h2 class="modal-title">{{ isEditMode ? 'EDIT REVIEWER' : 'ASSIGN REVIEWER' }}</h2>
+          <h2 class="modal-title">
+            {{ isEditMode ? "EDIT REVIEWER" : "ASSIGN REVIEWER" }}
+          </h2>
         </div>
         <button class="close-button" @click="closeOverlay">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -28,8 +50,20 @@
           <!-- Project Details (Auto-filled) -->
           <div class="form-section">
             <h3 class="section-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
               Project Details
@@ -37,17 +71,32 @@
             <div class="form-row">
               <div class="form-group">
                 <label>PROJECT NAME</label>
-                <input type="text" v-model="formData.projectName" readonly class="readonly-input">
+                <input
+                  type="text"
+                  v-model="formData.projectName"
+                  readonly
+                  class="readonly-input"
+                />
               </div>
               <div class="form-group">
                 <label>PROJECT ID</label>
-                <input type="text" v-model="formData.projectId" readonly class="readonly-input">
+                <input
+                  type="text"
+                  v-model="formData.projectId"
+                  readonly
+                  class="readonly-input"
+                />
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label>LRU NAME</label>
-                <input type="text" v-model="formData.lruName" readonly class="readonly-input">
+                <input
+                  type="text"
+                  v-model="formData.lruName"
+                  readonly
+                  class="readonly-input"
+                />
               </div>
             </div>
           </div>
@@ -55,7 +104,17 @@
           <!-- Reviewer Assignment -->
           <div class="form-section">
             <h3 class="section-title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -67,20 +126,36 @@
               <div class="form-group">
                 <label>SELECT REVIEWER *</label>
                 <div class="dropdown-container">
-                  <select v-model="formData.reviewerId" @change="onReviewerChange" required class="form-select">
+                  <select
+                    v-model="formData.reviewerId"
+                    @change="onReviewerChange"
+                    required
+                    class="form-select"
+                  >
                     <option value="">Select Reviewer</option>
-                    <option 
-                      v-for="reviewer in availableReviewers" 
-                      :key="reviewer.id" 
+                    <option
+                      v-for="reviewer in availableReviewers"
+                      :key="reviewer.id"
                       :value="reviewer.id"
                       :disabled="!reviewer.available"
                       :class="{ 'disabled-option': !reviewer.available }"
                     >
-                      {{ reviewer.name }} {{ !reviewer.available ? '(Not Available)' : '' }}
+                      {{ reviewer.name }}
+                      {{ !reviewer.available ? "(Not Available)" : "" }}
                     </option>
                   </select>
                   <div class="dropdown-arrow">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <polyline points="6,9 12,15 18,9"></polyline>
                     </svg>
                   </div>
@@ -88,29 +163,71 @@
               </div>
               <div class="form-group">
                 <label>REVIEWER ID</label>
-                <input type="text" v-model="formData.reviewerId" readonly class="readonly-input">
+                <input
+                  type="text"
+                  v-model="formData.reviewerId"
+                  readonly
+                  class="readonly-input"
+                />
               </div>
             </div>
           </div>
 
           <!-- Action Buttons -->
           <div class="form-actions">
-            <button type="button" @click="closeOverlay" class="btn btn-secondary">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              type="button"
+              @click="closeOverlay"
+              class="btn btn-secondary"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary" :disabled="!formData.reviewerId || loading">
-              <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="!formData.reviewerId || loading"
+            >
+              <svg
+                v-if="!loading"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                 <circle cx="9" cy="7" r="4"></circle>
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
               </svg>
               <div v-if="loading" class="loading-spinner"></div>
-              {{ loading ? (isEditMode ? 'UPDATING...' : 'ASSIGNING...') : (isEditMode ? 'UPDATE REVIEWER' : 'ASSIGN REVIEWER') }}
+              {{
+                loading
+                  ? isEditMode
+                    ? "UPDATING..."
+                    : "ASSIGNING..."
+                  : isEditMode
+                  ? "UPDATE REVIEWER"
+                  : "ASSIGN REVIEWER"
+              }}
             </button>
           </div>
         </form>
@@ -118,18 +235,53 @@
     </div>
 
     <!-- Success Overlay -->
-    <div v-if="showSuccessOverlay" class="success-overlay" @click="closeSuccessOverlay">
+    <div
+      v-if="showSuccessOverlay"
+      class="success-overlay"
+      @click="closeSuccessOverlay"
+    >
       <div class="success-modal" @click.stop>
         <div class="success-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
             <polyline points="22 4 12 14.01 9 11.01"></polyline>
           </svg>
         </div>
-        <h3>{{ isEditMode ? 'Reviewer Updated Successfully!' : 'Reviewer Assigned Successfully!' }}</h3>
-        <p>{{ formData.reviewerName }} has been {{ isEditMode ? 'updated as' : 'assigned as' }} reviewer for <strong>{{ formData.lruName }}</strong> in project <strong>{{ formData.projectName }}</strong></p>
+        <h3>
+          {{
+            isEditMode
+              ? "Reviewer Updated Successfully!"
+              : "Reviewer Assigned Successfully!"
+          }}
+        </h3>
+        <p>
+          {{ formData.reviewerName }} has been
+          {{ isEditMode ? "updated as" : "assigned as" }} reviewer for
+          <strong>{{ formData.lruName }}</strong> in project
+          <strong>{{ formData.projectName }}</strong>
+        </p>
         <button @click="closeSuccessOverlay" class="btn btn-success">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="20,6 9,17 4,12"></polyline>
           </svg>
           OK
@@ -141,39 +293,39 @@
 
 <script>
 export default {
-  name: 'QAHeadAssignReviewer',
+  name: "QAHeadAssignReviewer",
   props: {
     currentLruName: {
       type: String,
-      default: ''
+      default: "",
     },
     currentProjectName: {
       type: String,
-      default: ''
+      default: "",
     },
     isEditMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     currentReviewer: {
       type: Object,
-      default: null
-    }
+      default: null,
+    },
   },
   data() {
     return {
       formData: {
-        projectName: '',
-        projectId: '',
-        lruName: '',
-        reviewerId: '',
-        reviewerName: ''
+        projectName: "",
+        projectId: "",
+        lruName: "",
+        reviewerId: "",
+        reviewerName: "",
       },
       availableProjects: [],
       availableLrus: [],
       availableReviewers: [],
       loading: false,
-      showSuccessOverlay: false
+      showSuccessOverlay: false,
     };
   },
   mounted() {
@@ -186,132 +338,158 @@ export default {
         // Load reviewers and get project/LRU data
         await Promise.allSettled([
           this.loadAvailableReviewers(),
-          this.loadProjectAndLruData()
+          this.loadProjectAndLruData(),
         ]);
-        
+
         // Auto-fill current project and LRU information
         this.autoFillProjectAndLruData();
-        
+
         // If in edit mode, pre-populate current reviewer
         if (this.isEditMode && this.currentReviewer) {
           this.formData.reviewerId = this.currentReviewer.user_id;
           this.formData.reviewerName = this.currentReviewer.name;
         }
-        
       } catch (error) {
-        console.error('Error initializing form:', error);
+        console.error("Error initializing form:", error);
         // Continue with fallback data that was loaded in catch blocks
-        console.log('Using fallback data for form initialization');
+        console.log("Using fallback data for form initialization");
       } finally {
         this.loading = false;
       }
     },
-    
+
     async loadProjectAndLruData() {
       try {
         // Load both project and LRU data in parallel
         const [projectResponse, lruResponse] = await Promise.allSettled([
-          fetch('http://localhost:5000/api/project-options'),
-          fetch('http://localhost:5000/api/lru-options')
+          fetch("http://localhost:8000/api/project-options"),
+          fetch("http://localhost:8000/api/lru-options"),
         ]);
-        
+
         // Process project data
-        if (projectResponse.status === 'fulfilled') {
+        if (projectResponse.status === "fulfilled") {
           const projectData = await projectResponse.value.json();
           if (projectData.success) {
             this.availableProjects = projectData.project_options;
           }
         }
-        
+
         // Process LRU data
-        if (lruResponse.status === 'fulfilled') {
+        if (lruResponse.status === "fulfilled") {
           const lruData = await lruResponse.value.json();
           if (lruData.success) {
             this.availableLrus = lruData.lru_options;
           }
         }
       } catch (error) {
-        console.error('Error loading project and LRU data:', error);
+        console.error("Error loading project and LRU data:", error);
         // Set fallback data
         this.availableProjects = [
-          { project_name: 'Flight Control System', project_id: 1 },
-          { project_name: 'Navigation Module', project_id: 2 }
+          { project_name: "Flight Control System", project_id: 1 },
+          { project_name: "Navigation Module", project_id: 2 },
         ];
         this.availableLrus = [
-          { lru_name: 'Flight Computer', project_id: 1, project_name: 'Flight Control System' },
-          { lru_name: 'Autopilot System', project_id: 1, project_name: 'Flight Control System' },
-          { lru_name: 'GPS Receiver', project_id: 2, project_name: 'Navigation Module' },
-          { lru_name: 'Navigation Display', project_id: 2, project_name: 'Navigation Module' }
+          {
+            lru_name: "Flight Computer",
+            project_id: 1,
+            project_name: "Flight Control System",
+          },
+          {
+            lru_name: "Autopilot System",
+            project_id: 1,
+            project_name: "Flight Control System",
+          },
+          {
+            lru_name: "GPS Receiver",
+            project_id: 2,
+            project_name: "Navigation Module",
+          },
+          {
+            lru_name: "Navigation Display",
+            project_id: 2,
+            project_name: "Navigation Module",
+          },
         ];
       }
     },
-    
+
     autoFillProjectAndLruData() {
       // Auto-fill project information
       if (this.currentProjectName) {
         this.formData.projectName = this.currentProjectName;
-        
+
         // Find the project ID from the available projects
-        const project = this.availableProjects.find(p => p.project_name === this.currentProjectName);
+        const project = this.availableProjects.find(
+          (p) => p.project_name === this.currentProjectName
+        );
         if (project) {
           this.formData.projectId = project.project_id;
         }
       }
-      
+
       // Auto-fill LRU information
       if (this.currentLruName) {
         this.formData.lruName = this.currentLruName;
       }
-      
+
       // If no current data provided, try to use fallback values for demo
       if (!this.formData.projectName && this.availableProjects.length > 0) {
         this.formData.projectName = this.availableProjects[0].project_name;
         this.formData.projectId = this.availableProjects[0].project_id;
       }
-      
+
       if (!this.formData.lruName && this.availableLrus.length > 0) {
         // Find an LRU that matches the current project
-        const matchingLru = this.availableLrus.find(lru => 
-          lru.project_name === this.formData.projectName
+        const matchingLru = this.availableLrus.find(
+          (lru) => lru.project_name === this.formData.projectName
         );
         if (matchingLru) {
           this.formData.lruName = matchingLru.lru_name;
         }
       }
     },
-    
+
     async loadAvailableReviewers() {
       try {
-        const response = await fetch('http://localhost:5000/api/available-reviewers');
+        const response = await fetch(
+          "http://localhost:8000/api/available-reviewers"
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.availableReviewers = data.reviewers;
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
-        console.error('Error loading available reviewers:', error);
+        console.error("Error loading available reviewers:", error);
         // Fallback to sample data if API fails - only QA Reviewers (role_id = 3)
         this.availableReviewers = [
-          { id: 1001, name: 'Avanthika PG', email: 'avanthikapg22@gmail.com', role: 'QA Reviewer', available: true }
+          {
+            id: 1001,
+            name: "Avanthika PG",
+            email: "avanthikapg22@gmail.com",
+            role: "QA Reviewer",
+            available: true,
+          },
         ];
       }
     },
-    
-    
+
     onReviewerChange() {
       if (this.formData.reviewerId) {
-        const selectedReviewer = this.availableReviewers.find(r => r.id === this.formData.reviewerId);
+        const selectedReviewer = this.availableReviewers.find(
+          (r) => r.id === this.formData.reviewerId
+        );
         if (selectedReviewer) {
           this.formData.reviewerName = selectedReviewer.name;
           // The reviewerId is already set to the user_id from the dropdown value
         }
       } else {
-        this.formData.reviewerName = '';
+        this.formData.reviewerName = "";
       }
     },
-    
+
     async submitReviewer() {
       if (this.isEditMode) {
         await this.updateReviewer();
@@ -319,90 +497,96 @@ export default {
         await this.assignReviewer();
       }
     },
-    
+
     async assignReviewer() {
       if (!this.formData.reviewerId) {
-        alert('Please select a reviewer');
+        alert("Please select a reviewer");
         return;
       }
-      
+
       this.loading = true;
       try {
-        const response = await fetch('http://localhost:5000/api/assign-reviewer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            lru_name: this.formData.lruName,
-            project_name: this.formData.projectName,
-            reviewer_id: this.formData.reviewerId,
-            assigned_by: 1002 // TODO: Get from user store
-          })
-        });
-        
+        const response = await fetch(
+          "http://localhost:8000/api/assign-reviewer",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              lru_name: this.formData.lruName,
+              project_name: this.formData.projectName,
+              reviewer_id: this.formData.reviewerId,
+              assigned_by: 1002, // TODO: Get from user store
+            }),
+          }
+        );
+
         const data = await response.json();
-        
+
         if (data.success) {
           this.showSuccessOverlay = true;
-          this.$emit('reviewerUpdated');
+          this.$emit("reviewerUpdated");
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
-        console.error('Error assigning reviewer:', error);
-        alert('Error assigning reviewer: ' + error.message);
+        console.error("Error assigning reviewer:", error);
+        alert("Error assigning reviewer: " + error.message);
       } finally {
         this.loading = false;
       }
     },
-    
+
     async updateReviewer() {
       if (!this.formData.reviewerId) {
-        alert('Please select a reviewer');
+        alert("Please select a reviewer");
         return;
       }
-      
+
       this.loading = true;
       try {
-        const response = await fetch('http://localhost:5000/api/update-reviewer', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            lru_name: this.formData.lruName,
-            project_name: this.formData.projectName,
-            reviewer_id: this.formData.reviewerId,
-            assigned_by: 1002 // TODO: Get from user store
-          })
-        });
-        
+        const response = await fetch(
+          "http://localhost:8000/api/update-reviewer",
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              lru_name: this.formData.lruName,
+              project_name: this.formData.projectName,
+              reviewer_id: this.formData.reviewerId,
+              assigned_by: 1002, // TODO: Get from user store
+            }),
+          }
+        );
+
         const data = await response.json();
-        
+
         if (data.success) {
           this.showSuccessOverlay = true;
-          this.$emit('reviewerUpdated');
+          this.$emit("reviewerUpdated");
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
-        console.error('Error updating reviewer:', error);
-        alert('Error updating reviewer: ' + error.message);
+        console.error("Error updating reviewer:", error);
+        alert("Error updating reviewer: " + error.message);
       } finally {
         this.loading = false;
       }
     },
-    
+
     closeOverlay() {
-      this.$emit('close');
+      this.$emit("close");
     },
-    
+
     closeSuccessOverlay() {
       this.showSuccessOverlay = false;
       this.closeOverlay();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -695,17 +879,22 @@ export default {
 }
 
 @keyframes successBounce {
-  0%, 20%, 53%, 80%, 100% {
-    transform: translate3d(0,0,0);
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translate3d(0, 0, 0);
   }
-  40%, 43% {
-    transform: translate3d(0,-20px,0);
+  40%,
+  43% {
+    transform: translate3d(0, -20px, 0);
   }
   70% {
-    transform: translate3d(0,-10px,0);
+    transform: translate3d(0, -10px, 0);
   }
   90% {
-    transform: translate3d(0,-4px,0);
+    transform: translate3d(0, -4px, 0);
   }
 }
 
@@ -729,29 +918,29 @@ export default {
     margin: 10px;
     max-height: 95vh;
   }
-  
+
   .modal-header {
     padding: 20px 25px;
   }
-  
+
   .modal-content {
     padding: 25px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .btn {
     width: 100%;
     justify-content: center;
   }
-  
+
   .success-modal {
     padding: 30px 25px;
   }
@@ -768,6 +957,8 @@ export default {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

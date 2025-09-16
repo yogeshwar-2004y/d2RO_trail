@@ -102,6 +102,7 @@
             >
               {{ isUploading ? 'Uploading...' : 'Submit Document' }}
             </button>
+            
           </div>
         </div>
       </template>
@@ -558,9 +559,44 @@ export default {
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
-      documentVersions: [], // Will be loaded dynamically
-      existingDocuments: [], // List of uploaded documents for this LRU
-      loading: false, // Loading state for documents
+      // Document list
+      loading: false,
+      existingDocuments: [],
+      
+      documentVersions: [
+        { 
+          id: 1, 
+          projectId: 'PRJ-2025-078', 
+          version: 'A', 
+          date: '2025-01-15', 
+          isFavorite: true, 
+          deleted: false 
+        },
+        { 
+          id: 2, 
+          projectId: 'PRJ-2025-078', 
+          version: 'B', 
+          date: '2025-01-20', 
+          isFavorite: false, 
+          deleted: false 
+        },
+        { 
+          id: 3, 
+          projectId: 'PRJ-2025-078', 
+          version: 'C', 
+          date: '2025-01-25', 
+          isFavorite: false, 
+          deleted: false 
+        },
+        { 
+          id: 4, 
+          projectId: 'PRJ-2025-078', 
+          version: 'D', 
+          date: '2025-01-30', 
+          isFavorite: true, 
+          deleted: false 
+        }
+      ],
       
       // Reviewer assignment
       hasAssignedReviewer: false,
@@ -596,9 +632,28 @@ export default {
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     },
-    
+    isDesigner() {
+      return this.currentUserRole === 'Designer';
+    },
+    isDesignHead() {
+      return this.currentUserRole === 'Design Head';
+    },
+    isQAHead() {
+      return this.currentUserRole === 'QA Head';
+    },
+    isReviewer() {
+      return this.currentUserRole === 'Reviewer';
+    },
+    docContent() {
+      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxHtml);
+    },
+    //isFormValid() {
+    //return this.commentForm.description.trim();
     isFormValid() {
-      return this.commentForm.description.trim();
+      return this.documentDetails.documentNumber.trim() !== '' &&
+             this.documentDetails.version.trim() !== '' &&
+             this.documentDetails.revision.trim() !== '';
+    
     }
   },
   
@@ -721,23 +776,35 @@ export default {
       }
     },
 
-    // Load document versions for LRU (used for track versions modal)
+    // Load document versions for LRU and display the latest one
     async loadDocumentVersions(lruId) {
       try {
         const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
         const result = await response.json();
         
         if (result.success) {
-          // Transform the data to match the expected format for the modal
+          // Transform the data to match the expected format
           this.documentVersions = result.documents.map(doc => ({
             id: doc.document_id,
             projectId: `${doc.document_number}`,
-            version: doc.revision,
+            version: doc.version,
+            docVer: doc.doc_ver,
+            revision: doc.revision,
             date: new Date(doc.upload_date).toLocaleDateString(),
-            isFavorite: false, // You can add a favorite flag to your database later
+            filePath: doc.file_path,
+            originalFilename: doc.original_filename,
+            fileSize: doc.file_size,
+            isFavorite: false,
             deleted: false
-          }));
+          })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
           console.log(`Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`);
+          
+          // If there are existing documents, load the latest one
+          if (this.documentVersions.length > 0) {
+            const latestDoc = this.documentVersions[0];
+            this.loadExistingDocument(latestDoc);
+          }
         } else {
           console.warn('Failed to load document versions:', result.message);
         }
@@ -811,14 +878,22 @@ export default {
       }
     },
 
-    // Date formatting
-    formatDate(date) {
-      if (!date) return 'N/A';
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+    // Load a PDF directly from a URL (used when viewing existing documents)
+    async loadPdfFromUrl(fileUrl) {
+      try {
+        // Reset previous document state and set up for PDF
+        this.clearDocument();
+        this.fileType = 'pdf';
+        this.pdfUrl = fileUrl;
+        this.page = 1;
+
+        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+        const pdf = await loadingTask.promise;
+        this.numPages = pdf.numPages;
+      } catch (err) {
+        console.error('Failed to load PDF from URL', err);
+        alert('Failed to load PDF file.');
+      }
     },
 
     // Load existing document from server
@@ -861,40 +936,58 @@ export default {
           this.fileType = 'docx';
           this.loadDocxFromUrl(fileUrl);
         } else {
-          this.fileType = 'other';
-          this.fileName = originalFilename;
+          console.warn('Requested document not found among existing documents:', input);
         }
-      } catch (error) {
-        console.error('Error loading file from server:', error);
-        alert('Failed to load document from server.');
+      } catch (err) {
+        console.error('Error in loadExistingDocument:', err);
       }
     },
 
-    // Load PDF from URL
-    async loadPdfFromUrl(url) {
-      try {
-        this.pdfUrl = url;
-        this.page = 1;
+    // Date formatting
+    formatDate(date) {
+      if (!date) return 'N/A';
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      });
+    },
 
-        const loadingTask = pdfjsLib.getDocument(url);
-        const pdf = await loadingTask.promise;
-        this.numPages = pdf.numPages;
-      } catch (err) {
-        console.error("Failed to load PDF from URL", err);
-        alert("Failed to load PDF file from server.");
+    // Comment handling
+    handleAccept(comment) {
+      comment.status = 'accepted';
+      comment.response = 'Comment accepted and changes will be implemented.';
+      // TODO: Update on server
+    },
+
+    handleReject(comment) {
+      this.selectedComment = comment;
+      this.showRejectModal = true;
+    },
+
+    confirmReject() {
+      if (this.selectedComment && this.rejectJustification) {
+        this.selectedComment.status = 'rejected';
+        this.selectedComment.response = this.rejectJustification;
+        // TODO: Update on server
+        this.cancelReject();
       }
     },
 
-    // Load DOCX from URL
-    async loadDocxFromUrl(url) {
-      try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        this.docxHtml = result.value;
-      } catch (err) {
-        console.error("Failed to load DOCX from URL", err);
-        alert("Failed to load DOCX file from server.");
+    cancelReject() {
+      this.showRejectModal = false;
+      this.rejectJustification = '';
+      this.selectedComment = null;
+    },
+
+    scrollToPage(pageNum) {
+      if (this.fileType === 'pdf' && this.$refs.pdfScroll && this.$refs.pdfPages) {
+        const targetPage = this.$refs.pdfPages[pageNum - 1];
+        if (targetPage && targetPage.$el) {
+          targetPage.$el.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     },
 
@@ -1111,14 +1204,157 @@ export default {
     },
 
     async loadDocx(file) {
+      console.log('Starting DOCX file loading...', { fileName: file.name, fileSize: file.size });
+      
       try {
+        console.log('Reading file as ArrayBuffer...');
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        this.docxHtml = result.value;
+        console.log('File successfully read as ArrayBuffer');
+
+        console.log('Converting DOCX to HTML with page markers...');
+        const options = {
+          styleMap: [
+            "p[style-name='Page Break'] => div.page-break"
+          ]
+        };
+
+        // First convert to get the basic HTML
+        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+        console.log('Initial HTML conversion complete', { 
+          resultLength: result.value.length,
+          messages: result.messages 
+        });
+
+        // Process the HTML to add page markers
+        const processedHtml = this.processDocxHtml(result.value);
+        console.log('HTML processing complete', { 
+          finalLength: processedHtml.length,
+          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
+        });
+
+        // Set the processed HTML
+        this.docxHtml = processedHtml;
+        
+        // Calculate number of pages
+        this.$nextTick(() => {
+          const pages = document.querySelectorAll('.docx-content .page');
+          this.numPages = pages.length || 1;
+          console.log('Page calculation complete', { totalPages: this.numPages });
+        });
+
       } catch (err) {
-        alert("Failed to render DOCX file.");
-        console.error(err);
+        console.error('Error in loadDocx:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        alert("Failed to render DOCX file. Check console for details.");
       }
+    },
+
+    processDocxHtml(html) {
+      console.log('Processing DOCX HTML...');
+      try {
+        // Create a temporary container
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        
+        // Get approximate content per page (A4 size)
+        const CHARS_PER_PAGE = 3000; // Rough estimate of characters per page
+        const totalContent = temp.textContent;
+        const estimatedPages = Math.max(Math.ceil(totalContent.length / CHARS_PER_PAGE), 1);
+        console.log('Estimated pages:', { 
+          totalChars: totalContent.length, 
+          estimatedPages 
+        });
+
+        // Initialize result container
+        const result = document.createElement('div');
+        let pageCount = 0;
+        let currentPage = null;
+        let currentChars = 0;
+
+        function startNewPage() {
+          if (currentPage && currentPage.children.length > 0) {
+            result.appendChild(currentPage);
+          }
+          pageCount++;
+          currentPage = document.createElement('div');
+          currentPage.className = 'page';
+          currentPage.setAttribute('data-page', pageCount.toString());
+          currentChars = 0;
+        }
+
+        // Start first page
+        startNewPage();
+
+        // Process each element
+        const elements = Array.from(temp.children);
+        console.log('Processing elements:', { totalElements: elements.length });
+
+        elements.forEach((element, index) => {
+          // Check for explicit page breaks
+          const style = window.getComputedStyle(element);
+          const hasPageBreak = style.pageBreakBefore === 'always' || 
+                              style.pageBreakAfter === 'always' ||
+                              element.tagName === 'HR';
+
+          // Force a new page on headings for better content organization
+          const isHeading = /^H[1-6]$/.test(element.tagName);
+          const elementContent = element.textContent;
+          
+          // Start new page if:
+          // 1. There's an explicit page break, or
+          // 2. Current page has enough content and we're at a good break point, or
+          // 3. We're at a heading and current page has some content
+          if (hasPageBreak || 
+              (currentChars > CHARS_PER_PAGE && (isHeading || element.tagName === 'P')) ||
+              (isHeading && currentChars > CHARS_PER_PAGE * 0.5)) {
+            startNewPage();
+          }
+
+          // Add element to current page
+          currentPage.appendChild(element.cloneNode(true));
+          currentChars += elementContent.length;
+        });
+
+        // Append the last page
+        if (currentPage && currentPage.children.length > 0) {
+          result.appendChild(currentPage);
+        }
+
+        console.log('HTML processing complete', { 
+          actualPages: pageCount,
+          estimatedPages,
+          finalHtmlLength: result.innerHTML.length 
+        });
+
+        // Add page numbers
+        result.querySelectorAll('.page').forEach((page, index) => {
+          const pageNum = document.createElement('div');
+          pageNum.className = 'page-number';
+          pageNum.textContent = `Page ${index + 1} of ${pageCount}`;
+          page.appendChild(pageNum);
+        });
+
+        return result.innerHTML;
+      } catch (err) {
+        console.error('Error in processDocxHtml:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        // Return original HTML if processing fails
+        return html;
+      }
+    },
+
+    shouldStartNewPage(pageDiv) {
+      // Estimate if current page content exceeds A4 height
+      const ESTIMATED_PAGE_HEIGHT = 1056; // A4 height in pixels at 96 DPI
+      return pageDiv.offsetHeight > ESTIMATED_PAGE_HEIGHT;
     },
 
     // Zoom controls
@@ -1154,10 +1390,30 @@ export default {
     },
 
     scrollToPage(pageNum) {
+      console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
+      
       this.$nextTick(() => {
-        const pageEl = this.$refs.pdfPages?.[pageNum - 1]?.$el;
-        if (pageEl) {
-          pageEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        if (this.fileType === 'pdf' && this.$refs.pdfPages) {
+          const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
+          if (pageEl) {
+            console.log('Scrolling to PDF page element:', pageEl);
+            pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
+          }
+        } else if (this.fileType === 'docx') {
+          const docContainer = document.querySelector('.docx-content');
+          if (docContainer) {
+            const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
+            if (targetPage) {
+              console.log('Scrolling to DOCX page element:', targetPage);
+              targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+              console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
+            }
+          } else {
+            console.warn('DOCX container not found');
+          }
         }
       });
     },
@@ -1508,6 +1764,8 @@ export default {
       this.zoom = 1.0;
       this.fileType = null;
     },
+
+    // (duplicate removed) loadExistingDocuments is defined earlier
   },
   
   beforeUnmount() {
@@ -1565,7 +1823,9 @@ export default {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
-  gap: 1rem;
+  justify-content: center; /* Center the items horizontally */
+  align-items: center;     /* Align items vertically in the center */
+  gap: 1rem;               /* Space between buttons */
 }
 
 .action-btn {
@@ -1577,6 +1837,7 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  text-align: center;
 }
 
 .action-btn:hover {
@@ -1653,6 +1914,11 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  
+  /* Center horizontally */
+  display: block;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .upload-btn:hover {
@@ -1773,59 +2039,19 @@ export default {
 .content {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 0; /* Allow container to shrink */
+  position: relative; /* For absolute positioning if needed */
 }
 
-/* Documents List Panel */
-.documents-list-panel {
-  width: 350px;
-  background: white;
-  margin: 1rem 0 1rem 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.documents-list-panel h3 {
-  margin: 0;
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  color: #495057;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.documents-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 2rem;
-  color: #6c757d;
-}
-
-.no-documents {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #6c757d;
-}
-
-.no-docs-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.documents-list {
+.document-area {
+  flex: 3; /* Takes up 3 parts of the 5 total parts */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 0; /* Allow container to shrink */
+  overflow: auto; /* Add scroll to document area */
 }
 
 .document-item {
@@ -1837,117 +2063,10 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
   background: white;
-}
-
-.document-item:hover {
-  border-color: #007bff;
-  background: #f8f9ff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
-}
-
-.doc-icon {
-  margin-right: 0.75rem;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.doc-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.doc-title {
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 0.25rem;
-  word-break: break-word;
-}
-
-.doc-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.doc-version {
-  color: #6c757d;
-  font-size: 0.9rem;
-}
-
-.doc-ver {
-  background: #e9ecef;
-  color: #495057;
-  padding: 0.125rem 0.375rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.doc-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
-.uploaded-by {
-  font-weight: 500;
-}
-
-.upload-date {
-  font-style: italic;
-}
-
-.doc-status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.doc-status.status-not-assigned {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.doc-status.status-assigned-and-returned {
-  background: #d1ecf1;
-  color: #0c5460;
-}
-
-.doc-status.status-cleared {
-  background: #d4edda;
-  color: #155724;
-}
-
-.doc-status.status-disapproved {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.doc-status.status-moved-to-next-stage {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.doc-status.status-not-cleared {
-  background: #f5c6cb;
-  color: #721c24;
-}
-
-.document-area {
-  flex: 1;
-  display: flex;
-  background: white;
-  margin: 1rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  min-width: 0; /* Prevents flex child from overflowing */
 }
 
 .doc-container {
@@ -1967,6 +2086,36 @@ export default {
 .docx-content {
   line-height: 1.6;
   color: #333;
+  padding: 1rem;
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  overflow-y: auto; /* Enable scrolling for DOCX content */
+}
+
+.docx-content .page {
+  background: white;
+  padding: 2rem;
+  margin: 1rem auto;
+  max-width: 816px; /* A4 width at 96 DPI */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Match PDF page shadow */
+  min-height: 1056px; /* A4 height at 96 DPI */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  position: relative;
+}
+
+.docx-content .page::after {
+  content: attr(data-page);
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
 .docx-content h1,
@@ -1976,8 +2125,24 @@ export default {
   color: #111;
 }
 
+.docx-content h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.docx-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.docx-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .docx-content p {
   margin: 0.75rem 0;
+  line-height: 1.6;
 }
 
 /* Empty State */
@@ -2039,21 +2204,28 @@ export default {
 }
 
 .comment-item {
-  background: #f9fafb;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
   display: flex;
-  justify-content: space-between;
-  align-items: start;
+  flex-direction: column;
+}
+
+.comment-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
 }
 
 .comment-text {
   flex: 1;
-  color: #4b5563;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: #1f2937;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
 }
 
 .remove-btn {
@@ -2779,84 +2951,246 @@ export default {
   transform: scale(1.2);
 }
 
-/* Star styles */
-.star-button svg {
-  stroke: #888;
-  fill: none;
-}
-.star-button.starred svg {
-  stroke: #f59e0b;
-  fill: #f59e0b;
+/* Comments Section Styles */
+.comments-section {
+  flex: 2;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding: 1.75rem;
+  min-width: 300px;
+  max-width: 450px;
+  height: calc(100vh - 200px);
+  align-self: flex-start;
+  position: sticky;
+  top: 1rem;
 }
 
-/* Delete styles */
-.delete-button svg {
-  stroke: #d33;
+.comments-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #3b82f6, #10b981);
+  border-radius: 16px 16px 0 0;
 }
 
-/* Delete confirmation modal */
-.delete-confirm-overlay {
+/* Comments Header */
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.comments-header h3::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.comment-count {
+  background: linear-gradient(to right, #dbeafe, #e0f2fe);
+  color: #1e40af;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Comments List */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.comment-item:hover {
+  background: #f3f4f6;
+}
+
+.comment-item.comment-resolved {
+  border-left: 4px solid #10b981;
+}
+
+/* Comment Components */
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment-icon {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.comment-info {
+  flex: 1;
+}
+
+.comment-author {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.comment-page {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Status Styles */
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-accepted {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Comment Content and Actions */
+.comment-content {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+/* Comment Response */
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Modal Styles */
+.modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.delete-confirm-modal {
-  background: #fff;
+.modal-content {
+  background: white;
   border-radius: 8px;
-  width: 450px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease;
 }
 
-.confirm-message {
-  text-align: center;
-  padding: 1rem;
+.modal-content h3 {
+  margin: 0 0 1rem 0;
 }
 
-.warning-icon {
-  color: #e63946;
+.modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  resize: vertical;
   margin-bottom: 1rem;
-}
-
-.warning-text {
-  color: #d33;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
+  gap: 0.75rem;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
+.modal-actions button {
+  padding: 0.5rem 1.25rem;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  border: none;
 }
 
-.btn-secondary {
+.modal-actions button:first-child {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-actions button:last-child {
   background: #e5e7eb;
-  border: none;
-}
-.btn-danger {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-}
-.btn:hover {
-  opacity: 0.9;
+  color: #1f2937;
 }
 
-/* Smooth modal animation */
+/* Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }

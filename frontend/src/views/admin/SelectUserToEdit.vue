@@ -2,14 +2,32 @@
   <div class="select-user-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">SELECT USER TO EDIT</span>
     </div>
@@ -41,11 +59,25 @@
               <td>{{ user.user_id }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.name }}</td>
-              <td :class="{ 'no-role': user.role === 'No Role Assigned' }">{{ user.role }}</td>
+              <td :class="{ 'no-role': user.role === 'No Role Assigned' }">
+                {{ user.role }}
+              </td>
               <td>
                 <button class="edit-button" @click="editUser(user)">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+                    ></path>
                   </svg>
                   Edit
                 </button>
@@ -60,12 +92,12 @@
 
 <script>
 export default {
-  name: 'SelectUserToEdit',
+  name: "SelectUserToEdit",
   data() {
     return {
       users: [],
       loading: false,
-      error: null
+      error: null,
     };
   },
   async mounted() {
@@ -76,19 +108,20 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        
-        const response = await fetch('http://localhost:5000/api/users/manage');
+
+        const response = await fetch("http://localhost:8000/api/users/manage");
         const data = await response.json();
-        
+
         if (data.success) {
           this.users = data.users;
         } else {
-          this.error = data.message || 'Failed to fetch users';
-          alert('Error fetching users: ' + this.error);
+          this.error = data.message || "Failed to fetch users";
+          alert("Error fetching users: " + this.error);
         }
       } catch (err) {
-        console.error('Error fetching users:', err);
-        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        console.error("Error fetching users:", err);
+        this.error =
+          "Failed to connect to server. Please check if the backend is running.";
         alert(this.error);
       } finally {
         this.loading = false;
@@ -96,17 +129,17 @@ export default {
     },
     editUser(user) {
       // Navigate to edit user form with user data
-      this.$router.push({ 
-        name: 'EditUser', 
+      this.$router.push({
+        name: "EditUser",
         params: { userId: user.user_id },
         query: {
           name: user.name,
           email: user.email,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -163,7 +196,8 @@ table {
   border-collapse: collapse;
 }
 
-th, td {
+th,
+td {
   border: 1px solid #ccc;
   padding: 15px;
   text-align: left;
