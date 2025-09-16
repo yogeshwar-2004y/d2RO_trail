@@ -214,6 +214,7 @@ def create_comment():
         
         # Insert annotation if provided
         if data.get('is_annotation') and 'x' in data and 'y' in data:
+            print(f"Creating annotation for comment {comment_id}: x={data['x']}, y={data['y']}, page={data.get('page_no', 1)}")
             cur.execute("""
                 INSERT INTO document_annotations (
                     comment_id, document_id, page_no, x_position, y_position
@@ -225,6 +226,9 @@ def create_comment():
                 data['x'],
                 data['y']
             ))
+            print(f"Annotation created successfully for comment {comment_id}")
+        else:
+            print(f"No annotation data for comment {comment_id}: is_annotation={data.get('is_annotation')}, x={data.get('x')}, y={data.get('y')}")
         
         conn.commit()
         cur.close()
@@ -308,6 +312,68 @@ def delete_comment(comment_id):
         conn.rollback()
         print(f"Error deleting comment: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Test endpoint to check database tables
+@app.route('/api/test-db', methods=['GET'])
+def test_database():
+    """Test endpoint to check if database tables exist and are accessible"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if document_comments table exists
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'document_comments'
+            );
+        """)
+        comments_table_exists = cur.fetchone()[0]
+        
+        # Check if document_annotations table exists
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'document_annotations'
+            );
+        """)
+        annotations_table_exists = cur.fetchone()[0]
+        
+        # Get table schemas
+        cur.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'document_comments'
+            ORDER BY ordinal_position;
+        """)
+        comments_schema = cur.fetchall()
+        
+        cur.execute("""
+            SELECT column_name, data_type, is_nullable
+            FROM information_schema.columns 
+            WHERE table_name = 'document_annotations'
+            ORDER BY ordinal_position;
+        """)
+        annotations_schema = cur.fetchall()
+        
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "tables": {
+                "document_comments": {
+                    "exists": comments_table_exists,
+                    "schema": [{"column": row[0], "type": row[1], "nullable": row[2]} for row in comments_schema]
+                },
+                "document_annotations": {
+                    "exists": annotations_table_exists,
+                    "schema": [{"column": row[0], "type": row[1], "nullable": row[2]} for row in annotations_schema]
+                }
+            }
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Database test failed: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=8000)

@@ -1589,7 +1589,7 @@ export default {
         ...this.commentForm,
         author: currentUser,
         created_at: new Date().toISOString(),
-        annotation: true
+        annotation: !!this.currentAnnotation  // Only true if there's an annotation
       };
       
       console.log('Created comment object:', comment);
@@ -1680,21 +1680,55 @@ export default {
 
     async saveCommentToBackend(comment) {
       try {
+        // Prepare data in the format expected by the backend
+        const commentData = {
+          document_id: comment.document_id,
+          document_name: comment.document_name,
+          version: comment.version,
+          reviewer_id: comment.reviewer_id,
+          page_no: comment.page_no,
+          section: comment.section,
+          description: comment.description,
+          author: comment.author,
+          is_annotation: comment.annotation || false
+        };
+        
+        // Add annotation position data if it's an annotation
+        if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+          commentData.x = comment.x;
+          commentData.y = comment.y;
+        }
+        
+        console.log('Sending comment data to backend:', commentData);
+        console.log('Annotation data:', {
+          is_annotation: commentData.is_annotation,
+          x: commentData.x,
+          y: commentData.y,
+          page_no: commentData.page_no
+        });
+        
         const response = await fetch('http://localhost:8000/api/comments', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(comment)
+          body: JSON.stringify(commentData)
         });
         
         if (!response.ok) {
-          throw new Error('Failed to save comment');
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save comment');
         }
         
-        console.log('Comment saved successfully');
+        const result = await response.json();
+        console.log('Comment saved successfully:', result);
+        
+        // Reload comments from backend to get the correct IDs
+        await this.loadCommentsFromBackend();
+        
       } catch (error) {
         console.error('Error saving comment:', error);
+        alert(`Failed to save comment: ${error.message}`);
       }
     },
 
