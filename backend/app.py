@@ -1,11 +1,11 @@
 """
 Main Flask application with modular structure using blueprints
 """
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 # Import configuration and utilities
-from config import Config
+from config import Config, get_db_connection
 from utils.helpers import create_upload_directories
 from utils.database_init import initialize_database
 
@@ -26,8 +26,11 @@ def create_app():
     app.config.from_object(Config)
     
     # Enable CORS
-    CORS(app)
+    #CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
     
+
+
     # Create upload directories
     create_upload_directories()
     
@@ -55,6 +58,7 @@ app = create_app()
 def get_reviewers():
     """Get all users with reviewer role"""
     try:
+        conn = get_db_connection()
         cur = conn.cursor()
         
         cur.execute("""
@@ -97,6 +101,7 @@ def get_comments():
         if not document_id:
             return jsonify({"success": False, "message": "Document ID is required"}), 400
         
+        conn = get_db_connection()
         cur = conn.cursor()
         
         # Get comments with annotations
@@ -183,6 +188,7 @@ def create_comment():
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
         
+        conn = get_db_connection()
         cur = conn.cursor()
         
         # Insert comment
@@ -243,6 +249,7 @@ def update_comment(comment_id):
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
         
+        conn = get_db_connection()
         cur = conn.cursor()
         
         # Update comment
@@ -279,6 +286,7 @@ def update_comment(comment_id):
 def delete_comment(comment_id):
     """Delete a comment and its associated annotation"""
     try:
+        conn = get_db_connection()
         cur = conn.cursor()
         
         # Delete comment (annotations will be deleted due to CASCADE)

@@ -847,8 +847,10 @@ export default {
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
         
-        // Load existing comments and annotations
-        this.loadCommentsFromBackend();
+        // Load existing comments and annotations (non-blocking)
+        this.loadCommentsFromBackend().catch(err => {
+          console.warn('Comments loading failed (non-critical):', err);
+        });
         
         // Load the file for display based on file extension
         const extension = filename.split('.').pop().toLowerCase();
@@ -896,31 +898,49 @@ export default {
       }
     },
 
-    // Load existing document from server
-    async loadExistingDocument(documentId) {
+    // Load an existing document either by object or by id/number
+    async loadExistingDocument(input) {
       try {
-        const response = await fetch(`http://localhost:8000/api/plan-documents/${documentId}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          const doc = result.document;
-          this.documentId = doc.document_id;
-          this.fileName = doc.original_filename || 'Document';
-          this.status = doc.status;
-          this.lastModifiedDate = new Date(doc.upload_date);
-          
-          // Load the file for display
-          if (doc.file_path) {
-            await this.loadFileFromServer(doc.file_path, doc.original_filename);
-          }
+        // If a full document object was passed, delegate to viewDocument
+        if (input && typeof input === 'object' && input.file_path) {
+          await this.viewDocument(input);
+          return;
         }
-      } catch (error) {
-        console.error('Error loading document:', error);
+
+        // Otherwise, fetch list and find by document_number or document_id
+        const lruId = this.documentDetails.lruId;
+        if (!lruId) {
+          console.warn('loadExistingDocument called without LRU ID');
+          return;
+        }
+
+        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (!data.success) {
+          console.warn('Failed to load documents for selecting existing document:', data.message);
+          return;
+        }
+
+        const targetIdNum = Number(input);
+        const doc = (data.documents || []).find(d =>
+          d.document_number === input || d.document_id === targetIdNum
+        );
+
+        if (doc) {
+          await this.viewDocument(doc);
+        } else {
+          console.warn('Requested document not found among existing documents:', input);
+        }
+      } catch (err) {
+        console.error('Error in loadExistingDocument:', err);
       }
     },
 
     // Load file from server for display
-    async loadFileFromServer(filePath, originalFilename) {
+    /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
         const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
@@ -941,7 +961,7 @@ export default {
       } catch (err) {
         console.error('Error in loadExistingDocument:', err);
       }
-    },
+    },*/
 
     // Date formatting
     formatDate(date) {
@@ -1680,15 +1700,25 @@ export default {
 
     async loadCommentsFromBackend() {
       try {
+        if (!this.documentId) {
+          console.log('No document ID available for loading comments');
+          return;
+        }
+        
         const response = await fetch(`http://localhost:8000/api/comments?document_id=${this.documentId}`);
         
         if (response.ok) {
           const data = await response.json();
           this.comments = data.comments || [];
           this.annotations = data.annotations || [];
+          console.log(`Loaded ${this.comments.length} comments and ${this.annotations.length} annotations`);
+        } else {
+          console.warn(`Failed to load comments: ${response.status} ${response.statusText}`);
+          // Don't show error to user as comments are optional
         }
       } catch (error) {
-        console.error('Error loading comments:', error);
+        console.warn('Error loading comments (optional feature):', error.message);
+        // Don't show error to user as comments are optional
       }
     },
 
