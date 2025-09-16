@@ -79,7 +79,7 @@
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
-      <p>Loading LRUs...</p>
+      <p>{{ (isReviewer || isDesigner) ? 'Loading your assigned LRUs...' : 'Loading LRUs...' }}</p>
     </div>
 
     <!-- Error state -->
@@ -91,7 +91,7 @@
     <!-- LRUs grid -->
     <div v-else class="lru-grid">
       <div v-if="filteredLrus.length === 0" class="no-lrus">
-        <p>No LRUs found for this project.</p>
+        <p>{{ (isReviewer || isDesigner) ? 'No LRUs have been assigned to you in this project yet.' : 'No LRUs found for this project.' }}</p>
       </div>
       <div v-else v-for="lru in filteredLrus" :key="lru.id" class="lru-card" @click="viewLru(lru)">
         <div class="card-icon">
@@ -135,8 +135,17 @@ export default {
     currentUserRole() {
       return userStore.getters.currentUserRole()
     },
+    currentUser() {
+      return userStore.getters.currentUser()
+    },
     roleName() {
       return userStore.getters.roleName()
+    },
+    isReviewer() {
+      return this.roleName?.toLowerCase() === 'qa reviewer'
+    },
+    isDesigner() {
+      return this.roleName?.toLowerCase() === 'designer'
     },
     filteredLrus() {
       let list = this.lrus;
@@ -179,7 +188,18 @@ export default {
         this.loading = true;
         this.error = null;
         
-        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}/lrus`);
+        let apiUrl = `http://localhost:5000/api/projects/${this.projectId}/lrus`;
+        
+        // If user is a QA Reviewer, use the filtered endpoint
+        if (this.isReviewer && this.currentUser?.id) {
+          apiUrl = `http://localhost:5000/api/reviewer/${this.currentUser.id}/assigned-lrus/${this.projectId}`;
+        }
+        // If user is a Designer, use the designer filtered endpoint
+        else if (this.isDesigner && this.currentUser?.id) {
+          apiUrl = `http://localhost:5000/api/designer/${this.currentUser.id}/assigned-lrus/${this.projectId}`;
+        }
+        
+        const response = await fetch(apiUrl);
         const data = await response.json();
         
         if (data.success) {
