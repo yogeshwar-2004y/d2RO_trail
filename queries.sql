@@ -315,4 +315,28 @@ CREATE TABLE project_users (
     CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
 );
 
+CREATE TABLE document_annotations (
+    annotation_id SERIAL PRIMARY KEY,
+    comment_id INTEGER NOT NULL,
+    document_id VARCHAR(100) NOT NULL,
+    page_no INTEGER NOT NULL,
+    x_position NUMERIC(5,2) NOT NULL,
+    y_position NUMERIC(5,2) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE document_comments (
+    comment_id SERIAL PRIMARY KEY,
+    document_id VARCHAR(100) NOT NULL,
+    document_name VARCHAR(255),
+    version VARCHAR(50),
+    reviewer_id INTEGER,
+    page_no INTEGER NOT NULL,
+    section VARCHAR(100),
+    description TEXT,
+    author VARCHAR(100) DEFAULT 'Anonymous',
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    is_annotation BOOLEAN DEFAULT FALSE
+);
+
 
