@@ -143,7 +143,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:8000/api/roles");
+        const response = await fetch("http://localhost:5000/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -187,7 +187,7 @@ export default {
       try {
         this.loading = true;
 
-        const response = await fetch("http://localhost:8000/api/users", {
+        const response = await fetch("http://localhost:5000/api/users", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

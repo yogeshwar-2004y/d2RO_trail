@@ -32,3 +32,5 @@ dist/
 Thumbs.db
 node_modules/
 node_modules/
+
+plan_doc_uploads/

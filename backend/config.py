@@ -25,7 +25,7 @@ class Config:
     DATABASE_CONFIG = {
         'dbname': "ERP",
         'user': "postgres", 
-        'password': "12345",
+        'password': "Mahadev@2004",
         'host': "localhost",
         'port': "5432"
     }

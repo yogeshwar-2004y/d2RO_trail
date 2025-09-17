@@ -134,7 +134,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:8000/api/roles");
+        const response = await fetch("http://localhost:5000/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -204,7 +204,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/users/${this.userId}`,
+          `http://localhost:5000/api/users/${this.userId}`,
           {
             method: "PUT",
             headers: {

@@ -50,7 +50,7 @@ cd backend
 python app.py
 ```
 
-The Flask server will start on `http://127.0.0.1:8000`
+The Flask server will start on `http://127.0.0.1:5000`
 
 ### 4. Test the System
 Run the test script to verify database connectivity:

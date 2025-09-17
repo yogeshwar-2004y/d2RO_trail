@@ -690,7 +690,7 @@ export default {
     async loadLruMetadata(lruId) {
       try {
         console.log(`Attempting to load metadata for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/metadata`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/metadata`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -721,7 +721,7 @@ export default {
     async loadNextDocVer(lruId) {
       try {
         console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:8000/api/plan-documents/next-doc-ver/${lruId}`);
+        const response = await fetch(`http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -752,7 +752,7 @@ export default {
         this.loading = true;
         console.log(`Loading existing documents for LRU ${lruId}...`);
         
-        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
         
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -779,7 +779,7 @@ export default {
     // Load document versions for LRU and display the latest one
     async loadDocumentVersions(lruId) {
       try {
-        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
         const result = await response.json();
         
         if (result.success) {
@@ -825,7 +825,7 @@ export default {
         
         console.log('📄 Extracted filename:', filename);
         
-        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
         console.log('🌐 File URL:', fileUrl);
         
         // Test if file is accessible
@@ -880,6 +880,46 @@ export default {
       }
     },
 
+    // Load DOCX directly from a URL (used when viewing existing documents from backend)
+    async loadDocxFromUrl(fileUrl) {
+      try {
+        this.clearDocument();
+        this.fileType = "docx";
+        this.docxHtml = "";
+
+        console.log("Fetching DOCX from URL:", fileUrl);
+        const response = await fetch(fileUrl);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+
+        const options = {
+          styleMap: ["p[style-name='Page Break'] => div.page-break"]
+        };
+
+        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+
+        // Process and paginate the HTML
+        const processedHtml = this.processDocxHtml(result.value);
+
+        this.docxHtml = processedHtml;
+
+        // Calculate number of pages
+        this.$nextTick(() => {
+          const pages = document.querySelectorAll(".docx-content .page");
+          this.numPages = pages.length || 1;
+          console.log("DOCX pages loaded:", this.numPages);
+        });
+
+      } catch (err) {
+        console.error("❌ Failed to load DOCX from URL:", err);
+        alert("Failed to load DOCX file from server.");
+      }
+    },
+
     // Load a PDF directly from a URL (used when viewing existing documents)
     async loadPdfFromUrl(fileUrl) {
       try {
@@ -914,7 +954,7 @@ export default {
           return;
         }
 
-        const response = await fetch(`http://localhost:8000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
@@ -943,7 +983,7 @@ export default {
     /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
-        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
         
         // Determine file type from extension
         const extension = originalFilename.split('.').pop().toLowerCase();
@@ -1028,7 +1068,7 @@ export default {
       
       try {
         this.loadingReviewerStatus = true;
-        const response = await fetch(`http://localhost:8000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
+        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
         const data = await response.json();
         
         if (data.success) {
@@ -1171,7 +1211,7 @@ export default {
         formData.append('doc_ver', this.documentDetails.docVer);
         formData.append('uploaded_by', userStore.getters.currentUser()?.id || userStore.getters.currentUser()?.user_id || 1001);
 
-        const response = await fetch('http://localhost:8000/api/plan-documents', {
+        const response = await fetch('http://localhost:5000/api/plan-documents', {
           method: 'POST',
           body: formData
         });
@@ -1523,7 +1563,7 @@ export default {
 
     async deleteCommentFromBackend(commentId) {
       try {
-        const response = await fetch(`http://localhost:8000/api/comments/${commentId}`, {
+        const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
           method: 'DELETE'
         });
         
@@ -1611,6 +1651,7 @@ export default {
         
         console.log('Annotation created:', annotation);
         console.log('Total annotations:', this.annotations.length);
+        
         
         // Clear current annotation after creating it
         this.currentAnnotation = null;
@@ -1707,7 +1748,7 @@ export default {
           page_no: commentData.page_no
         });
         
-        const response = await fetch('http://localhost:8000/api/comments', {
+        const response = await fetch('http://localhost:5000/api/comments', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1739,7 +1780,7 @@ export default {
           return;
         }
         
-        const response = await fetch(`http://localhost:8000/api/comments?document_id=${this.documentId}`);
+        const response = await fetch(`http://localhost:5000/api/comments?document_id=${this.documentId}`);
         
         if (response.ok) {
           const data = await response.json();
