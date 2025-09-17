@@ -231,10 +231,11 @@
           v-if="fileType === 'docx'"
           class="doc-container docx-content"
           :class="{ 'annotation-mode': isAnnotationMode }"
-          :style="{ fontSize: zoom * 16 + 'px' }"
+          :style="{ transform: `scale(${zoom})`, transformOrigin: 'top left' }"
           @click="handleDocumentClick"
+          ref="docxContainer"
         >
-          <div v-html="docxHtml"></div>
+          <!-- docx-preview renders content here -->
           <!-- Annotation overlays for DOCX -->
           <div class="annotation-overlay">
             <div
@@ -511,6 +512,7 @@
 import VuePdfEmbed from "vue-pdf-embed"
 import * as mammoth from "mammoth/mammoth.browser"
 import * as pdfjsLib from "pdfjs-dist/build/pdf"
+import { renderAsync as renderDocx } from "docx-preview"
 
 // Configure pdf.js worker
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
@@ -537,7 +539,8 @@ export default {
       // Document viewing
       fileType: null,
       pdfUrl: null,
-      docxHtml: "",
+      docxHtml: "", // kept for back-compat; no longer used with docx-preview
+      docxRendered: false,
       page: 1,
       numPages: 0,
       zoom: 1.0,
@@ -645,7 +648,7 @@ export default {
       return this.currentUserRole === 'Reviewer';
     },
     docContent() {
-      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxHtml);
+      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
     },
     //isFormValid() {
     //return this.commentForm.description.trim();
@@ -880,43 +883,31 @@ export default {
       }
     },
 
-    // Load DOCX directly from a URL (used when viewing existing documents from backend)
+    // Load DOCX directly from a URL (docx-preview)
     async loadDocxFromUrl(fileUrl) {
       try {
         this.clearDocument();
-        this.fileType = "docx";
-        this.docxHtml = "";
+        this.fileType = 'docx';
 
-        console.log("Fetching DOCX from URL:", fileUrl);
         const response = await fetch(fileUrl);
-
         if (!response.ok) {
           throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
         }
-
         const arrayBuffer = await response.arrayBuffer();
-
-        const options = {
-          styleMap: ["p[style-name='Page Break'] => div.page-break"]
-        };
-
-        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
-
-        // Process and paginate the HTML
-        const processedHtml = this.processDocxHtml(result.value);
-
-        this.docxHtml = processedHtml;
-
-        // Calculate number of pages
-        this.$nextTick(() => {
-          const pages = document.querySelectorAll(".docx-content .page");
-          this.numPages = pages.length || 1;
-          console.log("DOCX pages loaded:", this.numPages);
+        const container = this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
         });
-
+        this.docxRendered = true;
+        this.$nextTick(() => {
+          this.numPages = 1;
+        });
       } catch (err) {
-        console.error("❌ Failed to load DOCX from URL:", err);
-        alert("Failed to load DOCX file from server.");
+        console.error('❌ Failed to load DOCX from URL:', err);
+        alert('Failed to load DOCX file from server.');
       }
     },
 
@@ -1264,52 +1255,22 @@ export default {
     },
 
     async loadDocx(file) {
-      console.log('Starting DOCX file loading...', { fileName: file.name, fileSize: file.size });
-      
       try {
-        console.log('Reading file as ArrayBuffer...');
         const arrayBuffer = await file.arrayBuffer();
-        console.log('File successfully read as ArrayBuffer');
-
-        console.log('Converting DOCX to HTML with page markers...');
-        const options = {
-          styleMap: [
-            "p[style-name='Page Break'] => div.page-break"
-          ]
-        };
-
-        // First convert to get the basic HTML
-        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
-        console.log('Initial HTML conversion complete', { 
-          resultLength: result.value.length,
-          messages: result.messages 
+        const container = this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
         });
-
-        // Process the HTML to add page markers
-        const processedHtml = this.processDocxHtml(result.value);
-        console.log('HTML processing complete', { 
-          finalLength: processedHtml.length,
-          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
-        });
-
-        // Set the processed HTML
-        this.docxHtml = processedHtml;
-        
-        // Calculate number of pages
+        this.docxRendered = true;
         this.$nextTick(() => {
-          const pages = document.querySelectorAll('.docx-content .page');
-          this.numPages = pages.length || 1;
-          console.log('Page calculation complete', { totalPages: this.numPages });
+          this.numPages = 1;
         });
-
       } catch (err) {
-        console.error('Error in loadDocx:', {
-          error: err,
-          errorName: err.name,
-          errorMessage: err.message,
-          errorStack: err.stack
-        });
-        alert("Failed to render DOCX file. Check console for details.");
+        console.error('Error rendering DOCX with docx-preview:', err);
+        alert('Failed to render DOCX file.');
       }
     },
 
@@ -1449,34 +1410,34 @@ export default {
       }
     },
 
-    scrollToPage(pageNum) {
-      console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
+    // scrollToPage(pageNum) {
+    //   console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
       
-      this.$nextTick(() => {
-        if (this.fileType === 'pdf' && this.$refs.pdfPages) {
-          const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
-          if (pageEl) {
-            console.log('Scrolling to PDF page element:', pageEl);
-            pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
-          }
-        } else if (this.fileType === 'docx') {
-          const docContainer = document.querySelector('.docx-content');
-          if (docContainer) {
-            const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
-            if (targetPage) {
-              console.log('Scrolling to DOCX page element:', targetPage);
-              targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-              console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
-            }
-          } else {
-            console.warn('DOCX container not found');
-          }
-        }
-      });
-    },
+    //   this.$nextTick(() => {
+    //     if (this.fileType === 'pdf' && this.$refs.pdfPages) {
+    //       const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
+    //       if (pageEl) {
+    //         console.log('Scrolling to PDF page element:', pageEl);
+    //         pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //       } else {
+    //         console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
+    //       }
+    //     } else if (this.fileType === 'docx') {
+    //       const docContainer = document.querySelector('.docx-content');
+    //       if (docContainer) {
+    //         const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
+    //         if (targetPage) {
+    //           console.log('Scrolling to DOCX page element:', targetPage);
+    //           targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //         } else {
+    //           console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
+    //         }
+    //       } else {
+    //         console.warn('DOCX container not found');
+    //       }
+    //     }
+    //   });
+    // },
 
     onScroll() {
       if (this.fileType !== "pdf" || !this.$refs.pdfPages?.length) return;
