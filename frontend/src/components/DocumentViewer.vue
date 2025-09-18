@@ -2459,6 +2459,8 @@ export default {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-item:hover {
@@ -2473,6 +2475,11 @@ export default {
   line-height: 1.6;
   margin-bottom: 0.75rem;
   font-weight: 800;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .remove-btn {
@@ -2724,6 +2731,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-header {
@@ -2747,6 +2756,8 @@ export default {
 
 .comment-content {
   margin-bottom: 0.5rem;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-meta {
@@ -2762,6 +2773,11 @@ export default {
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .annotation-info {
@@ -3277,6 +3293,8 @@ export default {
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.2s ease;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-item:hover {
@@ -3344,6 +3362,8 @@ export default {
   color: #1f2937;
   margin-bottom: 1rem;
   line-height: 1.5;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-actions {
