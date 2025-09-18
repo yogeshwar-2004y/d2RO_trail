@@ -17,321 +17,336 @@
 
     <!-- Requisition Details Section -->
     <div class="form-section requisition-details">
-      <div class="form-grid">
-        <div class="form-row">
-          <div class="form-field">
-            <label>FROM:</label>
-            <input type="text" v-model="formData.from" placeholder="Enter sender details">
-          </div>
-          <div class="form-field">
+      <table class="form-table">
+        <tr>
+          <td class="form-cell">
+            <label>From :</label>
+            <input type="text" v-model="formData.from1" placeholder="MED, CASDIC (DARE), Bangalore">
+            <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
+            <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
+          </td>
+          <td class="form-cell">
             <label>CASDIC Ref No.:</label>
-            <input type="text" v-model="formData.casdicRef" placeholder="Enter CASDIC reference">
-          </div>
-          <div class="form-field">
+            <input type="text" v-model="formData.casdicRef" placeholder="">
+          </td>
+          <td class="form-cell">
             <label>CASDIC/</label>
-            <input type="text" v-model="formData.casdic" placeholder="Enter CASDIC details">
-          </div>
-          <div class="form-field">
+            <input type="text" v-model="formData.casdic" placeholder="">
+          </td>
+          <td class="form-cell">
             <label>Dated:</label>
             <input type="date" v-model="formData.casdicDate">
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-field">
-            <label>TO:</label>
-            <input type="text" v-model="formData.to" placeholder="Enter recipient details">
-          </div>
-          <div class="form-field">
+          </td>
+        </tr>
+        <tr>
+          <td class="form-cell">
+            <label>To :</label>
+            <input type="text" v-model="formData.to1" placeholder="">
+            <input type="text" v-model="formData.to2" placeholder="">
+          </td>
+          <td class="form-cell">
+            <label>Thru/: O I/c, WH</label>
+          </td>
+          <td class="form-cell">
             <label>Wing/Proj Ref No.:</label>
-            <input type="text" v-model="formData.wingRef" placeholder="Enter wing/project reference">
-          </div>
-          <div class="form-field"></div>
-          <div class="form-field"></div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-field"></div>
-          <div class="form-field wide-field">
+            <input type="text" v-model="formData.wingRef" placeholder="">
+          </td>
+          <td class="form-cell"></td>
+        </tr>
+        <tr>
+          <td class="form-cell"></td>
+          <td class="form-cell wide-field" colspan="3">
             <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input type="text" v-model="formData.coordinator" placeholder="Enter coordinator details">
-          </div>
-          <div class="form-field"></div>
-          <div class="form-field"></div>
-        </div>
-      </div>
+            <input type="text" v-model="formData.coordinator" placeholder="">
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- LRU/SRU Details Section -->
     <div class="form-section lru-details">
-      <div class="details-table">
-        <div class="table-header">
-          <div class="lru-column">LRU/SRU DETAILS</div>
-          <div class="desc-column">LRU/SRU Desc:</div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.lruReady" id="lruReady">
-            <label for="lruReady"></label>
-          </div>
-          <div class="ref-column">Ref Doc</div>
-          <div class="refno-column">Ref No of Document</div>
-          <div class="ver-column">ver</div>
-          <div class="rev-column">rev</div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Part No:</label>
-              <input type="text" v-model="formData.partNo" placeholder="Enter part number">
-            </div>
-            <div class="lru-field">
-              <label>Manufacturer:</label>
-              <input type="text" v-model="formData.manufacturer" placeholder="Enter manufacturer">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description" placeholder="Enter LRU/SRU description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted" id="unitsNoted">
-            <label for="unitsNoted"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Sl.No of units:</label>
-              <input type="text" v-model="formData.slNo" placeholder="Enter serial number">
-            </div>
-            <div class="lru-field">
-              <label>Drawing no /Rev:</label>
-              <input type="text" v-model="formData.drawingNo" placeholder="Enter drawing number">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description2" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted2" id="unitsNoted2">
-            <label for="unitsNoted2"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc2" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo2" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version2" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision2" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Qty Offered:</label>
-              <input type="text" v-model="formData.qtyOffered" placeholder="Enter quantity">
-            </div>
-            <div class="lru-field">
-              <label>source:</label>
-              <input type="text" v-model="formData.source" placeholder="Enter source">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description3" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted3" id="unitsNoted3">
-            <label for="unitsNoted3"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc3" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo3" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version3" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision3" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>UNIT IDENTIFICATION:</label>
-              <input type="text" v-model="formData.unitId" placeholder="Enter unit identification">
-            </div>
-            <div class="lru-field">
-              <label>MECHANICAL INSPN:</label>
-              <input type="text" v-model="formData.mechanicalInsp" placeholder="Enter mechanical inspection">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description4" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted4" id="unitsNoted4">
-            <label for="unitsNoted4"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc4" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo4" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version4" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision4" placeholder="rev">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inspection/Test Stage Section -->
-    <div class="form-section inspection-stage">
-      <div class="stage-header">
-        <div class="stage-field">
-          <label>INSPECTION / TEST STAGE OFFERED NOW :</label>
-          <input type="text" v-model="formData.inspectionStage" placeholder="Enter inspection/test stage">
-        </div>
-        <div class="stage-field">
-          <label>STTE Status:</label>
-          <input type="text" v-model="formData.stteStatus" placeholder="Enter STTE status">
-        </div>
-      </div>
+      <table class="details-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="lru-header">LRU / SRU DETAILS</th>
+            <th rowspan="2" class="desc-header">LRU / SRU Desc:</th>
+            <th rowspan="2" class="ref-doc-header">Ref Doc</th>
+            <th rowspan="2" class="ref-no-header">Ref No of Document</th>
+            <th class="ver-header">ver</th>
+            <th class="rev-header">rev</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Part No:</label>
+                <input type="text" v-model="formData.partNo" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>Manufacturer:</label>
+                <input type="text" v-model="formData.manufacturer" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <textarea v-model="formData.description" placeholder=""></textarea>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Sl.No of units :</label>
+                <input type="text" v-model="formData.slNo" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>Drawing no/Rev:</label>
+                <input type="text" v-model="formData.drawingNo" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <span>NA</span>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc2" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo2" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version2" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision2" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Qty Offered:</label>
+                <input type="text" v-model="formData.qtyOffered" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>source :</label>
+                <span>NA</span>
+              </div>
+            </td>
+            <td class="desc-cell">
+              <textarea v-model="formData.description3" placeholder=""></textarea>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc3" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo3" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version3" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision3" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>UNIT IDENTIFICATION : SOFT / QT / AT / DT / TS / ESS</label>
+              </div>
+              <div class="lru-field">
+                <label>MECHANICAL INSPN :</label>
+                <input type="text" v-model="formData.mechanicalInsp" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <span>STAGE / PARTS / ASSY/ FINAL / INSTALL</span>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc4" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo4" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version4" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision4" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
+                <input type="text" v-model="formData.inspectionStage" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <div class="lru-field">
+                <label>STTE Status:</label>
+                <input type="text" v-model="formData.stteStatus" placeholder="">
+              </div>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc5" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo5" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version5" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision5" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <label>TEST STAGE CLEARED:</label>
+              <input type="text" v-model="formData.testStageCleared" placeholder="">
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc6" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo6" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version6" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision6" placeholder="">
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Test Details Section -->
     <div class="form-section test-details">
-      <div class="test-grid">
-        <div class="test-column">
-          <div class="test-field">
-            <label>Above Unit is ready for Testing at</label>
-            <input type="text" v-model="formData.testVenue" placeholder="venue, dated">
-            <span>onwards.</span>
-          </div>
-          <div class="test-field">
-            <label>SIGNATURE:</label>
-            <div class="signature-box"></div>
-          </div>
-          <div class="test-field">
-            <label>NAME / DESIGNATION</label>
-            <input type="text" v-model="formData.signatureName" placeholder="Enter name and designation">
-          </div>
-        </div>
-        
-        <div class="test-column">
-          <div class="test-field">
-            <label>Test facility to be used:</label>
-            <input type="text" v-model="formData.testFacility" placeholder="Enter test facility">
-          </div>
-          <div class="test-field">
-            <label>Test cycle / Duration:</label>
-            <input type="text" v-model="formData.testCycle" placeholder="Enter test cycle">
-            <span>hrs</span>
-          </div>
-          <div class="test-field">
-            <label>Test Start on:</label>
-            <input type="datetime-local" v-model="formData.testStart">
-          </div>
-          <div class="test-field">
-            <label>Test complete on :</label>
-            <input type="datetime-local" v-model="formData.testComplete">
-          </div>
-        </div>
-        
-        <div class="test-column">
-          <div class="test-field">
-            <label>Calibration status OK/Due on :</label>
-            <input type="date" v-model="formData.calibrationStatus">
-          </div>
-          <div class="test-field">
-            <label>Func. Check(Initial) :</label>
-            <input type="datetime-local" v-model="formData.funcCheckInitial">
-          </div>
-          <div class="test-field">
-            <label>Perf. check (during) :</label>
-            <input type="datetime-local" v-model="formData.perfCheckDuring">
-          </div>
-          <div class="test-field">
-            <label>Func Check (end) :</label>
-            <input type="datetime-local" v-model="formData.funcCheckEnd">
-          </div>
-        </div>
-      </div>
+      <table class="test-table">
+        <tr>
+          <td class="test-left">
+            <div class="test-field">
+              <label>Above Unit is ready for Testing at</label>
+              <input type="text" v-model="formData.testVenue" placeholder="">
+              <span>onwards.</span>
+            </div>
+            <div class="test-field">
+              <label>SIGNATURE :</label>
+              <div class="signature-box"></div>
+            </div>
+            <div class="test-field">
+              <label>NAME / DESIGNATION</label>
+              <input type="text" v-model="formData.signatureName" placeholder="">
+            </div>
+            <div class="test-field">
+              <span>It is certified that :</span>
+            </div>
+          </td>
+          <td class="test-middle">
+            <div class="test-field">
+              <label>i. Test facility to be used :</label>
+              <input type="text" v-model="formData.testFacility" placeholder="">
+            </div>
+            <div class="test-field">
+              <label>ii. Test cycle / Duration:</label>
+              <input type="text" v-model="formData.testCycle" placeholder="">
+              <span>hrs</span>
+            </div>
+            <div class="test-field">
+              <label>iii. Test start on:</label>
+              <input type="text" v-model="formData.testStart" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>iv. Test complete on :</label>
+              <input type="text" v-model="formData.testComplete" placeholder="date/time">
+            </div>
+          </td>
+          <td class="test-right">
+            <div class="test-field">
+              <label>v. Calibration status: OK / Due on</label>
+              <input type="text" v-model="formData.calibrationStatus" placeholder="">
+            </div>
+            <div class="test-field">
+              <label>vi. Func. Check (Initial):</label>
+              <input type="text" v-model="formData.funcCheckInitial" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>vii. Perf.check (during):</label>
+              <input type="text" v-model="formData.perfCheckDuring" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>viii. Func Check (end):</label>
+              <input type="text" v-model="formData.funcCheckEnd" placeholder="date/time">
+            </div>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- Certification Section -->
     <div class="form-section certification">
-      <h3>It is certified that :</h3>
       <div class="certification-list">
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert1" id="cert1">
-          <label for="cert1">Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
+          <span class="cert-letter">a)</span>
+          <span class="cert-text">Mechanical Quality Records of all the parts ( Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc. ) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports / test reports, etc.) were verified thoroughly .</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert2" id="cert2">
-          <label for="cert2">CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
+          <span class="cert-letter">b)</span>
+          <span class="cert-text">CoC for SRU, fasteners & standard parts are verified and satisfactory</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert3" id="cert3">
-          <label for="cert3">Sl no of the SRUs are noted down in the respective log book opened on</label>
-          <input type="text" v-model="formData.logBookDate" placeholder="Enter date">
+          <span class="cert-letter">c)</span>
+          <span class="cert-text">Sl no of the SRUs are noted down in the respective log book opened on <input type="text" v-model="formData.logBookDate" placeholder="" class="inline-input"></span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert4" id="cert4">
-          <label for="cert4">No Defect investigation is pending against this LRU</label>
+          <span class="cert-letter">d)</span>
+          <span class="cert-text">No Defect investigation is pending against this LRU</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert5" id="cert5">
-          <label for="cert5">All the previous test stages of this LRU/SRU are cleared</label>
+          <span class="cert-letter">e)</span>
+          <span class="cert-text">All the previous test stages of this LRU /SRU are cleared</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert6" id="cert6">
-          <label for="cert6">CASDIC QA has physically inspected and accepted the LRU on</label>
-          <input type="text" v-model="formData.qaInspectionDate" placeholder="Enter date">
+          <span class="cert-letter">f)</span>
+          <span class="cert-text">CASDIC QA has physically inspected and accepted the LRU on <input type="text" v-model="formData.qaInspectionDate" placeholder="" class="inline-input"></span>
         </div>
       </div>
       
-      <div class="signature-section">
-        <div class="signature-box-large"></div>
-        <p>SIGNATURE of Rep, IQA CASDIC</p>
+      <div class="action-taken-section">
+        <span class="action-taken-text">Action taken & remarks by DGAQA</span>
+      </div>
+      
+      <div class="signature-sections">
+        <div class="signature-section left">
+          <div class="signature-box-large"></div>
+          <p>SIGNATURE of Rep, IQA CASDIC</p>
+        </div>
+        <div class="remarks-section">
+          <p class="instruction">(please use space overleaf for details)</p>
+          <div class="signature-box-large"></div>
+          <p>SIGNATURE OF DGAQA REP..</p>
+        </div>
       </div>
     </div>
 
-    <!-- Action Taken Section -->
-    <div class="form-section action-taken">
-      <h3>Action taken & remarks by DGAQA</h3>
-      <p class="instruction">(please use space overleaf for details)</p>
-      <div class="remarks-area">
-        <textarea v-model="formData.dgaqaRemarks" placeholder="Enter DGAQA remarks and actions taken..."></textarea>
-      </div>
-      <div class="signature-section">
-        <div class="signature-box-large"></div>
-        <p>SIGNATURE OF DGAQA REP..</p>
-      </div>
-    </div>
 
     <div 
       class="form-section test-status" 
@@ -643,47 +658,51 @@ export default {
       showRejectionSection: false,
       
       formData: {
-        from: '',
+        from1: '',
+        from2: '',
+        from3: '',
         casdicRef: '',
         casdic: '',
         casdicDate: '',
-        to: '',
+        to1: '',
+        to2: '',
         wingRef: '',
         coordinator: '',
         partNo: '',
         manufacturer: '',
         description: '',
-        lruReady: false,
         refDoc: '',
         refNo: '',
         version: '',
         revision: '',
         slNo: '',
         drawingNo: '',
-        description2: '',
-        unitsNoted: false,
         refDoc2: '',
         refNo2: '',
         version2: '',
         revision2: '',
         qtyOffered: '',
-        source: '',
         description3: '',
-        unitsNoted2: false,
         refDoc3: '',
         refNo3: '',
         version3: '',
         revision3: '',
-        unitId: '',
         mechanicalInsp: '',
-        description4: '',
-        unitsNoted3: false,
         refDoc4: '',
         refNo4: '',
         version4: '',
         revision4: '',
         inspectionStage: '',
         stteStatus: '',
+        refDoc5: '',
+        refNo5: '',
+        version5: '',
+        revision5: '',
+        testStageCleared: '',
+        refDoc6: '',
+        refNo6: '',
+        version6: '',
+        revision6: '',
         testVenue: '',
         signatureName: '',
         testFacility: '',
@@ -694,15 +713,8 @@ export default {
         funcCheckInitial: '',
         perfCheckDuring: '',
         funcCheckEnd: '',
-        cert1: false,
-        cert2: false,
-        cert3: false,
-        cert4: false,
-        cert5: false,
-        cert6: false,
         logBookDate: '',
         qaInspectionDate: '',
-        dgaqaRemarks: '',
         testStatus: '',
         qaReviewerRemarks: ''
       }
@@ -898,44 +910,42 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 20px;
-  align-items: end;
+.form-table td, .form-table th {
+  border: 1px solid #333;
+  padding: 8px;
+  vertical-align: top;
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.form-cell {
+  position: relative;
 }
 
-.form-field label {
+.form-cell label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
 }
 
-.form-field input {
-  padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 1em;
-  color: #495057;
-  background-color: #f8f9fa;
-  transition: border-color 0.3s ease;
+.form-cell input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+  box-sizing: border-box;
 }
 
-.form-field input:focus {
+.form-cell input:focus {
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   outline: none;
 }
 
@@ -944,91 +954,94 @@ export default {
 }
 
 .details-table {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 2fr 0.5fr 1fr 1fr 0.5fr 0.5fr;
-  background-color: #e9ecef;
-  padding: 15px;
+.details-table th, .details-table td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.details-table th {
+  background-color: #f8f9fa;
   font-weight: bold;
-  color: #495057;
   text-align: center;
-  align-items: center;
 }
 
-.table-row {
-  display: grid;
-  grid-template-columns: 2fr 2fr 0.5fr 1fr 1fr 0.5fr 0.5fr;
-  border-top: 1px solid #dee2e6;
-  padding: 20px 15px;
-  align-items: start;
-  gap: 15px;
+.lru-header {
+  width: 25%;
 }
 
-.lru-column {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.desc-header {
+  width: 25%;
+}
+
+.ref-doc-header {
+  width: 15%;
+}
+
+.ref-no-header {
+  width: 20%;
+}
+
+.ver-header, .rev-header {
+  width: 7.5%;
+}
+
+.lru-cell, .desc-cell, .ref-cell, .refno-cell, .ver-cell, .rev-cell {
+  vertical-align: top;
 }
 
 .lru-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-bottom: 10px;
 }
 
 .lru-field label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.8em;
+  display: block;
+  margin-bottom: 3px;
 }
 
 .lru-field input {
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9em;
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
-.desc-column textarea {
+.desc-cell textarea {
   width: 100%;
-  height: 80px;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  height: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
   resize: vertical;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
-.checkbox-column {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.desc-cell span {
+  color: #666;
+  font-size: 0.8em;
+  font-style: italic;
 }
 
-.checkbox-column input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.ref-column, .refno-column, .ver-column, .rev-column {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.ref-column input, .refno-column input, .ver-column input, .rev-column input {
+.ref-cell input, .refno-cell input, .ver-cell input, .rev-cell input {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
 .stage-header {
@@ -1056,40 +1069,48 @@ export default {
   font-size: 1em;
 }
 
-.test-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 30px;
+.test-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.test-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.test-table td {
+  border: 1px solid #333;
+  padding: 15px;
+  vertical-align: top;
+  width: 33.33%;
+}
+
+.test-left, .test-middle, .test-right {
+  vertical-align: top;
 }
 
 .test-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-bottom: 15px;
 }
 
 .test-field label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
 }
 
 .test-field input {
-  padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 1em;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  box-sizing: border-box;
 }
 
 .test-field span {
-  color: #6c757d;
+  color: #666;
   font-size: 0.9em;
+  margin-left: 5px;
 }
 
 .signature-box {
@@ -1118,37 +1139,64 @@ export default {
 }
 
 .certification-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
   margin-bottom: 30px;
 }
 
 .cert-item {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.cert-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-top: 3px;
-  cursor: pointer;
+.cert-letter {
+  font-weight: bold;
+  color: #333;
+  min-width: 20px;
 }
 
-.cert-item label {
+.cert-text {
   flex-grow: 1;
-  color: #495057;
-  line-height: 1.5;
+  color: #333;
+  line-height: 1.4;
+  font-size: 0.9em;
 }
 
-.cert-item input[type="text"] {
-  width: 150px;
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  margin-left: 10px;
+.inline-input {
+  display: inline;
+  width: 100px;
+  padding: 2px 6px;
+  border: none;
+  border-bottom: 1px solid #333;
+  background: transparent;
+  font-size: 0.9em;
+  margin: 0 3px;
+}
+
+.action-taken-section {
+  margin: 30px 0 20px 0;
+}
+
+.action-taken-text {
+  font-weight: bold;
+  color: #333;
+  font-size: 1em;
+}
+
+.signature-sections {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.signature-section.left {
+  flex: 1;
+}
+
+.remarks-section {
+  flex: 1;
 }
 
 .signature-section {
@@ -1700,3 +1748,4 @@ export default {
   height: 20px;
 }
 </style>
+
