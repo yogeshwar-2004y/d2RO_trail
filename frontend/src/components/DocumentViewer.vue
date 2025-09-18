@@ -1645,13 +1645,29 @@ export default {
     // Annotation System
     handleDocumentClick(event) {
       if (!this.isAnnotationMode) return;
-      
-      const rect = event.currentTarget.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 100;
-      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      // Compute coordinates relative to the correct target
+      let x = 0;
+      let y = 0;
+      let pageNo = 1;
+
+      if (this.fileType === 'pdf') {
+        // For PDFs, position relative to the clicked page wrapper
+        const pageEl = event.target.closest('.pdf-page-wrapper');
+        if (!pageEl) return;
+        const rect = pageEl.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = Number(pageEl.getAttribute('data-page')) || this.page || 1;
+      } else {
+        // For DOCX and others, position relative to the container
+        const rect = event.currentTarget.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = 1;
+      }
       
       // Update comment form with click position and document details
-      this.commentForm.page_no = this.fileType === 'pdf' ? this.page : 1;
+      this.commentForm.page_no = pageNo;
       this.commentForm.document_name = this.fileName || '';
       this.commentForm.document_id = this.documentId || '';
       this.commentForm.version = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '';
@@ -1661,7 +1677,7 @@ export default {
       this.currentAnnotation = {
         x: x,
         y: y,
-        page: this.fileType === 'pdf' ? this.page : 1
+        page: pageNo
       };
       
       // Exit annotation mode and show comment form
@@ -2157,6 +2173,7 @@ export default {
   height: 100%;
   background: #f8fafc;
   overflow-y: auto; /* Enable scrolling for DOCX content */
+  position: relative; /* Needed so overlay positions correctly */
 }
 
 .docx-content .page {
@@ -2292,6 +2309,7 @@ export default {
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 0.75rem;
+  font-weight: 800;
 }
 
 .remove-btn {
