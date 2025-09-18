@@ -180,43 +180,69 @@
           
           <tr>
             <td class="lru-cell">
-              <div class="lru-field">
-                <label>UNIT IDENTIFICATION :</label>
-                <div class="test-dropdown" @click="toggleTestsDropdown">
-                  <div class="selected-value">{{ selectedTestName || 'Select Test' }}</div>
-                  <div class="dropdown-icon">▾</div>
-                </div>
-                <div
-                  v-if="showTestsDropdown"
-                  class="tests-menu"
-                  @mouseleave="hoveredTestId = null"
-                >
-                  <div class="tests-menu-left">
-                    <div
-                      v-for="t in tests"
-                      :key="t.test_id"
-                      class="test-item"
-                      @mouseenter="hoveredTestId = t.test_id"
-                      @click.stop="selectTest(t)"
-                    >
-                      {{ t.test_name }}
+               <div class="lru-field unit-identification-container">
+                 <label>UNIT IDENTIFICATION :</label>
+                 <div class="dropdown-wrapper">
+                   <div 
+                     class="test-dropdown" 
+                     :class="{ 'active': showTestsDropdown }"
+                     @click="toggleTestsDropdown"
+                   >
+                     <div class="selected-value">{{ selectedTestName || 'Select Test' }}</div>
+                     <div class="dropdown-icon">▾</div>
+                   </div>
+                  <!-- Main Tests Dropdown -->
+                  <div
+                    v-if="showTestsDropdown"
+                    class="tests-menu"
+                    @mouseleave="handleMainMenuLeave"
+                  >
+                    <div class="menu-item-container">
+                      <div v-if="tests.length === 0" class="menu-item no-data">
+                        No tests available
+                      </div>
+                      <div
+                        v-else
+                        v-for="t in tests"
+                        :key="t.test_id"
+                        class="menu-item"
+                        :class="{ 
+                          'has-submenu': testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0,
+                          'active': hoveredTestId === t.test_id
+                        }"
+                        @mouseenter="handleTestHover(t.test_id)"
+                        @click.stop="selectTest(t)"
+                      >
+                        <span class="menu-text">{{ t.test_name }}</span>
+                        <span v-if="testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0" class="menu-arrow">❯</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="tests-menu-right">
-                    <div v-if="hoveredStages.length === 0" class="stages-empty">&nbsp;</div>
-                    <ul v-else class="stages-list">
-                      <li 
-                        v-for="s in hoveredStages" 
+                  
+                  <!-- Separate Stages Submenu -->
+                  <div
+                    v-if="showTestsDropdown && hoveredTestId && hoveredStages.length > 0"
+                    class="stages-submenu"
+                    @mouseenter="keepSubmenuOpen = true"
+                    @mouseleave="handleSubmenuLeave"
+                  >
+                    <div class="submenu-header">
+                      <span class="submenu-title">Test Stages</span>
+                    </div>
+                    <div class="submenu-item-container">
+                      <div
+                        v-for="s in hoveredStages"
                         :key="s.stage_id"
-                        class="stage-item"
+                        class="submenu-item"
                         @click.stop="selectStage(s)"
                       >
-                        {{ s.stage_name }}
-                      </li>
-                    </ul>
+                        <span class="submenu-text">{{ s.stage_name }}</span>
+                        <span v-if="s.stage_name === formData.mechanicalInsp" class="check-icon">✓</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                 </div>
+               </div>
               <div class="lru-field">
                 <label>MECHANICAL INSPN :</label>
                 <select v-model="formData.mechanicalInsp" class="lru-select">
@@ -729,11 +755,12 @@ export default {
       
       // LRU options from database
       lruOptions: [],
-      // Tests data for Unit Identification dropdown
-      tests: [],
-      testIdToStages: {},
-      showTestsDropdown: false,
-      hoveredTestId: null,
+       // Tests data for Unit Identification dropdown
+       tests: [],
+       testIdToStages: {},
+       showTestsDropdown: false,
+       hoveredTestId: null,
+       keepSubmenuOpen: false,
       
       formData: {
         from1: '',
@@ -823,7 +850,14 @@ export default {
     },
     hoveredStages() {
       if (!this.hoveredTestId) return [];
-      return this.testIdToStages[this.hoveredTestId] || [];
+      const stages = this.testIdToStages[this.hoveredTestId] || [];
+      // Debug logging
+      if (this.hoveredTestId) {
+        console.log('Hovered Test ID:', this.hoveredTestId);
+        console.log('Available stages:', stages);
+        console.log('All test-stage mappings:', this.testIdToStages);
+      }
+      return stages;
     },
     isNewMemo() {
       // Check if this is a new memo being submitted
@@ -887,31 +921,86 @@ export default {
         this.formData.description = 'Main Control Unit for Aircraft Navigation System';
       }
     },
-    async fetchTestsConfiguration() {
-      try {
-        const res = await fetch('http://localhost:5000/api/tests-configuration');
-        const data = await res.json();
-        if (data && data.success) {
-          this.tests = data.tests || [];
-          const stageMap = {};
-          (data.stages || []).forEach(s => { stageMap[s.stage_id] = s; });
-          const mapping = {};
-          (data.configurations || []).forEach(c => {
-            if (!mapping[c.test_id]) mapping[c.test_id] = [];
-            const st = stageMap[c.stage_id];
-            if (st && !mapping[c.test_id].some(x => x.stage_id === st.stage_id)) {
-              mapping[c.test_id].push(st);
-            }
-          });
-          this.testIdToStages = mapping;
+     async fetchTestsConfiguration() {
+       try {
+         console.log('Fetching tests configuration...');
+         const res = await fetch('http://localhost:5000/api/tests-configuration');
+         const data = await res.json();
+         console.log('API Response:', data);
+         
+         if (data && data.success) {
+           this.tests = data.tests || [];
+           console.log('Loaded tests:', this.tests);
+           
+           const stageMap = {};
+           (data.stages || []).forEach(s => { stageMap[s.stage_id] = s; });
+           console.log('Stage map:', stageMap);
+           
+           const mapping = {};
+           (data.configurations || []).forEach(c => {
+             if (!mapping[c.test_id]) mapping[c.test_id] = [];
+             const st = stageMap[c.stage_id];
+             if (st && !mapping[c.test_id].some(x => x.stage_id === st.stage_id)) {
+               mapping[c.test_id].push(st);
+             }
+           });
+           this.testIdToStages = mapping;
+           console.log('Final test-to-stages mapping:', this.testIdToStages);
+         } else {
+           console.error('API did not return success:', data);
+         }
+       } catch (e) {
+         console.error('Failed to fetch tests configuration', e);
+         // Fallback: Create some mock data for testing
+         this.tests = [
+           { test_id: 1, test_name: 'Functional Test' },
+           { test_id: 2, test_name: 'Performance Test' },
+           { test_id: 3, test_name: 'Environmental Test' }
+         ];
+         this.testIdToStages = {
+           1: [
+             { stage_id: 1, stage_name: 'STAGE' },
+             { stage_id: 2, stage_name: 'PARTS' }
+           ],
+           2: [
+             { stage_id: 3, stage_name: 'ASSY' },
+             { stage_id: 4, stage_name: 'FINAL' }
+           ],
+           3: [
+             { stage_id: 5, stage_name: 'INSTALL' }
+           ]
+         };
+         console.log('Using fallback mock data');
+       }
+     },
+      toggleTestsDropdown() {
+        this.showTestsDropdown = !this.showTestsDropdown;
+        if (!this.showTestsDropdown) {
+          this.hoveredTestId = null;
         }
-      } catch (e) {
-        console.error('Failed to fetch tests configuration', e);
-      }
-    },
-    toggleTestsDropdown() {
-      this.showTestsDropdown = !this.showTestsDropdown;
-    },
+      },
+      
+      handleTestHover(testId) {
+        console.log('Hovering over test:', testId);
+        console.log('Available stages for this test:', this.testIdToStages[testId]);
+        this.hoveredTestId = testId;
+        this.keepSubmenuOpen = false;
+      },
+      
+      handleMainMenuLeave() {
+        setTimeout(() => {
+          if (!this.keepSubmenuOpen) {
+            this.hoveredTestId = null;
+          }
+        }, 150);
+      },
+      
+      handleSubmenuLeave() {
+        this.keepSubmenuOpen = false;
+        setTimeout(() => {
+          this.hoveredTestId = null;
+        }, 100);
+      },
     selectTest(test) {
       this.formData.unitIdentificationTestId = test.test_id;
       this.formData.unitIdentificationTestName = test.test_name;
@@ -1267,54 +1356,251 @@ export default {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-/* Tests dropdown (Unit Identification) */
-.test-dropdown {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  padding: 8px 10px;
-  background: #fff;
-  cursor: pointer;
-}
-.test-dropdown .selected-value {
-  color: #495057;
-  font-size: 0.9em;
-}
-.test-dropdown .dropdown-icon {
-  color: #6c757d;
-}
-.tests-menu {
-  margin-top: 6px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  padding: 10px;
-  background: #fff;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-  position: relative;
-  z-index: 5;
-}
-.tests-menu-left {
-  max-height: 220px;
-  overflow-y: auto;
-  border-right: 1px dashed #e9ecef;
-  padding-right: 8px;
-}
-.test-item {
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.test-item:hover { background: #f1f3f5; }
-.tests-menu-right { padding-left: 8px; }
-.stages-empty { color: #adb5bd; font-size: 0.9em; }
-.stages-list { margin: 0; padding-left: 18px; }
-.stages-list li { margin: 2px 0; cursor: pointer; }
-.stage-item:hover { text-decoration: underline; }
+ /* Unit Identification Container */
+ .unit-identification-container {
+   position: relative;
+ }
+ 
+ .dropdown-wrapper {
+   position: relative;
+   width: 100%;
+ }
+ 
+ /* Tests dropdown (Unit Identification) */
+ .test-dropdown {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   border: 1px solid #e1e5e9;
+   border-radius: 8px;
+   padding: 10px 12px;
+   background: #fff;
+   cursor: pointer;
+   width: 100%;
+   box-sizing: border-box;
+   transition: all 0.2s ease;
+   font-size: 0.85em;
+ }
+ 
+ .test-dropdown:hover {
+   border-color: #007bff;
+   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+ }
+ 
+ .test-dropdown .selected-value {
+   color: #2c3e50;
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .test-dropdown .dropdown-icon {
+   color: #6c757d;
+   font-size: 12px;
+   margin-left: 8px;
+   transition: transform 0.2s ease;
+ }
+ 
+ .test-dropdown.active .dropdown-icon {
+   transform: rotate(180deg);
+ }
+ 
+ /* Main dropdown menu */
+ .tests-menu {
+   position: absolute;
+   top: 100%;
+   left: 0;
+   right: 0;
+   margin-top: 4px;
+   background: #fff;
+   border: 1px solid #e1e5e9;
+   border-radius: 12px;
+   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+   z-index: 1000;
+   overflow: hidden;
+   animation: menuFadeIn 0.15s ease-out;
+ }
+ 
+ @keyframes menuFadeIn {
+   from {
+     opacity: 0;
+     transform: translateY(-8px);
+   }
+   to {
+     opacity: 1;
+     transform: translateY(0);
+   }
+ }
+ 
+ .menu-item-container {
+   padding: 8px 0;
+   max-height: 240px;
+   overflow-y: auto;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar {
+   width: 6px;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar-track {
+   background: transparent;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar-thumb {
+   background: #d1d5db;
+   border-radius: 3px;
+ }
+ 
+ .menu-item {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 12px 16px;
+   cursor: pointer;
+   transition: background-color 0.1s ease;
+   font-size: 0.9em;
+   color: #374151;
+   position: relative;
+ }
+ 
+ .menu-item:hover {
+   background-color: #f8fafc;
+ }
+ 
+ .menu-item.has-submenu:hover {
+   background-color: #e3f2fd;
+ }
+ 
+ .menu-item.active {
+   background-color: #e3f2fd;
+   border-left: 3px solid #2563eb;
+ }
+ 
+ .menu-item.no-data {
+   color: #9ca3af;
+   font-style: italic;
+   cursor: default;
+ }
+ 
+ .menu-item.no-data:hover {
+   background-color: transparent;
+ }
+ 
+ .menu-text {
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .menu-arrow {
+   color: #9ca3af;
+   font-size: 12px;
+   margin-left: 8px;
+   transition: color 0.1s ease;
+ }
+ 
+ .menu-item:hover .menu-arrow {
+   color: #6b7280;
+ }
+ 
+ /* Separate Stages Submenu */
+ .stages-submenu {
+   position: absolute;
+   top: 0;
+   left: calc(100% + 8px);
+   min-width: 220px;
+   max-width: 320px;
+   background: #fff;
+   border: 1px solid #e1e5e9;
+   border-radius: 12px;
+   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+   animation: submenuSlideIn 0.2s ease-out;
+   z-index: 1003;
+   overflow: hidden;
+ }
+ 
+ @keyframes submenuSlideIn {
+   from {
+     opacity: 0;
+     transform: translateX(-8px);
+   }
+   to {
+     opacity: 1;
+     transform: translateX(0);
+   }
+ }
+ 
+ .submenu-header {
+   padding: 12px 16px 8px;
+   border-bottom: 1px solid #f1f5f9;
+   background-color: #f8fafc;
+ }
+ 
+ .submenu-title {
+   font-size: 0.75em;
+   font-weight: 600;
+   color: #64748b;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+ }
+ 
+ .submenu-item-container {
+   max-height: 200px;
+   overflow-y: auto;
+ }
+ 
+ .submenu-item {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 12px 16px;
+   cursor: pointer;
+   transition: all 0.15s ease;
+   font-size: 0.85em;
+   color: #374151;
+   border-bottom: 1px solid #f8fafc;
+ }
+ 
+ .submenu-item:last-child {
+   border-bottom: none;
+ }
+ 
+ .submenu-item:hover {
+   background-color: #f0f9ff;
+   color: #0369a1;
+   padding-left: 20px;
+ }
+ 
+ .submenu-text {
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .check-icon {
+   color: #10b981;
+   font-weight: bold;
+   font-size: 14px;
+   margin-left: 8px;
+ }
+ 
+ /* Responsive adjustments */
+ @media (max-width: 768px) {
+   .submenu {
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     margin: 0;
+     max-width: 280px;
+     width: 90vw;
+   }
+   
+   .tests-menu {
+     max-width: 95vw;
+   }
+   
+   .menu-item-container {
+     max-height: 200px;
+   }
+ }
 
 .lru-select option {
   padding: 4px 6px;
