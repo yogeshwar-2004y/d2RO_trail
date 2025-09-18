@@ -272,7 +272,7 @@
                 🗑️
               </button>
               <div class="comment-header">
-                <span class="comment-author">{{ comment.author || 'Anonymous' }}</span>
+                <span class="comment-commented_by">{{ comment.commented_by || 'Anonymous' }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
               </div>
               <div class="comment-content">
@@ -376,7 +376,7 @@
             <strong>Comment:</strong>
             <p class="comment-text-preview">"{{ commentToDelete.comment.description }}"</p>
             <div class="comment-meta-preview">
-              <span>By: {{ commentToDelete.comment.author }}</span>
+              <span>By: {{ commentToDelete.comment.commented_by }}</span>
               <span>Page: {{ commentToDelete.comment.page_no }}</span>
             </div>
           </div>
@@ -1588,7 +1588,7 @@ export default {
       const comment = {
         id: Date.now(),
         ...this.commentForm,
-        author: currentUser,
+        commented_by: currentUser,
         created_at: new Date().toISOString(),
         annotation: !!this.currentAnnotation  // Only true if there's an annotation
       };
@@ -1691,7 +1691,7 @@ export default {
           page_no: comment.page_no,
           section: comment.section,
           description: comment.description,
-          author: comment.author,
+          commented_by: comment.commented_by,
           is_annotation: comment.annotation || false
         };
         
@@ -1773,7 +1773,7 @@ export default {
         page_no: 1,
         section: 'Test Section',
         description: 'This is a test comment with annotation',
-        author: 'Test User',
+        commented_by: 'Test User',
         created_at: new Date().toISOString(),
         annotation: true
       };
@@ -1808,7 +1808,7 @@ export default {
         page_no: 1,
         section: 'Test Section',
         description: 'This is a simple test comment',
-        author: 'Test User',
+        commented_by: 'Test User',
         created_at: new Date().toISOString(),
         annotation: false
       };
@@ -2553,7 +2553,7 @@ export default {
   padding-right: 2rem; /* Space for delete button */
 }
 
-.comment-author {
+.comment-commented_by {
   font-weight: 600;
   color: #374151;
   font-size: 0.9rem;
@@ -3123,7 +3123,7 @@ export default {
   flex: 1;
 }
 
-.comment-author {
+.comment-commented_by {
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
