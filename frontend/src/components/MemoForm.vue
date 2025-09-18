@@ -8,8 +8,14 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
+     
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
-      <div class="logos-container">
+       <button class="share-btn" @click="toggleShareBox">
+          <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+          </svg>
+        </button>
+          <div class="logos-container">
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
         <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
       </div>
@@ -203,14 +209,14 @@
                       </div>
                       <div
                         v-else
-                        v-for="t in tests"
+                        v-for="(t, index) in tests"
                         :key="t.test_id"
                         class="menu-item"
                         :class="{ 
                           'has-submenu': testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0,
                           'active': hoveredTestId === t.test_id
                         }"
-                        @mouseenter="handleTestHover(t.test_id)"
+                        @mouseenter="handleTestHover(t.test_id, index)"
                         @click.stop="selectTest(t)"
                       >
                         <span class="menu-text">{{ t.test_name }}</span>
@@ -223,6 +229,7 @@
                   <div
                     v-if="showTestsDropdown && hoveredTestId && hoveredStages.length > 0"
                     class="stages-submenu"
+                    :style="{ '--submenu-offset': submenuOffset + 'px' }"
                     @mouseenter="keepSubmenuOpen = true"
                     @mouseleave="handleSubmenuLeave"
                   >
@@ -479,7 +486,7 @@
             v-model="formData.testStatus" 
             value="failed"
           />
-          Test failed
+          Test failed. 
         </label>
       </div>
     </div>
@@ -761,6 +768,7 @@ export default {
        showTestsDropdown: false,
        hoveredTestId: null,
        keepSubmenuOpen: false,
+       submenuOffset: 0,
       
       formData: {
         from1: '',
@@ -924,7 +932,7 @@ export default {
      async fetchTestsConfiguration() {
        try {
          console.log('Fetching tests configuration...');
-         const res = await fetch('http://localhost:5000/api/tests-configuration');
+         const res = await fetch('http://localhost:8000/api/tests-configuration');
          const data = await res.json();
          console.log('API Response:', data);
          
@@ -977,14 +985,19 @@ export default {
         this.showTestsDropdown = !this.showTestsDropdown;
         if (!this.showTestsDropdown) {
           this.hoveredTestId = null;
+          this.submenuOffset = 0;
         }
       },
       
-      handleTestHover(testId) {
+      handleTestHover(testId, index) {
         console.log('Hovering over test:', testId);
         console.log('Available stages for this test:', this.testIdToStages[testId]);
         this.hoveredTestId = testId;
         this.keepSubmenuOpen = false;
+        
+        // Calculate offset based on the menu item index
+        // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
+        this.submenuOffset = index * 48;
       },
       
       handleMainMenuLeave() {
@@ -1014,7 +1027,7 @@ export default {
     
     async fetchLruOptions() {
       try {
-        const response = await fetch('http://localhost:5000/api/lru-names');
+        const response = await fetch('http://localhost:8000/api/lru-names');
         const data = await response.json();
         
         if (data.success) {
@@ -1089,6 +1102,26 @@ export default {
     
     rejectMemo() {
       this.showRejectOverlay = true;
+    },
+
+toggleShareBox() {
+      this.showShareBox = !this.showShareBox;
+      if (!this.showShareBox) {
+        this.emailAddresses = ''; // Clear input on close
+      }
+    },
+    sendEmails() {
+      if (this.emailAddresses.trim() === '') {
+        alert('Please enter at least one email address.');
+        return;
+      }
+      
+      const emails = this.emailAddresses.split(',').map(email => email.trim());
+      console.log('Sending memo to:', emails);
+      // Here you would add the logic to send the emails, for example, making an API call.
+      
+      alert(`Memo sent successfully to: ${emails.join(', ')}`);
+      this.toggleShareBox(); // Close the share box after "sending"
     },
 
     submitMemo() {
@@ -1515,6 +1548,7 @@ export default {
    animation: submenuSlideIn 0.2s ease-out;
    z-index: 1003;
    overflow: hidden;
+   transform: translateY(var(--submenu-offset, 0));
  }
  
  @keyframes submenuSlideIn {
@@ -2432,6 +2466,196 @@ export default {
 .submit-button svg {
   width: 20px;
   height: 20px;
+}
+
+/* Share Overlay Styles */
+.share-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.share-overlay-content {
+  background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.share-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 25px;
+  background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+  color: #000;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.share-overlay-header h3 {
+  margin: 0;
+  color: #000;
+  font-size: 1.4em;
+  font-weight: 600;
+  text-shadow: none;
+}
+
+.close-btn {
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  color: #000;
+  backdrop-filter: blur(10px);
+}
+
+.close-btn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  color: #000;
+  transform: scale(1.1);
+}
+
+.share-overlay-body {
+  padding: 40px;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 200px;
+}
+
+.email-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 18px 24px;
+  border: 2px solid #ced4da;
+  border-radius: 12px;
+  font-size: 1.1em;
+  color: #000;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+  margin-bottom: 30px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.email-input::placeholder {
+  color: #6c757d;
+}
+
+.email-input:focus {
+  border-color: #6c757d;
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  outline: none;
+  background-color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.share-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+}
+
+.send-btn {
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+}
+
+.send-btn:hover {
+  background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+}
+
+.cancel-btn {
+  padding: 16px 32px;
+  background: #adb5bd;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  box-shadow: 0 4px 15px rgba(173, 181, 189, 0.3);
+}
+
+.cancel-btn:hover {
+  background: #6c757d;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(173, 181, 189, 0.4);
+}
+
+/* Share Button Styles - Icon Only */
+.share-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 8px;
+}
+
+.share-btn:hover {
+  transform: scale(1.1);
+}
+
+.share-btn .icon {
+  width: 24px;
+  height: 24px;
+  color: #000;
+  stroke: #000;
+  fill: none;
+}
+
+/* Responsive Design for Share Overlay */
+@media (max-width: 768px) {
+  .share-overlay-content {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .share-actions {
+    flex-direction: column;
+  }
+  
+  .send-btn, .cancel-btn {
+    width: 100%;
+    min-width: auto;
+  }
 }
 </style>
 
