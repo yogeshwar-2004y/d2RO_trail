@@ -236,6 +236,7 @@
           ref="docxContainer"
         >
           <!-- docx-preview renders content here -->
+          <div ref="docxRenderRoot" class="docx-render-root"></div>
           <!-- Annotation overlays for DOCX -->
           <div class="annotation-overlay">
             <div
@@ -894,7 +895,7 @@ export default {
           throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
         }
         const arrayBuffer = await response.arrayBuffer();
-        const container = this.$refs.docxContainer;
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
         if (!container) return;
         container.innerHTML = '';
         await renderDocx(arrayBuffer, container, undefined, {
@@ -1257,7 +1258,7 @@ export default {
     async loadDocx(file) {
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const container = this.$refs.docxContainer;
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
         if (!container) return;
         container.innerHTML = '';
         await renderDocx(arrayBuffer, container, undefined, {
@@ -2174,6 +2175,11 @@ export default {
   background: #f8fafc;
   overflow-y: auto; /* Enable scrolling for DOCX content */
   position: relative; /* Needed so overlay positions correctly */
+}
+
+.docx-render-root {
+  position: relative;
+  z-index: 1;
 }
 
 .docx-content .page {
