@@ -21,7 +21,13 @@
         <tr>
           <td class="form-cell">
             <label>From :</label>
-            <input type="text" v-model="formData.from1" placeholder="MED, CASDIC (DARE), Bangalore">
+            <input 
+              type="text" 
+              v-model="formData.from1" 
+              placeholder="MED, CASDIC (DARE), Bangalore"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
             
           </td>
           <td class="form-cell">
@@ -39,8 +45,20 @@
         <tr>
           <td class="form-cell">
             <label>To :</label>
-            <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
-            <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
+            <input 
+              type="text" 
+              v-model="formData.from2" 
+              placeholder="DGAQA cell,"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
+            <input 
+              type="text" 
+              v-model="formData.from3" 
+              placeholder="ORDAQA(ADE), Bangalore"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
           </td>
           <td class="form-cell">
             <label>Thru/: O I/c, WH</label>
@@ -800,7 +818,7 @@ export default {
           date: new Date().toISOString().split('T')[0]
         };
         
-        // Initialize with current date for new memos
+        // Auto-fill and lock From/To fields for new memos
         this.formData.casdicDate = new Date().toISOString().split('T')[0];
         this.formData.from1 = 'MED, CASDIC (DARE), Bangalore';
         this.formData.from2 = 'DGAQA cell,';
@@ -1074,6 +1092,19 @@ export default {
 .form-cell input:focus {
   border-color: #80bdff;
   outline: none;
+}
+
+.readonly-field {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  border-color: #dee2e6 !important;
+}
+
+.readonly-field:focus {
+  background-color: #f8f9fa !important;
+  border-color: #dee2e6 !important;
+  box-shadow: none !important;
 }
 
 .wide-field {
