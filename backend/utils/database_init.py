@@ -65,8 +65,13 @@ def create_comments_tables():
                 page_no INTEGER,
                 section VARCHAR(255),
                 description TEXT NOT NULL,
-                author VARCHAR(255) NOT NULL,
+                commented_by VARCHAR(255) NOT NULL,
                 is_annotation BOOLEAN DEFAULT FALSE,
+                status VARCHAR(20) DEFAULT 'pending',
+                justification TEXT,
+                accepted_by VARCHAR(255),
+                designer_id INTEGER,
+                accepted_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
