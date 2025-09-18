@@ -638,9 +638,10 @@
       </div>
     </div>
 
-    <div class="submit-section">
-      <button class="submit-button" @click="submitMemo">
-        Submit
+    <!-- Submit section - only show for new memos -->
+    <div v-if="canSubmitNewMemo" class="submit-section">
+      <button class="submit-button" @click="submitNewMemo">
+        Submit Memo
       </button>
     </div>
   </div>
@@ -766,6 +767,14 @@ export default {
       // The role '2' corresponds to the QA Head/Manager based on the SRS document.
       // This ensures only authorized users see the accept/reject buttons.
       return this.currentUserRole === 2;
+    },
+    isNewMemo() {
+      // Check if this is a new memo being submitted
+      return this.$route.name === 'NewMemoForm';
+    },
+    canSubmitNewMemo() {
+      // Only designers (role 5) and design heads (role 4) can submit new memos
+      return this.isNewMemo && [4, 5].includes(this.currentUserRole);
     }
   },
   mounted() {
@@ -774,33 +783,51 @@ export default {
     this.fetchLruOptions();
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
+      isNewMemo: this.isNewMemo,
       rejectionFormData: this.rejectionFormData,
       acceptFormData: this.acceptFormData
     });
   },
   methods: {
     loadMemoData() {
-      // Simulate loading memo data based on memoId
-      // In a real application, this would fetch from an API
-      this.memoData = {
-        id: this.memoId,
-        status: 'Not Assigned',
-        title: 'DGAQA Inspection Requisition',
-        project: 'PRJ-2025-078',
-        date: '2025-01-15'
-      };
-      
-      // Auto-fill some sample data
-      this.formData.from = 'CASDIC QA Department';
-      this.formData.casdicRef = 'CAS-2025-001';
-      this.formData.casdic = 'CASDIC/QA/2025';
-      this.formData.casdicDate = '2025-01-15';
-      this.formData.to = 'DGAQA Office';
-      this.formData.wingRef = 'WING-2025-078';
-      this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
-      this.formData.partNo = 'LRU-001';
-      this.formData.manufacturer = 'Aviatrax Industries';
-      this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+      if (this.isNewMemo) {
+        // For new memos, initialize with empty/default data
+        this.memoData = {
+          id: null,
+          status: 'New',
+          title: 'DGAQA Inspection Requisition',
+          project: 'New Memo',
+          date: new Date().toISOString().split('T')[0]
+        };
+        
+        // Initialize with current date for new memos
+        this.formData.casdicDate = new Date().toISOString().split('T')[0];
+        this.formData.from1 = 'MED, CASDIC (DARE), Bangalore';
+        this.formData.from2 = 'DGAQA cell,';
+        this.formData.from3 = 'ORDAQA(ADE), Bangalore';
+      } else {
+        // For existing memos, simulate loading memo data based on memoId
+        // In a real application, this would fetch from an API
+        this.memoData = {
+          id: this.memoId,
+          status: 'Not Assigned',
+          title: 'DGAQA Inspection Requisition',
+          project: 'PRJ-2025-078',
+          date: '2025-01-15'
+        };
+        
+        // Auto-fill some sample data for existing memos
+        this.formData.from1 = 'CASDIC QA Department';
+        this.formData.casdicRef = 'CAS-2025-001';
+        this.formData.casdic = 'CASDIC/QA/2025';
+        this.formData.casdicDate = '2025-01-15';
+        this.formData.to = 'DGAQA Office';
+        this.formData.wingRef = 'WING-2025-078';
+        this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
+        this.formData.partNo = 'LRU-001';
+        this.formData.manufacturer = 'Aviatrax Industries';
+        this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+      }
     },
     
     async fetchLruOptions() {
@@ -905,6 +932,51 @@ export default {
       
       alert('Memo submitted successfully!');
       this.goBack(); // Navigate back after successful submission
+    },
+
+    submitNewMemo() {
+      // Validate required fields for new memo submission
+      if (!this.formData.description) {
+        alert('Please select an LRU from the dropdown.');
+        return;
+      }
+      
+      if (!this.formData.partNo) {
+        alert('Please enter Part Number.');
+        return;
+      }
+      
+      if (!this.formData.manufacturer) {
+        alert('Please enter Manufacturer.');
+        return;
+      }
+
+      if (!this.formData.unitIdentification) {
+        alert('Please select Unit Identification type.');
+        return;
+      }
+
+      if (!this.formData.mechanicalInsp) {
+        alert('Please select Mechanical Inspection stage.');
+        return;
+      }
+      
+      // Create new memo object
+      const newMemo = {
+        id: Date.now(), // Generate unique ID
+        project: this.formData.wingRef || 'NEW PROJECT',
+        author: 'Design Team',
+        assignedDate: new Date().toLocaleDateString(),
+        scheduledDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 3 days from now
+        status: 'NOT ASSIGNED',
+        formData: { ...this.formData }
+      };
+
+      // Here you would add the logic to save the memo to the database
+      console.log('Submitting new memo:', newMemo);
+      
+      alert('Memo submitted successfully!');
+      this.$router.push({ name: 'MemoDashboard' }); // Navigate back to dashboard
     }
   }
 };
