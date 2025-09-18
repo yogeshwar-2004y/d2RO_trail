@@ -1,3 +1,9 @@
 Flask
 flask-cors
 psycopg2-binary
+Flask-SQLAlchemy
+pytest
+pytest-flask
+pytest-cov
+pytest-html
+pytest-mock

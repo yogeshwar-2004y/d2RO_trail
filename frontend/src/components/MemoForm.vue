@@ -16,358 +16,439 @@
           </svg>
         </button>
           <div class="logos-container">
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-      <div class="logos-container">
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
         <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
-      </div>
-      </div>
-    </div>
-
-    <!-- Share Overlay -->
-    <div v-if="showShareBox" class="share-overlay" @click.self="toggleShareBox">
-      <div class="share-overlay-content">
-        <div class="share-overlay-header">
-          <h3>Share via Email</h3>
-          <button class="close-btn" @click="toggleShareBox">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div class="share-overlay-body">
-          <input 
-            type="text" 
-            v-model="emailAddresses" 
-            placeholder="Enter email addresses (comma separated)" 
-            class="email-input"
-          />
-          <div class="share-actions">
-            <button @click="sendEmails" class="send-btn">Send</button>
-            <button @click="toggleShareBox" class="cancel-btn">Cancel</button>
-          </div>
-        </div>
       </div>
     </div>
 
     <!-- Requisition Details Section -->
     <div class="form-section requisition-details">
-      <div class="form-grid">
-        <div class="form-row">
-          <div class="form-field">
-            <label>FROM:</label>
-            <input type="text" v-model="formData.from" placeholder="Enter sender details">
-          </div>
-          <div class="form-field">
+      <table class="form-table">
+        <tr>
+          <td class="form-cell">
+            <label>From :</label>
+            <input 
+              type="text" 
+              v-model="formData.from1" 
+              placeholder="MED, CASDIC (DARE), Bangalore"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
+            
+          </td>
+          <td class="form-cell">
             <label>CASDIC Ref No.:</label>
-            <input type="text" v-model="formData.casdicRef" placeholder="Enter CASDIC reference">
-          </div>
-          <div class="form-field">
+          </td>
+          <td class="form-cell">
             <label>CASDIC/</label>
-            <input type="text" v-model="formData.casdic" placeholder="Enter CASDIC details">
-          </div>
-          <div class="form-field">
+            <input type="text" v-model="formData.casdic" placeholder="">
+          </td>
+          <td class="form-cell">
             <label>Dated:</label>
             <input type="date" v-model="formData.casdicDate">
-          </div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-field">
-            <label>TO:</label>
-            <input type="text" v-model="formData.to" placeholder="Enter recipient details">
-          </div>
-          <div class="form-field">
+          </td>
+        </tr>
+        <tr>
+          <td class="form-cell">
+            <label>To :</label>
+            <input 
+              type="text" 
+              v-model="formData.from2" 
+              placeholder="DGAQA cell,"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
+            <input 
+              type="text" 
+              v-model="formData.from3" 
+              placeholder="ORDAQA(ADE), Bangalore"
+              :readonly="isNewMemo"
+              :class="{ 'readonly-field': isNewMemo }"
+            >
+          </td>
+          <td class="form-cell">
+            <label>Thru/: O I/c, WH</label>
+          </td>
+          <td class="form-cell">
             <label>Wing/Proj Ref No.:</label>
-            <input type="text" v-model="formData.wingRef" placeholder="Enter wing/project reference">
-          </div>
-          <div class="form-field"></div>
-          <div class="form-field"></div>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-field"></div>
-          <div class="form-field wide-field">
+            <input type="text" v-model="formData.wingRef" placeholder="">
+          </td>
+          <td class="form-cell"></td>
+        </tr>
+        <tr>
+          <td class="form-cell"></td>
+          <td class="form-cell wide-field" colspan="3">
             <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input type="text" v-model="formData.coordinator" placeholder="Enter coordinator details">
-          </div>
-          <div class="form-field"></div>
-          <div class="form-field"></div>
-        </div>
-      </div>
+            <input type="text" v-model="formData.coordinator" placeholder="">
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- LRU/SRU Details Section -->
     <div class="form-section lru-details">
-      <div class="details-table">
-        <div class="table-header">
-          <div class="lru-column">LRU/SRU DETAILS</div>
-          <div class="desc-column">LRU/SRU Desc:</div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.lruReady" id="lruReady">
-            <label for="lruReady"></label>
-          </div>
-          <div class="ref-column">Ref Doc</div>
-          <div class="refno-column">Ref No of Document</div>
-          <div class="ver-column">ver</div>
-          <div class="rev-column">rev</div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Part No:</label>
-              <input type="text" v-model="formData.partNo" placeholder="Enter part number">
-            </div>
-            <div class="lru-field">
-              <label>Manufacturer:</label>
-              <input type="text" v-model="formData.manufacturer" placeholder="Enter manufacturer">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description" placeholder="Enter LRU/SRU description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted" id="unitsNoted">
-            <label for="unitsNoted"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Sl.No of units:</label>
-              <input type="text" v-model="formData.slNo" placeholder="Enter serial number">
-            </div>
-            <div class="lru-field">
-              <label>Drawing no /Rev:</label>
-              <input type="text" v-model="formData.drawingNo" placeholder="Enter drawing number">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description2" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted2" id="unitsNoted2">
-            <label for="unitsNoted2"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc2" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo2" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version2" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision2" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>Qty Offered:</label>
-              <input type="text" v-model="formData.qtyOffered" placeholder="Enter quantity">
-            </div>
-            <div class="lru-field">
-              <label>source:</label>
-              <input type="text" v-model="formData.source" placeholder="Enter source">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description3" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted3" id="unitsNoted3">
-            <label for="unitsNoted3"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc3" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo3" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version3" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision3" placeholder="rev">
-          </div>
-        </div>
-        
-        <div class="table-row">
-          <div class="lru-column">
-            <div class="lru-field">
-              <label>UNIT IDENTIFICATION:</label>
-              <input type="text" v-model="formData.unitId" placeholder="Enter unit identification">
-            </div>
-            <div class="lru-field">
-              <label>MECHANICAL INSPN:</label>
-              <input type="text" v-model="formData.mechanicalInsp" placeholder="Enter mechanical inspection">
-            </div>
-          </div>
-          <div class="desc-column">
-            <textarea v-model="formData.description4" placeholder="Additional description"></textarea>
-          </div>
-          <div class="checkbox-column">
-            <input type="checkbox" v-model="formData.unitsNoted4" id="unitsNoted4">
-            <label for="unitsNoted4"></label>
-          </div>
-          <div class="ref-column">
-            <input type="text" v-model="formData.refDoc4" placeholder="Enter reference document">
-          </div>
-          <div class="refno-column">
-            <input type="text" v-model="formData.refNo4" placeholder="Enter reference number">
-          </div>
-          <div class="ver-column">
-            <input type="text" v-model="formData.version4" placeholder="ver">
-          </div>
-          <div class="rev-column">
-            <input type="text" v-model="formData.revision4" placeholder="rev">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Inspection/Test Stage Section -->
-    <div class="form-section inspection-stage">
-      <div class="stage-header">
-        <div class="stage-field">
-          <label>INSPECTION / TEST STAGE OFFERED NOW :</label>
-          <input type="text" v-model="formData.inspectionStage" placeholder="Enter inspection/test stage">
-        </div>
-        <div class="stage-field">
-          <label>STTE Status:</label>
-          <input type="text" v-model="formData.stteStatus" placeholder="Enter STTE status">
-        </div>
-      </div>
+      <table class="details-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="lru-header">LRU / SRU DETAILS</th>
+            <th rowspan="2" class="desc-header">LRU / SRU Desc:</th>
+            <th rowspan="2" class="ref-doc-header">Ref Doc</th>
+            <th rowspan="2" class="ref-no-header">Ref No of Document</th>
+            <th class="ver-header">ver</th>
+            <th class="rev-header">rev</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Part No:</label>
+                <input type="text" v-model="formData.partNo" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>Manufacturer:</label>
+                <input type="text" v-model="formData.manufacturer" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <select v-model="formData.description" class="lru-description-select">
+                <option value="">Select LRU</option>
+                <option v-for="lruName in lruOptions" :key="lruName" :value="lruName">
+                  {{ lruName }}
+                </option>
+              </select>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Sl.No of units :</label>
+                <input type="text" v-model="formData.slNo" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>Drawing no/Rev:</label>
+                <input type="text" v-model="formData.drawingNo" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc2" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo2" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version2" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision2" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>Qty Offered:</label>
+                <input type="text" v-model="formData.qtyOffered" placeholder="">
+              </div>
+              <div class="lru-field">
+                <label>source :</label>
+                <span>NA</span>
+              </div>
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc3" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo3" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version3" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision3" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+               <div class="lru-field unit-identification-container">
+                 <label>UNIT IDENTIFICATION :</label>
+                 <div class="dropdown-wrapper">
+                   <div 
+                     class="test-dropdown" 
+                     :class="{ 'active': showTestsDropdown }"
+                     @click="toggleTestsDropdown"
+                   >
+                     <div class="selected-value">{{ selectedTestName || 'Select Test' }}</div>
+                     <div class="dropdown-icon">▾</div>
+                   </div>
+                  <!-- Main Tests Dropdown -->
+                  <div
+                    v-if="showTestsDropdown"
+                    class="tests-menu"
+                    @mouseleave="handleMainMenuLeave"
+                  >
+                    <div class="menu-item-container">
+                      <div v-if="tests.length === 0" class="menu-item no-data">
+                        No tests available
+                      </div>
+                      <div
+                        v-else
+                        v-for="(t, index) in tests"
+                        :key="t.test_id"
+                        class="menu-item"
+                        :class="{ 
+                          'has-submenu': testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0,
+                          'active': hoveredTestId === t.test_id
+                        }"
+                        @mouseenter="handleTestHover(t.test_id, index)"
+                        @click.stop="selectTest(t)"
+                      >
+                        <span class="menu-text">{{ t.test_name }}</span>
+                        <span v-if="testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0" class="menu-arrow">❯</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Separate Stages Submenu -->
+                  <div
+                    v-if="showTestsDropdown && hoveredTestId && hoveredStages.length > 0"
+                    class="stages-submenu"
+                    :style="{ '--submenu-offset': submenuOffset + 'px' }"
+                    @mouseenter="keepSubmenuOpen = true"
+                    @mouseleave="handleSubmenuLeave"
+                  >
+                    <div class="submenu-header">
+                      <span class="submenu-title">Test Stages</span>
+                    </div>
+                    <div class="submenu-item-container">
+                      <div
+                        v-for="s in hoveredStages"
+                        :key="s.stage_id"
+                        class="submenu-item"
+                        @click.stop="selectStage(s)"
+                      >
+                        <span class="submenu-text">{{ s.stage_name }}</span>
+                        <span v-if="s.stage_name === formData.mechanicalInsp" class="check-icon">✓</span>
+                      </div>
+                    </div>
+                  </div>
+                 </div>
+               </div>
+              <div class="lru-field">
+                <label>MECHANICAL INSPN :</label>
+                <select v-model="formData.mechanicalInsp" class="lru-select">
+                  <option value="">Select Stage</option>
+                  <option value="STAGE">STAGE</option>
+                  <option value="PARTS">PARTS</option>
+                  <option value="ASSY">ASSY</option>
+                  <option value="FINAL">FINAL</option>
+                  <option value="INSTALL">INSTALL</option>
+                </select>
+              </div>
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc4" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo4" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version4" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision4" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field">
+                <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
+                <input type="text" v-model="formData.inspectionStage" placeholder="">
+              </div>
+            </td>
+            <td class="desc-cell">
+              <div class="lru-field">
+                <label>STTE Status:</label>
+                <input type="text" v-model="formData.stteStatus" placeholder="">
+              </div>
+            </td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc5" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo5" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version5" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision5" placeholder="">
+            </td>
+          </tr>
+          
+          <tr>
+            <td class="lru-cell">
+              <label>TEST STAGE CLEARED:</label>
+              <input type="text" v-model="formData.testStageCleared" placeholder="">
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc6" placeholder="">
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo6" placeholder="">
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version6" placeholder="">
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision6" placeholder="">
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Test Details Section -->
     <div class="form-section test-details">
-      <div class="test-grid">
-        <div class="test-column">
-          <div class="test-field">
-            <label>Above Unit is ready for Testing at</label>
-            <input type="text" v-model="formData.testVenue" placeholder="venue, dated">
-            <span>onwards.</span>
-          </div>
-          <div class="test-field">
-            <label>SIGNATURE:</label>
-            <div class="signature-box"></div>
-          </div>
-          <div class="test-field">
-            <label>NAME / DESIGNATION</label>
-            <input type="text" v-model="formData.signatureName" placeholder="Enter name and designation">
-          </div>
-        </div>
-        
-        <div class="test-column">
-          <div class="test-field">
-            <label>Test facility to be used:</label>
-            <input type="text" v-model="formData.testFacility" placeholder="Enter test facility">
-          </div>
-          <div class="test-field">
-            <label>Test cycle / Duration:</label>
-            <input type="text" v-model="formData.testCycle" placeholder="Enter test cycle">
-            <span>hrs</span>
-          </div>
-          <div class="test-field">
-            <label>Test Start on:</label>
-            <input type="datetime-local" v-model="formData.testStart">
-          </div>
-          <div class="test-field">
-            <label>Test complete on :</label>
-            <input type="datetime-local" v-model="formData.testComplete">
-          </div>
-        </div>
-        
-        <div class="test-column">
-          <div class="test-field">
-            <label>Calibration status OK/Due on :</label>
-            <input type="date" v-model="formData.calibrationStatus">
-          </div>
-          <div class="test-field">
-            <label>Func. Check(Initial) :</label>
-            <input type="datetime-local" v-model="formData.funcCheckInitial">
-          </div>
-          <div class="test-field">
-            <label>Perf. check (during) :</label>
-            <input type="datetime-local" v-model="formData.perfCheckDuring">
-          </div>
-          <div class="test-field">
-            <label>Func Check (end) :</label>
-            <input type="datetime-local" v-model="formData.funcCheckEnd">
-          </div>
-        </div>
-      </div>
+      <table class="test-table">
+        <tr>
+          <td class="test-left">
+            <div class="test-field">
+              <label>Above Unit is ready for Testing at</label>
+              <input type="text" v-model="formData.testVenue" placeholder="">
+              <span>onwards.</span>
+            </div>
+            <div class="test-field">
+              <label>SIGNATURE :</label>
+              <div class="signature-box"></div>
+            </div>
+            <div class="test-field">
+              <label>NAME / DESIGNATION</label>
+              <input type="text" v-model="formData.signatureName" placeholder="">
+            </div>
+            <div class="test-field">
+              <span>It is certified that :</span>
+            </div>
+          </td>
+          <td class="test-middle">
+            <div class="test-field">
+              <label>i. Test facility to be used :</label>
+              <input type="text" v-model="formData.testFacility" placeholder="">
+            </div>
+            <div class="test-field">
+              <label>ii. Test cycle / Duration:</label>
+              <input type="text" v-model="formData.testCycle" placeholder="">
+              <span>hrs</span>
+            </div>
+            <div class="test-field">
+              <label>iii. Test start on:</label>
+              <input type="text" v-model="formData.testStart" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>iv. Test complete on :</label>
+              <input type="text" v-model="formData.testComplete" placeholder="date/time">
+            </div>
+          </td>
+          <td class="test-right">
+            <div class="test-field">
+              <label>v. Calibration status: OK / Due on</label>
+              <input type="text" v-model="formData.calibrationStatus" placeholder="">
+            </div>
+            <div class="test-field">
+              <label>vi. Func. Check (Initial):</label>
+              <input type="text" v-model="formData.funcCheckInitial" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>vii. Perf.check (during):</label>
+              <input type="text" v-model="formData.perfCheckDuring" placeholder="date/time">
+            </div>
+            <div class="test-field">
+              <label>viii. Func Check (end):</label>
+              <input type="text" v-model="formData.funcCheckEnd" placeholder="date/time">
+            </div>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- Certification Section -->
     <div class="form-section certification">
-      <h3>It is certified that :</h3>
+      <div class="certification-header">
+        <span class="certification-statement">It is certified that:</span>
+      </div>
       <div class="certification-list">
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert1" id="cert1">
-          <label for="cert1">Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
+          <input type="checkbox" v-model="formData.certificationA" class="cert-checkbox" id="certA">
+          <span class="cert-letter">a)</span>
+          <span class="cert-text">Mechanical Quality Records of all the parts ( Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc. ) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports / test reports, etc.) were verified thoroughly .</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert2" id="cert2">
-          <label for="cert2">CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
+          <input type="checkbox" v-model="formData.certificationB" class="cert-checkbox" id="certB">
+          <span class="cert-letter">b)</span>
+          <span class="cert-text">CoC for SRU, fasteners & standard parts are verified and satisfactory</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert3" id="cert3">
-          <label for="cert3">Sl no of the SRUs are noted down in the respective log book opened on</label>
-          <input type="text" v-model="formData.logBookDate" placeholder="Enter date">
+          <input type="checkbox" v-model="formData.certificationC" class="cert-checkbox" id="certC">
+          <span class="cert-letter">c)</span>
+          <span class="cert-text">Sl no of the SRUs are noted down in the respective log book opened on <input type="text" v-model="formData.logBookDate" placeholder="" class="inline-input"></span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert4" id="cert4">
-          <label for="cert4">No Defect investigation is pending against this LRU</label>
+          <input type="checkbox" v-model="formData.certificationD" class="cert-checkbox" id="certD">
+          <span class="cert-letter">d)</span>
+          <span class="cert-text">No Defect investigation is pending against this LRU</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert5" id="cert5">
-          <label for="cert5">All the previous test stages of this LRU/SRU are cleared</label>
+          <input type="checkbox" v-model="formData.certificationE" class="cert-checkbox" id="certE">
+          <span class="cert-letter">e)</span>
+          <span class="cert-text">All the previous test stages of this LRU /SRU are cleared</span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.cert6" id="cert6">
-          <label for="cert6">CASDIC QA has physically inspected and accepted the LRU on</label>
-          <input type="text" v-model="formData.qaInspectionDate" placeholder="Enter date">
+          <input type="checkbox" v-model="formData.certificationF" class="cert-checkbox" id="certF">
+          <span class="cert-letter">f)</span>
+          <span class="cert-text">CASDIC QA has physically inspected and accepted the LRU on <input type="text" v-model="formData.qaInspectionDate" placeholder="" class="inline-input"></span>
         </div>
       </div>
       
-      <div class="signature-section">
+      <!-- IQA CASDIC Signature moved above action taken section -->
+      <div class="iqa-signature-section">
         <div class="signature-box-large"></div>
         <p>SIGNATURE of Rep, IQA CASDIC</p>
       </div>
-    </div>
-
-    <!-- Action Taken Section -->
-    <div class="form-section action-taken">
-      <h3>Action taken & remarks by DGAQA</h3>
-      <p class="instruction">(please use space overleaf for details)</p>
-      <div class="remarks-area">
-        <textarea v-model="formData.dgaqaRemarks" placeholder="Enter DGAQA remarks and actions taken..."></textarea>
+      
+      <div class="action-taken-section">
+        <span class="action-taken-text">Action taken & remarks by DGAQA</span>
+        <div class="dgaqa-remarks-box">
+          <textarea v-model="formData.dgaqaRemarks" placeholder="Enter DGAQA action taken and remarks..." class="dgaqa-textarea"></textarea>
+        </div>
       </div>
-      <div class="signature-section">
+      
+      <!-- DGAQA Signature moved to the end -->
+      <div class="dgaqa-signature-section">
+        <p class="instruction">(please use space overleaf for details)</p>
         <div class="signature-box-large"></div>
         <p>SIGNATURE OF DGAQA REP..</p>
       </div>
     </div>
+
 
     <div 
       class="form-section test-status" 
@@ -633,11 +714,10 @@
       </div>
     </div>
 
-    
-
-    <div class="submit-section">
-      <button class="submit-button" @click="submitMemo">
-        Submit
+    <!-- Submit section - only show for new memos -->
+    <div v-if="canSubmitNewMemo" class="submit-section">
+      <button class="submit-button" @click="submitNewMemo">
+        Submit Memo
       </button>
     </div>
   </div>
@@ -680,52 +760,65 @@ export default {
       showTestReviewSection: false,
       showRejectionSection: false,
       
-      // Share functionality
-      showShareBox: false,
-      emailAddresses: '',
+      // LRU options from database
+      lruOptions: [],
+       // Tests data for Unit Identification dropdown
+       tests: [],
+       testIdToStages: {},
+       showTestsDropdown: false,
+       hoveredTestId: null,
+       keepSubmenuOpen: false,
+       submenuOffset: 0,
       
       formData: {
-        from: '',
+        from1: '',
+        from2: '',
+        from3: '',
         casdicRef: '',
         casdic: '',
         casdicDate: '',
-        to: '',
+        to1: '',
+        to2: '',
         wingRef: '',
         coordinator: '',
         partNo: '',
         manufacturer: '',
         description: '',
-        lruReady: false,
         refDoc: '',
         refNo: '',
         version: '',
         revision: '',
         slNo: '',
         drawingNo: '',
-        description2: '',
-        unitsNoted: false,
         refDoc2: '',
         refNo2: '',
         version2: '',
         revision2: '',
         qtyOffered: '',
-        source: '',
         description3: '',
-        unitsNoted2: false,
         refDoc3: '',
         refNo3: '',
         version3: '',
         revision3: '',
-        unitId: '',
         mechanicalInsp: '',
-        description4: '',
-        unitsNoted3: false,
+        unitIdentification: '',
+        unitIdentificationTestId: null,
+        unitIdentificationTestName: '',
         refDoc4: '',
         refNo4: '',
         version4: '',
         revision4: '',
         inspectionStage: '',
         stteStatus: '',
+        refDoc5: '',
+        refNo5: '',
+        version5: '',
+        revision5: '',
+        testStageCleared: '',
+        refDoc6: '',
+        refNo6: '',
+        version6: '',
+        revision6: '',
         testVenue: '',
         signatureName: '',
         testFacility: '',
@@ -736,17 +829,17 @@ export default {
         funcCheckInitial: '',
         perfCheckDuring: '',
         funcCheckEnd: '',
-        cert1: false,
-        cert2: false,
-        cert3: false,
-        cert4: false,
-        cert5: false,
-        cert6: false,
         logBookDate: '',
         qaInspectionDate: '',
-        dgaqaRemarks: '',
         testStatus: '',
-        qaReviewerRemarks: ''
+        qaReviewerRemarks: '',
+        certificationA: false,
+        certificationB: false,
+        certificationC: false,
+        certificationD: false,
+        certificationE: false,
+        certificationF: false,
+        dgaqaRemarks: ''
       }
     };
   },
@@ -760,39 +853,193 @@ export default {
       // This ensures only authorized users see the accept/reject buttons.
       return this.currentUserRole === 2;
     },
+    selectedTestName() {
+      return this.formData.unitIdentificationTestName;
+    },
+    hoveredStages() {
+      if (!this.hoveredTestId) return [];
+      const stages = this.testIdToStages[this.hoveredTestId] || [];
+      // Debug logging
+      if (this.hoveredTestId) {
+        console.log('Hovered Test ID:', this.hoveredTestId);
+        console.log('Available stages:', stages);
+        console.log('All test-stage mappings:', this.testIdToStages);
+      }
+      return stages;
+    },
+    isNewMemo() {
+      // Check if this is a new memo being submitted
+      return this.$route.name === 'NewMemoForm';
+    },
+    canSubmitNewMemo() {
+      // Only designers (role 5) and design heads (role 4) can submit new memos
+      return this.isNewMemo && [4, 5].includes(this.currentUserRole);
+    }
   },
   mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
+    this.fetchTestsConfiguration();
+    this.fetchLruOptions();
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
+      isNewMemo: this.isNewMemo,
       rejectionFormData: this.rejectionFormData,
       acceptFormData: this.acceptFormData
     });
   },
   methods: {
     loadMemoData() {
-      // Simulate loading memo data based on memoId
-      // In a real application, this would fetch from an API
-      this.memoData = {
-        id: this.memoId,
-        status: 'Not Assigned',
-        title: 'DGAQA Inspection Requisition',
-        project: 'PRJ-2025-078',
-        date: '2025-01-15'
-      };
+      if (this.isNewMemo) {
+        // For new memos, initialize with empty/default data
+        this.memoData = {
+          id: null,
+          status: 'New',
+          title: 'DGAQA Inspection Requisition',
+          project: 'New Memo',
+          date: new Date().toISOString().split('T')[0]
+        };
+        
+        // Auto-fill and lock From/To fields for new memos
+        this.formData.casdicDate = new Date().toISOString().split('T')[0];
+        this.formData.from1 = 'MED, CASDIC (DARE), Bangalore';
+        this.formData.from2 = 'DGAQA cell,';
+        this.formData.from3 = 'ORDAQA(ADE), Bangalore';
+      } else {
+        // For existing memos, simulate loading memo data based on memoId
+        // In a real application, this would fetch from an API
+        this.memoData = {
+          id: this.memoId,
+          status: 'Not Assigned',
+          title: 'DGAQA Inspection Requisition',
+          project: 'PRJ-2025-078',
+          date: '2025-01-15'
+        };
+        
+        // Auto-fill some sample data for existing memos
+        this.formData.from1 = 'CASDIC QA Department';
+        this.formData.casdicRef = 'CAS-2025-001';
+        this.formData.casdic = 'CASDIC/QA/2025';
+        this.formData.casdicDate = '2025-01-15';
+        this.formData.to = 'DGAQA Office';
+        this.formData.wingRef = 'WING-2025-078';
+        this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
+        this.formData.partNo = 'LRU-001';
+        this.formData.manufacturer = 'Aviatrax Industries';
+        this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+      }
+    },
+     async fetchTestsConfiguration() {
+       try {
+         console.log('Fetching tests configuration...');
+         const res = await fetch('http://localhost:8000/api/tests-configuration');
+         const data = await res.json();
+         console.log('API Response:', data);
+         
+         if (data && data.success) {
+           this.tests = data.tests || [];
+           console.log('Loaded tests:', this.tests);
+           
+           const stageMap = {};
+           (data.stages || []).forEach(s => { stageMap[s.stage_id] = s; });
+           console.log('Stage map:', stageMap);
+           
+           const mapping = {};
+           (data.configurations || []).forEach(c => {
+             if (!mapping[c.test_id]) mapping[c.test_id] = [];
+             const st = stageMap[c.stage_id];
+             if (st && !mapping[c.test_id].some(x => x.stage_id === st.stage_id)) {
+               mapping[c.test_id].push(st);
+             }
+           });
+           this.testIdToStages = mapping;
+           console.log('Final test-to-stages mapping:', this.testIdToStages);
+         } else {
+           console.error('API did not return success:', data);
+         }
+       } catch (e) {
+         console.error('Failed to fetch tests configuration', e);
+         // Fallback: Create some mock data for testing
+         this.tests = [
+           { test_id: 1, test_name: 'Functional Test' },
+           { test_id: 2, test_name: 'Performance Test' },
+           { test_id: 3, test_name: 'Environmental Test' }
+         ];
+         this.testIdToStages = {
+           1: [
+             { stage_id: 1, stage_name: 'STAGE' },
+             { stage_id: 2, stage_name: 'PARTS' }
+           ],
+           2: [
+             { stage_id: 3, stage_name: 'ASSY' },
+             { stage_id: 4, stage_name: 'FINAL' }
+           ],
+           3: [
+             { stage_id: 5, stage_name: 'INSTALL' }
+           ]
+         };
+         console.log('Using fallback mock data');
+       }
+     },
+      toggleTestsDropdown() {
+        this.showTestsDropdown = !this.showTestsDropdown;
+        if (!this.showTestsDropdown) {
+          this.hoveredTestId = null;
+          this.submenuOffset = 0;
+        }
+      },
       
-      // Auto-fill some sample data
-      this.formData.from = 'CASDIC QA Department';
-      this.formData.casdicRef = 'CAS-2025-001';
-      this.formData.casdic = 'CASDIC/QA/2025';
-      this.formData.casdicDate = '2025-01-15';
-      this.formData.to = 'DGAQA Office';
-      this.formData.wingRef = 'WING-2025-078';
-      this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
-      this.formData.partNo = 'LRU-001';
-      this.formData.manufacturer = 'Aviatrax Industries';
-      this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+      handleTestHover(testId, index) {
+        console.log('Hovering over test:', testId);
+        console.log('Available stages for this test:', this.testIdToStages[testId]);
+        this.hoveredTestId = testId;
+        this.keepSubmenuOpen = false;
+        
+        // Calculate offset based on the menu item index
+        // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
+        this.submenuOffset = index * 48;
+      },
+      
+      handleMainMenuLeave() {
+        setTimeout(() => {
+          if (!this.keepSubmenuOpen) {
+            this.hoveredTestId = null;
+          }
+        }, 150);
+      },
+      
+      handleSubmenuLeave() {
+        this.keepSubmenuOpen = false;
+        setTimeout(() => {
+          this.hoveredTestId = null;
+        }, 100);
+      },
+    selectTest(test) {
+      this.formData.unitIdentificationTestId = test.test_id;
+      this.formData.unitIdentificationTestName = test.test_name;
+      this.showTestsDropdown = false;
+    },
+    selectStage(stage) {
+      // When a stage is clicked from side dropdown, set Mechanical Inspection field
+      this.formData.mechanicalInsp = stage.stage_name;
+      this.showTestsDropdown = false;
+    },
+    
+    async fetchLruOptions() {
+      try {
+        const response = await fetch('http://localhost:8000/api/lru-names');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.lruOptions = data.lru_names;
+        } else {
+          console.error('Failed to fetch LRU names:', data.message);
+          alert('Failed to load LRU names. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error fetching LRU names:', error);
+        alert('Error loading LRU names. Please check your connection.');
+      }
     },
     // Overlay management
     closeAcceptOverlay() {
@@ -900,6 +1147,51 @@ toggleShareBox() {
       
       alert('Memo submitted successfully!');
       this.goBack(); // Navigate back after successful submission
+    },
+
+    submitNewMemo() {
+      // Validate required fields for new memo submission
+      if (!this.formData.description) {
+        alert('Please select an LRU from the dropdown.');
+        return;
+      }
+      
+      if (!this.formData.partNo) {
+        alert('Please enter Part Number.');
+        return;
+      }
+      
+      if (!this.formData.manufacturer) {
+        alert('Please enter Manufacturer.');
+        return;
+      }
+
+      if (!this.formData.unitIdentification) {
+        alert('Please select Unit Identification type.');
+        return;
+      }
+
+      if (!this.formData.mechanicalInsp) {
+        alert('Please select Mechanical Inspection stage.');
+        return;
+      }
+      
+      // Create new memo object
+      const newMemo = {
+        id: Date.now(), // Generate unique ID
+        project: this.formData.wingRef || 'NEW PROJECT',
+        author: 'Design Team',
+        assignedDate: new Date().toLocaleDateString(),
+        scheduledDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 3 days from now
+        status: 'NOT ASSIGNED',
+        formData: { ...this.formData }
+      };
+
+      // Here you would add the logic to save the memo to the database
+      console.log('Submitting new memo:', newMemo);
+      
+      alert('Memo submitted successfully!');
+      this.$router.push({ name: 'MemoDashboard' }); // Navigate back to dashboard
     }
   }
 };
@@ -960,45 +1252,56 @@ toggleShareBox() {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
-.form-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 20px;
-  align-items: end;
+.form-table td, .form-table th {
+  border: 1px solid #333;
+  padding: 8px;
+  vertical-align: top;
 }
 
-.form-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.form-cell {
+  position: relative;
 }
 
-.form-field label {
+.form-cell label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
 }
 
-.form-field input {
-  padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 1em;
-  color: #495057;
-  background-color: #f8f9fa;
-  transition: border-color 0.3s ease;
+.form-cell input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+  box-sizing: border-box;
 }
 
-.form-field input:focus {
+.form-cell input:focus {
   border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   outline: none;
+}
+
+.readonly-field {
+  background-color: #f8f9fa !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+  border-color: #dee2e6 !important;
+}
+
+.readonly-field:focus {
+  background-color: #f8f9fa !important;
+  border-color: #dee2e6 !important;
+  box-shadow: none !important;
 }
 
 .wide-field {
@@ -1006,91 +1309,387 @@ toggleShareBox() {
 }
 
 .details-table {
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.table-header {
-  display: grid;
-  grid-template-columns: 2fr 2fr 0.5fr 1fr 1fr 0.5fr 0.5fr;
-  background-color: #e9ecef;
-  padding: 15px;
+.details-table th, .details-table td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.details-table th {
+  background-color: #f8f9fa;
   font-weight: bold;
-  color: #495057;
   text-align: center;
-  align-items: center;
 }
 
-.table-row {
-  display: grid;
-  grid-template-columns: 2fr 2fr 0.5fr 1fr 1fr 0.5fr 0.5fr;
-  border-top: 1px solid #dee2e6;
-  padding: 20px 15px;
-  align-items: start;
-  gap: 15px;
+.lru-header {
+  width: 25%;
 }
 
-.lru-column {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+.desc-header {
+  width: 25%;
+}
+
+.ref-doc-header {
+  width: 15%;
+}
+
+.ref-no-header {
+  width: 20%;
+}
+
+.ver-header, .rev-header {
+  width: 7.5%;
+}
+
+.lru-cell, .desc-cell, .ref-cell, .refno-cell, .ver-cell, .rev-cell {
+  vertical-align: top;
 }
 
 .lru-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-bottom: 10px;
 }
 
 .lru-field label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.8em;
+  display: block;
+  margin-bottom: 3px;
 }
 
 .lru-field input {
-  padding: 8px 12px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9em;
-}
-
-.desc-column textarea {
   width: 100%;
-  height: 80px;
-  padding: 10px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  resize: vertical;
-  font-size: 0.9em;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
-.checkbox-column {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.checkbox-column input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
+.lru-select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: white;
   cursor: pointer;
 }
 
-.ref-column, .refno-column, .ver-column, .rev-column {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.lru-select:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-.ref-column input, .refno-column input, .ver-column input, .rev-column input {
+ /* Unit Identification Container */
+ .unit-identification-container {
+   position: relative;
+ }
+ 
+ .dropdown-wrapper {
+   position: relative;
+   width: 100%;
+ }
+ 
+ /* Tests dropdown (Unit Identification) */
+ .test-dropdown {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   border: 1px solid #e1e5e9;
+   border-radius: 8px;
+   padding: 10px 12px;
+   background: #fff;
+   cursor: pointer;
+   width: 100%;
+   box-sizing: border-box;
+   transition: all 0.2s ease;
+   font-size: 0.85em;
+ }
+ 
+ .test-dropdown:hover {
+   border-color: #007bff;
+   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+ }
+ 
+ .test-dropdown .selected-value {
+   color: #2c3e50;
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .test-dropdown .dropdown-icon {
+   color: #6c757d;
+   font-size: 12px;
+   margin-left: 8px;
+   transition: transform 0.2s ease;
+ }
+ 
+ .test-dropdown.active .dropdown-icon {
+   transform: rotate(180deg);
+ }
+ 
+ /* Main dropdown menu */
+ .tests-menu {
+   position: absolute;
+   top: 100%;
+   left: 0;
+   right: 0;
+   margin-top: 4px;
+   background: #fff;
+   border: 1px solid #e1e5e9;
+   border-radius: 12px;
+   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+   z-index: 1000;
+   overflow: hidden;
+   animation: menuFadeIn 0.15s ease-out;
+ }
+ 
+ @keyframes menuFadeIn {
+   from {
+     opacity: 0;
+     transform: translateY(-8px);
+   }
+   to {
+     opacity: 1;
+     transform: translateY(0);
+   }
+ }
+ 
+ .menu-item-container {
+   padding: 8px 0;
+   max-height: 240px;
+   overflow-y: auto;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar {
+   width: 6px;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar-track {
+   background: transparent;
+ }
+ 
+ .menu-item-container::-webkit-scrollbar-thumb {
+   background: #d1d5db;
+   border-radius: 3px;
+ }
+ 
+ .menu-item {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 12px 16px;
+   cursor: pointer;
+   transition: background-color 0.1s ease;
+   font-size: 0.9em;
+   color: #374151;
+   position: relative;
+ }
+ 
+ .menu-item:hover {
+   background-color: #f8fafc;
+ }
+ 
+ .menu-item.has-submenu:hover {
+   background-color: #e3f2fd;
+ }
+ 
+ .menu-item.active {
+   background-color: #e3f2fd;
+   border-left: 3px solid #2563eb;
+ }
+ 
+ .menu-item.no-data {
+   color: #9ca3af;
+   font-style: italic;
+   cursor: default;
+ }
+ 
+ .menu-item.no-data:hover {
+   background-color: transparent;
+ }
+ 
+ .menu-text {
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .menu-arrow {
+   color: #9ca3af;
+   font-size: 12px;
+   margin-left: 8px;
+   transition: color 0.1s ease;
+ }
+ 
+ .menu-item:hover .menu-arrow {
+   color: #6b7280;
+ }
+ 
+ /* Separate Stages Submenu */
+ .stages-submenu {
+   position: absolute;
+   top: 0;
+   left: calc(100% + 8px);
+   min-width: 220px;
+   max-width: 320px;
+   background: #fff;
+   border: 1px solid #e1e5e9;
+   border-radius: 12px;
+   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+   animation: submenuSlideIn 0.2s ease-out;
+   z-index: 1003;
+   overflow: hidden;
+   transform: translateY(var(--submenu-offset, 0));
+ }
+ 
+ @keyframes submenuSlideIn {
+   from {
+     opacity: 0;
+     transform: translateX(-8px);
+   }
+   to {
+     opacity: 1;
+     transform: translateX(0);
+   }
+ }
+ 
+ .submenu-header {
+   padding: 12px 16px 8px;
+   border-bottom: 1px solid #f1f5f9;
+   background-color: #f8fafc;
+ }
+ 
+ .submenu-title {
+   font-size: 0.75em;
+   font-weight: 600;
+   color: #64748b;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+ }
+ 
+ .submenu-item-container {
+   max-height: 200px;
+   overflow-y: auto;
+ }
+ 
+ .submenu-item {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 12px 16px;
+   cursor: pointer;
+   transition: all 0.15s ease;
+   font-size: 0.85em;
+   color: #374151;
+   border-bottom: 1px solid #f8fafc;
+ }
+ 
+ .submenu-item:last-child {
+   border-bottom: none;
+ }
+ 
+ .submenu-item:hover {
+   background-color: #f0f9ff;
+   color: #0369a1;
+   padding-left: 20px;
+ }
+ 
+ .submenu-text {
+   flex: 1;
+   font-weight: 500;
+ }
+ 
+ .check-icon {
+   color: #10b981;
+   font-weight: bold;
+   font-size: 14px;
+   margin-left: 8px;
+ }
+ 
+ /* Responsive adjustments */
+ @media (max-width: 768px) {
+   .submenu {
+     position: fixed;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     margin: 0;
+     max-width: 280px;
+     width: 90vw;
+   }
+   
+   .tests-menu {
+     max-width: 95vw;
+   }
+   
+   .menu-item-container {
+     max-height: 200px;
+   }
+ }
+
+.lru-select option {
+  padding: 4px 6px;
+  font-size: 0.8em;
+}
+
+.desc-cell textarea {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
+  height: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  resize: vertical;
+  font-size: 0.8em;
+  box-sizing: border-box;
+}
+
+.lru-description-select {
+  width: 100%;
+  height: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+  overflow-y: auto;
+}
+
+.lru-description-select:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.lru-description-select option {
+  padding: 4px 6px;
+  font-size: 0.8em;
+}
+
+.desc-cell span {
+  color: #666;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.ref-cell input, .refno-cell input, .ver-cell input, .rev-cell input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
   text-align: center;
-  font-size: 0.9em;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
 .stage-header {
@@ -1118,40 +1717,48 @@ toggleShareBox() {
   font-size: 1em;
 }
 
-.test-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 30px;
+.test-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
 }
 
-.test-column {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.test-table td {
+  border: 1px solid #333;
+  padding: 15px;
+  vertical-align: top;
+  width: 33.33%;
+}
+
+.test-left, .test-middle, .test-right {
+  vertical-align: top;
 }
 
 .test-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-bottom: 15px;
 }
 
 .test-field label {
   font-weight: bold;
-  color: #495057;
+  color: #333;
   font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
 }
 
 .test-field input {
-  padding: 12px 15px;
-  border: 1px solid #ced4da;
-  border-radius: 8px;
-  font-size: 1em;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  box-sizing: border-box;
 }
 
 .test-field span {
-  color: #6c757d;
+  color: #666;
   font-size: 0.9em;
+  margin-left: 5px;
 }
 
 .signature-box {
@@ -1179,38 +1786,137 @@ toggleShareBox() {
   padding-bottom: 10px;
 }
 
+.certification-header {
+  margin-bottom: 20px;
+}
+
+.certification-statement {
+  font-weight: bold;
+  color: #333;
+  font-size: 1.1em;
+}
+
 .certification-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
   margin-bottom: 30px;
 }
 
 .cert-item {
   display: flex;
   align-items: flex-start;
-  gap: 15px;
+  gap: 10px;
+  margin-bottom: 12px;
 }
 
-.cert-item input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  margin-top: 3px;
+.cert-checkbox {
+  width: 18px;
+  height: 18px;
   cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
-.cert-item label {
+.cert-letter {
+  font-weight: bold;
+  color: #333;
+  min-width: 20px;
+}
+
+.cert-text {
   flex-grow: 1;
-  color: #495057;
-  line-height: 1.5;
+  color: #333;
+  line-height: 1.4;
+  font-size: 0.9em;
 }
 
-.cert-item input[type="text"] {
-  width: 150px;
-  padding: 8px 12px;
+.inline-input {
+  display: inline;
+  width: 100px;
+  padding: 2px 6px;
+  border: none;
+  border-bottom: 1px solid #333;
+  background: transparent;
+  font-size: 0.9em;
+  margin: 0 3px;
+}
+
+.iqa-signature-section {
+  text-align: center;
+  margin: 30px 0 20px 0;
+}
+
+.iqa-signature-section p {
+  margin: 10px 0 0 0;
+  color: #6c757d;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
+.action-taken-section {
+  margin: 30px 0 20px 0;
+}
+
+.action-taken-text {
+  font-weight: bold;
+  color: #333;
+  font-size: 1em;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.dgaqa-remarks-box {
+  margin-top: 15px;
+}
+
+.dgaqa-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 15px;
   border: 1px solid #ced4da;
-  border-radius: 6px;
-  margin-left: 10px;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 1em;
+  font-family: inherit;
+  color: #333;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.dgaqa-textarea:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.dgaqa-signature-section {
+  text-align: center;
+  margin: 30px 0 20px 0;
+}
+
+.dgaqa-signature-section p {
+  margin: 10px 0 0 0;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.dgaqa-signature-section .instruction {
+  font-style: italic;
+  margin-bottom: 20px;
+}
+
+.signature-sections {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.signature-section.left {
+  flex: 1;
+}
+
+.remarks-section {
+  flex: 1;
 }
 
 .signature-section {
@@ -1952,3 +2658,4 @@ toggleShareBox() {
   }
 }
 </style>
+

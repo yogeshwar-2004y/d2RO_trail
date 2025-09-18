@@ -23,43 +23,223 @@
     <div class="form-content">
       <div class="form-card">
         <h2 class="card-title">REQUISITION FOR DGAQA INSPECTION</h2>
-        <div class="grid-layout">
-          <div class="grid-item"><span>FROM:</span><input type="text" v-model="memoData.from" readonly /></div>
-          <div class="grid-item"><span>CASCIC Ref No.:</span><input type="text" v-model="memoData.cascicRefNo" readonly /></div>
-          <div class="grid-item"><span>CASCIC/</span><input type="text" v-model="memoData.cascic" readonly /></div>
-          <div class="grid-item"><span>Dated:</span><input type="text" v-model="memoData.dated" readonly /></div>
-          <div class="grid-item"><span>TO:</span><input type="text" v-model="memoData.to" readonly /></div>
-          <div class="grid-item"><span>Wing/Proj Ref No.:</span><input type="text" v-model="memoData.wingProjRefNo" readonly /></div>
-          <div class="grid-item-full"><span>Name & contact No of CASCIC (Designs) coordinator:</span><input type="text" v-model="memoData.coordinatorContact" readonly /></div>
-        </div>
+        <table class="form-table">
+          <tr>
+            <td class="form-cell">
+              <label>From :</label>
+              <input type="text" v-model="memoData.from1" readonly />
+              <input type="text" v-model="memoData.from2" readonly />
+              <input type="text" v-model="memoData.from3" readonly />
+            </td>
+            <td class="form-cell">
+              <label>CASDIC Ref No.:</label>
+              <input type="text" v-model="memoData.casdicRefNo" readonly />
+            </td>
+            <td class="form-cell">
+              <label>CASDIC/</label>
+              <input type="text" v-model="memoData.casdic" readonly />
+            </td>
+            <td class="form-cell">
+              <label>Dated:</label>
+              <input type="text" v-model="memoData.dated" readonly />
+            </td>
+          </tr>
+          <tr>
+            <td class="form-cell">
+              <label>To :</label>
+              <input type="text" v-model="memoData.to1" readonly />
+              <input type="text" v-model="memoData.to2" readonly />
+            </td>
+            <td class="form-cell">
+              <label>Thru/: O I/c, WH</label>
+            </td>
+            <td class="form-cell">
+              <label>Wing/Proj Ref No.:</label>
+              <input type="text" v-model="memoData.wingProjRefNo" readonly />
+            </td>
+            <td class="form-cell"></td>
+          </tr>
+          <tr>
+            <td class="form-cell"></td>
+            <td class="form-cell" colspan="3">
+              <label>Name & contact No of CASDIC (Designs) coordinator:</label>
+              <input type="text" v-model="memoData.coordinatorContact" readonly />
+            </td>
+          </tr>
+        </table>
       </div>
       <div class="form-card">
-        <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>LRU/SRU DETAILS</span><input type="text" v-model="memoData.lruSruDetails" readonly /></div>
-          <div class="grid-item-half"><span>LRU/SRU Desc:</span><input type="text" v-model="memoData.lruSruDesc" readonly /></div>
-        </div>
-        <div class="grid-layout two-col-doc">
-          <div class="grid-item"><span>Ref Doc</span><input type="text" v-model="memoData.refDoc" readonly /></div>
-          <div class="grid-item"><span>Ref No of Document</span><input type="text" v-model="memoData.refNoDocument" readonly /></div>
-          <div class="grid-item"><span>ver</span><input type="text" v-model="memoData.version" readonly /></div>
-          <div class="grid-item"><span>rev</span><input type="text" v-model="memoData.revision" readonly /></div>
-        </div>
-        <div class="grid-layout">
-          <div class="grid-item"><span>Part No:</span><input type="text" v-model="memoData.partNo" readonly /></div>
-          <div class="grid-item"><span>Manufacturer:</span><input type="text" v-model="memoData.manufacturer" readonly /></div>
-          <div class="grid-item"><span>Sl.No of units:</span><input type="text" v-model="memoData.serialNo" readonly /></div>
-          <div class="grid-item"><span>Drawing no/Rev:</span><input type="text" v-model="memoData.drawingNoRev" readonly /></div>
-          <div class="grid-item"><span>Qty Offered:</span><input type="text" v-model="memoData.qtyOffered" readonly /></div>
-          <div class="grid-item"><span>source:</span><input type="text" v-model="memoData.source" readonly /></div>
-        </div>
-        <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>UNIT IDENTIFICATION:</span><input type="text" v-model="memoData.unitIdentification" readonly /></div>
-          <div class="grid-item-half"><span>MECHANICAL INSPN:</span><input type="text" v-model="memoData.mechanicalInspection" readonly /></div>
-        </div>
-        <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>INSPECTION /TEST STAGE OFFERED NOW:</span><input type="text" v-model="memoData.inspectionTestStage" readonly /></div>
-          <div class="grid-item-half"><span>STTE Status:</span><input type="text" v-model="memoData.stteStatus" readonly /></div>
-        </div>
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th rowspan="2" class="lru-header">LRU / SRU DETAILS</th>
+              <th rowspan="2" class="desc-header">LRU / SRU Desc:</th>
+              <th rowspan="2" class="ref-doc-header">Ref Doc</th>
+              <th rowspan="2" class="ref-no-header">Ref No of Document</th>
+              <th class="ver-header">ver</th>
+              <th class="rev-header">rev</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Part No:</label>
+                  <input type="text" v-model="memoData.partNo" readonly />
+                </div>
+                <div class="lru-field">
+                  <label>Manufacturer:</label>
+                  <input type="text" v-model="memoData.manufacturer" readonly />
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>{{ memoData.lruSruDesc }}</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNoDocument" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision" readonly />
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Sl.No of units :</label>
+                  <input type="text" v-model="memoData.serialNo" readonly />
+                </div>
+                <div class="lru-field">
+                  <label>Drawing no/Rev:</label>
+                  <input type="text" v-model="memoData.drawingNoRev" readonly />
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>NA</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc2" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNo2" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version2" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision2" readonly />
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Qty Offered:</label>
+                  <input type="text" v-model="memoData.qtyOffered" readonly />
+                </div>
+                <div class="lru-field">
+                  <label>source :</label>
+                  <span>{{ memoData.source }}</span>
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>{{ memoData.description3 }}</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc3" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNo3" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version3" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision3" readonly />
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>UNIT IDENTIFICATION : SOFT / QT / AT / DT / TS / ESS</label>
+                </div>
+                <div class="lru-field">
+                  <label>MECHANICAL INSPN :</label>
+                  <input type="text" v-model="memoData.mechanicalInspection" readonly />
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>STAGE / PARTS / ASSY/ FINAL / INSTALL</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc4" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNo4" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version4" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision4" readonly />
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
+                  <input type="text" v-model="memoData.inspectionTestStage" readonly />
+                </div>
+              </td>
+              <td class="desc-cell">
+                <div class="lru-field">
+                  <label>STTE Status:</label>
+                  <input type="text" v-model="memoData.stteStatus" readonly />
+                </div>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc5" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNo5" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version5" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision5" readonly />
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <label>TEST STAGE CLEARED:</label>
+                <input type="text" v-model="memoData.testStageCleared" readonly />
+              </td>
+              <td class="desc-cell"></td>
+              <td class="ref-cell">
+                <input type="text" v-model="memoData.refDoc6" readonly />
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="memoData.refNo6" readonly />
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="memoData.version6" readonly />
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="memoData.revision6" readonly />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <div class="form-card">
         <div class="grid-layout">
@@ -122,11 +302,14 @@ export default {
   data() {
     return {
       memoData: {
-        from: 'CASCIC Design Team',
-        cascicRefNo: 'CASCIC/2025/001',
-        cascic: 'CASCIC/DES/2025',
+        from1: 'MED, CASDIC (DARE), Bangalore',
+        from2: 'DGAQA cell,',
+        from3: 'ORDAQA(ADE), Bangalore',
+        casdicRefNo: 'CASDIC/2025/001',
+        casdic: 'CASDIC/DES/2025',
         dated: '15-01-2025',
-        to: 'DGAQA Inspection Team',
+        to1: 'DGAQA Inspection Team',
+        to2: '',
         wingProjRefNo: 'WING/PROJ/2025/001',
         coordinatorContact: 'John Smith - +91-9876543210',
         lruSruDetails: 'LRU-001',
@@ -135,6 +318,28 @@ export default {
         refNoDocument: 'DOC/FCU/2025/001',
         version: 'v1.0',
         revision: 'A',
+        refDoc2: '',
+        refNo2: '',
+        version2: '',
+        revision2: '',
+        description3: '',
+        refDoc3: '',
+        refNo3: '',
+        version3: '',
+        revision3: '',
+        refDoc4: '',
+        refNo4: '',
+        version4: '',
+        revision4: '',
+        refDoc5: '',
+        refNo5: '',
+        version5: '',
+        revision5: '',
+        testStageCleared: '',
+        refDoc6: '',
+        refNo6: '',
+        version6: '',
+        revision6: '',
         partNo: 'FCU-001-REV-A',
         manufacturer: 'Aviation Systems Ltd.',
         serialNo: 'SN001234567',
@@ -381,4 +586,182 @@ export default {
   margin-top: 2px;
 }
 
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.share-modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.share-modal-content h2 {
+  margin: 0;
+  font-size: 1.5em;
+  text-align: center;
+}
+
+.share-modal-content p {
+  margin: 0;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.email-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.send-btn {
+  padding: 10px 20px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
+}
+
+.form-table td, .form-table th {
+  border: 1px solid #333;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.form-cell {
+  position: relative;
+}
+
+.form-cell label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-cell input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
+}
+
+.details-table th, .details-table td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.details-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-align: center;
+}
+
+.lru-header {
+  width: 25%;
+}
+
+.desc-header {
+  width: 25%;
+}
+
+.ref-doc-header {
+  width: 15%;
+}
+
+.ref-no-header {
+  width: 20%;
+}
+
+.ver-header, .rev-header {
+  width: 7.5%;
+}
+
+.lru-cell, .desc-cell, .ref-cell, .refno-cell, .ver-cell, .rev-cell {
+  vertical-align: top;
+}
+
+.lru-field {
+  margin-bottom: 10px;
+}
+
+.lru-field label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.8em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.lru-field input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.desc-cell span {
+  color: #666;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.ref-cell input, .refno-cell input, .ver-cell input, .rev-cell input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
 </style>

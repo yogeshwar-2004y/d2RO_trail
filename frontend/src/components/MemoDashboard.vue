@@ -211,7 +211,7 @@ export default {
       this.showMemoFilter = false;
     },
     submitNewMemo() {
-      this.$router.push({ name: 'SubmitMemo' });
+      this.$router.push({ name: 'NewMemoForm' });
     },
     viewMemo(memo) {
       this.$router.push({ name: 'MemoForm', params: { memoId: memo.id } });
