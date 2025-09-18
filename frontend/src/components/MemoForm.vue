@@ -22,12 +22,10 @@
           <td class="form-cell">
             <label>From :</label>
             <input type="text" v-model="formData.from1" placeholder="MED, CASDIC (DARE), Bangalore">
-            <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
-            <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
+            
           </td>
           <td class="form-cell">
             <label>CASDIC Ref No.:</label>
-            <input type="text" v-model="formData.casdicRef" placeholder="">
           </td>
           <td class="form-cell">
             <label>CASDIC/</label>
@@ -41,8 +39,8 @@
         <tr>
           <td class="form-cell">
             <label>To :</label>
-            <input type="text" v-model="formData.to1" placeholder="">
-            <input type="text" v-model="formData.to2" placeholder="">
+            <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
+            <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
           </td>
           <td class="form-cell">
             <label>Thru/: O I/c, WH</label>
@@ -116,9 +114,7 @@
                 <input type="text" v-model="formData.drawingNo" placeholder="">
               </div>
             </td>
-            <td class="desc-cell">
-              <span>NA</span>
-            </td>
+            
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc2" placeholder="">
             </td>
@@ -144,9 +140,7 @@
                 <span>NA</span>
               </div>
             </td>
-            <td class="desc-cell">
-              <textarea v-model="formData.description3" placeholder=""></textarea>
-            </td>
+            
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc3" placeholder="">
             </td>
@@ -171,9 +165,7 @@
                 <input type="text" v-model="formData.mechanicalInsp" placeholder="">
               </div>
             </td>
-            <td class="desc-cell">
-              <span>STAGE / PARTS / ASSY/ FINAL / INSTALL</span>
-            </td>
+            
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc4" placeholder="">
             </td>
