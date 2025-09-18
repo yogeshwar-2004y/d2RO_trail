@@ -162,7 +162,14 @@
               </div>
               <div class="lru-field">
                 <label>MECHANICAL INSPN :</label>
-                <input type="text" v-model="formData.mechanicalInsp" placeholder="">
+                <select v-model="formData.mechanicalInsp" class="lru-select">
+                  <option value="">Select Stage</option>
+                  <option value="STAGE">STAGE</option>
+                  <option value="PARTS">PARTS</option>
+                  <option value="ASSY">ASSY</option>
+                  <option value="FINAL">FINAL</option>
+                  <option value="INSTALL">INSTALL</option>
+                </select>
               </div>
             </td>
             <td class="desc-cell"></td>
@@ -1027,6 +1034,28 @@ export default {
   border-radius: 3px;
   font-size: 0.8em;
   box-sizing: border-box;
+}
+
+.lru-select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+}
+
+.lru-select:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.lru-select option {
+  padding: 4px 6px;
+  font-size: 0.8em;
 }
 
 .desc-cell textarea {
