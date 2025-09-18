@@ -114,7 +114,7 @@
                 <input type="text" v-model="formData.drawingNo" placeholder="">
               </div>
             </td>
-            
+            <td class="desc-cell"></td>
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc2" placeholder="">
             </td>
@@ -140,7 +140,7 @@
                 <span>NA</span>
               </div>
             </td>
-            
+            <td class="desc-cell"></td>
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc3" placeholder="">
             </td>
@@ -165,7 +165,7 @@
                 <input type="text" v-model="formData.mechanicalInsp" placeholder="">
               </div>
             </td>
-            
+            <td class="desc-cell"></td>
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc4" placeholder="">
             </td>
@@ -295,47 +295,60 @@
 
     <!-- Certification Section -->
     <div class="form-section certification">
+      <div class="certification-header">
+        <span class="certification-statement">It is certified that:</span>
+      </div>
       <div class="certification-list">
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationA" class="cert-checkbox" id="certA">
           <span class="cert-letter">a)</span>
           <span class="cert-text">Mechanical Quality Records of all the parts ( Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc. ) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports / test reports, etc.) were verified thoroughly .</span>
         </div>
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationB" class="cert-checkbox" id="certB">
           <span class="cert-letter">b)</span>
           <span class="cert-text">CoC for SRU, fasteners & standard parts are verified and satisfactory</span>
         </div>
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationC" class="cert-checkbox" id="certC">
           <span class="cert-letter">c)</span>
           <span class="cert-text">Sl no of the SRUs are noted down in the respective log book opened on <input type="text" v-model="formData.logBookDate" placeholder="" class="inline-input"></span>
         </div>
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationD" class="cert-checkbox" id="certD">
           <span class="cert-letter">d)</span>
           <span class="cert-text">No Defect investigation is pending against this LRU</span>
         </div>
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationE" class="cert-checkbox" id="certE">
           <span class="cert-letter">e)</span>
           <span class="cert-text">All the previous test stages of this LRU /SRU are cleared</span>
         </div>
         <div class="cert-item">
+          <input type="checkbox" v-model="formData.certificationF" class="cert-checkbox" id="certF">
           <span class="cert-letter">f)</span>
           <span class="cert-text">CASDIC QA has physically inspected and accepted the LRU on <input type="text" v-model="formData.qaInspectionDate" placeholder="" class="inline-input"></span>
         </div>
       </div>
       
-      <div class="action-taken-section">
-        <span class="action-taken-text">Action taken & remarks by DGAQA</span>
+      <!-- IQA CASDIC Signature moved above action taken section -->
+      <div class="iqa-signature-section">
+        <div class="signature-box-large"></div>
+        <p>SIGNATURE of Rep, IQA CASDIC</p>
       </div>
       
-      <div class="signature-sections">
-        <div class="signature-section left">
-          <div class="signature-box-large"></div>
-          <p>SIGNATURE of Rep, IQA CASDIC</p>
+      <div class="action-taken-section">
+        <span class="action-taken-text">Action taken & remarks by DGAQA</span>
+        <div class="dgaqa-remarks-box">
+          <textarea v-model="formData.dgaqaRemarks" placeholder="Enter DGAQA action taken and remarks..." class="dgaqa-textarea"></textarea>
         </div>
-        <div class="remarks-section">
-          <p class="instruction">(please use space overleaf for details)</p>
-          <div class="signature-box-large"></div>
-          <p>SIGNATURE OF DGAQA REP..</p>
-        </div>
+      </div>
+      
+      <!-- DGAQA Signature moved to the end -->
+      <div class="dgaqa-signature-section">
+        <p class="instruction">(please use space overleaf for details)</p>
+        <div class="signature-box-large"></div>
+        <p>SIGNATURE OF DGAQA REP..</p>
       </div>
     </div>
 
@@ -708,7 +721,14 @@ export default {
         logBookDate: '',
         qaInspectionDate: '',
         testStatus: '',
-        qaReviewerRemarks: ''
+        qaReviewerRemarks: '',
+        certificationA: false,
+        certificationB: false,
+        certificationC: false,
+        certificationD: false,
+        certificationE: false,
+        certificationF: false,
+        dgaqaRemarks: ''
       }
     };
   },
@@ -1130,6 +1150,16 @@ export default {
   padding-bottom: 10px;
 }
 
+.certification-header {
+  margin-bottom: 20px;
+}
+
+.certification-statement {
+  font-weight: bold;
+  color: #333;
+  font-size: 1.1em;
+}
+
 .certification-list {
   margin-bottom: 30px;
 }
@@ -1139,6 +1169,14 @@ export default {
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 12px;
+}
+
+.cert-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
 .cert-letter {
@@ -1165,6 +1203,18 @@ export default {
   margin: 0 3px;
 }
 
+.iqa-signature-section {
+  text-align: center;
+  margin: 30px 0 20px 0;
+}
+
+.iqa-signature-section p {
+  margin: 10px 0 0 0;
+  color: #6c757d;
+  font-size: 0.9em;
+  font-weight: bold;
+}
+
 .action-taken-section {
   margin: 30px 0 20px 0;
 }
@@ -1173,6 +1223,48 @@ export default {
   font-weight: bold;
   color: #333;
   font-size: 1em;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.dgaqa-remarks-box {
+  margin-top: 15px;
+}
+
+.dgaqa-textarea {
+  width: 100%;
+  height: 120px;
+  padding: 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  resize: vertical;
+  font-size: 1em;
+  font-family: inherit;
+  color: #333;
+  background-color: white;
+  box-sizing: border-box;
+}
+
+.dgaqa-textarea:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.dgaqa-signature-section {
+  text-align: center;
+  margin: 30px 0 20px 0;
+}
+
+.dgaqa-signature-section p {
+  margin: 10px 0 0 0;
+  color: #6c757d;
+  font-size: 0.9em;
+}
+
+.dgaqa-signature-section .instruction {
+  font-style: italic;
+  margin-bottom: 20px;
 }
 
 .signature-sections {
