@@ -732,6 +732,35 @@ def get_designer_assigned_lrus_in_project(designer_id, project_id):
         print(f"Error fetching assigned LRUs for designer {designer_id} in project {project_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@projects_bp.route('/api/lru-names', methods=['GET'])
+def get_all_lru_names():
+    """Get all LRU names from the lrus table"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch all unique LRU names from the lrus table
+        cur.execute("""
+            SELECT DISTINCT lru_name
+            FROM lrus
+            ORDER BY lru_name
+        """)
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to simple list of LRU names
+        lru_names = [lru[0] for lru in lrus]
+        
+        return jsonify({
+            "success": True,
+            "lru_names": lru_names
+        })
+        
+    except Exception as e:
+        print(f"Error fetching LRU names: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @projects_bp.route('/api/test-designer-assignments', methods=['GET'])
 def test_designer_assignments():
     """Test endpoint to view all designer-project assignments"""

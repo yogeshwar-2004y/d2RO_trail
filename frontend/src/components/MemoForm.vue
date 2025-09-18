@@ -87,7 +87,12 @@
               </div>
             </td>
             <td class="desc-cell">
-              <textarea v-model="formData.description" placeholder=""></textarea>
+              <select v-model="formData.description" class="lru-description-select">
+                <option value="">Select LRU</option>
+                <option v-for="lruName in lruOptions" :key="lruName" :value="lruName">
+                  {{ lruName }}
+                </option>
+              </select>
             </td>
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc" placeholder="">
@@ -678,6 +683,9 @@ export default {
       showTestReviewSection: false,
       showRejectionSection: false,
       
+      // LRU options from database
+      lruOptions: [],
+      
       formData: {
         from1: '',
         from2: '',
@@ -763,6 +771,7 @@ export default {
   mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
+    this.fetchLruOptions();
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
       rejectionFormData: this.rejectionFormData,
@@ -792,6 +801,23 @@ export default {
       this.formData.partNo = 'LRU-001';
       this.formData.manufacturer = 'Aviatrax Industries';
       this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+    },
+    
+    async fetchLruOptions() {
+      try {
+        const response = await fetch('http://localhost:5000/api/lru-names');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.lruOptions = data.lru_names;
+        } else {
+          console.error('Failed to fetch LRU names:', data.message);
+          alert('Failed to load LRU names. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error fetching LRU names:', error);
+        alert('Error loading LRU names. Please check your connection.');
+      }
     },
     // Overlay management
     closeAcceptOverlay() {
@@ -1077,6 +1103,30 @@ export default {
   resize: vertical;
   font-size: 0.8em;
   box-sizing: border-box;
+}
+
+.lru-description-select {
+  width: 100%;
+  height: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+  overflow-y: auto;
+}
+
+.lru-description-select:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.lru-description-select option {
+  padding: 4px 6px;
+  font-size: 0.8em;
 }
 
 .desc-cell span {
