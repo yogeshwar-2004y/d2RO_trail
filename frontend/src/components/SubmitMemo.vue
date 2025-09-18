@@ -18,154 +18,231 @@
       
       <!-- General Requisition Information -->
       <div class="form-section">
-        <div class="form-row">
-          <div class="form-group">
-            <label>FROM:</label>
-            <input type="text" class="form-input" v-model="formData.from[0]" placeholder="">
-            <input type="text" class="form-input" v-model="formData.from[1]" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>CASDIC Ref No.:</label>
-            <input type="text" class="form-input" v-model="formData.casdicRef" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>CASDIC/</label>
-            <input type="text" class="form-input" v-model="formData.casdic" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>Dated:</label>
-            <input type="text" class="form-input" v-model="formData.dated" placeholder="">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>TO:</label>
-            <input type="text" class="form-input" v-model="formData.to[0]" placeholder="">
-            <input type="text" class="form-input" v-model="formData.to[1]" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>Wing/Proj Ref No.:</label>
-            <input type="text" class="form-input" v-model="formData.wingProjRef" placeholder="">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group full-width">
-            <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input type="text" class="form-input" v-model="formData.coordinator" placeholder="">
-          </div>
-        </div>
+        <table class="form-table">
+          <tr>
+            <td class="form-cell">
+              <label>From :</label>
+              <input type="text" v-model="formData.from1" placeholder="MED, CASDIC (DARE), Bangalore">
+              <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
+              <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
+            </td>
+            <td class="form-cell">
+              <label>CASDIC Ref No.:</label>
+              <input type="text" v-model="formData.casdicRef" placeholder="">
+            </td>
+            <td class="form-cell">
+              <label>CASDIC/</label>
+              <input type="text" v-model="formData.casdic" placeholder="">
+            </td>
+            <td class="form-cell">
+              <label>Dated:</label>
+              <input type="date" v-model="formData.casdicDate">
+            </td>
+          </tr>
+          <tr>
+            <td class="form-cell">
+              <label>To :</label>
+              <input type="text" v-model="formData.to1" placeholder="">
+              <input type="text" v-model="formData.to2" placeholder="">
+            </td>
+            <td class="form-cell">
+              <label>Thru/: O I/c, WH</label>
+            </td>
+            <td class="form-cell">
+              <label>Wing/Proj Ref No.:</label>
+              <input type="text" v-model="formData.wingRef" placeholder="">
+            </td>
+            <td class="form-cell"></td>
+          </tr>
+          <tr>
+            <td class="form-cell"></td>
+            <td class="form-cell wide-field" colspan="3">
+              <label>Name & contact No of CASDIC (Designs) coordinator:</label>
+              <input type="text" v-model="formData.coordinator" placeholder="">
+            </td>
+          </tr>
+        </table>
       </div>
 
       <hr class="section-divider">
 
       <!-- LRU/SRU Details -->
       <div class="form-section">
-        <div class="section-header">
-          <h3>LRU/SRU DETAILS</h3>
-          <div class="dropdown-group">
-            <label>LRU/SRU Desc:</label>
-            <div class="dropdown-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6,9 12,15 18,9"></polyline>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Part No:</label>
-            <input type="text" class="form-input" v-model="formData.partNo" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>Manufacturer:</label>
-            <input type="text" class="form-input" v-model="formData.manufacturer" placeholder="">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Sl.No of units:</label>
-            <input type="text" class="form-input" v-model="formData.units" placeholder="">
-            <div class="dropdown-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6,9 12,15 18,9"></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Drawing no /Rev:</label>
-            <input type="text" class="form-input" v-model="formData.drawingNo" placeholder="">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Qty Offered:</label>
-            <input type="text" class="form-input" v-model="formData.qtyOffered" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>source:</label>
-            <input type="text" class="form-input" v-model="formData.source" placeholder="">
-          </div>
-        </div>
-
-        <div class="reference-docs">
-          <div class="ref-header">
-            <span>Ref Doc</span>
-            <span>Ref No of Document</span>
-            <span>ver</span>
-            <span>rev</span>
-          </div>
-          <div class="ref-rows">
-            <div class="ref-row" v-for="(doc, index) in formData.referenceDocs" :key="index">
-              <input type="text" class="ref-input" v-model="doc.doc" placeholder="">
-              <input type="text" class="ref-input" v-model="doc.refNo" placeholder="">
-              <input type="text" class="ref-input" v-model="doc.ver" placeholder="">
-              <input type="text" class="ref-input" v-model="doc.rev" placeholder="">
-            </div>
-          </div>
-        </div>
+        <table class="details-table">
+          <thead>
+            <tr>
+              <th rowspan="2" class="lru-header">LRU / SRU DETAILS</th>
+              <th rowspan="2" class="desc-header">LRU / SRU Desc:</th>
+              <th rowspan="2" class="ref-doc-header">Ref Doc</th>
+              <th rowspan="2" class="ref-no-header">Ref No of Document</th>
+              <th class="ver-header">ver</th>
+              <th class="rev-header">rev</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Part No:</label>
+                  <input type="text" v-model="formData.partNo" placeholder="">
+                </div>
+                <div class="lru-field">
+                  <label>Manufacturer:</label>
+                  <input type="text" v-model="formData.manufacturer" placeholder="">
+                </div>
+              </td>
+              <td class="desc-cell">
+                <textarea v-model="formData.description" placeholder=""></textarea>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision" placeholder="">
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Sl.No of units :</label>
+                  <input type="text" v-model="formData.slNo" placeholder="">
+                </div>
+                <div class="lru-field">
+                  <label>Drawing no/Rev:</label>
+                  <input type="text" v-model="formData.drawingNo" placeholder="">
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>NA</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc2" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo2" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version2" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision2" placeholder="">
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>Qty Offered:</label>
+                  <input type="text" v-model="formData.qtyOffered" placeholder="">
+                </div>
+                <div class="lru-field">
+                  <label>source :</label>
+                  <span>NA</span>
+                </div>
+              </td>
+              <td class="desc-cell">
+                <textarea v-model="formData.description3" placeholder=""></textarea>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc3" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo3" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version3" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision3" placeholder="">
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>UNIT IDENTIFICATION : SOFT / QT / AT / DT / TS / ESS</label>
+                </div>
+                <div class="lru-field">
+                  <label>MECHANICAL INSPN :</label>
+                  <input type="text" v-model="formData.mechanicalInspn" placeholder="">
+                </div>
+              </td>
+              <td class="desc-cell">
+                <span>STAGE / PARTS / ASSY/ FINAL / INSTALL</span>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc4" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo4" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version4" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision4" placeholder="">
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <div class="lru-field">
+                  <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
+                  <input type="text" v-model="formData.inspectionStage" placeholder="">
+                </div>
+              </td>
+              <td class="desc-cell">
+                <div class="lru-field">
+                  <label>STTE Status:</label>
+                  <input type="text" v-model="formData.stteStatus" placeholder="">
+                </div>
+              </td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc5" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo5" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version5" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision5" placeholder="">
+              </td>
+            </tr>
+            
+            <tr>
+              <td class="lru-cell">
+                <label>TEST STAGE CLEARED:</label>
+                <input type="text" v-model="formData.testStageCleared" placeholder="">
+              </td>
+              <td class="desc-cell"></td>
+              <td class="ref-cell">
+                <input type="text" v-model="formData.refDoc6" placeholder="">
+              </td>
+              <td class="refno-cell">
+                <input type="text" v-model="formData.refNo6" placeholder="">
+              </td>
+              <td class="ver-cell">
+                <input type="text" v-model="formData.version6" placeholder="">
+              </td>
+              <td class="rev-cell">
+                <input type="text" v-model="formData.revision6" placeholder="">
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <hr class="section-divider">
 
-      <!-- Unit Identification & Inspection -->
-      <div class="form-section">
-        <div class="form-row">
-          <div class="form-group">
-            <label>UNIT IDENTIFICATION:</label>
-            <input type="text" class="form-input" v-model="formData.unitIdentification" placeholder="">
-            <div class="dropdown-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6,9 12,15 18,9"></polyline>
-              </svg>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>MECHANICAL INSPN:</label>
-            <input type="text" class="form-input" v-model="formData.mechanicalInspn" placeholder="">
-            <div class="dropdown-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6,9 12,15 18,9"></polyline>
-              </svg>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>INSPECTION / TEST STAGE OFFERED NOW :</label>
-            <input type="text" class="form-input" v-model="formData.inspectionStage" placeholder="">
-          </div>
-          <div class="form-group">
-            <label>STTE Status:</label>
-            <input type="text" class="form-input" v-model="formData.stteStatus" placeholder="">
-          </div>
-        </div>
-      </div>
 
       <div class="form-actions">
         <button class="submit-button" @click="submitForm">SUBMIT</button>
@@ -180,24 +257,51 @@ export default {
   data() {
     return {
       formData: {
-        from: ['', ''],
+        from1: '',
+        from2: '',
+        from3: '',
         casdicRef: '',
         casdic: '',
-        dated: '',
-        to: ['', ''],
-        wingProjRef: '',
+        casdicDate: '',
+        to1: '',
+        to2: '',
+        wingRef: '',
         coordinator: '',
         partNo: '',
         manufacturer: '',
-        units: '',
+        description: '',
+        refDoc: '',
+        refNo: '',
+        version: '',
+        revision: '',
+        slNo: '',
         drawingNo: '',
+        refDoc2: '',
+        refNo2: '',
+        version2: '',
+        revision2: '',
         qtyOffered: '',
-        source: '',
-        unitIdentification: '',
+        description3: '',
+        refDoc3: '',
+        refNo3: '',
+        version3: '',
+        revision3: '',
         mechanicalInspn: '',
+        refDoc4: '',
+        refNo4: '',
+        version4: '',
+        revision4: '',
         inspectionStage: '',
         stteStatus: '',
-        referenceDocs: Array(5).fill().map(() => ({ doc: '', refNo: '', ver: '', rev: '' }))
+        refDoc5: '',
+        refNo5: '',
+        version5: '',
+        revision5: '',
+        testStageCleared: '',
+        refDoc6: '',
+        refNo6: '',
+        version6: '',
+        revision6: ''
       }
     };
   },
@@ -389,6 +493,136 @@ export default {
 
 .submit-button:hover {
   background-color: #0056b3;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
+}
+
+.form-table td, .form-table th {
+  border: 1px solid #333;
+  padding: 8px;
+  vertical-align: top;
+}
+
+.form-cell {
+  position: relative;
+}
+
+.form-cell label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9em;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-cell input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+  box-sizing: border-box;
+}
+
+.form-cell input:focus {
+  border-color: #80bdff;
+  outline: none;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #333;
+}
+
+.details-table th, .details-table td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.details-table th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  text-align: center;
+}
+
+.lru-header {
+  width: 25%;
+}
+
+.desc-header {
+  width: 25%;
+}
+
+.ref-doc-header {
+  width: 15%;
+}
+
+.ref-no-header {
+  width: 20%;
+}
+
+.ver-header, .rev-header {
+  width: 7.5%;
+}
+
+.lru-cell, .desc-cell, .ref-cell, .refno-cell, .ver-cell, .rev-cell {
+  vertical-align: top;
+}
+
+.lru-field {
+  margin-bottom: 10px;
+}
+
+.lru-field label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.8em;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.lru-field input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+}
+
+.desc-cell textarea {
+  width: 100%;
+  height: 60px;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  resize: vertical;
+  font-size: 0.8em;
+  box-sizing: border-box;
+}
+
+.desc-cell span {
+  color: #666;
+  font-size: 0.8em;
+  font-style: italic;
+}
+
+.ref-cell input, .refno-cell input, .ver-cell input, .rev-cell input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+  font-size: 0.8em;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
