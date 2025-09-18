@@ -158,7 +158,16 @@
           <tr>
             <td class="lru-cell">
               <div class="lru-field">
-                <label>UNIT IDENTIFICATION : SOFT / QT / AT / DT / TS / ESS</label>
+                <label>UNIT IDENTIFICATION :</label>
+                <select v-model="formData.unitIdentification" class="lru-select">
+                  <option value="">Select Type</option>
+                  <option value="SOFT">SOFT</option>
+                  <option value="QT">QT</option>
+                  <option value="AT">AT</option>
+                  <option value="DT">DT</option>
+                  <option value="TS">TS</option>
+                  <option value="ESS">ESS</option>
+                </select>
               </div>
               <div class="lru-field">
                 <label>MECHANICAL INSPN :</label>
@@ -700,6 +709,7 @@ export default {
         version3: '',
         revision3: '',
         mechanicalInsp: '',
+        unitIdentification: '',
         refDoc4: '',
         refNo4: '',
         version4: '',
