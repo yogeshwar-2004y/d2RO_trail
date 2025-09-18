@@ -115,7 +115,7 @@ def get_comments():
                 c.page_no,
                 c.section,
                 c.description,
-                c.author,
+                c.commented_by,
                 c.created_at,
                 c.is_annotation,
                 a.annotation_id,
@@ -144,7 +144,7 @@ def get_comments():
                 "page_no": row[5],
                 "section": row[6],
                 "description": row[7],
-                "author": row[8],
+                "commented_by": row[8],
                 "created_at": row[9].isoformat() if row[9] else None,
                 "annotation": row[10]
             }
@@ -183,7 +183,7 @@ def create_comment():
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['document_id', 'document_name', 'description', 'author']
+        required_fields = ['document_id', 'document_name', 'description', 'commented_by']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
@@ -195,7 +195,7 @@ def create_comment():
         cur.execute("""
             INSERT INTO document_comments (
                 document_id, document_name, version, reviewer_id, 
-                page_no, section, description, author, is_annotation
+                page_no, section, description, commented_by, is_annotation
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING comment_id
         """, (
@@ -206,7 +206,7 @@ def create_comment():
             data.get('page_no'),
             data.get('section'),
             data['description'],
-            data['author'],
+            data['commented_by'],
             data.get('is_annotation', False)
         ))
         

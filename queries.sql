@@ -325,6 +325,7 @@ CREATE TABLE document_annotations (
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+
 CREATE TABLE document_comments (
     comment_id SERIAL PRIMARY KEY,
     document_id VARCHAR(100) NOT NULL,
@@ -334,9 +335,10 @@ CREATE TABLE document_comments (
     page_no INTEGER NOT NULL,
     section VARCHAR(100),
     description TEXT,
-    author VARCHAR(100) DEFAULT 'Anonymous',
+    commented_by VARCHAR(100) DEFAULT 'Anonymous',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     is_annotation BOOLEAN DEFAULT FALSE
 );
 
 
+ADD COLUMN justification TEXT;
