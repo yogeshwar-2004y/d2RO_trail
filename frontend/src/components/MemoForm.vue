@@ -164,15 +164,40 @@
             <td class="lru-cell">
               <div class="lru-field">
                 <label>UNIT IDENTIFICATION :</label>
-                <select v-model="formData.unitIdentification" class="lru-select">
-                  <option value="">Select Type</option>
-                  <option value="SOFT">SOFT</option>
-                  <option value="QT">QT</option>
-                  <option value="AT">AT</option>
-                  <option value="DT">DT</option>
-                  <option value="TS">TS</option>
-                  <option value="ESS">ESS</option>
-                </select>
+                <div class="test-dropdown" @click="toggleTestsDropdown">
+                  <div class="selected-value">{{ selectedTestName || 'Select Test' }}</div>
+                  <div class="dropdown-icon">▾</div>
+                </div>
+                <div
+                  v-if="showTestsDropdown"
+                  class="tests-menu"
+                  @mouseleave="hoveredTestId = null"
+                >
+                  <div class="tests-menu-left">
+                    <div
+                      v-for="t in tests"
+                      :key="t.test_id"
+                      class="test-item"
+                      @mouseenter="hoveredTestId = t.test_id"
+                      @click.stop="selectTest(t)"
+                    >
+                      {{ t.test_name }}
+                    </div>
+                  </div>
+                  <div class="tests-menu-right">
+                    <div v-if="hoveredStages.length === 0" class="stages-empty">&nbsp;</div>
+                    <ul v-else class="stages-list">
+                      <li 
+                        v-for="s in hoveredStages" 
+                        :key="s.stage_id"
+                        class="stage-item"
+                        @click.stop="selectStage(s)"
+                      >
+                        {{ s.stage_name }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
               <div class="lru-field">
                 <label>MECHANICAL INSPN :</label>
@@ -686,6 +711,11 @@ export default {
       
       // LRU options from database
       lruOptions: [],
+      // Tests data for Unit Identification dropdown
+      tests: [],
+      testIdToStages: {},
+      showTestsDropdown: false,
+      hoveredTestId: null,
       
       formData: {
         from1: '',
@@ -719,6 +749,8 @@ export default {
         revision3: '',
         mechanicalInsp: '',
         unitIdentification: '',
+        unitIdentificationTestId: null,
+        unitIdentificationTestName: '',
         refDoc4: '',
         refNo4: '',
         version4: '',
@@ -768,6 +800,13 @@ export default {
       // This ensures only authorized users see the accept/reject buttons.
       return this.currentUserRole === 2;
     },
+    selectedTestName() {
+      return this.formData.unitIdentificationTestName;
+    },
+    hoveredStages() {
+      if (!this.hoveredTestId) return [];
+      return this.testIdToStages[this.hoveredTestId] || [];
+    },
     isNewMemo() {
       // Check if this is a new memo being submitted
       return this.$route.name === 'NewMemoForm';
@@ -780,6 +819,7 @@ export default {
   mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
+    this.fetchTestsConfiguration();
     this.fetchLruOptions();
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
@@ -828,6 +868,41 @@ export default {
         this.formData.manufacturer = 'Aviatrax Industries';
         this.formData.description = 'Main Control Unit for Aircraft Navigation System';
       }
+    },
+    async fetchTestsConfiguration() {
+      try {
+        const res = await fetch('http://localhost:5000/api/tests-configuration');
+        const data = await res.json();
+        if (data && data.success) {
+          this.tests = data.tests || [];
+          const stageMap = {};
+          (data.stages || []).forEach(s => { stageMap[s.stage_id] = s; });
+          const mapping = {};
+          (data.configurations || []).forEach(c => {
+            if (!mapping[c.test_id]) mapping[c.test_id] = [];
+            const st = stageMap[c.stage_id];
+            if (st && !mapping[c.test_id].some(x => x.stage_id === st.stage_id)) {
+              mapping[c.test_id].push(st);
+            }
+          });
+          this.testIdToStages = mapping;
+        }
+      } catch (e) {
+        console.error('Failed to fetch tests configuration', e);
+      }
+    },
+    toggleTestsDropdown() {
+      this.showTestsDropdown = !this.showTestsDropdown;
+    },
+    selectTest(test) {
+      this.formData.unitIdentificationTestId = test.test_id;
+      this.formData.unitIdentificationTestName = test.test_name;
+      this.showTestsDropdown = false;
+    },
+    selectStage(stage) {
+      // When a stage is clicked from side dropdown, set Mechanical Inspection field
+      this.formData.mechanicalInsp = stage.stage_name;
+      this.showTestsDropdown = false;
     },
     
     async fetchLruOptions() {
@@ -1160,6 +1235,55 @@ export default {
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
+
+/* Tests dropdown (Unit Identification) */
+.test-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.test-dropdown .selected-value {
+  color: #495057;
+  font-size: 0.9em;
+}
+.test-dropdown .dropdown-icon {
+  color: #6c757d;
+}
+.tests-menu {
+  margin-top: 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 5;
+}
+.tests-menu-left {
+  max-height: 220px;
+  overflow-y: auto;
+  border-right: 1px dashed #e9ecef;
+  padding-right: 8px;
+}
+.test-item {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.test-item:hover { background: #f1f3f5; }
+.tests-menu-right { padding-left: 8px; }
+.stages-empty { color: #adb5bd; font-size: 0.9em; }
+.stages-list { margin: 0; padding-left: 18px; }
+.stages-list li { margin: 2px 0; cursor: pointer; }
+.stage-item:hover { text-decoration: underline; }
 
 .lru-select option {
   padding: 4px 6px;

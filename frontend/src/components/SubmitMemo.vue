@@ -22,9 +22,9 @@
           <tr>
             <td class="form-cell">
               <label>From :</label>
-              <input type="text" v-model="formData.from1" placeholder="MED, CASDIC (DARE), Bangalore">
-              <input type="text" v-model="formData.from2" placeholder="DGAQA cell,">
-              <input type="text" v-model="formData.from3" placeholder="ORDAQA(ADE), Bangalore">
+              <input class="locked-input" type="text" value="MED, CASDIC (DARE), Bangalore" disabled>
+              <input class="locked-input" type="text" value="DGAQA cell," disabled>
+              <input class="locked-input" type="text" value="ORDAQA(ADE), Bangalore" disabled>
             </td>
             <td class="form-cell">
               <label>CASDIC Ref No.:</label>
@@ -42,8 +42,8 @@
           <tr>
             <td class="form-cell">
               <label>To :</label>
-              <input type="text" v-model="formData.to1" placeholder="">
-              <input type="text" v-model="formData.to2" placeholder="">
+              <input class="locked-input" type="text" value="DGAQA cell," disabled>
+              <input class="locked-input" type="text" value="ORDAQA(ADE), Bangalore" disabled>
             </td>
             <td class="form-cell">
               <label>Thru/: O I/c, WH</label>
@@ -257,14 +257,9 @@ export default {
   data() {
     return {
       formData: {
-        from1: '',
-        from2: '',
-        from3: '',
         casdicRef: '',
         casdic: '',
         casdicDate: '',
-        to1: '',
-        to2: '',
         wingRef: '',
         coordinator: '',
         partNo: '',
@@ -532,6 +527,44 @@ export default {
 .form-cell input:focus {
   border-color: #80bdff;
   outline: none;
+}
+
+.locked-input {
+  pointer-events: none;
+  background-color: #f1f3f5;
+  color: #6c757d;
+  border: 1px solid #dee2e6;
+  cursor: not-allowed;
+}
+
+.form-cell input[readonly] {
+  background-color: #e9ecef !important;
+  color: #495057 !important;
+  cursor: not-allowed;
+  border-color: #ced4da;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fixed-text {
+  padding: 4px 0px;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+  color: #6c757d;
+  cursor: default;
+  user-select: none;
+  min-height: 20px;
+  display: block;
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  outline: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  font-weight: normal;
+  background: none;
+  border: none;
 }
 
 .details-table {
