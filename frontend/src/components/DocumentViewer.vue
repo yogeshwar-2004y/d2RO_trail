@@ -898,6 +898,67 @@ export default {
       }
     },
 
+    // Load a DOCX file directly from a URL (used when viewing existing documents)
+    async loadDocxFromUrl(fileUrl) {
+      try {
+        console.log('Starting DOCX URL loading...', { fileUrl });
+        
+        // Reset previous document state and set up for DOCX
+        this.clearDocument();
+        this.fileType = 'docx';
+        
+        // Fetch the file from URL
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch DOCX file: ${response.status} ${response.statusText}`);
+        }
+        
+        console.log('File fetched successfully, converting to ArrayBuffer...');
+        const arrayBuffer = await response.arrayBuffer();
+        console.log('File successfully read as ArrayBuffer');
+
+        console.log('Converting DOCX to HTML with page markers...');
+        const options = {
+          styleMap: [
+            "p[style-name='Page Break'] => div.page-break"
+          ]
+        };
+
+        // First convert to get the basic HTML
+        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
+        console.log('Initial HTML conversion complete', { 
+          resultLength: result.value.length,
+          messages: result.messages 
+        });
+
+        // Process the HTML to add page markers
+        const processedHtml = this.processDocxHtml(result.value);
+        console.log('HTML processing complete', { 
+          finalLength: processedHtml.length,
+          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
+        });
+
+        // Set the processed HTML
+        this.docxHtml = processedHtml;
+        
+        // Calculate number of pages
+        this.$nextTick(() => {
+          const pages = document.querySelectorAll('.docx-content .page');
+          this.numPages = pages.length || 1;
+          console.log('Page calculation complete', { totalPages: this.numPages });
+        });
+
+      } catch (err) {
+        console.error('Error in loadDocxFromUrl:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        alert("Failed to render DOCX file. Check console for details.");
+      }
+    },
+
     // Load an existing document either by object or by id/number
     async loadExistingDocument(input) {
       try {
@@ -2290,6 +2351,7 @@ export default {
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 0.75rem;
+  font-weight: bold;
 }
 
 .remove-btn {
