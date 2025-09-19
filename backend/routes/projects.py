@@ -804,6 +804,59 @@ def get_all_lrus():
         print(f"Error fetching LRUs: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@projects_bp.route('/api/lrus/<int:lru_id>/serial-numbers', methods=['GET'])
+def get_lru_serial_numbers(lru_id):
+    """Get serial numbers for a specific LRU"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First verify the LRU exists
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        lru = cur.fetchone()
+        if not lru:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        # Fetch serial numbers for the LRU
+        cur.execute("""
+            SELECT serial_id, serial_number
+            FROM serial_numbers
+            WHERE lru_id = %s
+            ORDER BY serial_number
+        """, (lru_id,))
+        
+        serials = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        serial_list = []
+        for serial in serials:
+            serial_list.append({
+                "serial_id": serial[0],
+                "serial_number": serial[1]
+            })
+        
+        return jsonify({
+            "success": True,
+            "lru": {
+                "lru_id": lru[0],
+                "lru_name": lru[1],
+                "project_name": lru[2]
+            },
+            "serial_numbers": serial_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching serial numbers for LRU {lru_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @projects_bp.route('/api/test-designer-assignments', methods=['GET'])
 def test_designer_assignments():
     """Test endpoint to view all designer-project assignments"""

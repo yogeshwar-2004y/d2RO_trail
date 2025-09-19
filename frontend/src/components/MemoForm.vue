@@ -149,7 +149,30 @@
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Sl.No of units :</label>
-                <input type="text" v-model="formData.slNo" placeholder="">
+                <select 
+                  v-model="formData.slNo" 
+                  class="lru-select serial-number-select"
+                  :disabled="!selectedLruInfo || serialNumberLoading || availableSerialNumbers.length === 0"
+                >
+                  <option value="">
+                    {{ !selectedLruInfo ? 'Select LRU first' : 
+                        serialNumberLoading ? 'Loading serial numbers...' : 
+                        serialNumberError ? 'Error loading serial numbers' :
+                        availableSerialNumbers.length === 0 ? 'No serial numbers available' : 
+                        'Select Serial Number' }}
+                  </option>
+                  <option 
+                    v-for="option in availableSerialNumbers" 
+                    :key="option.value" 
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </option>
+                </select>
+                <div v-if="serialNumberError" class="error-message">
+                  <span>{{ serialNumberError }}</span>
+                  <button @click="fetchSerialNumbers(selectedLruInfo.lru_id)" class="retry-btn">Retry</button>
+                </div>
               </div>
               <div class="lru-field">
                 <label>Drawing no/Rev:</label>
@@ -779,6 +802,10 @@ export default {
       lruData: [], // Full LRU data with project information
       lruLoading: false,
       lruError: null,
+      // Serial number options
+      serialNumberOptions: [],
+      serialNumberLoading: false,
+      serialNumberError: null,
        // Tests data for Unit Identification dropdown
        tests: [],
        testIdToStages: {},
@@ -898,6 +925,10 @@ export default {
       if (!this.formData.description) return null;
       return this.lruData.find(lru => lru.lru_name === this.formData.description);
     },
+    availableSerialNumbers() {
+      // Return the serial number options for the selected LRU
+      return this.serialNumberOptions;
+    },
     hoveredStageTypes() {
       // Get stage types for the currently hovered test
       if (!this.hoveredTestId) return [];
@@ -925,17 +956,24 @@ export default {
     }
   },
   watch: {
-    'formData.description'(newValue) {
-      // When LRU is selected, log the selection and optionally auto-populate fields
+    'formData.description'(newValue, oldValue) {
+      // When LRU is selected, log the selection and fetch serial numbers
       if (newValue) {
         const selectedLru = this.selectedLruInfo;
         console.log('LRU selected:', selectedLru);
         
-        // You can add auto-population logic here if needed
-        // For example, auto-fill manufacturer or other fields based on LRU selection
         if (selectedLru) {
           console.log(`Selected LRU: ${selectedLru.lru_name} from project: ${selectedLru.project_name}`);
+          // Fetch serial numbers for the selected LRU
+          this.fetchSerialNumbers(selectedLru.lru_id);
         }
+      }
+      
+      // Clear serial number selection when LRU changes
+      if (newValue !== oldValue) {
+        this.formData.slNo = '';
+        this.serialNumberOptions = [];
+        this.serialNumberError = null;
       }
     }
   },
@@ -1166,6 +1204,28 @@ export default {
       console.log('Loaded fallback LRU options:', this.lruOptions);
     },
     
+    loadFallbackSerialNumbers(lruId) {
+      // Fallback serial numbers when backend is not available
+      console.log(`Loading fallback serial numbers for LRU ID: ${lruId}`);
+      
+      // Sample serial numbers for different LRUs
+      const fallbackSerials = {
+        1: [1, 2, 3, 4, 5], // Flight Control Unit
+        2: [1, 2, 3], // Navigation System
+        3: [1, 2, 3, 4, 5, 6, 7, 8], // Communication Module
+        4: [1, 2], // Power Management Unit
+        5: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Sensor Array
+      };
+      
+      const serials = fallbackSerials[lruId] || [];
+      this.serialNumberOptions = serials.map(serial => ({
+        value: serial,
+        label: serial.toString()
+      }));
+      
+      console.log(`Loaded fallback serial numbers for LRU ${lruId}:`, this.serialNumberOptions);
+    },
+    
     async checkBackendStatus() {
       try {
         const response = await fetch('http://localhost:5000/api', { 
@@ -1202,6 +1262,41 @@ export default {
       } catch (error) {
         console.error(`Error fetching stage types for test ${testId}:`, error);
         return [];
+      }
+    },
+    
+    async fetchSerialNumbers(lruId) {
+      try {
+        this.serialNumberLoading = true;
+        this.serialNumberError = null;
+        console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
+        
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/serial-numbers`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.serialNumberOptions = data.serial_numbers.map(serial => ({
+            value: serial.serial_number,
+            label: serial.serial_number.toString()
+          }));
+          console.log(`Loaded serial numbers for LRU ${lruId}:`, this.serialNumberOptions);
+        } else {
+          this.serialNumberError = data.message || 'Failed to fetch serial numbers';
+          console.error('Failed to fetch serial numbers:', data.message);
+          this.serialNumberOptions = [];
+        }
+      } catch (error) {
+        this.serialNumberError = `Network error: ${error.message}`;
+        console.error(`Error fetching serial numbers for LRU ${lruId}:`, error);
+        console.log('Using fallback serial numbers...');
+        this.loadFallbackSerialNumbers(lruId);
+      } finally {
+        this.serialNumberLoading = false;
       }
     },
     // Overlay management
@@ -1851,6 +1946,29 @@ toggleShareBox() {
 .lru-select option {
   padding: 4px 6px;
   font-size: 0.8em;
+}
+
+.serial-number-select {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 0.8em;
+  box-sizing: border-box;
+  background-color: white;
+  cursor: pointer;
+}
+
+.serial-number-select:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.serial-number-select:focus {
+  border-color: #80bdff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 .desc-cell textarea {
