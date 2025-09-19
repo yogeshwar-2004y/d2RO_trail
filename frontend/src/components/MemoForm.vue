@@ -16,7 +16,7 @@
           </svg>
         </button>
           <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
         <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
       </div>
     </div>
@@ -157,11 +157,15 @@
                     :disabled="!selectedLruInfo || serialNumberLoading || availableSerialNumbers.length === 0"
                   >
                     <div class="selected-value">
-                      {{ !selectedLruInfo ? 'Select LRU first' : 
-                          serialNumberLoading ? 'Loading serial numbers...' : 
-                          serialNumberError ? 'Error loading serial numbers' :
-                          availableSerialNumbers.length === 0 ? 'No serial numbers available' : 
-                          selectedSerialNumbersDisplay }}
+                      <span v-if="!selectedLruInfo" class="placeholder-text">Select LRU first</span>
+                      <span v-else-if="serialNumberLoading" class="loading-text">Loading serial numbers...</span>
+                      <span v-else-if="serialNumberError" class="error-text">Error loading serial numbers</span>
+                      <span v-else-if="availableSerialNumbers.length === 0" class="no-data-text">No serial numbers available</span>
+                      <div v-else-if="formData.slNo && formData.slNo.length > 0" class="selected-serials">
+                        <span class="serial-count">{{ formData.slNo.length }} selected:</span>
+                        <span class="serial-list">{{ selectedSerialNumbersDisplay }}</span>
+                      </div>
+                      <span v-else class="placeholder-text">Select Serial Numbers</span>
                     </div>
                     <div class="dropdown-icon">▾</div>
                   </div>
@@ -232,7 +236,13 @@
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Qty Offered:</label>
-                <input type="text" v-model="formData.qtyOffered" placeholder="">
+                <input 
+                  type="text" 
+                  :value="quantityOffered" 
+                  readonly 
+                  class="readonly-field"
+                  placeholder="Auto-calculated from selected serials"
+                >
               </div>
               <div class="lru-field">
                 <label>source :</label>
@@ -969,9 +979,14 @@ export default {
       if (!this.formData.slNo || this.formData.slNo.length === 0) {
         return 'Select Serial Numbers';
       }
-      return this.formData.slNo.length === 1 
-        ? `Serial ${this.formData.slNo[0]}` 
-        : `${this.formData.slNo.length} serials selected`;
+      
+      // Show all selected serial numbers
+      const sortedSerials = [...this.formData.slNo].sort((a, b) => a - b);
+      return sortedSerials.join(', ');
+    },
+    quantityOffered() {
+      // Auto-calculate quantity based on selected serial numbers
+      return this.formData.slNo ? this.formData.slNo.length : 0;
     },
     hoveredStageTypes() {
       // Get stage types for the currently hovered test
@@ -1016,6 +1031,7 @@ export default {
       // Clear serial number selection when LRU changes
       if (newValue !== oldValue) {
         this.formData.slNo = [];
+        this.formData.qtyOffered = 0;
         this.serialNumberOptions = [];
         this.serialNumberError = null;
         this.showSerialNumberDropdown = false;
@@ -1030,8 +1046,8 @@ export default {
     const backendAvailable = await this.checkBackendStatus();
     if (backendAvailable) {
       console.log('Backend is available, fetching data...');
-      this.fetchTestsConfiguration();
-      this.fetchLruOptions();
+    this.fetchTestsConfiguration();
+    this.fetchLruOptions();
     } else {
       console.log('Backend not available, using fallback data...');
       this.loadFallbackLruOptions();
@@ -1227,7 +1243,11 @@ export default {
         this.formData.slNo.push(serialNumber);
       }
       
+      // Update quantity offered automatically
+      this.formData.qtyOffered = this.formData.slNo.length;
+      
       console.log('Selected serial numbers:', this.formData.slNo);
+      console.log('Quantity offered:', this.formData.qtyOffered);
     },
     
     isSerialNumberSelected(serialNumber) {
@@ -1236,7 +1256,8 @@ export default {
     
     clearSerialNumbers() {
       this.formData.slNo = [];
-      console.log('Cleared serial numbers');
+      this.formData.qtyOffered = 0;
+      console.log('Cleared serial numbers and quantity');
     },
     
     handleClickOutside(event) {
@@ -1658,6 +1679,19 @@ toggleShareBox() {
   box-shadow: none !important;
 }
 
+.readonly-field {
+  background-color: #e9ecef !important;
+  color: #495057 !important;
+  cursor: not-allowed !important;
+  border-color: #ced4da !important;
+  font-weight: 500;
+}
+
+.readonly-field::placeholder {
+  color: #6c757d !important;
+  font-style: italic;
+}
+
 .wide-field {
   grid-column: span 2;
 }
@@ -1922,13 +1956,13 @@ toggleShareBox() {
    background-color: #f8fafc;
  }
  
-.submenu-title {
-  font-size: 0.75em;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+ .submenu-title {
+   font-size: 0.75em;
+   font-weight: 600;
+   color: #64748b;
+   text-transform: uppercase;
+   letter-spacing: 0.5px;
+ }
 
 .loading-indicator {
   font-size: 0.7em;
@@ -1969,12 +2003,12 @@ toggleShareBox() {
    font-weight: 500;
  }
  
-.check-icon {
-  color: #10b981;
-  font-weight: bold;
-  font-size: 14px;
-  margin-left: 8px;
-}
+ .check-icon {
+   color: #10b981;
+   font-weight: bold;
+   font-size: 14px;
+   margin-left: 8px;
+ }
 
 .stage-info {
   display: flex;
@@ -2108,6 +2142,48 @@ toggleShareBox() {
   flex: 1;
   color: #333;
   font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.selected-serials {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.serial-count {
+  font-weight: 600;
+  color: #2196f3;
+  font-size: 0.75em;
+}
+
+.serial-list {
+  color: #495057;
+  font-size: 0.75em;
+  word-break: break-all;
+  line-height: 1.2;
+}
+
+.placeholder-text {
+  color: #6c757d;
+  font-style: italic;
+}
+
+.loading-text {
+  color: #007bff;
+  font-style: italic;
+}
+
+.error-text {
+  color: #dc3545;
+  font-style: italic;
+}
+
+.no-data-text {
+  color: #6c757d;
+  font-style: italic;
 }
 
 .serial-number-dropdown .dropdown-icon {
