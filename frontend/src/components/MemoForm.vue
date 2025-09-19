@@ -2140,7 +2140,7 @@ toggleShareBox() {
 .serial-number-dropdown .selected-value {
   flex: 1;
   color: #333;
-  font-size: 0.8em;
+  font-size: 0.9em;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -2153,9 +2153,10 @@ toggleShareBox() {
 
 .serial-list {
   color: #495057;
-  font-size: 0.75em;
+  font-size: 0.9em;
   word-break: break-all;
-  line-height: 1.2;
+  line-height: 1.3;
+  font-weight: 500;
 }
 
 .placeholder-text {
