@@ -240,24 +240,25 @@
                   
                   <!-- Separate Stages Submenu -->
                   <div
-                    v-if="showTestsDropdown && hoveredTestId && hoveredStages.length > 0"
+                    v-if="showTestsDropdown && hoveredTestId && allHoveredTypes.length > 0"
                     class="stages-submenu"
                     :style="{ '--submenu-offset': submenuOffset + 'px' }"
                     @mouseenter="keepSubmenuOpen = true"
                     @mouseleave="handleSubmenuLeave"
                   >
                     <div class="submenu-header">
-                      <span class="submenu-title">Test Stages</span>
+                      <span class="submenu-title">Test Types</span>
+                      <span v-if="!allHoveredTypes.length && hoveredTestId" class="loading-indicator">Loading types...</span>
                     </div>
                     <div class="submenu-item-container">
                       <div
-                        v-for="s in hoveredStages"
-                        :key="s.stage_id"
-                        class="submenu-item"
-                        @click.stop="selectStage(s)"
+                        v-for="type in allHoveredTypes"
+                        :key="type.type_id"
+                        class="submenu-item type-item"
+                        @click.stop="selectType(type)"
                       >
-                        <span class="submenu-text">{{ s.stage_name }}</span>
-                        <span v-if="s.stage_name === formData.mechanicalInsp" class="check-icon">✓</span>
+                        <span class="submenu-text">{{ type.type_name }}</span>
+                        <span v-if="type.type_name === formData.mechanicalInsp" class="check-icon">✓</span>
                       </div>
                     </div>
                   </div>
@@ -781,6 +782,7 @@ export default {
        // Tests data for Unit Identification dropdown
        tests: [],
        testIdToStages: {},
+       testIdToStageTypes: {}, // Store type_names for each test-stage combination
        showTestsDropdown: false,
        hoveredTestId: null,
        keepSubmenuOpen: false,
@@ -895,6 +897,31 @@ export default {
       // Get the full LRU information for the selected LRU
       if (!this.formData.description) return null;
       return this.lruData.find(lru => lru.lru_name === this.formData.description);
+    },
+    hoveredStageTypes() {
+      // Get stage types for the currently hovered test
+      if (!this.hoveredTestId) return [];
+      return this.testIdToStageTypes[this.hoveredTestId] || [];
+    },
+    allHoveredTypes() {
+      // Get all type names from all stages for the currently hovered test
+      if (!this.hoveredTestId) return [];
+      const stageTypes = this.testIdToStageTypes[this.hoveredTestId] || [];
+      const allTypes = [];
+      
+      stageTypes.forEach(stage => {
+        if (stage.types && stage.types.length > 0) {
+          stage.types.forEach(type => {
+            // Avoid duplicates by checking if type already exists
+            if (!allTypes.find(t => t.type_id === type.type_id)) {
+              allTypes.push(type);
+            }
+          });
+        }
+      });
+      
+      // Sort by type name for better organization
+      return allTypes.sort((a, b) => a.type_name.localeCompare(b.type_name));
     }
   },
   watch: {
@@ -1035,7 +1062,7 @@ export default {
         }
       },
       
-      handleTestHover(testId, index) {
+      async handleTestHover(testId, index) {
         console.log('Hovering over test:', testId);
         console.log('Available stages for this test:', this.testIdToStages[testId]);
         this.hoveredTestId = testId;
@@ -1044,6 +1071,12 @@ export default {
         // Calculate offset based on the menu item index
         // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
         this.submenuOffset = index * 48;
+        
+        // Fetch stage types for this test if not already loaded
+        if (!this.testIdToStageTypes[testId]) {
+          console.log(`Fetching stage types for test ${testId}...`);
+          await this.fetchTestStageTypes(testId);
+        }
       },
       
       handleMainMenuLeave() {
@@ -1069,6 +1102,20 @@ export default {
       // When a stage is clicked from side dropdown, set Mechanical Inspection field
       this.formData.mechanicalInsp = stage.stage_name;
       this.showTestsDropdown = false;
+      
+      // Log the selected stage with its types for debugging
+      if (stage.types && stage.types.length > 0) {
+        console.log(`Selected stage: ${stage.stage_name} with types:`, stage.types.map(t => t.type_name));
+      }
+    },
+    
+    selectType(type) {
+      // When a type is clicked from dropdown, set Mechanical Inspection field
+      this.formData.mechanicalInsp = type.type_name;
+      this.showTestsDropdown = false;
+      
+      // Log the selected type for debugging
+      console.log(`Selected type: ${type.type_name}`);
     },
     
     async fetchLruOptions() {
@@ -1129,6 +1176,32 @@ export default {
       } catch (error) {
         console.log('Backend not available:', error.message);
         return false;
+      }
+    },
+    
+    async fetchTestStageTypes(testId) {
+      try {
+        console.log(`Fetching stage types for test ID: ${testId}`);
+        const response = await fetch(`http://localhost:5000/api/test/${testId}/stage-types`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Store the stage types for this test
+          this.testIdToStageTypes[testId] = data.stages;
+          console.log(`Loaded stage types for test ${testId}:`, data.stages);
+          return data.stages;
+        } else {
+          console.error('Failed to fetch stage types:', data.message);
+          return [];
+        }
+      } catch (error) {
+        console.error(`Error fetching stage types for test ${testId}:`, error);
+        return [];
       }
     },
     // Overlay management
@@ -1658,13 +1731,20 @@ toggleShareBox() {
    background-color: #f8fafc;
  }
  
- .submenu-title {
-   font-size: 0.75em;
-   font-weight: 600;
-   color: #64748b;
-   text-transform: uppercase;
-   letter-spacing: 0.5px;
- }
+.submenu-title {
+  font-size: 0.75em;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.loading-indicator {
+  font-size: 0.7em;
+  color: #9ca3af;
+  font-style: italic;
+  margin-left: 8px;
+}
  
  .submenu-item-container {
    max-height: 200px;
@@ -1698,12 +1778,54 @@ toggleShareBox() {
    font-weight: 500;
  }
  
- .check-icon {
-   color: #10b981;
-   font-weight: bold;
-   font-size: 14px;
-   margin-left: 8px;
- }
+.check-icon {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+.stage-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.type-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.type-name {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 0.7em;
+  font-weight: 500;
+  border: 1px solid #bbdefb;
+}
+
+.type-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-radius: 6px;
+  margin: 2px 0;
+}
+
+.type-item:hover {
+  background-color: #f0f9ff;
+  transform: translateX(2px);
+}
+
+.type-item .submenu-text {
+  font-weight: 500;
+  color: #374151;
+}
  
  /* Responsive adjustments */
  @media (max-width: 768px) {

@@ -250,6 +250,70 @@ def get_test_stage_types():
         print(f"Error fetching test-stage-type configurations: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@tests_bp.route('/api/test/<int:test_id>/stage-types', methods=['GET'])
+def get_test_stage_types_by_test(test_id):
+    """Get stage types for a specific test ID"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First verify the test exists
+        cur.execute("SELECT test_id, test_name FROM tests WHERE test_id = %s", (test_id,))
+        test = cur.fetchone()
+        if not test:
+            cur.close()
+            return jsonify({"success": False, "message": "Test not found"}), 404
+        
+        # Get stage types for this specific test
+        cur.execute("""
+            SELECT 
+                s.stage_id,
+                s.stage_name,
+                st.type_id,
+                st.type_name
+            FROM test_stage_types tst
+            JOIN stages s ON tst.stage_id = s.stage_id
+            JOIN stage_types st ON tst.type_id = st.type_id
+            WHERE tst.test_id = %s
+            ORDER BY s.stage_id, st.type_name
+        """, (test_id,))
+        
+        stage_types = cur.fetchall()
+        cur.close()
+        
+        # Group by stage
+        stages_with_types = {}
+        for stage_type in stage_types:
+            stage_id = stage_type[0]
+            stage_name = stage_type[1]
+            type_id = stage_type[2]
+            type_name = stage_type[3]
+            
+            if stage_id not in stages_with_types:
+                stages_with_types[stage_id] = {
+                    "stage_id": stage_id,
+                    "stage_name": stage_name,
+                    "types": []
+                }
+            
+            stages_with_types[stage_id]["types"].append({
+                "type_id": type_id,
+                "type_name": type_name
+            })
+        
+        return jsonify({
+            "success": True,
+            "test": {
+                "test_id": test[0],
+                "test_name": test[1]
+            },
+            "stages": list(stages_with_types.values())
+        })
+        
+    except Exception as e:
+        print(f"Error fetching stage types for test {test_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @tests_bp.route('/api/tests', methods=['POST'])
 def create_test():
     """Create new test"""
