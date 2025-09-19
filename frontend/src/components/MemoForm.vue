@@ -149,29 +149,63 @@
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Sl.No of units :</label>
-                <select 
-                  v-model="formData.slNo" 
-                  class="lru-select serial-number-select"
-                  :disabled="!selectedLruInfo || serialNumberLoading || availableSerialNumbers.length === 0"
-                >
-                  <option value="">
-                    {{ !selectedLruInfo ? 'Select LRU first' : 
-                        serialNumberLoading ? 'Loading serial numbers...' : 
-                        serialNumberError ? 'Error loading serial numbers' :
-                        availableSerialNumbers.length === 0 ? 'No serial numbers available' : 
-                        'Select Serial Number' }}
-                  </option>
-                  <option 
-                    v-for="option in availableSerialNumbers" 
-                    :key="option.value" 
-                    :value="option.value"
+                <div class="serial-number-dropdown-container">
+                  <div 
+                    class="serial-number-dropdown"
+                    :class="{ 'active': showSerialNumberDropdown }"
+                    @click="toggleSerialNumberDropdown"
+                    :disabled="!selectedLruInfo || serialNumberLoading || availableSerialNumbers.length === 0"
                   >
-                    {{ option.label }}
-                  </option>
-                </select>
-                <div v-if="serialNumberError" class="error-message">
-                  <span>{{ serialNumberError }}</span>
-                  <button @click="fetchSerialNumbers(selectedLruInfo.lru_id)" class="retry-btn">Retry</button>
+                    <div class="selected-value">
+                      {{ !selectedLruInfo ? 'Select LRU first' : 
+                          serialNumberLoading ? 'Loading serial numbers...' : 
+                          serialNumberError ? 'Error loading serial numbers' :
+                          availableSerialNumbers.length === 0 ? 'No serial numbers available' : 
+                          selectedSerialNumbersDisplay }}
+                    </div>
+                    <div class="dropdown-icon">▾</div>
+                  </div>
+                  
+                  <!-- Serial Number Checkbox Dropdown -->
+                  <div
+                    v-if="showSerialNumberDropdown && availableSerialNumbers.length > 0"
+                    class="serial-number-menu"
+                  >
+                    <div class="serial-menu-header">
+                      <span class="menu-title">Select Serial Numbers</span>
+                      <button @click.stop="clearSerialNumbers" class="clear-btn">Clear All</button>
+                    </div>
+                    <div class="serial-menu-content">
+                      <div
+                        v-for="option in availableSerialNumbers"
+                        :key="option.value"
+                        class="serial-checkbox-item"
+                        :class="{ 'selected': isSerialNumberSelected(option.value) }"
+                        @click="toggleSerialNumber(option.value)"
+                      >
+                        <div class="checkbox-wrapper">
+                          <input 
+                            type="checkbox" 
+                            :checked="isSerialNumberSelected(option.value)"
+                            class="serial-checkbox"
+                            @click.stop
+                          >
+                          <div class="checkbox-custom" :class="{ 'checked': isSerialNumberSelected(option.value) }">
+                            <svg v-if="isSerialNumberSelected(option.value)" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                          </div>
+                        </div>
+                        <span class="serial-label">Serial {{ option.label }}</span>
+                        <div v-if="isSerialNumberSelected(option.value)" class="selected-indicator">✓</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div v-if="serialNumberError" class="error-message">
+                    <span>{{ serialNumberError }}</span>
+                    <button @click="fetchSerialNumbers(selectedLruInfo.lru_id)" class="retry-btn">Retry</button>
+                  </div>
                 </div>
               </div>
               <div class="lru-field">
@@ -806,6 +840,7 @@ export default {
       serialNumberOptions: [],
       serialNumberLoading: false,
       serialNumberError: null,
+      showSerialNumberDropdown: false,
        // Tests data for Unit Identification dropdown
        tests: [],
        testIdToStages: {},
@@ -833,7 +868,7 @@ export default {
         refNo: '',
         version: '',
         revision: '',
-        slNo: '',
+        slNo: [],
         drawingNo: '',
         refDoc2: '',
         refNo2: '',
@@ -929,6 +964,15 @@ export default {
       // Return the serial number options for the selected LRU
       return this.serialNumberOptions;
     },
+    selectedSerialNumbersDisplay() {
+      // Return a display string for selected serial numbers
+      if (!this.formData.slNo || this.formData.slNo.length === 0) {
+        return 'Select Serial Numbers';
+      }
+      return this.formData.slNo.length === 1 
+        ? `Serial ${this.formData.slNo[0]}` 
+        : `${this.formData.slNo.length} serials selected`;
+    },
     hoveredStageTypes() {
       // Get stage types for the currently hovered test
       if (!this.hoveredTestId) return [];
@@ -971,9 +1015,10 @@ export default {
       
       // Clear serial number selection when LRU changes
       if (newValue !== oldValue) {
-        this.formData.slNo = '';
+        this.formData.slNo = [];
         this.serialNumberOptions = [];
         this.serialNumberError = null;
+        this.showSerialNumberDropdown = false;
       }
     }
   },
@@ -992,12 +1037,20 @@ export default {
       this.loadFallbackLruOptions();
     }
     
+    // Add click outside handler for dropdowns
+    document.addEventListener('click', this.handleClickOutside);
+    
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
       isNewMemo: this.isNewMemo,
       rejectionFormData: this.rejectionFormData,
       acceptFormData: this.acceptFormData
     });
+  },
+  
+  beforeUnmount() {
+    // Remove click outside handler
+    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     loadMemoData() {
@@ -1154,6 +1207,49 @@ export default {
       
       // Log the selected type for debugging
       console.log(`Selected type: ${type.type_name}`);
+    },
+    
+    toggleSerialNumberDropdown() {
+      this.showSerialNumberDropdown = !this.showSerialNumberDropdown;
+    },
+    
+    toggleSerialNumber(serialNumber) {
+      if (!this.formData.slNo) {
+        this.formData.slNo = [];
+      }
+      
+      const index = this.formData.slNo.indexOf(serialNumber);
+      if (index > -1) {
+        // Remove if already selected
+        this.formData.slNo.splice(index, 1);
+      } else {
+        // Add if not selected
+        this.formData.slNo.push(serialNumber);
+      }
+      
+      console.log('Selected serial numbers:', this.formData.slNo);
+    },
+    
+    isSerialNumberSelected(serialNumber) {
+      return this.formData.slNo && this.formData.slNo.includes(serialNumber);
+    },
+    
+    clearSerialNumbers() {
+      this.formData.slNo = [];
+      console.log('Cleared serial numbers');
+    },
+    
+    handleClickOutside(event) {
+      // Close serial number dropdown if clicking outside
+      if (this.showSerialNumberDropdown && !event.target.closest('.serial-number-dropdown-container')) {
+        this.showSerialNumberDropdown = false;
+      }
+      
+      // Close tests dropdown if clicking outside
+      if (this.showTestsDropdown && !event.target.closest('.dropdown-wrapper')) {
+        this.showTestsDropdown = false;
+        this.hoveredTestId = null;
+      }
     },
     
     async fetchLruOptions() {
@@ -1969,6 +2065,240 @@ toggleShareBox() {
   border-color: #80bdff;
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Serial Number Checkbox Dropdown Styles */
+.serial-number-dropdown-container {
+  position: relative;
+  width: 100%;
+}
+
+.serial-number-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 4px 6px;
+  background-color: white;
+  cursor: pointer;
+  font-size: 0.8em;
+  min-height: 28px;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.serial-number-dropdown:hover:not(:disabled) {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+}
+
+.serial-number-dropdown:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.serial-number-dropdown.active {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.serial-number-dropdown .selected-value {
+  flex: 1;
+  color: #333;
+  font-size: 0.8em;
+}
+
+.serial-number-dropdown .dropdown-icon {
+  color: #6c757d;
+  font-size: 12px;
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.serial-number-dropdown.active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+.serial-number-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
+  z-index: 1000;
+  overflow: hidden;
+  animation: menuFadeIn 0.2s ease-out;
+  backdrop-filter: blur(10px);
+}
+
+.serial-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 6px 6px 0 0;
+}
+
+.serial-menu-header .menu-title {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.serial-menu-header .menu-title::before {
+  content: "☑️";
+  font-size: 0.9em;
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  border: none;
+  color: white;
+  font-size: 0.7em;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
+}
+
+.clear-btn:hover {
+  background: linear-gradient(135deg, #c82333 0%, #a71e2a 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.clear-btn:active {
+  transform: translateY(0);
+}
+
+.serial-menu-content {
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.serial-menu-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.serial-menu-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.serial-menu-content::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.serial-menu-content::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+.serial-checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.8em;
+  border-bottom: 1px solid #f1f3f4;
+  position: relative;
+}
+
+.serial-checkbox-item:last-child {
+  border-bottom: none;
+}
+
+.serial-checkbox-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(2px);
+}
+
+.serial-checkbox-item.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196f3;
+}
+
+.checkbox-wrapper {
+  position: relative;
+  margin-right: 12px;
+}
+
+.serial-checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.checkbox-custom:hover {
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.checkbox-custom.checked {
+  background-color: #2196f3;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.check-icon {
+  width: 12px;
+  height: 12px;
+  color: white;
+  stroke-width: 3;
+}
+
+.serial-label {
+  color: #333;
+  font-size: 0.8em;
+  font-weight: 500;
+  flex: 1;
+}
+
+.selected-indicator {
+  color: #2196f3;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 8px;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .desc-cell textarea {
