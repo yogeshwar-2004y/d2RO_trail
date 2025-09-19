@@ -111,12 +111,25 @@
               </div>
             </td>
             <td class="desc-cell">
-              <select v-model="formData.description" class="lru-description-select">
-                <option value="">Select LRU</option>
-                <option v-for="lruName in lruOptions" :key="lruName" :value="lruName">
-                  {{ lruName }}
+              <select 
+                v-model="formData.description" 
+                class="lru-description-select"
+                :disabled="lruLoading"
+              >
+                <option value="">
+                  {{ lruLoading ? 'Loading LRUs...' : lruError ? 'Error loading LRUs' : 'Select LRU' }}
+                </option>
+                <option v-for="lru in lruData" :key="lru.lru_id" :value="lru.lru_name">
+                  {{ lru.lru_name }} ({{ lru.project_name }})
                 </option>
               </select>
+              <div v-if="lruError" class="error-message">
+                <span>{{ lruError }}</span>
+                <button @click="fetchLruOptions" class="retry-btn">Retry</button>
+              </div>
+              <div v-if="lruData.length > 0 && lruError" class="info-message">
+                Using fallback data. Start the backend server for live data.
+              </div>
             </td>
             <td class="ref-cell">
               <input type="text" v-model="formData.refDoc" placeholder="">
@@ -762,13 +775,16 @@ export default {
       
       // LRU options from database
       lruOptions: [],
+      lruData: [], // Full LRU data with project information
+      lruLoading: false,
+      lruError: null,
        // Tests data for Unit Identification dropdown
        tests: [],
        testIdToStages: {},
        showTestsDropdown: false,
        hoveredTestId: null,
        keepSubmenuOpen: false,
-       submenuOffset: 0,
+        submenuOffset: 0,
       
       formData: {
         from1: '',
@@ -874,13 +890,43 @@ export default {
     canSubmitNewMemo() {
       // Only designers (role 5) and design heads (role 4) can submit new memos
       return this.isNewMemo && [4, 5].includes(this.currentUserRole);
+    },
+    selectedLruInfo() {
+      // Get the full LRU information for the selected LRU
+      if (!this.formData.description) return null;
+      return this.lruData.find(lru => lru.lru_name === this.formData.description);
     }
   },
-  mounted() {
+  watch: {
+    'formData.description'(newValue) {
+      // When LRU is selected, log the selection and optionally auto-populate fields
+      if (newValue) {
+        const selectedLru = this.selectedLruInfo;
+        console.log('LRU selected:', selectedLru);
+        
+        // You can add auto-population logic here if needed
+        // For example, auto-fill manufacturer or other fields based on LRU selection
+        if (selectedLru) {
+          console.log(`Selected LRU: ${selectedLru.lru_name} from project: ${selectedLru.project_name}`);
+        }
+      }
+    }
+  },
+  async mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
-    this.fetchTestsConfiguration();
-    this.fetchLruOptions();
+    
+    // Check if backend is available before fetching data
+    const backendAvailable = await this.checkBackendStatus();
+    if (backendAvailable) {
+      console.log('Backend is available, fetching data...');
+      this.fetchTestsConfiguration();
+      this.fetchLruOptions();
+    } else {
+      console.log('Backend not available, using fallback data...');
+      this.loadFallbackLruOptions();
+    }
+    
     console.log('Component mounted, initial data:', {
       memoId: this.memoId,
       isNewMemo: this.isNewMemo,
@@ -932,7 +978,7 @@ export default {
      async fetchTestsConfiguration() {
        try {
          console.log('Fetching tests configuration...');
-         const res = await fetch('http://localhost:8000/api/tests-configuration');
+         const res = await fetch('http://localhost:5000/api/tests-configuration');
          const data = await res.json();
          console.log('API Response:', data);
          
@@ -1027,18 +1073,62 @@ export default {
     
     async fetchLruOptions() {
       try {
-        const response = await fetch('http://localhost:8000/api/lru-names');
+        this.lruLoading = true;
+        this.lruError = null;
+        console.log('Fetching LRU options...');
+        
+        const response = await fetch('http://localhost:5000/api/lrus');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
         
         if (data.success) {
-          this.lruOptions = data.lru_names;
+          // Store both the simple names for the dropdown and full LRU data
+          this.lruOptions = data.lrus.map(lru => lru.lru_name);
+          this.lruData = data.lrus; // Store full LRU data for future use
+          console.log('Loaded LRU options:', this.lruOptions);
+          console.log('Full LRU data:', this.lruData);
         } else {
-          console.error('Failed to fetch LRU names:', data.message);
-          alert('Failed to load LRU names. Please try again.');
+          this.lruError = data.message || 'Failed to fetch LRU options';
+          console.error('Failed to fetch LRU options:', data.message);
+          this.loadFallbackLruOptions();
         }
       } catch (error) {
-        console.error('Error fetching LRU names:', error);
-        alert('Error loading LRU names. Please check your connection.');
+        this.lruError = `Network error: ${error.message}`;
+        console.error('Error fetching LRU options:', error);
+        this.loadFallbackLruOptions();
+      } finally {
+        this.lruLoading = false;
+      }
+    },
+    
+    loadFallbackLruOptions() {
+      // Fallback LRU options when backend is not available
+      console.log('Loading fallback LRU options...');
+      this.lruData = [
+        { lru_id: 1, lru_name: 'Flight Control Unit', project_id: 1, project_name: 'Project Alpha' },
+        { lru_id: 2, lru_name: 'Navigation System', project_id: 1, project_name: 'Project Alpha' },
+        { lru_id: 3, lru_name: 'Communication Module', project_id: 2, project_name: 'Project Beta' },
+        { lru_id: 4, lru_name: 'Power Management Unit', project_id: 2, project_name: 'Project Beta' },
+        { lru_id: 5, lru_name: 'Sensor Array', project_id: 3, project_name: 'Project Gamma' }
+      ];
+      this.lruOptions = this.lruData.map(lru => lru.lru_name);
+      console.log('Loaded fallback LRU options:', this.lruOptions);
+    },
+    
+    async checkBackendStatus() {
+      try {
+        const response = await fetch('http://localhost:5000/api', { 
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return response.ok;
+      } catch (error) {
+        console.log('Backend not available:', error.message);
+        return false;
       }
     },
     // Overlay management
@@ -1674,6 +1764,43 @@ toggleShareBox() {
 .lru-description-select option {
   padding: 4px 6px;
   font-size: 0.8em;
+}
+
+.lru-description-select:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.75em;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.retry-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.7em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retry-btn:hover {
+  background-color: #0056b3;
+}
+
+.info-message {
+  color: #6c757d;
+  font-size: 0.75em;
+  margin-top: 4px;
+  font-style: italic;
 }
 
 .desc-cell span {
