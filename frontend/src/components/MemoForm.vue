@@ -162,7 +162,6 @@
                       <span v-else-if="serialNumberError" class="error-text">Error loading serial numbers</span>
                       <span v-else-if="availableSerialNumbers.length === 0" class="no-data-text">No serial numbers available</span>
                       <div v-else-if="formData.slNo && formData.slNo.length > 0" class="selected-serials">
-                        <span class="serial-count">{{ formData.slNo.length }} selected:</span>
                         <span class="serial-list">{{ selectedSerialNumbersDisplay }}</span>
                       </div>
                       <span v-else class="placeholder-text">Select Serial Numbers</span>
@@ -2150,13 +2149,6 @@ toggleShareBox() {
 .selected-serials {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-}
-
-.serial-count {
-  font-weight: 600;
-  color: #2196f3;
-  font-size: 0.75em;
 }
 
 .serial-list {
