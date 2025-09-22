@@ -398,6 +398,7 @@ export default {
       try {
         const response = await fetch('http://localhost:5000/api/news');
         const data = await response.json();
+         console.log('loadExistingNews data after jsonify:', data);
         
         if (data.success) {
           this.existingNews = data.news;

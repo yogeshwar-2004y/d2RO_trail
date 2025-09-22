@@ -18,14 +18,6 @@
         <span class="memo-id">Shared Memo ID: {{ id }}</span>
         <span class="view-only-indicator">VIEW ONLY</span>
       </div>
-      <div class="share-section">
-        <button class="share-btn" @click="toggleShareModal">
-          <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
-          </svg>
-          <span class="share-text">share</span>
-        </button>
-      </div>
     </header>
 
     <div class="form-content">
@@ -295,17 +287,6 @@
       </div>
     </div>
 
-    <!-- Share Modal -->
-    <div v-if="showShareModal" class="share-modal-overlay" @click="toggleShareModal">
-      <div class="share-modal-content" @click.stop>
-        <h2>Share via Email</h2>
-        <p>Enter email addresses separated by commas.</p>
-        <input type="text" v-model="emailAddresses" placeholder="e.g., mail1@example.com, mail2@example.com" class="email-input" />
-        <div class="modal-actions">
-          <button @click="sendEmails" class="send-btn">Send</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -320,8 +301,6 @@ export default {
   },
   data() {
     return {
-      showShareModal: false,
-      emailAddresses: '',
       memoData: {
         from1: 'MED, CASDIC (DARE), Bangalore',
         from2: 'DGAQA cell,',
@@ -412,24 +391,6 @@ export default {
       // You can replace this with actual API call
       // this.memoData = await api.getSharedMemo(this.id);
     },
-    toggleShareModal() {
-      this.showShareModal = !this.showShareModal;
-      if (!this.showShareModal) {
-        this.emailAddresses = '';
-      }
-    },
-    sendEmails() {
-      if (this.emailAddresses.trim() === '') {
-        alert('Please enter at least one email address.');
-        return;
-      }
-      
-      const emails = this.emailAddresses.split(',').map(email => email.trim());
-      console.log('Sharing memo to:', emails);
-      
-      alert(`Memo shared successfully to: ${emails.join(', ')}`);
-      this.toggleShareModal();
-    }
   }
 };
 </script>

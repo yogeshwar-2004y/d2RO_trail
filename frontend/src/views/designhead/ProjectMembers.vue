@@ -2,19 +2,47 @@
   <div class="project-members-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">ASSIGN PROJECT</span>
       <span class="project-id">{{ projectName || projectId }}</span>
       <button class="add-member-button" @click="addMember">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
           <circle cx="8.5" cy="7" r="4"></circle>
           <line x1="20" y1="8" x2="20" y2="14"></line>
@@ -53,10 +81,26 @@
             <td>{{ member.user_id }}</td>
             <td>{{ member.user_name }}</td>
             <td class="actions">
-              <button class="action-button" @click="removeMember(member, index)" :disabled="removing">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="action-button"
+                @click="removeMember(member, index)"
+                :disabled="removing"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M3 6h18"></path>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
                 </svg>
               </button>
             </td>
@@ -65,7 +109,9 @@
       </table>
       <div v-else class="no-members">
         <p>No members assigned to this project yet.</p>
-        <button @click="addMember" class="add-first-member-button">Add First Member</button>
+        <button @click="addMember" class="add-first-member-button">
+          Add First Member
+        </button>
       </div>
     </div>
   </div>
@@ -73,15 +119,15 @@
 
 <script>
 export default {
-  name: 'ProjectMembers',
+  name: "ProjectMembers",
   data() {
     return {
       projectId: this.$route.params.projectId,
-      projectName: '',
+      projectName: "",
       members: [],
       loading: true,
       error: null,
-      removing: false
+      removing: false,
     };
   },
   async mounted() {
@@ -92,60 +138,70 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        
-        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}/members`);
+
+        const response = await fetch(
+          `http://localhost:5000/api/projects/${this.projectId}/members`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.members = data.members;
           this.projectName = data.project.project_name;
         } else {
-          this.error = data.message || 'Failed to fetch project members';
+          this.error = data.message || "Failed to fetch project members";
         }
       } catch (err) {
-        console.error('Error fetching project members:', err);
-        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        console.error("Error fetching project members:", err);
+        this.error =
+          "Failed to connect to server. Please check if the backend is running.";
       } finally {
         this.loading = false;
       }
     },
-    
+
     addMember() {
-      this.$router.push({ name: 'AddMember', params: { projectId: this.projectId } });
+      this.$router.push({
+        name: "AddMember",
+        params: { projectId: this.projectId },
+      });
     },
-    
+
     async removeMember(member, index) {
-      if (confirm(`Are you sure you want to remove ${member.user_name} from this project?`)) {
+      if (
+        confirm(
+          `Are you sure you want to remove ${member.user_name} from this project?`
+        )
+      ) {
         try {
           this.removing = true;
-          
+
           const response = await fetch(
             `http://localhost:5000/api/projects/${this.projectId}/members/${member.user_id}`,
             {
-              method: 'DELETE',
+              method: "DELETE",
               headers: {
-                'Content-Type': 'application/json'
-              }
+                "Content-Type": "application/json",
+              },
             }
           );
-          
+
           const data = await response.json();
-          
+
           if (data.success) {
             // Remove from local array
             this.members.splice(index, 1);
-            alert('Member removed from project successfully');
+            alert("Member removed from project successfully");
           } else {
             alert(`Error: ${data.message}`);
           }
         } catch (err) {
-          console.error('Error removing member:', err);
-          alert('Failed to remove member. Please try again.');
+          console.error("Error removing member:", err);
+          alert("Failed to remove member. Please try again.");
         } finally {
           this.removing = false;
         }
       }
-    }
+    },
   },
 };
 </script>
@@ -208,7 +264,8 @@ table {
   width: 100%;
   border-collapse: collapse;
 }
-th, td {
+th,
+td {
   border: 1px solid #ccc;
   padding: 15px;
   text-align: left;
@@ -254,8 +311,12 @@ th {
   margin-bottom: 20px;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .error-container {
   display: flex;

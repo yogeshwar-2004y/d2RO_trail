@@ -3,18 +3,49 @@
     <div class="header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
         <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+          <img
+            src="@/assets/images/aviatrax-logo.png"
+            alt="Aviatrax Logo"
+            class="logo"
+          />
+          <img
+            src="@/assets/images/vista_logo.png"
+            alt="Vista Logo"
+            class="logo vista-logo"
+          />
         </div>
         <div class="page-title">
-          <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            class="title-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -25,36 +56,70 @@
       </div>
       <div class="header-right">
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search by Project ID" class="search-input">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search by Project ID"
+            class="search-input"
+          />
+          <svg
+            class="search-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
         </div>
       </div>
     </div>
-    
+
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>{{ (isReviewer || isDesigner) ? 'Loading your assigned projects...' : 'Loading projects...' }}</p>
     </div>
-    
+
     <!-- Error state -->
     <div v-else-if="error" class="error-container">
       <p class="error-message">{{ error }}</p>
       <button @click="fetchProjects" class="retry-button">Retry</button>
     </div>
-    
+
     <!-- Projects grid -->
     <div v-else class="card-grid">
       <div v-if="filteredProjects.length === 0" class="no-projects">
         <p>{{ (isReviewer || isDesigner) ? 'No projects have been assigned to you yet.' : 'No projects found.' }}</p>
       </div>
-      <div v-else v-for="project in filteredProjects" :key="project.id" class="project-card" @click="viewProject(project)">
+      <div
+        v-else
+        v-for="project in filteredProjects"
+        :key="project.id"
+        class="project-card"
+        @click="viewProject(project)"
+      >
         <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
@@ -65,16 +130,16 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'ProjectsDashboard',
+  name: "ProjectsDashboard",
   data() {
     return {
-      searchQuery: '',
+      searchQuery: "",
       projects: [],
       loading: true,
-      error: null
+      error: null,
     };
   },
   computed: {
@@ -99,7 +164,7 @@ export default {
         return this.projects;
       }
       const query = this.searchQuery.toLowerCase();
-      return this.projects.filter(project =>
+      return this.projects.filter((project) =>
         project.id.toString().toLowerCase().includes(query)
       );
     },
@@ -126,24 +191,25 @@ export default {
         
         const response = await fetch(apiUrl);
         const data = await response.json();
-        
+
         if (data.success) {
           this.projects = data.projects;
         } else {
-          this.error = data.message || 'Failed to fetch projects';
+          this.error = data.message || "Failed to fetch projects";
         }
       } catch (err) {
-        console.error('Error fetching projects:', err);
-        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        console.error("Error fetching projects:", err);
+        this.error =
+          "Failed to connect to server. Please check if the backend is running.";
       } finally {
         this.loading = false;
       }
     },
     viewProject(project) {
       // Navigate to the LRU Dashboard, passing the project ID as a parameter
-      this.$router.push({ 
-        name: 'LruDashboard', 
-        params: { projectId: project.id, projectName: project.name } 
+      this.$router.push({
+        name: "LruDashboard",
+        params: { projectId: project.id, projectName: project.name },
       });
     },
   },
@@ -287,8 +353,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {

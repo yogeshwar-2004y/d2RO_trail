@@ -3,21 +3,41 @@
     <!-- Header -->
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-             viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
 
       <div class="header-actions">
-        <button class="action-btn" @click="goToManageProjects">Manage Projects</button>
-        <button class="action-btn" @click="goToUpdateProject">Update existing project</button>
+        <button class="action-btn" @click="goToManageProjects">
+          Manage Projects
+        </button>
+        <button class="action-btn" @click="goToUpdateProject">
+          Update existing project
+        </button>
       </div>
     </div>
 
@@ -27,12 +47,20 @@
       <form @submit.prevent="createProject">
         <div class="form-group">
           <label>PROJECT NAME</label>
-          <input type="text" v-model="project.name" placeholder="Enter Project Name" />
+          <input
+            type="text"
+            v-model="project.name"
+            placeholder="Enter Project Name"
+          />
         </div>
 
         <div class="form-group">
           <label>PROJECT NUMBER</label>
-          <input type="text" v-model="project.number" placeholder="Enter Project Number" />
+          <input
+            type="text"
+            v-model="project.number"
+            placeholder="Enter Project Number"
+          />
         </div>
 
         <div class="form-group">
@@ -44,24 +72,41 @@
         <div class="lrus-section">
           <div class="section-header">
             <label>LRUs</label>
-            <button type="button" class="add-lru-btn" @click="addLru">+ Add LRU</button>
+            <button type="button" class="add-lru-btn" @click="addLru">
+              + Add LRU
+            </button>
           </div>
-          
+
           <div v-if="project.lrus.length === 0" class="no-lrus-message">
             No LRUs added yet. Click "Add LRU" to start.
           </div>
-          
-          <div v-for="(lru, index) in project.lrus" :key="index" class="lru-item">
+
+          <div
+            v-for="(lru, index) in project.lrus"
+            :key="index"
+            class="lru-item"
+          >
             <div class="lru-header">
               <h4>LRU {{ index + 1 }}</h4>
-              <button type="button" class="remove-lru-btn" @click="removeLru(index)" v-if="project.lrus.length > 1">×</button>
+              <button
+                type="button"
+                class="remove-lru-btn"
+                @click="removeLru(index)"
+                v-if="project.lrus.length > 1"
+              >
+                ×
+              </button>
             </div>
-            
+
             <div class="form-group">
               <label>LRU Name</label>
-              <input type="text" v-model="lru.name" placeholder="Enter LRU Name" />
+              <input
+                type="text"
+                v-model="lru.name"
+                placeholder="Enter LRU Name"
+              />
             </div>
-            
+
             <div class="form-group">
               <label>Serial Number Quantity</label>
               <select v-model="lru.serialQuantity">
@@ -79,7 +124,7 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
   name: "AddUpdateProjects",
@@ -92,26 +137,26 @@ export default {
         lrus: [
           {
             name: "",
-            serialQuantity: ""
-          }
-        ]
-      }
+            serialQuantity: "",
+          },
+        ],
+      },
     };
   },
   computed: {
     // Get current user from global store
     currentUser() {
-      return userStore.getters.currentUser()
+      return userStore.getters.currentUser();
     },
     isLoggedIn() {
-      return userStore.getters.isLoggedIn()
-    }
+      return userStore.getters.isLoggedIn();
+    },
   },
   methods: {
     addLru() {
       this.project.lrus.push({
         name: "",
-        serialQuantity: ""
+        serialQuantity: "",
       });
     },
     removeLru(index) {
@@ -125,50 +170,52 @@ export default {
         alert("Please fill in all project details.");
         return false;
       }
-      
+
       for (let i = 0; i < this.project.lrus.length; i++) {
         const lru = this.project.lrus[i];
         if (!lru.name) {
           alert(`Please enter a name for LRU ${i + 1}.`);
           return false;
         }
-        
+
         if (!lru.serialQuantity) {
-          alert(`Please select a serial number quantity for LRU "${lru.name}".`);
+          alert(
+            `Please select a serial number quantity for LRU "${lru.name}".`
+          );
           return false;
         }
       }
-      
+
       return true;
     },
     async createProject() {
       if (!this.validateProject()) {
         return;
       }
-      
+
       // Check if user is logged in using global store
       if (!this.isLoggedIn || !this.currentUser?.id) {
-        alert('User session expired. Please login again.');
-        this.$router.push({ name: 'login' });
+        alert("User session expired. Please login again.");
+        this.$router.push({ name: "login" });
         return;
       }
-      
+
       try {
         const projectData = {
           ...this.project,
-          createdBy: this.currentUser.id
+          createdBy: this.currentUser.id,
         };
-        
-        const response = await fetch('http://localhost:5000/api/projects', {
-          method: 'POST',
+
+        const response = await fetch("http://localhost:5000/api/projects", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(projectData)
+          body: JSON.stringify(projectData),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           alert("Project created successfully!");
           // Reset form
@@ -179,23 +226,25 @@ export default {
             lrus: [
               {
                 name: "",
-                serialQuantity: ""
-              }
-            ]
+                serialQuantity: "",
+              },
+            ],
           };
         } else {
           alert("Error creating project: " + data.message);
         }
       } catch (error) {
-        console.error('Error creating project:', error);
-        alert("Error creating project. Please check if the backend is running.");
+        console.error("Error creating project:", error);
+        alert(
+          "Error creating project. Please check if the backend is running."
+        );
       }
     },
     goToManageProjects() {
-      this.$router.push({ name: 'ManageProjects' });
+      this.$router.push({ name: "ManageProjects" });
     },
     goToUpdateProject() {
-      this.$router.push({ name: 'SelectProjectToEdit' });
+      this.$router.push({ name: "SelectProjectToEdit" });
     },
   },
 };
@@ -263,7 +312,7 @@ export default {
   padding: 30px 40px;
   border-radius: 15px;
   max-width: 600px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .title {
@@ -300,7 +349,7 @@ export default {
   border: none;
   border-radius: 20px;
   background: linear-gradient(90deg, #f5f5f5, #a1a1a1);
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s ease-in-out;
@@ -328,7 +377,7 @@ export default {
 }
 
 .add-lru-btn {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
   border: none;
   padding: 6px 12px;

@@ -1,40 +1,12 @@
 <script setup>
-import { RouterLink, RouterView } from 'vue-router'
+import { RouterLink, RouterView } from "vue-router";
 </script>
 
 <template>
   <RouterView />
 </template>
 
-<style scoped> </style>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<style scoped></style>
 
 <!-- simple flask connection -->
 <!-- <template>
@@ -71,4 +43,3 @@ export default {
   color: #5595d4;
 }
 </style> -->
-

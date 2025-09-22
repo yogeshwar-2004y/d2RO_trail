@@ -228,17 +228,17 @@ CREATE TABLE memos (
     from_person TEXT NOT NULL,
     to_person TEXT NOT NULL,
     thru_person TEXT,
-    casdic_ref_no INT,
+    casdic_ref_no VARCHAR,
     dated DATE,
-    wing_proj_ref_no INT,
+    wing_proj_ref_no VARCHAR,
     lru_sru_desc TEXT,
-    part_number INT,
+    part_number VARCHAR,
     slno_units TEXT[],               -- array of checkbox selections
     qty_offered INT,                 -- derived: count of slno_units
     manufacturer VARCHAR(255),
     drawing_no_rev TEXT,
     source TEXT,
-    unit_identification TEXT,
+    unit_identification TEXT[],      -- changed to array type
     mechanical_inspn TEXT,
     inspn_test_stage_offered TEXT,
     stte_status TEXT,
@@ -247,7 +247,7 @@ CREATE TABLE memos (
     memo_date DATE,
     name_designation TEXT,
     test_facility VARCHAR(255),
-    test_cycle_duration FLOAT,
+    test_cycle_duration TEXT,        -- changed from FLOAT to TEXT
     test_start_on TIMESTAMP,
     test_complete_on TIMESTAMP,
     calibration_status TEXT,
@@ -255,7 +255,11 @@ CREATE TABLE memos (
     perf_check_during TIMESTAMP,
     func_check_end TIMESTAMP,
     certified TEXT[],                -- store a-f checkbox selections
-    remarks TEXT
+    remarks TEXT,
+    submitted_at TIMESTAMP,          -- new column
+    submitted_by INT REFERENCES users(user_id) ON DELETE CASCADE,  -- new column
+    accepted_at TIMESTAMP,           -- new column
+    accepted_by INT REFERENCES users(user_id) ON DELETE CASCADE    -- new column
 );
 
 CREATE TABLE IF NOT EXISTS news_updates (
@@ -316,3 +320,4 @@ CREATE TABLE project_users (
 );
 
 
+queries 
