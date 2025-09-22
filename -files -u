@@ -1,0 +1,418 @@
+[1mdiff --git a/.DS_Store b/.DS_Store[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e951a46[m
+Binary files /dev/null and b/.DS_Store differ
+[1mdiff --git a/backend/app.py b/backend/app.py[m
+[1mindex 2410bd1..085674a 100644[m
+[1m--- a/backend/app.py[m
+[1m+++ b/backend/app.py[m
+[36m@@ -1,11 +1,11 @@[m
+ """[m
+ Main Flask application with modular structure using blueprints[m
+ """[m
+[31m-from flask import Flask[m
+[32m+[m[32mfrom flask import Flask, request, jsonify[m
+ from flask_cors import CORS[m
+ [m
+ # Import configuration and utilities[m
+[31m-from config import Config[m
+[32m+[m[32mfrom config import Config, get_db_connection[m
+ from utils.helpers import create_upload_directories[m
+ from utils.database_init import initialize_database[m
+ [m
+[36m@@ -26,8 +26,10 @@[m [mdef create_app():[m
+     app.config.from_object(Config)[m
+     [m
+     # Enable CORS[m
+[31m-    CORS(app)[m
+[32m+[m[32m    #CORS(app)[m
+[32m+[m[32m    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})[m
+     [m
+[32m+[m
+     # Create upload directories[m
+     create_upload_directories()[m
+     [m
+[36m@@ -48,5 +50,443 @@[m [mdef create_app():[m
+ # Create the application instance[m
+ app = create_app()[m
+ [m
+[32m+[m[32m# Users API Endpoints[m
+[32m+[m
+[32m+[m[32m# Get available reviewers[m
+[32m+[m[32m@app.route('/api/users/reviewers', methods=['GET'])[m
+[32m+[m[32mdef get_reviewers():[m
+[32m+[m[32m    """Get all users with reviewer role"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            SELECT u.user_id, u.name, u.email[m
+[32m+[m[32m            FROM users u[m
+[32m+[m[32m            JOIN user_roles ur ON u.user_id = ur.user_id[m
+[32m+[m[32m            JOIN roles r ON ur.role_id = r.role_id[m
+[32m+[m[32m            WHERE r.role_name = 'QA Reviewer'[m
+[32m+[m[32m            ORDER BY u.name[m
+[32m+[m[32m        """)[m
+[32m+[m[41m        [m
+[32m+[m[32m        rows = cur.fetchall()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        reviewers = [][m
+[32m+[m[32m        for row in rows:[m
+[32m+[m[32m            reviewers.append({[m
+[32m+[m[32m                "id": row[0],[m
+[32m+[m[32m                "name": row[1],[m
+[32m+[m[32m                "email": row[2][m
+[32m+[m[32m            })[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "reviewers": reviewers[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        print(f"Error fetching reviewers: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Comments and Annotations API Endpoints[m
+[32m+[m
+[32m+[m[32m# Get comments for a document[m
+[32m+[m[32m@app.route('/api/comments', methods=['GET'])[m
+[32m+[m[32mdef get_comments():[m
+[32m+[m[32m    """Get all comments and annotations for a specific document"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        document_id = request.args.get('document_id')[m
+[32m+[m[32m        if not document_id:[m
+[32m+[m[32m            return jsonify({"success": False, "message": "Document ID is required"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Get comments with annotations[m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            SELECT[m[41m [m
+[32m+[m[32m                c.comment_id,[m
+[32m+[m[32m                c.document_id,[m
+[32m+[m[32m                c.document_name,[m
+[32m+[m[32m                c.version,[m
+[32m+[m[32m                c.reviewer_id,[m
+[32m+[m[32m                c.page_no,[m
+[32m+[m[32m                c.section,[m
+[32m+[m[32m                c.description,[m
+[32m+[m[32m                c.commented_by,[m
+[32m+[m[32m                c.created_at,[m
+[32m+[m[32m                c.is_annotation,[m
+[32m+[m[32m                c.status,[m
+[32m+[m[32m                c.justification,[m
+[32m+[m[32m                c.accepted_by,[m
+[32m+[m[32m                c.designer_id,[m
+[32m+[m[32m                c.accepted_at,[m
+[32m+[m[32m                a.annotation_id,[m
+[32m+[m[32m                a.x_position,[m
+[32m+[m[32m                a.y_position[m
+[32m+[m[32m            FROM document_comments c[m
+[32m+[m[32m            LEFT JOIN document_annotations a ON c.comment_id = a.comment_id[m
+[32m+[m[32m            WHERE c.document_id = %s[m
+[32m+[m[32m            ORDER BY c.created_at DESC[m
+[32m+[m[32m        """, (document_id,))[m
+[32m+[m[41m        [m
+[32m+[m[32m        rows = cur.fetchall()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Group comments and annotations[m
+[32m+[m[32m        comments = [][m
+[32m+[m[32m        annotations = [][m
+[32m+[m[41m        [m
+[32m+[m[32m        for row in rows:[m
+[32m+[m[32m            comment = {[m
+[32m+[m[32m                "id": row[0],[m
+[32m+[m[32m                "document_id": row[1],[m
+[32m+[m[32m                "document_name": row[2],[m
+[32m+[m[32m                "version": row[3],[m
+[32m+[m[32m                "reviewer_id": row[4],[m
+[32m+[m[32m                "page_no": row[5],[m
+[32m+[m[32m                "section": row[6],[m
+[32m+[m[32m                "description": row[7],[m
+[32m+[m[32m                "commented_by": row[8],[m
+[32m+[m[32m                "created_at": row[9].isoformat() if row[9] else None,[m
+[32m+[m[32m                "annotation": row[10],[m
+[32m+[m[32m                "status": row[11],[m
+[32m+[m[32m                "justification": row[12],[m
+[32m+[m[32m                "accepted_by": row[13],[m
+[32m+[m[32m                "designer_id": row[14],[m
+[32m+[m[32m                "accepted_at": row[15].isoformat() if row[15] else None[m
+[32m+[m[32m            }[m
+[32m+[m[32m            comments.append(comment)[m
+[32m+[m[41m            [m
+[32m+[m[32m            # Add annotation if exists[m
+[32m+[m[32m            if row[16] is not None:  # annotation_id exists[m
+[32m+[m[32m                annotation = {[m
+[32m+[m[32m                    "id": row[16],[m
+[32m+[m[32m                    "comment_id": row[0],[m
+[32m+[m[32m                    "document_id": row[1],[m
+[32m+[m[32m                    "page": row[5],[m
+[32m+[m[32m                    "x": float(row[17]),[m
+[32m+[m[32m                    "y": float(row[18]),[m
+[32m+[m[32m                    "description": row[7][m
+[32m+[m[32m                }[m
+[32m+[m[32m                annotations.append(annotation)[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "comments": comments,[m
+[32m+[m[32m            "annotations": annotations[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        print(f"Error fetching comments: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Create a new comment[m
+[32m+[m[32m@app.route('/api/comments', methods=['POST'])[m
+[32m+[m[32mdef create_comment():[m
+[32m+[m[32m    """Create a new comment with optional annotation"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.json[m
+[32m+[m[32m        if not data:[m
+[32m+[m[32m            return jsonify({"success": False, "message": "No data provided"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Validate required fields[m
+[32m+[m[32m        required_fields = ['document_id', 'document_name', 'description', 'commented_by'][m
+[32m+[m[32m        for field in required_fields:[m
+[32m+[m[32m            if field not in data or not data[field]:[m
+[32m+[m[32m                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Insert comment[m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            INSERT INTO document_comments ([m
+[32m+[m[32m                document_id, document_name, version, reviewer_id,[m[41m [m
+[32m+[m[32m                page_no, section, description, commented_by, is_annotation[m
+[32m+[m[32m            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)[m
+[32m+[m[32m            RETURNING comment_id[m
+[32m+[m[32m        """, ([m
+[32m+[m[32m            data['document_id'],[m
+[32m+[m[32m            data['document_name'],[m
+[32m+[m[32m            data.get('version'),[m
+[32m+[m[32m            data.get('reviewer_id'),[m
+[32m+[m[32m            data.get('page_no'),[m
+[32m+[m[32m            data.get('section'),[m
+[32m+[m[32m            data['description'],[m
+[32m+[m[32m            data['commented_by'],[m
+[32m+[m[32m            data.get('is_annotation', False)[m
+[32m+[m[32m        ))[m
+[32m+[m[41m        [m
+[32m+[m[32m        comment_id = cur.fetchone()[0][m
+[32m+[m[41m        [m
+[32m+[m[32m        # Insert annotation if provided[m
+[32m+[m[32m        if data.get('is_annotation') and 'x' in data and 'y' in data:[m
+[32m+[m[32m            print(f"Creating annotation for comment {comment_id}: x={data['x']}, y={data['y']}, page={data.get('page_no', 1)}")[m
+[32m+[m[32m            cur.execute("""[m
+[32m+[m[32m                INSERT INTO document_annotations ([m
+[32m+[m[32m                    comment_id, document_id, page_no, x_position, y_position[m
+[32m+[m[32m                ) VALUES (%s, %s, %s, %s, %s)[m
+[32m+[m[32m            """, ([m
+[32m+[m[32m                comment_id,[m
+[32m+[m[32m                data['document_id'],[m
+[32m+[m[32m                data.get('page_no', 1),[m
+[32m+[m[32m                data['x'],[m
+[32m+[m[32m                data['y'][m
+[32m+[m[32m            ))[m
+[32m+[m[32m            print(f"Annotation created successfully for comment {comment_id}")[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            print(f"No annotation data for comment {comment_id}: is_annotation={data.get('is_annotation')}, x={data.get('x')}, y={data.get('y')}")[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn.commit()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "message": "Comment created successfully",[m
+[32m+[m[32m            "comment_id": comment_id[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        conn.rollback()[m
+[32m+[m[32m        print(f"Error creating comment: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Update a comment[m
+[32m+[m[32m@app.route('/api/comments/<int:comment_id>', methods=['PUT'])[m
+[32m+[m[32mdef update_comment(comment_id):[m
+[32m+[m[32m    """Update an existing comment"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.json[m
+[32m+[m[32m        if not data:[m
+[32m+[m[32m            return jsonify({"success": False, "message": "No data provided"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Update comment[m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            UPDATE document_comments[m[41m [m
+[32m+[m[32m            SET description = %s, section = %s, page_no = %s[m
+[32m+[m[32m            WHERE comment_id = %s[m
+[32m+[m[32m        """, ([m
+[32m+[m[32m            data.get('description'),[m
+[32m+[m[32m            data.get('section'),[m
+[32m+[m[32m            data.get('page_no'),[m
+[32m+[m[32m            comment_id[m
+[32m+[m[32m        ))[m
+[32m+[m[41m        [m
+[32m+[m[32m        if cur.rowcount == 0:[m
+[32m+[m[32m            cur.close()[m
+[32m+[m[32m            return jsonify({"success": False, "message": "Comment not found"}), 404[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn.commit()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "message": "Comment updated successfully"[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        conn.rollback()[m
+[32m+[m[32m        print(f"Error updating comment: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Delete a comment[m
+[32m+[m[32m@app.route('/api/comments/<int:comment_id>', methods=['DELETE'])[m
+[32m+[m[32mdef delete_comment(comment_id):[m
+[32m+[m[32m    """Delete a comment and its associated annotation"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Delete comment (annotations will be deleted due to CASCADE)[m
+[32m+[m[32m        cur.execute("DELETE FROM document_comments WHERE comment_id = %s", (comment_id,))[m
+[32m+[m[41m        [m
+[32m+[m[32m        if cur.rowcount == 0:[m
+[32m+[m[32m            cur.close()[m
+[32m+[m[32m            return jsonify({"success": False, "message": "Comment not found"}), 404[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn.commit()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "message": "Comment deleted successfully"[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        conn.rollback()[m
+[32m+[m[32m        print(f"Error deleting comment: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Accept a comment[m
+[32m+[m[32m@app.route('/api/comments/<int:comment_id>/accept', methods=['POST'])[m
+[32m+[m[32mdef accept_comment(comment_id):[m
+[32m+[m[32m    """Accept a comment with justification"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.json[m
+[32m+[m[32m        if not data:[m
+[32m+[m[32m            return jsonify({"success": False, "message": "No data provided"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Validate required fields[m
+[32m+[m[32m        required_fields = ['justification', 'accepted_by', 'designer_id'][m
+[32m+[m[32m        for field in required_fields:[m
+[32m+[m[32m            if field not in data or not data[field]:[m
+[32m+[m[32m                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Update comment status to accepted[m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            UPDATE document_comments[m[41m [m
+[32m+[m[32m            SET status = 'accept',[m[41m [m
+[32m+[m[32m                justification = %s,[m[41m [m
+[32m+[m[32m                accepted_by = %s,[m[41m [m
+[32m+[m[32m                designer_id = %s,[m[41m [m
+[32m+[m[32m                accepted_at = CURRENT_TIMESTAMP,[m
+[32m+[m[32m                updated_at = CURRENT_TIMESTAMP[m
+[32m+[m[32m            WHERE comment_id = %s[m
+[32m+[m[32m        """, ([m
+[32m+[m[32m            data['justification'],[m
+[32m+[m[32m            data['accepted_by'],[m
+[32m+[m[32m            data['designer_id'],[m
+[32m+[m[32m            comment_id[m
+[32m+[m[32m        ))[m
+[32m+[m[41m        [m
+[32m+[m[32m        if cur.rowcount == 0:[m
+[32m+[m[32m            cur.close()[m
+[32m+[m[32m            return jsonify({"success": False, "message": "Comment not found"}), 404[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn.commit()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "message": "Comment accepted successfully"[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        conn.rollback()[m
+[32m+[m[32m        print(f"Error accepting comment: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Reject a comment[m
+[32m+[m[32m@app.route('/api/comments/<int:comment_id>/reject', methods=['POST'])[m
+[32m+[m[32mdef reject_comment(comment_id):[m
+[32m+[m[32m    """Reject a comment with justification"""[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        data = request.json[m
+[32m+[m[32m        if not data:[m
+[32m+[m[32m            return jsonify({"success": False, "message": "No data provided"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Validate required fields[m
+[32m+[m[32m        required_fields = ['justification', 'accepted_by', 'designer_id'][m
+[32m+[m[32m        for field in required_fields:[m
+[32m+[m[32m            if field not in data or not data[field]:[m
+[32m+[m[32m                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn = get_db_connection()[m
+[32m+[m[32m        cur = conn.cursor()[m
+[32m+[m[41m        [m
+[32m+[m[32m        # Update comment status to rejected[m
+[32m+[m[32m        cur.execute("""[m
+[32m+[m[32m            UPDATE document_comments[m[41m [m
+[32m+[m[32m            SET status = 'reject',[m[41m [m
+[32m+[m[32m                justification = %s,[m[41m [m
+[32m+[m[32m                accepted_by = %s,[m[41m [m
+[32m+[m[32m                designer_id = %s,[m[41m [m
+[32m+[m[32m                accepted_at = CURRENT_TIMESTAMP,[m
+[32m+[m[32m                updated_at = CURRENT_TIMESTAMP[m
+[32m+[m[32m            WHERE comment_id = %s[m
+[32m+[m[32m        """, ([m
+[32m+[m[32m            data['justification'],[m
+[32m+[m[32m            data['accepted_by'],[m
+[32m+[m[32m            data['designer_id'],[m
+[32m+[m[32m            comment_id[m
+[32m+[m[32m        ))[m
+[32m+[m[41m        [m
+[32m+[m[32m        if cur.rowcount == 0:[m
+[32m+[m[32m            cur.close()[m
+[32m+[m[32m            return jsonify({"success": False, "message": "Comment not found"}), 404[m
+[32m+[m[41m        [m
+[32m+[m[32m        conn.commit()[m
+[32m+[m[32m        cur.close()[m
+[32m+[m[41m        [m
+[32m+[m[32m        return jsonify({[m
+[32m+[m[32m            "success": True,[m
+[32m+[m[32m            "message": "Comment rejected successfully"[m
+[32m+[m[32m        })[m
+[32m+[m[41m        [m
+[32m+[m[32m    except Exception as e:[m
+[32m+[m[32m        conn.rollback()[m
+[32m+[m[32m        print(f"Error rejecting comment: {str(e)}")[m
+[32m+[m[32m        return jsonify({"success": False, "message": "Internal server error"}), 500[m
+[32m+[m
+[32m+[m[32m# Test endpoint to check database tables[m
+[32m+[m[32m@app.route('/api/test-db', methods=['GET'])[m
+[32m+[m[32mdef test_database():[m
+[32m+[m[32m    """Test endpoint to check if database tables exist and are accessible

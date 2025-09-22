@@ -102,6 +102,7 @@
             >
               {{ isUploading ? 'Uploading...' : 'Submit Document' }}
             </button>
+            
           </div>
         </div>
       </template>
@@ -142,7 +143,7 @@
     <div class="content">
       <!-- Left Panel: Existing Documents List -->
       <div class="documents-list-panel">
-        <h3>Uploaded Documents</h3>
+        <h3>Uploaded Document Versions</h3>
         <div class="documents-container">
           <div v-if="loading" class="loading-state">
             <p>Loading documents...</p>
@@ -188,27 +189,71 @@
         <div
           v-if="fileType === 'pdf' && pdfUrl"
           class="doc-container"
+          :class="{ 'annotation-mode': isAnnotationMode }"
           ref="pdfScroll"
           @scroll="onScroll"
+          @click="handleDocumentClick"
         >
-          <vue-pdf-embed
+          <div
             v-for="p in numPages"
             :key="p"
-            :source="pdfUrl"
-            :page="p"
-            :scale="zoom"
-            ref="pdfPages"
-            class="pdf-page"
-          />
+            class="pdf-page-wrapper"
+            :data-page="p"
+          >
+            <vue-pdf-embed
+              :source="pdfUrl"
+              :page="p"
+              :scale="zoom"
+              :ref="`pdfPage${p}`"
+              class="pdf-page"
+            />
+            <!-- Annotation overlays for this page -->
+            <div class="annotation-overlay" :data-page="p">
+              <div
+                v-for="annotation in getAnnotationsForPage(p)"
+                :key="annotation.id"
+                class="annotation-marker"
+                :style="{
+                  left: annotation.x + '%',
+                  top: annotation.y + '%'
+                }"
+                @click="showAnnotationDetails(annotation)"
+                :title="annotation.description"
+              >
+                <div class="annotation-circle">C</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- DOCX Viewer -->
         <div
           v-if="fileType === 'docx'"
-          v-html="docxHtml"
           class="doc-container docx-content"
-          :style="{ fontSize: zoom * 16 + 'px' }"
-        ></div>
+          :class="{ 'annotation-mode': isAnnotationMode }"
+          :style="{ transform: `scale(${zoom})`, transformOrigin: 'top left' }"
+          @click="handleDocumentClick"
+          ref="docxContainer"
+        >
+          <!-- docx-preview renders content here -->
+          <div ref="docxRenderRoot" class="docx-render-root"></div>
+          <!-- Annotation overlays for DOCX -->
+          <div class="annotation-overlay">
+            <div
+              v-for="annotation in annotations"
+              :key="annotation.id"
+              class="annotation-marker"
+              :style="{
+                left: annotation.x + '%',
+                top: annotation.y + '%'
+              }"
+              @click="showAnnotationDetails(annotation)"
+              :title="annotation.description"
+            >
+              <div class="annotation-circle">C</div>
+            </div>
+          </div>
+        </div>
 
         <!-- Empty state -->
         <div v-if="!fileType" class="empty-state">
@@ -218,29 +263,194 @@
         </div>
       </div>
 
-      <!-- Simplified Comments Sidebar -->
+      <!-- Enhanced Comments Sidebar -->
       <aside class="sidebar">
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
-            <li v-for="(comment, index) in comments" :key="index" class="comment-item">
-              <span class="comment-text">{{ comment }}</span>
-              <button @click="removeComment(index)" class="remove-btn">×</button>
+            <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
+              <button @click="deleteComment(index)" class="delete-btn" title="Delete comment">
+                🗑️
+              </button>
+              <div class="comment-header">
+                <span class="comment-commented_by">{{ comment.commented_by || 'Anonymous' }}</span>
+                <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+                <span v-if="comment.status" class="comment-status" :class="'status-' + comment.status">
+                  {{ comment.status === 'accept' ? 'Accepted' : comment.status === 'reject' ? 'Rejected' : comment.status }}
+                </span>
+              </div>
+              <div class="comment-content">
+                <div class="comment-meta">
+                  <span v-if="comment.page_no">Page: {{ comment.page_no }}</span>
+                  <span v-if="comment.section">Section: {{ comment.section }}</span>
+                </div>
+                <p class="comment-text">{{ comment.description }}</p>
+                <!-- <div v-if="comment.annotation" class="annotation-info">
+                  <span class="annotation-marker">C Annotation</span>
+                </div> -->
+                
+                <!-- Comment Response Section -->
+                <div v-if="comment.justification" class="comment-response">
+                  <div class="response-header">
+                    {{ comment.status === 'accepted' ? 'Accepted' : 'Rejected' }} by {{ comment.accepted_by }}
+                    <span v-if="comment.accepted_at" class="response-date">{{ formatDate(comment.accepted_at) }}</span>
+                  </div>
+                  <div class="response-content">{{ comment.justification }}</div>
+                </div>
+                
+                <!-- Action Buttons (only show for pending comments) -->
+                <div v-if="comment.status === 'pending' || !comment.status" class="comment-actions">
+                  <button @click="acceptComment(comment)" class="action-btn accept">
+                    ✓ Accept
+                  </button>
+                  <button @click="rejectComment(comment)" class="action-btn reject">
+                    ✗ Reject
+                  </button>
+                </div>
+              </div>
             </li>
           </ul>
           <p v-else class="no-comments">No comments yet</p>
         </div>
-        <div class="add-comment">
-          <input
-            type="text"
-            v-model="newComment"
-            placeholder="Add a comment..."
-            @keyup.enter="addComment"
-            class="comment-input"
-          />
-          <button @click="addComment" class="comment-btn">Add</button>
+        
+        <!-- Add Comment Button -->
+        <div class="add-comment-section">
+          <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
+            Add Comment
+          </button>
+        </div>
+
+        <!-- Annotation Mode Indicator -->
+        <div v-if="isAnnotationMode" class="annotation-mode-indicator">
+          <div class="annotation-instruction">
+            <span class="annotation-icon">📍</span>
+            <span>Click on the document to place your annotation</span>
+            <button @click="cancelAnnotation" class="cancel-annotation-btn">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Comment Form Modal - Shows after annotation is placed -->
+        <div v-if="showCommentForm" class="comment-form-overlay" @click="closeCommentForm">
+          <div class="comment-form-container" @click.stop>
+            <div class="comment-form-header">
+              <h4>Add Comment</h4>
+              <button @click="closeCommentForm" class="close-btn">×</button>
+            </div>
+            
+            <div class="comment-form-body">
+              <!-- Document Details Flex Box -->
+              <div class="document-details-box">
+                <h5>Document Details</h5>
+                <div class="details-grid">
+                  <div class="detail-item">
+                    <span class="detail-label">Document ID:</span>
+                    <span class="detail-value">{{ commentForm.document_id }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Version:</span>
+                    <span class="detail-value">{{ commentForm.version }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Revision:</span>
+                    <span class="detail-value">{{ commentForm.revision }}</span>
+                  </div>
+                  <div class="detail-item">
+                    <span class="detail-label">Page:</span>
+                    <span class="detail-value">{{ commentForm.page_no }}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Description Input -->
+              <div class="form-group">
+                <label>Comment Description</label>
+                <textarea 
+                  v-model="commentForm.description" 
+                  placeholder="Enter your comment description..."
+                  rows="4"
+                  class="comment-description"
+                ></textarea>
+              </div>
+            </div>
+            
+            <div class="comment-form-footer">
+              <button @click="closeCommentForm" class="cancel-btn">Cancel</button>
+              <button @click="submitComment" class="submit-btn" :disabled="!commentForm.description.trim()">
+                Submit Comment
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteConfirm" class="delete-confirm-overlay" @click="cancelDelete">
+      <div class="delete-confirm-modal" @click.stop>
+        <div class="delete-confirm-header">
+          <h4>Delete Comment</h4>
+          <button @click="cancelDelete" class="close-btn">×</button>
+        </div>
+        
+        <div class="delete-confirm-body">
+          <div class="warning-icon">⚠️</div>
+          <p>Are you sure you want to delete this comment?</p>
+          <div class="comment-preview" v-if="commentToDelete">
+            <strong>Comment:</strong>
+            <p class="comment-text-preview">"{{ commentToDelete.comment.description }}"</p>
+            <div class="comment-meta-preview">
+              <span>By: {{ commentToDelete.comment.commented_by }}</span>
+              <span>Page: {{ commentToDelete.comment.page_no }}</span>
+            </div>
+          </div>
+          <p class="warning-text">This action cannot be undone.</p>
+        </div>
+        
+        <div class="delete-confirm-footer">
+          <button @click="cancelDelete" class="cancel-btn">Cancel</button>
+          <button @click="confirmDelete" class="delete-confirm-btn">Delete Comment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Justification Modal -->
+    <div v-if="showJustificationModal" class="justification-overlay" @click="cancelJustification">
+      <div class="justification-modal" @click.stop>
+        <div class="justification-header">
+          <h4>{{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}</h4>
+          <button @click="cancelJustification" class="close-btn">×</button>
+        </div>
+        
+        <div class="justification-body">
+          <div class="comment-preview" v-if="selectedComment">
+            <strong>Comment:</strong>
+            <p class="comment-text-preview">"{{ selectedComment.description }}"</p>
+            <div class="comment-meta-preview">
+              <span>By: {{ selectedComment.commented_by }}</span>
+              <span>Page: {{ selectedComment.page_no }}</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="justification">Justification *</label>
+            <textarea 
+              id="justification"
+              v-model="justificationText" 
+              placeholder="Please provide justification for your decision..."
+              rows="4"
+              class="justification-textarea"
+              required
+            ></textarea>
+          </div>
+        </div>
+        
+        <div class="justification-footer">
+          <button @click="cancelJustification" class="cancel-btn">Cancel</button>
+          <button @click="confirmJustification" class="confirm-btn" :class="justificationAction" :disabled="!justificationText.trim()">
+            {{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Assign Reviewer Modal -->
@@ -365,6 +575,7 @@
 import VuePdfEmbed from "vue-pdf-embed"
 import * as mammoth from "mammoth/mammoth.browser"
 import * as pdfjsLib from "pdfjs-dist/build/pdf"
+import { renderAsync as renderDocx } from "docx-preview"
 
 // Configure pdf.js worker
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
@@ -391,7 +602,8 @@ export default {
       // Document viewing
       fileType: null,
       pdfUrl: null,
-      docxHtml: "",
+      docxHtml: "", // kept for back-compat; no longer used with docx-preview
+      docxRendered: false,
       page: 1,
       numPages: 0,
       zoom: 1.0,
@@ -405,7 +617,7 @@ export default {
         documentNumber: "",
         version: "",
         revision: "",
-        docVer: 1
+        docVer: "A"
       },
 
       showAssignReviewerModal: false,
@@ -413,9 +625,44 @@ export default {
       showTrackVersionsModal: false,
       showDeleteConfirmModal: false,
       versionToDelete: null,
-      documentVersions: [], // Will be loaded dynamically
-      existingDocuments: [], // List of uploaded documents for this LRU
-      loading: false, // Loading state for documents
+      // Document list
+      loading: false,
+      existingDocuments: [],
+      
+      documentVersions: [
+        { 
+          id: 1, 
+          projectId: 'PRJ-2025-078', 
+          version: 'A', 
+          date: '2025-01-15', 
+          isFavorite: true, 
+          deleted: false 
+        },
+        { 
+          id: 2, 
+          projectId: 'PRJ-2025-078', 
+          version: 'B', 
+          date: '2025-01-20', 
+          isFavorite: false, 
+          deleted: false 
+        },
+        { 
+          id: 3, 
+          projectId: 'PRJ-2025-078', 
+          version: 'C', 
+          date: '2025-01-25', 
+          isFavorite: false, 
+          deleted: false 
+        },
+        { 
+          id: 4, 
+          projectId: 'PRJ-2025-078', 
+          version: 'D', 
+          date: '2025-01-30', 
+          isFavorite: true, 
+          deleted: false 
+        }
+      ],
       
       // Reviewer assignment
       hasAssignedReviewer: false,
@@ -425,6 +672,31 @@ export default {
       // Comments
       comments: [],
       newComment: "",
+      showCommentForm: false,
+      commentForm: {
+        document_name: '',
+        document_id: '',
+        version: '',
+        revision: '',
+        page_no: 1,
+        section: '',
+        description: ''
+      },
+      
+      // Annotations
+      annotations: [],
+      isAnnotationMode: false,
+      currentAnnotation: null,
+      
+      // Delete confirmation
+      showDeleteConfirm: false,
+      commentToDelete: null,
+      
+      // Justification modal
+      showJustificationModal: false,
+      selectedComment: null,
+      justificationAction: 'accept', // 'accept' or 'reject'
+      justificationText: '',
     }
   },
   
@@ -432,11 +704,28 @@ export default {
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     },
-    
+    isDesigner() {
+      return this.currentUserRole === 'Designer';
+    },
+    isDesignHead() {
+      return this.currentUserRole === 'Design Head';
+    },
+    isQAHead() {
+      return this.currentUserRole === 'QA Head';
+    },
+    isReviewer() {
+      return this.currentUserRole === 'Reviewer';
+    },
+    docContent() {
+      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
+    },
+    //isFormValid() {
+    //return this.commentForm.description.trim();
     isFormValid() {
-      return this.documentDetails.documentNumber.trim() && 
-             this.documentDetails.version.trim() && 
-             this.documentDetails.revision.trim();
+      return this.documentDetails.documentNumber.trim() !== '' &&
+             this.documentDetails.version.trim() !== '' &&
+             this.documentDetails.revision.trim() !== '';
+    
     }
   },
   
@@ -517,15 +806,15 @@ export default {
           this.documentDetails.docVer = result.nextDocVer;
           console.log(`✅ Next doc_ver for LRU ${lruId}: ${result.nextDocVer}`);
         } else {
-          // If no documents exist for this LRU, start with 1
-          this.documentDetails.docVer = 1;
-          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = 1`);
+          // If no documents exist for this LRU, start with A
+          this.documentDetails.docVer = "A";
+          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = A`);
         }
       } catch (error) {
         console.error('❌ Error loading next doc_ver:', error);
-        // Default to 1 if there's an error
-        this.documentDetails.docVer = 1;
-        console.log(`⚠️ Error occurred, defaulting to doc_ver = 1`);
+        // Default to A if there's an error
+        this.documentDetails.docVer = "A";
+        console.log(`⚠️ Error occurred, defaulting to doc_ver = A`);
       }
     },
 
@@ -559,23 +848,35 @@ export default {
       }
     },
 
-    // Load document versions for LRU (used for track versions modal)
+    // Load document versions for LRU and display the latest one
     async loadDocumentVersions(lruId) {
       try {
         const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
         const result = await response.json();
         
         if (result.success) {
-          // Transform the data to match the expected format for the modal
+          // Transform the data to match the expected format
           this.documentVersions = result.documents.map(doc => ({
             id: doc.document_id,
             projectId: `${doc.document_number}`,
-            version: doc.revision,
+            version: doc.version,
+            docVer: doc.doc_ver,
+            revision: doc.revision,
             date: new Date(doc.upload_date).toLocaleDateString(),
-            isFavorite: false, // You can add a favorite flag to your database later
+            filePath: doc.file_path,
+            originalFilename: doc.original_filename,
+            fileSize: doc.file_size,
+            isFavorite: false,
             deleted: false
-          }));
+          })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+
           console.log(`Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`);
+          
+          // If there are existing documents, load the latest one
+          if (this.documentVersions.length > 0) {
+            const latestDoc = this.documentVersions[0];
+            this.loadExistingDocument(latestDoc);
+          }
         } else {
           console.warn('Failed to load document versions:', result.message);
         }
@@ -618,6 +919,11 @@ export default {
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
         
+        // Load existing comments and annotations (non-blocking)
+        this.loadCommentsFromBackend().catch(err => {
+          console.warn('Comments loading failed (non-critical):', err);
+        });
+        
         // Load the file for display based on file extension
         const extension = filename.split('.').pop().toLowerCase();
         console.log('📋 File extension:', extension);
@@ -646,41 +952,95 @@ export default {
       }
     },
 
-    // Date formatting
-    formatDate(date) {
-      if (!date) return 'N/A';
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
+    // Load DOCX directly from a URL (docx-preview)
+    async loadDocxFromUrl(fileUrl) {
+      try {
+        this.clearDocument();
+        this.fileType = 'docx';
+
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
+        });
+        this.docxRendered = true;
+        this.$nextTick(() => {
+          this.numPages = 1;
+        });
+      } catch (err) {
+        console.error('❌ Failed to load DOCX from URL:', err);
+        alert('Failed to load DOCX file from server.');
+      }
     },
 
-    // Load existing document from server
-    async loadExistingDocument(documentId) {
+    // Load a PDF directly from a URL (used when viewing existing documents)
+    async loadPdfFromUrl(fileUrl) {
       try {
-        const response = await fetch(`http://localhost:5000/api/plan-documents/${documentId}`);
-        const result = await response.json();
-        
-        if (result.success) {
-          const doc = result.document;
-          this.documentId = doc.document_id;
-          this.fileName = doc.original_filename || 'Document';
-          this.status = doc.status;
-          this.lastModifiedDate = new Date(doc.upload_date);
-          
-          // Load the file for display
-          if (doc.file_path) {
-            await this.loadFileFromServer(doc.file_path, doc.original_filename);
-          }
+        // Reset previous document state and set up for PDF
+        this.clearDocument();
+        this.fileType = 'pdf';
+        this.pdfUrl = fileUrl;
+        this.page = 1;
+
+        const loadingTask = pdfjsLib.getDocument(this.pdfUrl);
+        const pdf = await loadingTask.promise;
+        this.numPages = pdf.numPages;
+      } catch (err) {
+        console.error('Failed to load PDF from URL', err);
+        alert('Failed to load PDF file.');
+      }
+    },
+
+    // Load an existing document either by object or by id/number
+    async loadExistingDocument(input) {
+      try {
+        // If a full document object was passed, delegate to viewDocument
+        if (input && typeof input === 'object' && input.file_path) {
+          await this.viewDocument(input);
+          return;
         }
-      } catch (error) {
-        console.error('Error loading document:', error);
+
+        // Otherwise, fetch list and find by document_number or document_id
+        const lruId = this.documentDetails.lruId;
+        if (!lruId) {
+          console.warn('loadExistingDocument called without LRU ID');
+          return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+        if (!data.success) {
+          console.warn('Failed to load documents for selecting existing document:', data.message);
+          return;
+        }
+
+        const targetIdNum = Number(input);
+        const doc = (data.documents || []).find(d =>
+          d.document_number === input || d.document_id === targetIdNum
+        );
+
+        if (doc) {
+          await this.viewDocument(doc);
+        } else {
+          console.warn('Requested document not found among existing documents:', input);
+        }
+      } catch (err) {
+        console.error('Error in loadExistingDocument:', err);
       }
     },
 
     // Load file from server for display
-    async loadFileFromServer(filePath, originalFilename) {
+    /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
         const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
@@ -696,40 +1056,147 @@ export default {
           this.fileType = 'docx';
           this.loadDocxFromUrl(fileUrl);
         } else {
-          this.fileType = 'other';
-          this.fileName = originalFilename;
+          console.warn('Requested document not found among existing documents:', input);
         }
+      } catch (err) {
+        console.error('Error in loadExistingDocument:', err);
+      }
+    },*/
+
+    // Date formatting
+    formatDate(date) {
+      if (!date) return 'N/A';
+      return new Date(date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric'
+      });
+    },
+
+    // Comment handling
+    handleAccept(comment) {
+      comment.status = 'accepted';
+      comment.response = 'Comment accepted and changes will be implemented.';
+      // TODO: Update on server
+    },
+
+    handleReject(comment) {
+      this.selectedComment = comment;
+      this.showRejectModal = true;
+    },
+
+    confirmReject() {
+      if (this.selectedComment && this.rejectJustification) {
+        this.selectedComment.status = 'rejected';
+        this.selectedComment.response = this.rejectJustification;
+        // TODO: Update on server
+        this.cancelReject();
+      }
+    },
+
+    cancelReject() {
+      this.showRejectModal = false;
+      this.rejectJustification = '';
+      this.selectedComment = null;
+    },
+
+    // Accept/Reject Comment Methods
+    acceptComment(comment) {
+      this.selectedComment = comment;
+      this.justificationAction = 'accept';
+      this.justificationText = '';
+      this.showJustificationModal = true;
+    },
+
+    rejectComment(comment) {
+      this.selectedComment = comment;
+      this.justificationAction = 'reject';
+      this.justificationText = '';
+      this.showJustificationModal = true;
+    },
+
+    cancelJustification() {
+      this.showJustificationModal = false;
+      this.selectedComment = null;
+      this.justificationText = '';
+      this.justificationAction = 'accept';
+    },
+
+    async confirmJustification() {
+      if (!this.justificationText.trim()) {
+        alert('Please provide justification for your decision.');
+        return;
+      }
+
+      if (!this.selectedComment) {
+        alert('No comment selected.');
+        return;
+      }
+
+      try {
+        // Get current user info
+        let currentUser = 'Anonymous';
+        let currentUserId = null;
+        try {
+          if (userStore && userStore.getters && userStore.getters.userName) {
+            currentUser = userStore.getters.userName() || 'Anonymous';
+          }
+          if (userStore && userStore.getters && userStore.getters.currentUser) {
+            const user = userStore.getters.currentUser();
+            currentUserId = user?.id || user?.user_id || null;
+          }
+        } catch (error) {
+          console.log('Error getting user info:', error);
+        }
+
+        const endpoint = this.justificationAction === 'accept' 
+          ? `/api/comments/${this.selectedComment.id}/accept`
+          : `/api/comments/${this.selectedComment.id}/reject`;
+
+        const response = await fetch(`http://localhost:5000${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            justification: this.justificationText,
+            accepted_by: currentUser,
+            designer_id: currentUserId
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update comment');
+        }
+
+        const result = await response.json();
+        console.log('Comment updated successfully:', result);
+
+        // Reload comments from backend to get updated status
+        await this.loadCommentsFromBackend();
+
+        // Close modal
+        this.cancelJustification();
+
+        // Show success message
+        const action = this.justificationAction === 'accept' ? 'accepted' : 'rejected';
+        alert(`Comment ${action} successfully!`);
+
       } catch (error) {
-        console.error('Error loading file from server:', error);
-        alert('Failed to load document from server.');
+        console.error('Error updating comment:', error);
+        alert(`Failed to ${this.justificationAction} comment: ${error.message}`);
       }
     },
 
-    // Load PDF from URL
-    async loadPdfFromUrl(url) {
-      try {
-        this.pdfUrl = url;
-        this.page = 1;
-
-        const loadingTask = pdfjsLib.getDocument(url);
-        const pdf = await loadingTask.promise;
-        this.numPages = pdf.numPages;
-      } catch (err) {
-        console.error("Failed to load PDF from URL", err);
-        alert("Failed to load PDF file from server.");
-      }
-    },
-
-    // Load DOCX from URL
-    async loadDocxFromUrl(url) {
-      try {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        this.docxHtml = result.value;
-      } catch (err) {
-        console.error("Failed to load DOCX from URL", err);
-        alert("Failed to load DOCX file from server.");
+    scrollToPage(pageNum) {
+      if (this.fileType === 'pdf' && this.$refs.pdfScroll && this.$refs.pdfPages) {
+        const targetPage = this.$refs.pdfPages[pageNum - 1];
+        if (targetPage && targetPage.$el) {
+          targetPage.$el.scrollIntoView({ behavior: 'smooth' });
+        }
       }
     },
 
@@ -828,7 +1295,7 @@ export default {
       const statusMap = {
         'Under Review': 'status-under-review',
         'Approved': 'status-approved',
-        'Rejected': 'status-rejected',
+        'Rejected': 'status-reject',
         'Pending': 'status-pending'
       };
       return statusMap[status] || 'status-default';
@@ -948,12 +1415,125 @@ export default {
     async loadDocx(file) {
       try {
         const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        this.docxHtml = result.value;
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
+        });
+        this.docxRendered = true;
+        this.$nextTick(() => {
+          this.numPages = 1;
+        });
       } catch (err) {
-        alert("Failed to render DOCX file.");
-        console.error(err);
+        console.error('Error rendering DOCX with docx-preview:', err);
+        alert('Failed to render DOCX file.');
       }
+    },
+
+    processDocxHtml(html) {
+      console.log('Processing DOCX HTML...');
+      try {
+        // Create a temporary container
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        
+        // Get approximate content per page (A4 size)
+        const CHARS_PER_PAGE = 3000; // Rough estimate of characters per page
+        const totalContent = temp.textContent;
+        const estimatedPages = Math.max(Math.ceil(totalContent.length / CHARS_PER_PAGE), 1);
+        console.log('Estimated pages:', { 
+          totalChars: totalContent.length, 
+          estimatedPages 
+        });
+
+        // Initialize result container
+        const result = document.createElement('div');
+        let pageCount = 0;
+        let currentPage = null;
+        let currentChars = 0;
+
+        function startNewPage() {
+          if (currentPage && currentPage.children.length > 0) {
+            result.appendChild(currentPage);
+          }
+          pageCount++;
+          currentPage = document.createElement('div');
+          currentPage.className = 'page';
+          currentPage.setAttribute('data-page', pageCount.toString());
+          currentChars = 0;
+        }
+
+        // Start first page
+        startNewPage();
+
+        // Process each element
+        const elements = Array.from(temp.children);
+        console.log('Processing elements:', { totalElements: elements.length });
+
+        elements.forEach((element, index) => {
+          // Check for explicit page breaks
+          const style = window.getComputedStyle(element);
+          const hasPageBreak = style.pageBreakBefore === 'always' || 
+                              style.pageBreakAfter === 'always' ||
+                              element.tagName === 'HR';
+
+          // Force a new page on headings for better content organization
+          const isHeading = /^H[1-6]$/.test(element.tagName);
+          const elementContent = element.textContent;
+          
+          // Start new page if:
+          // 1. There's an explicit page break, or
+          // 2. Current page has enough content and we're at a good break point, or
+          // 3. We're at a heading and current page has some content
+          if (hasPageBreak || 
+              (currentChars > CHARS_PER_PAGE && (isHeading || element.tagName === 'P')) ||
+              (isHeading && currentChars > CHARS_PER_PAGE * 0.5)) {
+            startNewPage();
+          }
+
+          // Add element to current page
+          currentPage.appendChild(element.cloneNode(true));
+          currentChars += elementContent.length;
+        });
+
+        // Append the last page
+        if (currentPage && currentPage.children.length > 0) {
+          result.appendChild(currentPage);
+        }
+
+        console.log('HTML processing complete', { 
+          actualPages: pageCount,
+          estimatedPages,
+          finalHtmlLength: result.innerHTML.length 
+        });
+
+        // Add page numbers
+        result.querySelectorAll('.page').forEach((page, index) => {
+          const pageNum = document.createElement('div');
+          pageNum.className = 'page-number';
+          pageNum.textContent = `Page ${index + 1} of ${pageCount}`;
+          page.appendChild(pageNum);
+        });
+
+        return result.innerHTML;
+      } catch (err) {
+        console.error('Error in processDocxHtml:', {
+          error: err,
+          errorName: err.name,
+          errorMessage: err.message,
+          errorStack: err.stack
+        });
+        // Return original HTML if processing fails
+        return html;
+      }
+    },
+
+    shouldStartNewPage(pageDiv) {
+      // Estimate if current page content exceeds A4 height
+      const ESTIMATED_PAGE_HEIGHT = 1056; // A4 height in pixels at 96 DPI
+      return pageDiv.offsetHeight > ESTIMATED_PAGE_HEIGHT;
     },
 
     // Zoom controls
@@ -988,14 +1568,34 @@ export default {
       }
     },
 
-    scrollToPage(pageNum) {
-      this.$nextTick(() => {
-        const pageEl = this.$refs.pdfPages?.[pageNum - 1]?.$el;
-        if (pageEl) {
-          pageEl.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      });
-    },
+    // scrollToPage(pageNum) {
+    //   console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
+      
+    //   this.$nextTick(() => {
+    //     if (this.fileType === 'pdf' && this.$refs.pdfPages) {
+    //       const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
+    //       if (pageEl) {
+    //         console.log('Scrolling to PDF page element:', pageEl);
+    //         pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //       } else {
+    //         console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
+    //       }
+    //     } else if (this.fileType === 'docx') {
+    //       const docContainer = document.querySelector('.docx-content');
+    //       if (docContainer) {
+    //         const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
+    //         if (targetPage) {
+    //           console.log('Scrolling to DOCX page element:', targetPage);
+    //           targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //         } else {
+    //           console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
+    //         }
+    //       } else {
+    //         console.warn('DOCX container not found');
+    //       }
+    //     }
+    //   });
+    // },
 
     onScroll() {
       if (this.fileType !== "pdf" || !this.$refs.pdfPages?.length) return;
@@ -1026,6 +1626,372 @@ export default {
       this.comments.splice(index, 1);
     },
 
+    deleteComment(index) {
+      const comment = this.comments[index];
+      if (!comment) return;
+      
+      // Store comment to delete and show confirmation modal
+      this.commentToDelete = { comment, index };
+      this.showDeleteConfirm = true;
+    },
+
+    confirmDelete() {
+      if (!this.commentToDelete) return;
+      
+      const { comment, index } = this.commentToDelete;
+      
+      // Delete comment from local array
+      this.comments.splice(index, 1);
+      
+      // If comment has annotation, also delete the annotation
+      if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+        this.deleteAnnotationForComment(comment);
+      }
+      
+      // Delete from backend if comment has an ID
+      if (comment.id) {
+        this.deleteCommentFromBackend(comment.id);
+      }
+      
+      console.log('Comment deleted:', comment);
+      console.log('Remaining comments:', this.comments.length);
+      
+      // Close confirmation modal
+      this.showDeleteConfirm = false;
+      this.commentToDelete = null;
+    },
+
+    cancelDelete() {
+      this.showDeleteConfirm = false;
+      this.commentToDelete = null;
+    },
+
+    deleteAnnotationForComment(comment) {
+      // Find and remove the corresponding annotation
+      const annotationIndex = this.annotations.findIndex(ann => 
+        ann.description === comment.description && 
+        ann.x === comment.x && 
+        ann.y === comment.y
+      );
+      
+      if (annotationIndex !== -1) {
+        this.annotations.splice(annotationIndex, 1);
+        console.log('Annotation deleted for comment:', comment);
+      }
+    },
+
+    async deleteCommentFromBackend(commentId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
+          method: 'DELETE'
+        });
+        
+        if (response.ok) {
+          console.log('Comment deleted from backend successfully');
+        } else {
+          console.error('Failed to delete comment from backend');
+        }
+      } catch (error) {
+        console.error('Error deleting comment from backend:', error);
+      }
+    },
+
+    // Enhanced Comment System
+    startAnnotationMode() {
+      this.isAnnotationMode = true;
+      this.showCommentForm = false;
+    },
+
+    closeCommentForm() {
+      this.showCommentForm = false;
+      this.isAnnotationMode = false;
+      this.commentForm = {
+        document_name: this.fileName || '',
+        document_id: this.documentId || '',
+        version: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '',
+        revision: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '',
+        page_no: this.page || 1,
+        section: '',
+        description: ''
+      };
+    },
+
+    cancelAnnotation() {
+      this.isAnnotationMode = false;
+      this.showCommentForm = false;
+    },
+
+    submitComment() {
+      console.log('Submit button clicked!');
+      console.log('Form data:', this.commentForm);
+      
+      // Validate required fields
+      if (!this.commentForm.description.trim()) {
+        alert('Please enter description');
+        return;
+      }
+      
+      // Get current user info
+      let currentUser = 'Anonymous';
+      try {
+        if (userStore && userStore.getters && userStore.getters.userName) {
+          currentUser = userStore.getters.userName() || 'Anonymous';
+        }
+      } catch (error) {
+        console.log('Error getting user name:', error);
+      }
+      console.log('Current user:', currentUser);
+      
+      // Create comment with annotation data
+      const comment = {
+        id: Date.now(),
+        ...this.commentForm,
+        commented_by: currentUser,
+        created_at: new Date().toISOString(),
+        annotation: !!this.currentAnnotation  // Only true if there's an annotation
+      };
+      
+      console.log('Created comment object:', comment);
+      
+      // Create annotation if we have position data
+      if (this.currentAnnotation) {
+        const annotation = {
+          id: Date.now(),
+          x: this.currentAnnotation.x,
+          y: this.currentAnnotation.y,
+          page: this.currentAnnotation.page,
+          description: this.commentForm.description,
+          document_id: this.documentId
+        };
+        
+        this.annotations.push(annotation);
+        comment.x = this.currentAnnotation.x;
+        comment.y = this.currentAnnotation.y;
+        
+        console.log('Annotation created:', annotation);
+        console.log('Total annotations:', this.annotations.length);
+        
+        
+        // Clear current annotation after creating it
+        this.currentAnnotation = null;
+      }
+      
+      // Add comment to the comments array
+      this.comments.push(comment);
+      console.log('Comment added to comments array:', comment);
+      console.log('Total comments now:', this.comments.length);
+      console.log('Comments array:', this.comments);
+      
+      // Close the form
+      this.closeCommentForm();
+      
+      // Save to backend
+      this.saveCommentToBackend(comment);
+      
+      // Show success message
+      console.log('Comment submitted successfully with annotation');
+      alert('Comment submitted successfully!');
+      
+      // Show user feedback
+      this.$nextTick(() => {
+        console.log('Comment and annotation added successfully!');
+        console.log('Comments in panel:', this.comments);
+        console.log('Annotations on document:', this.annotations);
+      });
+    },
+
+    // Annotation System
+    handleDocumentClick(event) {
+      if (!this.isAnnotationMode) return;
+      // Compute coordinates relative to the correct target
+      let x = 0;
+      let y = 0;
+      let pageNo = 1;
+
+      if (this.fileType === 'pdf') {
+        // For PDFs, position relative to the clicked page wrapper
+        const pageEl = event.target.closest('.pdf-page-wrapper');
+        if (!pageEl) return;
+        const rect = pageEl.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = Number(pageEl.getAttribute('data-page')) || this.page || 1;
+      } else {
+        // For DOCX and others, position relative to the container
+        const rect = event.currentTarget.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = 1;
+      }
+      
+      // Update comment form with click position and document details
+      this.commentForm.page_no = pageNo;
+      this.commentForm.document_name = this.fileName || '';
+      this.commentForm.document_id = this.documentId || '';
+      this.commentForm.version = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '';
+      this.commentForm.revision = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '';
+      
+      // Store annotation position for later use
+      this.currentAnnotation = {
+        x: x,
+        y: y,
+        page: pageNo
+      };
+      
+      // Exit annotation mode and show comment form
+      this.isAnnotationMode = false;
+      this.showCommentForm = true;
+    },
+
+    getAnnotationsForPage(pageNum) {
+      const pageAnnotations = this.annotations.filter(ann => ann.page === pageNum);
+      console.log(`Annotations for page ${pageNum}:`, pageAnnotations);
+      return pageAnnotations;
+    },
+
+    showAnnotationDetails(annotation) {
+      // Show annotation details in a tooltip or modal
+      alert(`Annotation: ${annotation.description}`);
+    },
+
+    async saveCommentToBackend(comment) {
+      try {
+        // Prepare data in the format expected by the backend
+        const commentData = {
+          document_id: comment.document_id,
+          document_name: comment.document_name,
+          version: comment.version,
+          reviewer_id: comment.reviewer_id,
+          page_no: comment.page_no,
+          section: comment.section,
+          description: comment.description,
+          commented_by: comment.commented_by,
+          is_annotation: comment.annotation || false
+        };
+        
+        // Add annotation position data if it's an annotation
+        if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+          commentData.x = comment.x;
+          commentData.y = comment.y;
+        }
+        
+        console.log('Sending comment data to backend:', commentData);
+        console.log('Annotation data:', {
+          is_annotation: commentData.is_annotation,
+          x: commentData.x,
+          y: commentData.y,
+          page_no: commentData.page_no
+        });
+        
+        const response = await fetch('http://localhost:5000/api/comments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(commentData)
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save comment');
+        }
+        
+        const result = await response.json();
+        console.log('Comment saved successfully:', result);
+        
+        // Reload comments from backend to get the correct IDs
+        await this.loadCommentsFromBackend();
+        
+      } catch (error) {
+        console.error('Error saving comment:', error);
+        alert(`Failed to save comment: ${error.message}`);
+      }
+    },
+
+    async loadCommentsFromBackend() {
+      try {
+        if (!this.documentId) {
+          console.log('No document ID available for loading comments');
+          return;
+        }
+        
+        const response = await fetch(`http://localhost:5000/api/comments?document_id=${this.documentId}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          this.comments = data.comments || [];
+          this.annotations = data.annotations || [];
+          console.log(`Loaded ${this.comments.length} comments and ${this.annotations.length} annotations`);
+        } else {
+          console.warn(`Failed to load comments: ${response.status} ${response.statusText}`);
+          // Don't show error to user as comments are optional
+        }
+      } catch (error) {
+        console.warn('Error loading comments (optional feature):', error.message);
+        // Don't show error to user as comments are optional
+      }
+    },
+
+
+    // Test method - can be called from browser console
+    testCommentAndAnnotation() {
+      console.log('Testing comment and annotation functionality...');
+      
+      // Create a test comment
+      const testComment = {
+        id: Date.now(),
+        document_name: 'test-document.pdf',
+        document_id: 'TEST-001',
+        version: '1.0',
+        revision: 'A',
+        page_no: 1,
+        section: 'Test Section',
+        description: 'This is a test comment with annotation',
+        commented_by: 'Test User',
+        created_at: new Date().toISOString(),
+        annotation: true
+      };
+      
+      // Create a test annotation
+      const testAnnotation = {
+        id: Date.now(),
+        x: 50,
+        y: 30,
+        page: 1,
+        description: 'This is a test comment with annotation',
+        document_id: 'TEST-001'
+      };
+      
+      this.comments.push(testComment);
+      this.annotations.push(testAnnotation);
+      
+      console.log('Test comment added:', testComment);
+      console.log('Test annotation added:', testAnnotation);
+      console.log('Total comments:', this.comments.length);
+      console.log('Total annotations:', this.annotations.length);
+    },
+
+    // Simple test method to add a comment directly
+    addTestComment() {
+      const testComment = {
+        id: Date.now(),
+        document_name: 'test-document.pdf',
+        document_id: 'TEST-001',
+        version: '1.0',
+        revision: 'A',
+        page_no: 1,
+        section: 'Test Section',
+        description: 'This is a simple test comment',
+        commented_by: 'Test User',
+        created_at: new Date().toISOString(),
+        annotation: false
+      };
+      
+      this.comments.push(testComment);
+      console.log('Simple test comment added:', testComment);
+      console.log('Comments array length:', this.comments.length);
+    },
+
     // Cleanup
     clearDocument() {
       if (this.pdfUrl) {
@@ -1038,6 +2004,8 @@ export default {
       this.zoom = 1.0;
       this.fileType = null;
     },
+
+    // (duplicate removed) loadExistingDocuments is defined earlier
   },
   
   beforeUnmount() {
@@ -1086,7 +2054,7 @@ export default {
 
 .status-pending { color: #f59e0b; }
 .status-approved { color: #10b981; }
-.status-rejected { color: #ef4444; }
+.status-reject { color: #ef4444; }
 .status-review { color: #3b82f6; }
 
 /* Action Bar */
@@ -1095,7 +2063,9 @@ export default {
   padding: 1rem 1.5rem;
   border-bottom: 1px solid #e0e0e0;
   display: flex;
-  gap: 1rem;
+  justify-content: center; /* Center the items horizontally */
+  align-items: center;     /* Align items vertically in the center */
+  gap: 1rem;               /* Space between buttons */
 }
 
 .action-btn {
@@ -1107,6 +2077,7 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  text-align: center;
 }
 
 .action-btn:hover {
@@ -1183,6 +2154,11 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+  
+  /* Center horizontally */
+  display: block;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .upload-btn:hover {
@@ -1303,59 +2279,19 @@ export default {
 .content {
   flex: 1;
   display: flex;
-  overflow: hidden;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 0; /* Allow container to shrink */
+  position: relative; /* For absolute positioning if needed */
 }
 
-/* Documents List Panel */
-.documents-list-panel {
-  width: 350px;
-  background: white;
-  margin: 1rem 0 1rem 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.documents-list-panel h3 {
-  margin: 0;
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  color: #495057;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.documents-container {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-
-.loading-state {
-  text-align: center;
-  padding: 2rem;
-  color: #6c757d;
-}
-
-.no-documents {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #6c757d;
-}
-
-.no-docs-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.documents-list {
+.document-area {
+  flex: 3; /* Takes up 3 parts of the 5 total parts */
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  min-height: 0; /* Allow container to shrink */
+  overflow: auto; /* Add scroll to document area */
 }
 
 .document-item {
@@ -1367,117 +2303,10 @@ export default {
   cursor: pointer;
   transition: all 0.2s;
   background: white;
-}
-
-.document-item:hover {
-  border-color: #007bff;
-  background: #f8f9ff;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
-}
-
-.doc-icon {
-  margin-right: 0.75rem;
-  font-size: 1.5rem;
-  flex-shrink: 0;
-}
-
-.doc-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.doc-title {
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 0.25rem;
-  word-break: break-word;
-}
-
-.doc-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.doc-version {
-  color: #6c757d;
-  font-size: 0.9rem;
-}
-
-.doc-ver {
-  background: #e9ecef;
-  color: #495057;
-  padding: 0.125rem 0.375rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.doc-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
-.uploaded-by {
-  font-weight: 500;
-}
-
-.upload-date {
-  font-style: italic;
-}
-
-.doc-status {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.doc-status.status-not-assigned {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.doc-status.status-assigned-and-returned {
-  background: #d1ecf1;
-  color: #0c5460;
-}
-
-.doc-status.status-cleared {
-  background: #d4edda;
-  color: #155724;
-}
-
-.doc-status.status-disapproved {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.doc-status.status-moved-to-next-stage {
-  background: #cce5ff;
-  color: #004085;
-}
-
-.doc-status.status-not-cleared {
-  background: #f5c6cb;
-  color: #721c24;
-}
-
-.document-area {
-  flex: 1;
-  display: flex;
-  background: white;
-  margin: 1rem;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+  min-width: 0; /* Prevents flex child from overflowing */
 }
 
 .doc-container {
@@ -1497,6 +2326,42 @@ export default {
 .docx-content {
   line-height: 1.6;
   color: #333;
+  padding: 1rem;
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  overflow-y: auto; /* Enable scrolling for DOCX content */
+  position: relative; /* Needed so overlay positions correctly */
+}
+
+.docx-render-root {
+  position: relative;
+  z-index: 1;
+}
+
+.docx-content .page {
+  background: white;
+  padding: 2rem;
+  margin: 1rem auto;
+  max-width: 816px; /* A4 width at 96 DPI */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Match PDF page shadow */
+  min-height: 1056px; /* A4 height at 96 DPI */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  position: relative;
+}
+
+.docx-content .page::after {
+  content: attr(data-page);
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
 }
 
 .docx-content h1,
@@ -1506,8 +2371,24 @@ export default {
   color: #111;
 }
 
+.docx-content h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+}
+
+.docx-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.docx-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .docx-content p {
   margin: 0.75rem 0;
+  line-height: 1.6;
 }
 
 /* Empty State */
@@ -1569,21 +2450,36 @@ export default {
 }
 
 .comment-item {
-  background: #f9fafb;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1rem;
   display: flex;
-  justify-content: space-between;
-  align-items: start;
+  flex-direction: column;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.comment-item:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transform: translateY(-1px);
 }
 
 .comment-text {
   flex: 1;
-  color: #4b5563;
-  font-size: 0.9rem;
-  line-height: 1.4;
+  color: #1f2937;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 0.75rem;
+  font-weight: 800;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .remove-btn {
@@ -1641,6 +2537,552 @@ export default {
 
 .comment-btn:hover {
   background: #2563eb;
+}
+
+/* Enhanced Comment System Styles */
+.add-comment-section {
+  margin-top: 1rem;
+}
+
+.add-comment-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.add-comment-btn:hover {
+  background: #2563eb;
+}
+
+/* Comment Form Modal */
+.comment-form-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.comment-form-container {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.comment-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comment-form-header h4 {
+  margin: 0;
+  color: #333;
+  font-size: 1.25rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #374151;
+}
+
+.comment-form-body {
+  padding: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  flex: 1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-select {
+  background-color: white;
+  cursor: pointer;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group input[readonly] {
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.comment-form-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cancel-btn,
+.annotation-btn,
+.submit-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.annotation-btn {
+  background: #f59e0b;
+  color: white;
+}
+
+.annotation-btn:hover {
+  background: #d97706;
+}
+
+.submit-btn {
+  background: #10b981;
+  color: white;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.submit-btn:disabled,
+.annotation-btn:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+/* Enhanced Comment Display */
+.comment-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.comment-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+  padding-right: 2rem; /* Space for delete button */
+}
+
+.comment-commented_by {
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.comment-date {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.comment-content {
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.comment-text {
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+}
+
+.annotation-info {
+  margin-top: 0.5rem;
+}
+
+.annotation-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Delete Button - Absolute Position in Top Right Corner */
+.delete-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 0.375rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  z-index: 10;
+}
+
+.delete-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+  transform: scale(1.05);
+}
+
+.delete-btn:active {
+  transform: scale(0.95);
+}
+
+/* Delete Confirmation Modal */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.delete-confirm-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.delete-confirm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fef2f2;
+}
+
+.delete-confirm-header h4 {
+  margin: 0;
+  color: #dc2626;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.delete-confirm-body {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.warning-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.delete-confirm-body p {
+  margin: 0 0 1rem 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.comment-preview {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+}
+
+.comment-text-preview {
+  font-style: italic;
+  color: #6b7280;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.comment-meta-preview {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.warning-text {
+  color: #dc2626;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.delete-confirm-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.delete-confirm-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.delete-confirm-btn:hover {
+  background: #b91c1c;
+}
+
+.delete-confirm-btn:active {
+  transform: scale(0.98);
+}
+
+/* Annotation System Styles */
+.pdf-page-wrapper {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.annotation-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.annotation-marker {
+  position: absolute;
+  pointer-events: all;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.annotation-circle {
+  width: 24px;
+  height: 24px;
+  background: #ef4444;
+  border: 2px solid white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.annotation-circle:hover {
+  transform: scale(1.2);
+}
+
+/* Annotation mode indicator */
+.doc-container.annotation-mode {
+  cursor: crosshair;
+}
+
+.annotation-mode-indicator {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.annotation-instruction {
+  background: #3b82f6;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.annotation-icon {
+  font-size: 1.2rem;
+}
+
+.cancel-annotation-btn {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  pointer-events: all;
+  transition: background 0.2s;
+}
+
+.cancel-annotation-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Document Details Box */
+.document-details-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.document-details-box h5 {
+  margin: 0 0 1rem 0;
+  color: #1e293b;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 0.9rem;
+  color: #1e293b;
+  font-weight: 600;
+  padding: 0.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+}
+
+.comment-description {
+  resize: vertical;
+  min-height: 100px;
 }
 
 /* Overlay for track versions modal */
@@ -1772,87 +3214,475 @@ export default {
   transform: scale(1.2);
 }
 
-/* Star styles */
-.star-button svg {
-  stroke: #888;
-  fill: none;
-}
-.star-button.starred svg {
-  stroke: #f59e0b;
-  fill: #f59e0b;
+/* Comments Section Styles */
+.comments-section {
+  flex: 2;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding: 1.75rem;
+  min-width: 300px;
+  max-width: 450px;
+  height: calc(100vh - 200px);
+  align-self: flex-start;
+  position: sticky;
+  top: 1rem;
 }
 
-/* Delete styles */
-.delete-button svg {
-  stroke: #d33;
+.comments-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #3b82f6, #10b981);
+  border-radius: 16px 16px 0 0;
 }
 
-/* Delete confirmation modal */
-.delete-confirm-overlay {
+/* Comments Header */
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.comments-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.comments-header h3::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: #3b82f6;
+  border-radius: 4px;
+}
+
+.comment-count {
+  background: linear-gradient(to right, #dbeafe, #e0f2fe);
+  color: #1e40af;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Comments List */
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comment-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.comment-item:hover {
+  background: #f3f4f6;
+}
+
+.comment-item.comment-resolved {
+  border-left: 4px solid #10b981;
+}
+
+/* Comment Components */
+.comment-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comment-icon {
+  flex-shrink: 0;
+  color: #6b7280;
+}
+
+.comment-info {
+  flex: 1;
+}
+
+.comment-commented_by {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.comment-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.comment-page {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Status Styles */
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-accept {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-reject {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Comment Content and Actions */
+.comment-content {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+/* Comment Response */
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Modal Styles */
+.modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
 
-.delete-confirm-modal {
-  background: #fff;
+.modal-content {
+  background: white;
   border-radius: 8px;
-  width: 450px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 500px;
+  animation: fadeIn 0.3s ease;
 }
 
-.confirm-message {
-  text-align: center;
-  padding: 1rem;
+.modal-content h3 {
+  margin: 0 0 1rem 0;
 }
 
-.warning-icon {
-  color: #e63946;
+.modal-content textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  resize: vertical;
   margin-bottom: 1rem;
-}
-
-.warning-text {
-  color: #d33;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
+  gap: 0.75rem;
 }
 
-.btn {
-  padding: 0.5rem 1rem;
+.modal-actions button {
+  padding: 0.5rem 1.25rem;
   border-radius: 6px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  border: none;
 }
 
-.btn-secondary {
+.modal-actions button:first-child {
+  background: #ef4444;
+  color: white;
+}
+
+.modal-actions button:last-child {
   background: #e5e7eb;
-  border: none;
-}
-.btn-danger {
-  background: #dc2626;
-  color: #fff;
-  border: none;
-}
-.btn:hover {
-  opacity: 0.9;
+  color: #1f2937;
 }
 
-/* Smooth modal animation */
+/* Animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Justification Modal Styles */
+.justification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.justification-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+.justification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.justification-header h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.justification-body {
+  padding: 1.5rem;
+}
+
+.justification-body .form-group {
+  margin-top: 1rem;
+}
+
+.justification-body .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.justification-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.justification-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.justification-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.confirm-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.confirm-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.confirm-btn.accept:hover:not(:disabled) {
+  background: #059669;
+}
+
+.confirm-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.confirm-btn.reject:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.confirm-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Comment Status Styles */
+.comment-item.status-accept {
+  border-left: 4px solid #10b981;
+  background: #f0fdf4;
+}
+
+.comment-item.status-reject {
+  border-left: 4px solid #ef4444;
+  background: #fef2f2;
+}
+
+.comment-item.status-pending {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-accept {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-reject {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* Comment Actions */
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.accept:hover {
+  background: #059669;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.action-btn.reject:hover {
+  background: #dc2626;
+}
+
+/* Comment Response */
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.response-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
 }
 
 </style>

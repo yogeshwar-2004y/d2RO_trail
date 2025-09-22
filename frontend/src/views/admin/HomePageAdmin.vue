@@ -68,6 +68,8 @@
 </template>
 
 <script>
+import router from '@/router';
+
 import NewsTicker from '@/components/NewsTicker.vue'
 
 export default {
@@ -93,7 +95,8 @@ export default {
     logout() {
       // Logic to log the user out and redirect to the login page
       // e.g., this.$router.push({ name: 'login' });
-      alert('Logging out...');
+      // alert('Logging out...');
+      this.$router.push({ name: 'login' });
     }
   }
 };

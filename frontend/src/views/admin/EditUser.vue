@@ -2,14 +2,32 @@
   <div class="edit-user-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">EDIT USER</span>
     </div>
@@ -18,38 +36,57 @@
       <div class="user-info">
         <h3>Editing User ID: {{ userId }}</h3>
       </div>
-      
+
       <div class="form-row">
         <label for="userName">USER NAME</label>
-        <input type="text" id="userName" v-model="user.name" class="form-input">
+        <input
+          type="text"
+          id="userName"
+          v-model="user.name"
+          class="form-input"
+        />
       </div>
-      
+
       <div class="form-row">
         <label for="userMailId">USER MAIL ID</label>
-        <input type="email" id="userMailId" v-model="user.email" class="form-input">
+        <input
+          type="email"
+          id="userMailId"
+          v-model="user.email"
+          class="form-input"
+        />
       </div>
-      
+
       <div class="form-row">
         <label for="password">NEW PASSWORD</label>
-        <input type="password" id="password" v-model="user.password" class="form-input" placeholder="Leave blank to keep current password">
+        <input
+          type="password"
+          id="password"
+          v-model="user.password"
+          class="form-input"
+          placeholder="Leave blank to keep current password"
+        />
       </div>
-      
+
       <div class="form-row">
         <label for="role">ROLE</label>
         <select id="role" v-model="user.roleId" class="form-input">
           <option value="" disabled>Select a role</option>
-          <option v-for="role in roles" :key="role.id" :value="role.id" :selected="role.name === user.currentRole">
+          <option
+            v-for="role in roles"
+            :key="role.id"
+            :value="role.id"
+            :selected="role.name === user.currentRole"
+          >
             {{ role.name }}
           </option>
         </select>
       </div>
 
       <div class="button-group">
-        <button class="cancel-button" @click="cancelEdit">
-          CANCEL
-        </button>
+        <button class="cancel-button" @click="cancelEdit">CANCEL</button>
         <button class="update-button" @click="updateUser" :disabled="loading">
-          {{ loading ? 'UPDATING USER...' : 'UPDATE USER' }}
+          {{ loading ? "UPDATING USER..." : "UPDATE USER" }}
         </button>
       </div>
     </div>
@@ -58,20 +95,20 @@
 
 <script>
 export default {
-  name: 'EditUser',
+  name: "EditUser",
   data() {
     return {
       userId: this.$route.params.userId,
       user: {
-        name: '',
-        email: '',
-        password: '',
-        roleId: '',
-        currentRole: ''
+        name: "",
+        email: "",
+        password: "",
+        roleId: "",
+        currentRole: "",
       },
       roles: [],
       loading: false,
-      originalData: {}
+      originalData: {},
     };
   },
   async mounted() {
@@ -82,118 +119,125 @@ export default {
     loadUserData() {
       // Get user data from query parameters passed from the previous page
       const query = this.$route.query;
-      this.user.name = query.name || '';
-      this.user.email = query.email || '';
-      this.user.currentRole = query.role || '';
-      
+      this.user.name = query.name || "";
+      this.user.email = query.email || "";
+      this.user.currentRole = query.role || "";
+
       // Store original data for comparison
       this.originalData = {
         name: this.user.name,
         email: this.user.email,
-        role: this.user.currentRole
+        role: this.user.currentRole,
       };
     },
-    
+
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch('http://localhost:5000/api/roles');
+        const response = await fetch("http://localhost:5000/api/roles");
         const data = await response.json();
-        
+
         if (data.success) {
           this.roles = data.roles;
           // Set the current role as selected
-          const currentRole = this.roles.find(role => role.name === this.user.currentRole);
+          const currentRole = this.roles.find(
+            (role) => role.name === this.user.currentRole
+          );
           if (currentRole) {
             this.user.roleId = currentRole.id;
           }
         } else {
-          alert('Error fetching roles: ' + data.message);
+          alert("Error fetching roles: " + data.message);
         }
       } catch (error) {
-        console.error('Error fetching roles:', error);
-        alert('Error fetching roles. Please check if the backend is running.');
+        console.error("Error fetching roles:", error);
+        alert("Error fetching roles. Please check if the backend is running.");
       } finally {
         this.loading = false;
       }
     },
-    
+
     validateUser() {
       if (!this.user.name || !this.user.email || !this.user.roleId) {
-        alert('Please fill in all required fields (Name, Email, Role).');
+        alert("Please fill in all required fields (Name, Email, Role).");
         return false;
       }
-      
+
       // Basic email validation
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(this.user.email)) {
-        alert('Please enter a valid email address.');
+        alert("Please enter a valid email address.");
         return false;
       }
-      
+
       return true;
     },
-    
+
     async updateUser() {
       if (!this.validateUser()) {
         return;
       }
-      
+
       try {
         this.loading = true;
-        
+
         // Prepare update data - only include fields that have changed
         const updateData = {
-          user_id: this.userId
+          user_id: this.userId,
         };
-        
+
         if (this.user.name !== this.originalData.name) {
           updateData.name = this.user.name;
         }
-        
+
         if (this.user.email !== this.originalData.email) {
           updateData.email = this.user.email;
         }
-        
-        if (this.user.password && this.user.password.trim() !== '') {
+
+        if (this.user.password && this.user.password.trim() !== "") {
           updateData.password = this.user.password;
         }
-        
+
         // Always include role update if roleId is set
         if (this.user.roleId) {
           updateData.roleId = this.user.roleId;
         }
-        
-        const response = await fetch(`http://localhost:5000/api/users/${this.userId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(updateData)
-        });
-        
+
+        const response = await fetch(
+          `http://localhost:5000/api/users/${this.userId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
         const data = await response.json();
-        
+
         if (data.success) {
-          alert('User updated successfully!');
-          this.$router.push({ name: 'SelectUserToEdit' });
+          alert("User updated successfully!");
+          this.$router.push({ name: "SelectUserToEdit" });
         } else {
-          alert('Error updating user: ' + data.message);
+          alert("Error updating user: " + data.message);
         }
       } catch (error) {
-        console.error('Error updating user:', error);
-        alert('Error updating user. Please check if the backend is running.');
+        console.error("Error updating user:", error);
+        alert("Error updating user. Please check if the backend is running.");
       } finally {
         this.loading = false;
       }
     },
-    
+
     cancelEdit() {
-      if (confirm('Are you sure you want to cancel? All changes will be lost.')) {
-        this.$router.push({ name: 'SelectUserToEdit' });
+      if (
+        confirm("Are you sure you want to cancel? All changes will be lost.")
+      ) {
+        this.$router.push({ name: "SelectUserToEdit" });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -291,7 +335,8 @@ export default {
 .form-input:focus {
   outline: none;
   border-color: #007bff;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(0, 123, 255, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05),
+    0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 .button-group {
@@ -302,7 +347,8 @@ export default {
   margin-top: 30px;
 }
 
-.cancel-button, .update-button {
+.cancel-button,
+.update-button {
   padding: 15px 30px;
   border: none;
   border-radius: 25px;

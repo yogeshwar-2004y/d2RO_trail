@@ -348,18 +348,34 @@ def get_next_doc_ver(lru_id):
         cur = conn.cursor()
         
         # Get the highest doc_ver for this LRU
+        # cur.execute("""
+        #     SELECT MAX(CAST(doc_ver AS INTEGER)) 
+        #     FROM plan_documents 
+        #     WHERE lru_id = %s
+        # """, (lru_id,))
         cur.execute("""
-            SELECT MAX(CAST(doc_ver AS INTEGER)) 
-            FROM plan_documents 
+            SELECT MAX(doc_ver)
+            FROM plan_documents
             WHERE lru_id = %s
         """, (lru_id,))
-        
+       
         result = cur.fetchone()
         cur.close()
         
         # If no documents exist for this LRU, start with 1
-        max_doc_ver = result[0] if result[0] is not None else 0
-        next_doc_ver = max_doc_ver + 1
+        # max_doc_ver = result[0] if result[0] is not None else 0
+        # next_doc_ver = max_doc_ver + 1
+
+        current_doc_ver = result[0]
+
+        if current_doc_ver is None:
+            next_doc_ver = 'A'
+        else:
+            # Convert to next alphabet letter
+            if current_doc_ver.upper() == 'Z':
+                next_doc_ver = 'AA'  # Optionally handle overflow
+            else:
+                next_doc_ver = chr(ord(current_doc_ver.upper()) + 1)
         
         return jsonify({
             "success": True,

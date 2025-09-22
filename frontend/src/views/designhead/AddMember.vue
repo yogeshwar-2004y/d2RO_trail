@@ -2,14 +2,32 @@
   <div class="add-member-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">ASSIGN PROJECT</span>
     </div>
@@ -30,32 +48,69 @@
     <div v-else class="form-container">
       <div class="form-row">
         <label for="projectName">PROJECT NAME</label>
-        <input type="text" id="projectName" v-model="project.name" class="form-input" readonly>
+        <input
+          type="text"
+          id="projectName"
+          v-model="project.name"
+          class="form-input"
+          readonly
+        />
       </div>
       <div class="form-row">
         <label for="projectNumber">PROJECT ID</label>
-        <input type="text" id="projectNumber" v-model="project.id" class="form-input" readonly>
+        <input
+          type="text"
+          id="projectNumber"
+          v-model="project.id"
+          class="form-input"
+          readonly
+        />
       </div>
       <div class="form-row">
         <label for="projectDate">PROJECT DATE</label>
-        <input type="date" id="projectDate" v-model="project.date" class="form-input" readonly>
+        <input
+          type="date"
+          id="projectDate"
+          v-model="project.date"
+          class="form-input"
+          readonly
+        />
       </div>
       <div class="form-row">
         <label for="userName">USER NAME</label>
-        <select id="userName" v-model="selectedUserId" class="form-input" @change="updateUserName">
+        <select
+          id="userName"
+          v-model="selectedUserId"
+          class="form-input"
+          @change="updateUserName"
+        >
           <option value="" disabled>Select User</option>
-          <option v-for="designer in availableDesigners" :key="designer.user_id" :value="designer.user_id">
+          <option
+            v-for="designer in availableDesigners"
+            :key="designer.user_id"
+            :value="designer.user_id"
+          >
             {{ designer.name }}
           </option>
         </select>
       </div>
       <div class="form-row">
         <label for="displayUserId">USER ID</label>
-        <input type="text" id="displayUserId" v-model="displayUserId" class="form-input" readonly>
+        <input
+          type="text"
+          id="displayUserId"
+          v-model="displayUserId"
+          class="form-input"
+          readonly
+        />
       </div>
 
-      <button class="assign-button" @click="assignMember" :disabled="!selectedUserId || assigning">
-        {{ assigning ? 'ASSIGNING...' : 'ASSIGN PROJECT' }}
+      <button
+        class="assign-button"
+        @click="assignMember"
+        :disabled="!selectedUserId || assigning"
+      >
+        {{ assigning ? "ASSIGNING..." : "ASSIGN PROJECT" }}
       </button>
     </div>
   </div>
@@ -63,21 +118,21 @@
 
 <script>
 export default {
-  name: 'AddMember',
+  name: "AddMember",
   data() {
     return {
       projectId: this.$route.params.projectId,
       project: {
-        id: '',
-        name: '',
-        date: ''
+        id: "",
+        name: "",
+        date: "",
       },
-      selectedUserId: '',
-      displayUserId: '',
+      selectedUserId: "",
+      displayUserId: "",
       availableDesigners: [],
       loading: true,
       error: null,
-      assigning: false
+      assigning: false,
     };
   },
   async mounted() {
@@ -88,91 +143,105 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        
+
         // Load project details and designers in parallel
         const [projectResponse, designersResponse] = await Promise.all([
           fetch(`http://localhost:5000/api/projects/${this.projectId}/details`),
-          fetch('http://localhost:5000/api/available-designers')
+          fetch("http://localhost:5000/api/available-designers"),
         ]);
-        
+
         const projectData = await projectResponse.json();
         const designersData = await designersResponse.json();
-        
+
         if (!projectData.success) {
-          throw new Error(projectData.message || 'Failed to load project details');
+          throw new Error(
+            projectData.message || "Failed to load project details"
+          );
         }
-        
+
         if (!designersData.success) {
-          throw new Error(designersData.message || 'Failed to load available designers');
+          throw new Error(
+            designersData.message || "Failed to load available designers"
+          );
         }
-        
+
         // Set project data
         this.project = {
           id: projectData.project.project_id,
           name: projectData.project.project_name,
-          date: projectData.project.project_date
+          date: projectData.project.project_date,
         };
-        
+
         // Set available designers
         this.availableDesigners = designersData.designers;
-        
       } catch (err) {
-        console.error('Error loading initial data:', err);
-        this.error = err.message || 'Failed to load data. Please try again.';
+        console.error("Error loading initial data:", err);
+        this.error = err.message || "Failed to load data. Please try again.";
       } finally {
         this.loading = false;
       }
     },
-    
+
     updateUserName() {
       // This method is called when user selection changes
       // Auto-fetch and display the user ID when a user is selected
       if (this.selectedUserId) {
-        const selectedDesigner = this.availableDesigners.find(designer => designer.user_id === this.selectedUserId);
-        this.displayUserId = selectedDesigner ? selectedDesigner.user_id : '';
+        const selectedDesigner = this.availableDesigners.find(
+          (designer) => designer.user_id === this.selectedUserId
+        );
+        this.displayUserId = selectedDesigner ? selectedDesigner.user_id : "";
       } else {
-        this.displayUserId = '';
+        this.displayUserId = "";
       }
     },
-    
+
     async assignMember() {
       if (!this.selectedUserId) {
-        alert('Please select a user to assign to the project.');
+        alert("Please select a user to assign to the project.");
         return;
       }
-      
+
       try {
         this.assigning = true;
-        
-        const response = await fetch(`http://localhost:5000/api/projects/${this.projectId}/members`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: this.selectedUserId
-          })
-        });
-        
+
+        const response = await fetch(
+          `http://localhost:5000/api/projects/${this.projectId}/members`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: this.selectedUserId,
+            }),
+          }
+        );
+
         const data = await response.json();
-        
+
         if (data.success) {
-          const selectedDesigner = this.availableDesigners.find(d => d.user_id === this.selectedUserId);
-          alert(`${selectedDesigner.name} has been successfully assigned to project ${this.project.name}`);
-          
+          const selectedDesigner = this.availableDesigners.find(
+            (d) => d.user_id === this.selectedUserId
+          );
+          alert(
+            `${selectedDesigner.name} has been successfully assigned to project ${this.project.name}`
+          );
+
           // Navigate back to project members page
-          this.$router.push({ name: 'ProjectMembers', params: { projectId: this.projectId } });
+          this.$router.push({
+            name: "ProjectMembers",
+            params: { projectId: this.projectId },
+          });
         } else {
           alert(`Error: ${data.message}`);
         }
-        
       } catch (err) {
-        console.error('Error assigning member:', err);
-        alert('Failed to assign member. Please try again.');
+        console.error("Error assigning member:", err);
+        alert("Failed to assign member. Please try again.");
       } finally {
         this.assigning = false;
       }
-    }
+    },
   },
 };
 </script>
@@ -305,8 +374,12 @@ export default {
   margin-bottom: 20px;
 }
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 .error-container {
   display: flex;

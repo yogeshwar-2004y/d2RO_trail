@@ -1,6 +1,8 @@
-// src/router/reviewerroutes.js
+// src/router/reviewerRoutes.js
 
 import HomePageReviewer from '@/views/reviewer/HomePageReviewer.vue'
+import InspectionMemo from '@/views/reviewer/InspectionMemo.vue'
+import ReviewerMemoDashboard from '@/views/reviewer/ReviewerMemoDashboard.vue'
 import SharedMemoDashboard from '@/views/reviewer/SharedMemoDashboard.vue'
 import SharedMemoView from '@/views/reviewer/SharedMemoView.vue'
 
@@ -11,15 +13,27 @@ const reviewerRoutes = [
     component: HomePageReviewer,
   },
   {
+    path: '/reviewer/memo-dashboard',
+    name: 'ReviewerMemoDashboard',
+    component: ReviewerMemoDashboard,
+  },
+  {
+    path: '/reviewer/InspectionMemo/:id',
+    name: 'InspectionMemo',
+    component: InspectionMemo,
+    props: true,
+  },
+  {
     path: '/shared-memos',
     name: 'SharedMemoDashboard',
     component: SharedMemoDashboard,
   },
-    {
-    path: '/shared-memo-view',
+  {
+    path: '/shared-memo-view/:id',
     name: 'SharedMemoView',
     component: SharedMemoView,
+    props: true,
   },
-]
+];
 
 export default reviewerRoutes
