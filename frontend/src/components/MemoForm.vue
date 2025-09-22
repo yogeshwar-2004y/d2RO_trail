@@ -1202,10 +1202,20 @@ export default {
         }, 100);
       },
     selectTest(test) {
-      this.formData.unitIdentificationTestId = test.test_id;
-      this.formData.unitIdentificationTestName = test.test_name;
-      this.formData.unitIdentification = test.test_name; // Update the main unitIdentification field
-      this.showTestsDropdown = false;
+      // Only allow direct test selection if there are no sub-types available
+      const hasSubTypes = this.testIdToStages[test.test_id] && this.testIdToStages[test.test_id].length > 0;
+      
+      if (!hasSubTypes) {
+        // No sub-types, allow direct selection
+        this.formData.unitIdentificationTestId = test.test_id;
+        this.formData.unitIdentificationTestName = test.test_name;
+        this.formData.unitIdentification = test.test_name;
+        this.showTestsDropdown = false;
+        console.log(`Selected test without sub-types: ${test.test_name}`);
+      } else {
+        // Has sub-types, don't close dropdown - let user select from submenu
+        console.log(`Test ${test.test_name} has sub-types, please select from submenu`);
+      }
     },
     selectStage(stage) {
       // When a stage is clicked from side dropdown, set Mechanical Inspection field
@@ -1219,14 +1229,24 @@ export default {
     },
     
     selectType(type) {
-      // When a type is clicked from dropdown, set Unit Identification field
-      const selectedTest = this.formData.unitIdentificationTestName;
-      const combinedValue = selectedTest ? `${selectedTest} - ${type.type_name}` : type.type_name;
-      this.formData.unitIdentification = combinedValue;
-      this.showTestsDropdown = false;
+      // When a type is clicked from dropdown, set Unit Identification field with complete path
+      const selectedTest = this.tests.find(t => t.test_id === this.hoveredTestId);
+      if (selectedTest) {
+        // Store both the test info and create the display value
+        this.formData.unitIdentificationTestId = selectedTest.test_id;
+        this.formData.unitIdentificationTestName = selectedTest.test_name;
+        const combinedValue = `${selectedTest.test_name} - ${type.type_name}`;
+        this.formData.unitIdentification = combinedValue;
+        
+        // Log the selected combination for debugging
+        console.log(`Selected test: ${selectedTest.test_name}, type: ${type.type_name}, Combined: ${combinedValue}`);
+      } else {
+        // Fallback if test not found
+        this.formData.unitIdentification = type.type_name;
+        console.log(`Selected type only: ${type.type_name}`);
+      }
       
-      // Log the selected type for debugging
-      console.log(`Selected type: ${type.type_name}, Combined value: ${combinedValue}`);
+      this.showTestsDropdown = false;
     },
     
     toggleSerialNumberDropdown() {
