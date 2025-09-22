@@ -945,7 +945,7 @@ export default {
       return this.currentUserRole === 2;
     },
     selectedTestName() {
-      return this.formData.unitIdentificationTestName;
+      return this.formData.unitIdentification || this.formData.unitIdentificationTestName;
     },
     hoveredStages() {
       if (!this.hoveredTestId) return [];
@@ -1204,6 +1204,7 @@ export default {
     selectTest(test) {
       this.formData.unitIdentificationTestId = test.test_id;
       this.formData.unitIdentificationTestName = test.test_name;
+      this.formData.unitIdentification = test.test_name; // Update the main unitIdentification field
       this.showTestsDropdown = false;
     },
     selectStage(stage) {
@@ -1218,12 +1219,14 @@ export default {
     },
     
     selectType(type) {
-      // When a type is clicked from dropdown, set Mechanical Inspection field
-      this.formData.mechanicalInsp = type.type_name;
+      // When a type is clicked from dropdown, set Unit Identification field
+      const selectedTest = this.formData.unitIdentificationTestName;
+      const combinedValue = selectedTest ? `${selectedTest} - ${type.type_name}` : type.type_name;
+      this.formData.unitIdentification = combinedValue;
       this.showTestsDropdown = false;
       
       // Log the selected type for debugging
-      console.log(`Selected type: ${type.type_name}`);
+      console.log(`Selected type: ${type.type_name}, Combined value: ${combinedValue}`);
     },
     
     toggleSerialNumberDropdown() {
