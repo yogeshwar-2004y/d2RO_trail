@@ -4,8 +4,7 @@
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
 *$py.class
 
 # Virtual environment
@@ -52,3 +51,6 @@ frontend/test-results.json
 reports/
 TEST_FIXES_SUMMARY.md
 TEST_SETUP_SUMMARY.md
+
+# Upload directories
+plan_doc_uploads/

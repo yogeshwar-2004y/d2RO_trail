@@ -319,4 +319,3 @@ CREATE TABLE project_users (
 );
 
 
-queries 
