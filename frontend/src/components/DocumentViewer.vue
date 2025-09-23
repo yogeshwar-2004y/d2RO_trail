@@ -266,21 +266,6 @@
       <!-- Enhanced Comments Sidebar -->
       <aside class="sidebar" v-if="canViewComments">
         <h3>Comments</h3>
-        <!-- Role-based permission indicator -->
-        <div class="permission-indicator">
-          <div v-if="canAddComments" class="permission-badge add-permission">
-            ✓ Can add comments
-          </div>
-          <div v-if="canDeleteComments" class="permission-badge delete-permission">
-            ✓ Can delete comments
-          </div>
-          <div v-if="canAcceptRejectComments" class="permission-badge action-permission">
-            ✓ Can accept/reject comments
-          </div>
-          <div v-if="!canAddComments && !canDeleteComments && !canAcceptRejectComments" class="permission-badge view-only">
-            👁️ View only
-          </div>
-        </div>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
@@ -2485,49 +2470,6 @@ export default {
   font-size: 1.1rem;
 }
 
-/* Permission Indicator */
-.permission-indicator {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-}
-
-.permission-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  margin: 0.125rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.add-permission {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.delete-permission {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
-}
-
-.action-permission {
-  background: #dbeafe;
-  color: #1e40af;
-  border: 1px solid #bfdbfe;
-}
-
-.view-only {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
 
 .comments-container {
   flex: 1;
