@@ -8,7 +8,12 @@
           <span><strong>Project:</strong> {{ projectName || 'N/A' }}</span>
           <span><strong>Document ID:</strong> {{ documentId || 'N/A' }}</span>
           <span><strong>Status:</strong> <span :class="'status-' + (status || 'pending')">{{ status || 'Pending' }}</span></span>
-           <!-- <span><strong>Status:</strong> <span :class="getStatusClass(status)">{{ status || 'Pending' }}</span></span> -->
+          <span><strong>Assignment:</strong> 
+            <span class="assignment-status-inline" :class="hasAssignedReviewer ? 'assigned' : 'not-assigned'">
+              {{ hasAssignedReviewer ? 'ASSIGNED' : 'NOT ASSIGNED' }}
+            </span>
+          </span>
+          <span v-if="hasAssignedReviewer"><strong>Reviewer:</strong> {{ assignedReviewer?.name || 'Unknown' }}</span>
           <span><strong>Created:</strong> {{ formatDate(createdDate) }}</span>
           <span><strong>Modified:</strong> {{ formatDate(lastModifiedDate) }}</span>
         </div>
@@ -35,10 +40,6 @@
         >
           {{ loadingReviewerStatus ? 'Loading...' : 'Edit Reviewer' }}
         </button>
-        <div v-if="hasAssignedReviewer" class="reviewer-info">
-          <span class="reviewer-label">Current Reviewer:</span>
-          <span class="reviewer-name">{{ assignedReviewer?.name || 'Unknown' }}</span>
-        </div>
         <button @click="viewObservations" class="action-btn">
           View Observations
         </button>
@@ -748,13 +749,11 @@ export default {
       this.loadExistingDocument(documentId);
     }
     
-    // Check reviewer assignment status for QA Head
-    if (this.currentUserRole === 'QA Head') {
-      // Add a delay to ensure LRU metadata is loaded first
-      setTimeout(() => {
-        this.checkReviewerAssignment();
-      }, 1000);
-    }
+    // Check reviewer assignment status for all users to display assignment information
+    // Add a delay to ensure LRU metadata is loaded first
+    setTimeout(() => {
+      this.checkReviewerAssignment();
+    }, 2000);
   },
   
   methods: {
@@ -775,6 +774,11 @@ export default {
           this.lruName = result.lru.lru_name;
           this.projectName = result.lru.project_name;
           console.log(`✅ Loaded metadata for LRU ${lruId}:`, result.lru);
+          
+          // Check reviewer assignment after LRU metadata is loaded
+          setTimeout(() => {
+            this.checkReviewerAssignment();
+          }, 100);
         } else {
           console.warn('❌ Failed to load LRU metadata:', result.message);
           // Set fallback values
@@ -1212,17 +1216,28 @@ export default {
     
     async checkReviewerAssignment() {
       if (!this.lruName || !this.projectName) {
+        console.log('Skipping reviewer assignment check - missing LRU name or project name');
         return;
       }
       
       try {
         this.loadingReviewerStatus = true;
-        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
+        const url = `http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`;
+        console.log('Checking reviewer assignment for:', this.lruName, 'in project:', this.projectName);
+        console.log('API URL:', url);
+        
+        const response = await fetch(url);
         const data = await response.json();
+        
+        console.log('Reviewer assignment response:', data);
         
         if (data.success) {
           this.hasAssignedReviewer = data.has_reviewer;
           this.assignedReviewer = data.reviewer;
+          console.log('Assignment status updated:', {
+            hasAssignedReviewer: this.hasAssignedReviewer,
+            assignedReviewer: this.assignedReviewer
+          });
         } else {
           console.error('Error checking reviewer assignment:', data.message);
           this.hasAssignedReviewer = false;
@@ -1262,6 +1277,14 @@ export default {
     closeTrackVersionsModal() {
       this.showTrackVersionsModal = false;
     },
+    getInitials(name) {
+      if (!name) return '??';
+      return name.split(' ')
+        .map(word => word.charAt(0).toUpperCase())
+        .slice(0, 2)
+        .join('');
+    },
+    
     selectVersion(version) {
       console.log('Selected version:', version);
       // Navigate to the document version view page
@@ -3683,6 +3706,26 @@ export default {
   padding: 0.75rem;
   border-radius: 4px;
   border: 1px solid #e5e7eb;
+}
+
+/* Inline Assignment Status Styles */
+.assignment-status-inline {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.assignment-status-inline.assigned {
+  background-color: #10b981;
+  color: white;
+}
+
+.assignment-status-inline.not-assigned {
+  background-color: #f59e0b;
+  color: white;
 }
 
 </style>

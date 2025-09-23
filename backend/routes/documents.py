@@ -235,6 +235,9 @@ def upload_plan_document():
         conn.commit()
         cur.close()
         
+        # Auto-assign reviewer if LRU already has a reviewer assigned to other documents
+        auto_assign_reviewer_to_new_document(int(lru_id), document_id)
+        
         return jsonify({
             "success": True,
             "message": "Plan document uploaded successfully",
@@ -455,19 +458,30 @@ def assign_reviewer():
             cur.close()
             return jsonify({"success": False, "message": "Reviewer not found or not a QA Reviewer"}), 404
         
-        # Check if assignment already exists for this document
+        # Check if any reviewer is already assigned to this LRU's active document
+        # Enforce one reviewer per LRU constraint
         cur.execute("""
-            SELECT assignment_id FROM plan_doc_assignment 
-            WHERE document_id = %s AND user_id = %s
-        """, (document_id, reviewer_id))
+            SELECT pda.assignment_id, pda.user_id, u.name as reviewer_name
+            FROM plan_doc_assignment pda
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pd.lru_id = %s AND pd.is_active = TRUE
+        """, (lru_id,))
         
         existing_assignment = cur.fetchone()
         
         if existing_assignment:
-            cur.close()
-            return jsonify({"success": False, "message": "This reviewer is already assigned to the active document for this LRU"}), 400
+            if existing_assignment[1] == reviewer_id:
+                cur.close()
+                return jsonify({"success": False, "message": "This reviewer is already assigned to the active document for this LRU"}), 400
+            else:
+                cur.close()
+                return jsonify({
+                    "success": False, 
+                    "message": f"This LRU is already assigned to another reviewer: {existing_assignment[2]}. Each LRU can only be assigned to one reviewer at a time."
+                }), 400
         
-        # Insert new assignment
+        # Insert new assignment for the active document
         cur.execute("""
             INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
             VALUES (%s, %s, NOW())
@@ -476,12 +490,26 @@ def assign_reviewer():
         
         assignment_id = cur.fetchone()[0]
         
-        # Update document status to 'assigned'
+        # Assign the same reviewer to ALL documents in this LRU (not just the active one)
+        # This ensures consistency across all versions
+        cur.execute("""
+            INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+            SELECT pd.document_id, %s, NOW()
+            FROM plan_documents pd
+            WHERE pd.lru_id = %s 
+            AND pd.document_id != %s
+            AND NOT EXISTS (
+                SELECT 1 FROM plan_doc_assignment pda 
+                WHERE pda.document_id = pd.document_id
+            )
+        """, (reviewer_id, lru_id, document_id))
+        
+        # Update status to 'assigned' for all documents in this LRU
         cur.execute("""
             UPDATE plan_documents 
             SET status = 'assigned'
-            WHERE document_id = %s
-        """, (document_id,))
+            WHERE lru_id = %s
+        """, (lru_id,))
         
         conn.commit()
         cur.close()
@@ -550,6 +578,137 @@ def test_assignments():
         print(f"Test assignments error: {str(e)}")
         return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
 
+def auto_assign_reviewer_to_new_document(lru_id, document_id):
+    """
+    Automatically assign a reviewer to a new document if the LRU already has a reviewer assigned.
+    This ensures consistency across all document versions in an LRU.
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if this LRU already has a reviewer assigned to any document
+        cur.execute("""
+            SELECT DISTINCT pda.user_id
+            FROM plan_doc_assignment pda
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            WHERE pd.lru_id = %s
+            LIMIT 1
+        """, (lru_id,))
+        
+        existing_reviewer = cur.fetchone()
+        
+        if existing_reviewer:
+            reviewer_id = existing_reviewer[0]
+            
+            # Check if this specific document already has an assignment
+            cur.execute("""
+                SELECT assignment_id FROM plan_doc_assignment 
+                WHERE document_id = %s
+            """, (document_id,))
+            
+            if not cur.fetchone():
+                # Assign the existing reviewer to this new document
+                cur.execute("""
+                    INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+                    VALUES (%s, %s, NOW())
+                """, (document_id, reviewer_id))
+                
+                # Update document status to 'assigned'
+                cur.execute("""
+                    UPDATE plan_documents 
+                    SET status = 'assigned'
+                    WHERE document_id = %s
+                """, (document_id,))
+                
+                conn.commit()
+                print(f"Auto-assigned reviewer {reviewer_id} to new document {document_id} in LRU {lru_id}")
+        
+        cur.close()
+        return True
+        
+    except Exception as e:
+        print(f"Error in auto-assigning reviewer: {str(e)}")
+        return False
+
+@documents_bp.route('/api/test-lru-constraint', methods=['GET'])
+def test_lru_constraint():
+    """Test endpoint to verify one reviewer per LRU constraint"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get LRUs with multiple active assignments (should be none after constraint)
+        cur.execute("""
+            SELECT 
+                l.lru_name,
+                p.project_name,
+                COUNT(DISTINCT pda.user_id) as reviewer_count,
+                STRING_AGG(DISTINCT u.name, ', ') as reviewers
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            JOIN plan_documents pd ON l.lru_id = pd.lru_id
+            JOIN plan_doc_assignment pda ON pd.document_id = pda.document_id
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pd.is_active = TRUE
+            GROUP BY l.lru_id, l.lru_name, p.project_name
+            HAVING COUNT(DISTINCT pda.user_id) > 1
+        """)
+        
+        violations = cur.fetchall()
+        
+        # Get all LRU assignments
+        cur.execute("""
+            SELECT 
+                l.lru_name,
+                p.project_name,
+                u.name as reviewer_name,
+                pd.doc_ver,
+                pda.assigned_at
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            JOIN plan_documents pd ON l.lru_id = pd.lru_id
+            JOIN plan_doc_assignment pda ON pd.document_id = pda.document_id
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pd.is_active = TRUE
+            ORDER BY l.lru_name, pda.assigned_at DESC
+        """)
+        
+        all_assignments = cur.fetchall()
+        cur.close()
+        
+        # Convert to lists
+        violation_list = []
+        for violation in violations:
+            violation_list.append({
+                "lru_name": violation[0],
+                "project_name": violation[1],
+                "reviewer_count": violation[2],
+                "reviewers": violation[3]
+            })
+        
+        assignment_list = []
+        for assignment in all_assignments:
+            assignment_list.append({
+                "lru_name": assignment[0],
+                "project_name": assignment[1],
+                "reviewer_name": assignment[2],
+                "doc_ver": assignment[3],
+                "assigned_at": assignment[4].isoformat() if assignment[4] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "constraint_violations": violation_list,
+            "total_violations": len(violation_list),
+            "all_lru_assignments": assignment_list,
+            "message": "One reviewer per LRU constraint is enforced" if len(violation_list) == 0 else f"Found {len(violation_list)} constraint violations"
+        })
+        
+    except Exception as e:
+        print(f"Error in LRU constraint test: {str(e)}")
+        return jsonify({"success": False, "message": f"Test error: {str(e)}"}), 500
+
 @documents_bp.route('/api/assigned-reviewer', methods=['GET'])
 def get_assigned_reviewer():
     """Get the assigned reviewer for a document based on LRU and project context"""
@@ -578,36 +737,23 @@ def get_assigned_reviewer():
         
         lru_id = lru_result[0]
         
-        # Find the active document for this LRU
-        cur.execute("""
-            SELECT document_id
-            FROM plan_documents
-            WHERE lru_id = %s AND is_active = TRUE
-            ORDER BY upload_date DESC
-            LIMIT 1
-        """, (lru_id,))
-        
-        doc_result = cur.fetchone()
-        if not doc_result:
-            cur.close()
-            return jsonify({"success": False, "message": "No active document found for this LRU"}), 404
-        
-        document_id = doc_result[0]
-        
-        # Get assigned reviewer information
+        # Get assigned reviewer information for this LRU (check any document in the LRU)
+        # Since we now assign reviewers to ALL documents in an LRU, we can check any document
         cur.execute("""
             SELECT 
                 pda.assignment_id,
                 pda.user_id,
                 pda.assigned_at,
                 u.name as reviewer_name,
-                u.email as reviewer_email
+                u.email as reviewer_email,
+                pd.document_id
             FROM plan_doc_assignment pda
             JOIN users u ON pda.user_id = u.user_id
-            WHERE pda.document_id = %s
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            WHERE pd.lru_id = %s AND pd.is_active = TRUE
             ORDER BY pda.assigned_at DESC
             LIMIT 1
-        """, (document_id,))
+        """, (lru_id,))
         
         assignment = cur.fetchone()
         cur.close()
@@ -623,7 +769,7 @@ def get_assigned_reviewer():
                     "name": assignment[3],
                     "email": assignment[4]
                 },
-                "document_id": document_id,
+                "document_id": assignment[5],  # document_id from the query result
                 "lru_id": lru_id
             })
         else:
@@ -631,13 +777,72 @@ def get_assigned_reviewer():
                 "success": True,
                 "has_reviewer": False,
                 "reviewer": None,
-                "document_id": document_id,
+                "document_id": None,
                 "lru_id": lru_id
             })
         
     except Exception as e:
         print(f"Error getting assigned reviewer: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@documents_bp.route('/api/debug-assignment/<lru_name>/<project_name>', methods=['GET'])
+def debug_assignment(lru_name, project_name):
+    """Debug endpoint to check assignment status for an LRU"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Find the LRU ID
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_name = %s AND p.project_name = %s
+        """, (lru_name, project_name))
+        
+        lru_info = cur.fetchone()
+        if not lru_info:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        lru_id = lru_info[0]
+        
+        # Get all documents in this LRU
+        cur.execute("""
+            SELECT document_id, document_number, status, is_active
+            FROM plan_documents
+            WHERE lru_id = %s
+            ORDER BY upload_date DESC
+        """, (lru_id,))
+        
+        documents = cur.fetchall()
+        
+        # Get all assignments for this LRU
+        cur.execute("""
+            SELECT pda.document_id, pda.user_id, u.name, pda.assigned_at
+            FROM plan_doc_assignment pda
+            JOIN users u ON pda.user_id = u.user_id
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            WHERE pd.lru_id = %s
+            ORDER BY pda.assigned_at DESC
+        """, (lru_id,))
+        
+        assignments = cur.fetchall()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "lru_info": {
+                "lru_id": lru_info[0],
+                "lru_name": lru_info[1],
+                "project_name": lru_info[2]
+            },
+            "documents": [{"document_id": d[0], "document_number": d[1], "status": d[2], "is_active": d[3]} for d in documents],
+            "assignments": [{"document_id": a[0], "user_id": a[1], "reviewer_name": a[2], "assigned_at": a[3].isoformat() if a[3] else None} for a in assignments]
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "message": f"Debug error: {str(e)}"}), 500
 
 @documents_bp.route('/api/update-reviewer', methods=['PUT'])
 def update_reviewer():
@@ -702,28 +907,35 @@ def update_reviewer():
             cur.close()
             return jsonify({"success": False, "message": "New reviewer not found or not a QA Reviewer"}), 404
         
-        # Check if there's an existing assignment to update
+        # Check if there's an existing assignment for this LRU's active document
+        # Enforce one reviewer per LRU constraint
         cur.execute("""
-            SELECT assignment_id FROM plan_doc_assignment 
-            WHERE document_id = %s
-            ORDER BY assigned_at DESC
+            SELECT pda.assignment_id, pda.user_id, u.name as reviewer_name
+            FROM plan_doc_assignment pda
+            JOIN plan_documents pd ON pda.document_id = pd.document_id
+            JOIN users u ON pda.user_id = u.user_id
+            WHERE pd.lru_id = %s AND pd.is_active = TRUE
+            ORDER BY pda.assigned_at DESC
             LIMIT 1
-        """, (document_id,))
+        """, (lru_id,))
         
         existing_assignment = cur.fetchone()
         
         if existing_assignment:
-            # Update existing assignment
+            # Update ALL assignments in this LRU to the new reviewer
             cur.execute("""
                 UPDATE plan_doc_assignment 
                 SET user_id = %s, assigned_at = NOW()
-                WHERE assignment_id = %s
-                RETURNING assignment_id
-            """, (new_reviewer_id, existing_assignment[0]))
+                WHERE document_id IN (
+                    SELECT pd.document_id 
+                    FROM plan_documents pd 
+                    WHERE pd.lru_id = %s
+                )
+            """, (new_reviewer_id, lru_id))
             
             assignment_id = existing_assignment[0]
         else:
-            # Create new assignment if none exists
+            # Create new assignment for the active document
             cur.execute("""
                 INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
                 VALUES (%s, %s, NOW())
@@ -731,13 +943,26 @@ def update_reviewer():
             """, (document_id, new_reviewer_id))
             
             assignment_id = cur.fetchone()[0]
+            
+            # Assign to all other documents in this LRU as well
+            cur.execute("""
+                INSERT INTO plan_doc_assignment (document_id, user_id, assigned_at)
+                SELECT pd.document_id, %s, NOW()
+                FROM plan_documents pd
+                WHERE pd.lru_id = %s 
+                AND pd.document_id != %s
+                AND NOT EXISTS (
+                    SELECT 1 FROM plan_doc_assignment pda 
+                    WHERE pda.document_id = pd.document_id
+                )
+            """, (new_reviewer_id, lru_id, document_id))
         
-        # Update document status to 'assigned'
+        # Update status to 'assigned' for all documents in this LRU
         cur.execute("""
             UPDATE plan_documents 
             SET status = 'assigned'
-            WHERE document_id = %s
-        """, (document_id,))
+            WHERE lru_id = %s
+        """, (lru_id,))
         
         conn.commit()
         cur.close()
