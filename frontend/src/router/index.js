@@ -26,6 +26,7 @@ import NewsUpdates from "@/views/admin/NewsUpdates.vue";
 import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
+import ViewOnlyMemoForm from "@/components/ViewOnlyMemoForm.vue";
 import DocumentViewer from "@/components/DocumentViewer.vue";
 import SubmitMemo from '@/components/SubmitMemo.vue'
 import RoleTestComponent from '@/components/RoleTestComponent.vue'
@@ -145,6 +146,12 @@ const router = createRouter({
       path: '/memos/:memoId',
       name: 'MemoForm',
       component: MemoForm,
+    },
+    {
+      path: '/memos/view/:id',
+      name: 'ViewOnlyMemoForm',
+      component: ViewOnlyMemoForm,
+      props: true,
     },
     {
       path: '/memos/submit/new',

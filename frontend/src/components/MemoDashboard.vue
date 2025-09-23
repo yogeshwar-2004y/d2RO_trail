@@ -305,15 +305,30 @@ export default {
         
         const data = await response.json();
         if (data.success) {
-          // Navigate to memo form with detailed data
-          this.$router.push({ 
-            name: 'MemoForm', 
-            params: { 
-              memoId: memo.id,
-              memoData: data.memo,
-              references: data.references
-            } 
-          });
+          // Navigate based on user role
+          const userRole = userStore.getters.roleName()?.toLowerCase();
+          
+          if (userRole === 'qa reviewer') {
+            // Reviewers use the InspectionMemo component
+            this.$router.push({ 
+              name: 'InspectionMemo', 
+              params: { 
+                id: memo.id,
+                memoData: data.memo,
+                references: data.references
+              } 
+            });
+          } else {
+            // All other roles use the ViewOnlyMemoForm component
+            this.$router.push({ 
+              name: 'ViewOnlyMemoForm', 
+              params: { 
+                id: memo.id,
+                memoData: data.memo,
+                references: data.references
+              } 
+            });
+          }
         } else {
           throw new Error(data.message || 'Failed to fetch memo details');
         }
