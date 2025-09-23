@@ -91,7 +91,7 @@ export default {
       showMemoFilter: false,
       activeProjectFilter: null,
       activeMemoFilter: null,
-      projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
+      projects: [],
       memoStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
         { name: 'DISAPPROVED', color: 'disapproved' },
@@ -100,58 +100,9 @@ export default {
         { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
         { name: 'NOT ASSIGNED', color: 'not-assigned' },
       ],
-      sharedMemos: [
-        { 
-          id: 101, 
-          project: 'PROJ001', 
-          author: 'Design Team', 
-          sharedBy: 'John Doe',
-          sharedDate: '10-01-2025',
-          assignedDate: '01-07-2025', 
-          scheduledDate: '04-07-2025', 
-          status: 'SUCCESSFULLY COMPLETED' 
-        },
-        { 
-          id: 102, 
-          project: 'PROJ002', 
-          author: 'Design Team', 
-          sharedBy: 'Jane Smith',
-          sharedDate: '12-01-2025',
-          assignedDate: '01-07-2025', 
-          scheduledDate: '04-07-2025', 
-          status: 'COMPLETED WITH OBSERVATIONS' 
-        },
-        { 
-          id: 103, 
-          project: 'PROJ003', 
-          author: 'Design Team', 
-          sharedBy: 'Mike Johnson',
-          sharedDate: '15-01-2025',
-          assignedDate: null, 
-          scheduledDate: null, 
-          status: 'NOT ASSIGNED' 
-        },
-        { 
-          id: 104, 
-          project: 'PROJ001', 
-          author: 'Design Team', 
-          sharedBy: 'Sarah Wilson',
-          sharedDate: '18-01-2025',
-          assignedDate: '01-07-2025', 
-          scheduledDate: '04-07-2025', 
-          status: 'DISAPPROVED' 
-        },
-        { 
-          id: 105, 
-          project: 'PROJ004', 
-          author: 'Design Team', 
-          sharedBy: 'David Brown',
-          sharedDate: '20-01-2025',
-          assignedDate: '01-07-2025', 
-          scheduledDate: '04-07-2025', 
-          status: 'SUCCESSFULLY COMPLETED' 
-        },
-      ],
+      sharedMemos: [],
+      loading: true,
+      error: null,
     };
   },
   computed: {

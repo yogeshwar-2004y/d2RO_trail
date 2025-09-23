@@ -111,7 +111,29 @@
     
     <!-- Memo List -->
     <div class="memo-list">
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading memos...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="error-state">
+        <div class="error-icon">⚠️</div>
+        <p>Error loading memos: {{ error }}</p>
+        <button @click="fetchMemos" class="retry-button">Retry</button>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="filteredMemos.length === 0" class="empty-state">
+        <div class="empty-icon">📝</div>
+        <p>No memos found</p>
+        <p class="empty-subtitle">{{ searchQuery || activeProjectFilter || activeMemoFilter ? 'Try adjusting your filters' : 'No memos have been submitted yet' }}</p>
+      </div>
+
+      <!-- Memo Cards -->
       <div 
+        v-else
         v-for="memo in filteredMemos" 
         :key="memo.id" 
         class="memo-card" 
@@ -120,7 +142,7 @@
       >
         <div class="memo-details">
           <div class="memo-project">{{ memo.project }}</div>
-          <div class="memo-author">FROM - AUTHORISING EMP (DESIGN TEAM)</div>
+          <div class="memo-author">FROM - {{ memo.author }}</div>
         </div>
         <div class="memo-schedule" v-if="memo.assignedDate">
           <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
@@ -143,7 +165,7 @@ export default {
       showMemoFilter: false,
       activeProjectFilter: null,
       activeMemoFilter: null,
-      projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
+      projects: [],
       memoStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
         { name: 'DISAPPROVED', color: 'disapproved' },
@@ -152,16 +174,9 @@ export default {
         { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
         { name: 'NOT ASSIGNED', color: 'not-assigned' },
       ],
-      memos: [
-        { id: 1, project: 'PROJ001', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'NOT ASSIGNED' },
-        { id: 2, project: 'PROJ002', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'ASSIGNED' },
-        { id: 3, project: 'PROJ003', author: 'Design Team', assignedDate: null, scheduledDate: null, status: 'NOT ASSIGNED' },
-        { id: 4, project: 'PROJ001', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 5, project: 'PROJ002', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'DISAPPROVED' },
-        { id: 6, project: 'PROJ003', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'COMPLETED WITH OBSERVATIONS' },
-        { id: 7, project: 'PROJ001', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'TEST NOT CONDUCTED' },
-        { id: 8, project: 'PROJ004', author: 'Design Team', assignedDate: '01-07-2025', scheduledDate: '04-07-2025', status: 'SUCCESSFULLY COMPLETED' },
-      ],
+      memos: [],
+      loading: true,
+      error: null,
       notifications: [
         { id: 1, project: 'PROJ001', serialNumber: '15,16', lru: 'LRU Name', completedStage: 'stage 1', requiredStage: 'stage3', justification: 'justification', status: 'pending', isRead: false },
         { id: 2, project: 'PROJ002', serialNumber: '17,18', lru: 'LRU Component', completedStage: 'stage 2', requiredStage: 'stage4', justification: 'Technical review required', status: 'pending', isRead: false },
@@ -193,7 +208,121 @@ export default {
       return this.notifications.filter(n => !n.isRead).length;
     }
   },
+  async mounted() {
+    await this.fetchMemos();
+    await this.fetchProjects();
+  },
   methods: {
+    async fetchMemos() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        const response = await fetch('/api/memos');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch memos: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          // Transform backend memo data to frontend format
+          this.memos = data.memos.map(memo => this.transformMemoData(memo));
+        } else {
+          throw new Error(data.message || 'Failed to fetch memos');
+        }
+      } catch (error) {
+        console.error('Error fetching memos:', error);
+        this.error = error.message;
+        this.memos = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async fetchProjects() {
+      try {
+        const response = await fetch('/api/projects');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch projects: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          this.projects = data.projects.map(project => project.name);
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        this.projects = [];
+      }
+    },
+
+    transformMemoData(backendMemo) {
+      // Map backend memo format to frontend expected format
+      return {
+        id: backendMemo.memo_id,
+        project: backendMemo.wing_proj_ref_no || 'N/A',
+        author: backendMemo.from_person || 'Design Team',
+        assignedDate: this.formatDate(backendMemo.dated),
+        scheduledDate: this.formatDate(backendMemo.memo_date),
+        status: this.determineStatus(backendMemo),
+        // Store the original backend data for detailed view
+        originalData: backendMemo
+      };
+    },
+
+    determineStatus(memo) {
+      // Determine status based on memo data
+      if (memo.accepted_at) {
+        return 'SUCCESSFULLY COMPLETED';
+      } else if (memo.submitted_at) {
+        return 'ASSIGNED';
+      } else {
+        return 'NOT ASSIGNED';
+      }
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return null;
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).replace(/\//g, '-');
+      } catch {
+        return dateString;
+      }
+    },
+
+    async viewMemo(memo) {
+      try {
+        // Fetch detailed memo data from backend
+        const response = await fetch(`/api/memos/${memo.id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch memo details: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          // Navigate to memo form with detailed data
+          this.$router.push({ 
+            name: 'MemoForm', 
+            params: { 
+              memoId: memo.id,
+              memoData: data.memo,
+              references: data.references
+            } 
+          });
+        } else {
+          throw new Error(data.message || 'Failed to fetch memo details');
+        }
+      } catch (error) {
+        console.error('Error fetching memo details:', error);
+        alert('Failed to load memo details. Please try again.');
+      }
+    },
+
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
       this.showMemoFilter = false;
@@ -213,16 +342,12 @@ export default {
     submitNewMemo() {
       this.$router.push({ name: 'NewMemoForm' });
     },
-    viewMemo(memo) {
-      this.$router.push({ name: 'MemoForm', params: { memoId: memo.id } });
-    },
     openNotifications() {
       this.$router.push({ name: 'QAHeadNotifications' });
     },
     openSharedMemos() {
-    this.$router.push({ name: 'SharedMemoDashboard' }); 
-    // 👆 replace with the actual route/view you want to navigate to
-  }
+      this.$router.push({ name: 'SharedMemoDashboard' }); 
+    }
   }
 };
 </script>
@@ -427,6 +552,58 @@ export default {
 }
 .shared-with-me-button svg {
   stroke: white;
+}
+
+/* Loading, Error, and Empty States */
+.loading-state, .error-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #5cb8de;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-icon, .empty-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background: #5cb8de;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 10px 20px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #4a9bc1;
+}
+
+.empty-subtitle {
+  font-size: 0.9em;
+  color: #999;
+  margin-top: 10px;
 }
 
 </style>
