@@ -30,7 +30,6 @@ def create_app():
     CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
     
 
-
     # Create upload directories
     create_upload_directories()
     
@@ -118,6 +117,11 @@ def get_comments():
                 c.commented_by,
                 c.created_at,
                 c.is_annotation,
+                c.status,
+                c.justification,
+                c.accepted_by,
+                c.designer_id,
+                c.accepted_at,
                 a.annotation_id,
                 a.x_position,
                 a.y_position
@@ -146,19 +150,24 @@ def get_comments():
                 "description": row[7],
                 "commented_by": row[8],
                 "created_at": row[9].isoformat() if row[9] else None,
-                "annotation": row[10]
+                "annotation": row[10],
+                "status": row[11],
+                "justification": row[12],
+                "accepted_by": row[13],
+                "designer_id": row[14],
+                "accepted_at": row[15].isoformat() if row[15] else None
             }
             comments.append(comment)
             
             # Add annotation if exists
-            if row[11] is not None:  # annotation_id exists
+            if row[16] is not None:  # annotation_id exists
                 annotation = {
-                    "id": row[11],
+                    "id": row[16],
                     "comment_id": row[0],
                     "document_id": row[1],
                     "page": row[5],
-                    "x": float(row[12]),
-                    "y": float(row[13]),
+                    "x": float(row[17]),
+                    "y": float(row[18]),
                     "description": row[7]
                 }
                 annotations.append(annotation)
@@ -311,6 +320,110 @@ def delete_comment(comment_id):
     except Exception as e:
         conn.rollback()
         print(f"Error deleting comment: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Accept a comment
+@app.route('/api/comments/<int:comment_id>/accept', methods=['POST'])
+def accept_comment(comment_id):
+    """Accept a comment with justification"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        required_fields = ['justification', 'accepted_by', 'designer_id']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Update comment status to accepted
+        cur.execute("""
+            UPDATE document_comments 
+            SET status = 'accept', 
+                justification = %s, 
+                accepted_by = %s, 
+                designer_id = %s, 
+                accepted_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE comment_id = %s
+        """, (
+            data['justification'],
+            data['accepted_by'],
+            data['designer_id'],
+            comment_id
+        ))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Comment not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Comment accepted successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error accepting comment: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+# Reject a comment
+@app.route('/api/comments/<int:comment_id>/reject', methods=['POST'])
+def reject_comment(comment_id):
+    """Reject a comment with justification"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        required_fields = ['justification', 'accepted_by', 'designer_id']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Update comment status to rejected
+        cur.execute("""
+            UPDATE document_comments 
+            SET status = 'reject', 
+                justification = %s, 
+                accepted_by = %s, 
+                designer_id = %s, 
+                accepted_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE comment_id = %s
+        """, (
+            data['justification'],
+            data['accepted_by'],
+            data['designer_id'],
+            comment_id
+        ))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Comment not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Comment rejected successfully"
+        })
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"Error rejecting comment: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Test endpoint to check database tables

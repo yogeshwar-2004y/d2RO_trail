@@ -2,39 +2,75 @@
   <div class="projects-assign-dashboard">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">ASSIGN PROJECT</span>
     </div>
-    
+
     <!-- Loading state -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading projects...</p>
     </div>
-    
+
     <!-- Error state -->
     <div v-else-if="error" class="error-container">
       <p class="error-message">{{ error }}</p>
       <button @click="fetchProjects" class="retry-button">Retry</button>
     </div>
-    
+
     <!-- Projects grid -->
     <div v-else class="card-grid">
       <div v-if="projects.length === 0" class="no-projects">
         <p>No projects found.</p>
       </div>
-      <div v-else v-for="project in projects" :key="project.id" class="project-card" @click="viewProjectMembers(project.id)">
+      <div
+        v-else
+        v-for="project in projects"
+        :key="project.id"
+        class="project-card"
+        @click="viewProjectMembers(project.id)"
+      >
         <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
@@ -46,12 +82,12 @@
 
 <script>
 export default {
-  name: 'ProjectsForAssigning',
+  name: "ProjectsForAssigning",
   data() {
     return {
       projects: [],
       loading: true,
-      error: null
+      error: null,
     };
   },
   async mounted() {
@@ -62,24 +98,25 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        
-        const response = await fetch('http://localhost:8000/api/projects');
+
+        const response = await fetch("http://localhost:8000/api/projects");
         const data = await response.json();
-        
+
         if (data.success) {
           this.projects = data.projects;
         } else {
-          this.error = data.message || 'Failed to fetch projects';
+          this.error = data.message || "Failed to fetch projects";
         }
       } catch (err) {
-        console.error('Error fetching projects:', err);
-        this.error = 'Failed to connect to server. Please check if the backend is running.';
+        console.error("Error fetching projects:", err);
+        this.error =
+          "Failed to connect to server. Please check if the backend is running.";
       } finally {
         this.loading = false;
       }
     },
     viewProjectMembers(projectId) {
-      this.$router.push({ name: 'ProjectMembers', params: { projectId } });
+      this.$router.push({ name: "ProjectMembers", params: { projectId } });
     },
   },
 };
@@ -176,8 +213,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {

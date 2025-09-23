@@ -231,10 +231,12 @@
           v-if="fileType === 'docx'"
           class="doc-container docx-content"
           :class="{ 'annotation-mode': isAnnotationMode }"
-          :style="{ fontSize: zoom * 16 + 'px' }"
+          :style="{ transform: `scale(${zoom})`, transformOrigin: 'top left' }"
           @click="handleDocumentClick"
+          ref="docxContainer"
         >
-          <div v-html="docxHtml"></div>
+          <!-- docx-preview renders content here -->
+          <div ref="docxRenderRoot" class="docx-render-root"></div>
           <!-- Annotation overlays for DOCX -->
           <div class="annotation-overlay">
             <div
@@ -266,13 +268,16 @@
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
-            <li v-for="(comment, index) in comments" :key="index" class="comment-item">
+            <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
               <button @click="deleteComment(index)" class="delete-btn" title="Delete comment">
                 🗑️
               </button>
               <div class="comment-header">
                 <span class="comment-commented_by">{{ comment.commented_by || 'Anonymous' }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
+                <span v-if="comment.status" class="comment-status" :class="'status-' + comment.status">
+                  {{ comment.status === 'accept' ? 'Accepted' : comment.status === 'reject' ? 'Rejected' : comment.status }}
+                </span>
               </div>
               <div class="comment-content">
                 <div class="comment-meta">
@@ -280,8 +285,27 @@
                   <span v-if="comment.section">Section: {{ comment.section }}</span>
                 </div>
                 <p class="comment-text">{{ comment.description }}</p>
-                <div v-if="comment.annotation" class="annotation-info">
+                <!-- <div v-if="comment.annotation" class="annotation-info">
                   <span class="annotation-marker">C Annotation</span>
+                </div> -->
+                
+                <!-- Comment Response Section -->
+                <div v-if="comment.justification" class="comment-response">
+                  <div class="response-header">
+                    {{ comment.status === 'accepted' ? 'Accepted' : 'Rejected' }} by {{ comment.accepted_by }}
+                    <span v-if="comment.accepted_at" class="response-date">{{ formatDate(comment.accepted_at) }}</span>
+                  </div>
+                  <div class="response-content">{{ comment.justification }}</div>
+                </div>
+                
+                <!-- Action Buttons (only show for pending comments) -->
+                <div v-if="comment.status === 'pending' || !comment.status" class="comment-actions">
+                  <button @click="acceptComment(comment)" class="action-btn accept">
+                    ✓ Accept
+                  </button>
+                  <button @click="rejectComment(comment)" class="action-btn reject">
+                    ✗ Reject
+                  </button>
                 </div>
               </div>
             </li>
@@ -385,6 +409,46 @@
         <div class="delete-confirm-footer">
           <button @click="cancelDelete" class="cancel-btn">Cancel</button>
           <button @click="confirmDelete" class="delete-confirm-btn">Delete Comment</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Justification Modal -->
+    <div v-if="showJustificationModal" class="justification-overlay" @click="cancelJustification">
+      <div class="justification-modal" @click.stop>
+        <div class="justification-header">
+          <h4>{{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}</h4>
+          <button @click="cancelJustification" class="close-btn">×</button>
+        </div>
+        
+        <div class="justification-body">
+          <div class="comment-preview" v-if="selectedComment">
+            <strong>Comment:</strong>
+            <p class="comment-text-preview">"{{ selectedComment.description }}"</p>
+            <div class="comment-meta-preview">
+              <span>By: {{ selectedComment.commented_by }}</span>
+              <span>Page: {{ selectedComment.page_no }}</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="justification">Justification *</label>
+            <textarea 
+              id="justification"
+              v-model="justificationText" 
+              placeholder="Please provide justification for your decision..."
+              rows="4"
+              class="justification-textarea"
+              required
+            ></textarea>
+          </div>
+        </div>
+        
+        <div class="justification-footer">
+          <button @click="cancelJustification" class="cancel-btn">Cancel</button>
+          <button @click="confirmJustification" class="confirm-btn" :class="justificationAction" :disabled="!justificationText.trim()">
+            {{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}
+          </button>
         </div>
       </div>
     </div>
@@ -511,6 +575,7 @@
 import VuePdfEmbed from "vue-pdf-embed"
 import * as mammoth from "mammoth/mammoth.browser"
 import * as pdfjsLib from "pdfjs-dist/build/pdf"
+import { renderAsync as renderDocx } from "docx-preview"
 
 // Configure pdf.js worker
 import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
@@ -537,7 +602,8 @@ export default {
       // Document viewing
       fileType: null,
       pdfUrl: null,
-      docxHtml: "",
+      docxHtml: "", // kept for back-compat; no longer used with docx-preview
+      docxRendered: false,
       page: 1,
       numPages: 0,
       zoom: 1.0,
@@ -625,6 +691,12 @@ export default {
       // Delete confirmation
       showDeleteConfirm: false,
       commentToDelete: null,
+      
+      // Justification modal
+      showJustificationModal: false,
+      selectedComment: null,
+      justificationAction: 'accept', // 'accept' or 'reject'
+      justificationText: '',
     }
   },
   
@@ -645,7 +717,7 @@ export default {
       return this.currentUserRole === 'Reviewer';
     },
     docContent() {
-      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxHtml);
+      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
     },
     //isFormValid() {
     //return this.commentForm.description.trim();
@@ -880,6 +952,34 @@ export default {
       }
     },
 
+    // Load DOCX directly from a URL (docx-preview)
+    async loadDocxFromUrl(fileUrl) {
+      try {
+        this.clearDocument();
+        this.fileType = 'docx';
+
+        const response = await fetch(fileUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
+        }
+        const arrayBuffer = await response.arrayBuffer();
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
+        });
+        this.docxRendered = true;
+        this.$nextTick(() => {
+          this.numPages = 1;
+        });
+      } catch (err) {
+        console.error('❌ Failed to load DOCX from URL:', err);
+        alert('Failed to load DOCX file from server.');
+      }
+    },
+
     // Load a PDF directly from a URL (used when viewing existing documents)
     async loadPdfFromUrl(fileUrl) {
       try {
@@ -895,67 +995,6 @@ export default {
       } catch (err) {
         console.error('Failed to load PDF from URL', err);
         alert('Failed to load PDF file.');
-      }
-    },
-
-    // Load a DOCX file directly from a URL (used when viewing existing documents)
-    async loadDocxFromUrl(fileUrl) {
-      try {
-        console.log('Starting DOCX URL loading...', { fileUrl });
-        
-        // Reset previous document state and set up for DOCX
-        this.clearDocument();
-        this.fileType = 'docx';
-        
-        // Fetch the file from URL
-        const response = await fetch(fileUrl);
-        if (!response.ok) {
-          throw new Error(`Failed to fetch DOCX file: ${response.status} ${response.statusText}`);
-        }
-        
-        console.log('File fetched successfully, converting to ArrayBuffer...');
-        const arrayBuffer = await response.arrayBuffer();
-        console.log('File successfully read as ArrayBuffer');
-
-        console.log('Converting DOCX to HTML with page markers...');
-        const options = {
-          styleMap: [
-            "p[style-name='Page Break'] => div.page-break"
-          ]
-        };
-
-        // First convert to get the basic HTML
-        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
-        console.log('Initial HTML conversion complete', { 
-          resultLength: result.value.length,
-          messages: result.messages 
-        });
-
-        // Process the HTML to add page markers
-        const processedHtml = this.processDocxHtml(result.value);
-        console.log('HTML processing complete', { 
-          finalLength: processedHtml.length,
-          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
-        });
-
-        // Set the processed HTML
-        this.docxHtml = processedHtml;
-        
-        // Calculate number of pages
-        this.$nextTick(() => {
-          const pages = document.querySelectorAll('.docx-content .page');
-          this.numPages = pages.length || 1;
-          console.log('Page calculation complete', { totalPages: this.numPages });
-        });
-
-      } catch (err) {
-        console.error('Error in loadDocxFromUrl:', {
-          error: err,
-          errorName: err.name,
-          errorMessage: err.message,
-          errorStack: err.stack
-        });
-        alert("Failed to render DOCX file. Check console for details.");
       }
     },
 
@@ -1063,6 +1102,95 @@ export default {
       this.selectedComment = null;
     },
 
+    // Accept/Reject Comment Methods
+    acceptComment(comment) {
+      this.selectedComment = comment;
+      this.justificationAction = 'accept';
+      this.justificationText = '';
+      this.showJustificationModal = true;
+    },
+
+    rejectComment(comment) {
+      this.selectedComment = comment;
+      this.justificationAction = 'reject';
+      this.justificationText = '';
+      this.showJustificationModal = true;
+    },
+
+    cancelJustification() {
+      this.showJustificationModal = false;
+      this.selectedComment = null;
+      this.justificationText = '';
+      this.justificationAction = 'accept';
+    },
+
+    async confirmJustification() {
+      if (!this.justificationText.trim()) {
+        alert('Please provide justification for your decision.');
+        return;
+      }
+
+      if (!this.selectedComment) {
+        alert('No comment selected.');
+        return;
+      }
+
+      try {
+        // Get current user info
+        let currentUser = 'Anonymous';
+        let currentUserId = null;
+        try {
+          if (userStore && userStore.getters && userStore.getters.userName) {
+            currentUser = userStore.getters.userName() || 'Anonymous';
+          }
+          if (userStore && userStore.getters && userStore.getters.currentUser) {
+            const user = userStore.getters.currentUser();
+            currentUserId = user?.id || user?.user_id || null;
+          }
+        } catch (error) {
+          console.log('Error getting user info:', error);
+        }
+
+        const endpoint = this.justificationAction === 'accept' 
+          ? `/api/comments/${this.selectedComment.id}/accept`
+          : `/api/comments/${this.selectedComment.id}/reject`;
+
+        const response = await fetch(`http://localhost:8000${endpoint}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            justification: this.justificationText,
+            accepted_by: currentUser,
+            designer_id: currentUserId
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update comment');
+        }
+
+        const result = await response.json();
+        console.log('Comment updated successfully:', result);
+
+        // Reload comments from backend to get updated status
+        await this.loadCommentsFromBackend();
+
+        // Close modal
+        this.cancelJustification();
+
+        // Show success message
+        const action = this.justificationAction === 'accept' ? 'accepted' : 'rejected';
+        alert(`Comment ${action} successfully!`);
+
+      } catch (error) {
+        console.error('Error updating comment:', error);
+        alert(`Failed to ${this.justificationAction} comment: ${error.message}`);
+      }
+    },
+
     scrollToPage(pageNum) {
       if (this.fileType === 'pdf' && this.$refs.pdfScroll && this.$refs.pdfPages) {
         const targetPage = this.$refs.pdfPages[pageNum - 1];
@@ -1167,7 +1295,7 @@ export default {
       const statusMap = {
         'Under Review': 'status-under-review',
         'Approved': 'status-approved',
-        'Rejected': 'status-rejected',
+        'Rejected': 'status-reject',
         'Pending': 'status-pending'
       };
       return statusMap[status] || 'status-default';
@@ -1285,52 +1413,22 @@ export default {
     },
 
     async loadDocx(file) {
-      console.log('Starting DOCX file loading...', { fileName: file.name, fileSize: file.size });
-      
       try {
-        console.log('Reading file as ArrayBuffer...');
         const arrayBuffer = await file.arrayBuffer();
-        console.log('File successfully read as ArrayBuffer');
-
-        console.log('Converting DOCX to HTML with page markers...');
-        const options = {
-          styleMap: [
-            "p[style-name='Page Break'] => div.page-break"
-          ]
-        };
-
-        // First convert to get the basic HTML
-        const result = await mammoth.convertToHtml({ arrayBuffer }, options);
-        console.log('Initial HTML conversion complete', { 
-          resultLength: result.value.length,
-          messages: result.messages 
+        const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
+        if (!container) return;
+        container.innerHTML = '';
+        await renderDocx(arrayBuffer, container, undefined, {
+          inWrapper: true,
+          className: 'docx-preview-root'
         });
-
-        // Process the HTML to add page markers
-        const processedHtml = this.processDocxHtml(result.value);
-        console.log('HTML processing complete', { 
-          finalLength: processedHtml.length,
-          pageCount: (processedHtml.match(/<div class="page"/g) || []).length 
-        });
-
-        // Set the processed HTML
-        this.docxHtml = processedHtml;
-        
-        // Calculate number of pages
+        this.docxRendered = true;
         this.$nextTick(() => {
-          const pages = document.querySelectorAll('.docx-content .page');
-          this.numPages = pages.length || 1;
-          console.log('Page calculation complete', { totalPages: this.numPages });
+          this.numPages = 1;
         });
-
       } catch (err) {
-        console.error('Error in loadDocx:', {
-          error: err,
-          errorName: err.name,
-          errorMessage: err.message,
-          errorStack: err.stack
-        });
-        alert("Failed to render DOCX file. Check console for details.");
+        console.error('Error rendering DOCX with docx-preview:', err);
+        alert('Failed to render DOCX file.');
       }
     },
 
@@ -1470,34 +1568,34 @@ export default {
       }
     },
 
-    scrollToPage(pageNum) {
-      console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
+    // scrollToPage(pageNum) {
+    //   console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
       
-      this.$nextTick(() => {
-        if (this.fileType === 'pdf' && this.$refs.pdfPages) {
-          const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
-          if (pageEl) {
-            console.log('Scrolling to PDF page element:', pageEl);
-            pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          } else {
-            console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
-          }
-        } else if (this.fileType === 'docx') {
-          const docContainer = document.querySelector('.docx-content');
-          if (docContainer) {
-            const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
-            if (targetPage) {
-              console.log('Scrolling to DOCX page element:', targetPage);
-              targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-              console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
-            }
-          } else {
-            console.warn('DOCX container not found');
-          }
-        }
-      });
-    },
+    //   this.$nextTick(() => {
+    //     if (this.fileType === 'pdf' && this.$refs.pdfPages) {
+    //       const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
+    //       if (pageEl) {
+    //         console.log('Scrolling to PDF page element:', pageEl);
+    //         pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //       } else {
+    //         console.warn('PDF page element not found:', { pageNum, totalPages: this.numPages });
+    //       }
+    //     } else if (this.fileType === 'docx') {
+    //       const docContainer = document.querySelector('.docx-content');
+    //       if (docContainer) {
+    //         const targetPage = docContainer.querySelector(`.page[data-page="${pageNum}"]`);
+    //         if (targetPage) {
+    //           console.log('Scrolling to DOCX page element:', targetPage);
+    //           targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    //         } else {
+    //           console.warn('DOCX page element not found:', { pageNum, totalPages: this.numPages });
+    //         }
+    //       } else {
+    //         console.warn('DOCX container not found');
+    //       }
+    //     }
+    //   });
+    // },
 
     onScroll() {
       if (this.fileType !== "pdf" || !this.$refs.pdfPages?.length) return;
@@ -1673,6 +1771,7 @@ export default {
         console.log('Annotation created:', annotation);
         console.log('Total annotations:', this.annotations.length);
         
+        
         // Clear current annotation after creating it
         this.currentAnnotation = null;
       }
@@ -1704,13 +1803,29 @@ export default {
     // Annotation System
     handleDocumentClick(event) {
       if (!this.isAnnotationMode) return;
-      
-      const rect = event.currentTarget.getBoundingClientRect();
-      const x = ((event.clientX - rect.left) / rect.width) * 100;
-      const y = ((event.clientY - rect.top) / rect.height) * 100;
+      // Compute coordinates relative to the correct target
+      let x = 0;
+      let y = 0;
+      let pageNo = 1;
+
+      if (this.fileType === 'pdf') {
+        // For PDFs, position relative to the clicked page wrapper
+        const pageEl = event.target.closest('.pdf-page-wrapper');
+        if (!pageEl) return;
+        const rect = pageEl.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = Number(pageEl.getAttribute('data-page')) || this.page || 1;
+      } else {
+        // For DOCX and others, position relative to the container
+        const rect = event.currentTarget.getBoundingClientRect();
+        x = ((event.clientX - rect.left) / rect.width) * 100;
+        y = ((event.clientY - rect.top) / rect.height) * 100;
+        pageNo = 1;
+      }
       
       // Update comment form with click position and document details
-      this.commentForm.page_no = this.fileType === 'pdf' ? this.page : 1;
+      this.commentForm.page_no = pageNo;
       this.commentForm.document_name = this.fileName || '';
       this.commentForm.document_id = this.documentId || '';
       this.commentForm.version = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '';
@@ -1720,7 +1835,7 @@ export default {
       this.currentAnnotation = {
         x: x,
         y: y,
-        page: this.fileType === 'pdf' ? this.page : 1
+        page: pageNo
       };
       
       // Exit annotation mode and show comment form
@@ -1939,7 +2054,7 @@ export default {
 
 .status-pending { color: #f59e0b; }
 .status-approved { color: #10b981; }
-.status-rejected { color: #ef4444; }
+.status-reject { color: #ef4444; }
 .status-review { color: #3b82f6; }
 
 /* Action Bar */
@@ -2216,6 +2331,12 @@ export default {
   height: 100%;
   background: #f8fafc;
   overflow-y: auto; /* Enable scrolling for DOCX content */
+  position: relative; /* Needed so overlay positions correctly */
+}
+
+.docx-render-root {
+  position: relative;
+  z-index: 1;
 }
 
 .docx-content .page {
@@ -2338,6 +2459,8 @@ export default {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-item:hover {
@@ -2351,7 +2474,12 @@ export default {
   font-size: 0.95rem;
   line-height: 1.6;
   margin-bottom: 0.75rem;
-  font-weight: bold;
+  font-weight: 800;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .remove-btn {
@@ -2603,6 +2731,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-header {
@@ -2626,6 +2756,8 @@ export default {
 
 .comment-content {
   margin-bottom: 0.5rem;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-meta {
@@ -2641,6 +2773,11 @@ export default {
   font-size: 0.9rem;
   line-height: 1.5;
   margin: 0;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
 }
 
 .annotation-info {
@@ -3156,6 +3293,8 @@ export default {
   border-radius: 8px;
   padding: 1rem;
   transition: all 0.2s ease;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-item:hover {
@@ -3208,12 +3347,12 @@ export default {
   font-weight: 500;
 }
 
-.status-accepted {
+.status-accept {
   background: #d1fae5;
   color: #059669;
 }
 
-.status-rejected {
+.status-reject {
   background: #fee2e2;
   color: #dc2626;
 }
@@ -3223,6 +3362,8 @@ export default {
   color: #1f2937;
   margin-bottom: 1rem;
   line-height: 1.5;
+  overflow: hidden;
+  word-wrap: break-word;
 }
 
 .comment-actions {
@@ -3320,6 +3461,228 @@ export default {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Justification Modal Styles */
+.justification-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.justification-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+.justification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+.justification-header h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.justification-body {
+  padding: 1.5rem;
+}
+
+.justification-body .form-group {
+  margin-top: 1rem;
+}
+
+.justification-body .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.justification-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  resize: vertical;
+  min-height: 100px;
+  transition: border-color 0.2s;
+}
+
+.justification-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.justification-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.confirm-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.confirm-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.confirm-btn.accept:hover:not(:disabled) {
+  background: #059669;
+}
+
+.confirm-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.confirm-btn.reject:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.confirm-btn:disabled {
+  background: #d1d5db;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Comment Status Styles */
+.comment-item.status-accept {
+  border-left: 4px solid #10b981;
+  background: #f0fdf4;
+}
+
+.comment-item.status-reject {
+  border-left: 4px solid #ef4444;
+  background: #fef2f2;
+}
+
+.comment-item.status-pending {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.comment-status {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-accept {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.status-reject {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+/* Comment Actions */
+.comment-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.action-btn.accept {
+  background: #10b981;
+  color: white;
+}
+
+.action-btn.accept:hover {
+  background: #059669;
+}
+
+.action-btn.reject {
+  background: #ef4444;
+  color: white;
+}
+
+.action-btn.reject:hover {
+  background: #dc2626;
+}
+
+/* Comment Response */
+.comment-response {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.response-header {
+  font-weight: 500;
+  color: #4b5563;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.response-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.response-content {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
 }
 
 </style>

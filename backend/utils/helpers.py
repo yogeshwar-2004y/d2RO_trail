@@ -22,7 +22,7 @@ def hash_password(password):
 def verify_password(password, hashed_password):
     """Verify password against hash"""
     return hash_password(password) == hashed_password
-    # return password == hashed_password
+    #return password == hashed_password
 
 def create_upload_directories():
     """Create upload directories if they don't exist"""

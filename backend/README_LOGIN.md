@@ -5,6 +5,7 @@ This document describes the implementation of the role-based login system for th
 ## Overview
 
 The system now implements proper role-based authentication where:
+
 1. Users are authenticated via email and password
 2. User roles are fetched from the `user_roles` and `roles` tables
 3. Frontend navigation is automatically determined based on the user's role
@@ -15,16 +16,19 @@ The system now implements proper role-based authentication where:
 The system uses three main tables:
 
 ### `users` table
+
 - `user_id`: Primary key
 - `name`: User's full name
 - `email`: Unique email address
 - `password_hash`: SHA-256 hashed password
 
 ### `roles` table
+
 - `role_id`: Primary key
 - `role_name`: Role name (Admin, QA Head, QA Reviewer, Design Head, Designer)
 
 ### `user_roles` table
+
 - `user_role_id`: Primary key
 - `user_id`: Foreign key to users table
 - `role_id`: Foreign key to roles table
@@ -33,10 +37,13 @@ The system uses three main tables:
 ## Setup Instructions
 
 ### 1. Database Setup
+
 Run the SQL queries from `queries.sql` to create the necessary tables and sample data.
 
 ### 2. Update Existing Passwords
+
 If you have existing users with plain text passwords, run:
+
 ```bash
 cd backend
 python update_passwords.py
@@ -45,6 +52,7 @@ python update_passwords.py
 This will hash all existing passwords using SHA-256.
 
 ### 3. Start the Backend
+
 ```bash
 cd backend
 python app.py
@@ -53,7 +61,9 @@ python app.py
 The Flask server will start on `http://127.0.0.1:8000`
 
 ### 4. Test the System
+
 Run the test script to verify database connectivity:
+
 ```bash
 cd backend
 python test_login.py
@@ -62,9 +72,11 @@ python test_login.py
 ## API Endpoints
 
 ### POST /api/login
+
 Authenticates a user and returns role information.
 
 **Request:**
+
 ```json
 {
   "email": "user@example.com",
@@ -73,6 +85,7 @@ Authenticates a user and returns role information.
 ```
 
 **Response (Success):**
+
 ```json
 {
   "success": true,
@@ -87,6 +100,7 @@ Authenticates a user and returns role information.
 ```
 
 **Response (Error):**
+
 ```json
 {
   "success": false,
@@ -98,13 +112,13 @@ Authenticates a user and returns role information.
 
 After successful login, users are automatically redirected based on their role:
 
-| Role | Route | Component |
-|------|-------|-----------|
-| Admin | `/admin` | `HomePageAdmin` |
-| QA Head | `/qahead/home` | `HomePageQAHead` |
-| QA Reviewer | `/reviewer/home` | `HomePageReviewer` |
+| Role        | Route              | Component            |
+| ----------- | ------------------ | -------------------- |
+| Admin       | `/admin`           | `HomePageAdmin`      |
+| QA Head     | `/qahead/home`     | `HomePageQAHead`     |
+| QA Reviewer | `/reviewer/home`   | `HomePageReviewer`   |
 | Design Head | `/designhead/home` | `HomePageDesignHead` |
-| Designer | `/designer/home` | `HomePageDesigner` |
+| Designer    | `/designer/home`   | `HomePageDesigner`   |
 
 ## Security Features
 
@@ -117,26 +131,29 @@ After successful login, users are automatically redirected based on their role:
 ## Testing
 
 ### Sample Users
+
 The system comes with sample users for testing:
 
-| Email | Password | Role |
-|-------|----------|------|
-| avanthikapg22@gmail.com | reviewer | QA Reviewer |
-| sudhikshamk06@gmail.com | admin | Admin |
+| Email                      | Password   | Role        |
+| -------------------------- | ---------- | ----------- |
+| avanthikapg22@gmail.com    | reviewer   | QA Reviewer |
+| sudhikshamk06@gmail.com    | admin      | Admin       |
 | mahadevmanohar07@gmail.com | designhead | Design Head |
-| mohan@gmail.com | qahead | QA Head |
-| mahaashri@gmail.com | designer | Designer |
+| mohan@gmail.com            | qahead     | QA Head     |
+| mahaashri@gmail.com        | designer   | Designer    |
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Database Connection Error**
+
    - Verify PostgreSQL is running
    - Check database credentials in `app.py`
    - Ensure database "ERP" exists
 
 2. **Login Fails**
+
    - Check if passwords were updated using `update_passwords.py`
    - Verify user exists in database
    - Check user has assigned role
@@ -146,7 +163,9 @@ The system comes with sample users for testing:
    - Check role names in database match expected values
 
 ### Debug Mode
+
 Enable debug logging by setting `debug=True` in `app.py`:
+
 ```python
 if __name__ == '__main__':
     app.run(debug=True)

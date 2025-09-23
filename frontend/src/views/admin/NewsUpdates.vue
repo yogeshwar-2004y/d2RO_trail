@@ -3,19 +3,49 @@
     <!-- Header -->
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
       <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
       <span class="page-title">NEWS UPDATES</span>
       <button @click="openManageNewsModal" class="btn btn-manage">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+          ></path>
         </svg>
         Manage News
       </button>
@@ -29,20 +59,47 @@
           <h2>Add News Updates</h2>
           <div class="form-actions">
             <button @click="addNewsItem" class="btn btn-add">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <line x1="12" y1="5" x2="12" y2="19"></line>
                 <line x1="5" y1="12" x2="19" y2="12"></line>
               </svg>
               Add News Text
             </button>
-            <button @click="saveAllNews" class="btn btn-save" :disabled="newsItems.length === 0 || saving">
-              <svg v-if="!saving" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <button
+              @click="saveAllNews"
+              class="btn btn-save"
+              :disabled="newsItems.length === 0 || saving"
+            >
+              <svg
+                v-if="!saving"
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"
+                ></path>
                 <polyline points="17,21 17,13 7,13 7,21"></polyline>
                 <polyline points="7,3 7,8 15,8"></polyline>
               </svg>
               <div v-if="saving" class="loading-spinner"></div>
-              {{ saving ? 'Saving...' : 'Save All News' }}
+              {{ saving ? "Saving..." : "Save All News" }}
             </button>
           </div>
         </div>
@@ -50,25 +107,46 @@
         <!-- News Items Form -->
         <div class="news-items-container">
           <div v-if="newsItems.length === 0" class="no-news-message">
-            <p>No news items added yet. Click "Add News Text" to start adding news.</p>
+            <p>
+              No news items added yet. Click "Add News Text" to start adding
+              news.
+            </p>
           </div>
-          
-          <div v-for="(item, index) in newsItems" :key="item.id" class="news-item-form">
+
+          <div
+            v-for="(item, index) in newsItems"
+            :key="item.id"
+            class="news-item-form"
+          >
             <div class="news-item-header">
               <h3>News Item {{ index + 1 }}</h3>
-              <button @click="removeNewsItem(index)" class="btn btn-delete-small">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                @click="removeNewsItem(index)"
+                class="btn btn-delete-small"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="3,6 5,6 21,6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
                 </svg>
               </button>
             </div>
-            
-            
+
             <div class="form-group">
               <label>News Text *</label>
-              <textarea 
-                v-model="item.newsText" 
+              <textarea
+                v-model="item.newsText"
                 class="form-textarea"
                 placeholder="Enter news content..."
                 rows="4"
@@ -83,18 +161,31 @@
       <div class="existing-news-section">
         <div class="section-header">
           <h2>Recent News Updates (Last 24 Hours)</h2>
-          <button 
-            @click="deleteAllNews" 
-            class="btn btn-delete-all" 
+          <button
+            @click="deleteAllNews"
+            class="btn btn-delete-all"
             :disabled="recentNews.length === 0 || deleting"
             v-if="recentNews.length > 0"
           >
-            <svg v-if="!deleting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              v-if="!deleting"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <polyline points="3,6 5,6 21,6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
             </svg>
             <div v-if="deleting" class="loading-spinner"></div>
-            {{ deleting ? 'Deleting...' : 'Delete All Records' }}
+            {{ deleting ? "Deleting..." : "Delete All Records" }}
           </button>
         </div>
 
@@ -113,10 +204,25 @@
               <div class="news-info">
                 <span class="news-title">News Update</span>
               </div>
-              <button @click="deleteNewsItem(news.id)" class="btn btn-delete-small">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                @click="deleteNewsItem(news.id)"
+                class="btn btn-delete-small"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="3,6 5,6 21,6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
                 </svg>
               </button>
             </div>
@@ -132,143 +238,228 @@
     </div>
 
     <!-- Manage News Modal -->
-    <div v-if="showManageModal" class="modal-overlay" @click="closeManageNewsModal">
+    <div
+      v-if="showManageModal"
+      class="modal-overlay"
+      @click="closeManageNewsModal"
+    >
       <div class="modal-content" @click.stop>
         <div class="modal-header">
           <h2>Manage All News</h2>
           <button @click="closeManageNewsModal" class="btn-close">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
-         <div class="modal-body">
-           <!-- Filter Tabs -->
-           <div class="filter-tabs">
-             <button 
-               @click="setNewsFilter('all')" 
-               :class="['filter-tab', { active: newsFilter === 'all' }]"
-             >
-               All News ({{ allNews.length }})
-             </button>
-             <button 
-               @click="setNewsFilter('active')" 
-               :class="['filter-tab', { active: newsFilter === 'active' }]"
-             >
-               Active ({{ activeNewsCount }})
-             </button>
-             <button 
-               @click="setNewsFilter('expired')" 
-               :class="['filter-tab', { active: newsFilter === 'expired' }]"
-             >
-               Expired ({{ expiredNewsCount }})
-             </button>
-             <button 
-               @click="setNewsFilter('hidden')" 
-               :class="['filter-tab', { active: newsFilter === 'hidden' }]"
-             >
-               Hidden ({{ hiddenNewsCount }})
-             </button>
-           </div>
-           
-           <div v-if="loadingAllNews" class="loading-container">
-             <div class="loading-spinner"></div>
-             <p>Loading all news...</p>
-           </div>
-           
-           <div v-else-if="filteredNews.length === 0" class="no-data-message">
-             <p v-if="allNews.length === 0">No news updates found in the database.</p>
-             <p v-else>No {{ newsFilter }} news items found.</p>
-           </div>
-           
-           <div v-else class="news-list modal-news-list">
-             <div v-for="news in filteredNews" :key="news.id" 
-                  :class="['news-card', 'enhanced-news-card', {
-                    'news-card-active': isNewsActive(news),
-                    'news-card-expired': isNewsExpired(news),
-                    'news-card-hidden': news.hidden,
-                    'news-card-repostable': !isNewsActive(news)
-                  }]">
-               <div class="news-card-header">
-                 <div class="news-info">
-                   <span class="news-title">News Update</span>
-                   <span v-if="isNewsExpired(news)" class="news-status expired">Expired</span>
-                   <span v-else-if="news.hidden" class="news-status hidden">Hidden</span>
-                   <span v-else class="news-status active">Active</span>
-                 </div>
-                 <div class="news-actions">
-                   <button 
-                     v-if="!isNewsActive(news)" 
-                     @click="repostNewsItem(news.id)" 
-                     class="btn btn-repost-small"
-                     :disabled="reposting"
-                     :title="news.hidden ? 'Repost hidden news' : 'Repost expired news'"
-                   >
-                     <svg v-if="!reposting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                       <polyline points="23,4 23,10 17,10"></polyline>
-                       <polyline points="1,20 1,14 7,14"></polyline>
-                       <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"></path>
-                     </svg>
-                     <div v-if="reposting" class="loading-spinner-small"></div>
-                     Repost
-                   </button>
-                   <button 
-                     @click="permanentlyDeleteNewsItem(news.id)" 
-                     class="btn btn-delete-small"
-                     title="Permanently delete this news item"
-                   >
-                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                       <polyline points="3,6 5,6 21,6"></polyline>
-                       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                     </svg>
-                   </button>
-                 </div>
-               </div>
-               <div class="news-content">
-                 {{ news.news_text }}
-               </div>
-               <div class="news-meta">
-                 <div class="meta-row">
-                   <span class="meta-label">Created:</span>
-                   <span class="meta-value">{{ formatDateTime(news.created_at) }}</span>
-                 </div>
-                 <div v-if="news.updated_at && news.updated_at !== news.created_at" class="meta-row">
-                   <span class="meta-label">Last Updated:</span>
-                   <span class="meta-value">{{ formatDateTime(news.updated_at) }}</span>
-                 </div>
-                 <div class="meta-row">
-                   <span class="meta-label">Status:</span>
-                   <span class="meta-value status-indicator">
-                     <span v-if="isNewsActive(news)" class="status-dot active"></span>
-                     <span v-else-if="isNewsExpired(news)" class="status-dot expired"></span>
-                     <span v-else-if="news.hidden" class="status-dot hidden"></span>
-                     {{ getNewsStatusText(news) }}
-                   </span>
-                 </div>
-                 <div v-if="isNewsActive(news)" class="meta-row">
-                   <span class="meta-label">Expires:</span>
-                   <span class="meta-value expiry-time">{{ getTimeUntilExpiry(news) }}</span>
-                 </div>
-               </div>
-             </div>
+
+        <div class="modal-body">
+          <!-- Filter Tabs -->
+          <div class="filter-tabs">
+            <button
+              @click="setNewsFilter('all')"
+              :class="['filter-tab', { active: newsFilter === 'all' }]"
+            >
+              All News ({{ allNews.length }})
+            </button>
+            <button
+              @click="setNewsFilter('active')"
+              :class="['filter-tab', { active: newsFilter === 'active' }]"
+            >
+              Active ({{ activeNewsCount }})
+            </button>
+            <button
+              @click="setNewsFilter('expired')"
+              :class="['filter-tab', { active: newsFilter === 'expired' }]"
+            >
+              Expired ({{ expiredNewsCount }})
+            </button>
+            <button
+              @click="setNewsFilter('hidden')"
+              :class="['filter-tab', { active: newsFilter === 'hidden' }]"
+            >
+              Hidden ({{ hiddenNewsCount }})
+            </button>
+          </div>
+
+          <div v-if="loadingAllNews" class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading all news...</p>
+          </div>
+
+          <div v-else-if="filteredNews.length === 0" class="no-data-message">
+            <p v-if="allNews.length === 0">
+              No news updates found in the database.
+            </p>
+            <p v-else>No {{ newsFilter }} news items found.</p>
+          </div>
+
+          <div v-else class="news-list modal-news-list">
+            <div
+              v-for="news in filteredNews"
+              :key="news.id"
+              :class="[
+                'news-card',
+                'enhanced-news-card',
+                {
+                  'news-card-active': isNewsActive(news),
+                  'news-card-expired': isNewsExpired(news),
+                  'news-card-hidden': news.hidden,
+                  'news-card-repostable': !isNewsActive(news),
+                },
+              ]"
+            >
+              <div class="news-card-header">
+                <div class="news-info">
+                  <span class="news-title">News Update</span>
+                  <span v-if="isNewsExpired(news)" class="news-status expired"
+                    >Expired</span
+                  >
+                  <span v-else-if="news.hidden" class="news-status hidden"
+                    >Hidden</span
+                  >
+                  <span v-else class="news-status active">Active</span>
+                </div>
+                <div class="news-actions">
+                  <button
+                    v-if="!isNewsActive(news)"
+                    @click="repostNewsItem(news.id)"
+                    class="btn btn-repost-small"
+                    :disabled="reposting"
+                    :title="
+                      news.hidden ? 'Repost hidden news' : 'Repost expired news'
+                    "
+                  >
+                    <svg
+                      v-if="!reposting"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="23,4 23,10 17,10"></polyline>
+                      <polyline points="1,20 1,14 7,14"></polyline>
+                      <path
+                        d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"
+                      ></path>
+                    </svg>
+                    <div v-if="reposting" class="loading-spinner-small"></div>
+                    Repost
+                  </button>
+                  <button
+                    @click="permanentlyDeleteNewsItem(news.id)"
+                    class="btn btn-delete-small"
+                    title="Permanently delete this news item"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="3,6 5,6 21,6"></polyline>
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      ></path>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="news-content">
+                {{ news.news_text }}
+              </div>
+              <div class="news-meta">
+                <div class="meta-row">
+                  <span class="meta-label">Created:</span>
+                  <span class="meta-value">{{
+                    formatDateTime(news.created_at)
+                  }}</span>
+                </div>
+                <div
+                  v-if="news.updated_at && news.updated_at !== news.created_at"
+                  class="meta-row"
+                >
+                  <span class="meta-label">Last Updated:</span>
+                  <span class="meta-value">{{
+                    formatDateTime(news.updated_at)
+                  }}</span>
+                </div>
+                <div class="meta-row">
+                  <span class="meta-label">Status:</span>
+                  <span class="meta-value status-indicator">
+                    <span
+                      v-if="isNewsActive(news)"
+                      class="status-dot active"
+                    ></span>
+                    <span
+                      v-else-if="isNewsExpired(news)"
+                      class="status-dot expired"
+                    ></span>
+                    <span
+                      v-else-if="news.hidden"
+                      class="status-dot hidden"
+                    ></span>
+                    {{ getNewsStatusText(news) }}
+                  </span>
+                </div>
+                <div v-if="isNewsActive(news)" class="meta-row">
+                  <span class="meta-label">Expires:</span>
+                  <span class="meta-value expiry-time">{{
+                    getTimeUntilExpiry(news)
+                  }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
+
         <div class="modal-footer">
-          <button 
-            @click="deleteAllNewsFromModal" 
-            class="btn btn-delete-all" 
+          <button
+            @click="deleteAllNewsFromModal"
+            class="btn btn-delete-all"
             :disabled="allNews.length === 0 || deleting"
             v-if="allNews.length > 0"
           >
-            <svg v-if="!deleting" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              v-if="!deleting"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <polyline points="3,6 5,6 21,6"></polyline>
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              ></path>
             </svg>
             <div v-if="deleting" class="loading-spinner"></div>
-            {{ deleting ? 'Deleting...' : 'Delete All News' }}
+            {{ deleting ? "Deleting..." : "Delete All News" }}
           </button>
         </div>
       </div>
@@ -278,57 +469,57 @@
 
 <script>
 export default {
-  name: 'NewsUpdates',
-   data() {
-     return {
-       newsItems: [],
-       existingNews: [],
-       allNews: [],
-       saving: false,
-       deleting: false,
-       reposting: false,
-       loadingNews: false,
-       loadingAllNews: false,
-       showManageModal: false,
-       newsFilter: 'all',
-       nextId: 1
-     };
-   },
+  name: "NewsUpdates",
+  data() {
+    return {
+      newsItems: [],
+      existingNews: [],
+      allNews: [],
+      saving: false,
+      deleting: false,
+      reposting: false,
+      loadingNews: false,
+      loadingAllNews: false,
+      showManageModal: false,
+      newsFilter: "all",
+      nextId: 1,
+    };
+  },
   computed: {
     recentNews() {
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-      
-      return this.existingNews.filter(news => {
+
+      return this.existingNews.filter((news) => {
         const newsDate = new Date(news.updated_at || news.created_at);
         return newsDate >= twentyFourHoursAgo && !news.hidden;
       });
     },
-    
+
     filteredNews() {
-      if (this.newsFilter === 'all') {
+      if (this.newsFilter === "all") {
         return this.allNews;
-      } else if (this.newsFilter === 'active') {
-        return this.allNews.filter(news => this.isNewsActive(news));
-      } else if (this.newsFilter === 'expired') {
-        return this.allNews.filter(news => this.isNewsExpired(news));
-      } else if (this.newsFilter === 'hidden') {
-        return this.allNews.filter(news => news.hidden);
+      } else if (this.newsFilter === "active") {
+        return this.allNews.filter((news) => this.isNewsActive(news));
+      } else if (this.newsFilter === "expired") {
+        return this.allNews.filter((news) => this.isNewsExpired(news));
+      } else if (this.newsFilter === "hidden") {
+        return this.allNews.filter((news) => news.hidden);
       }
       return this.allNews;
     },
-    
+
     activeNewsCount() {
-      return this.allNews.filter(news => this.isNewsActive(news)).length;
+      return this.allNews.filter((news) => this.isNewsActive(news)).length;
     },
-    
+
     expiredNewsCount() {
-      return this.allNews.filter(news => this.isNewsExpired(news)).length;
+      return this.allNews.filter((news) => this.isNewsExpired(news)).length;
     },
-    
+
     hiddenNewsCount() {
-      return this.allNews.filter(news => news.hidden).length;
-    }
+      return this.allNews.filter((news) => news.hidden).length;
+    },
   },
   mounted() {
     this.loadExistingNews();
@@ -337,21 +528,21 @@ export default {
     addNewsItem() {
       const newItem = {
         id: this.nextId++,
-        newsText: ''
+        newsText: "",
       };
       this.newsItems.push(newItem);
     },
-    
+
     removeNewsItem(index) {
       this.newsItems.splice(index, 1);
     },
-    
+
     async saveAllNews() {
       if (this.newsItems.length === 0) {
-        alert('Please add at least one news item');
+        alert("Please add at least one news item");
         return;
       }
-      
+
       // Validate required fields
       for (let i = 0; i < this.newsItems.length; i++) {
         const item = this.newsItems[i];
@@ -360,25 +551,25 @@ export default {
           return;
         }
       }
-      
+
       this.saving = true;
       try {
-        const response = await fetch('http://localhost:8000/api/news', {
-          method: 'POST',
+        const response = await fetch("http://localhost:8000/api/news", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            news_items: this.newsItems.map(item => ({
-              news_text: item.newsText
-            }))
-          })
+            news_items: this.newsItems.map((item) => ({
+              news_text: item.newsText,
+            })),
+          }),
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-          alert('News updates saved successfully!');
+          alert("News updates saved successfully!");
           this.newsItems = [];
           this.nextId = 1;
           await this.loadExistingNews();
@@ -386,265 +577,300 @@ export default {
           throw new Error(data.message);
         }
       } catch (error) {
-        console.error('Error saving news:', error);
-        alert('Error saving news updates: ' + error.message);
+        console.error("Error saving news:", error);
+        alert("Error saving news updates: " + error.message);
       } finally {
         this.saving = false;
       }
     },
-    
+
     async loadExistingNews() {
       this.loadingNews = true;
       try {
-        const response = await fetch('http://localhost:8000/api/news');
+        const response = await fetch("http://localhost:8000/api/news");
         const data = await response.json();
-         console.log('loadExistingNews data after jsonify:', data);
-        
+        console.log("loadExistingNews data after jsonify:", data);
+
         if (data.success) {
           this.existingNews = data.news;
         } else {
-          console.error('Error loading news:', data.message);
+          console.error("Error loading news:", data.message);
         }
       } catch (error) {
-        console.error('Error loading news:', error);
+        console.error("Error loading news:", error);
       } finally {
         this.loadingNews = false;
       }
     },
-    
+
     async deleteAllNews() {
-      if (!confirm('Are you sure you want to delete ALL news records? This action cannot be undone.')) {
+      if (
+        !confirm(
+          "Are you sure you want to delete ALL news records? This action cannot be undone."
+        )
+      ) {
         return;
       }
-      
+
       this.deleting = true;
       try {
-        const response = await fetch('http://localhost:8000/api/news/all', {
-          method: 'DELETE'
+        const response = await fetch("http://localhost:8000/api/news/all", {
+          method: "DELETE",
         });
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-          alert('All news records deleted successfully!');
+          alert("All news records deleted successfully!");
           this.existingNews = [];
         } else {
           throw new Error(data.message);
         }
       } catch (error) {
-        console.error('Error deleting all news:', error);
-        alert('Error deleting news records: ' + error.message);
+        console.error("Error deleting all news:", error);
+        alert("Error deleting news records: " + error.message);
       } finally {
         this.deleting = false;
       }
     },
-    
-     async deleteNewsItem(newsId) {
-       if (!confirm('Are you sure you want to hide this news item from the frontend? It will remain stored in the database.')) {
-         return;
-       }
-       
-       try {
-         const response = await fetch(`http://localhost:8000/api/news/${newsId}`, {
-           method: 'DELETE'
-         });
-         
-         const data = await response.json();
-         
-         if (data.success) {
-           this.existingNews = this.existingNews.filter(news => news.id !== newsId);
-           alert('News item hidden successfully!');
-         } else {
-           throw new Error(data.message);
-         }
-       } catch (error) {
-         console.error('Error hiding news item:', error);
-         alert('Error hiding news item: ' + error.message);
-       }
-     },
-     
-     async permanentlyDeleteNewsItem(newsId) {
-       if (!confirm('Are you sure you want to PERMANENTLY DELETE this news item? This action cannot be undone.')) {
-         return;
-       }
-       
-       try {
-         const response = await fetch(`http://localhost:8000/api/news/${newsId}/permanent`, {
-           method: 'DELETE'
-         });
-         
-         const data = await response.json();
-         
-         if (data.success) {
-           this.existingNews = this.existingNews.filter(news => news.id !== newsId);
-           this.allNews = this.allNews.filter(news => news.id !== newsId);
-           alert('News item permanently deleted!');
-         } else {
-           throw new Error(data.message);
-         }
-       } catch (error) {
-         console.error('Error permanently deleting news item:', error);
-         alert('Error permanently deleting news item: ' + error.message);
-       }
-     },
-     
-     async repostNewsItem(newsId) {
-       if (!confirm('Are you sure you want to repost this news item? It will be visible for another 24 hours.')) {
-         return;
-       }
-       
-       this.reposting = true;
-       try {
-         const response = await fetch(`http://localhost:8000/api/news/${newsId}/repost`, {
-           method: 'PUT'
-         });
-         
-         const data = await response.json();
-         
-         if (data.success) {
-           alert('News item reposted successfully! It will be visible for 24 hours.');
-           // Refresh both the main news and all news data
-           await Promise.all([
-             this.loadExistingNews(),
-             this.loadAllNews()
-           ]);
-         } else {
-           throw new Error(data.message);
-         }
-       } catch (error) {
-         console.error('Error reposting news item:', error);
-         alert('Error reposting news item: ' + error.message);
-       } finally {
-         this.reposting = false;
-       }
-     },
-     
-     isNewsExpired(news) {
-       if (!news.updated_at) return false;
-       const twentyFourHoursAgo = new Date();
-       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-       const newsDate = new Date(news.updated_at);
-       return newsDate < twentyFourHoursAgo && !news.hidden;
-     },
-     
-     isNewsActive(news) {
-       if (news.hidden) return false;
-       if (!news.updated_at) return false;
-       const twentyFourHoursAgo = new Date();
-       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-       const newsDate = new Date(news.updated_at);
-       return newsDate >= twentyFourHoursAgo;
-     },
-     
-     setNewsFilter(filter) {
-       this.newsFilter = filter;
-     },
-     
-     getNewsStatusText(news) {
-       if (news.hidden) return 'Hidden';
-       if (this.isNewsActive(news)) return 'Active';
-       if (this.isNewsExpired(news)) return 'Expired';
-       return 'Inactive';
-     },
-     
-     getTimeUntilExpiry(news) {
-       if (!news.updated_at) return '';
-       const expiryTime = new Date(news.updated_at);
-       expiryTime.setHours(expiryTime.getHours() + 24);
-       const now = new Date();
-       const timeDiff = expiryTime - now;
-       
-       if (timeDiff <= 0) return 'Expired';
-       
-       const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-       
-       if (hours > 0) {
-         return `${hours}h ${minutes}m remaining`;
-       } else {
-         return `${minutes}m remaining`;
-       }
-     },
-    
+
+    async deleteNewsItem(newsId) {
+      if (
+        !confirm(
+          "Are you sure you want to hide this news item from the frontend? It will remain stored in the database."
+        )
+      ) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/news/${newsId}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.existingNews = this.existingNews.filter(
+            (news) => news.id !== newsId
+          );
+          alert("News item hidden successfully!");
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error("Error hiding news item:", error);
+        alert("Error hiding news item: " + error.message);
+      }
+    },
+
+    async permanentlyDeleteNewsItem(newsId) {
+      if (
+        !confirm(
+          "Are you sure you want to PERMANENTLY DELETE this news item? This action cannot be undone."
+        )
+      ) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/news/${newsId}/permanent`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.existingNews = this.existingNews.filter(
+            (news) => news.id !== newsId
+          );
+          this.allNews = this.allNews.filter((news) => news.id !== newsId);
+          alert("News item permanently deleted!");
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error("Error permanently deleting news item:", error);
+        alert("Error permanently deleting news item: " + error.message);
+      }
+    },
+
+    async repostNewsItem(newsId) {
+      if (
+        !confirm(
+          "Are you sure you want to repost this news item? It will be visible for another 24 hours."
+        )
+      ) {
+        return;
+      }
+
+      this.reposting = true;
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/news/${newsId}/repost`,
+          {
+            method: "PUT",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(
+            "News item reposted successfully! It will be visible for 24 hours."
+          );
+          // Refresh both the main news and all news data
+          await Promise.all([this.loadExistingNews(), this.loadAllNews()]);
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error("Error reposting news item:", error);
+        alert("Error reposting news item: " + error.message);
+      } finally {
+        this.reposting = false;
+      }
+    },
+
+    isNewsExpired(news) {
+      if (!news.updated_at) return false;
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      const newsDate = new Date(news.updated_at);
+      return newsDate < twentyFourHoursAgo && !news.hidden;
+    },
+
+    isNewsActive(news) {
+      if (news.hidden) return false;
+      if (!news.updated_at) return false;
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+      const newsDate = new Date(news.updated_at);
+      return newsDate >= twentyFourHoursAgo;
+    },
+
+    setNewsFilter(filter) {
+      this.newsFilter = filter;
+    },
+
+    getNewsStatusText(news) {
+      if (news.hidden) return "Hidden";
+      if (this.isNewsActive(news)) return "Active";
+      if (this.isNewsExpired(news)) return "Expired";
+      return "Inactive";
+    },
+
+    getTimeUntilExpiry(news) {
+      if (!news.updated_at) return "";
+      const expiryTime = new Date(news.updated_at);
+      expiryTime.setHours(expiryTime.getHours() + 24);
+      const now = new Date();
+      const timeDiff = expiryTime - now;
+
+      if (timeDiff <= 0) return "Expired";
+
+      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+
+      if (hours > 0) {
+        return `${hours}h ${minutes}m remaining`;
+      } else {
+        return `${minutes}m remaining`;
+      }
+    },
+
     formatDate(dateString) {
-      if (!dateString) return '';
+      if (!dateString) return "";
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
       });
     },
-    
+
     formatDateTime(dateTimeString) {
-      if (!dateTimeString) return '';
+      if (!dateTimeString) return "";
       const date = new Date(dateTimeString);
-      return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     },
-    
+
     async openManageNewsModal() {
       this.showManageModal = true;
       await this.loadAllNews();
     },
-    
-     closeManageNewsModal() {
-       this.showManageModal = false;
-       this.newsFilter = 'all'; // Reset filter when closing modal
-     },
-    
+
+    closeManageNewsModal() {
+      this.showManageModal = false;
+      this.newsFilter = "all"; // Reset filter when closing modal
+    },
+
     async loadAllNews() {
       this.loadingAllNews = true;
       try {
-        const response = await fetch('http://localhost:8000/api/news/all');
+        const response = await fetch("http://localhost:8000/api/news/all");
         const data = await response.json();
-        
+
         if (data.success) {
           this.allNews = data.news;
         } else {
-          console.error('Error loading all news:', data.message);
+          console.error("Error loading all news:", data.message);
         }
       } catch (error) {
-        console.error('Error loading all news:', error);
+        console.error("Error loading all news:", error);
       } finally {
         this.loadingAllNews = false;
       }
     },
-    
-     async deleteAllNewsFromModal() {
-       if (!confirm('Are you sure you want to PERMANENTLY DELETE ALL news records? This action cannot be undone.')) {
-         return;
-       }
-       
-       this.deleting = true;
-       try {
-         const response = await fetch('http://localhost:8000/api/news/permanent/all', {
-           method: 'DELETE'
-         });
-         
-         const data = await response.json();
-         
-         if (data.success) {
-           alert('All news records permanently deleted!');
-           this.allNews = [];
-           this.existingNews = [];
-           this.closeManageNewsModal();
-         } else {
-           throw new Error(data.message);
-         }
-       } catch (error) {
-         console.error('Error permanently deleting all news:', error);
-         alert('Error deleting news records: ' + error.message);
-       } finally {
-         this.deleting = false;
-       }
-     }
-  }
+
+    async deleteAllNewsFromModal() {
+      if (
+        !confirm(
+          "Are you sure you want to PERMANENTLY DELETE ALL news records? This action cannot be undone."
+        )
+      ) {
+        return;
+      }
+
+      this.deleting = true;
+      try {
+        const response = await fetch(
+          "http://localhost:8000/api/news/permanent/all",
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert("All news records permanently deleted!");
+          this.allNews = [];
+          this.existingNews = [];
+          this.closeManageNewsModal();
+        } else {
+          throw new Error(data.message);
+        }
+      } catch (error) {
+        console.error("Error permanently deleting all news:", error);
+        alert("Error deleting news records: " + error.message);
+      } finally {
+        this.deleting = false;
+      }
+    },
+  },
 };
 </script>
 
@@ -794,28 +1020,28 @@ export default {
   background: #c82333;
 }
 
- .btn-delete-small {
-   background: #dc3545;
-   color: white;
-   padding: 8px;
-   border-radius: 6px;
- }
- 
- .btn-delete-small:hover {
-   background: #c82333;
- }
- 
- .btn-repost-small {
-   background: #28a745;
-   color: white;
-   padding: 8px 12px;
-   border-radius: 6px;
-   margin-right: 8px;
- }
- 
- .btn-repost-small:hover:not(:disabled) {
-   background: #218838;
- }
+.btn-delete-small {
+  background: #dc3545;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+}
+
+.btn-delete-small:hover {
+  background: #c82333;
+}
+
+.btn-repost-small {
+  background: #28a745;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-right: 8px;
+}
+
+.btn-repost-small:hover:not(:disabled) {
+  background: #218838;
+}
 
 /* News Items */
 .news-items-container {
@@ -871,7 +1097,8 @@ export default {
   color: #495057;
 }
 
-.form-input, .form-textarea {
+.form-input,
+.form-textarea {
   padding: 12px;
   border: 2px solid #ced4da;
   border-radius: 6px;
@@ -879,7 +1106,8 @@ export default {
   transition: border-color 0.3s ease;
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
   outline: none;
   border-color: #007bff;
 }
@@ -934,8 +1162,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .no-data-message {
@@ -1249,65 +1481,65 @@ export default {
     gap: 30px;
     padding: 20px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-header {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .form-actions {
     justify-content: center;
   }
-  
+
   /* Responsive Filter Tabs */
   .filter-tabs {
     flex-wrap: wrap;
     gap: 6px;
   }
-  
+
   .filter-tab {
     padding: 10px 12px;
     font-size: 13px;
     flex: 1;
     min-width: calc(50% - 3px);
   }
-  
+
   /* Responsive News Cards */
   .meta-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
-  
+
   .meta-label {
     min-width: auto;
   }
-  
+
   .meta-value {
     text-align: left;
   }
-  
+
   .news-actions {
     flex-direction: column;
     gap: 8px;
     width: 100%;
   }
-  
+
   .btn-repost-small {
     margin-right: 0;
     justify-content: center;
   }
-  
+
   /* Responsive Modal */
   .modal-content {
     width: 95%;
     max-height: 90vh;
   }
-  
+
   .modal-header,
   .modal-body,
   .modal-footer {

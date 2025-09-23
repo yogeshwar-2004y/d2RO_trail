@@ -1,13 +1,6 @@
 /extra
 .vscode/
 .env
-<<<<<<< HEAD
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-=======
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -42,25 +35,5 @@ Thumbs.db
 <<<<<<< HEAD
 node_modules/
 node_modules/
-=======
 
-# Node modules
-node_modules/
-
-# Backend test files and documentation
-backend/tests/
-backend/conftest.py
-backend/README_LOGIN.md
-backend/README_MODULAR_STRUCTURE.md
-backend/test_login.py
-
-# Frontend test files and configuration
-frontend/tests/
-frontend/cypress.config.js
-frontend/test-results.json
-
-# Root directory reports and documentation
-reports/
-TEST_FIXES_SUMMARY.md
-TEST_SETUP_SUMMARY.md
->>>>>>> 7ed061b6a92f66387c349b5a9db334d780156ce0
+plan_doc_uploads/
