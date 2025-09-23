@@ -25,6 +25,7 @@
     <!-- Requisition Details Section -->
     <div class="form-section requisition-details">
       <table class="form-table">
+        
         <tr>
           <td class="form-cell">
             <label>From :</label>
