@@ -209,10 +209,10 @@ CREATE TABLE IF NOT EXISTS test_stage_types (
 );
 
 INSERT INTO test_stage_types (test_id, stage_id, type_id, assigned_by) VALUES
-(1, 1, 1, 1002), -- Design stage functional test
-(1, 2, 2, 1003), -- Implementation stage performance test
-(2, 3, 3, 1004), -- Testing stage regression test
-(3, 4, 4, 1005); -- Deployment stage acceptance test
+(1, 1, 1, 1002), 
+(1, 2, 2, 1003), 
+(2, 3, 3, 1004), 
+(3, 4, 4, 1005); 
 
 
 CREATE TABLE plan_doc_assignment (
@@ -278,7 +278,6 @@ CREATE TABLE memo_references (
     ver FLOAT,
     rev FLOAT
 );
-
 
 CREATE TABLE reports (
     report_id SERIAL PRIMARY KEY,
