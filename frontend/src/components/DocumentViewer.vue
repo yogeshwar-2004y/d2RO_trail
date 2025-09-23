@@ -264,12 +264,32 @@
       </div>
 
       <!-- Enhanced Comments Sidebar -->
-      <aside class="sidebar">
+      <aside class="sidebar" v-if="canViewComments">
         <h3>Comments</h3>
+        <!-- Role-based permission indicator -->
+        <div class="permission-indicator">
+          <div v-if="canAddComments" class="permission-badge add-permission">
+            ✓ Can add comments
+          </div>
+          <div v-if="canDeleteComments" class="permission-badge delete-permission">
+            ✓ Can delete comments
+          </div>
+          <div v-if="canAcceptRejectComments" class="permission-badge action-permission">
+            ✓ Can accept/reject comments
+          </div>
+          <div v-if="!canAddComments && !canDeleteComments && !canAcceptRejectComments" class="permission-badge view-only">
+            👁️ View only
+          </div>
+        </div>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
-              <button @click="deleteComment(index)" class="delete-btn" title="Delete comment">
+              <button 
+                v-if="canDeleteComments" 
+                @click="deleteComment(index)" 
+                class="delete-btn" 
+                title="Delete comment"
+              >
                 🗑️
               </button>
               <div class="comment-header">
@@ -298,8 +318,8 @@
                   <div class="response-content">{{ comment.justification }}</div>
                 </div>
                 
-                <!-- Action Buttons (only show for pending comments) -->
-                <div v-if="comment.status === 'pending' || !comment.status" class="comment-actions">
+                <!-- Action Buttons (only show for pending comments and for designers/design heads) -->
+                <div v-if="(comment.status === 'pending' || !comment.status) && canAcceptRejectComments" class="comment-actions">
                   <button @click="acceptComment(comment)" class="action-btn accept">
                     ✓ Accept
                   </button>
@@ -313,15 +333,15 @@
           <p v-else class="no-comments">No comments yet</p>
         </div>
         
-        <!-- Add Comment Button -->
-        <div class="add-comment-section">
+        <!-- Add Comment Button (only for reviewers) -->
+        <div class="add-comment-section" v-if="canAddComments">
           <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
             Add Comment
           </button>
         </div>
 
-        <!-- Annotation Mode Indicator -->
-        <div v-if="isAnnotationMode" class="annotation-mode-indicator">
+        <!-- Annotation Mode Indicator (only for reviewers) -->
+        <div v-if="isAnnotationMode && canAddComments" class="annotation-mode-indicator">
           <div class="annotation-instruction">
             <span class="annotation-icon">📍</span>
             <span>Click on the document to place your annotation</span>
@@ -329,8 +349,8 @@
           </div>
         </div>
 
-        <!-- Comment Form Modal - Shows after annotation is placed -->
-        <div v-if="showCommentForm" class="comment-form-overlay" @click="closeCommentForm">
+        <!-- Comment Form Modal - Shows after annotation is placed (only for reviewers) -->
+        <div v-if="showCommentForm && canAddComments" class="comment-form-overlay" @click="closeCommentForm">
           <div class="comment-form-container" @click.stop>
             <div class="comment-form-header">
               <h4>Add Comment</h4>
@@ -713,8 +733,28 @@ export default {
     isQAHead() {
       return this.currentUserRole === 'QA Head';
     },
+    isQAAdmin() {
+      return this.currentUserRole === 'Admin';
+    },
     isReviewer() {
-      return this.currentUserRole === 'Reviewer';
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    // Role-based permissions for commenting
+    canAddComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canDeleteComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canAcceptRejectComments() {
+      return this.currentUserRole === 'Designer' || this.currentUserRole === 'Design Head';
+    },
+    canViewComments() {
+      return this.currentUserRole === 'Admin' || 
+             this.currentUserRole === 'QA Head' || 
+             this.currentUserRole === 'QA Reviewer' || 
+             this.currentUserRole === 'Design Head' || 
+             this.currentUserRole === 'Designer';
     },
     docContent() {
       return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
@@ -1163,7 +1203,8 @@ export default {
           body: JSON.stringify({
             justification: this.justificationText,
             accepted_by: currentUser,
-            designer_id: currentUserId
+            designer_id: currentUserId,
+            user_role: this.currentUserRole
           })
         });
 
@@ -1683,7 +1724,13 @@ export default {
     async deleteCommentFromBackend(commentId) {
       try {
         const response = await fetch(`http://localhost:8000/api/comments/${commentId}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_role: this.currentUserRole
+          })
         });
         
         if (response.ok) {
@@ -1866,7 +1913,8 @@ export default {
           section: comment.section,
           description: comment.description,
           commented_by: comment.commented_by,
-          is_annotation: comment.annotation || false
+          is_annotation: comment.annotation || false,
+          user_role: this.currentUserRole
         };
         
         // Add annotation position data if it's an annotation
@@ -2435,6 +2483,50 @@ export default {
   margin: 0 0 1rem 0;
   color: #333;
   font-size: 1.1rem;
+}
+
+/* Permission Indicator */
+.permission-indicator {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.permission-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  margin: 0.125rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.add-permission {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.delete-permission {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.action-permission {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.view-only {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
 }
 
 .comments-container {

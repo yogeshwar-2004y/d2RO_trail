@@ -192,10 +192,14 @@ def create_comment():
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['document_id', 'document_name', 'description', 'commented_by']
+        required_fields = ['document_id', 'document_name', 'description', 'commented_by', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        # Check if user has permission to add comments (only QA Reviewer)
+        if data.get('user_role') != 'QA Reviewer':
+            return jsonify({"success": False, "message": "Only QA Reviewers can add comments"}), 403
         
         conn = get_db_connection()
         cur = conn.cursor()
@@ -299,6 +303,13 @@ def update_comment(comment_id):
 def delete_comment(comment_id):
     """Delete a comment and its associated annotation"""
     try:
+        data = request.json or {}
+        user_role = data.get('user_role')
+        
+        # Check if user has permission to delete comments (only QA Reviewer)
+        if user_role != 'QA Reviewer':
+            return jsonify({"success": False, "message": "Only QA Reviewers can delete comments"}), 403
+        
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -332,10 +343,14 @@ def accept_comment(comment_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['justification', 'accepted_by', 'designer_id']
+        required_fields = ['justification', 'accepted_by', 'designer_id', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        # Check if user has permission to accept comments (only Designer or Design Head)
+        if data.get('user_role') not in ['Designer', 'Design Head']:
+            return jsonify({"success": False, "message": "Only Designers and Design Heads can accept comments"}), 403
         
         conn = get_db_connection()
         cur = conn.cursor()
@@ -384,10 +399,14 @@ def reject_comment(comment_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['justification', 'accepted_by', 'designer_id']
+        required_fields = ['justification', 'accepted_by', 'designer_id', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        # Check if user has permission to reject comments (only Designer or Design Head)
+        if data.get('user_role') not in ['Designer', 'Design Head']:
+            return jsonify({"success": False, "message": "Only Designers and Design Heads can reject comments"}), 403
         
         conn = get_db_connection()
         cur = conn.cursor()
