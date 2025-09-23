@@ -442,11 +442,47 @@
             </div>
             <div class="test-field">
               <label>iii. Test start on:</label>
-              <input type="text" v-model="formData.testStart" placeholder="date/time">
+              <div class="datetime-container">
+                <input type="date" v-model="formData.testStartDate" class="date-input">
+                <div class="time-picker">
+                  <select v-model="formData.testStartHour" class="time-select">
+                    <option value="">HH</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                  </select>
+                  <span class="time-separator">:</span>
+                  <select v-model="formData.testStartMinute" class="time-select">
+                    <option value="">MM</option>
+                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                  </select>
+                  <select v-model="formData.testStartAmPm" class="ampm-select">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="test-field">
               <label>iv. Test complete on :</label>
-              <input type="text" v-model="formData.testComplete" placeholder="date/time">
+              <div class="datetime-container">
+                <input type="date" v-model="formData.testCompleteDate" class="date-input">
+                <div class="time-picker">
+                  <select v-model="formData.testCompleteHour" class="time-select">
+                    <option value="">HH</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                  </select>
+                  <span class="time-separator">:</span>
+                  <select v-model="formData.testCompleteMinute" class="time-select">
+                    <option value="">MM</option>
+                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                  </select>
+                  <select v-model="formData.testCompleteAmPm" class="ampm-select">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </td>
           <td class="test-right">
@@ -456,15 +492,69 @@
             </div>
             <div class="test-field">
               <label>vi. Func. Check (Initial):</label>
-              <input type="text" v-model="formData.funcCheckInitial" placeholder="date/time">
+              <div class="datetime-container">
+                <input type="date" v-model="formData.funcCheckInitialDate" class="date-input">
+                <div class="time-picker">
+                  <select v-model="formData.funcCheckInitialHour" class="time-select">
+                    <option value="">HH</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                  </select>
+                  <span class="time-separator">:</span>
+                  <select v-model="formData.funcCheckInitialMinute" class="time-select">
+                    <option value="">MM</option>
+                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                  </select>
+                  <select v-model="formData.funcCheckInitialAmPm" class="ampm-select">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="test-field">
               <label>vii. Perf.check (during):</label>
-              <input type="text" v-model="formData.perfCheckDuring" placeholder="date/time">
+              <div class="datetime-container">
+                <input type="date" v-model="formData.perfCheckDuringDate" class="date-input">
+                <div class="time-picker">
+                  <select v-model="formData.perfCheckDuringHour" class="time-select">
+                    <option value="">HH</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                  </select>
+                  <span class="time-separator">:</span>
+                  <select v-model="formData.perfCheckDuringMinute" class="time-select">
+                    <option value="">MM</option>
+                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                  </select>
+                  <select v-model="formData.perfCheckDuringAmPm" class="ampm-select">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
             <div class="test-field">
               <label>viii. Func Check (end):</label>
-              <input type="text" v-model="formData.funcCheckEnd" placeholder="date/time">
+              <div class="datetime-container">
+                <input type="date" v-model="formData.funcCheckEndDate" class="date-input">
+                <div class="time-picker">
+                  <select v-model="formData.funcCheckEndHour" class="time-select">
+                    <option value="">HH</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                  </select>
+                  <span class="time-separator">:</span>
+                  <select v-model="formData.funcCheckEndMinute" class="time-select">
+                    <option value="">MM</option>
+                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                  </select>
+                  <select v-model="formData.funcCheckEndAmPm" class="ampm-select">
+                    <option value="">AM/PM</option>
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </td>
         </tr>
@@ -860,6 +950,10 @@ export default {
        hoveredTestId: null,
        keepSubmenuOpen: false,
         submenuOffset: 0,
+        
+        // Time picker options
+        hours: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+        minutes: ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'],
       
       formData: {
         from1: '',
@@ -914,12 +1008,27 @@ export default {
         signatureName: '',
         testFacility: '',
         testCycle: '',
-        testStart: '',
-        testComplete: '',
+        testStartDate: '',
+        testStartHour: '',
+        testStartMinute: '',
+        testStartAmPm: '',
+        testCompleteDate: '',
+        testCompleteHour: '',
+        testCompleteMinute: '',
+        testCompleteAmPm: '',
         calibrationStatus: '',
-        funcCheckInitial: '',
-        perfCheckDuring: '',
-        funcCheckEnd: '',
+        funcCheckInitialDate: '',
+        funcCheckInitialHour: '',
+        funcCheckInitialMinute: '',
+        funcCheckInitialAmPm: '',
+        perfCheckDuringDate: '',
+        perfCheckDuringHour: '',
+        perfCheckDuringMinute: '',
+        perfCheckDuringAmPm: '',
+        funcCheckEndDate: '',
+        funcCheckEndHour: '',
+        funcCheckEndMinute: '',
+        funcCheckEndAmPm: '',
         logBookDate: '',
         qaInspectionDate: '',
         testStatus: '',
@@ -1013,6 +1122,47 @@ export default {
       
       // Sort by type name for better organization
       return allTypes.sort((a, b) => a.type_name.localeCompare(b.type_name));
+    },
+    
+    // Computed properties to combine date and time fields (convert 12-hour to 24-hour format)
+    testStartOn() {
+      if (this.formData.testStartDate && this.formData.testStartHour && this.formData.testStartMinute && this.formData.testStartAmPm) {
+        const time24 = this.convertTo24Hour(this.formData.testStartHour, this.formData.testStartMinute, this.formData.testStartAmPm);
+        return `${this.formData.testStartDate}T${time24}`;
+      }
+      return '';
+    },
+    
+    testCompleteOn() {
+      if (this.formData.testCompleteDate && this.formData.testCompleteHour && this.formData.testCompleteMinute && this.formData.testCompleteAmPm) {
+        const time24 = this.convertTo24Hour(this.formData.testCompleteHour, this.formData.testCompleteMinute, this.formData.testCompleteAmPm);
+        return `${this.formData.testCompleteDate}T${time24}`;
+      }
+      return '';
+    },
+    
+    funcCheckInitial() {
+      if (this.formData.funcCheckInitialDate && this.formData.funcCheckInitialHour && this.formData.funcCheckInitialMinute && this.formData.funcCheckInitialAmPm) {
+        const time24 = this.convertTo24Hour(this.formData.funcCheckInitialHour, this.formData.funcCheckInitialMinute, this.formData.funcCheckInitialAmPm);
+        return `${this.formData.funcCheckInitialDate}T${time24}`;
+      }
+      return '';
+    },
+    
+    perfCheckDuring() {
+      if (this.formData.perfCheckDuringDate && this.formData.perfCheckDuringHour && this.formData.perfCheckDuringMinute && this.formData.perfCheckDuringAmPm) {
+        const time24 = this.convertTo24Hour(this.formData.perfCheckDuringHour, this.formData.perfCheckDuringMinute, this.formData.perfCheckDuringAmPm);
+        return `${this.formData.perfCheckDuringDate}T${time24}`;
+      }
+      return '';
+    },
+    
+    funcCheckEnd() {
+      if (this.formData.funcCheckEndDate && this.formData.funcCheckEndHour && this.formData.funcCheckEndMinute && this.formData.funcCheckEndAmPm) {
+        const time24 = this.convertTo24Hour(this.formData.funcCheckEndHour, this.formData.funcCheckEndMinute, this.formData.funcCheckEndAmPm);
+        return `${this.formData.funcCheckEndDate}T${time24}`;
+      }
+      return '';
     }
   },
   watch: {
@@ -1043,16 +1193,10 @@ export default {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
     
-    // Check if backend is available before fetching data
-    const backendAvailable = await this.checkBackendStatus();
-    if (backendAvailable) {
-      console.log('Backend is available, fetching data...');
-    this.fetchTestsConfiguration();
-    this.fetchLruOptions();
-    } else {
-      console.log('Backend not available, using fallback data...');
-      this.loadFallbackLruOptions();
-    }
+    // Always try to fetch real data first
+    console.log('Attempting to fetch data from backend...');
+    await this.fetchLruOptions();
+    await this.fetchTestsConfiguration();
     
     // Add click outside handler for dropdowns
     document.addEventListener('click', this.handleClickOutside);
@@ -1061,7 +1205,8 @@ export default {
       memoId: this.memoId,
       isNewMemo: this.isNewMemo,
       rejectionFormData: this.rejectionFormData,
-      acceptFormData: this.acceptFormData
+      acceptFormData: this.acceptFormData,
+      lruData: this.lruData
     });
   },
   
@@ -1070,6 +1215,26 @@ export default {
     document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
+    // Convert 12-hour time format to 24-hour format
+    convertTo24Hour(hour, minute, ampm) {
+      let hour24 = parseInt(hour);
+      
+      if (ampm === 'AM') {
+        if (hour24 === 12) {
+          hour24 = 0; // 12 AM becomes 00
+        }
+      } else if (ampm === 'PM') {
+        if (hour24 !== 12) {
+          hour24 += 12; // PM hours except 12 PM
+        }
+        // 12 PM stays 12
+      }
+      
+      // Format with leading zeros
+      const formattedHour = hour24.toString().padStart(2, '0');
+      return `${formattedHour}:${minute}`;
+    },
+    
     loadMemoData() {
       if (this.isNewMemo) {
         // For new memos, initialize with empty/default data
@@ -1369,7 +1534,7 @@ export default {
     
     async checkBackendStatus() {
       try {
-        const response = await fetch('http://localhost:5000/api', { 
+        const response = await fetch('http://localhost:5000/api/lrus', { 
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -1568,7 +1733,7 @@ toggleShareBox() {
       this.goBack(); // Navigate back after successful submission
     },
 
-    submitNewMemo() {
+    async submitNewMemo() {
       // Validate required fields for new memo submission
       if (!this.formData.description) {
         alert('Please select an LRU from the dropdown.');
@@ -1594,23 +1759,127 @@ toggleShareBox() {
         alert('Please select Mechanical Inspection stage.');
         return;
       }
-      
-      // Create new memo object
-      const newMemo = {
-        id: Date.now(), // Generate unique ID
-        project: this.formData.wingRef || 'NEW PROJECT',
-        author: 'Design Team',
-        assignedDate: new Date().toLocaleDateString(),
-        scheduledDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toLocaleDateString(), // 3 days from now
-        status: 'NOT ASSIGNED',
-        formData: { ...this.formData }
-      };
 
-      // Here you would add the logic to save the memo to the database
-      console.log('Submitting new memo:', newMemo);
-      
-      alert('Memo submitted successfully!');
-      this.$router.push({ name: 'MemoDashboard' }); // Navigate back to dashboard
+      try {
+        // Get current user info
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser) {
+          alert('User not logged in. Please login first.');
+          return;
+        }
+
+        // Prepare memo data for submission
+        const memoData = {
+          from_person: this.formData.fromPerson || currentUser.name,
+          to_person: this.formData.toPerson || 'QA Head',
+          thru_person: this.formData.thruPerson || '',
+          submitted_by: currentUser.id,
+          formData: {
+            // Basic Information
+            casdicRef: this.formData.casdicRef,
+            dated: this.formData.dated,
+            wingProjRef: this.formData.wingProjRef,
+            lruSruDesc: this.formData.description,
+            partNo: this.formData.partNo,
+            manufacturer: this.formData.manufacturer,
+            drawingNoRev: this.formData.drawingNoRev,
+            source: this.formData.source,
+            
+            // Serial Numbers (checkboxes)
+            slNo1: this.formData.slNo1,
+            slNo2: this.formData.slNo2,
+            slNo3: this.formData.slNo3,
+            slNo4: this.formData.slNo4,
+            slNo5: this.formData.slNo5,
+            slNo6: this.formData.slNo6,
+            slNo7: this.formData.slNo7,
+            slNo8: this.formData.slNo8,
+            slNo9: this.formData.slNo9,
+            slNo10: this.formData.slNo10,
+            
+            // Unit Identification
+            unitIdentification: this.formData.unitIdentification,
+            mechanicalInsp: this.formData.mechanicalInsp,
+            
+            // Test Information
+            inspnTestStageOffered: this.formData.inspnTestStageOffered,
+            stteStatus: this.formData.stteStatus,
+            testStageCleared: this.formData.testStageCleared,
+            venue: this.formData.venue,
+            memoDate: this.formData.memoDate,
+            nameDesignation: this.formData.nameDesignation,
+            testFacility: this.formData.testFacility,
+            testCycleDuration: this.formData.testCycleDuration,
+            testStartOn: this.testStartOn,
+            testCompleteOn: this.testCompleteOn,
+            calibrationStatus: this.formData.calibrationStatus,
+            funcCheckInitial: this.funcCheckInitial,
+            perfCheckDuring: this.perfCheckDuring,
+            funcCheckEnd: this.funcCheckEnd,
+            
+            // Certified checkboxes
+            certifiedA: this.formData.certifiedA,
+            certifiedB: this.formData.certifiedB,
+            certifiedC: this.formData.certifiedC,
+            certifiedD: this.formData.certifiedD,
+            certifiedE: this.formData.certifiedE,
+            certifiedF: this.formData.certifiedF,
+            
+            // References
+            refDoc: this.formData.refDoc,
+            refNo: this.formData.refNo,
+            version: this.formData.version,
+            revision: this.formData.revision,
+            refDoc2: this.formData.refDoc2,
+            refNo2: this.formData.refNo2,
+            version2: this.formData.version2,
+            revision2: this.formData.revision2,
+            refDoc3: this.formData.refDoc3,
+            refNo3: this.formData.refNo3,
+            version3: this.formData.version3,
+            revision3: this.formData.revision3,
+            refDoc4: this.formData.refDoc4,
+            refNo4: this.formData.refNo4,
+            version4: this.formData.version4,
+            revision4: this.formData.revision4,
+            refDoc5: this.formData.refDoc5,
+            refNo5: this.formData.refNo5,
+            version5: this.formData.version5,
+            revision5: this.formData.revision5,
+            refDoc6: this.formData.refDoc6,
+            refNo6: this.formData.refNo6,
+            version6: this.formData.version6,
+            revision6: this.formData.revision6,
+            
+            // Additional fields
+            remarks: this.formData.remarks
+          }
+        };
+
+        console.log('Submitting memo to backend:', memoData);
+
+        // Submit memo to backend
+        const response = await fetch('http://localhost:5000/api/memos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(memoData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`Memo submitted successfully! Memo ID: ${result.memo_id}`);
+          this.$router.push({ name: 'MemoDashboard' }); // Navigate back to dashboard
+        } else {
+          alert(`Error submitting memo: ${result.message}`);
+        }
+
+      } catch (error) {
+        console.error('Error submitting memo:', error);
+        alert('Error submitting memo. Please try again.');
+      }
     }
   }
 };
@@ -3656,6 +3925,100 @@ toggleShareBox() {
   .send-btn, .cancel-btn {
     width: 100%;
     min-width: auto;
+  }
+}
+
+/* DateTime container styling */
+.datetime-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 0.9em;
+  background: white;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 140px;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.date-input:hover {
+  border-color: #007bff;
+}
+
+/* Custom time picker styling */
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: white;
+  border: 1px solid #e1e5e9;
+  border-radius: 6px;
+  padding: 4px 8px;
+  transition: all 0.2s ease;
+}
+
+.time-picker:hover {
+  border-color: #007bff;
+}
+
+.time-picker:focus-within {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.time-select, .ampm-select {
+  border: none;
+  background: transparent;
+  font-size: 0.9em;
+  padding: 4px 2px;
+  cursor: pointer;
+  outline: none;
+  min-width: 45px;
+}
+
+.time-select:focus, .ampm-select:focus {
+  background: rgba(0, 123, 255, 0.1);
+  border-radius: 3px;
+}
+
+.time-separator {
+  font-weight: bold;
+  color: #6c757d;
+  margin: 0 2px;
+}
+
+.ampm-select {
+  min-width: 55px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments for datetime containers */
+@media (max-width: 768px) {
+  .datetime-container {
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+  }
+  
+  .date-input {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .time-picker {
+    justify-content: center;
   }
 }
 </style>

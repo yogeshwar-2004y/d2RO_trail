@@ -43,4 +43,4 @@ def handle_database_error(conn, error_message="Database error"):
     except:
         pass
     print(f"Database error: {error_message}")
-    return {"success": False, "message": "Internal server error"}, 500
+    return {"success": False, "message": f"Database error: {error_message}"}, 500
