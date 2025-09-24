@@ -1,11 +1,44 @@
 """
 User management routes
 """
+import os
+import uuid
 from flask import Blueprint, request, jsonify
-from config import get_db_connection
+from werkzeug.utils import secure_filename
+from config import get_db_connection, Config
 from utils.helpers import hash_password, handle_database_error
 
 users_bp = Blueprint('users', __name__)
+
+def allowed_signature_file(filename):
+    """Check if file has allowed signature extension"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in Config.ALLOWED_SIGNATURE_EXTENSIONS
+
+def save_signature_file(file):
+    """Save signature file and return the file path"""
+    if file and allowed_signature_file(file.filename):
+        # Generate unique filename to avoid conflicts
+        filename = str(uuid.uuid4()) + '.png'
+        filepath = os.path.join(Config.SIGNATURE_UPLOAD_FOLDER, filename)
+        
+        # Ensure the directory exists
+        os.makedirs(Config.SIGNATURE_UPLOAD_FOLDER, exist_ok=True)
+        
+        # Save the file
+        file.save(filepath)
+        return filepath
+    return None
+
+def delete_signature_file(filepath):
+    """Delete signature file if it exists"""
+    if filepath and os.path.exists(filepath):
+        try:
+            os.remove(filepath)
+            return True
+        except Exception as e:
+            print(f"Error deleting signature file {filepath}: {str(e)}")
+    return False
 
 @users_bp.route('/api/roles', methods=['GET'])
 def get_roles():
@@ -43,9 +76,16 @@ def get_roles():
 
 @users_bp.route('/api/users', methods=['POST'])
 def create_user():
-    """Create a new user"""
+    """Create a new user with optional signature"""
     try:
-        data = request.json
+        # Handle both JSON and multipart form data
+        if request.is_json:
+            data = request.json
+            signature_file = None
+        else:
+            data = request.form.to_dict()
+            signature_file = request.files.get('signature')
+        
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
         
@@ -72,14 +112,26 @@ def create_user():
             cur.close()
             return jsonify({"success": False, "message": "User ID or email already exists"}), 400
         
+        # Handle signature file upload
+        signature_path = None
+        if signature_file and signature_file.filename:
+            if not allowed_signature_file(signature_file.filename):
+                cur.close()
+                return jsonify({"success": False, "message": "Only PNG files are allowed for signatures"}), 400
+            
+            signature_path = save_signature_file(signature_file)
+            if not signature_path:
+                cur.close()
+                return jsonify({"success": False, "message": "Failed to save signature file"}), 400
+        
         # Hash the password
         hashed_password = hash_password(password)
         
-        # Insert user into users table
+        # Insert user into users table with signature path
         cur.execute("""
-            INSERT INTO users (user_id, name, email, password_hash)
-            VALUES (%s, %s, %s, %s)
-        """, (user_id, user_name, email, hashed_password))
+            INSERT INTO users (user_id, name, email, password_hash, signature_path)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user_id, user_name, email, hashed_password, signature_path))
         
         # Insert role assignment into user_roles table
         cur.execute("""
@@ -92,7 +144,8 @@ def create_user():
         
         return jsonify({
             "success": True,
-            "message": "User created successfully"
+            "message": "User created successfully",
+            "signature_uploaded": signature_path is not None
         })
         
     except Exception as e:
@@ -100,26 +153,36 @@ def create_user():
 
 @users_bp.route('/api/users/<user_id>', methods=['PUT'])
 def update_user(user_id):
-    """Update an existing user"""
+    """Update an existing user with optional signature"""
     try:
-        data = request.json
+        # Handle both JSON and multipart form data
+        if request.is_json:
+            data = request.json
+            signature_file = None
+        else:
+            data = request.form.to_dict()
+            signature_file = request.files.get('signature')
+        
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Check if user exists
-        cur.execute("SELECT user_id, name, email FROM users WHERE user_id = %s", (user_id,))
+        # Check if user exists and get current signature path
+        cur.execute("SELECT user_id, name, email, signature_path FROM users WHERE user_id = %s", (user_id,))
         existing_user = cur.fetchone()
         
         if not existing_user:
             cur.close()
             return jsonify({"success": False, "message": "User not found"}), 404
         
+        current_signature_path = existing_user[3]  # signature_path is the 4th column
+        
         # Build dynamic update query based on provided fields
         update_fields = []
         update_values = []
+        signature_updated = False
         
         # Update user table fields
         if 'name' in data:
@@ -139,6 +202,26 @@ def update_user(user_id):
             hashed_password = hash_password(data['password'])
             update_fields.append("password_hash = %s")
             update_values.append(hashed_password)
+        
+        # Handle signature file upload
+        if signature_file and signature_file.filename:
+            if not allowed_signature_file(signature_file.filename):
+                cur.close()
+                return jsonify({"success": False, "message": "Only PNG files are allowed for signatures"}), 400
+            
+            # Delete old signature file if it exists
+            if current_signature_path:
+                delete_signature_file(current_signature_path)
+            
+            # Save new signature file
+            new_signature_path = save_signature_file(signature_file)
+            if not new_signature_path:
+                cur.close()
+                return jsonify({"success": False, "message": "Failed to save signature file"}), 400
+            
+            update_fields.append("signature_path = %s")
+            update_values.append(new_signature_path)
+            signature_updated = True
         
         # Update users table if there are fields to update
         if update_fields:
@@ -164,7 +247,8 @@ def update_user(user_id):
         
         return jsonify({
             "success": True,
-            "message": "User updated successfully"
+            "message": "User updated successfully",
+            "signature_updated": signature_updated
         })
         
     except Exception as e:
@@ -225,7 +309,8 @@ def get_users_with_roles():
                 u.user_id,
                 u.name,
                 u.email,
-                r.role_name
+                r.role_name,
+                u.signature_path
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -242,7 +327,8 @@ def get_users_with_roles():
                 "user_id": row[0],
                 "name": row[1],
                 "email": row[2],
-                "role": row[3] if row[3] else "No Role Assigned"
+                "role": row[3] if row[3] else "No Role Assigned",
+                "has_signature": row[4] is not None
             })
         
         return jsonify({

@@ -21,6 +21,11 @@ class Config:
     ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg'}
     MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
     
+    # Signature upload configuration
+    SIGNATURE_UPLOAD_FOLDER = 'signature_uploads'
+    ALLOWED_SIGNATURE_EXTENSIONS = {'png'}
+    MAX_SIGNATURE_SIZE = 5 * 1024 * 1024  # 5MB
+    
     # Database configuration
     DATABASE_CONFIG = {
         'dbname': "ERP",

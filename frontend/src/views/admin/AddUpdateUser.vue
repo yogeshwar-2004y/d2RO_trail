@@ -113,6 +113,28 @@
         </select>
       </div>
 
+      <div class="form-row">
+        <label for="signature">SIGNATURE (PNG only)</label>
+        <div class="signature-upload-container">
+          <input
+            type="file"
+            id="signature"
+            @change="handleSignatureUpload"
+            accept=".png"
+            class="signature-input"
+          />
+          <div class="signature-preview" v-if="signaturePreview">
+            <img :src="signaturePreview" alt="Signature Preview" class="signature-image" />
+            <button type="button" @click="removeSignature" class="remove-signature-btn">
+              ×
+            </button>
+          </div>
+          <div class="signature-placeholder" v-if="!signaturePreview">
+            <span>No signature selected</span>
+          </div>
+        </div>
+      </div>
+
       <button class="add-button" @click="addUser" :disabled="loading">
         {{ loading ? "CREATING USER..." : "ADD USER" }}
       </button>
@@ -134,6 +156,8 @@ export default {
       },
       roles: [],
       loading: false,
+      signatureFile: null,
+      signaturePreview: null,
     };
   },
   async mounted() {
@@ -158,6 +182,44 @@ export default {
         this.loading = false;
       }
     },
+    handleSignatureUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        // Validate file type
+        if (!file.type.startsWith('image/png')) {
+          alert("Please select a PNG file for the signature.");
+          event.target.value = '';
+          return;
+        }
+
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Signature file size must be less than 5MB.");
+          event.target.value = '';
+          return;
+        }
+
+        this.signatureFile = file;
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.signaturePreview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+
+    removeSignature() {
+      this.signatureFile = null;
+      this.signaturePreview = null;
+      // Clear the file input
+      const fileInput = document.getElementById('signature');
+      if (fileInput) {
+        fileInput.value = '';
+      }
+    },
+
     validateUser() {
       if (
         !this.user.name ||
@@ -187,18 +249,33 @@ export default {
       try {
         this.loading = true;
 
+        // Create FormData for multipart form submission
+        const formData = new FormData();
+        formData.append('name', this.user.name);
+        formData.append('id', this.user.id);
+        formData.append('email', this.user.email);
+        formData.append('password', this.user.password);
+        formData.append('roleId', this.user.roleId);
+
+        // Add signature file if selected
+        if (this.signatureFile) {
+          formData.append('signature', this.signatureFile);
+        }
+
         const response = await fetch("http://localhost:5000/api/users", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(this.user),
+          body: formData, // No Content-Type header for FormData
         });
 
         const data = await response.json();
 
         if (data.success) {
-          alert("User created successfully!");
+          let message = "User created successfully!";
+          if (data.signature_uploaded) {
+            message += " Signature uploaded.";
+          }
+          alert(message);
+          
           // Reset form
           this.user = {
             name: "",
@@ -207,6 +284,7 @@ export default {
             password: "",
             roleId: "",
           };
+          this.removeSignature();
         } else {
           alert("Error creating user: " + data.message);
         }
@@ -322,6 +400,66 @@ export default {
   border-radius: 15px;
   font-size: 1em;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.signature-upload-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signature-input {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  font-size: 1em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.signature-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 200px;
+}
+
+.signature-image {
+  max-width: 100%;
+  max-height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.remove-signature-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-signature-btn:hover {
+  background: #cc3333;
+}
+
+.signature-placeholder {
+  padding: 20px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
 }
 
 .add-button {
