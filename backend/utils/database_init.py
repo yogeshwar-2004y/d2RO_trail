@@ -90,6 +90,17 @@ def create_comments_tables():
             )
         """)
         
+        # Add missing commented_by column if it doesn't exist
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                              WHERE table_name='document_comments' AND column_name='commented_by') THEN
+                    ALTER TABLE document_comments ADD COLUMN commented_by VARCHAR(100) DEFAULT 'Anonymous';
+                END IF;
+            END $$;
+        """)
+        
         conn.commit()
         cur.close()
         print("Comments and annotations tables created/verified successfully")

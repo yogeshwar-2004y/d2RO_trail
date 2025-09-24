@@ -291,7 +291,7 @@
                 🗑️
               </button>
               <div class="comment-header">
-                <span class="comment-commented_by">{{ comment.commented_by || 'Anonymous' }}</span>
+                <span class="comment-commented_by">Reviewer ID: {{ comment.reviewer_id || 'Unknown' }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
                 <span v-if="comment.status" class="comment-status" :class="'status-' + comment.status">
                   {{ comment.status === 'accept' ? 'Accepted' : comment.status === 'reject' ? 'Rejected' : comment.status }}
@@ -310,7 +310,7 @@
                 <!-- Comment Response Section -->
                 <div v-if="comment.justification" class="comment-response">
                   <div class="response-header">
-                    {{ comment.status === 'accepted' ? 'Accepted' : 'Rejected' }} by {{ comment.accepted_by }}
+                    {{ comment.status === 'accept' ? 'Accepted' : 'Rejected' }} by Designer ID {{ comment.accepted_by }}
                     <span v-if="comment.accepted_at" class="response-date">{{ formatDate(comment.accepted_at) }}</span>
                   </div>
                   <div class="response-content">{{ comment.justification }}</div>
@@ -417,7 +417,7 @@
             <strong>Comment:</strong>
             <p class="comment-text-preview">"{{ commentToDelete.comment.description }}"</p>
             <div class="comment-meta-preview">
-              <span>By: {{ commentToDelete.comment.commented_by }}</span>
+              <span>By: Reviewer ID {{ commentToDelete.comment.reviewer_id }}</span>
               <span>Page: {{ commentToDelete.comment.page_no }}</span>
             </div>
           </div>
@@ -444,7 +444,7 @@
             <strong>Comment:</strong>
             <p class="comment-text-preview">"{{ selectedComment.description }}"</p>
             <div class="comment-meta-preview">
-              <span>By: {{ selectedComment.commented_by }}</span>
+              <span>By: Reviewer ID {{ selectedComment.reviewer_id }}</span>
               <span>Page: {{ selectedComment.page_no }}</span>
             </div>
           </div>
@@ -1270,8 +1270,7 @@ export default {
 
         const requestData = {
           justification: this.justificationText,
-          accepted_by: currentUser,
-          designer_id: currentUserId,
+          accepted_by: currentUserId,
           user_role: this.currentUserRole,
           action: this.justificationAction, // 'accept' or 'reject'
           action_date: new Date().toISOString(),
@@ -1861,20 +1860,25 @@ export default {
       
       // Get current user info
       let currentUser = 'Anonymous';
+      let currentUserId = null;
       try {
         if (userStore && userStore.getters && userStore.getters.userName) {
           currentUser = userStore.getters.userName() || 'Anonymous';
         }
+        if (userStore && userStore.getters && userStore.getters.currentUser) {
+          const user = userStore.getters.currentUser();
+          currentUserId = user?.id || user?.user_id || null;
+        }
       } catch (error) {
-        console.log('Error getting user name:', error);
+        console.log('Error getting user info:', error);
       }
-      console.log('Current user:', currentUser);
+      console.log('Current user:', currentUser, 'User ID:', currentUserId);
       
       // Create comment with annotation data
       const comment = {
         id: Date.now(),
         ...this.commentForm,
-        commented_by: currentUser,
+        reviewer_id: currentUserId,
         created_at: new Date().toISOString(),
         annotation: !!this.currentAnnotation  // Only true if there's an annotation
       };
@@ -1993,7 +1997,6 @@ export default {
           page_no: comment.page_no,
           section: comment.section,
           description: comment.description,
-          commented_by: comment.commented_by,
           is_annotation: comment.annotation || false,
           user_role: this.currentUserRole
         };

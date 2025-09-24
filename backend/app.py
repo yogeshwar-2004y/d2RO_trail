@@ -105,6 +105,10 @@ def get_comments():
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Test the connection first
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        
         # Get comments with annotations
         cur.execute("""
             SELECT 
@@ -116,13 +120,11 @@ def get_comments():
                 c.page_no,
                 c.section,
                 c.description,
-                c.commented_by,
                 c.created_at,
                 c.is_annotation,
                 c.status,
                 c.justification,
                 c.accepted_by,
-                c.designer_id,
                 c.accepted_at,
                 a.annotation_id,
                 a.x_position,
@@ -135,6 +137,7 @@ def get_comments():
         
         rows = cur.fetchall()
         cur.close()
+        conn.close()
         
         # Group comments and annotations
         comments = []
@@ -150,26 +153,24 @@ def get_comments():
                 "page_no": row[5],
                 "section": row[6],
                 "description": row[7],
-                "commented_by": row[8],
-                "created_at": row[9].isoformat() if row[9] else None,
-                "annotation": row[10],
-                "status": row[11],
-                "justification": row[12],
-                "accepted_by": row[13],
-                "designer_id": row[14],
-                "accepted_at": row[15].isoformat() if row[15] else None
+                "created_at": row[8].isoformat() if row[8] else None,
+                "annotation": row[9],
+                "status": row[10],
+                "justification": row[11],
+                "accepted_by": row[12],
+                "accepted_at": row[13].isoformat() if row[13] else None
             }
             comments.append(comment)
             
             # Add annotation if exists
-            if row[16] is not None:  # annotation_id exists
+            if row[14] is not None:  # annotation_id exists
                 annotation = {
-                    "id": row[16],
+                    "id": row[14],
                     "comment_id": row[0],
                     "document_id": row[1],
                     "page": row[5],
-                    "x": float(row[17]),
-                    "y": float(row[18]),
+                    "x": float(row[15]),
+                    "y": float(row[16]),
                     "description": row[7]
                 }
                 annotations.append(annotation)
@@ -182,6 +183,13 @@ def get_comments():
         
     except Exception as e:
         print(f"Error fetching comments: {str(e)}")
+        try:
+            if 'cur' in locals():
+                cur.close()
+            if 'conn' in locals():
+                conn.close()
+        except:
+            pass
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 # Create a new comment
@@ -194,7 +202,7 @@ def create_comment():
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['document_id', 'document_name', 'description', 'commented_by', 'user_role']
+        required_fields = ['document_id', 'document_name', 'description', 'reviewer_id', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
@@ -210,8 +218,8 @@ def create_comment():
         cur.execute("""
             INSERT INTO document_comments (
                 document_id, document_name, version, reviewer_id, 
-                page_no, section, description, commented_by, is_annotation
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                page_no, section, description, is_annotation
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING comment_id
         """, (
             data['document_id'],
@@ -221,7 +229,6 @@ def create_comment():
             data.get('page_no'),
             data.get('section'),
             data['description'],
-            data['commented_by'],
             data.get('is_annotation', False)
         ))
         
@@ -345,7 +352,7 @@ def accept_comment(comment_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['justification', 'accepted_by', 'designer_id', 'user_role']
+        required_fields = ['justification', 'accepted_by', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
@@ -363,14 +370,11 @@ def accept_comment(comment_id):
             SET status = 'accept', 
                 justification = %s, 
                 accepted_by = %s, 
-                designer_id = %s, 
-                accepted_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP
+                accepted_at = CURRENT_TIMESTAMP
             WHERE comment_id = %s
         """, (
             data['justification'],
-            data['accepted_by'],
-            data['designer_id'],
+            int(data['accepted_by']),
             comment_id
         ))
         
@@ -401,7 +405,7 @@ def reject_comment(comment_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['justification', 'accepted_by', 'designer_id', 'user_role']
+        required_fields = ['justification', 'accepted_by', 'user_role']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
@@ -419,14 +423,11 @@ def reject_comment(comment_id):
             SET status = 'reject', 
                 justification = %s, 
                 accepted_by = %s, 
-                designer_id = %s, 
-                accepted_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP
+                accepted_at = CURRENT_TIMESTAMP
             WHERE comment_id = %s
         """, (
             data['justification'],
-            data['accepted_by'],
-            data['designer_id'],
+            int(data['accepted_by']),
             comment_id
         ))
         
