@@ -8,12 +8,7 @@
           <span><strong>Project:</strong> {{ projectName || 'N/A' }}</span>
           <span><strong>Document ID:</strong> {{ documentId || 'N/A' }}</span>
           <span><strong>Status:</strong> <span :class="'status-' + (status || 'pending')">{{ status || 'Pending' }}</span></span>
-          <span><strong>Assignment:</strong> 
-            <span class="assignment-status-inline" :class="hasAssignedReviewer ? 'assigned' : 'not-assigned'">
-              {{ hasAssignedReviewer ? 'ASSIGNED' : 'NOT ASSIGNED' }}
-            </span>
-          </span>
-          <span v-if="hasAssignedReviewer"><strong>Reviewer:</strong> {{ assignedReviewer?.name || 'Unknown' }}</span>
+           <!-- <span><strong>Status:</strong> <span :class="getStatusClass(status)">{{ status || 'Pending' }}</span></span> -->
           <span><strong>Created:</strong> {{ formatDate(createdDate) }}</span>
           <span><strong>Modified:</strong> {{ formatDate(lastModifiedDate) }}</span>
         </div>
@@ -40,6 +35,10 @@
         >
           {{ loadingReviewerStatus ? 'Loading...' : 'Edit Reviewer' }}
         </button>
+        <div v-if="hasAssignedReviewer" class="reviewer-info">
+          <span class="reviewer-label">Current Reviewer:</span>
+          <span class="reviewer-name">{{ assignedReviewer?.name || 'Unknown' }}</span>
+        </div>
         <button @click="viewObservations" class="action-btn">
           View Observations
         </button>
@@ -51,16 +50,26 @@
       <!-- Design Head / Designer Actions -->
       <template v-if="currentUserRole === 'Design Head' || currentUserRole === 'Designer'">
         <div class="upload-section">
-          <label for="file-upload" class="upload-btn">
+          <label for="file-upload" class="upload-btn" :class="{ 'disabled': !canUploadDocument }">
             Choose Document
             <input 
               id="file-upload"
               type="file" 
               accept=".pdf,.docx,.doc,.txt,.xlsx,.xls" 
               @change="handleFileSelect"
+              :disabled="!canUploadDocument"
               style="display: none"
             />
           </label>
+          
+          <!-- Upload restriction message -->
+          <div v-if="!canUploadDocument" class="upload-restriction-message">
+            <div class="restriction-icon">⚠️</div>
+            <div class="restriction-text">
+              <p><strong>Upload Restricted</strong></p>
+              <p>Document '{{ getCurrentDocumentLabel }}' has been uploaded. Please review and accept all comments for this document before uploading the next document.</p>
+            </div>
+          </div>
           
           <!-- Document Details Form - Show when file is selected -->
           <div v-if="selectedFile" class="document-form">
@@ -166,7 +175,10 @@
                 <span v-else>📄</span>
               </div>
               <div class="doc-info">
-                <div class="doc-title">{{ doc.document_number }}</div>
+                <div class="doc-title">
+                  <span class="doc-label">{{ doc.doc_ver || 'A' }}</span>
+                  {{ doc.document_number }}
+                </div>
                 <div class="doc-meta">
                   <span class="doc-version">{{ doc.version }} ({{ doc.revision }})</span>
                   <span class="doc-ver">v{{ doc.doc_ver }}</span>
@@ -265,12 +277,17 @@
       </div>
 
       <!-- Enhanced Comments Sidebar -->
-      <aside class="sidebar">
+      <aside class="sidebar" v-if="canViewComments">
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
-              <button @click="deleteComment(index)" class="delete-btn" title="Delete comment">
+              <button 
+                v-if="canDeleteComments" 
+                @click="deleteComment(index)" 
+                class="delete-btn" 
+                title="Delete comment"
+              >
                 🗑️
               </button>
               <div class="comment-header">
@@ -299,8 +316,8 @@
                   <div class="response-content">{{ comment.justification }}</div>
                 </div>
                 
-                <!-- Action Buttons (only show for pending comments) -->
-                <div v-if="comment.status === 'pending' || !comment.status" class="comment-actions">
+                <!-- Action Buttons (only show for pending comments and for designers/design heads) -->
+                <div v-if="(comment.status === 'pending' || !comment.status) && canAcceptRejectComments" class="comment-actions">
                   <button @click="acceptComment(comment)" class="action-btn accept">
                     ✓ Accept
                   </button>
@@ -314,15 +331,15 @@
           <p v-else class="no-comments">No comments yet</p>
         </div>
         
-        <!-- Add Comment Button -->
-        <div class="add-comment-section">
+        <!-- Add Comment Button (only for reviewers) -->
+        <div class="add-comment-section" v-if="canAddComments">
           <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
             Add Comment
           </button>
         </div>
 
-        <!-- Annotation Mode Indicator -->
-        <div v-if="isAnnotationMode" class="annotation-mode-indicator">
+        <!-- Annotation Mode Indicator (only for reviewers) -->
+        <div v-if="isAnnotationMode && canAddComments" class="annotation-mode-indicator">
           <div class="annotation-instruction">
             <span class="annotation-icon">📍</span>
             <span>Click on the document to place your annotation</span>
@@ -330,8 +347,8 @@
           </div>
         </div>
 
-        <!-- Comment Form Modal - Shows after annotation is placed -->
-        <div v-if="showCommentForm" class="comment-form-overlay" @click="closeCommentForm">
+        <!-- Comment Form Modal - Shows after annotation is placed (only for reviewers) -->
+        <div v-if="showCommentForm && canAddComments" class="comment-form-overlay" @click="closeCommentForm">
           <div class="comment-form-container" @click.stop>
             <div class="comment-form-header">
               <h4>Add Comment</h4>
@@ -714,8 +731,28 @@ export default {
     isQAHead() {
       return this.currentUserRole === 'QA Head';
     },
+    isQAAdmin() {
+      return this.currentUserRole === 'Admin';
+    },
     isReviewer() {
-      return this.currentUserRole === 'Reviewer';
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    // Role-based permissions for commenting
+    canAddComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canDeleteComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canAcceptRejectComments() {
+      return this.currentUserRole === 'Designer' || this.currentUserRole === 'Design Head';
+    },
+    canViewComments() {
+      return this.currentUserRole === 'Admin' || 
+             this.currentUserRole === 'QA Head' || 
+             this.currentUserRole === 'QA Reviewer' || 
+             this.currentUserRole === 'Design Head' || 
+             this.currentUserRole === 'Designer';
     },
     docContent() {
       return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
@@ -726,7 +763,33 @@ export default {
       return this.documentDetails.documentNumber.trim() !== '' &&
              this.documentDetails.version.trim() !== '' &&
              this.documentDetails.revision.trim() !== '';
+    },
     
+    // Check if user can upload a new document
+    canUploadDocument() {
+      // If no documents exist, allow upload
+      if (this.existingDocuments.length === 0) {
+        return true;
+      }
+      
+      // If any documents exist, disable upload until comments are accepted
+      return false;
+    },
+    
+    // Check if there are pending comments for any document
+    hasPendingComments() {
+      return this.comments.some(comment => 
+        comment.status === 'pending' || !comment.status
+      );
+    },
+    
+    // Get the label for the current document (A, B, C, etc.)
+    getCurrentDocumentLabel() {
+      const latestDocument = this.getLatestDocument();
+      if (!latestDocument) {
+        return 'A';
+      }
+      return latestDocument.doc_ver || 'A';
     }
   },
   
@@ -749,14 +812,52 @@ export default {
       this.loadExistingDocument(documentId);
     }
     
-    // Check reviewer assignment status for all users to display assignment information
-    // Add a delay to ensure LRU metadata is loaded first
-    setTimeout(() => {
-      this.checkReviewerAssignment();
-    }, 2000);
+    // Check reviewer assignment status for QA Head
+    if (this.currentUserRole === 'QA Head') {
+      // Add a delay to ensure LRU metadata is loaded first
+      setTimeout(() => {
+        this.checkReviewerAssignment();
+      }, 1000);
+    }
   },
   
   methods: {
+    // Helper method to get the latest uploaded document
+    getLatestDocument() {
+      if (this.existingDocuments.length === 0) {
+        return null;
+      }
+      
+      // Sort documents by upload date and get the latest
+      const sortedDocs = [...this.existingDocuments].sort((a, b) => 
+        new Date(b.upload_date) - new Date(a.upload_date)
+      );
+      
+      return sortedDocs[0];
+    },
+    
+    // Helper method to check if a specific document has pending comments
+    hasPendingCommentsForDocument(documentId) {
+      return this.comments.some(comment => 
+        comment.document_id === documentId && 
+        (comment.status === 'pending' || !comment.status)
+      );
+    },
+    
+    // Helper method to get the current document being viewed
+    getCurrentDocument() {
+      // If we have a specific document loaded, return it
+      if (this.documentId && this.existingDocuments.length > 0) {
+        return this.existingDocuments.find(doc => 
+          doc.document_id === this.documentId || 
+          doc.document_number === this.documentId
+        );
+      }
+      
+      // Otherwise return the latest document
+      return this.getLatestDocument();
+    },
+    
     // Load LRU metadata
     async loadLruMetadata(lruId) {
       try {
@@ -774,11 +875,6 @@ export default {
           this.lruName = result.lru.lru_name;
           this.projectName = result.lru.project_name;
           console.log(`✅ Loaded metadata for LRU ${lruId}:`, result.lru);
-          
-          // Check reviewer assignment after LRU metadata is loaded
-          setTimeout(() => {
-            this.checkReviewerAssignment();
-          }, 100);
         } else {
           console.warn('❌ Failed to load LRU metadata:', result.message);
           // Set fallback values
@@ -1159,16 +1255,38 @@ export default {
           ? `/api/comments/${this.selectedComment.id}/accept`
           : `/api/comments/${this.selectedComment.id}/reject`;
 
+        // Get current document details
+        const currentDocument = this.getCurrentDocument();
+        const documentDetails = {
+          document_id: this.selectedComment.document_id || currentDocument?.document_id,
+          document_name: this.selectedComment.document_name || currentDocument?.document_number,
+          document_version: this.selectedComment.version || currentDocument?.version,
+          document_revision: this.selectedComment.revision || currentDocument?.revision,
+          document_doc_ver: currentDocument?.doc_ver || 'A',
+          lru_id: this.documentDetails.lruId,
+          project_name: this.projectName,
+          lru_name: this.lruName
+        };
+
+        const requestData = {
+          justification: this.justificationText,
+          accepted_by: currentUser,
+          designer_id: currentUserId,
+          user_role: this.currentUserRole,
+          action: this.justificationAction, // 'accept' or 'reject'
+          action_date: new Date().toISOString(),
+          ...documentDetails
+        };
+
+        console.log('Sending comment acceptance/rejection data:', requestData);
+        console.log('API endpoint:', endpoint);
+
         const response = await fetch(`http://localhost:5000${endpoint}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            justification: this.justificationText,
-            accepted_by: currentUser,
-            designer_id: currentUserId
-          })
+          body: JSON.stringify(requestData)
         });
 
         if (!response.ok) {
@@ -1216,28 +1334,17 @@ export default {
     
     async checkReviewerAssignment() {
       if (!this.lruName || !this.projectName) {
-        console.log('Skipping reviewer assignment check - missing LRU name or project name');
         return;
       }
       
       try {
         this.loadingReviewerStatus = true;
-        const url = `http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`;
-        console.log('Checking reviewer assignment for:', this.lruName, 'in project:', this.projectName);
-        console.log('API URL:', url);
-        
-        const response = await fetch(url);
+        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
         const data = await response.json();
-        
-        console.log('Reviewer assignment response:', data);
         
         if (data.success) {
           this.hasAssignedReviewer = data.has_reviewer;
           this.assignedReviewer = data.reviewer;
-          console.log('Assignment status updated:', {
-            hasAssignedReviewer: this.hasAssignedReviewer,
-            assignedReviewer: this.assignedReviewer
-          });
         } else {
           console.error('Error checking reviewer assignment:', data.message);
           this.hasAssignedReviewer = false;
@@ -1277,14 +1384,6 @@ export default {
     closeTrackVersionsModal() {
       this.showTrackVersionsModal = false;
     },
-    getInitials(name) {
-      if (!name) return '??';
-      return name.split(' ')
-        .map(word => word.charAt(0).toUpperCase())
-        .slice(0, 2)
-        .join('');
-    },
-    
     selectVersion(version) {
       console.log('Selected version:', version);
       // Navigate to the document version view page
@@ -1706,7 +1805,13 @@ export default {
     async deleteCommentFromBackend(commentId) {
       try {
         const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
-          method: 'DELETE'
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_role: this.currentUserRole
+          })
         });
         
         if (response.ok) {
@@ -1889,7 +1994,8 @@ export default {
           section: comment.section,
           description: comment.description,
           commented_by: comment.commented_by,
-          is_annotation: comment.annotation || false
+          is_annotation: comment.annotation || false,
+          user_role: this.currentUserRole
         };
         
         // Add annotation position data if it's an annotation
@@ -2188,6 +2294,59 @@ export default {
   background: #059669;
 }
 
+.upload-btn.disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.upload-btn.disabled:hover {
+  background: #6b7280;
+}
+
+.upload-restriction-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.restriction-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.restriction-text p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.restriction-text p:first-child {
+  font-weight: 600;
+  color: #92400e;
+}
+
+.restriction-text p:not(:first-child) {
+  color: #78350f;
+  margin-top: 0.25rem;
+}
+
+.doc-label {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-right: 0.5rem;
+}
+
 /* Document Form */
 .document-form {
   margin-top: 1rem;
@@ -2459,6 +2618,7 @@ export default {
   color: #333;
   font-size: 1.1rem;
 }
+
 
 .comments-container {
   flex: 1;
@@ -3706,26 +3866,6 @@ export default {
   padding: 0.75rem;
   border-radius: 4px;
   border: 1px solid #e5e7eb;
-}
-
-/* Inline Assignment Status Styles */
-.assignment-status-inline {
-  padding: 2px 8px;
-  border-radius: 12px;
-  font-weight: bold;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.assignment-status-inline.assigned {
-  background-color: #10b981;
-  color: white;
-}
-
-.assignment-status-inline.not-assigned {
-  background-color: #f59e0b;
-  color: white;
 }
 
 </style>
