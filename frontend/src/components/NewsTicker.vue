@@ -11,63 +11,59 @@
 </template> -->
 
 <template>
-  <div 
-    class="news-ticker-container" 
+  <div
+    class="news-ticker-container"
     v-if="hasNews || showWhenEmpty"
     :style="{ height, backgroundColor }"
   >
     <div class="news-ticker">
-      <div 
-        class="news-content" 
-        :style="[animationStyle, { color: textColor }]"
-      >
-        <span 
-          v-for="(newsItem, index) in displayNews" 
-          :key="index" 
+      <div class="news-content" :style="[animationStyle, { color: textColor }]">
+        <span
+          v-for="(newsItem, index) in displayNews"
+          :key="index"
           class="news-item"
         >
-          📰 {{ typeof newsItem === 'string' ? newsItem : newsItem.news_text }}
+          📰 {{ typeof newsItem === "string" ? newsItem : newsItem.news_text }}
         </span>
       </div>
     </div>
   </div>
 </template>
 
-
 <script>
 export default {
-  name: 'NewsTicker',
+  name: "NewsTicker",
   props: {
     height: {
       type: String,
-      default: '50px'
+      default: "50px",
     },
     speed: {
       type: Number,
-      default: 100 // pixels per second
+      default: 100, // pixels per second
     },
     backgroundColor: {
       type: String,
-      default: '#2c3e50'
+      default: "#2c3e50",
     },
     textColor: {
       type: String,
-      default: '#ffffff'
+      default: "#ffffff",
     },
     showWhenEmpty: {
       type: Boolean,
-      default: true
+      default: true,
     },
     fallbackText: {
       type: String,
-      default: 'Welcome to Aviatrax'
-    }
+      default: "Welcome to Aviatrax",
+    },
   },
   data() {
     return {
       news: [],
       animationDuration: 30, // seconds
-      loading: false
+      loading: false,
     };
   },
   computed: {
@@ -84,10 +80,10 @@ export default {
     animationStyle() {
       return {
         animationDuration: `${this.animationDuration}s`,
-        animationTimingFunction: 'linear',
-        animationIterationCount: 'infinite'
+        animationTimingFunction: "linear",
+        animationIterationCount: "infinite",
       };
-    }
+    },
   },
   async mounted() {
     await this.loadNews();
@@ -97,18 +93,18 @@ export default {
   methods: {
     async loadNews() {
       if (this.loading) return;
-      
+
       this.loading = true;
       try {
-        const response = await fetch('http://localhost:5000/api/news');
+        const response = await fetch("http://localhost:5000/api/news");
         const data = await response.json();
-        
+
         if (data.success && data.news.length > 0) {
           this.news = data.news;
           this.calculateAnimationDuration();
         }
       } catch (error) {
-        console.error('Error loading news:', error);
+        console.error("Error loading news:", error);
       } finally {
         this.loading = false;
       }
@@ -116,13 +112,15 @@ export default {
     calculateAnimationDuration() {
       // Calculate animation duration based on content length and speed
       if (this.news.length > 0) {
-        const totalContent = this.displayNews.map(item => item.news_text).join(' 📰 ');
+        const totalContent = this.displayNews
+          .map((item) => item.news_text)
+          .join(" 📰 ");
         const contentLength = totalContent.length;
         // Adjust duration based on content length and desired speed
         this.animationDuration = Math.max(20, contentLength * 0.1);
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -169,8 +167,14 @@ export default {
 }
 
 @keyframes flash {
-  0%, 50% { opacity: 1; }
-  25%, 75% { opacity: 0.7; }
+  0%,
+  50% {
+    opacity: 1;
+  }
+  25%,
+  75% {
+    opacity: 0.7;
+  }
 }
 
 .news-ticker-container::before {
@@ -188,7 +192,6 @@ export default {
   font-size: 12px;
   animation: flash 2s infinite;
   z-index: 1;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.3);
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
 }
-
 </style>

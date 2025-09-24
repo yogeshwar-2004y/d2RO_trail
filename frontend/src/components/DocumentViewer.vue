@@ -278,10 +278,17 @@
 
       <!-- Enhanced Comments Sidebar -->
       <aside class="sidebar" v-if="canViewComments">
+      <aside class="sidebar" v-if="canViewComments">
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
             <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
+              <button 
+                v-if="canDeleteComments" 
+                @click="deleteComment(index)" 
+                class="delete-btn" 
+                title="Delete comment"
+              >
               <button 
                 v-if="canDeleteComments" 
                 @click="deleteComment(index)" 
@@ -318,6 +325,8 @@
                 
                 <!-- Action Buttons (only show for pending comments and for designers/design heads) -->
                 <div v-if="(comment.status === 'pending' || !comment.status) && canAcceptRejectComments" class="comment-actions">
+                <!-- Action Buttons (only show for pending comments and for designers/design heads) -->
+                <div v-if="(comment.status === 'pending' || !comment.status) && canAcceptRejectComments" class="comment-actions">
                   <button @click="acceptComment(comment)" class="action-btn accept">
                     ✓ Accept
                   </button>
@@ -333,11 +342,15 @@
         
         <!-- Add Comment Button (only for reviewers) -->
         <div class="add-comment-section" v-if="canAddComments">
+        <!-- Add Comment Button (only for reviewers) -->
+        <div class="add-comment-section" v-if="canAddComments">
           <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
             Add Comment
           </button>
         </div>
 
+        <!-- Annotation Mode Indicator (only for reviewers) -->
+        <div v-if="isAnnotationMode && canAddComments" class="annotation-mode-indicator">
         <!-- Annotation Mode Indicator (only for reviewers) -->
         <div v-if="isAnnotationMode && canAddComments" class="annotation-mode-indicator">
           <div class="annotation-instruction">
@@ -347,6 +360,8 @@
           </div>
         </div>
 
+        <!-- Comment Form Modal - Shows after annotation is placed (only for reviewers) -->
+        <div v-if="showCommentForm && canAddComments" class="comment-form-overlay" @click="closeCommentForm">
         <!-- Comment Form Modal - Shows after annotation is placed (only for reviewers) -->
         <div v-if="showCommentForm && canAddComments" class="comment-form-overlay" @click="closeCommentForm">
           <div class="comment-form-container" @click.stop>
@@ -734,7 +749,28 @@ export default {
     isQAAdmin() {
       return this.currentUserRole === 'Admin';
     },
+    isQAAdmin() {
+      return this.currentUserRole === 'Admin';
+    },
     isReviewer() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    // Role-based permissions for commenting
+    canAddComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canDeleteComments() {
+      return this.currentUserRole === 'QA Reviewer';
+    },
+    canAcceptRejectComments() {
+      return this.currentUserRole === 'Designer' || this.currentUserRole === 'Design Head';
+    },
+    canViewComments() {
+      return this.currentUserRole === 'Admin' || 
+             this.currentUserRole === 'QA Head' || 
+             this.currentUserRole === 'QA Reviewer' || 
+             this.currentUserRole === 'Design Head' || 
+             this.currentUserRole === 'Designer';
       return this.currentUserRole === 'QA Reviewer';
     },
     // Role-based permissions for commenting
@@ -1812,6 +1848,13 @@ export default {
           body: JSON.stringify({
             user_role: this.currentUserRole
           })
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            user_role: this.currentUserRole
+          })
         });
         
         if (response.ok) {
@@ -1994,6 +2037,8 @@ export default {
           section: comment.section,
           description: comment.description,
           commented_by: comment.commented_by,
+          is_annotation: comment.annotation || false,
+          user_role: this.currentUserRole
           is_annotation: comment.annotation || false,
           user_role: this.currentUserRole
         };
@@ -2618,6 +2663,7 @@ export default {
   color: #333;
   font-size: 1.1rem;
 }
+
 
 
 .comments-container {
