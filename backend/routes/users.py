@@ -3,7 +3,7 @@ User management routes
 """
 import os
 import uuid
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 from config import get_db_connection, Config
 from utils.helpers import hash_password, handle_database_error
@@ -261,14 +261,15 @@ def get_user(user_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch user with role information
+        # Fetch user with role information and signature
         cur.execute("""
             SELECT 
                 u.user_id,
                 u.name,
                 u.email,
                 r.role_id,
-                r.role_name
+                r.role_name,
+                u.signature_path
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -281,6 +282,11 @@ def get_user(user_id):
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 404
         
+        # Normalize signature path for cross-platform compatibility
+        signature_path = user[5]
+        if signature_path:
+            signature_path = signature_path.replace('\\', '/')
+        
         return jsonify({
             "success": True,
             "user": {
@@ -288,7 +294,9 @@ def get_user(user_id):
                 "name": user[1],
                 "email": user[2],
                 "role_id": user[3],
-                "role_name": user[4] if user[4] else "No Role Assigned"
+                "role_name": user[4] if user[4] else "No Role Assigned",
+                "signature_path": signature_path,
+                "has_signature": user[5] is not None
             }
         })
         
@@ -323,12 +331,20 @@ def get_users_with_roles():
         # Convert to list of dictionaries
         users_list = []
         for row in results:
+            signature_url = None
+            if row[4]:  # If signature_path exists
+                # Extract filename from path for URL (handle Windows paths)
+                signature_path = row[4].replace('\\', '/')  # Normalize path separators
+                filename = os.path.basename(signature_path)
+                signature_url = f"/api/users/signature/{filename}"
+            
             users_list.append({
                 "user_id": row[0],
                 "name": row[1],
                 "email": row[2],
                 "role": row[3] if row[3] else "No Role Assigned",
-                "has_signature": row[4] is not None
+                "has_signature": row[4] is not None,
+                "signature_url": signature_url
             })
         
         return jsonify({
@@ -339,6 +355,26 @@ def get_users_with_roles():
     except Exception as e:
         print(f"Error fetching users with roles: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@users_bp.route('/api/users/signature/<filename>', methods=['GET'])
+def get_signature(filename):
+    """Serve signature image files"""
+    try:
+        # Security check: only allow PNG files and basic filename validation
+        if not filename.endswith('.png') or '..' in filename or '/' in filename:
+            return jsonify({"success": False, "message": "Invalid file"}), 400
+        
+        signature_path = os.path.join(Config.SIGNATURE_UPLOAD_FOLDER, filename)
+        
+        # Check if file exists
+        if not os.path.exists(signature_path):
+            return jsonify({"success": False, "message": "Signature not found"}), 404
+        
+        return send_file(signature_path, mimetype='image/png')
+        
+    except Exception as e:
+        print(f"Error serving signature {filename}: {str(e)}")
+        return jsonify({"success": False, "message": "Error serving signature"}), 500
 
 @users_bp.route('/api/available-reviewers', methods=['GET'])
 def get_available_reviewers():

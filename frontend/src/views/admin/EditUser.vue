@@ -94,13 +94,22 @@
             class="signature-input"
           />
           <div class="signature-preview" v-if="signaturePreview">
-            <img :src="signaturePreview" alt="Signature Preview" class="signature-image" />
+            <img 
+              :src="signaturePreview" 
+              alt="Signature Preview" 
+              class="signature-image"
+              @error="handleSignatureImageError"
+              @load="handleSignatureImageLoad"
+            />
             <button type="button" @click="removeSignature" class="remove-signature-btn">
               ×
             </button>
+            <div class="signature-info">
+              <span class="signature-label">{{ signatureFile ? 'New signature selected' : 'Current signature' }}</span>
+            </div>
           </div>
           <div class="signature-placeholder" v-if="!signaturePreview">
-            <span>No signature selected</span>
+            <span>Upload new signature or keep existing</span>
           </div>
         </div>
       </div>
@@ -138,6 +147,7 @@ export default {
   async mounted() {
     await this.loadUserData();
     await this.fetchRoles();
+    await this.fetchUserDetails();
   },
   methods: {
     loadUserData() {
@@ -181,6 +191,35 @@ export default {
       }
     },
 
+    async fetchUserDetails() {
+      try {
+        const response = await fetch(`http://localhost:5000/api/users/${this.userId}`);
+        const data = await response.json();
+
+        if (data.success) {
+          const user = data.user;
+          // Load existing signature if it exists
+          if (user.has_signature && user.signature_path) {
+            // Extract filename from the path (handle both Windows and Unix paths)
+            let filename = user.signature_path;
+            // Replace backslashes with forward slashes first
+            filename = filename.replace(/\\/g, '/');
+            // Then extract the filename
+            if (filename.includes('/')) {
+              filename = filename.split('/').pop();
+            }
+            
+            // Set the signature preview URL
+            this.signaturePreview = `http://localhost:5000/api/users/signature/${filename}`;
+          }
+        } else {
+          console.error("Error fetching user details:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    },
+
     handleSignatureUpload(event) {
       const file = event.target.files[0];
       if (file) {
@@ -217,6 +256,18 @@ export default {
       if (fileInput) {
         fileInput.value = '';
       }
+    },
+
+    handleSignatureImageError(event) {
+      console.error('Failed to load signature image:', event.target.src);
+      // Show error message
+      alert('Failed to load signature image. Please check if the file exists.');
+      // Clear the preview
+      this.signaturePreview = null;
+    },
+
+    handleSignatureImageLoad(event) {
+      console.log('Signature image loaded successfully:', event.target.src);
     },
 
     validateUser() {
@@ -512,6 +563,17 @@ export default {
   border: 2px dashed #ccc;
   border-radius: 10px;
   text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.signature-info {
+  margin-top: 5px;
+  text-align: center;
+}
+
+.signature-label {
+  font-size: 12px;
   color: #666;
   font-style: italic;
 }
