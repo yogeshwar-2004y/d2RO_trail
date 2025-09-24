@@ -97,7 +97,7 @@ def submit_memo():
                     wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered,
                     manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn,
                     inspn_test_stage_offered, stte_status, test_stage_cleared, venue,
-                    memo_date, name_designation, test_facility, test_cycle_duration,
+                    memo_date, name_designation, coordinator, test_facility, test_cycle_duration,
                     test_start_on, test_complete_on, calibration_status, func_check_initial,
                     perf_check_during, func_check_end, certified, remarks,
                     submitted_at, submitted_by
@@ -105,7 +105,7 @@ def submit_memo():
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s
+                    %s, %s, %s, %s
                 ) RETURNING memo_id
             """, (
                 data.get('from_person'),
@@ -129,6 +129,7 @@ def submit_memo():
                 form_data.get('venue'),
                 parse_date(form_data.get('memoDate')),
                 form_data.get('nameDesignation'),
+                form_data.get('coordinator'),
                 form_data.get('testFacility'),
                 form_data.get('testCycleDuration'),
                 parse_timestamp(form_data.get('testStartOn')),
@@ -259,7 +260,8 @@ def get_memos():
                 m.part_number, m.manufacturer, m.qty_offered, m.venue,
                 m.memo_date, m.submitted_at, m.accepted_at,
                 u1.name as submitted_by_name,
-                u2.name as accepted_by_name
+                u2.name as accepted_by_name,
+                m.coordinator
             FROM memos m
             LEFT JOIN users u1 ON m.submitted_by = u1.user_id
             LEFT JOIN users u2 ON m.accepted_by = u2.user_id
@@ -270,6 +272,14 @@ def get_memos():
         memos = cur.fetchall()
         cur.close()
 
+        # Helper function to safely format dates
+        def safe_isoformat(date_obj):
+            if not date_obj:
+                return None
+            if hasattr(date_obj, 'isoformat'):
+                return date_obj.isoformat()
+            return str(date_obj)  # If it's already a string, return as is
+
         memo_list = []
         for memo in memos:
             memo_list.append({
@@ -278,18 +288,19 @@ def get_memos():
                 "to_person": memo[2],
                 "thru_person": memo[3],
                 "casdic_ref_no": memo[4],
-                "dated": memo[5].isoformat() if memo[5] else None,
+                "dated": safe_isoformat(memo[5]),
                 "wing_proj_ref_no": memo[6],
                 "lru_sru_desc": memo[7],
                 "part_number": memo[8],
                 "manufacturer": memo[9],
                 "qty_offered": memo[10],
                 "venue": memo[11],
-                "memo_date": memo[12].isoformat() if memo[12] else None,
-                "submitted_at": memo[13].isoformat() if memo[13] else None,
-                "accepted_at": memo[14].isoformat() if memo[14] else None,
+                "memo_date": safe_isoformat(memo[12]),
+                "submitted_at": safe_isoformat(memo[13]),
+                "accepted_at": safe_isoformat(memo[14]),
                 "submitted_by_name": memo[15],
-                "accepted_by_name": memo[16]
+                "accepted_by_name": memo[16],
+                "coordinator": memo[17]
             })
 
         return jsonify({
@@ -339,14 +350,23 @@ def get_memo_details(memo_id):
         references = cur.fetchall()
         cur.close()
 
+        # Helper function to safely format dates
+        def safe_isoformat(date_obj):
+            if not date_obj:
+                return None
+            if hasattr(date_obj, 'isoformat'):
+                return date_obj.isoformat()
+            return str(date_obj)  # If it's already a string, return as is
+
         # Convert memo to dictionary
+        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator
         memo_dict = {
             "memo_id": memo[0],
             "from_person": memo[1],
             "to_person": memo[2],
             "thru_person": memo[3],
             "casdic_ref_no": memo[4],
-            "dated": memo[5].isoformat() if memo[5] else None,
+            "dated": safe_isoformat(memo[5]),
             "wing_proj_ref_no": memo[6],
             "lru_sru_desc": memo[7],
             "part_number": memo[8],
@@ -361,24 +381,25 @@ def get_memo_details(memo_id):
             "stte_status": memo[17],
             "test_stage_cleared": memo[18],
             "venue": memo[19],
-            "memo_date": memo[20].isoformat() if memo[20] else None,
+            "memo_date": safe_isoformat(memo[20]),
             "name_designation": memo[21],
             "test_facility": memo[22],
             "test_cycle_duration": memo[23],
-            "test_start_on": memo[24].isoformat() if memo[24] else None,
-            "test_complete_on": memo[25].isoformat() if memo[25] else None,
+            "test_start_on": safe_isoformat(memo[24]),
+            "test_complete_on": safe_isoformat(memo[25]),
             "calibration_status": memo[26],
-            "func_check_initial": memo[27].isoformat() if memo[27] else None,
-            "perf_check_during": memo[28].isoformat() if memo[28] else None,
-            "func_check_end": memo[29].isoformat() if memo[29] else None,
+            "func_check_initial": safe_isoformat(memo[27]),
+            "perf_check_during": safe_isoformat(memo[28]),
+            "func_check_end": safe_isoformat(memo[29]),
             "certified": memo[30],
             "remarks": memo[31],
-            "submitted_at": memo[32].isoformat() if memo[32] else None,
+            "submitted_at": safe_isoformat(memo[32]),
             "submitted_by": memo[33],
-            "accepted_at": memo[34].isoformat() if memo[34] else None,
+            "accepted_at": safe_isoformat(memo[34]),
             "accepted_by": memo[35],
-            "submitted_by_name": memo[36],
-            "accepted_by_name": memo[37]
+            "coordinator": memo[36],
+            "submitted_by_name": memo[37],
+            "accepted_by_name": memo[38]
         }
 
         # Convert references to list
