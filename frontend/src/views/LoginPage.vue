@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <div style="color: white">🚀 This is the news ticker!</div>
+    
     <!-- News Ticker -->
     <NewsTicker
       height="60px"
