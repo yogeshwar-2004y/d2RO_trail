@@ -25,6 +25,7 @@
     <!-- Requisition Details Section -->
     <div class="form-section requisition-details">
       <table class="form-table">
+        
         <tr>
           <td class="form-cell">
             <label>From :</label>
@@ -1039,7 +1040,8 @@ export default {
         certificationD: false,
         certificationE: false,
         certificationF: false,
-        dgaqaRemarks: ''
+        dgaqaRemarks: '',
+        remarks: ''
       }
     };
   },
@@ -1248,6 +1250,7 @@ export default {
         
         // Auto-fill and lock From/To fields for new memos
         this.formData.casdicDate = new Date().toISOString().split('T')[0];
+        this.formData.casdic = 'CASDIC/QA/2025';
         this.formData.from1 = 'MED, CASDIC (DARE), Bangalore';
         this.formData.from2 = 'DGAQA cell,';
         this.formData.from3 = 'ORDAQA(ADE), Bangalore';
@@ -1264,10 +1267,9 @@ export default {
         
         // Auto-fill some sample data for existing memos
         this.formData.from1 = 'CASDIC QA Department';
-        this.formData.casdicRef = 'CAS-2025-001';
-        this.formData.casdic = 'CASDIC/QA/2025';
+        this.formData.casdic = 'CAS-2025-001';
         this.formData.casdicDate = '2025-01-15';
-        this.formData.to = 'DGAQA Office';
+        this.formData.from2 = 'DGAQA Office';
         this.formData.wingRef = 'WING-2025-078';
         this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
         this.formData.partNo = 'LRU-001';
@@ -1423,13 +1425,15 @@ export default {
         this.formData.slNo = [];
       }
       
-      const index = this.formData.slNo.indexOf(serialNumber);
+      // Convert to string for consistency
+      const serialStr = String(serialNumber);
+      const index = this.formData.slNo.indexOf(serialStr);
       if (index > -1) {
         // Remove if already selected
         this.formData.slNo.splice(index, 1);
       } else {
         // Add if not selected
-        this.formData.slNo.push(serialNumber);
+        this.formData.slNo.push(serialStr);
       }
       
       // Update quantity offered automatically
@@ -1440,7 +1444,7 @@ export default {
     },
     
     isSerialNumberSelected(serialNumber) {
-      return this.formData.slNo && this.formData.slNo.includes(serialNumber);
+      return this.formData.slNo && this.formData.slNo.includes(String(serialNumber));
     },
     
     clearSerialNumbers() {
@@ -1770,46 +1774,39 @@ toggleShareBox() {
 
         // Prepare memo data for submission
         const memoData = {
-          from_person: this.formData.fromPerson || currentUser.name,
-          to_person: this.formData.toPerson || 'QA Head',
-          thru_person: this.formData.thruPerson || '',
+          from_person: this.formData.from1 || currentUser.name,
+          to_person: this.formData.from2 || 'QA Head',
+          thru_person: this.formData.from3 || '',
           submitted_by: currentUser.id,
           formData: {
             // Basic Information
-            casdicRef: this.formData.casdicRef,
-            dated: this.formData.dated,
-            wingProjRef: this.formData.wingProjRef,
+            casdicRef: this.formData.casdic,
+            dated: this.formData.casdicDate,
+            wingProjRef: this.formData.wingRef,
             lruSruDesc: this.formData.description,
             partNo: this.formData.partNo,
             manufacturer: this.formData.manufacturer,
-            drawingNoRev: this.formData.drawingNoRev,
+            drawingNoRev: this.formData.drawingNo,
             source: this.formData.source,
             
-            // Serial Numbers (checkboxes)
-            slNo1: this.formData.slNo1,
-            slNo2: this.formData.slNo2,
-            slNo3: this.formData.slNo3,
-            slNo4: this.formData.slNo4,
-            slNo5: this.formData.slNo5,
-            slNo6: this.formData.slNo6,
-            slNo7: this.formData.slNo7,
-            slNo8: this.formData.slNo8,
-            slNo9: this.formData.slNo9,
-            slNo10: this.formData.slNo10,
+            // Serial Numbers (checkboxes) - send the actual array instead of individual boolean fields
+            // The backend will process the array directly
+            slNo: this.formData.slNo || [],
             
             // Unit Identification
             unitIdentification: this.formData.unitIdentification,
             mechanicalInsp: this.formData.mechanicalInsp,
             
             // Test Information
-            inspnTestStageOffered: this.formData.inspnTestStageOffered,
+            inspnTestStageOffered: this.formData.inspectionStage,
             stteStatus: this.formData.stteStatus,
             testStageCleared: this.formData.testStageCleared,
-            venue: this.formData.venue,
-            memoDate: this.formData.memoDate,
-            nameDesignation: this.formData.nameDesignation,
+            venue: this.formData.testVenue,
+            memoDate: this.formData.casdicDate,
+            nameDesignation: this.formData.signatureName,
+            coordinator: this.formData.coordinator,
             testFacility: this.formData.testFacility,
-            testCycleDuration: this.formData.testCycleDuration,
+            testCycleDuration: this.formData.testCycle,
             testStartOn: this.testStartOn,
             testCompleteOn: this.testCompleteOn,
             calibrationStatus: this.formData.calibrationStatus,
@@ -1818,12 +1815,12 @@ toggleShareBox() {
             funcCheckEnd: this.funcCheckEnd,
             
             // Certified checkboxes
-            certifiedA: this.formData.certifiedA,
-            certifiedB: this.formData.certifiedB,
-            certifiedC: this.formData.certifiedC,
-            certifiedD: this.formData.certifiedD,
-            certifiedE: this.formData.certifiedE,
-            certifiedF: this.formData.certifiedF,
+            certifiedA: this.formData.certificationA,
+            certifiedB: this.formData.certificationB,
+            certifiedC: this.formData.certificationC,
+            certifiedD: this.formData.certificationD,
+            certifiedE: this.formData.certificationE,
+            certifiedF: this.formData.certificationF,
             
             // References
             refDoc: this.formData.refDoc,
@@ -1852,11 +1849,17 @@ toggleShareBox() {
             revision6: this.formData.revision6,
             
             // Additional fields
-            remarks: this.formData.remarks
+            remarks: this.formData.dgaqaRemarks
           }
         };
 
         console.log('Submitting memo to backend:', memoData);
+        console.log('=== DEBUG: Serial numbers data ===');
+        console.log('formData.slNo:', this.formData.slNo);
+        console.log('slNo1:', this.formData.slNo && this.formData.slNo.includes('1'));
+        console.log('slNo2:', this.formData.slNo && this.formData.slNo.includes('2'));
+        console.log('slNo3:', this.formData.slNo && this.formData.slNo.includes('3'));
+        console.log('=== END DEBUG ===');
 
         // Submit memo to backend
         const response = await fetch('http://localhost:5000/api/memos', {

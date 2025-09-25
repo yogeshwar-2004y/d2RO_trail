@@ -426,6 +426,8 @@ export default {
     },
 
     transformAndSetMemoData(backendMemo, references) {
+      console.log('Transforming backend memo data:', backendMemo, references);
+      
       // Transform backend memo data to frontend format
       this.formData = {
         // Basic information
@@ -435,7 +437,7 @@ export default {
         casdic: backendMemo.casdic_ref_no || '',
         casdicDate: this.formatDate(backendMemo.dated),
         wingRef: backendMemo.wing_proj_ref_no || '',
-        coordinator: backendMemo.name_designation || '',
+        coordinator: backendMemo.coordinator || '',
         
         // LRU/SRU Details
         partNo: backendMemo.part_number || '',
