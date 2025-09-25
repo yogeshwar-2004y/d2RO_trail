@@ -363,7 +363,7 @@ def get_memo_details(memo_id):
             return str(date_obj)  # If it's already a string, return as is
 
         # Convert memo to dictionary
-        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator
+        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator, submitted_by_name, accepted_by_name
         memo_dict = {
             "memo_id": memo[0],
             "from_person": memo[1],
