@@ -735,10 +735,18 @@ export default {
       }
 
       try {
+        // Get current user (QA Head) from store
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser || !currentUser.id) {
+          alert('Error: Could not identify current user. Please log in again.');
+          return;
+        }
+
         // Prepare form data for file upload
         const formData = new FormData();
         formData.append('memo_id', this.approvalForm.memo_id);
-        formData.append('user_id', this.approvalForm.user_id);
+        formData.append('user_id', this.approvalForm.user_id);  // QA Reviewer ID
+        formData.append('approved_by', currentUser.id);  // QA Head ID (current user)
         formData.append('comments', this.approvalForm.comments);
         formData.append('authentication', this.approvalForm.authentication);
         formData.append('approval_date', this.approvalForm.approval_date);

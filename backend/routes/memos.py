@@ -445,7 +445,7 @@ def approve_memo(memo_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
 
         # Validate required fields
-        required_fields = ['status', 'user_id']
+        required_fields = ['status', 'user_id', 'approved_by']
         for field in required_fields:
             if field not in data:
                 print(f"Missing required field: {field}")
@@ -496,18 +496,13 @@ def approve_memo(memo_id):
                 UPDATE memos 
                 SET accepted_at = %s, accepted_by = %s
                 WHERE memo_id = %s
-            """, (datetime.now(), data.get('user_id'), memo_id))
+            """, (datetime.now(), data.get('approved_by'), memo_id))
         
         # Insert or update memo_approval record
         print(f"Inserting/updating memo_approval record...")
-        approval_date = None
-        if data.get('approval_date'):
-            try:
-                approval_date = datetime.strptime(data.get('approval_date'), '%Y-%m-%d').date()
-                print(f"Parsed approval_date: {approval_date}")
-            except ValueError as e:
-                print(f"Error parsing approval_date: {e}")
-                return jsonify({"success": False, "message": f"Invalid approval_date format: {data.get('approval_date')}"}), 400
+        # Store approval_date as current timestamp when approval is made
+        approval_timestamp = datetime.now()
+        print(f"Approval timestamp: {approval_timestamp}")
         
         # Check if approval record already exists
         cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
@@ -519,31 +514,33 @@ def approve_memo(memo_id):
             cur.execute("""
                 UPDATE memo_approval 
                 SET approval_date = %s, user_id = %s, comments = %s, authentication = %s, 
-                    attachment_path = %s, status = %s
+                    attachment_path = %s, status = %s, approved_by = %s
                 WHERE memo_id = %s
             """, (
-                approval_date,
-                data.get('user_id'),
+                approval_timestamp,
+                data.get('user_id'),  # QA Reviewer ID
                 data.get('comments'),
                 data.get('authentication'),
                 attachment_path,
                 status,
+                data.get('approved_by'),  # QA Head ID (person who clicked accept)
                 memo_id
             ))
         else:
             # Insert new record
             print(f"Inserting new approval record for memo {memo_id}")
             cur.execute("""
-                INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status, approved_by)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 memo_id,
-                approval_date,
-                data.get('user_id'),
+                approval_timestamp,
+                data.get('user_id'),  # QA Reviewer ID
                 data.get('comments'),
                 data.get('authentication'),
                 attachment_path,
-                status
+                status,
+                data.get('approved_by')  # QA Head ID (person who clicked accept)
             ))
 
         print("Committing transaction...")
