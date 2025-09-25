@@ -28,21 +28,23 @@ def submit_memo():
         # Extract form data
         form_data = data.get('formData', {})
         
-        # Prepare serial numbers array from checkboxes
-        slno_units = []
-        if form_data.get('slNo1'): slno_units.append('1')
-        if form_data.get('slNo2'): slno_units.append('2')
-        if form_data.get('slNo3'): slno_units.append('3')
-        if form_data.get('slNo4'): slno_units.append('4')
-        if form_data.get('slNo5'): slno_units.append('5')
-        if form_data.get('slNo6'): slno_units.append('6')
-        if form_data.get('slNo7'): slno_units.append('7')
-        if form_data.get('slNo8'): slno_units.append('8')
-        if form_data.get('slNo9'): slno_units.append('9')
-        if form_data.get('slNo10'): slno_units.append('10')
+        # Debug: Print form data to see what's being received
+        print("=== DEBUG: Form data received ===")
+        print(f"slNo array: {form_data.get('slNo')}")
+        print(f"slNo type: {type(form_data.get('slNo'))}")
+        print("=== END DEBUG ===")
         
-        # Convert to empty array if empty for PostgreSQL
-        slno_units = slno_units if slno_units else []
+        # Get serial numbers array directly from frontend
+        slno_units = form_data.get('slNo', [])
+        
+        # Ensure we have a proper list for PostgreSQL
+        if not isinstance(slno_units, list):
+            slno_units = []
+        
+        print(f"=== DEBUG: Processed slno_units: {slno_units} ===")
+        print(f"=== DEBUG: qty_offered will be: {len(slno_units)} ===")
+        print(f"=== DEBUG: slno_units type: {type(slno_units)} ===")
+        print(f"=== DEBUG: slno_units length: {len(slno_units) if slno_units else 0} ===")
 
         # Prepare unit identification array
         unit_identification = []
@@ -88,6 +90,8 @@ def submit_memo():
             print(f"to_person: {data.get('to_person')}")
             print(f"submitted_by: {data.get('submitted_by')}")
             print(f"slno_units: {slno_units}")
+            print(f"slno_units type: {type(slno_units)}")
+            print(f"qty_offered: {len(slno_units) if slno_units else 0}")
             print(f"unit_identification: {unit_identification}")
             print(f"certified: {certified}")
             

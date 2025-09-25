@@ -1040,7 +1040,8 @@ export default {
         certificationD: false,
         certificationE: false,
         certificationF: false,
-        dgaqaRemarks: ''
+        dgaqaRemarks: '',
+        remarks: ''
       }
     };
   },
@@ -1424,13 +1425,15 @@ export default {
         this.formData.slNo = [];
       }
       
-      const index = this.formData.slNo.indexOf(serialNumber);
+      // Convert to string for consistency
+      const serialStr = String(serialNumber);
+      const index = this.formData.slNo.indexOf(serialStr);
       if (index > -1) {
         // Remove if already selected
         this.formData.slNo.splice(index, 1);
       } else {
         // Add if not selected
-        this.formData.slNo.push(serialNumber);
+        this.formData.slNo.push(serialStr);
       }
       
       // Update quantity offered automatically
@@ -1441,7 +1444,7 @@ export default {
     },
     
     isSerialNumberSelected(serialNumber) {
-      return this.formData.slNo && this.formData.slNo.includes(serialNumber);
+      return this.formData.slNo && this.formData.slNo.includes(String(serialNumber));
     },
     
     clearSerialNumbers() {
@@ -1786,17 +1789,9 @@ toggleShareBox() {
             drawingNoRev: this.formData.drawingNo,
             source: this.formData.source,
             
-            // Serial Numbers (checkboxes) - convert array to individual fields
-            slNo1: this.formData.slNo && this.formData.slNo.includes('1'),
-            slNo2: this.formData.slNo && this.formData.slNo.includes('2'),
-            slNo3: this.formData.slNo && this.formData.slNo.includes('3'),
-            slNo4: this.formData.slNo && this.formData.slNo.includes('4'),
-            slNo5: this.formData.slNo && this.formData.slNo.includes('5'),
-            slNo6: this.formData.slNo && this.formData.slNo.includes('6'),
-            slNo7: this.formData.slNo && this.formData.slNo.includes('7'),
-            slNo8: this.formData.slNo && this.formData.slNo.includes('8'),
-            slNo9: this.formData.slNo && this.formData.slNo.includes('9'),
-            slNo10: this.formData.slNo && this.formData.slNo.includes('10'),
+            // Serial Numbers (checkboxes) - send the actual array instead of individual boolean fields
+            // The backend will process the array directly
+            slNo: this.formData.slNo || [],
             
             // Unit Identification
             unitIdentification: this.formData.unitIdentification,
@@ -1854,11 +1849,17 @@ toggleShareBox() {
             revision6: this.formData.revision6,
             
             // Additional fields
-            remarks: this.formData.remarks
+            remarks: this.formData.dgaqaRemarks
           }
         };
 
         console.log('Submitting memo to backend:', memoData);
+        console.log('=== DEBUG: Serial numbers data ===');
+        console.log('formData.slNo:', this.formData.slNo);
+        console.log('slNo1:', this.formData.slNo && this.formData.slNo.includes('1'));
+        console.log('slNo2:', this.formData.slNo && this.formData.slNo.includes('2'));
+        console.log('slNo3:', this.formData.slNo && this.formData.slNo.includes('3'));
+        console.log('=== END DEBUG ===');
 
         // Submit memo to backend
         const response = await fetch('http://localhost:5000/api/memos', {
