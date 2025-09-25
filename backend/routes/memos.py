@@ -445,15 +445,20 @@ def approve_memo(memo_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
 
         # Validate required fields
-        required_fields = ['status', 'user_id', 'approved_by']
+        status = data.get('status')
+        if status not in ['accepted', 'rejected']:
+            return jsonify({"success": False, "message": "Status must be 'accepted' or 'rejected'"}), 400
+
+        # Check required fields based on status
+        if status == 'accepted':
+            required_fields = ['status', 'user_id', 'approved_by']
+        else:  # rejected
+            required_fields = ['status', 'approved_by']
+            
         for field in required_fields:
             if field not in data:
                 print(f"Missing required field: {field}")
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
-
-        status = data.get('status')
-        if status not in ['accepted', 'rejected']:
-            return jsonify({"success": False, "message": "Status must be 'accepted' or 'rejected'"}), 400
 
         print(f"Connecting to database...")
         conn = get_db_connection()
@@ -489,7 +494,7 @@ def approve_memo(memo_id):
                 attachment_path = f"memo_approval_uploads/{unique_filename}"
                 print(f"File saved to: {attachment_path}")
 
-        # Update memo approval status
+        # Update memo approval status (only for accepted memos)
         if status == 'accepted':
             print(f"Updating memo {memo_id} with accepted status...")
             cur.execute("""
@@ -508,6 +513,9 @@ def approve_memo(memo_id):
         cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
         existing_approval = cur.fetchone()
         
+        # Get user_id for database operations (NULL for rejections)
+        user_id_for_db = data.get('user_id') if status == 'accepted' else None
+        
         if existing_approval:
             # Update existing record
             print(f"Updating existing approval record for memo {memo_id}")
@@ -518,12 +526,12 @@ def approve_memo(memo_id):
                 WHERE memo_id = %s
             """, (
                 approval_timestamp,
-                data.get('user_id'),  # QA Reviewer ID
+                user_id_for_db,  # QA Reviewer ID for accepted, NULL for rejected
                 data.get('comments'),
                 data.get('authentication'),
                 attachment_path,
                 status,
-                data.get('approved_by'),  # QA Head ID (person who clicked accept)
+                data.get('approved_by'),  # QA Head ID (person who clicked accept/reject)
                 memo_id
             ))
         else:
@@ -535,12 +543,12 @@ def approve_memo(memo_id):
             """, (
                 memo_id,
                 approval_timestamp,
-                data.get('user_id'),  # QA Reviewer ID
+                user_id_for_db,  # QA Reviewer ID for accepted, NULL for rejected
                 data.get('comments'),
                 data.get('authentication'),
                 attachment_path,
                 status,
-                data.get('approved_by')  # QA Head ID (person who clicked accept)
+                data.get('approved_by')  # QA Head ID (person who clicked accept/reject)
             ))
 
         print("Committing transaction...")
@@ -581,18 +589,22 @@ def get_memo_approval_status(memo_id):
             cur.close()
             return jsonify({"success": False, "message": "No approval record found"}), 404
 
-        # Get reviewer details
+        # Get reviewer details (only if user_id is not NULL)
         reviewer_id = approval_record[2]  # user_id
-        cur.execute("""
-            SELECT user_id, name, email
-            FROM users 
-            WHERE user_id = %s
-        """, (reviewer_id,))
+        reviewer = None
         
-        reviewer = cur.fetchone()
+        if reviewer_id:
+            cur.execute("""
+                SELECT user_id, name, email
+                FROM users 
+                WHERE user_id = %s
+            """, (reviewer_id,))
+            
+            reviewer = cur.fetchone()
+        
         cur.close()
 
-        if not reviewer:
+        if reviewer_id and not reviewer:
             return jsonify({"success": False, "message": "Reviewer not found"}), 404
 
         approval_data = {
@@ -609,7 +621,7 @@ def get_memo_approval_status(memo_id):
                 "id": reviewer[0],
                 "name": reviewer[1],
                 "email": reviewer[2]
-            }
+            } if reviewer else None
         }
 
         return jsonify({

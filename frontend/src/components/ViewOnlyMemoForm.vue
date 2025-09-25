@@ -288,8 +288,8 @@
       <textarea v-model="formData.remarks" readonly class="readonly-field remarks-textarea"></textarea>
     </div>
 
-    <!-- QA Head Action Buttons (only show if memo is not approved) -->
-    <div class="form-section action-buttons" v-if="isQAHead && !isMemoApproved">
+    <!-- QA Head Action Buttons (only show if memo is not processed) -->
+    <div class="form-section action-buttons" v-if="isQAHead && !isMemoProcessed">
       <div class="button-container">
         <button class="btn btn-accept" @click="handleAccept">
           ACCEPT
@@ -319,6 +319,29 @@
         <div class="reviewer-field">
           <label>Approval Date:</label>
           <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rejection Information (only show for QA Head when memo is rejected) -->
+    <div class="form-section rejection-info-section" v-if="isQAHead && isMemoRejected">
+      <h3>Memo Rejected</h3>
+      <div class="rejection-details">
+        <div class="rejection-field">
+          <label>Rejection Comments:</label>
+          <span class="rejection-value">{{ memoApprovalStatus.comments }}</span>
+        </div>
+        <div class="rejection-field">
+          <label>Authentication:</label>
+          <span class="rejection-value">{{ memoApprovalStatus.authentication }}</span>
+        </div>
+        <div class="rejection-field">
+          <label>Rejection Date:</label>
+          <span class="rejection-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
+        </div>
+        <div class="rejection-field">
+          <label>Rejected By:</label>
+          <span class="rejection-value">QA Head (ID: {{ memoApprovalStatus.approved_by }})</span>
         </div>
       </div>
     </div>
@@ -378,11 +401,32 @@
 
     <!-- Reject Confirmation Overlay -->
     <div v-if="showRejectOverlay" class="overlay">
-      <div class="overlay-content">
-        <h3>Confirm Rejection</h3>
-        <p>Are you sure you want to reject this memo?</p>
+      <div class="overlay-content rejection-form">
+        <h3>Memo Rejection Form</h3>
+        
+        <div class="form-group">
+          <label>Memo ID:</label>
+          <input type="text" v-model="rejectionForm.memo_id" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group">
+          <label>Comments:</label>
+          <textarea v-model="rejectionForm.comments" placeholder="Enter rejection comments..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Authentication:</label>
+          <input type="text" v-model="rejectionForm.authentication" placeholder="Enter authentication details..." required />
+        </div>
+
+        <div class="form-group">
+          <label>Attachments (PDF):</label>
+          <input type="file" @change="onRejectionFileChange" accept=".pdf" />
+          <small class="file-info">Optional: Upload PDF attachment</small>
+        </div>
+
         <div class="overlay-buttons">
-          <button class="btn btn-confirm" @click="confirmReject">Confirm Reject</button>
+          <button class="btn btn-confirm" @click="confirmReject">Reject Memo</button>
           <button class="btn btn-cancel" @click="cancelReject">Cancel</button>
         </div>
       </div>
@@ -424,6 +468,12 @@ export default {
         authentication: '',
         attachment: null,
         approval_date: ''
+      },
+      rejectionForm: {
+        memo_id: null,
+        comments: '',
+        authentication: '',
+        attachment: null
       },
       formData: {
         // Basic information
@@ -525,10 +575,21 @@ export default {
              this.memoApprovalStatus.status === 'accepted' && 
              this.assignedReviewer;
     },
+    // Check if memo is rejected
+    isMemoRejected() {
+      return this.memoApprovalStatus && 
+             this.memoApprovalStatus.status === 'rejected';
+    },
     // Check if memo is approved (for hiding buttons)
     isMemoApproved() {
       return this.memoApprovalStatus && 
              this.memoApprovalStatus.status === 'accepted';
+    },
+    // Check if memo has been processed (approved or rejected)
+    isMemoProcessed() {
+      return this.memoApprovalStatus && 
+             (this.memoApprovalStatus.status === 'accepted' || 
+              this.memoApprovalStatus.status === 'rejected');
     }
   },
   async mounted() {
@@ -704,6 +765,7 @@ export default {
 
     // Handle reject button click
     handleReject() {
+      this.rejectionForm.memo_id = this.id;
       this.showRejectOverlay = true;
     },
 
@@ -861,11 +923,51 @@ export default {
     },
 
     // Confirm reject action
-    confirmReject() {
-      // TODO: Implement reject logic - call API to update memo status
-      console.log('Memo rejected by QA Head');
-      alert('Memo has been rejected successfully!');
-      this.showRejectOverlay = false;
+    async confirmReject() {
+      if (!this.validateRejectionForm()) {
+        return;
+      }
+
+      try {
+        // Get current user (QA Head) from store
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser || !currentUser.id) {
+          alert('Error: Could not identify current user. Please log in again.');
+          return;
+        }
+
+        // Prepare form data for file upload
+        const formData = new FormData();
+        formData.append('memo_id', this.rejectionForm.memo_id);
+        formData.append('approved_by', currentUser.id);  // QA Head ID (current user)
+        formData.append('comments', this.rejectionForm.comments);
+        formData.append('authentication', this.rejectionForm.authentication);
+        formData.append('status', 'rejected');
+        
+        if (this.rejectionForm.attachment) {
+          formData.append('attachment', this.rejectionForm.attachment);
+        }
+
+        const response = await fetch(`http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Memo has been rejected successfully!');
+          this.showRejectOverlay = false;
+          this.resetRejectionForm();
+          // Refresh approval status
+          await this.fetchMemoApprovalStatus();
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Error rejecting memo:', error);
+        alert('Error rejecting memo. Please try again.');
+      }
     },
 
     // Cancel accept action
@@ -876,6 +978,40 @@ export default {
     // Cancel reject action
     cancelReject() {
       this.showRejectOverlay = false;
+    },
+
+    // Validate rejection form
+    validateRejectionForm() {
+      if (!this.rejectionForm.comments.trim()) {
+        alert('Please enter rejection comments');
+        return false;
+      }
+      if (!this.rejectionForm.authentication.trim()) {
+        alert('Please enter authentication details');
+        return false;
+      }
+      return true;
+    },
+
+    // Handle rejection file change
+    onRejectionFileChange(event) {
+      const file = event.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        this.rejectionForm.attachment = file;
+      } else {
+        alert('Please select a PDF file');
+        event.target.value = '';
+      }
+    },
+
+    // Reset rejection form
+    resetRejectionForm() {
+      this.rejectionForm = {
+        memo_id: null,
+        comments: '',
+        authentication: '',
+        attachment: null
+      };
     },
 
     // Reset approval form
@@ -1211,6 +1347,14 @@ export default {
   overflow-y: auto;
 }
 
+/* Rejection Form Styles */
+.rejection-form {
+  max-width: 600px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
 .form-group {
   margin-bottom: 20px;
 }
@@ -1307,6 +1451,48 @@ export default {
 }
 
 .reviewer-value {
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #495057;
+}
+
+/* Rejection Information Section Styles */
+.rejection-info-section {
+  background-color: #f8e8e8;
+  border: 2px solid #dc3545;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.rejection-info-section h3 {
+  margin: 0 0 15px 0;
+  color: #dc3545;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.rejection-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.rejection-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.rejection-field label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.rejection-value {
   background-color: #f8f9fa;
   padding: 8px 12px;
   border: 1px solid #dee2e6;
