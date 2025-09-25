@@ -559,3 +559,64 @@ def approve_memo(memo_id):
         if conn:
             conn.rollback()
         return jsonify({"success": False, "message": f"Error approving memo: {str(e)}"}), 500
+
+@memos_bp.route('/api/memos/<int:memo_id>/approval-status', methods=['GET'])
+def get_memo_approval_status(memo_id):
+    """Get memo approval status and assigned reviewer information"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Get memo approval status
+        cur.execute("""
+            SELECT approval_id, memo_id, user_id, comments, authentication, 
+                   attachment_path, status, approval_date, approved_by
+            FROM memo_approval 
+            WHERE memo_id = %s
+        """, (memo_id,))
+        
+        approval_record = cur.fetchone()
+        
+        if not approval_record:
+            cur.close()
+            return jsonify({"success": False, "message": "No approval record found"}), 404
+
+        # Get reviewer details
+        reviewer_id = approval_record[2]  # user_id
+        cur.execute("""
+            SELECT user_id, name, email
+            FROM users 
+            WHERE user_id = %s
+        """, (reviewer_id,))
+        
+        reviewer = cur.fetchone()
+        cur.close()
+
+        if not reviewer:
+            return jsonify({"success": False, "message": "Reviewer not found"}), 404
+
+        approval_data = {
+            "approval_id": approval_record[0],
+            "memo_id": approval_record[1],
+            "user_id": approval_record[2],
+            "comments": approval_record[3],
+            "authentication": approval_record[4],
+            "attachment_path": approval_record[5],
+            "status": approval_record[6],
+            "approval_date": approval_record[7].isoformat() if approval_record[7] else None,
+            "approved_by": approval_record[8],
+            "reviewer": {
+                "id": reviewer[0],
+                "name": reviewer[1],
+                "email": reviewer[2]
+            }
+        }
+
+        return jsonify({
+            "success": True,
+            "approval": approval_data
+        })
+
+    except Exception as e:
+        print(f"Error fetching memo approval status: {str(e)}")
+        return jsonify({"success": False, "message": f"Error fetching approval status: {str(e)}"}), 500

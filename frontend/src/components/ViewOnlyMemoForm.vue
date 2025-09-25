@@ -288,8 +288,8 @@
       <textarea v-model="formData.remarks" readonly class="readonly-field remarks-textarea"></textarea>
     </div>
 
-    <!-- QA Head Action Buttons -->
-    <div class="form-section action-buttons" v-if="isQAHead">
+    <!-- QA Head Action Buttons (only show if memo is not approved) -->
+    <div class="form-section action-buttons" v-if="isQAHead && !isMemoApproved">
       <div class="button-container">
         <button class="btn btn-accept" @click="handleAccept">
           ACCEPT
@@ -297,6 +297,29 @@
         <button class="btn btn-reject" @click="handleReject">
           REJECT
         </button>
+      </div>
+    </div>
+
+    <!-- Assigned Reviewer Information (only show for QA Head when memo is approved) -->
+    <div class="form-section reviewer-info-section" v-if="isQAHead && isMemoApprovedWithReviewer">
+      <h3>Memo Approved - Assigned Reviewer</h3>
+      <div class="reviewer-details">
+        <div class="reviewer-field">
+          <label>Reviewer Name:</label>
+          <span class="reviewer-value">{{ assignedReviewer.name }}</span>
+        </div>
+        <div class="reviewer-field">
+          <label>Reviewer ID:</label>
+          <span class="reviewer-value">{{ assignedReviewer.id }}</span>
+        </div>
+        <div class="reviewer-field">
+          <label>Email:</label>
+          <span class="reviewer-value">{{ assignedReviewer.email }}</span>
+        </div>
+        <div class="reviewer-field">
+          <label>Approval Date:</label>
+          <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
+        </div>
       </div>
     </div>
 
@@ -391,6 +414,8 @@ export default {
       showAcceptOverlay: false,
       showRejectOverlay: false,
       qaReviewers: [],
+      assignedReviewer: null,
+      memoApprovalStatus: null,
       approvalForm: {
         memo_id: null,
         user_id: '',
@@ -493,11 +518,23 @@ export default {
     // Check if current user is QA Head (role_id = 2)
     isQAHead() {
       return this.currentUserRole === 2;
+    },
+    // Check if memo is approved and has assigned reviewer
+    isMemoApprovedWithReviewer() {
+      return this.memoApprovalStatus && 
+             this.memoApprovalStatus.status === 'accepted' && 
+             this.assignedReviewer;
+    },
+    // Check if memo is approved (for hiding buttons)
+    isMemoApproved() {
+      return this.memoApprovalStatus && 
+             this.memoApprovalStatus.status === 'accepted';
     }
   },
   async mounted() {
     await this.fetchMemoData();
     await this.fetchQAReviewers();
+    await this.fetchMemoApprovalStatus();
   },
   methods: {
     async fetchMemoData() {
@@ -686,6 +723,51 @@ export default {
       }
     },
 
+    // Fetch memo approval status and assigned reviewer
+    async fetchMemoApprovalStatus() {
+      try {
+        const response = await fetch(`http://localhost:5000/api/memos/${this.id}/approval-status`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.memoApprovalStatus = data.approval;
+          if (data.approval && data.approval.status === 'accepted' && data.approval.user_id) {
+            // Find the reviewer details from the QA reviewers list
+            this.assignedReviewer = this.qaReviewers.find(reviewer => 
+              reviewer.id === data.approval.user_id
+            );
+            
+            // If not found in the current list, fetch user details
+            if (!this.assignedReviewer) {
+              await this.fetchReviewerDetails(data.approval.user_id);
+            }
+          }
+        } else {
+          console.log('No approval status found for memo:', this.id);
+        }
+      } catch (error) {
+        console.error('Error fetching memo approval status:', error);
+      }
+    },
+
+    // Fetch reviewer details by user ID
+    async fetchReviewerDetails(userId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/users/${userId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.assignedReviewer = {
+            id: data.user.user_id,
+            name: data.user.name,
+            email: data.user.email
+          };
+        }
+      } catch (error) {
+        console.error('Error fetching reviewer details:', error);
+      }
+    },
+
     // Handle user selection change
     onUserChange() {
       if (this.approvalForm.user_id) {
@@ -767,6 +849,8 @@ export default {
           alert('Memo has been accepted successfully!');
           this.showAcceptOverlay = false;
           this.resetApprovalForm();
+          // Refresh approval status and reviewer info
+          await this.fetchMemoApprovalStatus();
         } else {
           alert(`Error: ${data.message}`);
         }
@@ -805,6 +889,23 @@ export default {
         attachment: null,
         approval_date: ''
       };
+    },
+
+    // Format approval date for display
+    formatApprovalDate(dateString) {
+      if (!dateString) return 'N/A';
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch {
+        return dateString;
+      }
     }
   }
 };
@@ -1170,5 +1271,47 @@ export default {
 .form-group input[type="file"]:hover {
   border-color: #007bff;
   background-color: #e3f2fd;
+}
+
+/* Reviewer Information Section Styles */
+.reviewer-info-section {
+  background-color: #e8f5e8;
+  border: 2px solid #28a745;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.reviewer-info-section h3 {
+  margin: 0 0 15px 0;
+  color: #28a745;
+  font-size: 1.2em;
+  text-align: center;
+}
+
+.reviewer-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.reviewer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.reviewer-field label {
+  font-weight: bold;
+  color: #333;
+  font-size: 0.9em;
+}
+
+.reviewer-value {
+  background-color: #f8f9fa;
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: #495057;
 }
 </style>
