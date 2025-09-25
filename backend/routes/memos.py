@@ -428,9 +428,19 @@ def get_memo_details(memo_id):
 
 @memos_bp.route('/api/memos/<int:memo_id>/approve', methods=['POST'])
 def approve_memo(memo_id):
-    """Approve or reject a memo"""
+    """Approve or reject a memo with file upload support"""
+    conn = None
     try:
-        data = request.json
+        print(f"Starting memo approval for memo_id: {memo_id}")
+        
+        # Handle both JSON and form data
+        if request.is_json:
+            data = request.json
+            print(f"Received JSON data: {data}")
+        else:
+            data = request.form.to_dict()
+            print(f"Received form data: {data}")
+        
         if not data:
             return jsonify({"success": False, "message": "No data provided"}), 400
 
@@ -438,23 +448,50 @@ def approve_memo(memo_id):
         required_fields = ['status', 'user_id']
         for field in required_fields:
             if field not in data:
+                print(f"Missing required field: {field}")
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
 
         status = data.get('status')
         if status not in ['accepted', 'rejected']:
             return jsonify({"success": False, "message": "Status must be 'accepted' or 'rejected'"}), 400
 
+        print(f"Connecting to database...")
         conn = get_db_connection()
         cur = conn.cursor()
 
         # Check if memo exists
+        print(f"Checking if memo {memo_id} exists...")
         cur.execute("SELECT memo_id FROM memos WHERE memo_id = %s", (memo_id,))
         if not cur.fetchone():
             cur.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
 
+        # Handle file upload
+        attachment_path = None
+        if 'attachment' in request.files:
+            file = request.files['attachment']
+            if file and file.filename:
+                print(f"Processing file upload: {file.filename}")
+                # Create uploads directory if it doesn't exist
+                import os
+                upload_dir = os.path.join(os.getcwd(), 'memo_approval_uploads')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Generate unique filename
+                import uuid
+                file_extension = os.path.splitext(file.filename)[1]
+                unique_filename = f"{uuid.uuid4()}{file_extension}"
+                attachment_path = os.path.join(upload_dir, unique_filename)
+                
+                # Save file
+                file.save(attachment_path)
+                # Store relative path for database
+                attachment_path = f"memo_approval_uploads/{unique_filename}"
+                print(f"File saved to: {attachment_path}")
+
         # Update memo approval status
         if status == 'accepted':
+            print(f"Updating memo {memo_id} with accepted status...")
             cur.execute("""
                 UPDATE memos 
                 SET accepted_at = %s, accepted_by = %s
@@ -462,26 +499,54 @@ def approve_memo(memo_id):
             """, (datetime.now(), data.get('user_id'), memo_id))
         
         # Insert or update memo_approval record
-        cur.execute("""
-            INSERT INTO memo_approval (memo_id, test_date, user_id, comments, authentication, attachment_path, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
-            ON CONFLICT (memo_id) DO UPDATE SET
-                test_date = EXCLUDED.test_date,
-                user_id = EXCLUDED.user_id,
-                comments = EXCLUDED.comments,
-                authentication = EXCLUDED.authentication,
-                attachment_path = EXCLUDED.attachment_path,
-                status = EXCLUDED.status
-        """, (
-            memo_id,
-            datetime.strptime(data.get('test_date'), '%Y-%m-%d').date() if data.get('test_date') else None,
-            data.get('user_id'),
-            data.get('comments'),
-            data.get('authentication'),
-            data.get('attachment_path'),
-            status
-        ))
+        print(f"Inserting/updating memo_approval record...")
+        approval_date = None
+        if data.get('approval_date'):
+            try:
+                approval_date = datetime.strptime(data.get('approval_date'), '%Y-%m-%d').date()
+                print(f"Parsed approval_date: {approval_date}")
+            except ValueError as e:
+                print(f"Error parsing approval_date: {e}")
+                return jsonify({"success": False, "message": f"Invalid approval_date format: {data.get('approval_date')}"}), 400
+        
+        # Check if approval record already exists
+        cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
+        existing_approval = cur.fetchone()
+        
+        if existing_approval:
+            # Update existing record
+            print(f"Updating existing approval record for memo {memo_id}")
+            cur.execute("""
+                UPDATE memo_approval 
+                SET approval_date = %s, user_id = %s, comments = %s, authentication = %s, 
+                    attachment_path = %s, status = %s
+                WHERE memo_id = %s
+            """, (
+                approval_date,
+                data.get('user_id'),
+                data.get('comments'),
+                data.get('authentication'),
+                attachment_path,
+                status,
+                memo_id
+            ))
+        else:
+            # Insert new record
+            print(f"Inserting new approval record for memo {memo_id}")
+            cur.execute("""
+                INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                memo_id,
+                approval_date,
+                data.get('user_id'),
+                data.get('comments'),
+                data.get('authentication'),
+                attachment_path,
+                status
+            ))
 
+        print("Committing transaction...")
         conn.commit()
         cur.close()
 
@@ -491,6 +556,9 @@ def approve_memo(memo_id):
         })
 
     except Exception as e:
-        if 'conn' in locals():
+        print(f"Error in approve_memo: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        if conn:
             conn.rollback()
-        return handle_database_error(get_db_connection(), f"Error approving memo: {str(e)}")
+        return jsonify({"success": False, "message": f"Error approving memo: {str(e)}"}), 500

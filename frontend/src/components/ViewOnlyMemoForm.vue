@@ -302,11 +302,52 @@
 
     <!-- Accept Confirmation Overlay -->
     <div v-if="showAcceptOverlay" class="overlay">
-      <div class="overlay-content">
-        <h3>Confirm Acceptance</h3>
-        <p>Are you sure you want to accept this memo?</p>
+      <div class="overlay-content approval-form">
+        <h3>Memo Approval Form</h3>
+        
+        <div class="form-group">
+          <label>Memo ID:</label>
+          <input type="text" v-model="approvalForm.memo_id" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group">
+          <label>Approval Date:</label>
+          <input type="date" v-model="approvalForm.approval_date" required />
+        </div>
+
+        <div class="form-group">
+          <label>QA Reviewer:</label>
+          <select v-model="approvalForm.user_id" @change="onUserChange" required>
+            <option value="">Select a QA Reviewer</option>
+            <option v-for="reviewer in qaReviewers" :key="reviewer.id" :value="reviewer.id">
+              {{ reviewer.name }} ({{ reviewer.email }})
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>User ID:</label>
+          <input type="text" v-model="approvalForm.user_id" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group">
+          <label>Comments:</label>
+          <textarea v-model="approvalForm.comments" placeholder="Enter your comments..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Authentication:</label>
+          <input type="text" v-model="approvalForm.authentication" placeholder="Enter authentication details..." required />
+        </div>
+
+        <div class="form-group">
+          <label>Attachments (PDF):</label>
+          <input type="file" @change="onFileChange" accept=".pdf" />
+          <small class="file-info">Optional: Upload PDF attachment</small>
+        </div>
+
         <div class="overlay-buttons">
-          <button class="btn btn-confirm" @click="confirmAccept">Confirm Accept</button>
+          <button class="btn btn-confirm" @click="confirmAccept">Approve Memo</button>
           <button class="btn btn-cancel" @click="cancelAccept">Cancel</button>
         </div>
       </div>
@@ -349,6 +390,16 @@ export default {
     return {
       showAcceptOverlay: false,
       showRejectOverlay: false,
+      qaReviewers: [],
+      approvalForm: {
+        memo_id: null,
+        user_id: '',
+        user_name: '',
+        comments: '',
+        authentication: '',
+        attachment: null,
+        approval_date: ''
+      },
       formData: {
         // Basic information
         from1: '',
@@ -446,6 +497,7 @@ export default {
   },
   async mounted() {
     await this.fetchMemoData();
+    await this.fetchQAReviewers();
   },
   methods: {
     async fetchMemoData() {
@@ -606,6 +658,10 @@ export default {
 
     // Handle accept button click
     handleAccept() {
+      // Set memo_id from props
+      this.approvalForm.memo_id = this.id;
+      // Set current date as default approval date
+      this.approvalForm.approval_date = new Date().toISOString().split('T')[0];
       this.showAcceptOverlay = true;
     },
 
@@ -614,12 +670,102 @@ export default {
       this.showRejectOverlay = true;
     },
 
+    // Fetch QA reviewers for dropdown
+    async fetchQAReviewers() {
+      try {
+        const response = await fetch('http://localhost:5000/api/available-reviewers');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.qaReviewers = data.reviewers;
+        } else {
+          console.error('Failed to fetch QA reviewers:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching QA reviewers:', error);
+      }
+    },
+
+    // Handle user selection change
+    onUserChange() {
+      if (this.approvalForm.user_id) {
+        const selectedUser = this.qaReviewers.find(
+          user => user.id === parseInt(this.approvalForm.user_id)
+        );
+        if (selectedUser) {
+          this.approvalForm.user_name = selectedUser.name;
+        }
+      } else {
+        this.approvalForm.user_name = '';
+      }
+    },
+
+    // Handle file upload
+    onFileChange(event) {
+      const file = event.target.files[0];
+      if (file && file.type === 'application/pdf') {
+        this.approvalForm.attachment = file;
+      } else {
+        alert('Please select a PDF file');
+        event.target.value = '';
+      }
+    },
+
+    // Validate approval form
+    validateApprovalForm() {
+      if (!this.approvalForm.user_id) {
+        alert('Please select a QA Reviewer');
+        return false;
+      }
+      if (!this.approvalForm.comments.trim()) {
+        alert('Please enter comments');
+        return false;
+      }
+      if (!this.approvalForm.authentication.trim()) {
+        alert('Please enter authentication details');
+        return false;
+      }
+      return true;
+    },
+
     // Confirm accept action
-    confirmAccept() {
-      // TODO: Implement accept logic - call API to update memo status
-      console.log('Memo accepted by QA Head');
-      alert('Memo has been accepted successfully!');
-      this.showAcceptOverlay = false;
+    async confirmAccept() {
+      if (!this.validateApprovalForm()) {
+        return;
+      }
+
+      try {
+        // Prepare form data for file upload
+        const formData = new FormData();
+        formData.append('memo_id', this.approvalForm.memo_id);
+        formData.append('user_id', this.approvalForm.user_id);
+        formData.append('comments', this.approvalForm.comments);
+        formData.append('authentication', this.approvalForm.authentication);
+        formData.append('approval_date', this.approvalForm.approval_date);
+        formData.append('status', 'accepted');
+        
+        if (this.approvalForm.attachment) {
+          formData.append('attachment', this.approvalForm.attachment);
+        }
+
+        const response = await fetch(`http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Memo has been accepted successfully!');
+          this.showAcceptOverlay = false;
+          this.resetApprovalForm();
+        } else {
+          alert(`Error: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Error accepting memo:', error);
+        alert('Error accepting memo. Please try again.');
+      }
     },
 
     // Confirm reject action
@@ -638,6 +784,19 @@ export default {
     // Cancel reject action
     cancelReject() {
       this.showRejectOverlay = false;
+    },
+
+    // Reset approval form
+    resetApprovalForm() {
+      this.approvalForm = {
+        memo_id: null,
+        user_id: '',
+        user_name: '',
+        comments: '',
+        authentication: '',
+        attachment: null,
+        approval_date: ''
+      };
     }
   }
 };
@@ -933,5 +1092,75 @@ export default {
 .btn-cancel:hover {
   background-color: #545b62;
   border-color: #4e555b;
+}
+
+/* Approval Form Styles */
+.approval-form {
+  max-width: 600px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.readonly-input {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.form-group textarea {
+  height: 80px;
+  resize: vertical;
+}
+
+.file-info {
+  display: block;
+  margin-top: 5px;
+  color: #666;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.form-group input[type="file"] {
+  padding: 5px;
+  border: 2px dashed #ddd;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.form-group input[type="file"]:hover {
+  border-color: #007bff;
+  background-color: #e3f2fd;
 }
 </style>
