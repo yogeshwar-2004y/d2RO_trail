@@ -320,6 +320,10 @@
           <label>Approval Date:</label>
           <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
         </div>
+        <div class="reviewer-field" v-if="memoApprovalStatus.test_date">
+          <label>Test Date:</label>
+          <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.test_date) }}</span>
+        </div>
       </div>
     </div>
 
@@ -359,6 +363,12 @@
         <div class="form-group">
           <label>Approval Date:</label>
           <input type="date" v-model="approvalForm.approval_date" required />
+        </div>
+
+        <div class="form-group">
+          <label>Test Date (Optional):</label>
+          <input type="datetime-local" v-model="approvalForm.test_date" />
+          <small class="file-info">Optional: Select test date and time</small>
         </div>
 
         <div class="form-group">
@@ -467,7 +477,8 @@ export default {
         comments: '',
         authentication: '',
         attachment: null,
-        approval_date: ''
+        approval_date: '',
+        test_date: ''
       },
       rejectionForm: {
         memo_id: null,
@@ -894,6 +905,7 @@ export default {
         formData.append('comments', this.approvalForm.comments);
         formData.append('authentication', this.approvalForm.authentication);
         formData.append('approval_date', this.approvalForm.approval_date);
+        formData.append('test_date', this.approvalForm.test_date || '');  // Optional test date
         formData.append('status', 'accepted');
         
         if (this.approvalForm.attachment) {
@@ -1023,7 +1035,8 @@ export default {
         comments: '',
         authentication: '',
         attachment: null,
-        approval_date: ''
+        approval_date: '',
+        test_date: ''
       };
     },
 

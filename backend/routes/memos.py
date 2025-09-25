@@ -509,6 +509,16 @@ def approve_memo(memo_id):
         approval_timestamp = datetime.now()
         print(f"Approval timestamp: {approval_timestamp}")
         
+        # Parse test_date if provided
+        test_date = None
+        if data.get('test_date'):
+            try:
+                test_date = datetime.fromisoformat(data.get('test_date').replace('Z', '+00:00'))
+                print(f"Test date: {test_date}")
+            except ValueError as e:
+                print(f"Invalid test_date format: {e}")
+                test_date = None
+        
         # Check if approval record already exists
         cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
         existing_approval = cur.fetchone()
@@ -522,7 +532,7 @@ def approve_memo(memo_id):
             cur.execute("""
                 UPDATE memo_approval 
                 SET approval_date = %s, user_id = %s, comments = %s, authentication = %s, 
-                    attachment_path = %s, status = %s, approved_by = %s
+                    attachment_path = %s, status = %s, approved_by = %s, test_date = %s
                 WHERE memo_id = %s
             """, (
                 approval_timestamp,
@@ -532,14 +542,15 @@ def approve_memo(memo_id):
                 attachment_path,
                 status,
                 data.get('approved_by'),  # QA Head ID (person who clicked accept/reject)
+                test_date,  # Test date (optional)
                 memo_id
             ))
         else:
             # Insert new record
             print(f"Inserting new approval record for memo {memo_id}")
             cur.execute("""
-                INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status, approved_by)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status, approved_by, test_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 memo_id,
                 approval_timestamp,
@@ -548,7 +559,8 @@ def approve_memo(memo_id):
                 data.get('authentication'),
                 attachment_path,
                 status,
-                data.get('approved_by')  # QA Head ID (person who clicked accept/reject)
+                data.get('approved_by'),  # QA Head ID (person who clicked accept/reject)
+                test_date  # Test date (optional)
             ))
 
         print("Committing transaction...")
@@ -578,7 +590,7 @@ def get_memo_approval_status(memo_id):
         # Get memo approval status
         cur.execute("""
             SELECT approval_id, memo_id, user_id, comments, authentication, 
-                   attachment_path, status, approval_date, approved_by
+                   attachment_path, status, approval_date, approved_by, test_date
             FROM memo_approval 
             WHERE memo_id = %s
         """, (memo_id,))
@@ -617,6 +629,7 @@ def get_memo_approval_status(memo_id):
             "status": approval_record[6],
             "approval_date": approval_record[7].isoformat() if approval_record[7] else None,
             "approved_by": approval_record[8],
+            "test_date": approval_record[9].isoformat() if approval_record[9] else None,
             "reviewer": {
                 "id": reviewer[0],
                 "name": reviewer[1],
