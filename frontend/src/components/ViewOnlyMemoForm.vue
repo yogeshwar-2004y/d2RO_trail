@@ -287,10 +287,48 @@
       <label>Remarks:</label>
       <textarea v-model="formData.remarks" readonly class="readonly-field remarks-textarea"></textarea>
     </div>
+
+    <!-- QA Head Action Buttons -->
+    <div class="form-section action-buttons" v-if="isQAHead">
+      <div class="button-container">
+        <button class="btn btn-accept" @click="handleAccept">
+          ACCEPT
+        </button>
+        <button class="btn btn-reject" @click="handleReject">
+          REJECT
+        </button>
+      </div>
+    </div>
+
+    <!-- Accept Confirmation Overlay -->
+    <div v-if="showAcceptOverlay" class="overlay">
+      <div class="overlay-content">
+        <h3>Confirm Acceptance</h3>
+        <p>Are you sure you want to accept this memo?</p>
+        <div class="overlay-buttons">
+          <button class="btn btn-confirm" @click="confirmAccept">Confirm Accept</button>
+          <button class="btn btn-cancel" @click="cancelAccept">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reject Confirmation Overlay -->
+    <div v-if="showRejectOverlay" class="overlay">
+      <div class="overlay-content">
+        <h3>Confirm Rejection</h3>
+        <p>Are you sure you want to reject this memo?</p>
+        <div class="overlay-buttons">
+          <button class="btn btn-confirm" @click="confirmReject">Confirm Reject</button>
+          <button class="btn btn-cancel" @click="cancelReject">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'ViewOnlyMemoForm',
   props: {
@@ -309,6 +347,8 @@ export default {
   },
   data() {
     return {
+      showAcceptOverlay: false,
+      showRejectOverlay: false,
       formData: {
         // Basic information
         from1: '',
@@ -393,6 +433,16 @@ export default {
         remarks: ''
       }
     };
+  },
+  computed: {
+    // Get current user role from global store
+    currentUserRole() {
+      return userStore.getters.currentUserRole()
+    },
+    // Check if current user is QA Head (role_id = 2)
+    isQAHead() {
+      return this.currentUserRole === 2;
+    }
   },
   async mounted() {
     await this.fetchMemoData();
@@ -552,6 +602,42 @@ export default {
     formatUnitIdentification(unitIdArray) {
       if (!unitIdArray || !Array.isArray(unitIdArray)) return '';
       return unitIdArray.join(', ');
+    },
+
+    // Handle accept button click
+    handleAccept() {
+      this.showAcceptOverlay = true;
+    },
+
+    // Handle reject button click
+    handleReject() {
+      this.showRejectOverlay = true;
+    },
+
+    // Confirm accept action
+    confirmAccept() {
+      // TODO: Implement accept logic - call API to update memo status
+      console.log('Memo accepted by QA Head');
+      alert('Memo has been accepted successfully!');
+      this.showAcceptOverlay = false;
+    },
+
+    // Confirm reject action
+    confirmReject() {
+      // TODO: Implement reject logic - call API to update memo status
+      console.log('Memo rejected by QA Head');
+      alert('Memo has been rejected successfully!');
+      this.showRejectOverlay = false;
+    },
+
+    // Cancel accept action
+    cancelAccept() {
+      this.showAcceptOverlay = false;
+    },
+
+    // Cancel reject action
+    cancelReject() {
+      this.showRejectOverlay = false;
     }
   }
 };
@@ -726,5 +812,126 @@ export default {
 .testing-details .form-table,
 .additional-details .form-table {
   margin-top: 10px;
+}
+
+/* Action Buttons Styles */
+.action-buttons {
+  text-align: center;
+  padding: 30px 20px;
+  background-color: #f8f9fa;
+  border: 2px solid #000;
+}
+
+.button-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-accept {
+  background-color: #28a745;
+  color: white;
+  border: 2px solid #28a745;
+}
+
+.btn-accept:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-reject {
+  background-color: #dc3545;
+  color: white;
+  border: 2px solid #dc3545;
+}
+
+.btn-reject:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+/* Overlay Styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+}
+
+.overlay-content h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.5em;
+}
+
+.overlay-content p {
+  margin: 0 0 25px 0;
+  color: #666;
+  font-size: 1.1em;
+}
+
+.overlay-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.btn-confirm {
+  background-color: #007bff;
+  color: white;
+  border: 2px solid #007bff;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.btn-confirm:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  border: 2px solid #6c757d;
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.btn-cancel:hover {
+  background-color: #545b62;
+  border-color: #4e555b;
 }
 </style>
