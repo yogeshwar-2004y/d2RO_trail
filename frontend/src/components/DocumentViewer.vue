@@ -95,13 +95,14 @@
                 />
               </div>
               <div class="form-group">
-                <label>Revision:</label>
+                <label>Revision (Auto-assigned):</label>
                 <input 
                   type="text" 
-                  v-model="documentDetails.revision" 
+                  v-model="documentDetails.docVer" 
                   placeholder="e.g., A"
                   class="form-input"
-                  required
+                  readonly
+                  style="background-color: #f3f4f6; cursor: not-allowed;"
                 />
               </div>
             </div>
@@ -772,14 +773,16 @@ export default {
         return true;
       }
       
-      // If any documents exist, disable upload until comments are accepted
-      return false;
+      // If documents exist, check if all comments are accepted
+      // Allow upload only if there are no pending comments
+      return !this.hasPendingComments;
     },
     
-    // Check if there are pending comments for any document
+    // Check if there are pending comments for the current document
+    // Note: this.comments is already filtered to current document by loadCommentsFromBackend()
     hasPendingComments() {
       return this.comments.some(comment => 
-        comment.status === 'pending' || !comment.status
+        comment.status !== 'accept' && comment.status !== 'reject'
       );
     },
     
@@ -790,7 +793,8 @@ export default {
         return 'A';
       }
       return latestDocument.doc_ver || 'A';
-    }
+    },
+    
   },
   
   mounted() {
@@ -1018,6 +1022,10 @@ export default {
         this.documentId = doc.document_number;
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
+        
+        // Clear previous comments and annotations first
+        this.comments = [];
+        this.annotations = [];
         
         // Load existing comments and annotations (non-blocking)
         this.loadCommentsFromBackend().catch(err => {
@@ -1451,6 +1459,8 @@ export default {
 
       this.selectedFile = file;
       this.fileName = file.name;
+      
+      // Version will be assigned by backend API during upload
       
       // Preview the file
       this.clearDocument();
