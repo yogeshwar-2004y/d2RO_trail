@@ -477,7 +477,7 @@ export default {
         
         // Additional details
         drawingRev: backendMemo.drawing_no_rev || '',
-        source: backendMemo.source || '',
+        source: backendMemo.source || 'NA',
         serialNo: this.formatSerialNumbers(backendMemo.slno_units),
         qtyOffered: backendMemo.qty_offered?.toString() || '0',
         unitIdentification: this.formatUnitIdentification(backendMemo.unit_identification),

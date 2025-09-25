@@ -247,7 +247,12 @@
               </div>
               <div class="lru-field">
                 <label>source :</label>
-                <span>NA</span>
+                <input 
+                  type="text" 
+                  v-model="formData.source" 
+                  placeholder="NA"
+                  class="source-input"
+                >
               </div>
             </td>
             <td class="desc-cell"></td>
@@ -976,6 +981,7 @@ export default {
         revision: '',
         slNo: [],
         drawingNo: '',
+        source: 'NA',
         refDoc2: '',
         refNo2: '',
         version2: '',
@@ -2045,6 +2051,20 @@ toggleShareBox() {
 
 .ref-no-header {
   width: 20%;
+}
+
+.source-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+}
+
+.source-input:focus {
+  border-color: #80bdff;
+  outline: none;
 }
 
 .ver-header, .rev-header {
