@@ -132,6 +132,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'ReviewerMemoDashboard',
   data() {
@@ -188,7 +190,18 @@ export default {
         this.loading = true;
         this.error = null;
         
-        const response = await fetch('/api/memos');
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (currentUser && currentUserRole) {
+          params.append('user_id', currentUser.id);
+          params.append('user_role', currentUserRole);
+        }
+        
+        const response = await fetch(`/api/memos?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }

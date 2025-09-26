@@ -243,35 +243,75 @@ def submit_memo():
 
 @memos_bp.route('/api/memos', methods=['GET'])
 def get_memos():
-    """Get all memos with pagination"""
+    """Get all memos with pagination, filtered by assigned reviewer for QA reviewers"""
     try:
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', 10, type=int)
         offset = (page - 1) * limit
+        
+        # Get current user information from request headers or query params
+        current_user_id = request.args.get('user_id', type=int)
+        current_user_role = request.args.get('user_role', type=int)
 
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Get total count
-        cur.execute("SELECT COUNT(*) FROM memos")
-        total_count = cur.fetchone()[0]
-
-        # Get memos with user information
-        cur.execute("""
-            SELECT 
-                m.memo_id, m.from_person, m.to_person, m.thru_person,
-                m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
-                m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                m.memo_date, m.submitted_at, m.accepted_at,
-                u1.name as submitted_by_name,
-                u2.name as accepted_by_name,
-                m.coordinator
-            FROM memos m
-            LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-            LEFT JOIN users u2 ON m.accepted_by = u2.user_id
-            ORDER BY m.submitted_at DESC
-            LIMIT %s OFFSET %s
-        """, (limit, offset))
+        # Build query based on user role
+        if current_user_role == 3:  # QA Reviewer role
+            # For QA reviewers, only show memos assigned to them
+            base_query = """
+                SELECT 
+                    m.memo_id, m.from_person, m.to_person, m.thru_person,
+                    m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
+                    m.part_number, m.manufacturer, m.qty_offered, m.venue,
+                    m.memo_date, m.submitted_at, m.accepted_at,
+                    u1.name as submitted_by_name,
+                    u2.name as accepted_by_name,
+                    m.coordinator
+                FROM memos m
+                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
+                LEFT JOIN users u2 ON m.accepted_by = u2.user_id
+                INNER JOIN memo_approval ma ON m.memo_id = ma.memo_id
+                WHERE ma.user_id = %s AND ma.status = 'accepted'
+                ORDER BY m.submitted_at DESC
+            """
+            
+            count_query = """
+                SELECT COUNT(*) 
+                FROM memos m
+                INNER JOIN memo_approval ma ON m.memo_id = ma.memo_id
+                WHERE ma.user_id = %s AND ma.status = 'accepted'
+            """
+            
+            # Get total count for QA reviewer
+            cur.execute(count_query, (current_user_id,))
+            total_count = cur.fetchone()[0]
+            
+            # Get memos for QA reviewer
+            cur.execute(base_query + " LIMIT %s OFFSET %s", (current_user_id, limit, offset))
+        else:
+            # For all other roles, show all memos
+            base_query = """
+                SELECT 
+                    m.memo_id, m.from_person, m.to_person, m.thru_person,
+                    m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
+                    m.part_number, m.manufacturer, m.qty_offered, m.venue,
+                    m.memo_date, m.submitted_at, m.accepted_at,
+                    u1.name as submitted_by_name,
+                    u2.name as accepted_by_name,
+                    m.coordinator
+                FROM memos m
+                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
+                LEFT JOIN users u2 ON m.accepted_by = u2.user_id
+                ORDER BY m.submitted_at DESC
+            """
+            
+            # Get total count for all other roles
+            cur.execute("SELECT COUNT(*) FROM memos")
+            total_count = cur.fetchone()[0]
+            
+            # Get memos for all other roles
+            cur.execute(base_query + " LIMIT %s OFFSET %s", (limit, offset))
 
         memos = cur.fetchall()
         cur.close()
