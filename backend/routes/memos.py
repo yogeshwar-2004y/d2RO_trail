@@ -844,3 +844,80 @@ def get_qa_reviewers():
     except Exception as e:
         print(f"Error fetching QA reviewers: {str(e)}")
         return jsonify({"success": False, "message": f"Error fetching reviewers: {str(e)}"}), 500
+
+@memos_bp.route('/api/memos/shared', methods=['GET'])
+def get_shared_memos():
+    """Get memos shared with the current user"""
+    try:
+        user_id = request.args.get('user_id', type=int)
+        if not user_id:
+            return jsonify({"success": False, "message": "User ID is required"}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Get memos shared with the user
+        cur.execute("""
+            SELECT 
+                m.memo_id, m.from_person, m.to_person, m.thru_person,
+                m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
+                m.part_number, m.manufacturer, m.qty_offered, m.venue,
+                m.memo_date, m.submitted_at, m.accepted_at,
+                u1.name as submitted_by_name,
+                u2.name as accepted_by_name,
+                m.coordinator, m.memo_status,
+                sm.shared_at, u3.name as shared_by_name
+            FROM shared_memos sm
+            JOIN memos m ON sm.memo_id = m.memo_id
+            LEFT JOIN users u1 ON m.submitted_by = u1.user_id
+            LEFT JOIN users u2 ON m.accepted_by = u2.user_id
+            LEFT JOIN users u3 ON sm.shared_by = u3.user_id
+            WHERE sm.shared_with = %s
+            ORDER BY sm.shared_at DESC
+        """, (user_id,))
+
+        shared_memos = cur.fetchall()
+        cur.close()
+
+        # Helper function to safely format dates
+        def safe_isoformat(date_obj):
+            if not date_obj:
+                return None
+            if hasattr(date_obj, 'isoformat'):
+                return date_obj.isoformat()
+            return str(date_obj)
+
+        memo_list = []
+        for memo in shared_memos:
+            memo_list.append({
+                "memo_id": memo[0],
+                "from_person": memo[1],
+                "to_person": memo[2],
+                "thru_person": memo[3],
+                "casdic_ref_no": memo[4],
+                "dated": safe_isoformat(memo[5]),
+                "wing_proj_ref_no": memo[6],
+                "lru_sru_desc": memo[7],
+                "part_number": memo[8],
+                "manufacturer": memo[9],
+                "qty_offered": memo[10],
+                "venue": memo[11],
+                "memo_date": safe_isoformat(memo[12]),
+                "submitted_at": safe_isoformat(memo[13]),
+                "accepted_at": safe_isoformat(memo[14]),
+                "submitted_by_name": memo[15],
+                "accepted_by_name": memo[16],
+                "coordinator": memo[17],
+                "memo_status": memo[18],
+                "shared_at": safe_isoformat(memo[19]),
+                "shared_by_name": memo[20]
+            })
+
+        return jsonify({
+            "success": True,
+            "shared_memos": memo_list
+        })
+
+    except Exception as e:
+        print(f"Error fetching shared memos: {str(e)}")
+        return jsonify({"success": False, "message": f"Error fetching shared memos: {str(e)}"}), 500

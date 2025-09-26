@@ -58,7 +58,30 @@
     </div>
     
     <div class="memo-list">
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Loading shared memos...</p>
+      </div>
+      
+      <!-- Error State -->
+      <div v-else-if="error" class="error-state">
+        <div class="error-icon">⚠️</div>
+        <h3>Error Loading Shared Memos</h3>
+        <p>{{ error }}</p>
+        <button @click="fetchSharedMemos" class="retry-button">Retry</button>
+      </div>
+      
+      <!-- Empty State -->
+      <div v-else-if="filteredMemos.length === 0" class="empty-state">
+        <div class="empty-icon">📄</div>
+        <h3>No Shared Memos</h3>
+        <p>You haven't received any shared memos yet.</p>
+      </div>
+      
+      <!-- Memo Cards -->
       <div 
+        v-else
         v-for="memo in filteredMemos" 
         :key="memo.id" 
         class="memo-card shared-memo-card" 
@@ -82,6 +105,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'SharedMemoDashboard',
   data() {
@@ -128,7 +153,113 @@ export default {
       return filtered;
     },
   },
+  async mounted() {
+    await this.fetchSharedMemos();
+    await this.fetchProjects();
+  },
   methods: {
+    async fetchSharedMemos() {
+      try {
+        this.loading = true;
+        this.error = null;
+        
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser) {
+          throw new Error('User not logged in');
+        }
+        
+        const response = await fetch(`/api/memos/shared?user_id=${currentUser.id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch shared memos: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          // Transform backend memo data to frontend format
+          this.sharedMemos = data.shared_memos.map(memo => this.transformSharedMemoData(memo));
+          console.log(`Loaded ${this.sharedMemos.length} shared memos`);
+        } else {
+          throw new Error(data.message || 'Failed to fetch shared memos');
+        }
+      } catch (error) {
+        console.error('Error fetching shared memos:', error);
+        this.error = error.message;
+        this.sharedMemos = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+    async fetchProjects() {
+      try {
+        const response = await fetch('/api/projects');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch projects: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          this.projects = data.projects;
+        } else {
+          throw new Error(data.message || 'Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        this.projects = [];
+      }
+    },
+    transformSharedMemoData(backendMemo) {
+      // Map backend shared memo format to frontend expected format
+      return {
+        id: backendMemo.memo_id,
+        project: backendMemo.wing_proj_ref_no || 'N/A',
+        author: backendMemo.from_person || 'Design Team',
+        sharedBy: backendMemo.shared_by_name || 'Unknown',
+        sharedDate: this.formatDate(backendMemo.shared_at),
+        assignedDate: this.formatDate(backendMemo.dated),
+        scheduledDate: this.formatDate(backendMemo.memo_date),
+        status: this.determineStatus(backendMemo),
+        // Store the original backend data for detailed view
+        originalData: backendMemo
+      };
+    },
+    determineStatus(memo) {
+      // Use memo_status field if available, otherwise fall back to legacy logic
+      if (memo.memo_status) {
+        switch (memo.memo_status) {
+          case 'not_assigned':
+            return 'NOT ASSIGNED';
+          case 'assigned':
+            return 'ASSIGNED';
+          case 'disapproved':
+            return 'DISAPPROVED';
+          default:
+            return memo.memo_status.toUpperCase();
+        }
+      }
+      // Fallback to legacy logic
+      if (memo.accepted_at) {
+        return 'SUCCESSFULLY COMPLETED';
+      } else if (memo.submitted_at) {
+        return 'ASSIGNED';
+      } else {
+        return 'NOT ASSIGNED';
+      }
+    },
+    formatDate(dateString) {
+      if (!dateString) return null;
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      } catch (error) {
+        console.error('Error formatting date:', error);
+        return dateString;
+      }
+    },
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
       this.showMemoFilter = false;
@@ -364,5 +495,114 @@ export default {
   border-radius: 3px;
   margin-top: 5px;
   display: inline-block;
+}
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 1.1em;
+  margin: 0;
+}
+
+/* Error State */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.error-icon {
+  font-size: 3em;
+  margin-bottom: 20px;
+}
+
+.error-state h3 {
+  color: #dc3545;
+  margin: 0 0 10px 0;
+  font-size: 1.5em;
+}
+
+.error-state p {
+  color: #666;
+  margin: 0 0 20px 0;
+  font-size: 1.1em;
+}
+
+.retry-button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background: #0056b3;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.empty-icon {
+  font-size: 4em;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: #333;
+  margin: 0 0 10px 0;
+  font-size: 1.5em;
+}
+
+.empty-state p {
+  color: #666;
+  margin: 0;
+  font-size: 1.1em;
 }
 </style>
