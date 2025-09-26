@@ -305,7 +305,7 @@ CREATE TABLE memo_approval (
     approval_id SERIAL PRIMARY KEY,
     memo_id INT NOT NULL UNIQUE REFERENCES memos(memo_id) ON DELETE CASCADE,
     test_date DATE,
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     comments TEXT,
     authentication TEXT,
     attachment_path TEXT,
