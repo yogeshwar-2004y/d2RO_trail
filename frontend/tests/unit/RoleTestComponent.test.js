@@ -16,6 +16,12 @@ vi.mock('@/stores/userStore', () => ({
       setUser: vi.fn(),
       setRole: vi.fn(),
       logout: vi.fn()
+    },
+    actions: {
+      hasRole: vi.fn((roleId) => roleId === 1),
+      hasRoleName: vi.fn((roleName) => roleName === 'Admin'),
+      login: vi.fn(),
+      logout: vi.fn()
     }
   }
 }))

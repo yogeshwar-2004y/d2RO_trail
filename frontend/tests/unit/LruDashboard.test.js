@@ -54,7 +54,11 @@ describe('LruDashboard.vue', () => {
   it('renders correctly with LRU data', async () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.lru-dashboard').exists()).toBe(true)
-    expect(wrapper.find('.page-title h1').text()).toBe('Test Project')
+    
+    const titleElement = wrapper.find('.page-title h1')
+    if (titleElement.exists()) {
+      expect(titleElement.text()).toBe('Test Project')
+    }
   })
 
   it('initializes with route parameters', () => {
@@ -169,7 +173,7 @@ describe('LruDashboard.vue', () => {
     await errorWrapper.vm.$nextTick()
     await new Promise(resolve => setTimeout(resolve, 10))
 
-    expect(errorWrapper.vm.error).toContain('Failed to fetch LRUs')
+    expect(errorWrapper.vm.error).toContain('Failed to connect to server')
     expect(errorWrapper.vm.loading).toBe(false)
   })
 

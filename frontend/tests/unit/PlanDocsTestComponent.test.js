@@ -11,6 +11,12 @@ vi.mock('@/stores/userStore', () => ({
       currentUser: vi.fn(() => ({ id: 1, name: 'Test User', email: 'test@example.com' })),
       currentUserRole: vi.fn(() => 2),
       roleName: vi.fn(() => 'Design Head')
+    },
+    actions: {
+      hasRole: vi.fn((roleId) => roleId === 2),
+      hasRoleName: vi.fn((roleName) => roleName === 'Design Head'),
+      login: vi.fn(),
+      logout: vi.fn()
     }
   }
 }))
@@ -38,7 +44,7 @@ describe('PlanDocsTestComponent.vue', () => {
 
   it('renders correctly', () => {
     expect(wrapper.find('.plan-docs-test').exists()).toBe(true)
-    expect(wrapper.find('h2').text()).toContain('Plan Documents Test Component')
+    expect(wrapper.find('h2').text()).toContain('Plan Documents Global User Store Test')
   })
 
   it('displays user store integration status', () => {
