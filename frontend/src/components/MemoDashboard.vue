@@ -449,7 +449,19 @@ export default {
     },
     async fetchReviewers() {
       try {
-        const response = await fetch('/api/reviewers');
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser) {
+          console.error('No current user found');
+          this.reviewers = [];
+          return;
+        }
+
+        // Build query parameters to exclude current user
+        const params = new URLSearchParams();
+        params.append('current_user_id', currentUser.id);
+
+        const response = await fetch(`/api/reviewers?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
         }
@@ -457,6 +469,7 @@ export default {
         const data = await response.json();
         if (data.success) {
           this.reviewers = data.reviewers;
+          console.log(`Fetched ${this.reviewers.length} reviewers (excluding current user)`);
         } else {
           throw new Error(data.message || 'Failed to fetch reviewers');
         }

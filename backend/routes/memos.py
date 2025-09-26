@@ -796,19 +796,34 @@ def share_memo():
 
 @memos_bp.route('/api/reviewers', methods=['GET'])
 def get_qa_reviewers():
-    """Get list of QA reviewers for sharing dropdown"""
+    """Get list of QA reviewers for sharing dropdown (excluding current user)"""
     try:
+        # Get current user ID from query parameter
+        current_user_id = request.args.get('current_user_id', type=int)
+        
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute("""
-            SELECT u.user_id, u.name, u.email
-            FROM users u
-            JOIN user_roles ur ON u.user_id = ur.user_id
-            JOIN roles r ON ur.role_id = r.role_id
-            WHERE r.role_name = 'QA Reviewer'
-            ORDER BY u.name
-        """)
+        if current_user_id:
+            # Exclude current user from the list
+            cur.execute("""
+                SELECT u.user_id, u.name, u.email
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE r.role_name = 'QA Reviewer' AND u.user_id != %s
+                ORDER BY u.name
+            """, (current_user_id,))
+        else:
+            # If no current user ID provided, return all QA reviewers
+            cur.execute("""
+                SELECT u.user_id, u.name, u.email
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE r.role_name = 'QA Reviewer'
+                ORDER BY u.name
+            """)
 
         reviewers = cur.fetchall()
         cur.close()
