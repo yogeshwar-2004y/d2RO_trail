@@ -27,8 +27,7 @@ def create_app():
     app.config.from_object(Config)
     
     # Enable CORS
-    #CORS(app)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     
 
     # Create upload directories

@@ -104,12 +104,12 @@ def submit_memo():
                     memo_date, name_designation, coordinator, test_facility, test_cycle_duration,
                     test_start_on, test_complete_on, calibration_status, func_check_initial,
                     perf_check_during, func_check_end, certified, remarks,
-                    submitted_at, submitted_by
+                    submitted_at, submitted_by, memo_status
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s
+                    %s, %s, %s, %s, %s
                 ) RETURNING memo_id
             """, (
                 data.get('from_person'),
@@ -145,7 +145,8 @@ def submit_memo():
                 certified,
                 form_data.get('remarks'),
                 datetime.now(),
-                data.get('submitted_by')
+                data.get('submitted_by'),
+                'not assigned'  # Initial memo_status
             ))
         except Exception as e:
             print(f"Database insertion error: {str(e)}")
@@ -267,7 +268,7 @@ def get_memos():
                     m.memo_date, m.submitted_at, m.accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
-                    m.coordinator
+                    m.coordinator, m.memo_status
                 FROM memos m
                 LEFT JOIN users u1 ON m.submitted_by = u1.user_id
                 LEFT JOIN users u2 ON m.accepted_by = u2.user_id
@@ -299,7 +300,7 @@ def get_memos():
                     m.memo_date, m.submitted_at, m.accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
-                    m.coordinator
+                    m.coordinator, m.memo_status
                 FROM memos m
                 LEFT JOIN users u1 ON m.submitted_by = u1.user_id
                 LEFT JOIN users u2 ON m.accepted_by = u2.user_id
@@ -329,7 +330,7 @@ def get_memos():
                     m.memo_date, m.submitted_at, m.accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
-                    m.coordinator
+                    m.coordinator, m.memo_status
                 FROM memos m
                 LEFT JOIN users u1 ON m.submitted_by = u1.user_id
                 LEFT JOIN users u2 ON m.accepted_by = u2.user_id
@@ -374,7 +375,8 @@ def get_memos():
                 "accepted_at": safe_isoformat(memo[14]),
                 "submitted_by_name": memo[15],
                 "accepted_by_name": memo[16],
-                "coordinator": memo[17]
+                "coordinator": memo[17],
+                "memo_status": memo[18]
             })
 
         return jsonify({
@@ -433,7 +435,7 @@ def get_memo_details(memo_id):
             return str(date_obj)  # If it's already a string, return as is
 
         # Convert memo to dictionary
-        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator, submitted_by_name, accepted_by_name
+        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator, memo_status, submitted_by_name, accepted_by_name
         memo_dict = {
             "memo_id": memo[0],
             "from_person": memo[1],
@@ -472,8 +474,9 @@ def get_memo_details(memo_id):
             "accepted_at": safe_isoformat(memo[34]),
             "accepted_by": memo[35],
             "coordinator": memo[36],
-            "submitted_by_name": memo[37],
-            "accepted_by_name": memo[38]
+            "memo_status": memo[37],
+            "submitted_by_name": memo[38],
+            "accepted_by_name": memo[39]
         }
 
         # Convert references to list
@@ -569,9 +572,16 @@ def approve_memo(memo_id):
             print(f"Updating memo {memo_id} with accepted status...")
             cur.execute("""
                 UPDATE memos 
-                SET accepted_at = %s, accepted_by = %s
+                SET accepted_at = %s, accepted_by = %s, memo_status = 'assigned'
                 WHERE memo_id = %s
             """, (datetime.now(), data.get('approved_by'), memo_id))
+        elif status == 'rejected':
+            print(f"Updating memo {memo_id} with rejected status...")
+            cur.execute("""
+                UPDATE memos 
+                SET memo_status = 'disapproved'
+                WHERE memo_id = %s
+            """, (memo_id,))
         
         # Insert or update memo_approval record
         print(f"Inserting/updating memo_approval record...")

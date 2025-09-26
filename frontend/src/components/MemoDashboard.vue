@@ -282,7 +282,21 @@ export default {
     },
 
     determineStatus(memo) {
-      // Determine status based on memo data
+      // Use memo_status field if available, otherwise fall back to legacy logic
+      if (memo.memo_status) {
+        switch (memo.memo_status) {
+          case 'not assigned':
+            return 'NOT ASSIGNED';
+          case 'assigned':
+            return 'ASSIGNED';
+          case 'disapproved':
+            return 'DISAPPROVED';
+          default:
+            return memo.memo_status.toUpperCase();
+        }
+      }
+      
+      // Fallback to legacy logic for backward compatibility
       if (memo.accepted_at) {
         return 'SUCCESSFULLY COMPLETED';
       } else if (memo.submitted_at) {
