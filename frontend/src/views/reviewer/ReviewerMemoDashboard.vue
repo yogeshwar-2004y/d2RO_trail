@@ -525,6 +525,7 @@ export default {
 }
 
 .memo-card {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -579,9 +580,9 @@ export default {
 /* Memo Actions */
 .memo-actions {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
 }
 
 .share-btn {
