@@ -259,7 +259,9 @@ CREATE TABLE memos (
     submitted_at TIMESTAMP,          -- new column
     submitted_by INT REFERENCES users(user_id) ON DELETE CASCADE,  -- new column
     accepted_at TIMESTAMP,           -- new column
-    accepted_by INT REFERENCES users(user_id) ON DELETE CASCADE    -- new column
+    accepted_by INT REFERENCES users(user_id) ON DELETE CASCADE,   -- new column
+    memo_status VARCHAR(20) NOT NULL DEFAULT 'not assigned'
+        CHECK (memo_status IN ('assigned', 'not assigned', 'disapproved'))
 );
 
 CREATE TABLE IF NOT EXISTS news_updates (
@@ -307,8 +309,11 @@ CREATE TABLE memo_approval (
     comments TEXT,
     authentication TEXT,
     attachment_path TEXT,
-    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected'))
+    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected')),
+    approval_date TIMESTAMP DEFAULT NOW(),
+    approved_by INT REFERENCES users(user_id)
 );
+
 
 CREATE TABLE project_users (
     project_user_id SERIAL PRIMARY KEY,
@@ -318,4 +323,11 @@ CREATE TABLE project_users (
     CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
 );
 
-
+CREATE TABLE shared_memos (
+    share_id SERIAL PRIMARY KEY,
+    memo_id INT NOT NULL REFERENCES memos(memo_id) ON DELETE CASCADE,
+    shared_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    shared_with INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    shared_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_not_self_share CHECK (shared_by <> shared_with)
+);
