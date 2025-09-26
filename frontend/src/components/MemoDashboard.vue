@@ -775,6 +775,7 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  margin-right: 300px;
 }
 
 .share-btn:hover {
