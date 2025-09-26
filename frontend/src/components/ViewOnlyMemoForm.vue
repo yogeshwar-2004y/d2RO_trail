@@ -301,51 +301,77 @@
     </div>
 
     <!-- Assigned Reviewer Information (only show for QA Head when memo is approved) -->
-    <div class="form-section reviewer-info-section" v-if="isQAHead && isMemoApprovedWithReviewer">
-      <h3>Memo Approved - Assigned Reviewer</h3>
-      <div class="reviewer-details">
-        <div class="reviewer-field">
-          <label>Reviewer Name:</label>
-          <span class="reviewer-value">{{ assignedReviewer.name }}</span>
+    <div class="form-section reviewer-info-section approved-section" v-if="isQAHead && isMemoApprovedWithReviewer">
+      <div class="status-badge approved-badge">✓ APPROVED AND ASSIGNED REVIEWER</div>
+      <h3>Test or Review Details</h3>
+      <div class="test-review-grid">
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Date of Test or Review :</label>
+            <span class="test-review-value">{{ formatApprovalDate(memoApprovalStatus.test_date || memoApprovalStatus.approval_date) }}</span>
+          </div>
+          <div class="test-review-field comments-field">
+            <label>Comments :</label>
+            <span class="test-review-value comments-value">{{ memoApprovalStatus.comments || 'No comments provided' }}</span>
+          </div>
         </div>
-        <div class="reviewer-field">
-          <label>Reviewer ID:</label>
-          <span class="reviewer-value">{{ assignedReviewer.id }}</span>
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Internal Tester ID:</label>
+            <span class="test-review-value">{{ assignedReviewer.id }}</span>
+          </div>
         </div>
-        <div class="reviewer-field">
-          <label>Email:</label>
-          <span class="reviewer-value">{{ assignedReviewer.email }}</span>
-        </div>
-        <div class="reviewer-field">
-          <label>Approval Date:</label>
-          <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
-        </div>
-        <div class="reviewer-field" v-if="memoApprovalStatus.test_date">
-          <label>Test Date:</label>
-          <span class="reviewer-value">{{ formatApprovalDate(memoApprovalStatus.test_date) }}</span>
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Internal Tester Name :</label>
+            <span class="test-review-value">{{ assignedReviewer.name }}</span>
+          </div>
+          <div class="test-review-field">
+            <label>Authentication</label>
+            <span class="test-review-value">{{ memoApprovalStatus.authentication || 'Not provided' }}</span>
+          </div>
+          <div class="test-review-field">
+            <label>Attachments</label>
+            <span class="test-review-value">{{ memoApprovalStatus.attachment_path ? 'File attached' : 'No attachments' }}</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Rejection Information (only show for QA Head when memo is rejected) -->
-    <div class="form-section rejection-info-section" v-if="isQAHead && isMemoRejected">
-      <h3>Memo Rejected</h3>
-      <div class="rejection-details">
-        <div class="rejection-field">
-          <label>Rejection Comments:</label>
-          <span class="rejection-value">{{ memoApprovalStatus.comments }}</span>
+    <div class="form-section rejection-info-section rejected-section" v-if="isQAHead && isMemoRejected">
+      <div class="status-badge rejected-badge">✗ REJECTED</div>
+      <h3>Test or Review Details</h3>
+      <div class="test-review-grid">
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Date of Test or Review :</label>
+            <span class="test-review-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
+          </div>
+          <div class="test-review-field comments-field">
+            <label>Comments :</label>
+            <span class="test-review-value comments-value">{{ memoApprovalStatus.comments || 'No comments provided' }}</span>
+          </div>
         </div>
-        <div class="rejection-field">
-          <label>Authentication:</label>
-          <span class="rejection-value">{{ memoApprovalStatus.authentication }}</span>
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Internal Tester ID:</label>
+            <span class="test-review-value">{{ memoApprovalStatus.approved_by }}</span>
+          </div>
         </div>
-        <div class="rejection-field">
-          <label>Rejection Date:</label>
-          <span class="rejection-value">{{ formatApprovalDate(memoApprovalStatus.approval_date) }}</span>
-        </div>
-        <div class="rejection-field">
-          <label>Rejected By:</label>
-          <span class="rejection-value">QA Head (ID: {{ memoApprovalStatus.approved_by }})</span>
+        <div class="test-review-row">
+          <div class="test-review-field">
+            <label>Internal Tester Name :</label>
+            <span class="test-review-value">QA Head</span>
+          </div>
+          <div class="test-review-field">
+            <label>Authentication</label>
+            <span class="test-review-value">{{ memoApprovalStatus.authentication || 'Not provided' }}</span>
+          </div>
+          <div class="test-review-field">
+            <label>Attachments</label>
+            <span class="test-review-value">{{ memoApprovalStatus.attachment_path ? 'File attached' : 'No attachments' }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -1430,87 +1456,118 @@ export default {
   background-color: #e3f2fd;
 }
 
-/* Reviewer Information Section Styles */
-.reviewer-info-section {
-  background-color: #e8f5e8;
+/* Status Badge Styles */
+.status-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9em;
+  text-align: center;
+  margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.approved-badge {
+  background-color: #d4edda;
+  color: #155724;
   border: 2px solid #28a745;
-  padding: 20px;
-  margin-top: 20px;
 }
 
-.reviewer-info-section h3 {
-  margin: 0 0 15px 0;
-  color: #28a745;
-  font-size: 1.2em;
-  text-align: center;
-}
-
-.reviewer-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.reviewer-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.reviewer-field label {
-  font-weight: bold;
-  color: #333;
-  font-size: 0.9em;
-}
-
-.reviewer-value {
-  background-color: #f8f9fa;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 0.9em;
-  color: #495057;
-}
-
-/* Rejection Information Section Styles */
-.rejection-info-section {
-  background-color: #f8e8e8;
+.rejected-badge {
+  background-color: #f8d7da;
+  color: #721c24;
   border: 2px solid #dc3545;
-  padding: 20px;
+}
+
+/* Test Review Details Section Styles */
+.reviewer-info-section,
+.rejection-info-section {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 25px;
   margin-top: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.rejection-info-section h3 {
-  margin: 0 0 15px 0;
+/* Approved Section - Green Theme */
+.approved-section {
+  background-color: #f0f9f0;
+  border: 2px solid #28a745;
+}
+
+.approved-section h3 {
+  color: #28a745;
+}
+
+/* Rejected Section - Red Theme */
+.rejected-section {
+  background-color: #fdf2f2;
+  border: 2px solid #dc3545;
+}
+
+.rejected-section h3 {
   color: #dc3545;
-  font-size: 1.2em;
+}
+
+.reviewer-info-section h3,
+.rejection-info-section h3 {
+  margin: 0 0 20px 0;
+  font-size: 1.3em;
   text-align: center;
+  text-decoration: underline;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 10px;
 }
 
-.rejection-details {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-.rejection-field {
+.test-review-grid {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 20px;
 }
 
-.rejection-field label {
+.test-review-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.test-review-row:last-child {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.test-review-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.test-review-field.comments-field {
+  grid-row: span 2;
+}
+
+.test-review-field label {
   font-weight: bold;
-  color: #333;
+  color: #495057;
   font-size: 0.9em;
 }
 
-.rejection-value {
-  background-color: #f8f9fa;
-  padding: 8px 12px;
-  border: 1px solid #dee2e6;
+.test-review-value {
+  padding: 12px 15px;
+  background-color: white;
+  border: 1px solid #ced4da;
   border-radius: 4px;
+  color: #333;
+  min-height: 20px;
   font-size: 0.9em;
-  color: #495057;
+}
+
+.test-review-value.comments-value {
+  min-height: 60px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 </style>
