@@ -146,7 +146,7 @@ def submit_memo():
                 form_data.get('remarks'),
                 datetime.now(),
                 data.get('submitted_by'),
-                'not_assigned'  # Initial memo_status
+                'not assigned'  # Initial memo_status
             ))
         except Exception as e:
             print(f"Database insertion error: {str(e)}")
@@ -679,7 +679,7 @@ def get_memo_approval_status(memo_id):
         
         if not approval_record:
             cur.close()
-            return jsonify({"success": False, "message": "No approval record found"}), 404
+            return jsonify({"success": True, "message": "No approval record found", "approval": None}), 200
 
         # Get reviewer details (only if user_id is not NULL)
         reviewer_id = approval_record[2]  # user_id
