@@ -146,7 +146,7 @@ def submit_memo():
                 form_data.get('remarks'),
                 datetime.now(),
                 data.get('submitted_by'),
-                'not assigned'  # Initial memo_status
+                'not_assigned'  # Initial memo_status
             ))
         except Exception as e:
             print(f"Database insertion error: {str(e)}")

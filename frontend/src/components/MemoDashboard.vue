@@ -285,7 +285,7 @@ export default {
       // Use memo_status field if available, otherwise fall back to legacy logic
       if (memo.memo_status) {
         switch (memo.memo_status) {
-          case 'not assigned':
+          case 'not_assigned':
             return 'NOT ASSIGNED';
           case 'assigned':
             return 'ASSIGNED';

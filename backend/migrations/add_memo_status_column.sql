@@ -4,8 +4,8 @@
 
 -- Add memo_status column with enum constraint
 ALTER TABLE memos 
-ADD COLUMN memo_status VARCHAR(20) DEFAULT 'not assigned' 
-CHECK (memo_status IN ('not assigned', 'assigned', 'disapproved'));
+ADD COLUMN memo_status VARCHAR(20) DEFAULT 'not_assigned' 
+CHECK (memo_status IN ('not_assigned', 'assigned', 'disapproved'));
 
 -- Update existing memos to have appropriate status based on current data
 -- If memo has been accepted, set status to 'assigned'
@@ -23,4 +23,4 @@ WHERE memo_id IN (
 );
 
 -- Add comment to the column for documentation
-COMMENT ON COLUMN memos.memo_status IS 'Status of the memo: not assigned, assigned, or disapproved';
+COMMENT ON COLUMN memos.memo_status IS 'Status of the memo: not_assigned, assigned, or disapproved';
