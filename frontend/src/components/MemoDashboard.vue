@@ -167,16 +167,25 @@
         <p>Select a QA reviewer to share this memo with.</p>
         <div class="memo-info">
           <strong>Project:</strong> {{ selectedMemo?.project }}<br>
-          <strong>Author:</strong> {{ selectedMemo?.author }}
+          <strong>Author:</strong> {{ selectedMemo?.author }}<br>
+          <strong>Memo ID:</strong> {{ selectedMemo?.id }}
         </div>
         <div class="form-group">
-          <label for="reviewer-select">Select Reviewer:</label>
-          <select id="reviewer-select" v-model="selectedReviewerId" class="reviewer-select">
+          <label for="reviewer-select">Select QA Reviewer:</label>
+          <select id="reviewer-select" v-model="selectedReviewerId" class="reviewer-select" @change="onReviewerChange">
             <option value="">Choose a reviewer...</option>
             <option v-for="reviewer in reviewers" :key="reviewer.user_id" :value="reviewer.user_id">
               {{ reviewer.name }} ({{ reviewer.email }})
             </option>
           </select>
+        </div>
+        <div class="form-group" v-if="selectedReviewerId">
+          <label>Selected Reviewer Details:</label>
+          <div class="reviewer-details">
+            <strong>Username:</strong> {{ getSelectedReviewerName() }}<br>
+            <strong>User ID:</strong> {{ selectedReviewerId }}<br>
+            <strong>Email:</strong> {{ getSelectedReviewerEmail() }}
+          </div>
         </div>
         <div class="modal-actions">
           <button @click="shareMemoWithReviewer" class="send-btn" :disabled="!selectedReviewerId">Share</button>
@@ -456,6 +465,19 @@ export default {
         this.reviewers = [];
       }
     },
+    onReviewerChange() {
+      // This method is called when reviewer selection changes
+      // The selectedReviewerId is automatically updated by v-model
+      console.log('Selected reviewer ID:', this.selectedReviewerId);
+    },
+    getSelectedReviewerName() {
+      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
+      return reviewer ? reviewer.name : '';
+    },
+    getSelectedReviewerEmail() {
+      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
+      return reviewer ? reviewer.email : '';
+    },
     async shareMemoWithReviewer() {
       if (!this.selectedReviewerId) {
         alert('Please select a reviewer to share with.');
@@ -469,22 +491,27 @@ export default {
           return;
         }
 
+        // Prepare the sharing data
+        const shareData = {
+          memo_id: this.selectedMemo.id,
+          shared_by: currentUser.id,
+          shared_with: parseInt(this.selectedReviewerId)
+        };
+
+        console.log('Sharing memo with data:', shareData);
+
         const response = await fetch('/api/memos/share', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            memo_id: this.selectedMemo.id,
-            shared_by: currentUser.id,
-            shared_with: parseInt(this.selectedReviewerId)
-          })
+          body: JSON.stringify(shareData)
         });
 
         const data = await response.json();
         if (data.success) {
           const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
-          alert(`Memo "${this.selectedMemo.project}" shared successfully with ${reviewer.name}!`);
+          alert(`Memo ID ${this.selectedMemo.id} shared successfully with ${reviewer.name} (${reviewer.email})!`);
           this.toggleShareModal();
         } else {
           alert(`Error sharing memo: ${data.message}`);
@@ -869,6 +896,21 @@ export default {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.reviewer-details {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  margin-top: 8px;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+
+.reviewer-details strong {
+  color: #0369a1;
+  font-weight: 600;
 }
 
 .modal-actions {

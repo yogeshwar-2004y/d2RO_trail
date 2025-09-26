@@ -725,3 +725,107 @@ def get_memo_approval_status(memo_id):
     except Exception as e:
         print(f"Error fetching memo approval status: {str(e)}")
         return jsonify({"success": False, "message": f"Error fetching approval status: {str(e)}"}), 500
+
+@memos_bp.route('/api/memos/share', methods=['POST'])
+def share_memo():
+    """Share a memo with another QA reviewer"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+
+        # Validate required fields
+        required_fields = ['memo_id', 'shared_by', 'shared_with']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+
+        memo_id = data.get('memo_id')
+        shared_by = data.get('shared_by')
+        shared_with = data.get('shared_with')
+
+        # Check if trying to share with self
+        if shared_by == shared_with:
+            return jsonify({"success": False, "message": "Cannot share memo with yourself"}), 400
+
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        # Check if memo exists
+        cur.execute("SELECT memo_id FROM memos WHERE memo_id = %s", (memo_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Memo not found"}), 404
+
+        # Check if both users are QA reviewers
+        cur.execute("""
+            SELECT u.user_id, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE u.user_id IN (%s, %s) AND r.role_name = 'QA Reviewer'
+        """, (shared_by, shared_with))
+        
+        reviewers = cur.fetchall()
+        if len(reviewers) != 2:
+            cur.close()
+            return jsonify({"success": False, "message": "Both users must be QA reviewers"}), 400
+
+        # Insert sharing record
+        cur.execute("""
+            INSERT INTO shared_memos (memo_id, shared_by, shared_with)
+            VALUES (%s, %s, %s)
+            RETURNING share_id
+        """, (memo_id, shared_by, shared_with))
+
+        share_id = cur.fetchone()[0]
+        conn.commit()
+        cur.close()
+
+        return jsonify({
+            "success": True,
+            "message": "Memo shared successfully",
+            "share_id": share_id
+        })
+
+    except Exception as e:
+        if 'conn' in locals():
+            conn.rollback()
+        print(f"Error sharing memo: {str(e)}")
+        return jsonify({"success": False, "message": f"Error sharing memo: {str(e)}"}), 500
+
+@memos_bp.route('/api/reviewers', methods=['GET'])
+def get_qa_reviewers():
+    """Get list of QA reviewers for sharing dropdown"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE r.role_name = 'QA Reviewer'
+            ORDER BY u.name
+        """)
+
+        reviewers = cur.fetchall()
+        cur.close()
+
+        reviewer_list = []
+        for reviewer in reviewers:
+            reviewer_list.append({
+                "user_id": reviewer[0],
+                "name": reviewer[1],
+                "email": reviewer[2]
+            })
+
+        return jsonify({
+            "success": True,
+            "reviewers": reviewer_list
+        })
+
+    except Exception as e:
+        print(f"Error fetching QA reviewers: {str(e)}")
+        return jsonify({"success": False, "message": f"Error fetching reviewers: {str(e)}"}), 500
