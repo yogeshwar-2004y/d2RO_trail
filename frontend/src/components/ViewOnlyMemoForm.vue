@@ -300,8 +300,8 @@
       </div>
     </div>
 
-    <!-- Assigned Reviewer Information (only show for QA Head when memo is approved) -->
-    <div class="form-section reviewer-info-section approved-section" v-if="isQAHead && isMemoApprovedWithReviewer">
+    <!-- Assigned Reviewer Information (show for all roles when memo is approved) -->
+    <div class="form-section reviewer-info-section approved-section" v-if="isMemoApprovedWithReviewer">
       <div class="status-badge approved-badge">✓ APPROVED AND ASSIGNED REVIEWER</div>
       <h3>Test or Review Details</h3>
       <div class="test-review-grid">
@@ -338,8 +338,8 @@
       </div>
     </div>
 
-    <!-- Rejection Information (only show for QA Head when memo is rejected) -->
-    <div class="form-section rejection-info-section rejected-section" v-if="isQAHead && isMemoRejected">
+    <!-- Rejection Information (show for all roles when memo is rejected) -->
+    <div class="form-section rejection-info-section rejected-section" v-if="isMemoRejected">
       <div class="status-badge rejected-badge">✗ REJECTED</div>
       <h3>Test or Review Details</h3>
       <div class="test-review-grid">
@@ -398,7 +398,7 @@
         </div>
 
         <div class="form-group">
-          <label>QA Reviewer:</label>
+          <label>QA Reviewer: <span class="required-field">*</span></label>
           <select v-model="approvalForm.user_id" @change="onUserChange" required>
             <option value="">Select a QA Reviewer</option>
             <option v-for="reviewer in qaReviewers" :key="reviewer.id" :value="reviewer.id">
@@ -1569,5 +1569,11 @@ export default {
   min-height: 60px;
   word-wrap: break-word;
   white-space: pre-wrap;
+}
+
+/* Required field indicator */
+.required-field {
+  color: #dc3545;
+  font-weight: bold;
 }
 </style>
