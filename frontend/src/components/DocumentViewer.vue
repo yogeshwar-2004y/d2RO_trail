@@ -67,7 +67,31 @@
             <div class="restriction-icon">⚠️</div>
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
-              <p>Document '{{ getCurrentDocumentLabel }}' has been uploaded. Please review and accept all comments for this document before uploading the next document.</p>
+              <p v-if="hasPendingCommentsInProject">There are pending comments on the latest document that need to be reviewed and accepted before uploading the next version.</p>
+              <p v-else>The latest document is awaiting review. Please wait for reviewer comments and accept them before uploading the next version.</p>
+            </div>
+          </div>
+          
+          <!-- Upload available message -->
+          <div v-if="canUploadDocument && existingDocuments.length > 0" class="upload-available-message">
+            <div class="success-icon">✅</div>
+            <div class="success-text">
+              <p><strong>Upload Available</strong></p>
+              <p>All comments have been reviewed. You can now upload the next version of the document.</p>
+            </div>
+          </div>
+          
+          <!-- Delete Latest Document Button -->
+          <div v-if="existingDocuments.length > 0" class="delete-section">
+            <button 
+              @click="deleteLatestDocument" 
+              class="delete-btn"
+              :disabled="isDeleting"
+            >
+              {{ isDeleting ? 'Deleting...' : '🗑️ Delete Latest Document' }}
+            </button>
+            <div class="delete-warning">
+              <p><strong>⚠️ Warning:</strong> This will permanently delete the latest document and all its comments.</p>
             </div>
           </div>
           
@@ -295,7 +319,7 @@
                 <span class="comment-commented_by">Reviewer ID: {{ comment.reviewer_id || 'Unknown' }}</span>
                 <span class="comment-date">{{ formatDate(comment.created_at) }}</span>
                 <span v-if="comment.status" class="comment-status" :class="'status-' + comment.status">
-                  {{ comment.status === 'accept' ? 'Accepted' : comment.status === 'reject' ? 'Rejected' : comment.status }}
+                  {{ comment.status === 'accepted' ? 'Accepted' : comment.status === 'rejected' ? 'Rejected' : comment.status }}
                 </span>
               </div>
               <div class="comment-content">
@@ -311,7 +335,7 @@
                 <!-- Comment Response Section -->
                 <div v-if="comment.justification" class="comment-response">
                   <div class="response-header">
-                    {{ comment.status === 'accept' ? 'Accepted' : 'Rejected' }} by Designer ID {{ comment.accepted_by }}
+                    {{ comment.status === 'accepted' ? 'Accepted' : 'Rejected' }} by Designer ID {{ comment.accepted_by }}
                     <span v-if="comment.accepted_at" class="response-date">{{ formatDate(comment.accepted_at) }}</span>
                   </div>
                   <div class="response-content">{{ comment.justification }}</div>
@@ -332,11 +356,20 @@
           <p v-else class="no-comments">No comments yet</p>
         </div>
         
-        <!-- Add Comment Button (only for reviewers) -->
-        <div class="add-comment-section" v-if="canAddComments">
+        <!-- Add Comment Button (only for reviewers and only on latest version) -->
+        <div class="add-comment-section" v-if="canAddCommentsOnCurrentDocument">
           <button @click="startAnnotationMode" class="add-comment-btn" v-if="!isAnnotationMode && !showCommentForm">
             Add Comment
           </button>
+        </div>
+        
+        <!-- Message for reviewers when viewing older versions -->
+        <div v-if="canAddComments && !isLatestDocument" class="comment-restriction-message">
+          <div class="restriction-icon">ℹ️</div>
+          <div class="restriction-text">
+            <p><strong>Comments Not Available</strong></p>
+            <p>You can only add comments to the latest version of the document. Please select the most recent version to add comments.</p>
+          </div>
         </div>
 
         <!-- Annotation Mode Indicator (only for reviewers) -->
@@ -631,6 +664,7 @@ export default {
       // File upload
       selectedFile: null,
       isUploading: false,
+      isDeleting: false,
       documentDetails: {
         lruId: 1,
         documentNumber: "",
@@ -690,6 +724,8 @@ export default {
       
       // Comments
       comments: [],
+      allComments: [], // All comments across all documents in the project
+      loadingAllComments: false, // Flag to track if we're loading all comments
       newComment: "",
       showCommentForm: false,
       commentForm: {
@@ -755,6 +791,25 @@ export default {
              this.currentUserRole === 'Design Head' || 
              this.currentUserRole === 'Designer';
     },
+    
+    // Check if the currently viewed document is the latest version
+    isLatestDocument() {
+      if (!this.documentId || this.existingDocuments.length === 0) {
+        return false;
+      }
+      
+      // Get the latest document (first in the list, sorted by upload date)
+      const latestDocument = this.existingDocuments[0];
+      
+      // Check if current document matches the latest document
+      return this.documentId === latestDocument.document_id || 
+             this.documentId === latestDocument.document_number;
+    },
+    
+    // Check if reviewer can add comments (only on latest version)
+    canAddCommentsOnCurrentDocument() {
+      return this.canAddComments && this.isLatestDocument;
+    },
     docContent() {
       return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
     },
@@ -763,48 +818,136 @@ export default {
     isFormValid() {
       return this.documentDetails.documentNumber.trim() !== '' &&
              this.documentDetails.version.trim() !== '' &&
-             this.documentDetails.revision.trim() !== '';
+             this.documentDetails.docVer.trim() !== '';
     },
     
     // Check if user can upload a new document
     canUploadDocument() {
+      console.log('=== canUploadDocument DEBUG ===');
+      console.log('existingDocuments.length:', this.existingDocuments.length);
+      console.log('hasPendingCommentsInProject:', this.hasPendingCommentsInProject);
+      console.log('allComments.length:', this.allComments?.length || 0);
+      console.log('loadingAllComments:', this.loadingAllComments);
+      
       // If no documents exist, allow upload
       if (this.existingDocuments.length === 0) {
+        console.log('No documents exist, allowing upload');
         return true;
       }
       
-      // If documents exist, check if all comments are accepted
-      // Allow upload only if there are no pending comments
-      return !this.hasPendingComments;
+      // If documents exist, check if all comments are accepted across ALL documents in the project
+      // Allow upload only if there are no pending comments in any document
+      const canUpload = !this.hasPendingCommentsInProject;
+      console.log('Final canUpload result:', canUpload);
+      console.log('=== END canUploadDocument DEBUG ===');
+      return canUpload;
     },
     
     // Check if there are pending comments for the current document
     // Note: this.comments is already filtered to current document by loadCommentsFromBackend()
     hasPendingComments() {
       return this.comments.some(comment => 
-        comment.status !== 'accept' && comment.status !== 'reject'
+        comment.status !== 'accepted' && comment.status !== 'rejected'
       );
+    },
+    
+    // Check if there are pending comments across ALL documents in the project
+    hasPendingCommentsInProject() {
+      console.log('Checking hasPendingCommentsInProject...');
+      console.log('loadingAllComments:', this.loadingAllComments);
+      console.log('allComments:', this.allComments);
+      console.log('allComments.length:', this.allComments?.length);
+      
+      // If we're still loading comments, don't disable upload yet - wait for loading to complete
+      if (this.loadingAllComments) {
+        console.log('Still loading comments - allowing upload for now');
+        return false; // Don't disable upload while loading
+      }
+      
+      // If no documents exist, allow upload
+      if (this.existingDocuments.length === 0) {
+        console.log('No existing documents - allowing upload');
+        return false;
+      }
+      
+      // Check ALL comments across ALL documents in the project (not just latest document)
+      if (this.allComments && this.allComments.length > 0) {
+        console.log('All comments across project:', this.allComments.map(c => ({ id: c.id, status: c.status, doc_id: c.document_id, description: c.description?.substring(0, 30) })));
+        
+        // Check if there are any pending comments across ALL documents
+        const pendingComments = this.allComments.filter(comment => 
+          comment.status !== 'accepted' && comment.status !== 'rejected'
+        );
+        
+        console.log('Pending comments across ALL documents:', pendingComments);
+        
+        // If all comments across all documents are accepted/rejected, allow upload
+        if (pendingComments.length === 0) {
+          console.log('All comments across all documents are resolved - allowing upload');
+          return false;
+        }
+        
+        console.log('hasPendingCommentsInProject result:', pendingComments.length > 0);
+        return pendingComments.length > 0;
+      }
+      
+      // If we have documents but no comments loaded yet, disable upload (not reviewed yet)
+      console.log('Have documents but no comments loaded - disabling upload (not reviewed yet)');
+      return true;
     },
     
     // Get the label for the current document (A, B, C, etc.)
     getCurrentDocumentLabel() {
+      // First, try to find which document has active comments
+      if (this.allComments && this.allComments.length > 0) {
+        const pendingComments = this.allComments.filter(comment => 
+          comment.status !== 'accepted' && comment.status !== 'rejected'
+        );
+        
+        if (pendingComments.length > 0) {
+          // Find the document that has the most recent pending comment
+          const latestPendingComment = pendingComments.reduce((latest, comment) => {
+            const commentDate = new Date(comment.created_at);
+            const latestDate = new Date(latest.created_at);
+            return commentDate > latestDate ? comment : latest;
+          });
+          
+          // Find the document that has this comment
+          const documentWithComment = this.existingDocuments.find(doc => 
+            doc.document_id == latestPendingComment.document_id || 
+            doc.document_number === latestPendingComment.document_id
+          );
+          
+          if (documentWithComment) {
+            console.log('Document with active comment:', documentWithComment);
+            return documentWithComment.doc_ver || 'Unknown';
+          }
+        }
+      }
+      
+      // Fallback to latest document
       const latestDocument = this.getLatestDocument();
       if (!latestDocument) {
         return 'A';
       }
+      
       return latestDocument.doc_ver || 'A';
     },
     
   },
   
-  mounted() {
+  async mounted() {
     const { lruId, documentId, projectId } = this.$route.params;
     console.log('Document Viewer initialized:', { lruId, documentId, projectId });
     
     // Set the correct LRU ID from route params
     if (lruId) {
       this.documentDetails.lruId = parseInt(lruId);
-      // Load LRU metadata, next doc_ver, document versions, and existing documents
+      
+      // Load all comments FIRST to enable proper upload restrictions
+      await this.loadAllCommentsForProject();
+      
+      // Then load other data
       this.loadLruMetadata(parseInt(lruId));
       this.loadNextDocVer(parseInt(lruId));
       this.loadDocumentVersions(parseInt(lruId));
@@ -1306,13 +1449,17 @@ export default {
 
         // Reload comments from backend to get updated status
         await this.loadCommentsFromBackend();
+        
+        // Reload all comments for the project to update upload restrictions
+        await this.loadAllCommentsForProject();
 
         // Close modal
         this.cancelJustification();
 
-        // Show success message
+        // Show success message with upload status
         const action = this.justificationAction === 'accept' ? 'accepted' : 'rejected';
-        alert(`Comment ${action} successfully!`);
+        const uploadStatus = this.canUploadDocument ? 'You can now upload the next version of the document.' : 'Please review and accept all remaining comments before uploading.';
+        alert(`Comment ${action} successfully! ${uploadStatus}`);
 
       } catch (error) {
         console.error('Error updating comment:', error);
@@ -1503,6 +1650,12 @@ export default {
           this.selectedFile = null;
           this.$emit('document-uploaded', result);
           
+          // Clear current document state (but preserve comments in database)
+          this.clearDocument();
+          this.documentId = null;
+          this.fileType = null;
+          this.fileName = null;
+          
           // Update modified date and reload data
           this.lastModifiedDate = new Date();
           
@@ -1510,6 +1663,17 @@ export default {
           this.loadNextDocVer(this.documentDetails.lruId);
           this.loadDocumentVersions(this.documentDetails.lruId);
           this.loadExistingDocuments(this.documentDetails.lruId);
+          
+          // Reload all comments to update upload restrictions
+          await this.loadAllCommentsForProject();
+          
+          // Auto-view the newly uploaded document to make it active for commenting
+          setTimeout(() => {
+            if (this.existingDocuments.length > 0) {
+              const latestDocument = this.existingDocuments[0]; // Get the most recent document
+              this.viewDocument(latestDocument);
+            }
+          }, 1000); // Small delay to ensure documents are loaded
           
           // Clear the form
           this.documentDetails.documentNumber = "";
@@ -1523,6 +1687,56 @@ export default {
         alert('Failed to upload document. Please try again.');
       } finally {
         this.isUploading = false;
+      }
+    },
+
+    async deleteLatestDocument() {
+      if (this.existingDocuments.length === 0) {
+        alert('No documents to delete.');
+        return;
+      }
+
+      const latestDocument = this.existingDocuments[0];
+      const confirmMessage = `Are you sure you want to delete the latest document?\n\nDocument: ${latestDocument.document_number}\nVersion: ${latestDocument.version}\n\nThis action cannot be undone and will delete all associated comments.`;
+      
+      if (!confirm(confirmMessage)) {
+        return;
+      }
+
+      this.isDeleting = true;
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/plan-documents/${latestDocument.document_id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Document deleted successfully!');
+          
+          // Reload documents and comments
+          await this.loadDocuments();
+          await this.loadAllCommentsForProject();
+          
+          // Clear current PDF if it was the deleted document
+          if (this.currentDocument && this.currentDocument.document_id === latestDocument.document_id) {
+            this.currentDocument = null;
+            this.pdfUrl = null;
+            this.page = 1;
+            this.numPages = 0;
+          }
+        } else {
+          alert(`Failed to delete document: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Delete error:', error);
+        alert('Failed to delete document. Please try again.');
+      } finally {
+        this.isDeleting = false;
       }
     },
 
@@ -2044,6 +2258,9 @@ export default {
         // Reload comments from backend to get the correct IDs
         await this.loadCommentsFromBackend();
         
+        // Reload all comments for the project to update upload restrictions
+        await this.loadAllCommentsForProject();
+        
       } catch (error) {
         console.error('Error saving comment:', error);
         alert(`Failed to save comment: ${error.message}`);
@@ -2072,6 +2289,155 @@ export default {
         console.warn('Error loading comments (optional feature):', error.message);
         // Don't show error to user as comments are optional
       }
+    },
+
+    async loadAllCommentsForProject() {
+      try {
+        this.loadingAllComments = true;
+        console.log('loadAllCommentsForProject called with LRU ID:', this.documentDetails.lruId);
+        
+        if (!this.documentDetails.lruId) {
+          console.log('No LRU ID available for loading all comments');
+          return;
+        }
+        
+        // Get all documents for this LRU/project
+        const documentsResponse = await fetch(`http://localhost:5000/api/lrus/${this.documentDetails.lruId}/plan-documents`);
+        console.log('Documents response status:', documentsResponse.status);
+        
+        if (!documentsResponse.ok) {
+          console.warn('Failed to load documents for comment checking');
+          return;
+        }
+        
+        const documentsData = await documentsResponse.json();
+        console.log('Documents data:', documentsData);
+        
+        if (!documentsData.success || !documentsData.documents) {
+          console.warn('No documents found for comment checking');
+          return;
+        }
+        
+        console.log('Found documents:', documentsData.documents.length);
+        
+        // Load comments for all documents
+        const allComments = [];
+        for (const doc of documentsData.documents) {
+          console.log('Loading comments for document:', doc.document_id);
+          try {
+            const commentsResponse = await fetch(`http://localhost:5000/api/comments?document_id=${doc.document_id}`);
+            if (commentsResponse.ok) {
+              const commentsData = await commentsResponse.json();
+              console.log('Comments data for doc', doc.document_id, ':', commentsData);
+              if (commentsData.success && commentsData.comments) {
+                allComments.push(...commentsData.comments);
+                console.log('Added', commentsData.comments.length, 'comments for document', doc.document_id);
+              }
+            }
+          } catch (error) {
+            console.warn(`Failed to load comments for document ${doc.document_id}:`, error);
+          }
+        }
+        
+        this.allComments = allComments;
+        console.log(`Loaded ${allComments.length} total comments across all documents in project`);
+        console.log('All comments:', allComments);
+        
+        // Log upload restriction status after loading comments
+        const pendingComments = allComments.filter(comment => 
+          comment.status !== 'accepted' && comment.status !== 'rejected'
+        );
+        console.log(`Upload restriction status: ${pendingComments.length > 0 ? 'DISABLED' : 'ENABLED'} (${pendingComments.length} pending comments)`);
+      } catch (error) {
+        console.warn('Error loading all comments for project:', error.message);
+      } finally {
+        this.loadingAllComments = false;
+      }
+    },
+
+    // Debug method - can be called from browser console
+    debugUploadStatus() {
+      console.log('=== UPLOAD STATUS DEBUG ===');
+      console.log('existingDocuments.length:', this.existingDocuments.length);
+      console.log('allComments.length:', this.allComments?.length || 0);
+      console.log('loadingAllComments:', this.loadingAllComments);
+      console.log('canUploadDocument:', this.canUploadDocument);
+      console.log('hasPendingCommentsInProject:', this.hasPendingCommentsInProject);
+      
+      if (this.allComments && this.allComments.length > 0) {
+        console.log('All comments:', this.allComments);
+        const pendingComments = this.allComments.filter(comment => 
+          comment.status !== 'accepted' && comment.status !== 'rejected'
+        );
+        console.log('Pending comments:', pendingComments);
+      }
+      
+      console.log('=== END DEBUG ===');
+    },
+
+    // Manual reload method - can be called from browser console
+    async manualReloadComments() {
+      console.log('Manually reloading all comments...');
+      await this.loadAllCommentsForProject();
+      console.log('Reload complete. Upload status:', this.canUploadDocument);
+    },
+
+    // Debug method to check latest document comments specifically
+    debugLatestDocumentComments() {
+      console.log('=== LATEST DOCUMENT COMMENTS DEBUG ===');
+      
+      if (this.existingDocuments.length === 0) {
+        console.log('No documents exist');
+        return;
+      }
+      
+      const latestDocument = this.existingDocuments[0];
+      console.log('Latest document:', latestDocument);
+      
+      if (!this.allComments || this.allComments.length === 0) {
+        console.log('No comments loaded');
+        return;
+      }
+      
+      const latestDocumentComments = this.allComments.filter(comment => 
+        comment.document_id == latestDocument.document_id || 
+        comment.document_id === latestDocument.document_number
+      );
+      
+      console.log('Comments for latest document:', latestDocumentComments);
+      
+      latestDocumentComments.forEach((comment, index) => {
+        console.log(`Comment ${index + 1}:`, {
+          id: comment.id,
+          document_id: comment.document_id,
+          status: comment.status,
+          description: comment.description,
+          created_at: comment.created_at
+        });
+      });
+      
+      const pendingComments = latestDocumentComments.filter(comment => 
+        comment.status !== 'accepted' && comment.status !== 'rejected'
+      );
+      
+      console.log('Pending comments:', pendingComments);
+      console.log('Should upload be enabled:', pendingComments.length === 0);
+      console.log('=== END DEBUG ===');
+    },
+
+    // Force refresh upload status
+    async forceRefreshUploadStatus() {
+      console.log('Force refreshing upload status...');
+      await this.loadAllCommentsForProject();
+      console.log('Current upload status:', this.canUploadDocument);
+      console.log('hasPendingCommentsInProject:', this.hasPendingCommentsInProject);
+    },
+
+    // Force enable upload for testing
+    forceEnableUpload() {
+      console.log('Force enabling upload for testing...');
+      this.allComments = []; // Clear all comments to force enable
+      console.log('Upload should now be enabled:', this.canUploadDocument);
     },
 
 
@@ -2317,6 +2683,44 @@ export default {
   background: #6b7280;
 }
 
+.delete-section {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+}
+
+.delete-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.delete-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.delete-warning {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
 .upload-restriction-message {
   margin-top: 1rem;
   padding: 1rem;
@@ -2346,6 +2750,65 @@ export default {
 
 .restriction-text p:not(:first-child) {
   color: #78350f;
+  margin-top: 0.25rem;
+}
+
+.upload-available-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #d1fae5;
+  border: 1px solid #10b981;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.success-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.success-text p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.success-text p:first-child {
+  font-weight: 600;
+  color: #065f46;
+}
+
+.success-text p:not(:first-child) {
+  color: #047857;
+  margin-top: 0.25rem;
+}
+
+.comment-restriction-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #e0f2fe;
+  border: 1px solid #0284c7;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.comment-restriction-message .restriction-text p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.comment-restriction-message .restriction-text p:first-child {
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.comment-restriction-message .restriction-text p:not(:first-child) {
+  color: #075985;
   margin-top: 0.25rem;
 }
 
@@ -3543,7 +4006,7 @@ export default {
   font-weight: 500;
 }
 
-.status-accept {
+.status-accepted {
   background: #d1fae5;
   color: #059669;
 }
@@ -3776,12 +4239,12 @@ export default {
 }
 
 /* Comment Status Styles */
-.comment-item.status-accept {
+.comment-item.status-accepted {
   border-left: 4px solid #10b981;
   background: #f0fdf4;
 }
 
-.comment-item.status-reject {
+.comment-item.status-rejected {
   border-left: 4px solid #ef4444;
   background: #fef2f2;
 }
@@ -3799,7 +4262,7 @@ export default {
   text-transform: capitalize;
 }
 
-.status-accept {
+.status-accepted {
   background: #d1fae5;
   color: #059669;
 }

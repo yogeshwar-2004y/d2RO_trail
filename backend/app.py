@@ -367,7 +367,7 @@ def accept_comment(comment_id):
         # Update comment status to accepted
         cur.execute("""
             UPDATE document_comments 
-            SET status = 'accept', 
+            SET status = 'accepted', 
                 justification = %s, 
                 accepted_by = %s, 
                 accepted_at = CURRENT_TIMESTAMP
@@ -420,7 +420,7 @@ def reject_comment(comment_id):
         # Update comment status to rejected
         cur.execute("""
             UPDATE document_comments 
-            SET status = 'reject', 
+            SET status = 'rejected', 
                 justification = %s, 
                 accepted_by = %s, 
                 accepted_at = CURRENT_TIMESTAMP
