@@ -32,6 +32,8 @@ import DocumentViewer from "@/components/DocumentViewer.vue";
 import SubmitMemo from '@/components/SubmitMemo.vue'
 import RoleTestComponent from '@/components/RoleTestComponent.vue'
 import PlanDocsTestComponent from '@/components/PlanDocsTestComponent.vue'
+import TemplateDashboard from '@/components/TemplateDashboard.vue'
+import TemplateViewer from '@/components/TemplateViewer.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -184,6 +186,17 @@ const router = createRouter({
         path: '/test-plan-docs',
         name: 'PlanDocsTestComponent',
         component: PlanDocsTestComponent,
+      },
+      {
+        path: '/templates',
+        name: 'TemplateDashboard',
+        component: TemplateDashboard,
+      },
+      {
+        path: '/templates/view/:templateName',
+        name: 'TemplateViewer',
+        component: TemplateViewer,
+        props: true,
       },
     ...reviewerRoutes,
     ...qaheadRoutes,

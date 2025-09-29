@@ -418,11 +418,9 @@ export default {
     },
     
     viewTemplates() {
-      // Navigate to templates view or show template management
-      console.log('Viewing templates for Design Head');
-      alert('Template management functionality will be implemented soon!');
-      // TODO: Implement actual template navigation
-      // this.$router.push({ name: 'TemplatesManagement' });
+      // Navigate to template dashboard
+      console.log('Navigating to template dashboard');
+      this.$router.push({ name: 'TemplateDashboard' });
     }
   }
 };
