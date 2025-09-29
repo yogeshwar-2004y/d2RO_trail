@@ -1478,7 +1478,19 @@ export default {
         this.lruError = null;
         console.log('Fetching LRU options...');
         
-        const response = await fetch('http://localhost:5000/api/lrus');
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+        
+        if (!currentUser || !currentUserRole) {
+          console.error('User information not available');
+          this.lruError = 'User information not available';
+          this.loadFallbackLruOptions();
+          return;
+        }
+        
+        // Use the new filtered API endpoint
+        const response = await fetch(`http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -1492,6 +1504,7 @@ export default {
           this.lruData = data.lrus; // Store full LRU data for future use
           console.log('Loaded LRU options:', this.lruOptions);
           console.log('Full LRU data:', this.lruData);
+          console.log(`User role ${currentUserRole}: ${data.lrus.length} LRUs available`);
         } else {
           this.lruError = data.message || 'Failed to fetch LRU options';
           console.error('Failed to fetch LRU options:', data.message);
