@@ -120,12 +120,24 @@
         <div class="section-header">
           <h3 class="section-title">TEST STATUS</h3>
         </div>
-        <div class="grid-layout one-col-checkbox">
-          <label><input type="checkbox" v-model="memoData.testStatus.successfullyCompleted" />Successfully completed</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.completedWithObservations" />Completed with observations</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.testNotConducted" />Test not conducted</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.testFailed" />Test failed</label>
-        </div>
+       <div class="grid-layout one-col-radio">
+  <label>
+    <input type="radio" value="Successfully completed" v-model="memoData.testStatus" />
+    Successfully completed
+  </label>
+  <label>
+    <input type="radio" value="Completed with observations" v-model="memoData.testStatus" />
+    Completed with observations
+  </label>
+  <label>
+    <input type="radio" value="Test not conducted" v-model="memoData.testStatus" />
+    Test not conducted
+  </label>
+  <label>
+    <input type="radio" value="Test failed" v-model="memoData.testStatus" />
+    Test failed
+  </label>
+</div>
       </div>
       <div class="form-card editable-section">
         <div class="section-header">
