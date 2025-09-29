@@ -76,7 +76,25 @@
       </div>
     </div>
     
-    <div class="report-grid">
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading reports...</p>
+    </div>
+    
+    <div v-else-if="error" class="error-container">
+      <div class="error-message">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <h3>Error Loading Reports</h3>
+        <p>{{ error }}</p>
+        <button @click="fetchReports" class="retry-button">Retry</button>
+      </div>
+    </div>
+    
+    <div v-else class="report-grid">
       <div 
         v-for="report in filteredReports" 
         :key="report.id" 
@@ -91,6 +109,17 @@
           </svg>
         </div>
         <span class="card-title">{{ report.name }}</span>
+      </div>
+      
+      <div v-if="filteredReports.length === 0" class="no-reports">
+        <div class="no-reports-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </div>
+        <h3>No Reports Found</h3>
+        <p>No reports match your current filters.</p>
       </div>
     </div>
   </div>
@@ -108,31 +137,16 @@ export default {
       showReportFilter: false,
       activeProjectFilter: null,
       activeReportFilter: null,
-      projects: ['PROJ001', 'PROJ002', 'PROJ003', 'PROJ004', 'PROJ005', 'PROJ006'],
+      projects: [],
       reportStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
         { name: 'ASSIGNED', color: 'assigned' },
         { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
         { name: 'TEST FAILED', color: 'failed' },
       ],
-      reports: [
-        { id: 1, project: 'PROJ001', name: 'MEMO-2025-018', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 2, project: 'PROJ002', name: 'MEMO002', status: 'ASSIGNED' },
-        { id: 3, project: 'PROJ003', name: 'MEMO003', status: 'TEST FAILED' },
-        { id: 4, project: 'PROJ001', name: 'MEMO004', status: 'TEST NOT CONDUCTED' },
-        { id: 5, project: 'PROJ002', name: 'MEMO005', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 6, project: 'PROJ003', name: 'MEMO006', status: 'ASSIGNED' },
-        { id: 7, project: 'PROJ004', name: 'MEMO007', status: 'TEST NOT CONDUCTED' },
-        { id: 8, project: 'PROJ004', name: 'MEMO008', status: 'TEST FAILED' },
-        { id: 9, project: 'PROJ005', name: 'MEMO009', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 10, project: 'PROJ005', name: 'MEMO010', status: 'ASSIGNED' },
-        { id: 11, project: 'PROJ006', name: 'MEMO011', status: 'TEST NOT CONDUCTED' },
-        { id: 12, project: 'PROJ006', name: 'MEMO012', status: 'TEST FAILED' },
-        { id: 13, project: 'PROJ001', name: 'MEMO013', status: 'SUCCESSFULLY COMPLETED' },
-        { id: 14, project: 'PROJ002', name: 'MEMO014', status: 'ASSIGNED' },
-        { id: 15, project: 'PROJ003', name: 'MEMO015', status: 'TEST NOT CONDUCTED' },
-        { id: 16, project: 'PROJ004', name: 'MEMO016', status: 'TEST FAILED' },
-      ],
+      reports: [],
+      loading: true,
+      error: null,
     };
   },
   computed: {
@@ -155,7 +169,56 @@ export default {
       return filtered;
     },
   },
+  async mounted() {
+    await this.fetchReports();
+    await this.fetchProjects();
+  },
   methods: {
+    async fetchReports() {
+      try {
+        this.loading = true;
+        const response = await fetch('http://localhost:5000/api/reports');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reports: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.reports = data.reports;
+        } else {
+          throw new Error(data.message || 'Failed to fetch reports');
+        }
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+        this.error = error.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async fetchProjects() {
+      try {
+        const response = await fetch('http://localhost:5000/api/projects');
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch projects: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          this.projects = data.projects.map(project => project.name);
+        } else {
+          throw new Error(data.message || 'Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        // Don't set error state for projects as it's not critical
+      }
+    },
+    
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
       this.showReportFilter = false;
@@ -541,6 +604,100 @@ export default {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+}
+
+/* Loading, Error, and No Reports States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.error-message {
+  text-align: center;
+  max-width: 400px;
+}
+
+.error-message svg {
+  color: #e74c3c;
+  margin-bottom: 20px;
+}
+
+.error-message h3 {
+  color: #e74c3c;
+  margin-bottom: 10px;
+}
+
+.error-message p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.retry-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+  background-color: #2980b9;
+}
+
+.no-reports {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.no-reports-icon {
+  margin-bottom: 20px;
+}
+
+.no-reports-icon svg {
+  color: #bdc3c7;
+}
+
+.no-reports h3 {
+  color: #7f8c8d;
+  margin-bottom: 10px;
+}
+
+.no-reports p {
+  color: #95a5a6;
 }
 
 /* Responsive Design */
