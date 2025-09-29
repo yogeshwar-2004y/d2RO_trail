@@ -122,6 +122,20 @@
         <p>No reports match your current filters.</p>
       </div>
     </div>
+    
+    <!-- View Templates Button - Only for Design Head -->
+    <div v-if="canViewTemplates" class="view-templates-container">
+      <button class="view-templates-button" @click="viewTemplates">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <line x1="10" y1="9" x2="8" y2="9"></line>
+        </svg>
+        VIEW TEMPLATES
+      </button>
+    </div>
   </div>
 </template>
 
@@ -168,6 +182,11 @@ export default {
       }
 
       return filtered;
+    },
+    canViewTemplates() {
+      // Only Design Head (role_id = 4) can view templates
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 4;
     },
   },
   async mounted() {
@@ -396,6 +415,14 @@ export default {
           alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
         });
       }
+    },
+    
+    viewTemplates() {
+      // Navigate to templates view or show template management
+      console.log('Viewing templates for Design Head');
+      alert('Template management functionality will be implemented soon!');
+      // TODO: Implement actual template navigation
+      // this.$router.push({ name: 'TemplatesManagement' });
     }
   }
 };
@@ -718,6 +745,47 @@ export default {
   color: #95a5a6;
 }
 
+/* View Templates Button */
+.view-templates-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+}
+
+.view-templates-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  padding: 15px 25px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  min-width: 160px;
+  justify-content: center;
+}
+
+.view-templates-button:hover {
+  background: linear-gradient(135deg, #5a6fd8, #6a4190);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.view-templates-button:active {
+  transform: translateY(0);
+}
+
+.view-templates-button svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header {
@@ -763,6 +831,17 @@ export default {
   .report-card {
     height: 150px;
     padding: 15px;
+  }
+  
+  .view-templates-container {
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .view-templates-button {
+    padding: 12px 20px;
+    font-size: 13px;
+    min-width: 140px;
   }
 }
 </style>
