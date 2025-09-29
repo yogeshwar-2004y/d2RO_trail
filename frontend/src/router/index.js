@@ -11,6 +11,7 @@ import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
 import LruDashboard from '@/components/LruDashboard.vue'
 import MemoDashboard from '@/components/MemoDashboard.vue'
 import ReportDashboard from '@/components/ReportDashboard.vue'
+import IndividualReport from '@/components/IndividualReport.vue'
 import UserActivities from '@/views/admin/UserActivities.vue'
 import AddUpdateProjects from "@/views/admin/AddUpdateProjects.vue";
 import ManageProjects from "@/views/admin/ManageProjects.vue";
@@ -31,6 +32,8 @@ import DocumentViewer from "@/components/DocumentViewer.vue";
 import SubmitMemo from '@/components/SubmitMemo.vue'
 import RoleTestComponent from '@/components/RoleTestComponent.vue'
 import PlanDocsTestComponent from '@/components/PlanDocsTestComponent.vue'
+import TemplateDashboard from '@/components/TemplateDashboard.vue'
+import TemplateViewer from '@/components/TemplateViewer.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -113,6 +116,12 @@ const router = createRouter({
       component: ReportDashboard,
     },
     {
+      path: "/reports/individual/:reportId",
+      name: "IndividualReport",
+      component: IndividualReport,
+      props: true,
+    },
+    {
       path: "/user-activities/tests",
       name: "TestsPage",
       component: TestsPage
@@ -177,6 +186,17 @@ const router = createRouter({
         path: '/test-plan-docs',
         name: 'PlanDocsTestComponent',
         component: PlanDocsTestComponent,
+      },
+      {
+        path: '/templates',
+        name: 'TemplateDashboard',
+        component: TemplateDashboard,
+      },
+      {
+        path: '/templates/view/:templateName',
+        name: 'TemplateViewer',
+        component: TemplateViewer,
+        props: true,
       },
     ...reviewerRoutes,
     ...qaheadRoutes,

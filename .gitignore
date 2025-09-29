@@ -13,6 +13,8 @@ env/
 ENV/
 .venv/
 
+test_suite/
+
 # VS Code settings
 .vscode/
 

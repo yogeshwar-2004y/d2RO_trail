@@ -582,6 +582,11 @@ def approve_memo(memo_id):
                 SET memo_status = 'disapproved'
                 WHERE memo_id = %s
             """, (memo_id,))
+            
+            # Remove any existing report for rejected memo
+            cur.execute("DELETE FROM reports WHERE memo_id = %s", (memo_id,))
+            if cur.rowcount > 0:
+                print(f"Removed existing report for rejected memo {memo_id}")
         
         # Insert or update memo_approval record
         print(f"Inserting/updating memo_approval record...")
@@ -645,6 +650,55 @@ def approve_memo(memo_id):
 
         print("Committing transaction...")
         conn.commit()
+        
+        # Create report for assigned memo
+        if status == 'accepted':
+            print(f"Creating report for assigned memo {memo_id}...")
+            try:
+                # Get memo details to extract project and LRU information
+                cur.execute("""
+                    SELECT m.wing_proj_ref_no, m.lru_sru_desc, m.part_number, m.venue
+                    FROM memos m
+                    WHERE m.memo_id = %s
+                """, (memo_id,))
+                
+                memo_details = cur.fetchone()
+                if memo_details:
+                    # For now, we'll use default values for project_id, lru_id, and serial_id
+                    # In a real implementation, these would be derived from the memo data
+                    # or provided by the user during memo submission
+                    default_project_id = 1  # Default project
+                    default_lru_id = 1       # Default LRU
+                    default_serial_id = 1   # Default serial
+                    
+                    # Check if report already exists for this memo
+                    cur.execute("SELECT report_id FROM reports WHERE memo_id = %s", (memo_id,))
+                    if not cur.fetchone():
+                        # Create new report
+                        cur.execute("""
+                            INSERT INTO reports (memo_id, project_id, lru_id, serial_id, 
+                                               inspection_stage, review_venue, status, created_at)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, NOW())
+                        """, (
+                            memo_id,
+                            default_project_id,
+                            default_lru_id,
+                            default_serial_id,
+                            memo_details[1],  # lru_sru_desc as inspection_stage
+                            memo_details[3],  # venue as review_venue
+                            'ASSIGNED'
+                        ))
+                        print(f"Report created successfully for memo {memo_id}")
+                    else:
+                        print(f"Report already exists for memo {memo_id}")
+                
+                conn.commit()
+            except Exception as report_error:
+                print(f"Error creating report for memo {memo_id}: {str(report_error)}")
+                # Don't fail the entire operation if report creation fails
+                conn.rollback()
+                conn.commit()  # Re-commit the memo approval
+        
         cur.close()
 
         return jsonify({
