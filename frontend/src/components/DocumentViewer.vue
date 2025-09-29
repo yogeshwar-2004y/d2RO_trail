@@ -67,7 +67,7 @@
             <div class="restriction-icon">⚠️</div>
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
-              <p v-if="hasPendingCommentsInProject">There are pending comments on the latest document that need to be reviewed and accepted before uploading the next version.</p>
+              <p v-if="hasPendingCommentsInProject">There are comments on the latest document that need to be accepted before uploading the next version. Rejected comments will keep upload disabled.</p>
               <p v-else>The latest document is awaiting review. Please wait for reviewer comments and accept them before uploading the next version.</p>
             </div>
           </div>
@@ -77,7 +77,7 @@
             <div class="success-icon">✅</div>
             <div class="success-text">
               <p><strong>Upload Available</strong></p>
-              <p>All comments have been reviewed. You can now upload the next version of the document.</p>
+              <p>All comments have been accepted. You can now upload the next version of the document.</p>
             </div>
           </div>
           
@@ -759,6 +759,22 @@ export default {
     canUpload() {
       return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
     },
+    
+    // Helper function to check if a comment is accepted (case-insensitive)
+    isCommentAccepted() {
+      return (comment) => {
+        const status = comment.status?.toString().toLowerCase();
+        return status === 'accepted';
+      };
+    },
+    
+    // Helper function to check if a comment is pending (not accepted)
+    isCommentPending() {
+      return (comment) => {
+        const status = comment.status?.toString().toLowerCase();
+        return !status || status === 'pending' || status === 'rejected' || status === 'none';
+      };
+    },
     isDesigner() {
       return this.currentUserRole === 'Designer';
     },
@@ -847,16 +863,19 @@ export default {
     // Note: this.comments is already filtered to current document by loadCommentsFromBackend()
     hasPendingComments() {
       return this.comments.some(comment => 
-        comment.status !== 'accepted' && comment.status !== 'rejected'
+        this.isCommentPending(comment)
       );
     },
     
     // Check if there are pending comments across ALL documents in the project
     hasPendingCommentsInProject() {
-      console.log('Checking hasPendingCommentsInProject...');
+      console.log('=== hasPendingCommentsInProject DEBUG ===');
       console.log('loadingAllComments:', this.loadingAllComments);
       console.log('allComments:', this.allComments);
       console.log('allComments.length:', this.allComments?.length);
+      console.log('existingDocuments.length:', this.existingDocuments.length);
+      console.log('Current document comments (this.comments):', this.comments);
+      console.log('Current document comments length:', this.comments?.length);
       
       // If we're still loading comments, don't disable upload yet - wait for loading to complete
       if (this.loadingAllComments) {
@@ -875,15 +894,48 @@ export default {
         console.log('All comments across project:', this.allComments.map(c => ({ id: c.id, status: c.status, doc_id: c.document_id, description: c.description?.substring(0, 30) })));
         
         // Check if there are any pending comments across ALL documents
+        // Only 'accepted' comments are considered resolved - all others keep upload disabled
         const pendingComments = this.allComments.filter(comment => 
-          comment.status !== 'accepted' && comment.status !== 'rejected'
+          this.isCommentPending(comment)
         );
         
+        const acceptedComments = this.allComments.filter(comment => 
+          this.isCommentAccepted(comment)
+        );
+        
+        const rejectedComments = this.allComments.filter(comment => {
+          const status = comment.status?.toString().toLowerCase();
+          return status === 'rejected';
+        });
+        
+        const noneStatusComments = this.allComments.filter(comment => {
+          const status = comment.status?.toString().toLowerCase();
+          return !status || status === 'none' || status === 'null';
+        });
+        
+        console.log('Comment status breakdown:');
+        console.log(`- Accepted: ${acceptedComments.length}`);
+        console.log(`- Rejected: ${rejectedComments.length}`);
+        console.log(`- None/Null status: ${noneStatusComments.length}`);
+        console.log(`- Pending/Other: ${pendingComments.length}`);
         console.log('Pending comments across ALL documents:', pendingComments);
         
-        // If all comments across all documents are accepted/rejected, allow upload
+        // Debug individual comment statuses
+        console.log('Individual comment statuses:');
+        this.allComments.forEach((comment, index) => {
+          console.log(`Comment ${index}:`, {
+            id: comment.id,
+            status: comment.status,
+            statusType: typeof comment.status,
+            isPending: this.isCommentPending(comment),
+            isAccepted: this.isCommentAccepted(comment),
+            description: comment.description?.substring(0, 30)
+          });
+        });
+        
+        // If all comments across all documents are accepted, allow upload
         if (pendingComments.length === 0) {
-          console.log('All comments across all documents are resolved - allowing upload');
+          console.log('All comments across all documents are accepted - allowing upload');
           return false;
         }
         
@@ -891,9 +943,25 @@ export default {
         return pendingComments.length > 0;
       }
       
-      // If we have documents but no comments loaded yet, disable upload (not reviewed yet)
-      console.log('Have documents but no comments loaded - disabling upload (not reviewed yet)');
-      return true;
+      // If we have documents but no comments loaded yet, check current document comments as fallback
+      console.log('Have documents but no allComments loaded - checking current document comments as fallback');
+      
+      // Fallback: check current document comments if allComments is not loaded
+      if (this.comments && this.comments.length > 0) {
+        console.log('Fallback: Checking current document comments:', this.comments);
+        const currentDocPendingComments = this.comments.filter(comment => 
+          this.isCommentPending(comment)
+        );
+        console.log('Current document pending comments:', currentDocPendingComments.length);
+        
+        if (currentDocPendingComments.length > 0) {
+          console.log('Found pending comments in current document - disabling upload');
+          return true;
+        }
+      }
+      
+      console.log('No pending comments found - allowing upload');
+      return false;
     },
     
     // Get the label for the current document (A, B, C, etc.)
@@ -966,6 +1034,20 @@ export default {
         this.checkReviewerAssignment();
       }, 1000);
     }
+  },
+  
+  watch: {
+    // Watch for changes in allComments to update upload restrictions
+    allComments: {
+      handler() {
+        console.log('allComments changed, re-evaluating upload restrictions');
+        // Force reactivity update
+        this.$nextTick(() => {
+          console.log('Upload restriction after allComments change:', this.hasPendingCommentsInProject);
+        });
+      },
+      deep: true
+    },
   },
   
   methods: {
@@ -1452,6 +1534,9 @@ export default {
         
         // Reload all comments for the project to update upload restrictions
         await this.loadAllCommentsForProject();
+        
+        // Force update of upload restrictions
+        this.$forceUpdate();
 
         // Close modal
         this.cancelJustification();
@@ -2261,6 +2346,9 @@ export default {
         // Reload all comments for the project to update upload restrictions
         await this.loadAllCommentsForProject();
         
+        // Force update of upload restrictions
+        this.$forceUpdate();
+        
       } catch (error) {
         console.error('Error saving comment:', error);
         alert(`Failed to save comment: ${error.message}`);
@@ -2344,10 +2432,11 @@ export default {
         console.log('All comments:', allComments);
         
         // Log upload restriction status after loading comments
-        const pendingComments = allComments.filter(comment => 
-          comment.status !== 'accepted' && comment.status !== 'rejected'
-        );
-        console.log(`Upload restriction status: ${pendingComments.length > 0 ? 'DISABLED' : 'ENABLED'} (${pendingComments.length} pending comments)`);
+        const pendingComments = allComments.filter(comment => {
+          const status = comment.status?.toString().toLowerCase();
+          return !status || status === 'pending' || status === 'rejected' || status === 'none' || status === 'null';
+        });
+        console.log(`Upload restriction status: ${pendingComments.length > 0 ? 'DISABLED' : 'ENABLED'} (${pendingComments.length} non-accepted comments)`);
       } catch (error) {
         console.warn('Error loading all comments for project:', error.message);
       } finally {
@@ -2360,6 +2449,7 @@ export default {
       console.log('=== UPLOAD STATUS DEBUG ===');
       console.log('existingDocuments.length:', this.existingDocuments.length);
       console.log('allComments.length:', this.allComments?.length || 0);
+      console.log('comments (current doc) length:', this.comments?.length || 0);
       console.log('loadingAllComments:', this.loadingAllComments);
       console.log('canUploadDocument:', this.canUploadDocument);
       console.log('hasPendingCommentsInProject:', this.hasPendingCommentsInProject);
@@ -2367,9 +2457,17 @@ export default {
       if (this.allComments && this.allComments.length > 0) {
         console.log('All comments:', this.allComments);
         const pendingComments = this.allComments.filter(comment => 
-          comment.status !== 'accepted' && comment.status !== 'rejected'
+          this.isCommentPending(comment)
         );
-        console.log('Pending comments:', pendingComments);
+        console.log('Pending comments (using isCommentPending):', pendingComments);
+      }
+      
+      if (this.comments && this.comments.length > 0) {
+        console.log('Current document comments:', this.comments);
+        const currentDocPending = this.comments.filter(comment => 
+          this.isCommentPending(comment)
+        );
+        console.log('Current document pending comments:', currentDocPending);
       }
       
       console.log('=== END DEBUG ===');
