@@ -172,6 +172,14 @@ export default {
     id: {
       type: [String, Number],
       required: true
+    },
+    memoData: {
+      type: Object,
+      default: null
+    },
+    references: {
+      type: Array,
+      default: () => []
     }
   },
   data() {
@@ -238,13 +246,139 @@ export default {
     goBack() {
       this.$router.go(-1);
     },
-    fetchMemoData() {
-      // In a real application, you would fetch memo data from an API
-      // For now, we'll simulate it with mock data
-      console.log('Fetching memo data for ID:', this.id);
-      // You can replace this with actual API call
-      // this.memoData = await api.getMemo(this.id);
+    async fetchMemoData() {
+      try {
+        // If memo data is passed as props (from dashboard navigation), use it
+        if (this.$route.params.memoData && this.$route.params.references) {
+          this.transformAndSetMemoData(this.$route.params.memoData, this.$route.params.references);
+          return;
+        }
+
+        // Otherwise, fetch from API
+        const response = await fetch(`/api/memos/${this.id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch memo details: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          this.transformAndSetMemoData(data.memo, data.references || []);
+        } else {
+          throw new Error(data.message || 'Failed to fetch memo details');
+        }
+      } catch (error) {
+        console.error('Error fetching memo data:', error);
+        // Fallback to default data if fetch fails
+        console.log('Using default memo data due to fetch error');
+      }
     },
+
+    transformAndSetMemoData(backendMemo, references) {
+      // Transform backend memo data to frontend format
+      this.memoData = {
+        // Basic memo information
+        dgaqaRemarks: backendMemo.remarks || 'No remarks provided',
+        from: backendMemo.from_person || 'CASCIC Design Team',
+        cascicRefNo: backendMemo.casdic_ref_no || '',
+        cascic: backendMemo.casdic_ref_no || '',
+        dated: this.formatDate(backendMemo.dated),
+        to: backendMemo.to_person || 'DGAQA Inspection Team',
+        wingProjRefNo: backendMemo.wing_proj_ref_no || '',
+        coordinatorContact: backendMemo.name_designation || '',
+        
+        // LRU/SRU Details
+        lruSruDetails: backendMemo.part_number || '',
+        lruSruDesc: backendMemo.lru_sru_desc || '',
+        refDoc: references[0]?.ref_doc || '',
+        refNoDocument: references[0]?.ref_no || '',
+        version: references[0]?.ver?.toString() || '',
+        revision: references[0]?.rev?.toString() || '',
+        partNo: backendMemo.part_number || '',
+        manufacturer: backendMemo.manufacturer || '',
+        serialNo: this.formatSerialNumbers(backendMemo.slno_units),
+        drawingNoRev: backendMemo.drawing_no_rev || '',
+        qtyOffered: backendMemo.qty_offered?.toString() || '0',
+        source: backendMemo.source || '',
+        unitIdentification: this.formatUnitIdentification(backendMemo.unit_identification),
+        mechanicalInspection: backendMemo.mechanical_inspn || '',
+        inspectionTestStage: backendMemo.inspn_test_stage_offered || '',
+        stteStatus: backendMemo.stte_status || '',
+        
+        // Testing Details
+        testingVenueDate: this.formatDate(backendMemo.memo_date),
+        testFacility: backendMemo.test_facility || '',
+        calibrationStatus: backendMemo.calibration_status || '',
+        signatureNameDesignation: backendMemo.name_designation || '',
+        testCycleDuration: backendMemo.test_cycle_duration || '',
+        funcCheckInitial: this.formatDateTime(backendMemo.func_check_initial),
+        testStartOn: this.formatDateTime(backendMemo.test_start_on),
+        perfCheckDuring: this.formatDateTime(backendMemo.perf_check_during),
+        testCompleteOn: this.formatDateTime(backendMemo.test_complete_on),
+        funcCheckEnd: this.formatDateTime(backendMemo.func_check_end),
+        
+        // Certifications object with all required properties
+        certifications: {
+          mechanicalQualityRecords: backendMemo.certified?.includes('a') || false,
+          cocVerified: backendMemo.certified?.includes('b') || false,
+          sruSerialNoted: backendMemo.certified?.includes('c') || false,
+          noDefectInvestigation: backendMemo.certified?.includes('d') || false,
+          previousTestStagesCleared: backendMemo.certified?.includes('e') || false,
+          cascicQAInspected: backendMemo.certified?.includes('f') || false,
+        },
+        
+        // Test Status object with all required properties
+        testStatus: {
+          successfullyCompleted: false,
+          completedWithObservations: false,
+          testNotConducted: false,
+          testFailed: false
+        },
+        
+        // Reviewer comments (empty for view-only)
+        reviewerComments: ''
+      };
+    },
+
+    formatDate(dateString) {
+      if (!dateString) return '';
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).replace(/\//g, '-');
+      } catch {
+        return dateString;
+      }
+    },
+
+    formatDateTime(datetimeString) {
+      if (!datetimeString) return '';
+      try {
+        const date = new Date(datetimeString);
+        return date.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
+      } catch {
+        return datetimeString;
+      }
+    },
+
+    formatSerialNumbers(serialArray) {
+      if (!serialArray || !Array.isArray(serialArray)) return '';
+      return serialArray.join(', ');
+    },
+
+    formatUnitIdentification(unitIdArray) {
+      if (!unitIdArray || !Array.isArray(unitIdArray)) return '';
+      return unitIdArray.join(', ');
+    },
+
    /** toggleShareModal() {
       this.showShareModal = !this.showShareModal;
       if (!this.showShareModal) {
@@ -656,4 +790,5 @@ export default {
   font-size: 1.2em;
   font-weight: bold;
 }
+
 </style>

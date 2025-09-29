@@ -732,6 +732,67 @@ def get_designer_assigned_lrus_in_project(designer_id, project_id):
         print(f"Error fetching assigned LRUs for designer {designer_id} in project {project_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@projects_bp.route('/api/lrus-filtered', methods=['GET'])
+def get_filtered_lrus():
+    """Get LRUs filtered by user role and assigned projects"""
+    try:
+        # Get user_id and user_role from query parameters
+        user_id = request.args.get('user_id', type=int)
+        user_role = request.args.get('user_role', type=int)
+        
+        if not user_id or not user_role:
+            return jsonify({"success": False, "message": "user_id and user_role are required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        if user_role == 4:  # Design Head - see all LRUs
+            cur.execute("""
+                SELECT l.lru_id, l.lru_name, p.project_name, l.created_at
+                FROM lrus l
+                JOIN projects p ON l.project_id = p.project_id
+                ORDER BY p.project_name, l.lru_name
+            """)
+        elif user_role == 5:  # Designer - see only LRUs from assigned projects
+            cur.execute("""
+                SELECT DISTINCT l.lru_id, l.lru_name, p.project_name, l.created_at
+                FROM lrus l
+                JOIN projects p ON l.project_id = p.project_id
+                JOIN project_users pu ON p.project_id = pu.project_id
+                WHERE pu.user_id = %s
+                ORDER BY p.project_name, l.lru_name
+            """, (user_id,))
+        else:
+            # Other roles - return empty list (they shouldn't be submitting memos)
+            cur.close()
+            return jsonify({
+                "success": True,
+                "lrus": [],
+                "message": "No LRUs available for this role"
+            })
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_list = []
+        for lru in lrus:
+            lru_list.append({
+                "lru_id": lru[0],
+                "lru_name": lru[1],
+                "project_name": lru[2],
+                "created_at": lru[3].isoformat() if lru[3] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "lrus": lru_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching filtered LRUs: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @projects_bp.route('/api/lru-names', methods=['GET'])
 def get_all_lru_names():
     """Get all LRU names from the lrus table"""
@@ -759,6 +820,102 @@ def get_all_lru_names():
         
     except Exception as e:
         print(f"Error fetching LRU names: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/lrus', methods=['GET'])
+def get_all_lrus():
+    """Get all LRUs with detailed information from the lrus table"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch all LRUs with project information
+        cur.execute("""
+            SELECT 
+                l.lru_id,
+                l.lru_name,
+                l.project_id,
+                p.project_name,
+                l.created_at
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            ORDER BY l.lru_name
+        """)
+        
+        lrus = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        lru_list = []
+        for lru in lrus:
+            lru_list.append({
+                "lru_id": lru[0],
+                "lru_name": lru[1],
+                "project_id": lru[2],
+                "project_name": lru[3],
+                "created_at": lru[4].isoformat() if lru[4] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "lrus": lru_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching LRUs: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/lrus/<int:lru_id>/serial-numbers', methods=['GET'])
+def get_lru_serial_numbers(lru_id):
+    """Get serial numbers for a specific LRU"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First verify the LRU exists
+        cur.execute("""
+            SELECT l.lru_id, l.lru_name, p.project_name
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        lru = cur.fetchone()
+        if not lru:
+            cur.close()
+            return jsonify({"success": False, "message": "LRU not found"}), 404
+        
+        # Fetch serial numbers for the LRU
+        cur.execute("""
+            SELECT serial_id, serial_number
+            FROM serial_numbers
+            WHERE lru_id = %s
+            ORDER BY serial_number
+        """, (lru_id,))
+        
+        serials = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        serial_list = []
+        for serial in serials:
+            serial_list.append({
+                "serial_id": serial[0],
+                "serial_number": serial[1]
+            })
+        
+        return jsonify({
+            "success": True,
+            "lru": {
+                "lru_id": lru[0],
+                "lru_name": lru[1],
+                "project_name": lru[2]
+            },
+            "serial_numbers": serial_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching serial numbers for LRU {lru_id}: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 @projects_bp.route('/api/test-designer-assignments', methods=['GET'])

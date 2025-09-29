@@ -17,6 +17,8 @@ from routes.documents import documents_bp
 from routes.tests import tests_bp
 from routes.news import news_bp
 from routes.files import files_bp
+from routes.memos import memos_bp
+from routes.reports import reports_bp
 
 def create_app():
     """Application factory pattern"""
@@ -26,8 +28,7 @@ def create_app():
     app.config.from_object(Config)
     
     # Enable CORS
-    #CORS(app)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     
 
     # Create upload directories
@@ -44,6 +45,8 @@ def create_app():
     app.register_blueprint(tests_bp)
     app.register_blueprint(news_bp)
     app.register_blueprint(files_bp)
+    app.register_blueprint(memos_bp)
+    app.register_blueprint(reports_bp)
     
     return app
 

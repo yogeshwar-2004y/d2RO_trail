@@ -28,8 +28,8 @@ INSERT INTO users (user_id, name, email, password_hash) VALUES
 
 CREATE TABLE IF NOT EXISTS user_roles (
     user_role_id SERIAL PRIMARY KEY,
-    user_id INT NOT NULL REFERENCES users(user_id),
-    role_id INT NOT NULL REFERENCES roles(role_id),
+    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    role_id INT NOT NULL REFERENCES roles(role_id) ON DELETE CASCADE,
     assigned_at TIMESTAMP DEFAULT now()
 );
 
@@ -43,7 +43,7 @@ INSERT INTO user_roles (user_id, role_id) VALUES
 CREATE TABLE IF NOT EXISTS projects (
     project_id SERIAL PRIMARY KEY,
     project_name VARCHAR(50) NOT NULL,
-    created_by INT NOT NULL REFERENCES users(user_id),
+    created_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     created_at TIMESTAMP DEFAULT now(),
     project_date DATE NOT NULL
 );
@@ -54,7 +54,7 @@ INSERT INTO projects (project_name, created_by, project_date) VALUES
 
 CREATE TABLE IF NOT EXISTS lrus (
     lru_id SERIAL PRIMARY KEY,
-    project_id INT NOT NULL REFERENCES projects(project_id),
+    project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
     lru_name VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -68,7 +68,7 @@ INSERT INTO lrus (project_id, lru_name) VALUES
 
 CREATE TABLE IF NOT EXISTS serial_numbers (
     serial_id SERIAL PRIMARY KEY,
-    lru_id INT NOT NULL REFERENCES lrus(lru_id),
+    lru_id INT NOT NULL REFERENCES lrus(lru_id) ON DELETE CASCADE,
     serial_number INT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
@@ -82,12 +82,12 @@ INSERT INTO serial_numbers (lru_id, serial_number) VALUES
 
 CREATE TABLE IF NOT EXISTS plan_documents (
     document_id SERIAL PRIMARY KEY,
-    lru_id INT NOT NULL REFERENCES lrus(lru_id),
+    lru_id INT NOT NULL REFERENCES lrus(lru_id) ON DELETE CASCADE,
     document_number VARCHAR(50) NOT NULL,
     version VARCHAR(10),
     revision VARCHAR(10),
     doc_ver VARCHAR(2) CHECK (doc_ver ~ '^[A-Z]{1,2}$'),
-    uploaded_by INT NOT NULL REFERENCES users(user_id),
+    uploaded_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     upload_date TIMESTAMP DEFAULT NOW(),
     file_path VARCHAR(255) NOT NULL,
     status VARCHAR(50) DEFAULT 'not assigned' CHECK (
@@ -111,11 +111,11 @@ INSERT INTO plan_documents (lru_id, document_number, version, revision, doc_ver,
 
 CREATE TABLE IF NOT EXISTS document_version (
     version_id SERIAL PRIMARY KEY,
-    document_id INT NOT NULL REFERENCES plan_documents(document_id),
+    document_id INT NOT NULL REFERENCES plan_documents(document_id) ON DELETE CASCADE,
     version VARCHAR(20) NOT NULL,
     revision VARCHAR(20),
     doc_version VARCHAR(2) NOT NULL CHECK (doc_version ~ '^[A-Z]{1,2}$'),
-    uploaded_by INT NOT NULL REFERENCES users(user_id),
+    uploaded_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     uploaded_date TIMESTAMP DEFAULT now(),
     file_path VARCHAR(255) NOT NULL
  );
@@ -133,8 +133,8 @@ VALUES
 
 CREATE TABLE IF NOT EXISTS document_reviews (
     review_id SERIAL PRIMARY KEY,
-    document_id INT NOT NULL REFERENCES plan_documents(document_id),
-    reviewer_id INT NOT NULL REFERENCES users(user_id),
+    document_id INT NOT NULL REFERENCES plan_documents(document_id) ON DELETE CASCADE,
+    reviewer_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
     review_date TIMESTAMP DEFAULT now()
 );
@@ -147,8 +147,8 @@ INSERT INTO document_reviews (document_id, reviewer_id, status) VALUES
 
 CREATE TABLE IF NOT EXISTS review_comments (
     comment_id SERIAL PRIMARY KEY,
-    review_id INT NOT NULL REFERENCES document_reviews(review_id),
-    commented_by INT NOT NULL REFERENCES users(user_id),
+    review_id INT NOT NULL REFERENCES document_reviews(review_id) ON DELETE CASCADE,
+    commented_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
     comment_text TEXT NOT NULL,
     classification VARCHAR(10) NOT NULL CHECK (classification IN ('major', 'minor')),
     justification TEXT,
@@ -199,20 +199,20 @@ INSERT INTO stage_types (type_name) VALUES
 ('Acceptance');
 
 CREATE TABLE IF NOT EXISTS test_stage_types (
-    test_id INT NOT NULL REFERENCES tests(test_id),
-    stage_id INT NOT NULL REFERENCES stages(stage_id),
-    type_id INT NOT NULL REFERENCES stage_types(type_id),
+    test_id INT NOT NULL REFERENCES tests(test_id) ON DELETE CASCADE,
+    stage_id INT NOT NULL REFERENCES stages(stage_id) ON DELETE CASCADE,
+    type_id INT NOT NULL REFERENCES stage_types(type_id) ON DELETE CASCADE,
     assigned_at TIMESTAMP DEFAULT NOW(),
-    assigned_by INT REFERENCES users(user_id),
+    assigned_by INT REFERENCES users(user_id) ON DELETE CASCADE,
     -- ensure only one type per stage per test
     CONSTRAINT unique_test_stage UNIQUE (test_id, stage_id)
 );
 
 INSERT INTO test_stage_types (test_id, stage_id, type_id, assigned_by) VALUES
-(1, 1, 1, 1002), -- Design stage functional test
-(1, 2, 2, 1003), -- Implementation stage performance test
-(2, 3, 3, 1004), -- Testing stage regression test
-(3, 4, 4, 1005); -- Deployment stage acceptance test
+(1, 1, 1, 1002), 
+(1, 2, 2, 1003), 
+(2, 3, 3, 1004), 
+(3, 4, 4, 1005); 
 
 
 CREATE TABLE plan_doc_assignment (
@@ -228,17 +228,17 @@ CREATE TABLE memos (
     from_person TEXT NOT NULL,
     to_person TEXT NOT NULL,
     thru_person TEXT,
-    casdic_ref_no INT,
+    casdic_ref_no VARCHAR,
     dated DATE,
-    wing_proj_ref_no INT,
+    wing_proj_ref_no VARCHAR,
     lru_sru_desc TEXT,
-    part_number INT,
+    part_number VARCHAR,
     slno_units TEXT[],               -- array of checkbox selections
     qty_offered INT,                 -- derived: count of slno_units
     manufacturer VARCHAR(255),
     drawing_no_rev TEXT,
     source TEXT,
-    unit_identification TEXT,
+    unit_identification TEXT[],      -- changed to array type
     mechanical_inspn TEXT,
     inspn_test_stage_offered TEXT,
     stte_status TEXT,
@@ -247,7 +247,7 @@ CREATE TABLE memos (
     memo_date DATE,
     name_designation TEXT,
     test_facility VARCHAR(255),
-    test_cycle_duration FLOAT,
+    test_cycle_duration TEXT,        -- changed from FLOAT to TEXT
     test_start_on TIMESTAMP,
     test_complete_on TIMESTAMP,
     calibration_status TEXT,
@@ -255,7 +255,13 @@ CREATE TABLE memos (
     perf_check_during TIMESTAMP,
     func_check_end TIMESTAMP,
     certified TEXT[],                -- store a-f checkbox selections
-    remarks TEXT
+    remarks TEXT,
+    submitted_at TIMESTAMP,          -- new column
+    submitted_by INT REFERENCES users(user_id) ON DELETE CASCADE,  -- new column
+    accepted_at TIMESTAMP,           -- new column
+    accepted_by INT REFERENCES users(user_id) ON DELETE CASCADE,   -- new column
+    memo_status VARCHAR(20) NOT NULL DEFAULT 'not assigned'
+        CHECK (memo_status IN ('assigned', 'not assigned', 'disapproved'))
 );
 
 CREATE TABLE IF NOT EXISTS news_updates (
@@ -274,7 +280,6 @@ CREATE TABLE memo_references (
     ver FLOAT,
     rev FLOAT
 );
-
 
 CREATE TABLE reports (
     report_id SERIAL PRIMARY KEY,
@@ -300,12 +305,15 @@ CREATE TABLE memo_approval (
     approval_id SERIAL PRIMARY KEY,
     memo_id INT NOT NULL UNIQUE REFERENCES memos(memo_id) ON DELETE CASCADE,
     test_date DATE,
-    user_id INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     comments TEXT,
     authentication TEXT,
     attachment_path TEXT,
-    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected'))
+    status VARCHAR(10) NOT NULL CHECK (status IN ('accepted', 'rejected')),
+    approval_date TIMESTAMP DEFAULT NOW(),
+    approved_by INT REFERENCES users(user_id)
 );
+
 
 CREATE TABLE project_users (
     project_user_id SERIAL PRIMARY KEY,
@@ -315,30 +323,11 @@ CREATE TABLE project_users (
     CONSTRAINT unique_project_user UNIQUE (project_id, user_id)
 );
 
-CREATE TABLE document_annotations (
-    annotation_id SERIAL PRIMARY KEY,
-    comment_id INTEGER NOT NULL,
-    document_id VARCHAR(100) NOT NULL,
-    page_no INTEGER NOT NULL,
-    x_position NUMERIC(5,2) NOT NULL,
-    y_position NUMERIC(5,2) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+CREATE TABLE shared_memos (
+    share_id SERIAL PRIMARY KEY,
+    memo_id INT NOT NULL REFERENCES memos(memo_id) ON DELETE CASCADE,
+    shared_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    shared_with INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+    shared_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_not_self_share CHECK (shared_by <> shared_with)
 );
-
-
-CREATE TABLE document_comments (
-    comment_id SERIAL PRIMARY KEY,
-    document_id VARCHAR(100) NOT NULL,
-    document_name VARCHAR(255),
-    version VARCHAR(50),
-    reviewer_id INTEGER,
-    page_no INTEGER NOT NULL,
-    section VARCHAR(100),
-    description TEXT,
-    commented_by VARCHAR(100) DEFAULT 'Anonymous',
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    is_annotation BOOLEAN DEFAULT FALSE
-);
-
-
-ADD COLUMN justification TEXT;

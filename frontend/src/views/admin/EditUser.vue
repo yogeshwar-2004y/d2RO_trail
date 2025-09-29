@@ -83,6 +83,43 @@
         </select>
       </div>
 
+      <div class="form-row">
+        <label for="signature">SIGNATURE (PNG only)</label>
+        <div class="signature-upload-container">
+          <input
+            type="file"
+            id="signature"
+            @change="handleSignatureUpload"
+            accept=".png"
+            class="signature-input"
+          />
+          <div class="signature-preview" v-if="signaturePreview">
+            <img
+              :src="signaturePreview"
+              alt="Signature Preview"
+              class="signature-image"
+              @error="handleSignatureImageError"
+              @load="handleSignatureImageLoad"
+            />
+            <button
+              type="button"
+              @click="removeSignature"
+              class="remove-signature-btn"
+            >
+              ×
+            </button>
+            <div class="signature-info">
+              <span class="signature-label">{{
+                signatureFile ? "New signature selected" : "Current signature"
+              }}</span>
+            </div>
+          </div>
+          <div class="signature-placeholder" v-if="!signaturePreview">
+            <span>Upload new signature or keep existing</span>
+          </div>
+        </div>
+      </div>
+
       <div class="button-group">
         <button class="cancel-button" @click="cancelEdit">CANCEL</button>
         <button class="update-button" @click="updateUser" :disabled="loading">
@@ -109,11 +146,14 @@ export default {
       roles: [],
       loading: false,
       originalData: {},
+      signatureFile: null,
+      signaturePreview: null,
     };
   },
   async mounted() {
     await this.loadUserData();
     await this.fetchRoles();
+    await this.fetchUserDetails();
   },
   methods: {
     loadUserData() {
@@ -157,6 +197,87 @@ export default {
       }
     },
 
+    async fetchUserDetails() {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/users/${this.userId}`
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          const user = data.user;
+          // Load existing signature if it exists
+          if (user.has_signature && user.signature_path) {
+            // Extract filename from the path (handle both Windows and Unix paths)
+            let filename = user.signature_path;
+            // Replace backslashes with forward slashes first
+            filename = filename.replace(/\\/g, "/");
+            // Then extract the filename
+            if (filename.includes("/")) {
+              filename = filename.split("/").pop();
+            }
+
+            // Set the signature preview URL
+            this.signaturePreview = `http://localhost:8000/api/users/signature/${filename}`;
+          }
+        } else {
+          console.error("Error fetching user details:", data.message);
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    },
+
+    handleSignatureUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        // Validate file type
+        if (!file.type.startsWith("image/png")) {
+          alert("Please select a PNG file for the signature.");
+          event.target.value = "";
+          return;
+        }
+
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Signature file size must be less than 5MB.");
+          event.target.value = "";
+          return;
+        }
+
+        this.signatureFile = file;
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          this.signaturePreview = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+
+    removeSignature() {
+      this.signatureFile = null;
+      this.signaturePreview = null;
+      // Clear the file input
+      const fileInput = document.getElementById("signature");
+      if (fileInput) {
+        fileInput.value = "";
+      }
+    },
+
+    handleSignatureImageError(event) {
+      console.error("Failed to load signature image:", event.target.src);
+      // Show error message
+      alert("Failed to load signature image. Please check if the file exists.");
+      // Clear the preview
+      this.signaturePreview = null;
+    },
+
+    handleSignatureImageLoad(event) {
+      console.log("Signature image loaded successfully:", event.target.src);
+    },
+
     validateUser() {
       if (!this.user.name || !this.user.email || !this.user.roleId) {
         alert("Please fill in all required fields (Name, Email, Role).");
@@ -181,43 +302,49 @@ export default {
       try {
         this.loading = true;
 
-        // Prepare update data - only include fields that have changed
-        const updateData = {
-          user_id: this.userId,
-        };
+        // Create FormData for multipart form submission
+        const formData = new FormData();
+        formData.append("user_id", this.userId);
 
+        // Only include fields that have changed
         if (this.user.name !== this.originalData.name) {
-          updateData.name = this.user.name;
+          formData.append("name", this.user.name);
         }
 
         if (this.user.email !== this.originalData.email) {
-          updateData.email = this.user.email;
+          formData.append("email", this.user.email);
         }
 
         if (this.user.password && this.user.password.trim() !== "") {
-          updateData.password = this.user.password;
+          formData.append("password", this.user.password);
         }
 
         // Always include role update if roleId is set
         if (this.user.roleId) {
-          updateData.roleId = this.user.roleId;
+          formData.append("roleId", this.user.roleId);
+        }
+
+        // Add signature file if selected
+        if (this.signatureFile) {
+          formData.append("signature", this.signatureFile);
         }
 
         const response = await fetch(
           `http://localhost:8000/api/users/${this.userId}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(updateData),
+            body: formData, // No Content-Type header for FormData
           }
         );
 
         const data = await response.json();
 
         if (data.success) {
-          alert("User updated successfully!");
+          let message = "User updated successfully!";
+          if (data.signature_updated) {
+            message += " Signature updated.";
+          }
+          alert(message);
           this.$router.push({ name: "SelectUserToEdit" });
         } else {
           alert("Error updating user: " + data.message);
@@ -386,5 +513,76 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.signature-upload-container {
+  flex: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signature-input {
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 15px;
+  font-size: 1em;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.signature-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 200px;
+}
+
+.signature-image {
+  max-width: 100%;
+  max-height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  object-fit: contain;
+}
+
+.remove-signature-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-signature-btn:hover {
+  background: #cc3333;
+}
+
+.signature-placeholder {
+  padding: 20px;
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+.signature-info {
+  margin-top: 5px;
+  text-align: center;
+}
+
+.signature-label {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
 }
 </style>

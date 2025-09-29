@@ -189,11 +189,19 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        console.log("before fetching");
 
-        const response = await fetch("http://localhost:8000/api/projects");
-        console.log("after fetching");
+        let apiUrl = "http://localhost:8000/api/projects";
 
+        // If user is a QA Reviewer, use the filtered endpoint
+        if (this.isReviewer && this.currentUser?.id) {
+          apiUrl = `http://localhost:8000/api/reviewer/${this.currentUser.id}/assigned-projects`;
+        }
+        // If user is a Designer, use the designer filtered endpoint
+        else if (this.isDesigner && this.currentUser?.id) {
+          apiUrl = `http://localhost:8000/api/designer/${this.currentUser.id}/assigned-projects`;
+        }
+
+        const response = await fetch(apiUrl);
         const data = await response.json();
 
         if (data.success) {
