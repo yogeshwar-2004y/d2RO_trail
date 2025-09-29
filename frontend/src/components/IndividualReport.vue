@@ -45,32 +45,26 @@
       <!-- No Reports Uploaded State -->
       <div class="no-reports-state">
         <div class="empty-icon">📄</div>
-        <h3>No reports uploaded</h3>
-        <p>This report is currently empty and needs to be populated with observations and data.</p>
         
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <button 
-            v-if="canSelectTemplate" 
-            @click="selectTemplate"
-            class="action-btn template-btn"
-          >
-            Select Template
-          </button>
+        <!-- Different messages based on user role -->
+        <div v-if="canSelectTemplate" class="template-message">
+          <h3>Template not yet chosen</h3>
+          <p>Please select a template to proceed with this report.</p>
           
-          <button 
-            @click="uploadReport"
-            class="action-btn upload-btn"
-          >
-            Upload Report
-          </button>
-          
-          <button 
-            @click="createReport"
-            class="action-btn create-btn"
-          >
-            Create New Report
-          </button>
+          <!-- Single Choose Template Button for QA Head/Design Head -->
+          <div class="template-action">
+            <button 
+              @click="selectTemplate"
+              class="choose-template-btn"
+            >
+              Choose Template
+            </button>
+          </div>
+        </div>
+        
+        <div v-else class="report-message">
+          <h3>Report not uploaded yet</h3>
+          <p>This report is currently empty and needs to be populated with observations and data.</p>
         </div>
       </div>
     </div>
@@ -104,8 +98,8 @@ export default {
   },
   methods: {
     selectTemplate() {
-      console.log('Selecting template for report:', this.reportId);
-      alert(`Template selection for Report ID: ${this.reportId} will be implemented soon!`);
+      console.log('Choosing template for report:', this.reportId);
+      alert(`Choose template for Report ID: ${this.reportId} will be implemented soon!`);
     },
     
     uploadReport() {
@@ -282,6 +276,20 @@ export default {
   font-weight: 600;
 }
 
+.template-message h3 {
+  color: #007bff;
+  font-size: 2.2em;
+  margin: 0;
+  font-weight: 600;
+}
+
+.report-message h3 {
+  color: #ffc107;
+  font-size: 2.2em;
+  margin: 0;
+  font-weight: 600;
+}
+
 .no-reports-state p {
   color: #6c757d;
   font-size: 1.2em;
@@ -290,56 +298,29 @@ export default {
   line-height: 1.6;
 }
 
-.action-buttons {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-top: 20px;
+.template-action {
+  margin-top: 30px;
 }
 
-.action-btn {
-  padding: 15px 30px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1em;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.template-btn {
+.choose-template-btn {
   background-color: #007bff;
   color: white;
+  border: none;
+  padding: 18px 40px;
+  border-radius: 10px;
+  font-size: 1.3em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.template-btn:hover {
+.choose-template-btn:hover {
   background-color: #0056b3;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
-}
-
-.upload-btn {
-  background-color: #28a745;
-  color: white;
-}
-
-.upload-btn:hover {
-  background-color: #218838;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
-}
-
-.create-btn {
-  background-color: #6f42c1;
-  color: white;
-}
-
-.create-btn:hover {
-  background-color: #5a32a3;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(111, 66, 193, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
 }
 
 /* Responsive Design */
@@ -376,19 +357,19 @@ export default {
     font-size: 1.8em;
   }
   
+  .template-message h3,
+  .report-message h3 {
+    font-size: 1.8em;
+  }
+  
   .no-reports-state p {
     font-size: 1.1em;
   }
   
-  .action-buttons {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .action-btn {
-    padding: 12px 24px;
-    font-size: 1em;
-    width: 200px;
+  .choose-template-btn {
+    padding: 15px 30px;
+    font-size: 1.1em;
+    width: 250px;
   }
 }
 </style>
