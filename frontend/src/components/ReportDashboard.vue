@@ -127,6 +127,7 @@
 
 <script>
 import jsPDF from 'jspdf';
+import { userStore } from '@/stores/userStore'
 
 export default {
   name: 'QAHeadReportDashboard',
@@ -177,7 +178,23 @@ export default {
     async fetchReports() {
       try {
         this.loading = true;
-        const response = await fetch('http://localhost:5000/api/reports');
+        
+        // Get user context from the store
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+        
+        console.log('Current user:', currentUser);
+        console.log('Current user role:', currentUserRole);
+        
+        // Build API URL with user context
+        let apiUrl = 'http://localhost:5000/api/reports';
+        if (currentUser && currentUserRole) {
+          apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
+        }
+        
+        console.log('API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch reports: ${response.statusText}`);
@@ -187,6 +204,7 @@ export default {
         
         if (data.success) {
           this.reports = data.reports;
+          console.log(`Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`);
         } else {
           throw new Error(data.message || 'Failed to fetch reports');
         }
