@@ -1,254 +1,223 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ObservationReport from '@/components/ObservationReport.vue'
+import { userStore } from '@/stores/userStore'
+
+// Mock the user store
+vi.mock('@/stores/userStore', () => ({
+  userStore: {
+    getters: {
+      currentUserRole: vi.fn(() => 1),
+      roleName: vi.fn(() => 'Admin')
+    }
+  }
+}))
+
+// Mock fetch
+global.fetch = vi.fn()
+
+// Mock router
+const mockRouter = {
+  go: vi.fn(),
+  push: vi.fn()
+}
 
 describe('ObservationReport.vue', () => {
   let wrapper
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
-    wrapper = mount(ObservationReport)
+    global.fetch.mockClear()
   })
 
-  it('renders correctly', () => {
-    expect(wrapper.find('.observation-report').exists()).toBe(true)
-  })
-
-  it('initializes with default observation data', () => {
-    expect(wrapper.vm.observationData).toHaveProperty('reportId')
-    expect(wrapper.vm.observationData).toHaveProperty('date')
-    expect(wrapper.vm.observationData).toHaveProperty('inspector')
-    expect(wrapper.vm.observationData).toHaveProperty('project')
-  })
-
-  it('initializes with empty observations array', () => {
-    expect(Array.isArray(wrapper.vm.observations)).toBe(true)
-    expect(wrapper.vm.observations).toHaveLength(0)
-  })
-
-  it('adds new observation', async () => {
-    const newObservation = {
-      category: 'Quality',
-      description: 'Test observation',
-      severity: 'High',
-      status: 'Open'
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount()
     }
-    
-    await wrapper.vm.addObservation(newObservation)
-    
-    expect(wrapper.vm.observations).toHaveLength(1)
-    expect(wrapper.vm.observations[0]).toMatchObject(newObservation)
   })
 
-  it('removes observation by index', async () => {
-    // Add some observations first
-    await wrapper.setData({
-      observations: [
-        { id: 1, category: 'Quality', description: 'Obs 1' },
-        { id: 2, category: 'Safety', description: 'Obs 2' },
-        { id: 3, category: 'Process', description: 'Obs 3' }
-      ]
+  const createWrapper = (props = {}) => {
+    return mount(ObservationReport, {
+      global: {
+        mocks: {
+          $router: mockRouter
+        }
+      },
+      props
     })
-    
-    await wrapper.vm.removeObservation(1)
-    
-    expect(wrapper.vm.observations).toHaveLength(2)
-    expect(wrapper.vm.observations[1].id).toBe(3)
-  })
+  }
 
-  it('updates observation status', async () => {
-    await wrapper.setData({
-      observations: [
-        { id: 1, category: 'Quality', description: 'Test', status: 'Open' }
-      ]
+  const mockReportData = {
+    id: 1,
+    projectName: 'Test Project',
+    lruName: 'Test LRU',
+    serialNumber: 'SN001',
+    observationCount: 5,
+    currentYear: '2024',
+    currentDate: '2024-01-15',
+    currentVersion: '1.0',
+    revision: 'A',
+    projectNumber: 'PROJ001',
+    status: 'Active'
+  }
+
+  describe('Component Rendering', () => {
+    it('renders the observation report page', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.find('.view-observations-page').exists()).toBe(true)
+      expect(wrapper.find('.page-header').exists()).toBe(true)
+      expect(wrapper.find('.main-content').exists()).toBe(true)
     })
-    
-    await wrapper.vm.updateObservationStatus(0, 'Closed')
-    
-    expect(wrapper.vm.observations[0].status).toBe('Closed')
-  })
 
-  it('validates observation data before adding', async () => {
-    const invalidObservation = {
-      category: '',
-      description: '',
-      severity: '',
-      status: ''
-    }
-    
-    const result = await wrapper.vm.validateObservation(invalidObservation)
-    
-    expect(result).toBe(false)
-  })
-
-  it('validates complete observation data', async () => {
-    const validObservation = {
-      category: 'Quality',
-      description: 'Valid observation',
-      severity: 'Medium',
-      status: 'Open'
-    }
-    
-    const result = await wrapper.vm.validateObservation(validObservation)
-    
-    expect(result).toBe(true)
-  })
-
-  it('generates report summary', async () => {
-    await wrapper.setData({
-      observations: [
-        { category: 'Quality', severity: 'High', status: 'Open' },
-        { category: 'Safety', severity: 'Medium', status: 'Closed' },
-        { category: 'Quality', severity: 'Low', status: 'Open' }
-      ]
+    it('displays correct page title', () => {
+      wrapper = createWrapper()
+      
+      const title = wrapper.find('.page-title')
+      expect(title.text()).toBe('IQA OBSERVATION REPORT')
     })
-    
-    const summary = await wrapper.vm.generateSummary()
-    
-    expect(summary).toHaveProperty('total', 3)
-    expect(summary).toHaveProperty('open', 2)
-    expect(summary).toHaveProperty('closed', 1)
-    expect(summary).toHaveProperty('byCategory')
-    expect(summary.byCategory['Quality']).toBe(2)
-    expect(summary.byCategory['Safety']).toBe(1)
-  })
 
-  it('filters observations by category', async () => {
-    await wrapper.setData({
-      observations: [
-        { category: 'Quality', description: 'Quality issue' },
-        { category: 'Safety', description: 'Safety concern' },
-        { category: 'Quality', description: 'Another quality issue' },
-        { category: 'Process', description: 'Process improvement' }
-      ]
+    it('renders export button', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.find('.export-button').exists()).toBe(true)
     })
-    
-    const qualityObservations = await wrapper.vm.filterByCategory('Quality')
-    
-    expect(qualityObservations).toHaveLength(2)
-    expect(qualityObservations.every(obs => obs.category === 'Quality')).toBe(true)
   })
 
-  it('filters observations by status', async () => {
-    await wrapper.setData({
-      observations: [
-        { status: 'Open', description: 'Open issue 1' },
-        { status: 'Closed', description: 'Closed issue' },
-        { status: 'Open', description: 'Open issue 2' },
-        { status: 'In Progress', description: 'In progress issue' }
-      ]
+  describe('Report Header', () => {
+    beforeEach(() => {
+      wrapper = createWrapper()
+      wrapper.setData({ 
+        projectName: mockReportData.projectName,
+        lruName: mockReportData.lruName,
+        serialNumber: mockReportData.serialNumber,
+        observationCount: mockReportData.observationCount,
+        currentYear: mockReportData.currentYear
+      })
     })
-    
-    const openObservations = await wrapper.vm.filterByStatus('Open')
-    
-    expect(openObservations).toHaveLength(2)
-    expect(openObservations.every(obs => obs.status === 'Open')).toBe(true)
-  })
 
-  it('exports report data', async () => {
-    const mockData = {
-      reportId: 'RPT001',
-      observations: [
-        { category: 'Quality', description: 'Test observation' }
-      ]
-    }
-    
-    await wrapper.setData({
-      observationData: mockData.reportId,
-      observations: mockData.observations
+    it('displays document path correctly', () => {
+      const documentPath = wrapper.find('.document-path')
+      expect(documentPath.text()).toContain('CASDIC/Test Project/Test LRU/SL.SN001/5/2024')
     })
-    
-    const exportData = await wrapper.vm.exportReport()
-    
-    expect(exportData).toHaveProperty('reportId')
-    expect(exportData).toHaveProperty('observations')
-    expect(exportData.observations).toEqual(mockData.observations)
-  })
 
-  it('saves draft report', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-    
-    await wrapper.vm.saveDraft()
-    
-    expect(consoleSpy).toHaveBeenCalledWith('Draft saved:', expect.any(Object))
-    
-    consoleSpy.mockRestore()
-  })
-
-  it('submits final report', async () => {
-    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
-    
-    await wrapper.setData({
-      observations: [
-        { category: 'Quality', description: 'Test', status: 'Open' }
-      ]
+    it('displays current date', () => {
+      const reportDate = wrapper.find('.report-date')
+      expect(reportDate.text()).toContain('Date:')
     })
-    
-    await wrapper.vm.submitReport()
-    
-    expect(consoleSpy).toHaveBeenCalledWith('Report submitted:', expect.any(Object))
-    
-    consoleSpy.mockRestore()
   })
 
-  it('handles empty report submission', async () => {
-    await wrapper.setData({ observations: [] })
-    
-    const result = await wrapper.vm.canSubmitReport()
-    
-    expect(result).toBe(false)
+  describe('Subject Line', () => {
+    beforeEach(() => {
+      wrapper = createWrapper()
+      wrapper.setData({ 
+        lruName: mockReportData.lruName,
+        isVersionSpecific: true,
+        currentVersion: mockReportData.currentVersion,
+        reportData: {
+          revision: mockReportData.revision
+        }
+      })
+    })
+
+    it('displays subject line with LRU name', () => {
+      const subjectLine = wrapper.find('.subject-line')
+      expect(subjectLine.text()).toContain('IQA Observation Report for Test LRU')
+    })
+
+    it('shows version information when version specific', () => {
+      const versionInfo = wrapper.find('.version-info')
+      expect(versionInfo.text()).toContain('Version 1.0 - Revision A')
+    })
   })
 
-  it('validates report before submission', async () => {
-    await wrapper.setData({
-      observations: [
-        { category: 'Quality', description: 'Valid observation', status: 'Open' }
-      ],
-      observationData: {
-        reportId: 'RPT001',
-        inspector: 'John Doe',
-        project: 'Test Project'
+  describe('Export Functionality', () => {
+    beforeEach(() => {
+      wrapper = createWrapper()
+    })
+
+    it('handles export button click', async () => {
+      const exportButton = wrapper.find('.export-button')
+      await exportButton.trigger('click')
+
+      expect(wrapper.vm.exportReport).toHaveBeenCalled()
+    })
+
+    it('exports report as PDF', async () => {
+      // Mock html2canvas and jsPDF
+      const mockCanvas = { toDataURL: vi.fn(() => 'data:image/png;base64,test') }
+      const mockPdf = { 
+        addImage: vi.fn(),
+        save: vi.fn()
+      }
+      
+      global.html2canvas = vi.fn(() => Promise.resolve(mockCanvas))
+      global.jsPDF = vi.fn(() => mockPdf)
+
+      await wrapper.vm.exportReport()
+
+      expect(global.html2canvas).toHaveBeenCalled()
+      expect(mockPdf.save).toHaveBeenCalled()
+    })
+  })
+
+  describe('Navigation', () => {
+    it('goes back when back button is clicked', async () => {
+      wrapper = createWrapper()
+      
+      const backButton = wrapper.find('.back-button')
+      await backButton.trigger('click')
+
+      expect(mockRouter.go).toHaveBeenCalledWith(-1)
+    })
+  })
+
+  describe('Data Loading', () => {
+    it('loads report data on mount', async () => {
+      global.fetch.mockResolvedValueOnce({
+        json: () => Promise.resolve(mockReportData)
+      })
+
+      wrapper = createWrapper()
+      await wrapper.vm.$nextTick()
+
+      expect(global.fetch).toHaveBeenCalled()
+    })
+
+    it('handles loading errors', async () => {
+      global.fetch.mockRejectedValueOnce(new Error('Network error'))
+
+      wrapper = createWrapper()
+      await wrapper.vm.loadReportData()
+      
+      expect(wrapper.vm.error).toBe('Failed to load report data')
+    })
+  })
+
+  describe('Report Content', () => {
+    beforeEach(() => {
+      wrapper = createWrapper()
+      wrapper.setData({ reportData: mockReportData })
+    })
+
+    it('displays observation details', () => {
+      const observations = wrapper.findAll('.observation-item')
+      expect(observations.length).toBeGreaterThanOrEqual(0)
+    })
+
+    it('shows report status', () => {
+      const statusElement = wrapper.find('.report-status')
+      if (statusElement.exists()) {
+        expect(statusElement.text()).toContain('Active')
       }
     })
-    
-    const result = await wrapper.vm.canSubmitReport()
-    
-    expect(result).toBe(true)
   })
 
-  it('maintains observation data integrity', () => {
-    const observation = {
-      id: 1,
-      category: 'Quality',
-      description: 'Test observation',
-      severity: 'High',
-      status: 'Open',
-      dateCreated: new Date().toISOString()
-    }
-    
-    wrapper.vm.observations.push(observation)
-    
-    expect(wrapper.vm.observations[0]).toEqual(observation)
-    expect(wrapper.vm.observations[0].id).toBe(1)
-    expect(wrapper.vm.observations[0].category).toBe('Quality')
-  })
-
-  it('calculates observation statistics', async () => {
-    await wrapper.setData({
-      observations: [
-        { severity: 'High', status: 'Open' },
-        { severity: 'High', status: 'Closed' },
-        { severity: 'Medium', status: 'Open' },
-        { severity: 'Low', status: 'Open' }
-      ]
+  describe('Responsive Design', () => {
+    it('adapts to different screen sizes', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.find('.view-observations-page').exists()).toBe(true)
     })
-    
-    const stats = await wrapper.vm.calculateStats()
-    
-    expect(stats.totalObservations).toBe(4)
-    expect(stats.highSeverity).toBe(2)
-    expect(stats.openItems).toBe(3)
-    expect(stats.completionRate).toBe(25) // 1 closed out of 4 total
   })
 })

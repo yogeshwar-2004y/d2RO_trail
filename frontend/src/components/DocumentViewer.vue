@@ -3719,4 +3719,4 @@ export default {
   border: 1px solid #e5e7eb;
 }
 
-</style>
+</style>ts

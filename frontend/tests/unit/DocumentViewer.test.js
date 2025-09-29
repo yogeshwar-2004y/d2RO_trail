@@ -40,11 +40,33 @@ vi.mock('pdfjs-dist/build/pdf', () => ({
 describe('DocumentViewer.vue', () => {
   let wrapper
 
+  // Mock route parameters
+  const mockRoute = {
+    params: {
+      lruId: '1',
+      documentId: 'DOC001',
+      projectId: 'PROJ001'
+    }
+  }
+
+  // Mock router
+  const mockRouter = {
+    push: vi.fn(),
+    replace: vi.fn(),
+    go: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn()
+  }
+
   beforeEach(() => {
     vi.clearAllMocks()
     
     wrapper = mount(DocumentViewer, {
       global: {
+        mocks: {
+          $route: mockRoute,
+          $router: mockRouter
+        },
         stubs: {
           'VuePdfEmbed': true,
           'QAHeadAssignReviewer': true

@@ -19,18 +19,33 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['./tests/setup.js'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      reportsDirectory: './coverage',
+      reporter: ['text', 'json', 'html', 'lcov', 'junit'],
+      reportsDirectory: '../reports/frontend/coverage',
       exclude: [
         'node_modules/',
         'dist/',
         '**/*.config.js',
         '**/*.config.ts',
         'cypress/',
-        'tests/'
-      ]
+        'tests/',
+        '**/*.test.js',
+        '**/*.spec.js'
+      ],
+      thresholds: {
+        global: {
+          branches: 70,
+          functions: 70,
+          lines: 70,
+          statements: 70
+        }
+      }
+    },
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: '../reports/frontend/junit.xml'
     }
   },
 })

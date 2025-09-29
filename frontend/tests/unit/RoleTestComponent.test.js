@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import RoleTestComponent from '@/components/RoleTestComponent.vue'
 import { userStore } from '@/stores/userStore'
@@ -8,14 +8,13 @@ vi.mock('@/stores/userStore', () => ({
   userStore: {
     getters: {
       isLoggedIn: vi.fn(() => true),
-      currentUser: vi.fn(() => ({ id: 1, name: 'Test User', role: 'Admin' })),
-      currentUserRole: vi.fn(() => 1),
-      roleName: vi.fn(() => 'Admin')
-    },
-    mutations: {
-      setUser: vi.fn(),
-      setRole: vi.fn(),
-      logout: vi.fn()
+      currentUser: vi.fn(() => ({
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com'
+      })),
+      currentUserRole: vi.fn(() => 2),
+      roleName: vi.fn(() => 'QA Head')
     }
   }
 }))
@@ -25,185 +24,159 @@ describe('RoleTestComponent.vue', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
-    wrapper = mount(RoleTestComponent)
   })
 
-  it('renders correctly', () => {
-    expect(wrapper.find('.role-test-component').exists()).toBe(true)
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount()
+    }
   })
 
-  it('displays current user information from store', () => {
-    expect(wrapper.vm.isLoggedIn).toBe(true)
-    expect(wrapper.vm.currentUser).toEqual({
-      id: 1,
-      name: 'Test User',
-      role: 'Admin'
+  const createWrapper = (props = {}) => {
+    return mount(RoleTestComponent, {
+      props
     })
-    expect(wrapper.vm.currentUserRole).toBe(1)
-    expect(wrapper.vm.roleName).toBe('Admin')
-  })
+  }
 
-  it('provides role testing functionality', () => {
-    // Test different role scenarios
-    const roles = ['Admin', 'Design Head', 'Designer', 'QA Head', 'Reviewer']
-    
-    roles.forEach(role => {
-      userStore.getters.roleName.mockReturnValue(role)
+  describe('Component Rendering', () => {
+    it('renders the role test component', () => {
+      wrapper = createWrapper()
       
-      const testWrapper = mount(RoleTestComponent)
-      expect(testWrapper.vm.roleName).toBe(role)
+      expect(wrapper.find('.role-test-component').exists()).toBe(true)
+      expect(wrapper.find('h2').text()).toBe('Global Role System Test')
     })
-  })
 
-  it('tests admin role permissions', () => {
-    userStore.getters.roleName.mockReturnValue('Admin')
-    userStore.getters.currentUserRole.mockReturnValue(1)
-    
-    const adminWrapper = mount(RoleTestComponent)
-    
-    expect(adminWrapper.vm.roleName).toBe('Admin')
-    expect(adminWrapper.vm.currentUserRole).toBe(1)
-  })
-
-  it('tests design head role permissions', () => {
-    userStore.getters.roleName.mockReturnValue('Design Head')
-    userStore.getters.currentUserRole.mockReturnValue(2)
-    
-    const designHeadWrapper = mount(RoleTestComponent)
-    
-    expect(designHeadWrapper.vm.roleName).toBe('Design Head')
-    expect(designHeadWrapper.vm.currentUserRole).toBe(2)
-  })
-
-  it('tests designer role permissions', () => {
-    userStore.getters.roleName.mockReturnValue('Designer')
-    userStore.getters.currentUserRole.mockReturnValue(3)
-    
-    const designerWrapper = mount(RoleTestComponent)
-    
-    expect(designerWrapper.vm.roleName).toBe('Designer')
-    expect(designerWrapper.vm.currentUserRole).toBe(3)
-  })
-
-  it('tests QA head role permissions', () => {
-    userStore.getters.roleName.mockReturnValue('QA Head')
-    userStore.getters.currentUserRole.mockReturnValue(4)
-    
-    const qaHeadWrapper = mount(RoleTestComponent)
-    
-    expect(qaHeadWrapper.vm.roleName).toBe('QA Head')
-    expect(qaHeadWrapper.vm.currentUserRole).toBe(4)
-  })
-
-  it('tests reviewer role permissions', () => {
-    userStore.getters.roleName.mockReturnValue('Reviewer')
-    userStore.getters.currentUserRole.mockReturnValue(5)
-    
-    const reviewerWrapper = mount(RoleTestComponent)
-    
-    expect(reviewerWrapper.vm.roleName).toBe('Reviewer')
-    expect(reviewerWrapper.vm.currentUserRole).toBe(5)
-  })
-
-  it('handles logged out state', () => {
-    userStore.getters.isLoggedIn.mockReturnValue(false)
-    userStore.getters.currentUser.mockReturnValue(null)
-    userStore.getters.roleName.mockReturnValue(null)
-    
-    const loggedOutWrapper = mount(RoleTestComponent)
-    
-    expect(loggedOutWrapper.vm.isLoggedIn).toBe(false)
-    expect(loggedOutWrapper.vm.currentUser).toBe(null)
-    expect(loggedOutWrapper.vm.roleName).toBe(null)
-  })
-
-  it('simulates role switching', async () => {
-    // Initial role
-    expect(wrapper.vm.roleName).toBe('Admin')
-    
-    // Switch to different role
-    userStore.getters.roleName.mockReturnValue('Designer')
-    userStore.getters.currentUserRole.mockReturnValue(3)
-    
-    // Create new wrapper to simulate role change
-    const newWrapper = mount(RoleTestComponent)
-    
-    expect(newWrapper.vm.roleName).toBe('Designer')
-    expect(newWrapper.vm.currentUserRole).toBe(3)
-  })
-
-  it('tests store getter calls', () => {
-    // Verify that component calls store getters
-    expect(userStore.getters.isLoggedIn).toHaveBeenCalled()
-    expect(userStore.getters.currentUser).toHaveBeenCalled()
-    expect(userStore.getters.currentUserRole).toHaveBeenCalled()
-    expect(userStore.getters.roleName).toHaveBeenCalled()
-  })
-
-  it('provides computed properties for role testing', () => {
-    // Test that component has the necessary computed properties
-    expect(wrapper.vm.hasOwnProperty('isLoggedIn')).toBe(true)
-    expect(wrapper.vm.hasOwnProperty('currentUser')).toBe(true)
-    expect(wrapper.vm.hasOwnProperty('currentUserRole')).toBe(true)
-    expect(wrapper.vm.hasOwnProperty('roleName')).toBe(true)
-  })
-
-  it('maintains component reactivity to store changes', async () => {
-    // Initial state
-    expect(wrapper.vm.roleName).toBe('Admin')
-    
-    // Mock store change
-    userStore.getters.roleName.mockReturnValue('QA Head')
-    
-    // Force reactivity update
-    await wrapper.vm.$forceUpdate()
-    await wrapper.vm.$nextTick()
-    
-    // Component should reflect store changes
-    expect(wrapper.vm.roleName).toBe('QA Head')
-  })
-
-  it('handles undefined user gracefully', () => {
-    userStore.getters.currentUser.mockReturnValue(undefined)
-    userStore.getters.isLoggedIn.mockReturnValue(false)
-    
-    const undefinedUserWrapper = mount(RoleTestComponent)
-    
-    expect(undefinedUserWrapper.vm.currentUser).toBe(undefined)
-    expect(undefinedUserWrapper.vm.isLoggedIn).toBe(false)
-  })
-
-  it('validates role-based access control patterns', () => {
-    const testRoles = [
-      { name: 'Admin', id: 1, hasFullAccess: true },
-      { name: 'Design Head', id: 2, canManageDesigners: true },
-      { name: 'Designer', id: 3, canCreateDocuments: true },
-      { name: 'QA Head', id: 4, canApproveQA: true },
-      { name: 'Reviewer', id: 5, canReviewDocuments: true }
-    ]
-    
-    testRoles.forEach(role => {
-      userStore.getters.roleName.mockReturnValue(role.name)
-      userStore.getters.currentUserRole.mockReturnValue(role.id)
+    it('displays user information when logged in', () => {
+      wrapper = createWrapper()
       
-      const roleWrapper = mount(RoleTestComponent)
-      
-      expect(roleWrapper.vm.roleName).toBe(role.name)
-      expect(roleWrapper.vm.currentUserRole).toBe(role.id)
+      expect(wrapper.find('.user-info').exists()).toBe(true)
+      expect(wrapper.text()).toContain('Current User Information')
     })
   })
 
-  it('demonstrates store integration for role testing', () => {
-    // This component specifically tests role-based functionality
-    expect(wrapper.vm.roleName).toBeDefined()
-    expect(wrapper.vm.currentUserRole).toBeDefined()
-    
-    // Should work with different role types
-    const numericRole = wrapper.vm.currentUserRole
-    const stringRole = wrapper.vm.roleName
-    
-    expect(typeof numericRole).toBe('number')
-    expect(typeof stringRole).toBe('string')
+  describe('User Information Display', () => {
+    it('shows user details', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.text()).toContain('Name: Test User')
+      expect(wrapper.text()).toContain('Email: test@example.com')
+      expect(wrapper.text()).toContain('Role ID: 2')
+      expect(wrapper.text()).toContain('Role Name: QA Head')
+    })
+  })
+
+  describe('Role-based Access Checks', () => {
+    it('shows role checks section', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.text()).toContain('Role-based Access Checks')
+      expect(wrapper.find('.role-checks').exists()).toBe(true)
+    })
+
+    it('displays role check items', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.text()).toContain('Admin (Role ID: 1)')
+      expect(wrapper.text()).toContain('QA Head (Role ID: 2)')
+      expect(wrapper.text()).toContain('QA Reviewer (Role ID: 3)')
+    })
+
+    it('shows access results', () => {
+      wrapper = createWrapper()
+      
+      const accessResults = wrapper.findAll('.check-result')
+      expect(accessResults.length).toBeGreaterThan(0)
+      
+      accessResults.forEach(result => {
+        expect(result.text()).toMatch(/✅ Access|❌ No Access/)
+      })
+    })
+  })
+
+  describe('hasRole Method', () => {
+    it('checks role access correctly', () => {
+      wrapper = createWrapper()
+      
+      expect(typeof wrapper.vm.hasRole(1)).toBe('boolean')
+      expect(typeof wrapper.vm.hasRole(2)).toBe('boolean')
+      expect(typeof wrapper.vm.hasRole(3)).toBe('boolean')
+    })
+
+    it('returns true for current user role', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.vm.hasRole(2)).toBe(true)
+    })
+  })
+
+  describe('Computed Properties', () => {
+    it('calculates isLoggedIn correctly', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.vm.isLoggedIn).toBe(true)
+    })
+
+    it('gets current user data', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.vm.currentUser).toEqual({
+        id: 1,
+        name: 'Test User',
+        email: 'test@example.com'
+      })
+    })
+
+    it('gets current user role', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.vm.currentUserRole).toBe(2)
+    })
+
+    it('gets role name', () => {
+      wrapper = createWrapper()
+      
+      expect(wrapper.vm.roleName).toBe('QA Head')
+    })
+  })
+
+  describe('User Store Integration', () => {
+    it('uses user store getters', () => {
+      wrapper = createWrapper()
+      
+      expect(userStore.getters.isLoggedIn).toHaveBeenCalled()
+      expect(userStore.getters.currentUser).toHaveBeenCalled()
+      expect(userStore.getters.currentUserRole).toHaveBeenCalled()
+      expect(userStore.getters.roleName).toHaveBeenCalled()
+    })
+  })
+
+  describe('Role Check Items', () => {
+    it('applies correct CSS classes based on access', () => {
+      wrapper = createWrapper()
+      
+      const checkItems = wrapper.findAll('.check-item')
+      checkItems.forEach(item => {
+        expect(item.classes()).toContain('has-access')
+      })
+    })
+  })
+
+  describe('Edge Cases', () => {
+    it('handles undefined user data', () => {
+      vi.mocked(userStore.getters.currentUser).mockReturnValue(undefined)
+      
+      wrapper = createWrapper()
+      
+      expect(wrapper.text()).toContain('Name: N/A')
+      expect(wrapper.text()).toContain('Email: N/A')
+    })
+
+    it('handles null role data', () => {
+      vi.mocked(userStore.getters.currentUserRole).mockReturnValue(null)
+      
+      wrapper = createWrapper()
+      
+      expect(wrapper.text()).toContain('Role ID: N/A')
+    })
   })
 })
