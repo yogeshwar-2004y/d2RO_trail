@@ -365,6 +365,9 @@ def accept_comment(comment_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Debug logging
+        print(f"Accepting comment {comment_id} with data: {data}")
+        
         # Update comment status to accepted
         cur.execute("""
             UPDATE document_comments 
@@ -379,6 +382,8 @@ def accept_comment(comment_id):
             comment_id
         ))
         
+        print(f"Updated {cur.rowcount} rows for comment {comment_id}")
+        
         if cur.rowcount == 0:
             cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
@@ -392,9 +397,10 @@ def accept_comment(comment_id):
         })
         
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals():
+            conn.rollback()
         print(f"Error accepting comment: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 # Reject a comment
 @app.route('/api/comments/<int:comment_id>/reject', methods=['POST'])
@@ -418,6 +424,9 @@ def reject_comment(comment_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Debug logging
+        print(f"Rejecting comment {comment_id} with data: {data}")
+        
         # Update comment status to rejected
         cur.execute("""
             UPDATE document_comments 
@@ -432,6 +441,8 @@ def reject_comment(comment_id):
             comment_id
         ))
         
+        print(f"Updated {cur.rowcount} rows for comment {comment_id}")
+        
         if cur.rowcount == 0:
             cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
@@ -445,9 +456,10 @@ def reject_comment(comment_id):
         })
         
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals():
+            conn.rollback()
         print(f"Error rejecting comment: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 # Test endpoint to check database tables
 @app.route('/api/test-db', methods=['GET'])

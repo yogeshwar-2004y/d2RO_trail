@@ -69,7 +69,7 @@ def create_comments_tables():
                 is_annotation BOOLEAN DEFAULT FALSE,
                 status VARCHAR(20) DEFAULT 'pending',
                 justification TEXT,
-                accepted_by VARCHAR(255),
+                accepted_by INTEGER,
                 designer_id INTEGER,
                 accepted_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -98,6 +98,36 @@ def create_comments_tables():
                               WHERE table_name='document_comments' AND column_name='commented_by') THEN
                     ALTER TABLE document_comments ADD COLUMN commented_by VARCHAR(100) DEFAULT 'Anonymous';
                 END IF;
+            END $$;
+        """)
+        
+        # Update accepted_by column to INTEGER if it's currently VARCHAR
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                IF EXISTS (SELECT 1 FROM information_schema.columns 
+                          WHERE table_name='document_comments' AND column_name='accepted_by' 
+                          AND data_type='character varying') THEN
+                    -- First, drop the old column and add the new one
+                    ALTER TABLE document_comments DROP COLUMN IF EXISTS accepted_by;
+                    ALTER TABLE document_comments ADD COLUMN accepted_by INTEGER;
+                END IF;
+            END $$;
+        """)
+        
+        # Update status constraint to allow pending, accepted, rejected
+        cur.execute("""
+            DO $$ 
+            BEGIN 
+                -- Drop existing status constraint if it exists
+                IF EXISTS (SELECT 1 FROM pg_constraint 
+                          WHERE conname = 'document_comments_status_check') THEN
+                    ALTER TABLE document_comments DROP CONSTRAINT document_comments_status_check;
+                END IF;
+                
+                -- Add new constraint with correct values
+                ALTER TABLE document_comments ADD CONSTRAINT document_comments_status_check 
+                CHECK (status IN ('pending', 'accepted', 'rejected'));
             END $$;
         """)
         
