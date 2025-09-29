@@ -11,6 +11,7 @@ import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
 import LruDashboard from '@/components/LruDashboard.vue'
 import MemoDashboard from '@/components/MemoDashboard.vue'
 import ReportDashboard from '@/components/ReportDashboard.vue'
+import IndividualReport from '@/components/IndividualReport.vue'
 import UserActivities from '@/views/admin/UserActivities.vue'
 import AddUpdateProjects from "@/views/admin/AddUpdateProjects.vue";
 import ManageProjects from "@/views/admin/ManageProjects.vue";
@@ -111,6 +112,12 @@ const router = createRouter({
       path: "/reports",
       name: "ReportDashboard",
       component: ReportDashboard,
+    },
+    {
+      path: "/reports/individual/:reportId",
+      name: "IndividualReport",
+      component: IndividualReport,
+      props: true,
     },
     {
       path: "/user-activities/tests",

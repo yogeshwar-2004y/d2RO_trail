@@ -254,13 +254,13 @@ export default {
       this.showReportFilter = false;
     },
     viewReport(report) {
-      // Navigate to the QAHeadViewObservations form with report data
+      // Navigate to the individual report page
       this.$router.push({
-        name: 'ObservationReport',
+        name: 'IndividualReport',
         params: {
-          lruName: report.name,
-          projectName: report.project,
-          reportId: report.id
+          reportId: report.id,
+          reportName: report.name,
+          projectName: report.project
         }
       });
     },
