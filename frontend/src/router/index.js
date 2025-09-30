@@ -35,6 +35,7 @@ import PlanDocsTestComponent from '@/components/PlanDocsTestComponent.vue'
 import TemplateDashboard from '@/components/TemplateDashboard.vue'
 import TemplateViewer from '@/components/TemplateViewer.vue'
 import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -203,6 +204,12 @@ const router = createRouter({
         path: '/templates/bare-pcb-inspection/:projectName?/:lruName?',
         name: 'BarePcbInspectionReport',
         component: BarePcbInspectionReport,
+        props: true,
+      },
+      {
+        path: '/templates/conformal-coating-inspection/:projectName?/:lruName?',
+        name: 'Conformalcoatinginspectionreport',
+        component: Conformalcoatinginspectionreport,
         props: true,
       },
     ...reviewerRoutes,
