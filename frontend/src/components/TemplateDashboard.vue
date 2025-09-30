@@ -62,7 +62,41 @@
         @click="viewTemplate(template)"
       >
         <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <!-- Custom icon for Bare PCB Inspection Report -->
+          <svg v-if="template.name === 'BarePcbInspectionReport'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <circle cx="8" cy="8" r="1"></circle>
+            <circle cx="12" cy="8" r="1"></circle>
+            <circle cx="16" cy="8" r="1"></circle>
+            <circle cx="8" cy="12" r="1"></circle>
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="16" cy="12" r="1"></circle>
+          </svg>
+          <!-- Custom icon for Conformal Coating Inspection Report -->
+          <svg v-else-if="template.name === 'Conformalcoatinginspectionreport'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <path d="M6 8h12M6 12h12M6 16h8"></path>
+            <circle cx="18" cy="8" r="1"></circle>
+            <circle cx="18" cy="12" r="1"></circle>
+            <circle cx="18" cy="16" r="1"></circle>
+          </svg>
+          <!-- Custom icon for Raw Material Inspection Report -->
+          <svg v-else-if="template.name === 'RawMaterialInspectionReport'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <path d="M6 8h12M6 12h12M6 16h8"></path>
+            <circle cx="18" cy="8" r="1"></circle>
+            <circle cx="18" cy="12" r="1"></circle>
+            <circle cx="18" cy="16" r="1"></circle>
+            <path d="M3 6h18M3 10h18M3 14h12"></path>
+          </svg>
+          <!-- Default icon for other templates -->
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -128,6 +162,24 @@ export default {
             displayName: 'Observation Report',
             description: 'Template for creating observation reports with detailed analysis',
             component: 'ObservationReport'
+          },
+          {
+            name: 'BarePcbInspectionReport',
+            displayName: 'Bare PCB Inspection Report',
+            description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
+            component: 'BarePcbInspectionReport'
+          },
+          {
+            name: 'Conformalcoatinginspectionreport',
+            displayName: 'Conformal Coating Inspection Report',
+            description: 'Template for creating conformal coating inspection reports with quality testing criteria',
+            component: 'Conformalcoatinginspectionreport'
+          },
+          {
+            name: 'RawMaterialInspectionReport',
+            displayName: 'Raw Material Inspection Report',
+            description: 'Template for creating raw material inspection reports with compliance checking',
+            component: 'RawMaterialInspectionReport'
           }
         ];
         

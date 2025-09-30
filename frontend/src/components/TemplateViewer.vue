@@ -88,11 +88,17 @@
 
 <script>
 import ObservationReport from '@/templates/ObservationReport.vue'
+import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
+import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
 
 export default {
   name: 'TemplateViewer',
   components: {
-    ObservationReport
+    ObservationReport,
+    BarePcbInspectionReport,
+    Conformalcoatinginspectionreport,
+    RawMaterialInspectionReport
   },
   data() {
     return {
@@ -115,7 +121,10 @@ export default {
       try {
         // Map template names to components
         const templateComponents = {
-          'ObservationReport': ObservationReport
+          'ObservationReport': ObservationReport,
+          'BarePcbInspectionReport': BarePcbInspectionReport,
+          'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport,
+          'RawMaterialInspectionReport': RawMaterialInspectionReport
         };
         
         this.templateComponent = templateComponents[this.templateName] || null;
@@ -133,15 +142,49 @@ export default {
     },
     
     useTemplate() {
-      // Navigate back to reports dashboard or create new report with this template
+      // Navigate to the actual form based on template type
       console.log(`Using template: ${this.templateName}`);
-      alert(`Template "${this.templateDisplayName}" will be used to create a new report. This functionality will be implemented soon!`);
       
-      // TODO: Implement actual template usage
-      // this.$router.push({ 
-      //   name: 'CreateReport', 
-      //   params: { templateName: this.templateName } 
-      // });
+      if (this.templateName === 'BarePcbInspectionReport') {
+        // Navigate to bare PCB inspection report form
+        this.$router.push({ 
+          name: 'BarePcbInspectionReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'ObservationReport') {
+        // Navigate to observation report form
+        this.$router.push({ 
+          name: 'ObservationReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'Conformalcoatinginspectionreport') {
+        // Navigate to conformal coating inspection report form
+        this.$router.push({ 
+          name: 'Conformalcoatinginspectionreport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'RawMaterialInspectionReport') {
+        // Navigate to raw material inspection report form
+        this.$router.push({ 
+          name: 'RawMaterialInspectionReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else {
+        // Default behavior for other templates
+        alert(`Template "${this.templateDisplayName}" will be used to create a new report. This functionality will be implemented soon!`);
+      }
     }
   }
 };
