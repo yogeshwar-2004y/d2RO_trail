@@ -77,6 +77,10 @@
                 <label for="testVenue">Test Venue:</label>
                 <input type="text" id="testVenue" v-model="formData.testVenue" required>
               </div>
+              <div class="form-group">
+                <label for="slNos">SL.NO's:</label>
+                <input type="text" id="slNos" v-model="formData.slNos" required>
+              </div>
             </div>
             
             <!-- Right Column -->
@@ -106,10 +110,6 @@
                 <input type="number" id="quantity" v-model="formData.quantity" required>
               </div>
               <div class="form-group">
-                <label for="slNos">SL.NO's:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" required>
-              </div>
-              <div class="form-group">
                 <label for="startDate">Start Date:</label>
                 <input type="date" id="startDate" v-model="formData.startDate" required>
               </div>
@@ -117,63 +117,6 @@
                 <label for="endDate">End Date:</label>
                 <input type="date" id="endDate" v-model="formData.endDate" required>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- PCB Details Section -->
-        <div class="form-section">
-          <h2 class="section-title">PCB Details</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="pcbType">PCB Type:</label>
-              <select id="pcbType" v-model="formData.pcbType" required>
-                <option value="">Select Type</option>
-                <option value="Single Layer">Single Layer</option>
-                <option value="Double Layer">Double Layer</option>
-                <option value="Multi Layer">Multi Layer</option>
-                <option value="Flexible">Flexible</option>
-                <option value="Rigid-Flex">Rigid-Flex</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="pcbThickness">PCB Thickness (mm):</label>
-              <input type="number" id="pcbThickness" v-model="formData.pcbThickness" step="0.1" required>
-            </div>
-            <div class="form-group">
-              <label for="copperWeight">Copper Weight (oz):</label>
-              <input type="number" id="copperWeight" v-model="formData.copperWeight" step="0.1" required>
-            </div>
-            <div class="form-group">
-              <label for="surfaceFinish">Surface Finish:</label>
-              <select id="surfaceFinish" v-model="formData.surfaceFinish" required>
-                <option value="">Select Finish</option>
-                <option value="HASL">HASL (Hot Air Solder Leveling)</option>
-                <option value="ENIG">ENIG (Electroless Nickel Immersion Gold)</option>
-                <option value="OSP">OSP (Organic Solderability Preservative)</option>
-                <option value="Immersion Silver">Immersion Silver</option>
-                <option value="Immersion Tin">Immersion Tin</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="pcbDimensions">PCB Dimensions (L x W in mm):</label>
-              <div class="dimensions-input">
-                <input type="number" v-model="formData.pcbLength" placeholder="Length" step="0.1" required>
-                <span>x</span>
-                <input type="number" v-model="formData.pcbWidth" placeholder="Width" step="0.1" required>
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="boardColor">Board Color:</label>
-              <select id="boardColor" v-model="formData.boardColor" required>
-                <option value="">Select Color</option>
-                <option value="Green">Green</option>
-                <option value="Blue">Blue</option>
-                <option value="Red">Red</option>
-                <option value="Black">Black</option>
-                <option value="White">White</option>
-                <option value="Yellow">Yellow</option>
-              </select>
             </div>
           </div>
         </div>
