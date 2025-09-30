@@ -212,6 +212,23 @@ def upload_plan_document():
             cur.close()
             return jsonify({"success": False, "message": "LRU not found"}), 404
         
+        # Check for active comments in this LRU/project before allowing upload
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM document_comments dc
+            JOIN plan_documents pd ON dc.document_id::INTEGER = pd.document_id
+            WHERE pd.lru_id = %s 
+            AND dc.status NOT IN ('accepted', 'rejected')
+        """, (lru_id,))
+        
+        active_comments_count = cur.fetchone()[0]
+        if active_comments_count > 0:
+            cur.close()
+            return jsonify({
+                "success": False, 
+                "message": f"Upload restricted. There are {active_comments_count} active comment(s) in this project that must be reviewed and accepted before uploading a new document."
+            }), 400
+        
         # Generate unique filename
         file_extension = file.filename.rsplit('.', 1)[1].lower()
         unique_filename = f"{uuid.uuid4()}.{file_extension}"
@@ -977,3 +994,60 @@ def update_reviewer():
         
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error updating reviewer: {str(e)}")
+
+@documents_bp.route('/api/plan-documents/<int:document_id>', methods=['DELETE'])
+def delete_plan_document(document_id):
+    """Delete a plan document and all its associated comments"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First, get the document details for confirmation
+        cur.execute("""
+            SELECT document_id, document_number, version, file_path, lru_id
+            FROM plan_documents 
+            WHERE document_id = %s AND is_active = TRUE
+        """, (document_id,))
+        
+        document = cur.fetchone()
+        if not document:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        # Delete all comments associated with this document
+        cur.execute("DELETE FROM document_comments WHERE document_id = %s", (str(document_id),))
+        comments_deleted = cur.rowcount
+        
+        # Delete all annotations associated with this document
+        cur.execute("""
+            DELETE FROM document_annotations 
+            WHERE document_id = %s
+        """, (str(document_id),))
+        annotations_deleted = cur.rowcount
+        
+        # Delete the document record
+        cur.execute("DELETE FROM plan_documents WHERE document_id = %s", (document_id,))
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        # Delete the physical file if it exists
+        file_path = document[3]  # file_path is the 4th column
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Warning: Could not delete file {file_path}: {str(e)}")
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Document deleted successfully. Removed {comments_deleted} comments and {annotations_deleted} annotations.",
+            "deleted_comments": comments_deleted,
+            "deleted_annotations": annotations_deleted
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error deleting plan document: {str(e)}")

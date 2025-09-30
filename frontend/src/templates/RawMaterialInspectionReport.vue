@@ -1,5 +1,5 @@
 <template>
-  <div class="mechanical-inspection-page">
+  <div class="raw-material-inspection-page">
     <!-- Header -->
     <div class="page-header">
       <div class="header-left">
@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="header-center">
-        <h1 class="page-title">MECHANICAL INSPECTION REPORT</h1>
+        <h1 class="page-title">RAW MATERIAL INSPECTION REPORT</h1>
       </div>
       <div class="header-right">
         <button class="export-button" @click="exportReport">
@@ -34,15 +34,15 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ reportData.projectName }}/{{ reportData.productName }}/SL.{{ reportData.slNo }}/{{ reportData.reportNo }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ inspectionCount }}/{{ currentYear }}
         </div>
         <div class="report-date">
-          Date: {{ formattedDate }}
+          Date: {{ currentDate }}
         </div>
       </div>
 
       <div class="subject-line">
-        SUB : Mechanical Inspection Report for {{ reportData.productName }}
+        SUB : Raw Material Inspection Report for {{ lruName }}
       </div>
 
       <!-- Inspection Form -->
@@ -55,164 +55,116 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="reportData.projectName" required>
+                <input type="text" id="projectName" v-model="formData.projectName" required>
               </div>
               <div class="form-group">
-                <label for="reportNo">Report No:</label>
-                <input type="text" id="reportNo" v-model="reportData.reportNo" required>
+                <label for="reportRefNo">Report Ref No:</label>
+                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" required>
               </div>
               <div class="form-group">
-                <label for="documentNo">Document No:</label>
-                <input type="text" id="documentNo" v-model="reportData.documentNo" required>
+                <label for="memoRefNo">Memo Ref No:</label>
+                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" required>
               </div>
               <div class="form-group">
-                <label for="dateOfIssue">Date of Issue:</label>
-                <input type="date" id="dateOfIssue" v-model="reportData.dateOfIssue" required>
+                <label for="lruName">LRU Name:</label>
+                <input type="text" id="lruName" v-model="formData.lruName" required>
               </div>
               <div class="form-group">
-                <label for="issueLevel">Issue Level:</label>
-                <input type="text" id="issueLevel" v-model="reportData.issueLevel" required>
+                <label for="inspectionStage">Inspection Stage:</label>
+                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" required>
               </div>
               <div class="form-group">
-                <label for="customerName">Customer Name:</label>
-                <input type="text" id="customerName" v-model="reportData.customerName" required>
+                <label for="testVenue">Test Venue:</label>
+                <input type="text" id="testVenue" v-model="formData.testVenue" required>
+              </div>
+              <div class="form-group">
+                <label for="slNos">SL.NO'S:</label>
+                <input type="text" id="slNos" v-model="formData.slNos" required>
               </div>
             </div>
             
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
-                <label for="memoId">Memo ID:</label>
-                <input type="text" id="memoId" v-model="reportData.memoId" required>
-              </div>
-              <div class="form-group">
-                <label for="productName">Product Name:</label>
-                <input type="text" id="productName" v-model="reportData.productName" required>
-              </div>
-              <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="reportData.dpName" required>
+                <input type="text" id="dpName" v-model="formData.dpName" required>
               </div>
               <div class="form-group">
-                <label for="skuName">SRU Name:</label>
-                <input type="text" id="skuName" v-model="reportData.skuName" required>
+                <label for="dated1">Dated:</label>
+                <input type="date" id="dated1" v-model="formData.dated1" required>
+              </div>
+              <div class="form-group">
+                <label for="dated2">Dated:</label>
+                <input type="date" id="dated2" v-model="formData.dated2" required>
+              </div>
+              <div class="form-group">
+                <label for="sruName">SRU Name:</label>
+                <input type="text" id="sruName" v-model="formData.sruName" required>
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="reportData.partNo" required>
+                <input type="text" id="partNo" v-model="formData.partNo" required>
               </div>
               <div class="form-group">
-                <label for="slNo">Sl. No:</label>
-                <input type="text" id="slNo" v-model="reportData.slNo" required>
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" v-model="formData.quantity" required>
               </div>
               <div class="form-group">
-                <label for="qty">Quantity:</label>
-                <input type="text" id="qty" v-model="reportData.qty" required>
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" v-model="formData.startDate" required>
+              </div>
+              
+              
+              <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" v-model="formData.endDate" required>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Test Timeline Section -->
+        <!-- Check Points Section -->
         <div class="form-section">
-          <h2 class="section-title">Test Timeline</h2>
-          <div class="general-info-grid">
-            <div class="info-column">
-              <div class="form-group">
-                <label for="testStartedOn">Test Started On:</label>
-                <input type="datetime-local" id="testStartedOn" v-model="reportData.testStartedOn" required>
-              </div>
-            </div>
-            <div class="info-column">
-              <div class="form-group">
-                <label for="testEndedOn">Test Ended On:</label>
-                <input type="datetime-local" id="testEndedOn" v-model="reportData.testEndedOn" required>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Dimensional Checklist Section -->
-        <div class="form-section">
-          <h2 class="section-title">Dimensional Checklist</h2>
-          <div class="inspection-table-container">
-            <table class="inspection-table">
+          <h2 class="section-title">Check Points</h2>
+          <div class="checkpoints-table-container">
+            <table class="checkpoints-table">
               <thead>
                 <tr>
-                  <th>SL NO</th>
-                  <th>DIMENSION</th>
-                  <th>TOLERANCE</th>
-                  <th>OBSERVED VALUE</th>
-                  <th>INSTRUMENT USED</th>
-                  <th>REMARKS</th>
+                  <th>SL.NO:</th>
+                  <th>CHECK POINTS</th>
+                  <th>APPLICABILITY (A / NA)</th>
+                  <th>COMPLIANCE (YES / NO)</th>
+                  <th>REMARKS (OK / NOT OK)</th>
                   <th>UPLOAD</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in dimensionalChecklist" :key="'dim-'+index">
+                <tr v-for="(checkpoint, index) in formData.checkPoints" :key="index">
                   <td>{{ index + 1 }}</td>
+                  <td class="checkpoint-description">{{ checkpoint.description }}</td>
                   <td>
-                    <input type="text" v-model="item.dimension" placeholder="Enter dimension">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.tolerance" placeholder="Enter tolerance">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.observedValue" placeholder="Enter observed value">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.instrumentUsed" placeholder="Enter instrument">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.remarks" placeholder="Enter remarks">
-                  </td>
-                  <td>
-                    <input type="file" @change="handleFileUpload($event, item, 'dim')">
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Parameter Checklist Section -->
-        <div class="form-section">
-          <h2 class="section-title">Parameter Checklist</h2>
-          <div class="inspection-table-container">
-            <table class="inspection-table">
-              <thead>
-                <tr>
-                  <th>SL NO</th>
-                  <th>PARAMETERS</th>
-                  <th>ALLOWED / NOT ALLOWED</th>
-                  <th>YES/NO</th>
-                  <th>EXPECTED</th>
-                  <th>REMARKS / OBSERVATIONS</th>
-                  <th>UPLOAD</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(item, index) in parameterChecklist" :key="'param-'+index">
-                  <td>{{ index + 1 }}</td>
-                  <td>{{ item.parameter }}</td>
-                  <td>
-                    <input type="text" v-model="item.allowed" placeholder="Enter allowed/not allowed">
-                  </td>
-                  <td>
-                    <select v-model="item.yesNo">
+                    <select v-model="checkpoint.applicability">
                       <option value="">Select</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
+                      <option value="A">A</option>
+                      <option value="NA">NA</option>
                     </select>
                   </td>
                   <td>
-                    <input type="text" v-model="item.expected" placeholder="Enter expected">
+                    <select v-model="checkpoint.compliance">
+                      <option value="">Select</option>
+                      <option value="YES">YES</option>
+                      <option value="NO">NO</option>
+                    </select>
                   </td>
                   <td>
-                    <input type="text" v-model="item.remarks" placeholder="Enter remarks">
+                    <select v-model="checkpoint.remarks">
+                      <option value="">Select</option>
+                      <option value="OK">OK</option>
+                      <option value="NOT OK">NOT OK</option>
+                    </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, item, 'param')">
+                    <input type="file" @change="handleFileUpload($event, 'checkpoint', index)">
                   </td>
                 </tr>
               </tbody>
@@ -260,124 +212,182 @@
 import jsPDF from 'jspdf';
 
 export default {
-  name: 'MechanicalInspection',
+  name: 'RawMaterialInspectionReport',
   data() {
     return {
+      projectName: '',
+      lruName: '',
+      serialNumber: 'SL-001',
+      inspectionCount: 'INS-001',
       currentYear: '2025',
-      reportData: {
+      currentDate: new Date().toISOString().split('T')[0],
+      formData: {
         projectName: '',
-        reportNo: '',
-        documentNo: '',
-        dateOfIssue: '',
-        issueLevel: '',
-        customerName: '',
-        memoId: '',
-        productName: '',
+        reportRefNo: '',
+        memoRefNo: '',
+        lruName: '',
+        inspectionStage: '',
+        testVenue: '',
         dpName: '',
-        slNo: '',
-        skuName: '',
+        dated1: '',
+        dated2: '',
+        sruName: '',
+        quantity: '',
+        startDate: '',
         partNo: '',
-        qty: '',
-        testStartedOn: '',
-        testEndedOn: '',
-      },
-      dimensionalChecklist: [
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
-      ],
-      parameterChecklist: [
-        { parameter: 'Burrs', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Damages', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Name Plate', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Engraving', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Passivation', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Chromate', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Electro-less Nickel plating', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Fasteners', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-      ],
-      currentDate: new Date(),
+        slNos: '',
+        endDate: '',
+        checkPoints: [
+          {
+            description: 'Dimensions of the Raw Materials Received as per Certificate',
+            applicability: 'A',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'CoC of Raw Materials',
+            applicability: 'A',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'Chemical Reports as specified in QAP',
+            applicability: 'NA',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'Tensile Strength',
+            applicability: 'A',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'Hardness Test Results as specified in QAP',
+            applicability: 'NA',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'UT Test',
+            applicability: 'A',
+            compliance: '',
+            remarks: ''
+          },
+          {
+            description: 'Any Other Observations:',
+            applicability: 'NIL',
+            compliance: '',
+            remarks: ''
+          }
+        ]
+      }
     };
   },
   computed: {
-    formattedDate() {
-      return this.currentDate.toISOString().split('T')[0];
-    },
     isFormValid() {
-      return this.reportData.projectName &&
-             this.reportData.reportNo &&
-             this.reportData.documentNo &&
-             this.reportData.productName &&
-             this.reportData.dpName &&
-             this.reportData.skuName &&
-             this.reportData.partNo;
+      return this.formData.projectName &&
+             this.formData.reportRefNo &&
+             this.formData.memoRefNo &&
+             this.formData.lruName &&
+             this.formData.dpName &&
+             this.formData.sruName &&
+             this.formData.partNo;
     }
   },
   mounted() {
     // Get parameters from route
-    const projectName = this.$route.params.projectName || '';
-    const lruName = this.$route.params.lruName || '';
+    this.lruName = this.$route.params.lruName || '';
+    this.projectName = this.$route.params.projectName || '';
     
     // Set default values
-    this.reportData.projectName = projectName;
-    this.reportData.productName = lruName;
-    this.reportData.dateOfIssue = this.formattedDate;
+    this.formData.lruName = this.lruName;
+    this.formData.projectName = this.projectName;
+    this.formData.startDate = this.currentDate;
   },
   methods: {
-    handleFileUpload(event, item, checklistType) {
+    handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        item.fileName = file.name;
-        console.log(`Uploaded file for ${checklistType} item: ${file.name}`);
-      } else {
-        item.fileName = null;
+        console.log(`File uploaded for ${section} section, item ${index}:`, file.name);
+        // Here you would typically upload the file to your backend
+        // For now, we'll just log it
       }
     },
     saveDraft() {
-      console.log('Saving draft:', this.reportData);
+      console.log('Saving draft:', this.formData);
       alert('Draft saved successfully!');
     },
     resetForm() {
       if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
-        this.reportData = {
-          projectName: this.$route.params.projectName || '',
-          reportNo: '',
-          documentNo: '',
-          dateOfIssue: this.formattedDate,
-          issueLevel: '',
-          customerName: '',
-          memoId: '',
-          productName: this.$route.params.lruName || '',
+        this.formData = {
+          projectName: this.projectName,
+          lruName: this.lruName,
+          reportRefNo: '',
+          memoRefNo: '',
+          inspectionStage: '',
+          testVenue: '',
           dpName: '',
-          slNo: '',
-          skuName: '',
+          dated1: '',
+          dated2: '',
+          sruName: this.lruName,
+          quantity: '',
+          startDate: this.currentDate,
           partNo: '',
-          qty: '',
-          testStartedOn: '',
-          testEndedOn: '',
+          slNos: '',
+          endDate: '',
+          checkPoints: [
+            {
+              description: 'Dimensions of the Raw Materials Received as per Certificate',
+              applicability: 'A',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'CoC of Raw Materials',
+              applicability: 'A',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'Chemical Reports as specified in QAP',
+              applicability: 'NA',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'Tensile Strength',
+              applicability: 'A',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'Hardness Test Results as specified in QAP',
+              applicability: 'NA',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'UT Test',
+              applicability: 'A',
+              compliance: '',
+              remarks: ''
+            },
+            {
+              description: 'Any Other Observations:',
+              applicability: 'NIL',
+              compliance: '',
+              remarks: ''
+            }
+          ]
         };
-        // Reset checklists
-        this.dimensionalChecklist.forEach(item => {
-          item.dimension = '';
-          item.tolerance = '';
-          item.observedValue = '';
-          item.instrumentUsed = '';
-          item.remarks = '';
-          item.fileName = null;
-        });
-        this.parameterChecklist.forEach(item => {
-          item.allowed = '';
-          item.yesNo = '';
-          item.expected = '';
-          item.remarks = '';
-          item.fileName = null;
-        });
       }
     },
     submitForm() {
       if (this.isFormValid) {
-        console.log('Submitting form:', this.reportData);
+        console.log('Submitting form:', this.formData);
         alert('Report submitted successfully!');
+        // Here you would typically send the data to your backend API
       } else {
         alert('Please fill in all required fields.');
       }
@@ -388,6 +398,7 @@ export default {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
+        const contentWidth = pageWidth - (2 * margin);
         
         let yPosition = margin;
         
@@ -397,16 +408,16 @@ export default {
         // Header
         doc.setFontSize(18);
         doc.setFont('helvetica', 'bold');
-        doc.text('MECHANICAL INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.text('RAW MATERIAL INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 15;
         
         // Document path and date
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.reportData.projectName || 'PROJECT'}/${this.reportData.productName || 'PRODUCT'}/SL.${this.reportData.slNo || '001'}/${this.reportData.reportNo || '001'}/${this.currentYear}`;
+        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.inspectionCount || '001'}/${this.currentYear || '2025'}`;
         doc.text(documentPath, margin, yPosition);
         
-        const dateText = `Date: ${this.formattedDate}`;
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
@@ -414,12 +425,80 @@ export default {
         // Subject line
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: Mechanical Inspection Report for ${this.reportData.productName || 'Unknown Product'}`;
+        const subjectText = `SUB: Raw Material Inspection Report for ${this.lruName || 'Unknown LRU'}`;
         doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 15;
         
+        // Report details
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Report Details:', margin, yPosition);
+        yPosition += 8;
+        
+        doc.setFont('helvetica', 'normal');
+        const details = [
+          `Project Name: ${this.formData.projectName || 'Not specified'}`,
+          `Report Ref No: ${this.formData.reportRefNo || 'Not specified'}`,
+          `Memo Ref No: ${this.formData.memoRefNo || 'Not specified'}`,
+          `LRU Name: ${this.formData.lruName || 'Not specified'}`,
+          `DP Name: ${this.formData.dpName || 'Not specified'}`,
+          `SRU Name: ${this.formData.sruName || 'Not specified'}`,
+          `Part No: ${this.formData.partNo || 'Not specified'}`,
+          `Quantity: ${this.formData.quantity || 'Not specified'}`,
+          `Start Date: ${this.formData.startDate || 'Not specified'}`,
+          `End Date: ${this.formData.endDate || 'Not specified'}`
+        ];
+        
+        details.forEach(detail => {
+          doc.text(detail, margin, yPosition);
+          yPosition += 6;
+        });
+        
+        yPosition += 10;
+        
+        // Check points table
+        doc.setFont('helvetica', 'bold');
+        doc.text('Check Points:', margin, yPosition);
+        yPosition += 8;
+        
+        if (this.formData.checkPoints && this.formData.checkPoints.length > 0) {
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          
+          // Table headers
+          doc.text('SL.NO', margin, yPosition);
+          doc.text('CHECK POINTS', margin + 15, yPosition);
+          doc.text('APPLICABILITY', margin + 100, yPosition);
+          doc.text('COMPLIANCE', margin + 130, yPosition);
+          doc.text('REMARKS', margin + 160, yPosition);
+          yPosition += 6;
+          
+          // Table data
+          doc.setFont('helvetica', 'normal');
+          this.formData.checkPoints.forEach((checkpoint, index) => {
+            doc.text((index + 1).toString(), margin, yPosition);
+            doc.text(checkpoint.description.substring(0, 30), margin + 15, yPosition);
+            doc.text(checkpoint.applicability || '', margin + 100, yPosition);
+            doc.text(checkpoint.compliance || '', margin + 130, yPosition);
+            doc.text(checkpoint.remarks || '', margin + 160, yPosition);
+            yPosition += 6;
+          });
+        }
+        
+        yPosition += 15;
+        
+        // Signatures
+        doc.setFont('helvetica', 'bold');
+        doc.text('Signatures:', margin, yPosition);
+        yPosition += 8;
+        
+        doc.setFont('helvetica', 'normal');
+        doc.text('Prepared By: _________________', margin, yPosition);
+        doc.text('Verified By: _________________', margin + 70, yPosition);
+        doc.text('Approved By: _________________', margin + 140, yPosition);
+        
         // Save PDF
-        const fileName = `Mechanical_Inspection_Report_${this.reportData.productName || 'Unknown'}_${this.formattedDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `Raw_Material_Inspection_Report_${this.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
         doc.save(fileName);
         
         alert('Report exported successfully as PDF!');
@@ -434,7 +513,7 @@ export default {
 </script>
 
 <style scoped>
-.mechanical-inspection-page {
+.raw-material-inspection-page {
   min-height: 100vh;
   background: #f5f5f5;
 }
@@ -561,7 +640,7 @@ export default {
   border-radius: 4px;
 }
 
-/* Form Sections */
+/* Inspection Form */
 .inspection-form {
   background: white;
   border-radius: 15px;
@@ -569,6 +648,7 @@ export default {
   overflow: hidden;
 }
 
+/* Form Sections */
 .form-section {
   padding: 30px;
   border-bottom: 1px solid #e2e8f0;
@@ -631,13 +711,13 @@ export default {
   box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
 }
 
-/* Inspection Table */
-.inspection-table-container {
+/* Check Points Table */
+.checkpoints-table-container {
   margin-top: 20px;
   overflow-x: auto;
 }
 
-.inspection-table {
+.checkpoints-table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #e2e8f0;
@@ -646,7 +726,7 @@ export default {
   font-size: 0.9em;
 }
 
-.inspection-table th {
+.checkpoints-table th {
   background: #2d3748;
   color: white;
   padding: 12px 8px;
@@ -655,18 +735,24 @@ export default {
   font-size: 0.85em;
 }
 
-.inspection-table td {
+.checkpoints-table td {
   padding: 8px;
   border-bottom: 1px solid #e2e8f0;
   vertical-align: top;
 }
 
-.inspection-table tr:nth-child(even) {
+.checkpoints-table tr:nth-child(even) {
   background-color: #f8fafc;
 }
 
-.inspection-table input[type="text"],
-.inspection-table select {
+.checkpoint-description {
+  font-size: 0.8em;
+  line-height: 1.4;
+  max-width: 200px;
+}
+
+.checkpoints-table input[type="text"],
+.checkpoints-table select {
   width: 100%;
   padding: 6px;
   border: 1px solid #e2e8f0;
@@ -674,7 +760,7 @@ export default {
   font-size: 0.85em;
 }
 
-.inspection-table input[type="file"] {
+.checkpoints-table input[type="file"] {
   font-size: 0.8em;
   padding: 4px;
 }
@@ -798,11 +884,11 @@ export default {
     align-items: center;
   }
   
-  .inspection-table-container {
+  .checkpoints-table-container {
     overflow-x: auto;
   }
   
-  .inspection-table {
+  .checkpoints-table {
     min-width: 800px;
   }
 }

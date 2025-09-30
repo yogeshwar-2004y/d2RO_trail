@@ -1,379 +1,730 @@
 <template>
-  <div class="inspection-report-container">
-    <h1 class="report-title">Kit of Part Inspection Report</h1>
-    <form @submit.prevent="handleSubmit" class="report-form">
-      
-      <section class="header-grid">
-        <div class="form-group">
-          <label for="project">Project Name</label>
-          <input id="project" type="text" v-model="reportData.project" required />
+  <div class="kit-inspection-page">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-left">
+        <button class="back-button" @click="$router.go(-1)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+        </button>
+        <div class="logos-container">
+          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="app-logo">
+          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="app-logo vista-logo">
         </div>
-        <div class="form-group">
-          <label for="dpName">DP Name</label>
-          <input id="dpName" type="text" v-model="reportData.dpName" required />
-        </div>
-        <div class="form-group">
-          <label for="reportRefNo">Report Ref No</label>
-          <input id="reportRefNo" type="text" v-model="reportData.reportRefNo" required />
-        </div>
-        <div class="form-group">
-          <label for="memoRefNo">Memo Ref No</label>
-          <input id="memoRefNo" type="text" v-model="reportData.memoRefNo" />
-        </div>
-        <div class="form-group">
-          <label for="lruName">LRU Name / Part No</label>
-          <input id="lruName" type="text" v-model="reportData.lruName" required />
-        </div>
-        <div class="form-group">
-          <label for="sruName">SRU Name</label>
-          <input id="sruName" type="text" v-model="reportData.sruName" />
-        </div>
-        <div class="form-group">
-          <label for="partNo">Part No</label>
-          <input id="partNo" type="text" v-model="reportData.partNo" />
-        </div>
-        <div class="form-group">
-          <label for="quantity">Quantity</label>
-          <input id="quantity" type="number" v-model.number="reportData.quantity" min="1" required />
-        </div>
-        <div class="form-group">
-          <label for="slNos">SL No's</label>
-          <input id="slNos" type="text" v-model="reportData.slNos" />
-        </div>
-        <div class="form-group">
-          <label for="testVenue">Test Venue</label>
-          <input id="testVenue" type="text" v-model="reportData.testVenue" required />
-        </div>
-        <div class="form-group">
-          <label for="startDate">Start Date/Time</label>
-          <input id="startDate" type="datetime-local" v-model="reportData.startDate" required />
-        </div>
-        <div class="form-group">
-          <label for="endDate">End Date/Time</label>
-          <input id="endDate" type="datetime-local" v-model="reportData.endDate" required />
-        </div>
-      </section>
+      </div>
+      <div class="header-center">
+        <h1 class="page-title">KIT OF PART INSPECTION REPORT</h1>
+      </div>
+      <div class="header-right">
+        <button class="export-button" @click="exportReport">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7,10 12,15 17,10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          EXPORT
+        </button>
+      </div>
+    </div>
 
-      <section class="results-section">
-        <h2>Inspection Results</h2>
-        <table class="inspection-table">
-          <thead>
-            <tr>
-              <th>SL.NO.</th>
-              <th>TEST CASES</th>
-              <th>EXPECTED</th>
-              <th class="observations-col">OBSERVATIONS</th>
-              <th class="remark-col">REMARKS (OK/NOT OK)</th>
-              <th class="upload-col">UPLOAD</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in reportData.inspectionItems" :key="item.slNo">
-              <td>{{ item.slNo }}</td>
-              <td class="test-case-col">{{ item.testCase }}</td>
-              <td class="expected-col">{{ item.expected }}</td>
-              <td>
-                <textarea 
-                  v-model="item.observations" 
-                  rows="2" 
-                  placeholder="Enter observations here..."
-                ></textarea>
-              </td>
-              <td>
-                <div class="radio-group">
-                  <label>
-                    <input type="radio" :name="'remark-'+item.slNo" value="OK" v-model="item.remarks" required> OK
-                  </label>
-                  <label>
-                    <input type="radio" :name="'remark-'+item.slNo" value="NOT OK" v-model="item.remarks"> NOT OK
-                  </label>
-                </div>
-              </td>
-              <td class="upload-cell">
-                <input type="file" @change="handleFileUpload($event, item)" />
-                <span v-if="item.fileName" class="file-name">{{ item.fileName }}</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="signature-section">
-        <div class="signature-block">
-          <label for="preparedBy">Prepared By (QA G1 -Team)</label>
-          <input id="preparedBy" type="text" v-model="reportData.preparedBy" required />
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Form Header -->
+      <div class="form-header">
+        <div class="document-path">
+          CASDIC/{{ reportData.project }}/{{ reportData.lruName }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{ currentYear }}
         </div>
-        <div class="signature-block">
-          <label for="verifiedBy">Verified By (G1H - QA G)</label>
-          <input id="verifiedBy" type="text" v-model="reportData.verifiedBy" required />
+        <div class="report-date">
+          Date: {{ currentDate }}
         </div>
-        <div class="signature-block">
-          <label for="approvedBy">Approved By</label>
-          <input id="approvedBy" type="text" v-model="reportData.approvedBy" required />
-        </div>
-      </section>
-
-      <div class="action-buttons">
-        <button type="submit" class="btn primary">Submit Report</button>
-        <button type="button" class="btn secondary">Save Draft</button>
-        <button type="button" class="btn secondary" @click="printReport">Print/Export PDF</button>
       </div>
 
-    </form>
+      <div class="subject-line">
+        SUB : Kit of Part Inspection Report for {{ reportData.lruName }}
+      </div>
+
+      <!-- Inspection Form -->
+      <form @submit.prevent="handleSubmit" class="inspection-form">
+      
+        <!-- General Information Section -->
+        <div class="form-section">
+          <h2 class="section-title">General Information</h2>
+          <div class="general-info-grid">
+            <!-- Left Column -->
+            <div class="info-column">
+              <div class="form-group">
+                <label for="project">Project Name:</label>
+                <input id="project" type="text" v-model="reportData.project" required>
+              </div>
+              <div class="form-group">
+                <label for="dpName">DP Name:</label>
+                <input id="dpName" type="text" v-model="reportData.dpName" required>
+              </div>
+              <div class="form-group">
+                <label for="reportRefNo">Report Ref No:</label>
+                <input id="reportRefNo" type="text" v-model="reportData.reportRefNo" required>
+              </div>
+              <div class="form-group">
+                <label for="memoRefNo">Memo Ref No:</label>
+                <input id="memoRefNo" type="text" v-model="reportData.memoRefNo">
+              </div>
+              <div class="form-group">
+                <label for="lruName">LRU Name / Part No:</label>
+                <input id="lruName" type="text" v-model="reportData.lruName" required>
+              </div>
+              <div class="form-group">
+                <label for="sruName">SRU Name:</label>
+                <input id="sruName" type="text" v-model="reportData.sruName">
+              </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="info-column">
+              <div class="form-group">
+                <label for="partNo">Part No:</label>
+                <input id="partNo" type="text" v-model="reportData.partNo">
+              </div>
+              <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input id="quantity" type="number" v-model.number="reportData.quantity" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="slNos">SL No's:</label>
+                <input id="slNos" type="text" v-model="reportData.slNos">
+              </div>
+              <div class="form-group">
+                <label for="testVenue">Test Venue:</label>
+                <input id="testVenue" type="text" v-model="reportData.testVenue" required>
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date/Time:</label>
+                <input id="startDate" type="datetime-local" v-model="reportData.startDate" required>
+              </div>
+              <div class="form-group">
+                <label for="endDate">End Date/Time:</label>
+                <input id="endDate" type="datetime-local" v-model="reportData.endDate" required>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Inspection Results Section -->
+        <div class="form-section">
+          <h2 class="section-title">Inspection Results</h2>
+          <div class="inspection-table-container">
+            <table class="inspection-table">
+              <thead>
+                <tr>
+                  <th>SL NO</th>
+                  <th>TEST CASES</th>
+                  <th>EXPECTED</th>
+                  <th>OBSERVATIONS</th>
+                  <th>REMARKS (OK/NOT OK)</th>
+                  <th>UPLOAD</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="item in reportData.inspectionItems" :key="item.slNo">
+                  <td>{{ item.slNo }}</td>
+                  <td>{{ item.testCase }}</td>
+                  <td>{{ item.expected }}</td>
+                  <td>
+                    <textarea 
+                      v-model="item.observations" 
+                      rows="2" 
+                      placeholder="Enter observations here..."
+                    ></textarea>
+                  </td>
+                  <td>
+                    <select v-model="item.remarks">
+                      <option value="">Select</option>
+                      <option value="OK">OK</option>
+                      <option value="NOT OK">NOT OK</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input type="file" @change="handleFileUpload($event, item)">
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Signatures Section -->
+        <div class="form-section">
+          <h2 class="section-title">Signatures</h2>
+          <div class="signatures-layout">
+            <div class="signature-item">
+              <label>Prepared By (QA G1 -Team):</label>
+              <div class="signature-line"></div>
+            </div>
+            <div class="signature-item">
+              <label>Verified By (G1H - QA G):</label>
+              <div class="signature-line"></div>
+            </div>
+            <div class="signature-item">
+              <label>Approved By:</label>
+              <div class="signature-line"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button type="button" @click="saveDraft" class="btn btn-secondary">
+            Save Draft
+          </button>
+          <button type="button" @click="resetForm" class="btn btn-secondary">
+            Reset
+          </button>
+          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+            Submit Report
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
+<script>
+import jsPDF from 'jspdf';
 
-// Define the initial structure and data for the inspection items
-const initialInspectionItems = [
-  { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
-  { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
-  { slNo: 3, testCase: 'Quantity as BOM', expected: 'Matching', observations: '', remarks: '', fileName: null },
-  { slNo: 4, testCase: 'Quantity as per number of boards to be assembled', expected: 'Matching', observations: '', remarks: '', fileName: null },
-  { slNo: 5, testCase: 'Components storage in ESD cover', expected: 'Stored in ESD', observations: '', remarks: '', fileName: null },
-  { slNo: 6, testCase: 'All connectors to be fitted with screws before assembly', expected: 'Fitted properly', observations: '', remarks: '', fileName: null },
-  { slNo: 7, testCase: 'Any other observations', expected: 'NIL', observations: '', remarks: '', fileName: null },
-];
+export default {
+  name: 'KitOfPartInsp',
+  data() {
+    return {
+      currentYear: '2025',
+      currentDate: new Date().toISOString().split('T')[0],
+      reportData: {
+        // Header fields
+        project: '',
+        dpName: '',
+        reportRefNo: '',
+        memoRefNo: '',
+        lruName: '',
+        sruName: '',
+        partNo: '',
+        quantity: null,
+        slNos: '',
+        testVenue: '',
+        startDate: new Date().toISOString().slice(0, 16),
+        endDate: new Date().toISOString().slice(0, 16), 
 
-// Reactive state for all form data
-const reportData = ref({
-  // Header fields
-  project: '',
-  dpName: '',
-  reportRefNo: '',
-  memoRefNo: '',
-  lruName: '',
-  sruName: '',
-  partNo: '',
-  quantity: null,
-  slNos: '',
-  testVenue: '',
-  startDate: new Date().toISOString().slice(0, 16), // Default to current time
-  endDate: new Date().toISOString().slice(0, 16), 
+        // Table data
+        inspectionItems: [
+          { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
+          { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
+          { slNo: 3, testCase: 'Quantity as BOM', expected: 'Matching', observations: '', remarks: '', fileName: null },
+          { slNo: 4, testCase: 'Quantity as per number of boards to be assembled', expected: 'Matching', observations: '', remarks: '', fileName: null },
+          { slNo: 5, testCase: 'Components storage in ESD cover', expected: 'Stored in ESD', observations: '', remarks: '', fileName: null },
+          { slNo: 6, testCase: 'All connectors to be fitted with screws before assembly', expected: 'Fitted properly', observations: '', remarks: '', fileName: null },
+          { slNo: 7, testCase: 'Any other observations', expected: 'NIL', observations: '', remarks: '', fileName: null },
+        ],
 
-  // Table data
-  inspectionItems: initialInspectionItems,
-
-  // Footer/Signature fields
-  preparedBy: '',
-  verifiedBy: '',
-  approvedBy: '',
-});
-
-// Method to handle file upload change
-const handleFileUpload = (event, item) => {
-  const file = event.target.files[0];
-  if (file) {
-    // Store the file name/reference. In a real app, you'd upload this file
-    // and store a file path or ID.
-    item.fileName = file.name;
-    console.log(`File for item ${item.slNo}: ${file.name}`);
-  } else {
-    item.fileName = null;
+        // Footer/Signature fields
+        preparedBy: '',
+        verifiedBy: '',
+        approvedBy: '',
+      }
+    };
+  },
+  computed: {
+    isFormValid() {
+      return this.reportData.project &&
+             this.reportData.dpName &&
+             this.reportData.reportRefNo &&
+             this.reportData.lruName &&
+             this.reportData.testVenue &&
+             this.reportData.quantity;
+    }
+  },
+  mounted() {
+    // Get parameters from route
+    const projectName = this.$route.params.projectName || '';
+    const lruName = this.$route.params.lruName || '';
+    
+    // Set default values
+    this.reportData.project = projectName;
+    this.reportData.lruName = lruName;
+  },
+  methods: {
+    handleFileUpload(event, item) {
+      const file = event.target.files[0];
+      if (file) {
+        item.fileName = file.name;
+        console.log(`File for item ${item.slNo}: ${file.name}`);
+      } else {
+        item.fileName = null;
+      }
+    },
+    saveDraft() {
+      console.log('Saving draft:', this.reportData);
+      alert('Draft saved successfully!');
+    },
+    resetForm() {
+      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+        this.reportData = {
+          project: this.$route.params.projectName || '',
+          dpName: '',
+          reportRefNo: '',
+          memoRefNo: '',
+          lruName: this.$route.params.lruName || '',
+          sruName: '',
+          partNo: '',
+          quantity: null,
+          slNos: '',
+          testVenue: '',
+          startDate: new Date().toISOString().slice(0, 16),
+          endDate: new Date().toISOString().slice(0, 16),
+          inspectionItems: [
+            { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
+            { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
+            { slNo: 3, testCase: 'Quantity as BOM', expected: 'Matching', observations: '', remarks: '', fileName: null },
+            { slNo: 4, testCase: 'Quantity as per number of boards to be assembled', expected: 'Matching', observations: '', remarks: '', fileName: null },
+            { slNo: 5, testCase: 'Components storage in ESD cover', expected: 'Stored in ESD', observations: '', remarks: '', fileName: null },
+            { slNo: 6, testCase: 'All connectors to be fitted with screws before assembly', expected: 'Fitted properly', observations: '', remarks: '', fileName: null },
+            { slNo: 7, testCase: 'Any other observations', expected: 'NIL', observations: '', remarks: '', fileName: null },
+          ],
+          preparedBy: '',
+          verifiedBy: '',
+          approvedBy: '',
+        };
+      }
+    },
+    handleSubmit() {
+      if (this.isFormValid) {
+        console.log('Report Submitted:', this.reportData);
+        alert('Inspection Report Submitted!');
+      } else {
+        alert('Please fill in all required fields.');
+      }
+    },
+    exportReport() {
+      try {
+        const doc = new jsPDF('p', 'mm', 'a4');
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        
+        let yPosition = margin;
+        
+        // Set font styles
+        doc.setFont('helvetica');
+        
+        // Header
+        doc.setFontSize(18);
+        doc.setFont('helvetica', 'bold');
+        doc.text('KIT OF PART INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Document path and date
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const documentPath = `CASDIC/${this.reportData.project || 'PROJECT'}/${this.reportData.lruName || 'LRU'}/SL.${this.reportData.slNos || '001'}/${this.reportData.reportRefNo || '001'}/${this.currentYear}`;
+        doc.text(documentPath, margin, yPosition);
+        
+        const dateText = `Date: ${this.currentDate}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 12;
+        
+        // Subject line
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
+        const subjectText = `SUB: Kit of Part Inspection Report for ${this.reportData.lruName || 'Unknown LRU'}`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+        
+        // Save PDF
+        const fileName = `Kit_of_Part_Inspection_Report_${this.reportData.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        doc.save(fileName);
+        
+        alert('Report exported successfully as PDF!');
+        
+      } catch (error) {
+        console.error('Error exporting PDF:', error);
+        alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+      }
+    }
   }
-};
-
-// Method to handle form submission
-const handleSubmit = () => {
-  console.log('Report Submitted:', JSON.parse(JSON.stringify(reportData.value)));
-  // In a real application, this is where you would call an API to save the data.
-  alert('Inspection Report Submitted!');
-};
-
-// Method for printing
-const printReport = () => {
-  window.print();
 };
 </script>
 
 <style scoped>
-/* BASIC STYLING FOR A CLEAR FORM LAYOUT */
-.inspection-report-container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 30px;
-  border: 1px solid #ccc;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  font-family: Arial, sans-serif;
-  background-color: #fff;
+.kit-inspection-page {
+  min-height: 100vh;
+  background: #f5f5f5;
 }
 
-.report-title {
+/* Header */
+.page-header {
+  background: #2d3748;
+  padding: 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.app-logo {
+  width: 120px;
+  height: auto;
+  filter: brightness(0) invert(1);
+}
+
+.header-center {
+  flex: 1;
   text-align: center;
-  margin-bottom: 25px;
-  color: #333;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 10px;
 }
 
-/* HEADER GRID LAYOUT */
-.header-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px 20px;
-  margin-bottom: 30px;
+.page-title {
+  color: white;
+  font-size: 2.2em;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.export-button {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 25px;
+  padding: 12px 20px;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.export-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+/* Main Content */
+.main-content {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 30px;
+}
+
+/* Form Header */
+.form-header {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.document-path {
+  font-family: 'Courier New', monospace;
+  color: #4a5568;
+  font-size: 0.9em;
+  background: #f7fafc;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.report-date {
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.subject-line {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 0;
   padding: 15px;
-  border: 1px solid #ddd;
-  background-color: #f9f9f9;
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  border-radius: 4px;
+}
+
+/* Form Sections */
+.inspection-form {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.form-section {
+  padding: 30px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.form-section:last-child {
+  border-bottom: none;
+}
+
+.section-title {
+  color: #2d3748;
+  border-bottom: 3px solid #4a5568;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+/* General Info Grid */
+.general-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-  color: #555;
+  font-weight: 600;
+  color: #4a5568;
   font-size: 0.9em;
 }
 
-.form-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 12px 15px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.9em;
+  transition: all 0.3s ease;
+  background: white;
 }
 
-/* TABLE STYLING */
-.results-section h2 {
-    margin-bottom: 15px;
-    color: #007bff;
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4a5568;
+  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+/* Inspection Table */
+.inspection-table-container {
+  margin-top: 20px;
+  overflow-x: auto;
 }
 
 .inspection-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 25px;
-}
-
-.inspection-table th, 
-.inspection-table td {
-  border: 1px solid #ddd;
-  padding: 8px;
-  text-align: left;
-  vertical-align: top;
-}
-
-.inspection-table th {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
   font-size: 0.9em;
 }
 
-.inspection-table td {
-    background-color: #fff;
-    font-size: 0.85em;
+.inspection-table th {
+  background: #2d3748;
+  color: white;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85em;
 }
 
-.test-case-col { width: 25%; }
-.expected-col { width: 10%; }
-.observations-col { width: 30%; }
-.remark-col { width: 15%; text-align: center; }
-.upload-col { width: 10%; }
+.inspection-table td {
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: top;
+}
 
+.inspection-table tr:nth-child(even) {
+  background-color: #f8fafc;
+}
+
+.inspection-table input[type="text"],
+.inspection-table select,
 .inspection-table textarea {
   width: 100%;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-  resize: vertical;
-  min-height: 40px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.85em;
 }
 
-/* RADIO BUTTONS */
-.radio-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    align-items: flex-start;
-}
-
-.radio-group label {
-    font-weight: normal;
-    font-size: 0.9em;
-}
-
-/* FILE UPLOAD */
-.upload-cell input[type="file"] {
-  max-width: 100%;
+.inspection-table input[type="file"] {
   font-size: 0.8em;
+  padding: 4px;
 }
 
-.file-name {
-    display: block;
-    font-size: 0.75em;
-    color: green;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-top: 5px;
+/* Signatures */
+.signatures-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 30px;
+  padding: 20px 0;
 }
 
-/* SIGNATURE SECTION */
-.signature-section {
-    display: flex;
-    justify-content: space-between;
-    gap: 30px;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px dashed #ccc;
+.signature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 200px;
 }
 
-.signature-block {
-    flex: 1;
-    text-align: center;
+.signature-item label {
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 1em;
+  margin-bottom: 5px;
 }
 
-.signature-block label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    font-size: 0.9em;
-    color: #333;
+.signature-line {
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px solid #333;
+  margin-top: 10px;
 }
 
-.signature-block input {
-    width: 90%;
-    border: none;
-    border-bottom: 1px solid #555;
-    padding: 5px 0;
-    text-align: center;
-}
-
-/* ACTION BUTTONS */
-.action-buttons {
-    text-align: center;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
+/* Form Actions */
+.form-actions {
+  padding: 30px;
+  background: #f8fafc;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .btn {
-    padding: 10px 20px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.9em;
 }
 
-.btn.primary {
-    background-color: #007bff;
-    color: white;
+.btn-primary {
+  background-color: #2d3748;
+  color: white;
 }
 
-.btn.primary:hover {
-    background-color: #0056b3;
+.btn-primary:hover:not(:disabled) {
+  background-color: #1a202c;
+  transform: translateY(-1px);
 }
 
-.btn.secondary {
-    background-color: #6c757d;
-    color: white;
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
 }
 
-.btn.secondary:hover {
-    background-color: #5a6268;
+.btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .page-title {
+    font-size: 1.8em;
+  }
+  
+  .main-content {
+    padding: 0 20px;
+    margin: 20px auto;
+  }
+  
+  .general-info-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .signatures-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .signature-item {
+    max-width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .inspection-table-container {
+    overflow-x: auto;
+  }
+  
+  .inspection-table {
+    min-width: 800px;
+  }
 }
 </style>
