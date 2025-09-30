@@ -69,6 +69,7 @@
               <p><strong>Upload Restricted</strong></p>
               <p v-if="hasPendingCommentsInProject">There are unacknowledged comments on the latest document. Please acknowledge (accept or reject) all comments before uploading the next version.</p>
               <p v-else-if="allCommentsRejected">All comments have been rejected. You need to accept at least one comment to upload a revised document.</p>
+              <p v-else-if="!hasCommentsOnCurrentDocument">The latest document is awaiting reviewer comments. Please wait for a reviewer to add comments before uploading the next version.</p>
               <p v-else>The latest document is awaiting review. Please wait for reviewer comments and acknowledge them before uploading the next version.</p>
             </div>
           </div>
@@ -860,7 +861,7 @@ export default {
         return true;
       }
       
-      // Check comments for the current document only
+      // Check if current document has any comments
       if (this.comments && this.comments.length > 0) {
         const pendingComments = this.comments.filter(comment => 
           this.isCommentPending(comment)
@@ -896,9 +897,9 @@ export default {
         }
       }
       
-      // If no comments exist, allow upload
-      console.log('No comments exist - upload enabled');
-      return true;
+      // If no comments exist on current document, disable upload (waiting for reviewer comments)
+      console.log('No comments exist on current document - upload disabled (waiting for reviewer comments)');
+      return false;
     },
     
     // Check if there are pending comments for the current document
@@ -925,6 +926,11 @@ export default {
       
       // All comments are rejected if all acknowledged comments are rejected (no accepted ones)
       return acknowledgedComments.length > 0 && acceptedComments.length === 0;
+    },
+    
+    // Check if current document has any comments
+    hasCommentsOnCurrentDocument() {
+      return this.comments && this.comments.length > 0;
     },
     
     // Check if there are pending comments across ALL documents in the project
