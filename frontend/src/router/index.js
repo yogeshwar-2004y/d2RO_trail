@@ -34,6 +34,7 @@ import RoleTestComponent from '@/components/RoleTestComponent.vue'
 import PlanDocsTestComponent from '@/components/PlanDocsTestComponent.vue'
 import TemplateDashboard from '@/components/TemplateDashboard.vue'
 import TemplateViewer from '@/components/TemplateViewer.vue'
+import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -196,6 +197,12 @@ const router = createRouter({
         path: '/templates/view/:templateName',
         name: 'TemplateViewer',
         component: TemplateViewer,
+        props: true,
+      },
+      {
+        path: '/templates/bare-pcb-inspection/:projectName?/:lruName?',
+        name: 'BarePcbInspectionReport',
+        component: BarePcbInspectionReport,
         props: true,
       },
     ...reviewerRoutes,
