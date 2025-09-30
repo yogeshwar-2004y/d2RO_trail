@@ -47,63 +47,76 @@
 
       <!-- Inspection Form -->
       <form @submit.prevent="submitForm" class="inspection-form">
-        <!-- Document Details Section -->
+        <!-- General Information Section -->
         <div class="form-section">
-          <h2 class="section-title">Document Details</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="projectName">Project Name:</label>
-              <input type="text" id="projectName" v-model="formData.projectName" required>
+          <h2 class="section-title">General Information</h2>
+          <div class="general-info-grid">
+            <!-- Left Column -->
+            <div class="info-column">
+              <div class="form-group">
+                <label for="projectName">Project Name:</label>
+                <input type="text" id="projectName" v-model="formData.projectName" required>
+              </div>
+              <div class="form-group">
+                <label for="reportRefNo">Report Ref No:</label>
+                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" required>
+              </div>
+              <div class="form-group">
+                <label for="memoRefNo">Memo Ref No:</label>
+                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" required>
+              </div>
+              <div class="form-group">
+                <label for="lruName">LRU Name:</label>
+                <input type="text" id="lruName" v-model="formData.lruName" required>
+              </div>
+              <div class="form-group">
+                <label for="inspectionStage">Inspection Stage:</label>
+                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" required>
+              </div>
+              <div class="form-group">
+                <label for="testVenue">Test Venue:</label>
+                <input type="text" id="testVenue" v-model="formData.testVenue" required>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="projectNumber">Project Number:</label>
-              <input type="text" id="projectNumber" v-model="formData.projectNumber" required>
-            </div>
-            <div class="form-group">
-              <label for="projectDate">Project Date:</label>
-              <input type="date" id="projectDate" v-model="formData.projectDate" required>
-            </div>
-            <div class="form-group">
-              <label for="lruName">LRU Name:</label>
-              <input type="text" id="lruName" v-model="formData.lruName" required>
-            </div>
-            <div class="form-group">
-              <label for="lruPartNumber">LRU Part No.:</label>
-              <input type="text" id="lruPartNumber" v-model="formData.lruPartNumber" required>
-            </div>
-            <div class="form-group">
-              <label for="serialNumber">Serial Number:</label>
-              <input type="text" id="serialNumber" v-model="formData.serialNumber" required>
-            </div>
-            <div class="form-group">
-              <label for="version">Version:</label>
-              <input type="text" id="version" v-model="formData.version" required>
-            </div>
-            <div class="form-group">
-              <label for="revision">Revision:</label>
-              <input type="text" id="revision" v-model="formData.revision" required>
-            </div>
-            <div class="form-group">
-              <label for="inspectionStage">Inspection Stage:</label>
-              <select id="inspectionStage" v-model="formData.inspectionStage" required>
-                <option value="">Select Stage</option>
-                <option value="Visual Inspection">Visual Inspection</option>
-                <option value="Dimensional Check">Dimensional Check</option>
-                <option value="Electrical Test">Electrical Test</option>
-                <option value="Final Inspection">Final Inspection</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="inspectionDate">Date of Inspection:</label>
-              <input type="date" id="inspectionDate" v-model="formData.inspectionDate" required>
-            </div>
-            <div class="form-group">
-              <label for="inspectionVenue">Inspection Venue:</label>
-              <input type="text" id="inspectionVenue" v-model="formData.inspectionVenue" required>
-            </div>
-            <div class="form-group">
-              <label for="referenceDocument">Reference Document:</label>
-              <input type="text" id="referenceDocument" v-model="formData.referenceDocument" required>
+            
+            <!-- Right Column -->
+            <div class="info-column">
+              <div class="form-group">
+                <label for="dpName">DP Name:</label>
+                <input type="text" id="dpName" v-model="formData.dpName" required>
+              </div>
+              <div class="form-group">
+                <label for="dated1">Dated:</label>
+                <input type="date" id="dated1" v-model="formData.dated1" required>
+              </div>
+              <div class="form-group">
+                <label for="dated2">Dated:</label>
+                <input type="date" id="dated2" v-model="formData.dated2" required>
+              </div>
+              <div class="form-group">
+                <label for="sruName">SRU Name:</label>
+                <input type="text" id="sruName" v-model="formData.sruName" required>
+              </div>
+              <div class="form-group">
+                <label for="partNo">Part No:</label>
+                <input type="text" id="partNo" v-model="formData.partNo" required>
+              </div>
+              <div class="form-group">
+                <label for="quantity">Quantity:</label>
+                <input type="number" id="quantity" v-model="formData.quantity" required>
+              </div>
+              <div class="form-group">
+                <label for="slNos">SL.NO's:</label>
+                <input type="text" id="slNos" v-model="formData.slNos" required>
+              </div>
+              <div class="form-group">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" v-model="formData.startDate" required>
+              </div>
+              <div class="form-group">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" v-model="formData.endDate" required>
+              </div>
             </div>
           </div>
         </div>
@@ -165,204 +178,108 @@
           </div>
         </div>
 
-        <!-- Inspection Criteria Section -->
+        <!-- Inspection Checklist Section -->
         <div class="form-section">
-          <h2 class="section-title">Inspection Criteria</h2>
-          <div class="criteria-grid">
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.visualInspection">
-                Visual Inspection
-              </label>
-            </div>
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.dimensionalCheck">
-                Dimensional Check
-              </label>
-            </div>
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.electricalTest">
-                Electrical Test
-              </label>
-            </div>
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.solderabilityTest">
-                Solderability Test
-              </label>
-            </div>
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.cleanlinessCheck">
-                Cleanliness Check
-              </label>
-            </div>
-            <div class="criteria-item">
-              <label>
-                <input type="checkbox" v-model="formData.criteria.markingCheck">
-                Marking Check
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Inspection Results Section -->
-        <div class="form-section">
-          <h2 class="section-title">Inspection Results</h2>
-          <div class="results-table">
-            <table>
+          <h2 class="section-title">Inspection Checklist</h2>
+          <div class="inspection-table-container">
+            <table class="inspection-table">
               <thead>
                 <tr>
-                  <th>SNO</th>
-                  <th>Inspection Item</th>
-                  <th>Specification</th>
-                  <th>Actual Value</th>
-                  <th>Status</th>
-                  <th>Remarks</th>
+                  <th>SL NO</th>
+                  <th>PARAMETERS TO BE CHECKED</th>
+                  <th>OBSERVATION</th>
+                  <th>REMARKS (OK/NOT OK)</th>
+                  <th>UPLOAD</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in formData.inspectionItems" :key="index">
+                <!-- I. VISUAL INSPECTION -->
+                <tr class="section-header">
+                  <td colspan="5"><strong>I. VISUAL INSPECTION</strong></td>
+                </tr>
+                <tr v-for="(item, index) in formData.visualInspection" :key="'visual-' + index">
                   <td>{{ index + 1 }}</td>
+                  <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.item" placeholder="Inspection Item">
+                    <input type="text" v-model="item.observation" placeholder="Enter observation">
                   </td>
                   <td>
-                    <input type="text" v-model="item.specification" placeholder="Specification">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.actualValue" placeholder="Actual Value">
-                  </td>
-                  <td>
-                    <select v-model="item.status">
+                    <select v-model="item.remarks">
                       <option value="">Select</option>
-                      <option value="Pass">Pass</option>
-                      <option value="Fail">Fail</option>
-                      <option value="N/A">N/A</option>
+                      <option value="OK">OK</option>
+                      <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="text" v-model="item.remarks" placeholder="Remarks">
+                    <input type="file" @change="handleFileUpload($event, 'visual', index)">
+                  </td>
+                </tr>
+                
+                <!-- II. CONTINUITY CHECKING -->
+                <tr class="section-header">
+                  <td colspan="5"><strong>II. CONTINUITY CHECKING</strong></td>
+                </tr>
+                <tr v-for="(item, index) in formData.continuityCheck" :key="'continuity-' + index">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ item.parameter }}</td>
+                  <td>
+                    <input type="text" v-model="item.observation" placeholder="Enter observation">
+                  </td>
+                  <td>
+                    <select v-model="item.remarks">
+                      <option value="">Select</option>
+                      <option value="OK">OK</option>
+                      <option value="NOT OK">NOT OK</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input type="file" @change="handleFileUpload($event, 'continuity', index)">
+                  </td>
+                </tr>
+                
+                <!-- III. FABRICATOR & VENDOR QC REPORTS VERIFICATION -->
+                <tr class="section-header">
+                  <td colspan="5"><strong>III. FABRICATOR & VENDOR QC REPORTS VERIFICATION</strong></td>
+                </tr>
+                <tr>
+                  <td>1</td>
+                  <td class="description-cell">
+                    (Fabricator Report shall be as per Mil 551101 (Mil QML 31032) Group A & B Certificates for Rigid boards and Mil 50884 for Flexi boards (or) IPC 6012 Class 3 DS)
+                  </td>
+                  <td>
+                    <input type="text" v-model="formData.fabricatorReport.observation" placeholder="Enter observation">
+                  </td>
+                  <td>
+                    <select v-model="formData.fabricatorReport.remarks">
+                      <option value="">Select</option>
+                      <option value="OK">OK</option>
+                      <option value="NOT OK">NOT OK</option>
+                    </select>
+                  </td>
+                  <td>
+                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)">
                   </td>
                 </tr>
               </tbody>
             </table>
-            <button type="button" @click="addInspectionItem" class="add-item-btn">
-              + Add Inspection Item
-            </button>
-          </div>
-        </div>
-
-        <!-- Defects Section -->
-        <div class="form-section">
-          <h2 class="section-title">Defects Found</h2>
-          <div class="defects-table">
-            <table>
-              <thead>
-                <tr>
-                  <th>SNO</th>
-                  <th>Defect Type</th>
-                  <th>Description</th>
-                  <th>Severity</th>
-                  <th>Location</th>
-                  <th>Action Taken</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(defect, index) in formData.defects" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td>
-                    <select v-model="defect.type">
-                      <option value="">Select Type</option>
-                      <option value="Visual">Visual</option>
-                      <option value="Dimensional">Dimensional</option>
-                      <option value="Electrical">Electrical</option>
-                      <option value="Solderability">Solderability</option>
-                      <option value="Cleanliness">Cleanliness</option>
-                    </select>
-                  </td>
-                  <td>
-                    <textarea v-model="defect.description" placeholder="Defect Description" rows="2"></textarea>
-                  </td>
-                  <td>
-                    <select v-model="defect.severity">
-                      <option value="">Select</option>
-                      <option value="Critical">Critical</option>
-                      <option value="Major">Major</option>
-                      <option value="Minor">Minor</option>
-                    </select>
-                  </td>
-                  <td>
-                    <input type="text" v-model="defect.location" placeholder="Location">
-                  </td>
-                  <td>
-                    <select v-model="defect.action">
-                      <option value="">Select Action</option>
-                      <option value="Accept">Accept</option>
-                      <option value="Reject">Reject</option>
-                      <option value="Rework">Rework</option>
-                      <option value="Repair">Repair</option>
-                    </select>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <button type="button" @click="addDefect" class="add-item-btn">
-              + Add Defect
-            </button>
-          </div>
-        </div>
-
-        <!-- Overall Assessment Section -->
-        <div class="form-section">
-          <h2 class="section-title">Overall Assessment</h2>
-          <div class="assessment-grid">
-            <div class="form-group">
-              <label for="overallStatus">Overall Status:</label>
-              <select id="overallStatus" v-model="formData.overallStatus" required>
-                <option value="">Select Status</option>
-                <option value="Pass">Pass</option>
-                <option value="Fail">Fail</option>
-                <option value="Conditional Pass">Conditional Pass</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="qualityRating">Quality Rating (1-10):</label>
-              <input type="number" id="qualityRating" v-model="formData.qualityRating" min="1" max="10" required>
-            </div>
-            <div class="form-group full-width">
-              <label for="recommendations">Recommendations:</label>
-              <textarea id="recommendations" v-model="formData.recommendations" rows="4" placeholder="Enter recommendations or additional notes"></textarea>
-            </div>
           </div>
         </div>
 
         <!-- Signatures Section -->
         <div class="form-section">
           <h2 class="section-title">Signatures</h2>
-          <div class="signatures-grid">
+          <div class="signatures-layout">
             <div class="signature-item">
-              <label>Inspected By:</label>
-              <div class="signature-area">
-                <input type="text" v-model="formData.inspectedBy" placeholder="Inspector Name" required>
-                <input type="date" v-model="formData.inspectionSignatureDate" required>
-              </div>
+              <label>Prepared By:</label>
+              <div class="signature-line"></div>
             </div>
             <div class="signature-item">
-              <label>Reviewed By:</label>
-              <div class="signature-area">
-                <input type="text" v-model="formData.reviewedBy" placeholder="Reviewer Name" required>
-                <input type="date" v-model="formData.reviewSignatureDate" required>
-              </div>
+              <label>Verified By:</label>
+              <div class="signature-line"></div>
             </div>
             <div class="signature-item">
               <label>Approved By:</label>
-              <div class="signature-area">
-                <input type="text" v-model="formData.approvedBy" placeholder="Approver Name" required>
-                <input type="date" v-model="formData.approvalSignatureDate" required>
-              </div>
+              <div class="signature-line"></div>
             </div>
           </div>
         </div>
@@ -399,60 +316,51 @@ export default {
       currentDate: new Date().toISOString().split('T')[0],
       formData: {
         projectName: '',
-        projectNumber: '',
-        projectDate: '',
+        reportRefNo: '',
+        memoRefNo: '',
         lruName: '',
-        lruPartNumber: '',
-        serialNumber: '',
-        version: '',
-        revision: '',
         inspectionStage: '',
-        inspectionDate: '',
-        inspectionVenue: '',
-        referenceDocument: '',
-        pcbType: '',
-        pcbThickness: '',
-        copperWeight: '',
-        surfaceFinish: '',
-        pcbLength: '',
-        pcbWidth: '',
-        boardColor: '',
-        criteria: {
-          visualInspection: false,
-          dimensionalCheck: false,
-          electricalTest: false,
-          solderabilityTest: false,
-          cleanlinessCheck: false,
-          markingCheck: false
-        },
-        inspectionItems: [
-          { item: '', specification: '', actualValue: '', status: '', remarks: '' }
+        testVenue: '',
+        dpName: '',
+        dated1: '',
+        dated2: '',
+        sruName: '',
+        partNo: '',
+        quantity: '',
+        slNos: '',
+        startDate: '',
+        endDate: '',
+        visualInspection: [
+          { parameter: 'CHECK FOR BONDING PROBLEM (DELAMINATION)', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR SOLDER MASK OPENINGS', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR BUBBLES ON PCB', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR ANY DAMAGE TO THE PCB', observation: '', remarks: '' },
+          { parameter: 'ALL THROUGH HOLES SHOULD BE CLEAR', observation: '', remarks: '' },
+          { parameter: 'ALL VIAS TO BE MASKED', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR SILK SCREEN (LEGEND) PRINTING', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR TRACKS NEAR MOUNTING HOLES', observation: '', remarks: '' },
+          { parameter: 'CHECK FOR PCB WARPAGE', observation: '', remarks: '' }
         ],
-        defects: [
-          { type: '', description: '', severity: '', location: '', action: '' }
+        continuityCheck: [
+          { parameter: 'CHECK FOR VCC TO GROUND CONTINUITY', observation: '', remarks: '' }
         ],
-        overallStatus: '',
-        qualityRating: '',
-        recommendations: '',
-        inspectedBy: '',
-        inspectionSignatureDate: '',
-        reviewedBy: '',
-        reviewSignatureDate: '',
-        approvedBy: '',
-        approvalSignatureDate: ''
+        fabricatorReport: {
+          observation: '',
+          remarks: ''
+        }
       }
     };
   },
   computed: {
     isFormValid() {
       return this.formData.projectName &&
-             this.formData.projectNumber &&
+             this.formData.reportRefNo &&
+             this.formData.memoRefNo &&
              this.formData.lruName &&
-             this.formData.inspectionStage &&
-             this.formData.overallStatus &&
-             this.formData.inspectedBy &&
-             this.formData.reviewedBy &&
-             this.formData.approvedBy;
+             this.formData.dpName &&
+             this.formData.sruName &&
+             this.formData.partNo;
     }
   },
   mounted() {
@@ -466,23 +374,13 @@ export default {
     this.formData.inspectionDate = this.currentDate;
   },
   methods: {
-    addInspectionItem() {
-      this.formData.inspectionItems.push({
-        item: '',
-        specification: '',
-        actualValue: '',
-        status: '',
-        remarks: ''
-      });
-    },
-    addDefect() {
-      this.formData.defects.push({
-        type: '',
-        description: '',
-        severity: '',
-        location: '',
-        action: ''
-      });
+    handleFileUpload(event, section, index) {
+      const file = event.target.files[0];
+      if (file) {
+        console.log(`File uploaded for ${section} section, item ${index}:`, file.name);
+        // Here you would typically upload the file to your backend
+        // For now, we'll just log it
+      }
     },
     saveDraft() {
       console.log('Saving draft:', this.formData);
@@ -493,46 +391,38 @@ export default {
         this.formData = {
           projectName: this.projectName,
           lruName: this.lruName,
-          projectNumber: '',
-          projectDate: '',
-          lruPartNumber: '',
-          serialNumber: '',
-          version: '',
-          revision: '',
+          reportRefNo: '',
+          memoRefNo: '',
           inspectionStage: '',
-          inspectionDate: this.currentDate,
-          inspectionVenue: '',
-          referenceDocument: '',
-          pcbType: '',
-          pcbThickness: '',
-          copperWeight: '',
-          surfaceFinish: '',
-          pcbLength: '',
-          pcbWidth: '',
-          boardColor: '',
-          criteria: {
-            visualInspection: false,
-            dimensionalCheck: false,
-            electricalTest: false,
-            solderabilityTest: false,
-            cleanlinessCheck: false,
-            markingCheck: false
-          },
-          inspectionItems: [
-            { item: '', specification: '', actualValue: '', status: '', remarks: '' }
+          testVenue: '',
+          dpName: '',
+          dated1: '',
+          dated2: '',
+          sruName: this.lruName,
+          partNo: '',
+          quantity: '',
+          slNos: '',
+          startDate: this.currentDate,
+          endDate: '',
+          visualInspection: [
+            { parameter: 'CHECK FOR BONDING PROBLEM (DELAMINATION)', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR SOLDER MASK OPENINGS', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR BUBBLES ON PCB', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR ANY DAMAGE TO THE PCB', observation: '', remarks: '' },
+            { parameter: 'ALL THROUGH HOLES SHOULD BE CLEAR', observation: '', remarks: '' },
+            { parameter: 'ALL VIAS TO BE MASKED', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR SILK SCREEN (LEGEND) PRINTING', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR TRACKS NEAR MOUNTING HOLES', observation: '', remarks: '' },
+            { parameter: 'CHECK FOR PCB WARPAGE', observation: '', remarks: '' }
           ],
-          defects: [
-            { type: '', description: '', severity: '', location: '', action: '' }
+          continuityCheck: [
+            { parameter: 'CHECK FOR VCC TO GROUND CONTINUITY', observation: '', remarks: '' }
           ],
-          overallStatus: '',
-          qualityRating: '',
-          recommendations: '',
-          inspectedBy: '',
-          inspectionSignatureDate: '',
-          reviewedBy: '',
-          reviewSignatureDate: '',
-          approvedBy: '',
-          approvalSignatureDate: ''
+          fabricatorReport: {
+            observation: '',
+            remarks: ''
+          }
         };
       }
     },
@@ -846,6 +736,19 @@ export default {
   gap: 20px;
 }
 
+/* General Info Grid */
+.general-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -928,54 +831,69 @@ export default {
   accent-color: #4a5568;
 }
 
-/* Tables */
-.results-table,
-.defects-table {
+/* Inspection Table */
+.inspection-table-container {
   margin-top: 20px;
+  overflow-x: auto;
 }
 
-.results-table table,
-.defects-table table {
+.inspection-table {
   width: 100%;
   border-collapse: collapse;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.results-table th,
-.defects-table th {
-  background: #2d3748;
-  color: white;
-  padding: 15px 10px;
-  text-align: left;
-  font-weight: 600;
   font-size: 0.9em;
 }
 
-.results-table td,
-.defects-table td {
-  padding: 10px;
+.inspection-table th {
+  background: #2d3748;
+  color: white;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.inspection-table td {
+  padding: 8px;
   border-bottom: 1px solid #e2e8f0;
   vertical-align: top;
 }
 
-.results-table tr:nth-child(even),
-.defects-table tr:nth-child(even) {
+.inspection-table tr:nth-child(even) {
   background-color: #f8fafc;
 }
 
-.results-table input,
-.results-table select,
-.results-table textarea,
-.defects-table input,
-.defects-table select,
-.defects-table textarea {
+.section-header {
+  background-color: #f0f4f8 !important;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.section-header td {
+  padding: 12px 8px;
+  border-bottom: 2px solid #2d3748;
+}
+
+.description-cell {
+  font-size: 0.8em;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.inspection-table input[type="text"],
+.inspection-table select {
   width: 100%;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 0.85em;
+}
+
+.inspection-table input[type="file"] {
+  font-size: 0.8em;
+  padding: 4px;
 }
 
 .add-item-btn {
@@ -1003,39 +921,35 @@ export default {
 }
 
 /* Signatures */
-.signatures-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 30px;
+.signatures-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 30px;
+  padding: 20px 0;
 }
 
 .signature-item {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 200px;
 }
 
 .signature-item label {
   font-weight: 600;
   color: #4a5568;
-  font-size: 1.1em;
+  font-size: 1em;
+  margin-bottom: 5px;
 }
 
-.signature-area {
-  border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  padding: 20px;
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.signature-area input {
-  padding: 10px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 0.9em;
+.signature-line {
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px solid #333;
+  margin-top: 10px;
 }
 
 /* Form Actions */
@@ -1117,8 +1031,19 @@ export default {
     grid-template-columns: 1fr;
   }
   
-  .assessment-grid {
+  .general-info-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .signatures-layout {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .signature-item {
+    max-width: 100%;
   }
   
   .form-actions {
@@ -1126,14 +1051,13 @@ export default {
     align-items: center;
   }
   
-  .results-table,
-  .defects-table {
+  .inspection-table-container {
     overflow-x: auto;
   }
   
-  .results-table table,
-  .defects-table table {
-    min-width: 600px;
+  .inspection-table {
+    min-width: 800px;
   }
 }
 </style>
+
