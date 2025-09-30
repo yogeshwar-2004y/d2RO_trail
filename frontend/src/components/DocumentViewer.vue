@@ -67,7 +67,8 @@
             <div class="restriction-icon">⚠️</div>
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
-              <p v-if="hasPendingCommentsInProject">There are unacknowledged comments on the latest document. Please acknowledge (accept or reject) all comments before uploading the next version.</p>
+              <p v-if="!isLatestDocument">You are viewing a previous version of the document. Upload is only available for the latest version.</p>
+              <p v-else-if="hasPendingCommentsInProject">There are unacknowledged comments on the latest document. Please acknowledge (accept or reject) all comments before uploading the next version.</p>
               <p v-else-if="allCommentsRejected">All comments have been rejected. You need to accept at least one comment to upload a revised document.</p>
               <p v-else-if="!hasCommentsOnCurrentDocument">The latest document is awaiting reviewer comments. Please wait for a reviewer to add comments before uploading the next version.</p>
               <p v-else>The latest document is awaiting review. Please wait for reviewer comments and acknowledge them before uploading the next version.</p>
@@ -854,11 +855,18 @@ export default {
       console.log('existingDocuments.length:', this.existingDocuments.length);
       console.log('current document comments (this.comments):', this.comments);
       console.log('current document comments length:', this.comments?.length || 0);
+      console.log('isLatestDocument:', this.isLatestDocument);
       
       // If no documents exist, allow upload
       if (this.existingDocuments.length === 0) {
         console.log('No documents exist, allowing upload');
         return true;
+      }
+      
+      // Only allow upload for the latest document version
+      if (!this.isLatestDocument) {
+        console.log('Not the latest document - upload disabled');
+        return false;
       }
       
       // Check if current document has any comments
