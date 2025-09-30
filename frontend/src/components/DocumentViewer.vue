@@ -67,8 +67,9 @@
             <div class="restriction-icon">⚠️</div>
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
-              <p v-if="hasPendingCommentsInProject">There are comments on the latest document that need to be accepted before uploading the next version. Rejected comments will keep upload disabled.</p>
-              <p v-else>The latest document is awaiting review. Please wait for reviewer comments and accept them before uploading the next version.</p>
+              <p v-if="hasPendingCommentsInProject">There are unacknowledged comments on the latest document. Please acknowledge (accept or reject) all comments before uploading the next version.</p>
+              <p v-else-if="allCommentsRejected">All comments have been rejected. You need to accept at least one comment to upload a revised document.</p>
+              <p v-else>The latest document is awaiting review. Please wait for reviewer comments and acknowledge them before uploading the next version.</p>
             </div>
           </div>
           
@@ -768,11 +769,20 @@ export default {
       };
     },
     
-    // Helper function to check if a comment is pending (not accepted)
+    // Helper function to check if a comment is pending (not acknowledged)
     isCommentPending() {
       return (comment) => {
         const status = comment.status?.toString().toLowerCase();
-        return !status || status === 'pending' || status === 'rejected' || status === 'none';
+        // Only consider comments pending if they haven't been acknowledged (accepted or rejected)
+        return !status || status === 'pending' || status === 'none';
+      };
+    },
+    
+    // Helper function to check if a comment is acknowledged (either accepted or rejected)
+    isCommentAcknowledged() {
+      return (comment) => {
+        const status = comment.status?.toString().toLowerCase();
+        return status === 'accepted' || status === 'rejected';
       };
     },
     isDesigner() {
@@ -841,9 +851,8 @@ export default {
     canUploadDocument() {
       console.log('=== canUploadDocument DEBUG ===');
       console.log('existingDocuments.length:', this.existingDocuments.length);
-      console.log('hasPendingCommentsInProject:', this.hasPendingCommentsInProject);
-      console.log('allComments.length:', this.allComments?.length || 0);
-      console.log('loadingAllComments:', this.loadingAllComments);
+      console.log('current document comments (this.comments):', this.comments);
+      console.log('current document comments length:', this.comments?.length || 0);
       
       // If no documents exist, allow upload
       if (this.existingDocuments.length === 0) {
@@ -851,12 +860,45 @@ export default {
         return true;
       }
       
-      // If documents exist, check if all comments are accepted across ALL documents in the project
-      // Allow upload only if there are no pending comments in any document
-      const canUpload = !this.hasPendingCommentsInProject;
-      console.log('Final canUpload result:', canUpload);
-      console.log('=== END canUploadDocument DEBUG ===');
-      return canUpload;
+      // Check comments for the current document only
+      if (this.comments && this.comments.length > 0) {
+        const pendingComments = this.comments.filter(comment => 
+          this.isCommentPending(comment)
+        );
+        
+        const acceptedComments = this.comments.filter(comment => 
+          this.isCommentAccepted(comment)
+        );
+        
+        const rejectedComments = this.comments.filter(comment => {
+          const status = comment.status?.toString().toLowerCase();
+          return status === 'rejected';
+        });
+        
+        console.log('Current document comment status breakdown:');
+        console.log(`- Accepted: ${acceptedComments.length}`);
+        console.log(`- Rejected: ${rejectedComments.length}`);
+        console.log(`- Pending: ${pendingComments.length}`);
+        
+        // If there are pending comments, disable upload
+        if (pendingComments.length > 0) {
+          console.log('There are pending comments - upload disabled');
+          return false;
+        }
+        
+        // If all comments are acknowledged, check if at least one is accepted
+        if (acceptedComments.length > 0) {
+          console.log('At least one comment is accepted - upload enabled');
+          return true;
+        } else {
+          console.log('All comments are rejected - upload disabled (need at least one accepted)');
+          return false;
+        }
+      }
+      
+      // If no comments exist, allow upload
+      console.log('No comments exist - upload enabled');
+      return true;
     },
     
     // Check if there are pending comments for the current document
@@ -865,6 +907,24 @@ export default {
       return this.comments.some(comment => 
         this.isCommentPending(comment)
       );
+    },
+    
+    // Check if all comments are rejected (no accepted comments)
+    allCommentsRejected() {
+      if (!this.comments || this.comments.length === 0) {
+        return false;
+      }
+      
+      const acknowledgedComments = this.comments.filter(comment => 
+        this.isCommentAcknowledged(comment)
+      );
+      
+      const acceptedComments = this.comments.filter(comment => 
+        this.isCommentAccepted(comment)
+      );
+      
+      // All comments are rejected if all acknowledged comments are rejected (no accepted ones)
+      return acknowledgedComments.length > 0 && acceptedComments.length === 0;
     },
     
     // Check if there are pending comments across ALL documents in the project
@@ -933,10 +993,16 @@ export default {
           });
         });
         
-        // If all comments across all documents are accepted, allow upload
+        // If all comments across all documents are acknowledged, check if at least one is accepted
         if (pendingComments.length === 0) {
-          console.log('All comments across all documents are accepted - allowing upload');
-          return false;
+          // Check if there's at least one accepted comment
+          if (acceptedComments.length > 0) {
+            console.log('All comments acknowledged and at least one is accepted - allowing upload');
+            return false;
+          } else {
+            console.log('All comments are rejected - upload disabled (need at least one accepted comment)');
+            return true;
+          }
         }
         
         console.log('hasPendingCommentsInProject result:', pendingComments.length > 0);

@@ -215,12 +215,16 @@ def create_comment():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Insert comment
+        # Prepare commented_by (string) - prefer explicit field, else use reviewer_id, else 'Anonymous'
+        commented_by_val = data.get('commented_by') or (str(data.get('reviewer_id')) if data.get('reviewer_id') else 'Anonymous')
+        print(f"Creating comment: document_id={data.get('document_id')} reviewer_id={data.get('reviewer_id')} commented_by={commented_by_val}")
+
+        # Insert comment (include commented_by to satisfy NOT NULL constraint)
         cur.execute("""
             INSERT INTO document_comments (
                 document_id, document_name, version, reviewer_id, 
-                page_no, section, description, is_annotation
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                page_no, section, description, is_annotation, commented_by
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING comment_id
         """, (
             data['document_id'],
@@ -230,7 +234,8 @@ def create_comment():
             data.get('page_no'),
             data.get('section'),
             data['description'],
-            data.get('is_annotation', False)
+            data.get('is_annotation', False),
+            commented_by_val
         ))
         
         comment_id = cur.fetchone()[0]
