@@ -91,6 +91,7 @@ import ObservationReport from '@/templates/ObservationReport.vue'
 import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
 import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
 import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
+import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
 
 export default {
   name: 'TemplateViewer',
@@ -98,7 +99,8 @@ export default {
     ObservationReport,
     BarePcbInspectionReport,
     Conformalcoatinginspectionreport,
-    RawMaterialInspectionReport
+    RawMaterialInspectionReport,
+    CotsScreeningInspectionReport
   },
   data() {
     return {
@@ -124,7 +126,8 @@ export default {
           'ObservationReport': ObservationReport,
           'BarePcbInspectionReport': BarePcbInspectionReport,
           'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport,
-          'RawMaterialInspectionReport': RawMaterialInspectionReport
+          'RawMaterialInspectionReport': RawMaterialInspectionReport,
+          'CotsScreeningInspectionReport': CotsScreeningInspectionReport
         };
         
         this.templateComponent = templateComponents[this.templateName] || null;
@@ -176,6 +179,15 @@ export default {
         // Navigate to raw material inspection report form
         this.$router.push({ 
           name: 'RawMaterialInspectionReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'CotsScreeningInspectionReport') {
+        // Navigate to COTS screening inspection report form
+        this.$router.push({ 
+          name: 'CotsScreeningInspectionReport',
           params: { 
             projectName: 'Default Project',
             lruName: 'Default LRU'
