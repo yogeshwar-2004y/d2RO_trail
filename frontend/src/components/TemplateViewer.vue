@@ -90,13 +90,15 @@
 import ObservationReport from '@/templates/ObservationReport.vue'
 import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
 import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
+import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
 
 export default {
   name: 'TemplateViewer',
   components: {
     ObservationReport,
     BarePcbInspectionReport,
-    Conformalcoatinginspectionreport
+    Conformalcoatinginspectionreport,
+    RawMaterialInspectionReport
   },
   data() {
     return {
@@ -121,7 +123,8 @@ export default {
         const templateComponents = {
           'ObservationReport': ObservationReport,
           'BarePcbInspectionReport': BarePcbInspectionReport,
-          'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport
+          'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport,
+          'RawMaterialInspectionReport': RawMaterialInspectionReport
         };
         
         this.templateComponent = templateComponents[this.templateName] || null;
@@ -164,6 +167,15 @@ export default {
         // Navigate to conformal coating inspection report form
         this.$router.push({ 
           name: 'Conformalcoatinginspectionreport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'RawMaterialInspectionReport') {
+        // Navigate to raw material inspection report form
+        this.$router.push({ 
+          name: 'RawMaterialInspectionReport',
           params: { 
             projectName: 'Default Project',
             lruName: 'Default LRU'
