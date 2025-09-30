@@ -38,6 +38,7 @@ import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
 import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
 import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
 import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
+import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -224,6 +225,12 @@ const router = createRouter({
         path: '/templates/cots-screening-inspection/:projectName?/:lruName?',
         name: 'CotsScreeningInspectionReport',
         component: CotsScreeningInspectionReport,
+        props: true,
+      },
+      {
+        path: '/templates/assembled-board-inspection/:projectName?/:lruName?',
+        name: 'AssembledBoardInspectionReport',
+        component: AssembledBoardInspectionReport,
         props: true,
       },
     ...reviewerRoutes,
