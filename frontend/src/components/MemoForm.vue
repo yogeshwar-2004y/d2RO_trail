@@ -3,22 +3,49 @@
     <!-- Header -->
     <div class="form-header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-     
-     
+
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
-       <button class="share-btn" @click="toggleShareBox">
-          <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
-          </svg>
-        </button>
-          <div class="logos-container">
-      <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      <button class="share-btn" @click="toggleShareBox">
+        <svg
+          class="icon share"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"
+          />
+        </svg>
+      </button>
+      <div class="logos-container">
+        <img
+          src="@/assets/images/aviatrax-logo.png"
+          alt="Aviatrax Logo"
+          class="logo"
+        />
+        <img
+          src="@/assets/images/vista_logo.png"
+          alt="Vista Logo"
+          class="logo vista-logo"
+        />
       </div>
     </div>
 
@@ -28,51 +55,50 @@
         <tr>
           <td class="form-cell">
             <label>From :</label>
-            <input 
-              type="text" 
-              v-model="formData.from1" 
+            <input
+              type="text"
+              v-model="formData.from1"
               placeholder="MED, CASDIC (DARE), Bangalore"
               :readonly="isNewMemo"
               :class="{ 'readonly-field': isNewMemo }"
-            >
-            
+            />
           </td>
           <td class="form-cell">
             <label>CASDIC Ref No.:</label>
           </td>
           <td class="form-cell">
             <label>CASDIC/</label>
-            <input type="text" v-model="formData.casdic" placeholder="">
+            <input type="text" v-model="formData.casdic" placeholder="" />
           </td>
           <td class="form-cell">
             <label>Dated:</label>
-            <input type="date" v-model="formData.casdicDate">
+            <input type="date" v-model="formData.casdicDate" />
           </td>
         </tr>
         <tr>
           <td class="form-cell">
             <label>To :</label>
-            <input 
-              type="text" 
-              v-model="formData.from2" 
+            <input
+              type="text"
+              v-model="formData.from2"
               placeholder="DGAQA cell,"
               :readonly="isNewMemo"
               :class="{ 'readonly-field': isNewMemo }"
-            >
-            <input 
-              type="text" 
-              v-model="formData.from3" 
+            />
+            <input
+              type="text"
+              v-model="formData.from3"
               placeholder="ORDAQA(ADE), Bangalore"
               :readonly="isNewMemo"
               :class="{ 'readonly-field': isNewMemo }"
-            >
+            />
           </td>
           <td class="form-cell">
             <label>Thru/: O I/c, WH</label>
           </td>
           <td class="form-cell">
             <label>Wing/Proj Ref No.:</label>
-            <input type="text" v-model="formData.wingRef" placeholder="">
+            <input type="text" v-model="formData.wingRef" placeholder="" />
           </td>
           <td class="form-cell"></td>
         </tr>
@@ -80,7 +106,7 @@
           <td class="form-cell"></td>
           <td class="form-cell wide-field" colspan="3">
             <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input type="text" v-model="formData.coordinator" placeholder="">
+            <input type="text" v-model="formData.coordinator" placeholder="" />
           </td>
         </tr>
       </table>
@@ -104,179 +130,263 @@
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Part No:</label>
-                <input type="text" v-model="formData.partNo" placeholder="">
+                <input type="text" v-model="formData.partNo" placeholder="" />
               </div>
               <div class="lru-field">
                 <label>Manufacturer:</label>
-                <input type="text" v-model="formData.manufacturer" placeholder="">
+                <input
+                  type="text"
+                  v-model="formData.manufacturer"
+                  placeholder=""
+                />
               </div>
             </td>
             <td class="desc-cell">
-              <select 
-                v-model="formData.description" 
+              <select
+                v-model="formData.description"
                 class="lru-description-select"
                 :disabled="lruLoading"
               >
                 <option value="">
-                  {{ lruLoading ? 'Loading LRUs...' : lruError ? 'Error loading LRUs' : 'Select LRU' }}
+                  {{
+                    lruLoading
+                      ? "Loading LRUs..."
+                      : lruError
+                      ? "Error loading LRUs"
+                      : "Select LRU"
+                  }}
                 </option>
-                <option v-for="lru in lruData" :key="lru.lru_id" :value="lru.lru_name">
+                <option
+                  v-for="lru in lruData"
+                  :key="lru.lru_id"
+                  :value="lru.lru_name"
+                >
                   {{ lru.lru_name }} ({{ lru.project_name }})
                 </option>
               </select>
               <div v-if="lruError" class="error-message">
                 <span>{{ lruError }}</span>
-                <button @click="fetchLruOptions" class="retry-btn">Retry</button>
+                <button @click="fetchLruOptions" class="retry-btn">
+                  Retry
+                </button>
               </div>
               <div v-if="lruData.length > 0 && lruError" class="info-message">
                 Using fallback data. Start the backend server for live data.
               </div>
             </td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc" placeholder="">
+              <input type="text" v-model="formData.refDoc" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo" placeholder="">
+              <input type="text" v-model="formData.refNo" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version" placeholder="">
+              <input type="text" v-model="formData.version" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision" placeholder="">
+              <input type="text" v-model="formData.revision" placeholder="" />
             </td>
           </tr>
-          
+
           <tr>
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Sl.No of units :</label>
                 <div class="serial-number-dropdown-container">
-                  <div 
+                  <div
                     class="serial-number-dropdown"
-                    :class="{ 'active': showSerialNumberDropdown }"
+                    :class="{ active: showSerialNumberDropdown }"
                     @click="toggleSerialNumberDropdown"
-                    :disabled="!selectedLruInfo || serialNumberLoading || availableSerialNumbers.length === 0"
+                    :disabled="
+                      !selectedLruInfo ||
+                      serialNumberLoading ||
+                      availableSerialNumbers.length === 0
+                    "
                   >
                     <div class="selected-value">
-                      <span v-if="!selectedLruInfo" class="placeholder-text">Select LRU first</span>
-                      <span v-else-if="serialNumberLoading" class="loading-text">Loading serial numbers...</span>
-                      <span v-else-if="serialNumberError" class="error-text">Error loading serial numbers</span>
-                      <span v-else-if="availableSerialNumbers.length === 0" class="no-data-text">No serial numbers available</span>
-                      <div v-else-if="formData.slNo && formData.slNo.length > 0" class="selected-serials">
-                        <span class="serial-list">{{ selectedSerialNumbersDisplay }}</span>
+                      <span v-if="!selectedLruInfo" class="placeholder-text"
+                        >Select LRU first</span
+                      >
+                      <span v-else-if="serialNumberLoading" class="loading-text"
+                        >Loading serial numbers...</span
+                      >
+                      <span v-else-if="serialNumberError" class="error-text"
+                        >Error loading serial numbers</span
+                      >
+                      <span
+                        v-else-if="availableSerialNumbers.length === 0"
+                        class="no-data-text"
+                        >No serial numbers available</span
+                      >
+                      <div
+                        v-else-if="formData.slNo && formData.slNo.length > 0"
+                        class="selected-serials"
+                      >
+                        <span class="serial-list">{{
+                          selectedSerialNumbersDisplay
+                        }}</span>
                       </div>
-                      <span v-else class="placeholder-text">Select Serial Numbers</span>
+                      <span v-else class="placeholder-text"
+                        >Select Serial Numbers</span
+                      >
                     </div>
                     <div class="dropdown-icon">▾</div>
                   </div>
-                  
+
                   <!-- Serial Number Checkbox Dropdown -->
                   <div
-                    v-if="showSerialNumberDropdown && availableSerialNumbers.length > 0"
+                    v-if="
+                      showSerialNumberDropdown &&
+                      availableSerialNumbers.length > 0
+                    "
                     class="serial-number-menu"
                   >
                     <div class="serial-menu-header">
                       <span class="menu-title">Select Serial Numbers</span>
-                      <button @click.stop="clearSerialNumbers" class="clear-btn">Clear All</button>
+                      <button
+                        @click.stop="clearSerialNumbers"
+                        class="clear-btn"
+                      >
+                        Clear All
+                      </button>
                     </div>
                     <div class="serial-menu-content">
                       <div
                         v-for="option in availableSerialNumbers"
                         :key="option.value"
                         class="serial-checkbox-item"
-                        :class="{ 'selected': isSerialNumberSelected(option.value) }"
+                        :class="{
+                          selected: isSerialNumberSelected(option.value),
+                        }"
                         @click="toggleSerialNumber(option.value)"
                       >
                         <div class="checkbox-wrapper">
-                          <input 
-                            type="checkbox" 
+                          <input
+                            type="checkbox"
                             :checked="isSerialNumberSelected(option.value)"
                             class="serial-checkbox"
                             @click.stop
+                          />
+                          <div
+                            class="checkbox-custom"
+                            :class="{
+                              checked: isSerialNumberSelected(option.value),
+                            }"
                           >
-                          <div class="checkbox-custom" :class="{ 'checked': isSerialNumberSelected(option.value) }">
-                            <svg v-if="isSerialNumberSelected(option.value)" class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg
+                              v-if="isSerialNumberSelected(option.value)"
+                              class="check-icon"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
                               <polyline points="20 6 9 17 4 12"></polyline>
                             </svg>
                           </div>
                         </div>
-                        <span class="serial-label">Serial {{ option.label }}</span>
-                        <div v-if="isSerialNumberSelected(option.value)" class="selected-indicator">✓</div>
+                        <span class="serial-label"
+                          >Serial {{ option.label }}</span
+                        >
+                        <div
+                          v-if="isSerialNumberSelected(option.value)"
+                          class="selected-indicator"
+                        >
+                          ✓
+                        </div>
                       </div>
                     </div>
                   </div>
-                  
+
                   <div v-if="serialNumberError" class="error-message">
                     <span>{{ serialNumberError }}</span>
-                    <button @click="fetchSerialNumbers(selectedLruInfo.lru_id)" class="retry-btn">Retry</button>
+                    <button
+                      @click="fetchSerialNumbers(selectedLruInfo.lru_id)"
+                      class="retry-btn"
+                    >
+                      Retry
+                    </button>
                   </div>
                 </div>
               </div>
               <div class="lru-field">
                 <label>Drawing no/Rev:</label>
-                <input type="text" v-model="formData.drawingNo" placeholder="">
+                <input
+                  type="text"
+                  v-model="formData.drawingNo"
+                  placeholder=""
+                />
               </div>
             </td>
             <td class="desc-cell"></td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc2" placeholder="">
+              <input type="text" v-model="formData.refDoc2" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo2" placeholder="">
+              <input type="text" v-model="formData.refNo2" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version2" placeholder="">
+              <input type="text" v-model="formData.version2" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision2" placeholder="">
+              <input type="text" v-model="formData.revision2" placeholder="" />
             </td>
           </tr>
-          
+
           <tr>
             <td class="lru-cell">
               <div class="lru-field">
                 <label>Qty Offered:</label>
-                <input 
-                  type="text" 
-                  :value="quantityOffered" 
-                  readonly 
+                <input
+                  type="text"
+                  :value="quantityOffered"
+                  readonly
                   class="readonly-field"
                   placeholder="Auto-calculated from selected serials"
-                >
+                />
               </div>
               <div class="lru-field">
                 <label>source :</label>
-                <span>NA</span>
+                <input
+                  type="text"
+                  v-model="formData.source"
+                  placeholder="NA"
+                  class="source-input"
+                />
               </div>
             </td>
             <td class="desc-cell"></td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc3" placeholder="">
+              <input type="text" v-model="formData.refDoc3" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo3" placeholder="">
+              <input type="text" v-model="formData.refNo3" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version3" placeholder="">
+              <input type="text" v-model="formData.version3" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision3" placeholder="">
+              <input type="text" v-model="formData.revision3" placeholder="" />
             </td>
           </tr>
-          
+
           <tr>
             <td class="lru-cell">
-               <div class="lru-field unit-identification-container">
-                 <label>UNIT IDENTIFICATION :</label>
-                 <div class="dropdown-wrapper">
-                   <div 
-                     class="test-dropdown" 
-                     :class="{ 'active': showTestsDropdown }"
-                     @click="toggleTestsDropdown"
-                   >
-                     <div class="selected-value">{{ selectedTestName || 'Select Test' }}</div>
-                     <div class="dropdown-icon">▾</div>
-                   </div>
+              <div class="lru-field unit-identification-container">
+                <label>UNIT IDENTIFICATION :</label>
+                <div class="dropdown-wrapper">
+                  <div
+                    class="test-dropdown"
+                    :class="{ active: showTestsDropdown }"
+                    @click="toggleTestsDropdown"
+                  >
+                    <div class="selected-value">
+                      {{ selectedTestName || "Select Test" }}
+                    </div>
+                    <div class="dropdown-icon">▾</div>
+                  </div>
                   <!-- Main Tests Dropdown -->
                   <div
                     v-if="showTestsDropdown"
@@ -292,22 +402,35 @@
                         v-for="(t, index) in tests"
                         :key="t.test_id"
                         class="menu-item"
-                        :class="{ 
-                          'has-submenu': testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0,
-                          'active': hoveredTestId === t.test_id
+                        :class="{
+                          'has-submenu':
+                            testIdToStages[t.test_id] &&
+                            testIdToStages[t.test_id].length > 0,
+                          active: hoveredTestId === t.test_id,
                         }"
                         @mouseenter="handleTestHover(t.test_id, index)"
                         @click.stop="selectTest(t)"
                       >
                         <span class="menu-text">{{ t.test_name }}</span>
-                        <span v-if="testIdToStages[t.test_id] && testIdToStages[t.test_id].length > 0" class="menu-arrow">❯</span>
+                        <span
+                          v-if="
+                            testIdToStages[t.test_id] &&
+                            testIdToStages[t.test_id].length > 0
+                          "
+                          class="menu-arrow"
+                          >❯</span
+                        >
                       </div>
                     </div>
                   </div>
-                  
+
                   <!-- Separate Stages Submenu -->
                   <div
-                    v-if="showTestsDropdown && hoveredTestId && allHoveredTypes.length > 0"
+                    v-if="
+                      showTestsDropdown &&
+                      hoveredTestId &&
+                      allHoveredTypes.length > 0
+                    "
                     class="stages-submenu"
                     :style="{ '--submenu-offset': submenuOffset + 'px' }"
                     @mouseenter="keepSubmenuOpen = true"
@@ -315,7 +438,11 @@
                   >
                     <div class="submenu-header">
                       <span class="submenu-title">Test Types</span>
-                      <span v-if="!allHoveredTypes.length && hoveredTestId" class="loading-indicator">Loading types...</span>
+                      <span
+                        v-if="!allHoveredTypes.length && hoveredTestId"
+                        class="loading-indicator"
+                        >Loading types...</span
+                      >
                     </div>
                     <div class="submenu-item-container">
                       <div
@@ -325,12 +452,16 @@
                         @click.stop="selectType(type)"
                       >
                         <span class="submenu-text">{{ type.type_name }}</span>
-                        <span v-if="type.type_name === formData.mechanicalInsp" class="check-icon">✓</span>
+                        <span
+                          v-if="type.type_name === formData.mechanicalInsp"
+                          class="check-icon"
+                          >✓</span
+                        >
                       </div>
                     </div>
                   </div>
-                 </div>
-               </div>
+                </div>
+              </div>
               <div class="lru-field">
                 <label>MECHANICAL INSPN :</label>
                 <select v-model="formData.mechanicalInsp" class="lru-select">
@@ -345,63 +476,75 @@
             </td>
             <td class="desc-cell"></td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc4" placeholder="">
+              <input type="text" v-model="formData.refDoc4" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo4" placeholder="">
+              <input type="text" v-model="formData.refNo4" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version4" placeholder="">
+              <input type="text" v-model="formData.version4" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision4" placeholder="">
+              <input type="text" v-model="formData.revision4" placeholder="" />
             </td>
           </tr>
-          
+
           <tr>
             <td class="lru-cell">
               <div class="lru-field">
                 <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
-                <input type="text" v-model="formData.inspectionStage" placeholder="">
+                <input
+                  type="text"
+                  v-model="formData.inspectionStage"
+                  placeholder=""
+                />
               </div>
             </td>
             <td class="desc-cell">
               <div class="lru-field">
                 <label>STTE Status:</label>
-                <input type="text" v-model="formData.stteStatus" placeholder="">
+                <input
+                  type="text"
+                  v-model="formData.stteStatus"
+                  placeholder=""
+                />
               </div>
             </td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc5" placeholder="">
+              <input type="text" v-model="formData.refDoc5" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo5" placeholder="">
+              <input type="text" v-model="formData.refNo5" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version5" placeholder="">
+              <input type="text" v-model="formData.version5" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision5" placeholder="">
+              <input type="text" v-model="formData.revision5" placeholder="" />
             </td>
           </tr>
-          
+
           <tr>
             <td class="lru-cell">
               <label>TEST STAGE CLEARED:</label>
-              <input type="text" v-model="formData.testStageCleared" placeholder="">
+              <input
+                type="text"
+                v-model="formData.testStageCleared"
+                placeholder=""
+              />
             </td>
             <td class="desc-cell"></td>
             <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc6" placeholder="">
+              <input type="text" v-model="formData.refDoc6" placeholder="" />
             </td>
             <td class="refno-cell">
-              <input type="text" v-model="formData.refNo6" placeholder="">
+              <input type="text" v-model="formData.refNo6" placeholder="" />
             </td>
             <td class="ver-cell">
-              <input type="text" v-model="formData.version6" placeholder="">
+              <input type="text" v-model="formData.version6" placeholder="" />
             </td>
             <td class="rev-cell">
-              <input type="text" v-model="formData.revision6" placeholder="">
+              <input type="text" v-model="formData.revision6" placeholder="" />
             </td>
           </tr>
         </tbody>
@@ -415,7 +558,7 @@
           <td class="test-left">
             <div class="test-field">
               <label>Above Unit is ready for Testing at</label>
-              <input type="text" v-model="formData.testVenue" placeholder="">
+              <input type="text" v-model="formData.testVenue" placeholder="" />
               <span>onwards.</span>
             </div>
             <div class="test-field">
@@ -424,7 +567,11 @@
             </div>
             <div class="test-field">
               <label>NAME / DESIGNATION</label>
-              <input type="text" v-model="formData.signatureName" placeholder="">
+              <input
+                type="text"
+                v-model="formData.signatureName"
+                placeholder=""
+              />
             </div>
             <div class="test-field">
               <span>It is certified that :</span>
@@ -433,26 +580,45 @@
           <td class="test-middle">
             <div class="test-field">
               <label>i. Test facility to be used :</label>
-              <input type="text" v-model="formData.testFacility" placeholder="">
+              <input
+                type="text"
+                v-model="formData.testFacility"
+                placeholder=""
+              />
             </div>
             <div class="test-field">
               <label>ii. Test cycle / Duration:</label>
-              <input type="text" v-model="formData.testCycle" placeholder="">
+              <input type="text" v-model="formData.testCycle" placeholder="" />
               <span>hrs</span>
             </div>
             <div class="test-field">
               <label>iii. Test start on:</label>
               <div class="datetime-container">
-                <input type="date" v-model="formData.testStartDate" class="date-input">
+                <input
+                  type="date"
+                  v-model="formData.testStartDate"
+                  class="date-input"
+                />
                 <div class="time-picker">
                   <select v-model="formData.testStartHour" class="time-select">
                     <option value="">HH</option>
-                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">
+                      {{ hour }}
+                    </option>
                   </select>
                   <span class="time-separator">:</span>
-                  <select v-model="formData.testStartMinute" class="time-select">
+                  <select
+                    v-model="formData.testStartMinute"
+                    class="time-select"
+                  >
                     <option value="">MM</option>
-                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                    <option
+                      v-for="minute in minutes"
+                      :key="minute"
+                      :value="minute"
+                    >
+                      {{ minute }}
+                    </option>
                   </select>
                   <select v-model="formData.testStartAmPm" class="ampm-select">
                     <option value="">AM/PM</option>
@@ -465,18 +631,39 @@
             <div class="test-field">
               <label>iv. Test complete on :</label>
               <div class="datetime-container">
-                <input type="date" v-model="formData.testCompleteDate" class="date-input">
+                <input
+                  type="date"
+                  v-model="formData.testCompleteDate"
+                  class="date-input"
+                />
                 <div class="time-picker">
-                  <select v-model="formData.testCompleteHour" class="time-select">
+                  <select
+                    v-model="formData.testCompleteHour"
+                    class="time-select"
+                  >
                     <option value="">HH</option>
-                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">
+                      {{ hour }}
+                    </option>
                   </select>
                   <span class="time-separator">:</span>
-                  <select v-model="formData.testCompleteMinute" class="time-select">
+                  <select
+                    v-model="formData.testCompleteMinute"
+                    class="time-select"
+                  >
                     <option value="">MM</option>
-                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                    <option
+                      v-for="minute in minutes"
+                      :key="minute"
+                      :value="minute"
+                    >
+                      {{ minute }}
+                    </option>
                   </select>
-                  <select v-model="formData.testCompleteAmPm" class="ampm-select">
+                  <select
+                    v-model="formData.testCompleteAmPm"
+                    class="ampm-select"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -488,23 +675,48 @@
           <td class="test-right">
             <div class="test-field">
               <label>v. Calibration status: OK / Due on</label>
-              <input type="text" v-model="formData.calibrationStatus" placeholder="">
+              <input
+                type="text"
+                v-model="formData.calibrationStatus"
+                placeholder=""
+              />
             </div>
             <div class="test-field">
               <label>vi. Func. Check (Initial):</label>
               <div class="datetime-container">
-                <input type="date" v-model="formData.funcCheckInitialDate" class="date-input">
+                <input
+                  type="date"
+                  v-model="formData.funcCheckInitialDate"
+                  class="date-input"
+                />
                 <div class="time-picker">
-                  <select v-model="formData.funcCheckInitialHour" class="time-select">
+                  <select
+                    v-model="formData.funcCheckInitialHour"
+                    class="time-select"
+                  >
                     <option value="">HH</option>
-                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">
+                      {{ hour }}
+                    </option>
                   </select>
                   <span class="time-separator">:</span>
-                  <select v-model="formData.funcCheckInitialMinute" class="time-select">
+                  <select
+                    v-model="formData.funcCheckInitialMinute"
+                    class="time-select"
+                  >
                     <option value="">MM</option>
-                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                    <option
+                      v-for="minute in minutes"
+                      :key="minute"
+                      :value="minute"
+                    >
+                      {{ minute }}
+                    </option>
                   </select>
-                  <select v-model="formData.funcCheckInitialAmPm" class="ampm-select">
+                  <select
+                    v-model="formData.funcCheckInitialAmPm"
+                    class="ampm-select"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -515,18 +727,39 @@
             <div class="test-field">
               <label>vii. Perf.check (during):</label>
               <div class="datetime-container">
-                <input type="date" v-model="formData.perfCheckDuringDate" class="date-input">
+                <input
+                  type="date"
+                  v-model="formData.perfCheckDuringDate"
+                  class="date-input"
+                />
                 <div class="time-picker">
-                  <select v-model="formData.perfCheckDuringHour" class="time-select">
+                  <select
+                    v-model="formData.perfCheckDuringHour"
+                    class="time-select"
+                  >
                     <option value="">HH</option>
-                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">
+                      {{ hour }}
+                    </option>
                   </select>
                   <span class="time-separator">:</span>
-                  <select v-model="formData.perfCheckDuringMinute" class="time-select">
+                  <select
+                    v-model="formData.perfCheckDuringMinute"
+                    class="time-select"
+                  >
                     <option value="">MM</option>
-                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                    <option
+                      v-for="minute in minutes"
+                      :key="minute"
+                      :value="minute"
+                    >
+                      {{ minute }}
+                    </option>
                   </select>
-                  <select v-model="formData.perfCheckDuringAmPm" class="ampm-select">
+                  <select
+                    v-model="formData.perfCheckDuringAmPm"
+                    class="ampm-select"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -537,18 +770,39 @@
             <div class="test-field">
               <label>viii. Func Check (end):</label>
               <div class="datetime-container">
-                <input type="date" v-model="formData.funcCheckEndDate" class="date-input">
+                <input
+                  type="date"
+                  v-model="formData.funcCheckEndDate"
+                  class="date-input"
+                />
                 <div class="time-picker">
-                  <select v-model="formData.funcCheckEndHour" class="time-select">
+                  <select
+                    v-model="formData.funcCheckEndHour"
+                    class="time-select"
+                  >
                     <option value="">HH</option>
-                    <option v-for="hour in hours" :key="hour" :value="hour">{{ hour }}</option>
+                    <option v-for="hour in hours" :key="hour" :value="hour">
+                      {{ hour }}
+                    </option>
                   </select>
                   <span class="time-separator">:</span>
-                  <select v-model="formData.funcCheckEndMinute" class="time-select">
+                  <select
+                    v-model="formData.funcCheckEndMinute"
+                    class="time-select"
+                  >
                     <option value="">MM</option>
-                    <option v-for="minute in minutes" :key="minute" :value="minute">{{ minute }}</option>
+                    <option
+                      v-for="minute in minutes"
+                      :key="minute"
+                      :value="minute"
+                    >
+                      {{ minute }}
+                    </option>
                   </select>
-                  <select v-model="formData.funcCheckEndAmPm" class="ampm-select">
+                  <select
+                    v-model="formData.funcCheckEndAmPm"
+                    class="ampm-select"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -568,50 +822,112 @@
       </div>
       <div class="certification-list">
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationA" class="cert-checkbox" id="certA">
+          <input
+            type="checkbox"
+            v-model="formData.certificationA"
+            class="cert-checkbox"
+            id="certA"
+          />
           <span class="cert-letter">a)</span>
-          <span class="cert-text">Mechanical Quality Records of all the parts ( Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc. ) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports / test reports, etc.) were verified thoroughly .</span>
+          <span class="cert-text"
+            >Mechanical Quality Records of all the parts ( Raw material TC
+            (chemical & mechanical), Dimensional reports, NDT reports, Process
+            certificates etc. ) & Electrical Quality Records (Components
+            Screening report, PCB manufacturing report, process compliance
+            reports / test reports, etc.) were verified thoroughly .</span
+          >
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationB" class="cert-checkbox" id="certB">
+          <input
+            type="checkbox"
+            v-model="formData.certificationB"
+            class="cert-checkbox"
+            id="certB"
+          />
           <span class="cert-letter">b)</span>
-          <span class="cert-text">CoC for SRU, fasteners & standard parts are verified and satisfactory</span>
+          <span class="cert-text"
+            >CoC for SRU, fasteners & standard parts are verified and
+            satisfactory</span
+          >
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationC" class="cert-checkbox" id="certC">
+          <input
+            type="checkbox"
+            v-model="formData.certificationC"
+            class="cert-checkbox"
+            id="certC"
+          />
           <span class="cert-letter">c)</span>
-          <span class="cert-text">Sl no of the SRUs are noted down in the respective log book opened on <input type="text" v-model="formData.logBookDate" placeholder="" class="inline-input"></span>
+          <span class="cert-text"
+            >Sl no of the SRUs are noted down in the respective log book opened
+            on
+            <input
+              type="text"
+              v-model="formData.logBookDate"
+              placeholder=""
+              class="inline-input"
+          /></span>
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationD" class="cert-checkbox" id="certD">
+          <input
+            type="checkbox"
+            v-model="formData.certificationD"
+            class="cert-checkbox"
+            id="certD"
+          />
           <span class="cert-letter">d)</span>
-          <span class="cert-text">No Defect investigation is pending against this LRU</span>
+          <span class="cert-text"
+            >No Defect investigation is pending against this LRU</span
+          >
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationE" class="cert-checkbox" id="certE">
+          <input
+            type="checkbox"
+            v-model="formData.certificationE"
+            class="cert-checkbox"
+            id="certE"
+          />
           <span class="cert-letter">e)</span>
-          <span class="cert-text">All the previous test stages of this LRU /SRU are cleared</span>
+          <span class="cert-text"
+            >All the previous test stages of this LRU /SRU are cleared</span
+          >
         </div>
         <div class="cert-item">
-          <input type="checkbox" v-model="formData.certificationF" class="cert-checkbox" id="certF">
+          <input
+            type="checkbox"
+            v-model="formData.certificationF"
+            class="cert-checkbox"
+            id="certF"
+          />
           <span class="cert-letter">f)</span>
-          <span class="cert-text">CASDIC QA has physically inspected and accepted the LRU on <input type="text" v-model="formData.qaInspectionDate" placeholder="" class="inline-input"></span>
+          <span class="cert-text"
+            >CASDIC QA has physically inspected and accepted the LRU on
+            <input
+              type="text"
+              v-model="formData.qaInspectionDate"
+              placeholder=""
+              class="inline-input"
+          /></span>
         </div>
       </div>
-      
+
       <!-- IQA CASDIC Signature moved above action taken section -->
       <div class="iqa-signature-section">
         <div class="signature-box-large"></div>
         <p>SIGNATURE of Rep, IQA CASDIC</p>
       </div>
-      
+
       <div class="action-taken-section">
         <span class="action-taken-text">Action taken & remarks by DGAQA</span>
         <div class="dgaqa-remarks-box">
-          <textarea v-model="formData.dgaqaRemarks" placeholder="Enter DGAQA action taken and remarks..." class="dgaqa-textarea"></textarea>
+          <textarea
+            v-model="formData.dgaqaRemarks"
+            placeholder="Enter DGAQA action taken and remarks..."
+            class="dgaqa-textarea"
+          ></textarea>
         </div>
       </div>
-      
+
       <!-- DGAQA Signature moved to the end -->
       <div class="dgaqa-signature-section">
         <p class="instruction">(please use space overleaf for details)</p>
@@ -620,58 +936,48 @@
       </div>
     </div>
 
-
-    <div 
-      class="form-section test-status" 
-      v-if="currentUserRole === 3"
-    >
+    <div class="form-section test-status" v-if="currentUserRole === 3">
       <h3>TEST STATUS</h3>
       <div class="status-options">
         <label>
-          <input 
-            type="radio" 
-            v-model="formData.testStatus" 
+          <input
+            type="radio"
+            v-model="formData.testStatus"
             value="successful"
           />
           Successfully completed
         </label>
         <label>
-          <input 
-            type="radio" 
-            v-model="formData.testStatus" 
+          <input
+            type="radio"
+            v-model="formData.testStatus"
             value="withObservations"
           />
           Completed with observations
         </label>
         <label>
-          <input 
-            type="radio" 
-            v-model="formData.testStatus" 
+          <input
+            type="radio"
+            v-model="formData.testStatus"
             value="notConducted"
           />
           Test not conducted
         </label>
         <label>
-          <input 
-            type="radio" 
-            v-model="formData.testStatus" 
-            value="failed"
-          />
-          Test failed. 
-          Test failed. 
+          <input type="radio" v-model="formData.testStatus" value="failed" />
+          Test failed. Test failed.
         </label>
       </div>
     </div>
 
-
     <!-- ✅ New Section: Remarks by QA Reviewer -->
-    <div 
-      class="form-section reviewer-remarks" 
-      v-if="currentUserRole === 3"
-    >
+    <div class="form-section reviewer-remarks" v-if="currentUserRole === 3">
       <h3>Remarks by QA Reviewer</h3>
       <div class="remarks-container">
-        <textarea v-model="formData.qaReviewerRemarks" placeholder="Enter reviewer comments..."></textarea>
+        <textarea
+          v-model="formData.qaReviewerRemarks"
+          placeholder="Enter reviewer comments..."
+        ></textarea>
         <div class="signature-box-large"></div>
         <p>SIGNATURE OF QA REVIEWER</p>
       </div>
@@ -679,28 +985,66 @@
 
     <div
       class="action-buttons"
-      v-if="memoData.status === 'Not Assigned' 
-            && !showTestReviewSection 
-            && !showRejectionSection 
-            && canApproveMemo"
+      v-if="
+        memoData.status === 'Not Assigned' &&
+        !showTestReviewSection &&
+        !showRejectionSection &&
+        canApproveMemo
+      "
     >
-      <button class="btn btn-accept" @click="showAcceptOverlay = true">ACCEPT</button>
-      <button class="btn btn-reject" @click="showRejectOverlay = true">REJECT</button>
+      <button class="btn btn-accept" @click="showAcceptOverlay = true">
+        ACCEPT
+      </button>
+      <button class="btn btn-reject" @click="showRejectOverlay = true">
+        REJECT
+      </button>
     </div>
 
     <!-- Status Display (shown after Accept/Reject) -->
-    <div v-if="showTestReviewSection || showRejectionSection" class="status-display">
-      <div class="status-badge" :class="showTestReviewSection ? 'accepted' : 'rejected'">
-        <svg v-if="showTestReviewSection" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div
+      v-if="showTestReviewSection || showRejectionSection"
+      class="status-display"
+    >
+      <div
+        class="status-badge"
+        :class="showTestReviewSection ? 'accepted' : 'rejected'"
+      >
+        <svg
+          v-if="showTestReviewSection"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <span>{{ showTestReviewSection ? 'MEMO ACCEPTED' : 'MEMO REJECTED' }}</span>
+        <span>{{
+          showTestReviewSection ? "MEMO ACCEPTED" : "MEMO REJECTED"
+        }}</span>
       </div>
-      <p class="status-date">Processed on: {{ new Date().toLocaleDateString() }}</p>
+      <p class="status-date">
+        Processed on: {{ new Date().toLocaleDateString() }}
+      </p>
     </div>
 
     <!-- Accept Overlay - Test or Review Details -->
@@ -709,50 +1053,77 @@
         <div class="overlay-header">
           <h2>TEST OR REVIEW DETAILS</h2>
           <button class="close-button" @click="closeAcceptOverlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
+
         <div class="overlay-body">
           <div class="form-row">
             <div class="form-field">
               <label>DATE OF TEST OR REVIEW</label>
-              <input type="date" v-model="acceptFormData.testDate">
+              <input type="date" v-model="acceptFormData.testDate" />
             </div>
             <div class="form-field">
               <label>INTERNAL TESTER EMP ID</label>
-              <input type="text" v-model="acceptFormData.testerId" placeholder="Enter tester ID">
+              <input
+                type="text"
+                v-model="acceptFormData.testerId"
+                placeholder="Enter tester ID"
+              />
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-field">
               <label>INTERNAL TESTER NAME</label>
-              <input type="text" v-model="acceptFormData.testerName" placeholder="Enter tester name">
+              <input
+                type="text"
+                v-model="acceptFormData.testerName"
+                placeholder="Enter tester name"
+              />
             </div>
             <div class="form-field">
               <label>COMMENTS</label>
-              <textarea v-model="acceptFormData.comments" placeholder="Enter comments"></textarea>
+              <textarea
+                v-model="acceptFormData.comments"
+                placeholder="Enter comments"
+              ></textarea>
             </div>
           </div>
-          
+
           <div class="form-row">
             <div class="form-field">
               <label>AUTHENTICATION</label>
-              <input type="text" v-model="acceptFormData.authentication" placeholder="Enter authentication">
+              <input
+                type="text"
+                v-model="acceptFormData.authentication"
+                placeholder="Enter authentication"
+              />
             </div>
             <div class="form-field">
               <label>ATTACHMENTS</label>
-              <input type="file" @change="handleAttachmentUpload" multiple>
+              <input type="file" @change="handleAttachmentUpload" multiple />
             </div>
           </div>
         </div>
-        
+
         <div class="overlay-footer">
-          <button class="btn btn-primary" @click="submitAcceptForm">DONE</button>
+          <button class="btn btn-primary" @click="submitAcceptForm">
+            DONE
+          </button>
         </div>
       </div>
     </div>
@@ -763,65 +1134,145 @@
         <div class="overlay-header">
           <h2>MEMO REJECTION DETAILS</h2>
           <button class="close-button" @click="closeRejectOverlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
+
         <div class="overlay-body">
-          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'comments' }" @click="selectRejectionSection('comments')">
+          <div
+            class="rejection-section"
+            :class="{ active: rejectionFormData.section === 'comments' }"
+            @click="selectRejectionSection('comments')"
+          >
             <div class="section-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                ></path>
               </svg>
             </div>
             <span>COMMENTS</span>
             <div class="notification-icon">!</div>
           </div>
-          
-          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'authentication' }" @click="selectRejectionSection('authentication')">
+
+          <div
+            class="rejection-section"
+            :class="{ active: rejectionFormData.section === 'authentication' }"
+            @click="selectRejectionSection('authentication')"
+          >
             <div class="section-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                ></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
               </svg>
             </div>
             <span>AUTHENTICATION</span>
             <div class="notification-icon">!</div>
           </div>
-          
-          <div class="rejection-section" :class="{ 'active': rejectionFormData.section === 'attachments' }" @click="selectRejectionSection('attachments')">
+
+          <div
+            class="rejection-section"
+            :class="{ active: rejectionFormData.section === 'attachments' }"
+            @click="selectRejectionSection('attachments')"
+          >
             <div class="section-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                ></path>
               </svg>
             </div>
             <span>ATTACHMENTS</span>
           </div>
-          
+
           <!-- Dynamic content based on selected section -->
           <div class="section-content">
-            <div v-if="rejectionFormData.section === 'comments'" class="content-area">
+            <div
+              v-if="rejectionFormData.section === 'comments'"
+              class="content-area"
+            >
               <label>Rejection Comments:</label>
-              <textarea v-model="rejectionFormData.comments" placeholder="Enter rejection comments..."></textarea>
+              <textarea
+                v-model="rejectionFormData.comments"
+                placeholder="Enter rejection comments..."
+              ></textarea>
             </div>
-            
-            <div v-if="rejectionFormData.section === 'authentication'" class="content-area">
+
+            <div
+              v-if="rejectionFormData.section === 'authentication'"
+              class="content-area"
+            >
               <label>Authentication Details:</label>
-              <input type="text" v-model="rejectionFormData.authentication" placeholder="Enter authentication details">
+              <input
+                type="text"
+                v-model="rejectionFormData.authentication"
+                placeholder="Enter authentication details"
+              />
             </div>
-            
-            <div v-if="rejectionFormData.section === 'attachments'" class="content-area">
+
+            <div
+              v-if="rejectionFormData.section === 'attachments'"
+              class="content-area"
+            >
               <label>Rejection Attachments:</label>
-              <input type="file" @change="handleRejectionAttachmentUpload" multiple>
+              <input
+                type="file"
+                @change="handleRejectionAttachmentUpload"
+                multiple
+              />
             </div>
           </div>
         </div>
-        
+
         <div class="overlay-footer">
-          <button class="btn btn-primary" @click="submitRejectForm">DONE</button>
+          <button class="btn btn-primary" @click="submitRejectForm">
+            DONE
+          </button>
         </div>
       </div>
     </div>
@@ -840,7 +1291,7 @@
             <div class="detail-value">{{ acceptFormData.comments }}</div>
           </div>
         </div>
-        
+
         <div class="detail-row">
           <div class="detail-field">
             <label>Internal Tester ID:</label>
@@ -851,7 +1302,7 @@
             <div class="detail-value">{{ acceptFormData.testerName }}</div>
           </div>
         </div>
-        
+
         <div class="detail-row">
           <div class="detail-field">
             <label>Authentication</label>
@@ -859,7 +1310,13 @@
           </div>
           <div class="detail-field">
             <label>Attachments</label>
-            <div class="detail-value">{{ acceptFormData.attachments.length > 0 ? acceptFormData.attachments.join(', ') : 'No attachments' }}</div>
+            <div class="detail-value">
+              {{
+                acceptFormData.attachments.length > 0
+                  ? acceptFormData.attachments.join(", ")
+                  : "No attachments"
+              }}
+            </div>
           </div>
         </div>
       </div>
@@ -873,65 +1330,71 @@
           <label>Rejection Comments:</label>
           <div class="rejection-value">{{ rejectionFormData.comments }}</div>
         </div>
-        
+
         <div class="rejection-item">
           <label>Authentication:</label>
-          <div class="rejection-value">{{ rejectionFormData.authentication }}</div>
+          <div class="rejection-value">
+            {{ rejectionFormData.authentication }}
+          </div>
         </div>
-        
+
         <div class="rejection-item">
           <label>Attachments:</label>
-          <div class="rejection-value">{{ rejectionFormData.attachments.length > 0 ? rejectionFormData.attachments.join(', ') : 'No attachments' }}</div>
+          <div class="rejection-value">
+            {{
+              rejectionFormData.attachments.length > 0
+                ? rejectionFormData.attachments.join(", ")
+                : "No attachments"
+            }}
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Submit section - only show for new memos -->
     <div v-if="canSubmitNewMemo" class="submit-section">
-      <button class="submit-button" @click="submitNewMemo">
-        Submit Memo
-      </button>
+      <button class="submit-button" @click="submitNewMemo">Submit Memo</button>
     </div>
   </div>
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'QAHeadMemoForm',
+  name: "QAHeadMemoForm",
   data() {
     return {
-      memoId: '',
+      memoId: "",
       memoData: {
-        status: 'Not Assigned'
+        status: "Not Assigned",
       },
       // Overlay visibility
       showAcceptOverlay: false,
       showRejectOverlay: false,
-      
+
       // Accept form data
       acceptFormData: {
-        testDate: '',
-        testerId: '',
-        testerName: '',
-        comments: '',
-        authentication: '',
-        attachments: []
+        testDate: "",
+        testerId: "",
+        testerName: "",
+        comments: "",
+        authentication: "",
+        attachments: [],
       },
-      
+
       // Reject form data
       rejectionFormData: {
-        section: 'comments',
-        comments: '',
-        authentication: '',
-        attachments: []
+        section: "comments",
+        comments: "",
+        authentication: "",
+        attachments: [],
       },
-      
+
       // Additional sections visibility
       showTestReviewSection: false,
       showRejectionSection: false,
-      
+
       // LRU options from database
       lruOptions: [],
       lruData: [], // Full LRU data with project information
@@ -942,111 +1405,139 @@ export default {
       serialNumberLoading: false,
       serialNumberError: null,
       showSerialNumberDropdown: false,
-       // Tests data for Unit Identification dropdown
-       tests: [],
-       testIdToStages: {},
-       testIdToStageTypes: {}, // Store type_names for each test-stage combination
-       showTestsDropdown: false,
-       hoveredTestId: null,
-       keepSubmenuOpen: false,
-        submenuOffset: 0,
-        
-        // Time picker options
-        hours: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
-        minutes: ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'],
-      
+      // Tests data for Unit Identification dropdown
+      tests: [],
+      testIdToStages: {},
+      testIdToStageTypes: {}, // Store type_names for each test-stage combination
+      showTestsDropdown: false,
+      hoveredTestId: null,
+      keepSubmenuOpen: false,
+      submenuOffset: 0,
+
+      // Time picker options
+      hours: [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+      ],
+      minutes: [
+        "00",
+        "05",
+        "10",
+        "15",
+        "20",
+        "25",
+        "30",
+        "35",
+        "40",
+        "45",
+        "50",
+        "55",
+      ],
+
       formData: {
-        from1: '',
-        from2: '',
-        from3: '',
-        casdicRef: '',
-        casdic: '',
-        casdicDate: '',
-        to1: '',
-        to2: '',
-        wingRef: '',
-        coordinator: '',
-        partNo: '',
-        manufacturer: '',
-        description: '',
-        refDoc: '',
-        refNo: '',
-        version: '',
-        revision: '',
+        from1: "",
+        from2: "",
+        from3: "",
+        casdicRef: "",
+        casdic: "",
+        casdicDate: "",
+        to1: "",
+        to2: "",
+        wingRef: "",
+        coordinator: "",
+        partNo: "",
+        manufacturer: "",
+        description: "",
+        refDoc: "",
+        refNo: "",
+        version: "",
+        revision: "",
         slNo: [],
-        drawingNo: '',
-        refDoc2: '',
-        refNo2: '',
-        version2: '',
-        revision2: '',
-        qtyOffered: '',
-        description3: '',
-        refDoc3: '',
-        refNo3: '',
-        version3: '',
-        revision3: '',
-        mechanicalInsp: '',
-        unitIdentification: '',
+        drawingNo: "",
+        source: "NA",
+        refDoc2: "",
+        refNo2: "",
+        version2: "",
+        revision2: "",
+        qtyOffered: "",
+        description3: "",
+        refDoc3: "",
+        refNo3: "",
+        version3: "",
+        revision3: "",
+        mechanicalInsp: "",
+        unitIdentification: "",
         unitIdentificationTestId: null,
-        unitIdentificationTestName: '',
-        refDoc4: '',
-        refNo4: '',
-        version4: '',
-        revision4: '',
-        inspectionStage: '',
-        stteStatus: '',
-        refDoc5: '',
-        refNo5: '',
-        version5: '',
-        revision5: '',
-        testStageCleared: '',
-        refDoc6: '',
-        refNo6: '',
-        version6: '',
-        revision6: '',
-        testVenue: '',
-        signatureName: '',
-        testFacility: '',
-        testCycle: '',
-        testStartDate: '',
-        testStartHour: '',
-        testStartMinute: '',
-        testStartAmPm: '',
-        testCompleteDate: '',
-        testCompleteHour: '',
-        testCompleteMinute: '',
-        testCompleteAmPm: '',
-        calibrationStatus: '',
-        funcCheckInitialDate: '',
-        funcCheckInitialHour: '',
-        funcCheckInitialMinute: '',
-        funcCheckInitialAmPm: '',
-        perfCheckDuringDate: '',
-        perfCheckDuringHour: '',
-        perfCheckDuringMinute: '',
-        perfCheckDuringAmPm: '',
-        funcCheckEndDate: '',
-        funcCheckEndHour: '',
-        funcCheckEndMinute: '',
-        funcCheckEndAmPm: '',
-        logBookDate: '',
-        qaInspectionDate: '',
-        testStatus: '',
-        qaReviewerRemarks: '',
+        unitIdentificationTestName: "",
+        refDoc4: "",
+        refNo4: "",
+        version4: "",
+        revision4: "",
+        inspectionStage: "",
+        stteStatus: "",
+        refDoc5: "",
+        refNo5: "",
+        version5: "",
+        revision5: "",
+        testStageCleared: "",
+        refDoc6: "",
+        refNo6: "",
+        version6: "",
+        revision6: "",
+        testVenue: "",
+        signatureName: "",
+        testFacility: "",
+        testCycle: "",
+        testStartDate: "",
+        testStartHour: "",
+        testStartMinute: "",
+        testStartAmPm: "",
+        testCompleteDate: "",
+        testCompleteHour: "",
+        testCompleteMinute: "",
+        testCompleteAmPm: "",
+        calibrationStatus: "",
+        funcCheckInitialDate: "",
+        funcCheckInitialHour: "",
+        funcCheckInitialMinute: "",
+        funcCheckInitialAmPm: "",
+        perfCheckDuringDate: "",
+        perfCheckDuringHour: "",
+        perfCheckDuringMinute: "",
+        perfCheckDuringAmPm: "",
+        funcCheckEndDate: "",
+        funcCheckEndHour: "",
+        funcCheckEndMinute: "",
+        funcCheckEndAmPm: "",
+        logBookDate: "",
+        qaInspectionDate: "",
+        testStatus: "",
+        qaReviewerRemarks: "",
         certificationA: false,
         certificationB: false,
         certificationC: false,
         certificationD: false,
         certificationE: false,
         certificationF: false,
-        dgaqaRemarks: ''
-      }
+        dgaqaRemarks: "",
+        remarks: "",
+      },
     };
   },
   computed: {
     // Get current user role from global store
     currentUserRole() {
-      return userStore.getters.currentUserRole()
+      return userStore.getters.currentUserRole();
     },
     canApproveMemo() {
       // The role '2' corresponds to the QA Head/Manager based on the SRS document.
@@ -1054,22 +1545,25 @@ export default {
       return this.currentUserRole === 2;
     },
     selectedTestName() {
-      return this.formData.unitIdentification || this.formData.unitIdentificationTestName;
+      return (
+        this.formData.unitIdentification ||
+        this.formData.unitIdentificationTestName
+      );
     },
     hoveredStages() {
       if (!this.hoveredTestId) return [];
       const stages = this.testIdToStages[this.hoveredTestId] || [];
       // Debug logging
       if (this.hoveredTestId) {
-        console.log('Hovered Test ID:', this.hoveredTestId);
-        console.log('Available stages:', stages);
-        console.log('All test-stage mappings:', this.testIdToStages);
+        console.log("Hovered Test ID:", this.hoveredTestId);
+        console.log("Available stages:", stages);
+        console.log("All test-stage mappings:", this.testIdToStages);
       }
       return stages;
     },
     isNewMemo() {
       // Check if this is a new memo being submitted
-      return this.$route.name === 'NewMemoForm';
+      return this.$route.name === "NewMemoForm";
     },
     canSubmitNewMemo() {
       // Only designers (role 5) and design heads (role 4) can submit new memos
@@ -1078,7 +1572,9 @@ export default {
     selectedLruInfo() {
       // Get the full LRU information for the selected LRU
       if (!this.formData.description) return null;
-      return this.lruData.find(lru => lru.lru_name === this.formData.description);
+      return this.lruData.find(
+        (lru) => lru.lru_name === this.formData.description
+      );
     },
     availableSerialNumbers() {
       // Return the serial number options for the selected LRU
@@ -1087,12 +1583,12 @@ export default {
     selectedSerialNumbersDisplay() {
       // Return a display string for selected serial numbers
       if (!this.formData.slNo || this.formData.slNo.length === 0) {
-        return 'Select Serial Numbers';
+        return "Select Serial Numbers";
       }
-      
+
       // Show all selected serial numbers
       const sortedSerials = [...this.formData.slNo].sort((a, b) => a - b);
-      return sortedSerials.join(', ');
+      return sortedSerials.join(", ");
     },
     quantityOffered() {
       // Auto-calculate quantity based on selected serial numbers
@@ -1108,77 +1604,124 @@ export default {
       if (!this.hoveredTestId) return [];
       const stageTypes = this.testIdToStageTypes[this.hoveredTestId] || [];
       const allTypes = [];
-      
-      stageTypes.forEach(stage => {
+
+      stageTypes.forEach((stage) => {
         if (stage.types && stage.types.length > 0) {
-          stage.types.forEach(type => {
+          stage.types.forEach((type) => {
             // Avoid duplicates by checking if type already exists
-            if (!allTypes.find(t => t.type_id === type.type_id)) {
+            if (!allTypes.find((t) => t.type_id === type.type_id)) {
               allTypes.push(type);
             }
           });
         }
       });
-      
+
       // Sort by type name for better organization
       return allTypes.sort((a, b) => a.type_name.localeCompare(b.type_name));
     },
-    
+
     // Computed properties to combine date and time fields (convert 12-hour to 24-hour format)
     testStartOn() {
-      if (this.formData.testStartDate && this.formData.testStartHour && this.formData.testStartMinute && this.formData.testStartAmPm) {
-        const time24 = this.convertTo24Hour(this.formData.testStartHour, this.formData.testStartMinute, this.formData.testStartAmPm);
+      if (
+        this.formData.testStartDate &&
+        this.formData.testStartHour &&
+        this.formData.testStartMinute &&
+        this.formData.testStartAmPm
+      ) {
+        const time24 = this.convertTo24Hour(
+          this.formData.testStartHour,
+          this.formData.testStartMinute,
+          this.formData.testStartAmPm
+        );
         return `${this.formData.testStartDate}T${time24}`;
       }
-      return '';
+      return "";
     },
-    
+
     testCompleteOn() {
-      if (this.formData.testCompleteDate && this.formData.testCompleteHour && this.formData.testCompleteMinute && this.formData.testCompleteAmPm) {
-        const time24 = this.convertTo24Hour(this.formData.testCompleteHour, this.formData.testCompleteMinute, this.formData.testCompleteAmPm);
+      if (
+        this.formData.testCompleteDate &&
+        this.formData.testCompleteHour &&
+        this.formData.testCompleteMinute &&
+        this.formData.testCompleteAmPm
+      ) {
+        const time24 = this.convertTo24Hour(
+          this.formData.testCompleteHour,
+          this.formData.testCompleteMinute,
+          this.formData.testCompleteAmPm
+        );
         return `${this.formData.testCompleteDate}T${time24}`;
       }
-      return '';
+      return "";
     },
-    
+
     funcCheckInitial() {
-      if (this.formData.funcCheckInitialDate && this.formData.funcCheckInitialHour && this.formData.funcCheckInitialMinute && this.formData.funcCheckInitialAmPm) {
-        const time24 = this.convertTo24Hour(this.formData.funcCheckInitialHour, this.formData.funcCheckInitialMinute, this.formData.funcCheckInitialAmPm);
+      if (
+        this.formData.funcCheckInitialDate &&
+        this.formData.funcCheckInitialHour &&
+        this.formData.funcCheckInitialMinute &&
+        this.formData.funcCheckInitialAmPm
+      ) {
+        const time24 = this.convertTo24Hour(
+          this.formData.funcCheckInitialHour,
+          this.formData.funcCheckInitialMinute,
+          this.formData.funcCheckInitialAmPm
+        );
         return `${this.formData.funcCheckInitialDate}T${time24}`;
       }
-      return '';
+      return "";
     },
-    
+
     perfCheckDuring() {
-      if (this.formData.perfCheckDuringDate && this.formData.perfCheckDuringHour && this.formData.perfCheckDuringMinute && this.formData.perfCheckDuringAmPm) {
-        const time24 = this.convertTo24Hour(this.formData.perfCheckDuringHour, this.formData.perfCheckDuringMinute, this.formData.perfCheckDuringAmPm);
+      if (
+        this.formData.perfCheckDuringDate &&
+        this.formData.perfCheckDuringHour &&
+        this.formData.perfCheckDuringMinute &&
+        this.formData.perfCheckDuringAmPm
+      ) {
+        const time24 = this.convertTo24Hour(
+          this.formData.perfCheckDuringHour,
+          this.formData.perfCheckDuringMinute,
+          this.formData.perfCheckDuringAmPm
+        );
         return `${this.formData.perfCheckDuringDate}T${time24}`;
       }
-      return '';
+      return "";
     },
-    
+
     funcCheckEnd() {
-      if (this.formData.funcCheckEndDate && this.formData.funcCheckEndHour && this.formData.funcCheckEndMinute && this.formData.funcCheckEndAmPm) {
-        const time24 = this.convertTo24Hour(this.formData.funcCheckEndHour, this.formData.funcCheckEndMinute, this.formData.funcCheckEndAmPm);
+      if (
+        this.formData.funcCheckEndDate &&
+        this.formData.funcCheckEndHour &&
+        this.formData.funcCheckEndMinute &&
+        this.formData.funcCheckEndAmPm
+      ) {
+        const time24 = this.convertTo24Hour(
+          this.formData.funcCheckEndHour,
+          this.formData.funcCheckEndMinute,
+          this.formData.funcCheckEndAmPm
+        );
         return `${this.formData.funcCheckEndDate}T${time24}`;
       }
-      return '';
-    }
+      return "";
+    },
   },
   watch: {
-    'formData.description'(newValue, oldValue) {
+    "formData.description"(newValue, oldValue) {
       // When LRU is selected, log the selection and fetch serial numbers
       if (newValue) {
         const selectedLru = this.selectedLruInfo;
-        console.log('LRU selected:', selectedLru);
-        
+        console.log("LRU selected:", selectedLru);
+
         if (selectedLru) {
-          console.log(`Selected LRU: ${selectedLru.lru_name} from project: ${selectedLru.project_name}`);
+          console.log(
+            `Selected LRU: ${selectedLru.lru_name} from project: ${selectedLru.project_name}`
+          );
           // Fetch serial numbers for the selected LRU
           this.fetchSerialNumbers(selectedLru.lru_id);
         }
       }
-      
+
       // Clear serial number selection when LRU changes
       if (newValue !== oldValue) {
         this.formData.slNo = [];
@@ -1187,189 +1730,200 @@ export default {
         this.serialNumberError = null;
         this.showSerialNumberDropdown = false;
       }
-    }
+    },
   },
   async mounted() {
     this.memoId = this.$route.params.memoId;
     this.loadMemoData();
-    
+
     // Always try to fetch real data first
-    console.log('Attempting to fetch data from backend...');
+    console.log("Attempting to fetch data from backend...");
     await this.fetchLruOptions();
     await this.fetchTestsConfiguration();
-    
+
     // Add click outside handler for dropdowns
-    document.addEventListener('click', this.handleClickOutside);
-    
-    console.log('Component mounted, initial data:', {
+    document.addEventListener("click", this.handleClickOutside);
+
+    console.log("Component mounted, initial data:", {
       memoId: this.memoId,
       isNewMemo: this.isNewMemo,
       rejectionFormData: this.rejectionFormData,
       acceptFormData: this.acceptFormData,
-      lruData: this.lruData
+      lruData: this.lruData,
     });
   },
-  
+
   beforeUnmount() {
     // Remove click outside handler
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
     // Convert 12-hour time format to 24-hour format
     convertTo24Hour(hour, minute, ampm) {
       let hour24 = parseInt(hour);
-      
-      if (ampm === 'AM') {
+
+      if (ampm === "AM") {
         if (hour24 === 12) {
           hour24 = 0; // 12 AM becomes 00
         }
-      } else if (ampm === 'PM') {
+      } else if (ampm === "PM") {
         if (hour24 !== 12) {
           hour24 += 12; // PM hours except 12 PM
         }
         // 12 PM stays 12
       }
-      
+
       // Format with leading zeros
-      const formattedHour = hour24.toString().padStart(2, '0');
+      const formattedHour = hour24.toString().padStart(2, "0");
       return `${formattedHour}:${minute}`;
     },
-    
+
     loadMemoData() {
       if (this.isNewMemo) {
         // For new memos, initialize with empty/default data
         this.memoData = {
           id: null,
-          status: 'New',
-          title: 'DGAQA Inspection Requisition',
-          project: 'New Memo',
-          date: new Date().toISOString().split('T')[0]
+          status: "New",
+          title: "DGAQA Inspection Requisition",
+          project: "New Memo",
+          date: new Date().toISOString().split("T")[0],
         };
-        
+
         // Auto-fill and lock From/To fields for new memos
-        this.formData.casdicDate = new Date().toISOString().split('T')[0];
-        this.formData.from1 = 'MED, CASDIC (DARE), Bangalore';
-        this.formData.from2 = 'DGAQA cell,';
-        this.formData.from3 = 'ORDAQA(ADE), Bangalore';
+        this.formData.casdicDate = new Date().toISOString().split("T")[0];
+        this.formData.casdic = "CASDIC/QA/2025";
+        this.formData.from1 = "MED, CASDIC (DARE), Bangalore";
+        this.formData.from2 = "DGAQA cell,";
+        this.formData.from3 = "ORDAQA(ADE), Bangalore";
       } else {
         // For existing memos, simulate loading memo data based on memoId
         // In a real application, this would fetch from an API
         this.memoData = {
           id: this.memoId,
-          status: 'Not Assigned',
-          title: 'DGAQA Inspection Requisition',
-          project: 'PRJ-2025-078',
-          date: '2025-01-15'
+          status: "Not Assigned",
+          title: "DGAQA Inspection Requisition",
+          project: "PRJ-2025-078",
+          date: "2025-01-15",
         };
-        
+
         // Auto-fill some sample data for existing memos
-        this.formData.from1 = 'CASDIC QA Department';
-        this.formData.casdicRef = 'CAS-2025-001';
-        this.formData.casdic = 'CASDIC/QA/2025';
-        this.formData.casdicDate = '2025-01-15';
-        this.formData.to = 'DGAQA Office';
-        this.formData.wingRef = 'WING-2025-078';
-        this.formData.coordinator = 'John Smith (Designs) - +91-98765-43210';
-        this.formData.partNo = 'LRU-001';
-        this.formData.manufacturer = 'Aviatrax Industries';
-        this.formData.description = 'Main Control Unit for Aircraft Navigation System';
+        this.formData.from1 = "CASDIC QA Department";
+        this.formData.casdic = "CAS-2025-001";
+        this.formData.casdicDate = "2025-01-15";
+        this.formData.from2 = "DGAQA Office";
+        this.formData.wingRef = "WING-2025-078";
+        this.formData.coordinator = "John Smith (Designs) - +91-98765-43210";
+        this.formData.partNo = "LRU-001";
+        this.formData.manufacturer = "Aviatrax Industries";
+        this.formData.description =
+          "Main Control Unit for Aircraft Navigation System";
       }
     },
-     async fetchTestsConfiguration() {
-       try {
-         console.log('Fetching tests configuration...');
-         const res = await fetch('http://localhost:5000/api/tests-configuration');
-         const data = await res.json();
-         console.log('API Response:', data);
-         
-         if (data && data.success) {
-           this.tests = data.tests || [];
-           console.log('Loaded tests:', this.tests);
-           
-           const stageMap = {};
-           (data.stages || []).forEach(s => { stageMap[s.stage_id] = s; });
-           console.log('Stage map:', stageMap);
-           
-           const mapping = {};
-           (data.configurations || []).forEach(c => {
-             if (!mapping[c.test_id]) mapping[c.test_id] = [];
-             const st = stageMap[c.stage_id];
-             if (st && !mapping[c.test_id].some(x => x.stage_id === st.stage_id)) {
-               mapping[c.test_id].push(st);
-             }
-           });
-           this.testIdToStages = mapping;
-           console.log('Final test-to-stages mapping:', this.testIdToStages);
-         } else {
-           console.error('API did not return success:', data);
-         }
-       } catch (e) {
-         console.error('Failed to fetch tests configuration', e);
-         // Fallback: Create some mock data for testing
-         this.tests = [
-           { test_id: 1, test_name: 'Functional Test' },
-           { test_id: 2, test_name: 'Performance Test' },
-           { test_id: 3, test_name: 'Environmental Test' }
-         ];
-         this.testIdToStages = {
-           1: [
-             { stage_id: 1, stage_name: 'STAGE' },
-             { stage_id: 2, stage_name: 'PARTS' }
-           ],
-           2: [
-             { stage_id: 3, stage_name: 'ASSY' },
-             { stage_id: 4, stage_name: 'FINAL' }
-           ],
-           3: [
-             { stage_id: 5, stage_name: 'INSTALL' }
-           ]
-         };
-         console.log('Using fallback mock data');
-       }
-     },
-      toggleTestsDropdown() {
-        this.showTestsDropdown = !this.showTestsDropdown;
-        if (!this.showTestsDropdown) {
-          this.hoveredTestId = null;
-          this.submenuOffset = 0;
+    async fetchTestsConfiguration() {
+      try {
+        console.log("Fetching tests configuration...");
+        const res = await fetch(
+          "http://localhost:8000/api/tests-configuration"
+        );
+        const data = await res.json();
+        console.log("API Response:", data);
+
+        if (data && data.success) {
+          this.tests = data.tests || [];
+          console.log("Loaded tests:", this.tests);
+
+          const stageMap = {};
+          (data.stages || []).forEach((s) => {
+            stageMap[s.stage_id] = s;
+          });
+          console.log("Stage map:", stageMap);
+
+          const mapping = {};
+          (data.configurations || []).forEach((c) => {
+            if (!mapping[c.test_id]) mapping[c.test_id] = [];
+            const st = stageMap[c.stage_id];
+            if (
+              st &&
+              !mapping[c.test_id].some((x) => x.stage_id === st.stage_id)
+            ) {
+              mapping[c.test_id].push(st);
+            }
+          });
+          this.testIdToStages = mapping;
+          console.log("Final test-to-stages mapping:", this.testIdToStages);
+        } else {
+          console.error("API did not return success:", data);
         }
-      },
-      
-      async handleTestHover(testId, index) {
-        console.log('Hovering over test:', testId);
-        console.log('Available stages for this test:', this.testIdToStages[testId]);
-        this.hoveredTestId = testId;
-        this.keepSubmenuOpen = false;
-        
-        // Calculate offset based on the menu item index
-        // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
-        this.submenuOffset = index * 48;
-        
-        // Fetch stage types for this test if not already loaded
-        if (!this.testIdToStageTypes[testId]) {
-          console.log(`Fetching stage types for test ${testId}...`);
-          await this.fetchTestStageTypes(testId);
-        }
-      },
-      
-      handleMainMenuLeave() {
-        setTimeout(() => {
-          if (!this.keepSubmenuOpen) {
-            this.hoveredTestId = null;
-          }
-        }, 150);
-      },
-      
-      handleSubmenuLeave() {
-        this.keepSubmenuOpen = false;
-        setTimeout(() => {
+      } catch (e) {
+        console.error("Failed to fetch tests configuration", e);
+        // Fallback: Create some mock data for testing
+        this.tests = [
+          { test_id: 1, test_name: "Functional Test" },
+          { test_id: 2, test_name: "Performance Test" },
+          { test_id: 3, test_name: "Environmental Test" },
+        ];
+        this.testIdToStages = {
+          1: [
+            { stage_id: 1, stage_name: "STAGE" },
+            { stage_id: 2, stage_name: "PARTS" },
+          ],
+          2: [
+            { stage_id: 3, stage_name: "ASSY" },
+            { stage_id: 4, stage_name: "FINAL" },
+          ],
+          3: [{ stage_id: 5, stage_name: "INSTALL" }],
+        };
+        console.log("Using fallback mock data");
+      }
+    },
+    toggleTestsDropdown() {
+      this.showTestsDropdown = !this.showTestsDropdown;
+      if (!this.showTestsDropdown) {
+        this.hoveredTestId = null;
+        this.submenuOffset = 0;
+      }
+    },
+
+    async handleTestHover(testId, index) {
+      console.log("Hovering over test:", testId);
+      console.log(
+        "Available stages for this test:",
+        this.testIdToStages[testId]
+      );
+      this.hoveredTestId = testId;
+      this.keepSubmenuOpen = false;
+
+      // Calculate offset based on the menu item index
+      // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
+      this.submenuOffset = index * 48;
+
+      // Fetch stage types for this test if not already loaded
+      if (!this.testIdToStageTypes[testId]) {
+        console.log(`Fetching stage types for test ${testId}...`);
+        await this.fetchTestStageTypes(testId);
+      }
+    },
+
+    handleMainMenuLeave() {
+      setTimeout(() => {
+        if (!this.keepSubmenuOpen) {
           this.hoveredTestId = null;
-        }, 100);
-      },
+        }
+      }, 150);
+    },
+
+    handleSubmenuLeave() {
+      this.keepSubmenuOpen = false;
+      setTimeout(() => {
+        this.hoveredTestId = null;
+      }, 100);
+    },
     selectTest(test) {
       // Only allow direct test selection if there are no sub-types available
-      const hasSubTypes = this.testIdToStages[test.test_id] && this.testIdToStages[test.test_id].length > 0;
-      
+      const hasSubTypes =
+        this.testIdToStages[test.test_id] &&
+        this.testIdToStages[test.test_id].length > 0;
+
       if (!hasSubTypes) {
         // No sub-types, allow direct selection
         this.formData.unitIdentificationTestId = test.test_id;
@@ -1379,190 +1933,256 @@ export default {
         console.log(`Selected test without sub-types: ${test.test_name}`);
       } else {
         // Has sub-types, don't close dropdown - let user select from submenu
-        console.log(`Test ${test.test_name} has sub-types, please select from submenu`);
+        console.log(
+          `Test ${test.test_name} has sub-types, please select from submenu`
+        );
       }
     },
     selectStage(stage) {
       // When a stage is clicked from side dropdown, set Mechanical Inspection field
       this.formData.mechanicalInsp = stage.stage_name;
       this.showTestsDropdown = false;
-      
+
       // Log the selected stage with its types for debugging
       if (stage.types && stage.types.length > 0) {
-        console.log(`Selected stage: ${stage.stage_name} with types:`, stage.types.map(t => t.type_name));
+        console.log(
+          `Selected stage: ${stage.stage_name} with types:`,
+          stage.types.map((t) => t.type_name)
+        );
       }
     },
-    
+
     selectType(type) {
       // When a type is clicked from dropdown, set Unit Identification field with complete path
-      const selectedTest = this.tests.find(t => t.test_id === this.hoveredTestId);
+      const selectedTest = this.tests.find(
+        (t) => t.test_id === this.hoveredTestId
+      );
       if (selectedTest) {
         // Store both the test info and create the display value
         this.formData.unitIdentificationTestId = selectedTest.test_id;
         this.formData.unitIdentificationTestName = selectedTest.test_name;
         const combinedValue = `${selectedTest.test_name} - ${type.type_name}`;
         this.formData.unitIdentification = combinedValue;
-        
+
         // Log the selected combination for debugging
-        console.log(`Selected test: ${selectedTest.test_name}, type: ${type.type_name}, Combined: ${combinedValue}`);
+        console.log(
+          `Selected test: ${selectedTest.test_name}, type: ${type.type_name}, Combined: ${combinedValue}`
+        );
       } else {
         // Fallback if test not found
         this.formData.unitIdentification = type.type_name;
         console.log(`Selected type only: ${type.type_name}`);
       }
-      
+
       this.showTestsDropdown = false;
     },
-    
+
     toggleSerialNumberDropdown() {
       this.showSerialNumberDropdown = !this.showSerialNumberDropdown;
     },
-    
+
     toggleSerialNumber(serialNumber) {
       if (!this.formData.slNo) {
         this.formData.slNo = [];
       }
-      
-      const index = this.formData.slNo.indexOf(serialNumber);
+
+      // Convert to string for consistency
+      const serialStr = String(serialNumber);
+      const index = this.formData.slNo.indexOf(serialStr);
       if (index > -1) {
         // Remove if already selected
         this.formData.slNo.splice(index, 1);
       } else {
         // Add if not selected
-        this.formData.slNo.push(serialNumber);
+        this.formData.slNo.push(serialStr);
       }
-      
+
       // Update quantity offered automatically
       this.formData.qtyOffered = this.formData.slNo.length;
-      
-      console.log('Selected serial numbers:', this.formData.slNo);
-      console.log('Quantity offered:', this.formData.qtyOffered);
+
+      console.log("Selected serial numbers:", this.formData.slNo);
+      console.log("Quantity offered:", this.formData.qtyOffered);
     },
-    
+
     isSerialNumberSelected(serialNumber) {
-      return this.formData.slNo && this.formData.slNo.includes(serialNumber);
+      return (
+        this.formData.slNo && this.formData.slNo.includes(String(serialNumber))
+      );
     },
-    
+
     clearSerialNumbers() {
       this.formData.slNo = [];
       this.formData.qtyOffered = 0;
-      console.log('Cleared serial numbers and quantity');
+      console.log("Cleared serial numbers and quantity");
     },
-    
+
     handleClickOutside(event) {
       // Close serial number dropdown if clicking outside
-      if (this.showSerialNumberDropdown && !event.target.closest('.serial-number-dropdown-container')) {
+      if (
+        this.showSerialNumberDropdown &&
+        !event.target.closest(".serial-number-dropdown-container")
+      ) {
         this.showSerialNumberDropdown = false;
       }
-      
+
       // Close tests dropdown if clicking outside
-      if (this.showTestsDropdown && !event.target.closest('.dropdown-wrapper')) {
+      if (
+        this.showTestsDropdown &&
+        !event.target.closest(".dropdown-wrapper")
+      ) {
         this.showTestsDropdown = false;
         this.hoveredTestId = null;
       }
     },
-    
+
     async fetchLruOptions() {
       try {
         this.lruLoading = true;
         this.lruError = null;
-        console.log('Fetching LRU options...');
-        
-        const response = await fetch('http://localhost:5000/api/lrus');
-        
+        console.log("Fetching LRU options...");
+
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+
+        if (!currentUser || !currentUserRole) {
+          console.error("User information not available");
+          this.lruError = "User information not available";
+          this.loadFallbackLruOptions();
+          return;
+        }
+
+        // Use the new filtered API endpoint
+        const response = await fetch(
+          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           // Store both the simple names for the dropdown and full LRU data
-          this.lruOptions = data.lrus.map(lru => lru.lru_name);
+          this.lruOptions = data.lrus.map((lru) => lru.lru_name);
           this.lruData = data.lrus; // Store full LRU data for future use
-          console.log('Loaded LRU options:', this.lruOptions);
-          console.log('Full LRU data:', this.lruData);
+          console.log("Loaded LRU options:", this.lruOptions);
+          console.log("Full LRU data:", this.lruData);
+          console.log(
+            `User role ${currentUserRole}: ${data.lrus.length} LRUs available`
+          );
         } else {
-          this.lruError = data.message || 'Failed to fetch LRU options';
-          console.error('Failed to fetch LRU options:', data.message);
+          this.lruError = data.message || "Failed to fetch LRU options";
+          console.error("Failed to fetch LRU options:", data.message);
           this.loadFallbackLruOptions();
         }
       } catch (error) {
         this.lruError = `Network error: ${error.message}`;
-        console.error('Error fetching LRU options:', error);
+        console.error("Error fetching LRU options:", error);
         this.loadFallbackLruOptions();
       } finally {
         this.lruLoading = false;
       }
     },
-    
+
     loadFallbackLruOptions() {
       // Fallback LRU options when backend is not available
-      console.log('Loading fallback LRU options...');
+      console.log("Loading fallback LRU options...");
       this.lruData = [
-        { lru_id: 1, lru_name: 'Flight Control Unit', project_id: 1, project_name: 'Project Alpha' },
-        { lru_id: 2, lru_name: 'Navigation System', project_id: 1, project_name: 'Project Alpha' },
-        { lru_id: 3, lru_name: 'Communication Module', project_id: 2, project_name: 'Project Beta' },
-        { lru_id: 4, lru_name: 'Power Management Unit', project_id: 2, project_name: 'Project Beta' },
-        { lru_id: 5, lru_name: 'Sensor Array', project_id: 3, project_name: 'Project Gamma' }
+        {
+          lru_id: 1,
+          lru_name: "Flight Control Unit",
+          project_id: 1,
+          project_name: "Project Alpha",
+        },
+        {
+          lru_id: 2,
+          lru_name: "Navigation System",
+          project_id: 1,
+          project_name: "Project Alpha",
+        },
+        {
+          lru_id: 3,
+          lru_name: "Communication Module",
+          project_id: 2,
+          project_name: "Project Beta",
+        },
+        {
+          lru_id: 4,
+          lru_name: "Power Management Unit",
+          project_id: 2,
+          project_name: "Project Beta",
+        },
+        {
+          lru_id: 5,
+          lru_name: "Sensor Array",
+          project_id: 3,
+          project_name: "Project Gamma",
+        },
       ];
-      this.lruOptions = this.lruData.map(lru => lru.lru_name);
-      console.log('Loaded fallback LRU options:', this.lruOptions);
+      this.lruOptions = this.lruData.map((lru) => lru.lru_name);
+      console.log("Loaded fallback LRU options:", this.lruOptions);
     },
-    
+
     loadFallbackSerialNumbers(lruId) {
       // Fallback serial numbers when backend is not available
       console.log(`Loading fallback serial numbers for LRU ID: ${lruId}`);
-      
+
       // Sample serial numbers for different LRUs
       const fallbackSerials = {
         1: [1, 2, 3, 4, 5], // Flight Control Unit
         2: [1, 2, 3], // Navigation System
         3: [1, 2, 3, 4, 5, 6, 7, 8], // Communication Module
         4: [1, 2], // Power Management Unit
-        5: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] // Sensor Array
+        5: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], // Sensor Array
       };
-      
+
       const serials = fallbackSerials[lruId] || [];
-      this.serialNumberOptions = serials.map(serial => ({
+      this.serialNumberOptions = serials.map((serial) => ({
         value: serial,
-        label: serial.toString()
+        label: serial.toString(),
       }));
-      
-      console.log(`Loaded fallback serial numbers for LRU ${lruId}:`, this.serialNumberOptions);
+
+      console.log(
+        `Loaded fallback serial numbers for LRU ${lruId}:`,
+        this.serialNumberOptions
+      );
     },
-    
+
     async checkBackendStatus() {
       try {
-        const response = await fetch('http://localhost:5000/api/lrus', { 
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
+        const response = await fetch("http://localhost:8000/api/lrus", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
         return response.ok;
       } catch (error) {
-        console.log('Backend not available:', error.message);
+        console.log("Backend not available:", error.message);
         return false;
       }
     },
-    
+
     async fetchTestStageTypes(testId) {
       try {
         console.log(`Fetching stage types for test ID: ${testId}`);
-        const response = await fetch(`http://localhost:5000/api/test/${testId}/stage-types`);
-        
+        const response = await fetch(
+          `http://localhost:8000/api/test/${testId}/stage-types`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           // Store the stage types for this test
           this.testIdToStageTypes[testId] = data.stages;
           console.log(`Loaded stage types for test ${testId}:`, data.stages);
           return data.stages;
         } else {
-          console.error('Failed to fetch stage types:', data.message);
+          console.error("Failed to fetch stage types:", data.message);
           return [];
         }
       } catch (error) {
@@ -1570,36 +2190,42 @@ export default {
         return [];
       }
     },
-    
+
     async fetchSerialNumbers(lruId) {
       try {
         this.serialNumberLoading = true;
         this.serialNumberError = null;
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
-        
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/serial-numbers`);
-        
+
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-          this.serialNumberOptions = data.serial_numbers.map(serial => ({
+          this.serialNumberOptions = data.serial_numbers.map((serial) => ({
             value: serial.serial_number,
-            label: serial.serial_number.toString()
+            label: serial.serial_number.toString(),
           }));
-          console.log(`Loaded serial numbers for LRU ${lruId}:`, this.serialNumberOptions);
+          console.log(
+            `Loaded serial numbers for LRU ${lruId}:`,
+            this.serialNumberOptions
+          );
         } else {
-          this.serialNumberError = data.message || 'Failed to fetch serial numbers';
-          console.error('Failed to fetch serial numbers:', data.message);
+          this.serialNumberError =
+            data.message || "Failed to fetch serial numbers";
+          console.error("Failed to fetch serial numbers:", data.message);
           this.serialNumberOptions = [];
         }
       } catch (error) {
         this.serialNumberError = `Network error: ${error.message}`;
         console.error(`Error fetching serial numbers for LRU ${lruId}:`, error);
-        console.log('Using fallback serial numbers...');
+        console.log("Using fallback serial numbers...");
         this.loadFallbackSerialNumbers(lruId);
       } finally {
         this.serialNumberLoading = false;
@@ -1609,154 +2235,168 @@ export default {
     closeAcceptOverlay() {
       this.showAcceptOverlay = false;
     },
-    
+
     closeRejectOverlay() {
       this.showRejectOverlay = false;
     },
-    
+
     // Rejection section selection
     selectRejectionSection(section) {
-      console.log('Selecting rejection section:', section);
+      console.log("Selecting rejection section:", section);
       this.rejectionFormData.section = section;
-      console.log('Updated rejection form data:', this.rejectionFormData);
+      console.log("Updated rejection form data:", this.rejectionFormData);
     },
-    
+
     // File upload handlers
     handleAttachmentUpload(event) {
       const files = Array.from(event.target.files);
-      this.acceptFormData.attachments = files.map(file => file.name);
+      this.acceptFormData.attachments = files.map((file) => file.name);
     },
-    
+
     handleRejectionAttachmentUpload(event) {
       const files = Array.from(event.target.files);
-      this.rejectionFormData.attachments = files.map(file => file.name);
+      this.rejectionFormData.attachments = files.map((file) => file.name);
     },
-    
+
     // Form submission
     submitAcceptForm() {
-      if (!this.acceptFormData.testDate || !this.acceptFormData.testerId || !this.acceptFormData.testerName) {
-        alert('Please fill in all required fields');
+      if (
+        !this.acceptFormData.testDate ||
+        !this.acceptFormData.testerId ||
+        !this.acceptFormData.testerName
+      ) {
+        alert("Please fill in all required fields");
         return;
       }
-      
+
       this.showTestReviewSection = true;
       this.closeAcceptOverlay();
-      alert('Memo accepted successfully! Test/Review details have been added.');
+      alert("Memo accepted successfully! Test/Review details have been added.");
     },
-    
+
     submitRejectForm() {
-      console.log('Submit reject form called');
-      console.log('Rejection form data:', this.rejectionFormData);
-      
-      if (!this.rejectionFormData.comments && !this.rejectionFormData.authentication && this.rejectionFormData.attachments.length === 0) {
-        alert('Please fill in at least one field for rejection details.');
+      console.log("Submit reject form called");
+      console.log("Rejection form data:", this.rejectionFormData);
+
+      if (
+        !this.rejectionFormData.comments &&
+        !this.rejectionFormData.authentication &&
+        this.rejectionFormData.attachments.length === 0
+      ) {
+        alert("Please fill in at least one field for rejection details.");
         return;
       }
-      
+
       this.showRejectionSection = true;
       this.closeRejectOverlay();
-      alert('Memo rejected! Rejection details have been added.');
-      console.log('Rejection form submitted successfully');
+      alert("Memo rejected! Rejection details have been added.");
+      console.log("Rejection form submitted successfully");
     },
-    
+
     // Legacy methods (kept for compatibility)
     acceptMemo() {
       this.showAcceptOverlay = true;
     },
-    
+
     rejectMemo() {
       this.showRejectOverlay = true;
     },
 
-toggleShareBox() {
+    toggleShareBox() {
       this.showShareBox = !this.showShareBox;
       if (!this.showShareBox) {
-        this.emailAddresses = ''; // Clear input on close
+        this.emailAddresses = ""; // Clear input on close
       }
     },
     sendEmails() {
-      if (this.emailAddresses.trim() === '') {
-        alert('Please enter at least one email address.');
+      if (this.emailAddresses.trim() === "") {
+        alert("Please enter at least one email address.");
         return;
       }
-      
-      const emails = this.emailAddresses.split(',').map(email => email.trim());
-      console.log('Sending memo to:', emails);
+
+      const emails = this.emailAddresses
+        .split(",")
+        .map((email) => email.trim());
+      console.log("Sending memo to:", emails);
       // Here you would add the logic to send the emails, for example, making an API call.
-      
-      alert(`Memo sent successfully to: ${emails.join(', ')}`);
+
+      alert(`Memo sent successfully to: ${emails.join(", ")}`);
       this.toggleShareBox(); // Close the share box after "sending"
     },
 
-toggleShareBox() {
+    toggleShareBox() {
       this.showShareBox = !this.showShareBox;
       if (!this.showShareBox) {
-        this.emailAddresses = ''; // Clear input on close
+        this.emailAddresses = ""; // Clear input on close
       }
     },
     sendEmails() {
-      if (this.emailAddresses.trim() === '') {
-        alert('Please enter at least one email address.');
+      if (this.emailAddresses.trim() === "") {
+        alert("Please enter at least one email address.");
         return;
       }
-      
-      const emails = this.emailAddresses.split(',').map(email => email.trim());
-      console.log('Sending memo to:', emails);
+
+      const emails = this.emailAddresses
+        .split(",")
+        .map((email) => email.trim());
+      console.log("Sending memo to:", emails);
       // Here you would add the logic to send the emails, for example, making an API call.
-      
-      alert(`Memo sent successfully to: ${emails.join(', ')}`);
+
+      alert(`Memo sent successfully to: ${emails.join(", ")}`);
       this.toggleShareBox(); // Close the share box after "sending"
     },
 
     submitMemo() {
-    // Validate that at least one test status is selected
-    const testStatusSelected = Object.values(this.memoData.testStatus).some(status => status);
-      
+      // Validate that at least one test status is selected
+      const testStatusSelected = Object.values(this.memoData.testStatus).some(
+        (status) => status
+      );
+
       if (!testStatusSelected) {
-        alert('Please select at least one test status.');
+        alert("Please select at least one test status.");
         return;
       }
-      
+
       if (!this.memoData.reviewerComments.trim()) {
-        alert('Please provide reviewer comments.');
+        alert("Please provide reviewer comments.");
         return;
       }
-      
+
       // Here you would add the logic to submit the memo, for example, making an API call.
-      console.log('Submitting memo:', {
+      console.log("Submitting memo:", {
         memoId: this.id,
         testStatus: this.memoData.testStatus,
-        reviewerComments: this.memoData.reviewerComments
+        reviewerComments: this.memoData.reviewerComments,
       });
-      
-      alert('Memo submitted successfully!');
+
+      alert("Memo submitted successfully!");
       this.goBack(); // Navigate back after successful submission
     },
 
     async submitNewMemo() {
       // Validate required fields for new memo submission
       if (!this.formData.description) {
-        alert('Please select an LRU from the dropdown.');
+        alert("Please select an LRU from the dropdown.");
         return;
       }
-      
+
       if (!this.formData.partNo) {
-        alert('Please enter Part Number.');
+        alert("Please enter Part Number.");
         return;
       }
-      
+
       if (!this.formData.manufacturer) {
-        alert('Please enter Manufacturer.');
+        alert("Please enter Manufacturer.");
         return;
       }
 
       if (!this.formData.unitIdentification) {
-        alert('Please select Unit Identification type.');
+        alert("Please select Unit Identification type.");
         return;
       }
 
       if (!this.formData.mechanicalInsp) {
-        alert('Please select Mechanical Inspection stage.');
+        alert("Please select Mechanical Inspection stage.");
         return;
       }
 
@@ -1764,67 +2404,60 @@ toggleShareBox() {
         // Get current user info
         const currentUser = userStore.getters.currentUser();
         if (!currentUser) {
-          alert('User not logged in. Please login first.');
+          alert("User not logged in. Please login first.");
           return;
         }
 
         // Prepare memo data for submission
         const memoData = {
-          from_person: this.formData.fromPerson || currentUser.name,
-          to_person: this.formData.toPerson || 'QA Head',
-          thru_person: this.formData.thruPerson || '',
+          from_person: this.formData.from1 || currentUser.name,
+          to_person: this.formData.from2 || "QA Head",
+          thru_person: this.formData.from3 || "",
           submitted_by: currentUser.id,
           formData: {
             // Basic Information
-            casdicRef: this.formData.casdicRef,
-            dated: this.formData.dated,
-            wingProjRef: this.formData.wingProjRef,
+            casdicRef: this.formData.casdic,
+            dated: this.formData.casdicDate,
+            wingProjRef: this.formData.wingRef,
             lruSruDesc: this.formData.description,
             partNo: this.formData.partNo,
             manufacturer: this.formData.manufacturer,
-            drawingNoRev: this.formData.drawingNoRev,
+            drawingNoRev: this.formData.drawingNo,
             source: this.formData.source,
-            
-            // Serial Numbers (checkboxes)
-            slNo1: this.formData.slNo1,
-            slNo2: this.formData.slNo2,
-            slNo3: this.formData.slNo3,
-            slNo4: this.formData.slNo4,
-            slNo5: this.formData.slNo5,
-            slNo6: this.formData.slNo6,
-            slNo7: this.formData.slNo7,
-            slNo8: this.formData.slNo8,
-            slNo9: this.formData.slNo9,
-            slNo10: this.formData.slNo10,
-            
+
+            // Serial Numbers (checkboxes) - send the actual array instead of individual boolean fields
+            // The backend will process the array directly
+            slNo: this.formData.slNo || [],
+
             // Unit Identification
             unitIdentification: this.formData.unitIdentification,
             mechanicalInsp: this.formData.mechanicalInsp,
-            
+
             // Test Information
-            inspnTestStageOffered: this.formData.inspnTestStageOffered,
+            inspnTestStageOffered: this.formData.inspectionStage,
             stteStatus: this.formData.stteStatus,
             testStageCleared: this.formData.testStageCleared,
-            venue: this.formData.venue,
-            memoDate: this.formData.memoDate,
-            nameDesignation: this.formData.nameDesignation,
+            venue: this.formData.testVenue,
+            memoDate: this.formData.casdicDate,
+            nameDesignation: this.formData.signatureName,
+            coordinator: this.formData.coordinator,
             testFacility: this.formData.testFacility,
-            testCycleDuration: this.formData.testCycleDuration,
+            testCycleDuration: this.formData.testCycle,
             testStartOn: this.testStartOn,
             testCompleteOn: this.testCompleteOn,
             calibrationStatus: this.formData.calibrationStatus,
             funcCheckInitial: this.funcCheckInitial,
             perfCheckDuring: this.perfCheckDuring,
             funcCheckEnd: this.funcCheckEnd,
-            
+
             // Certified checkboxes
-            certifiedA: this.formData.certifiedA,
-            certifiedB: this.formData.certifiedB,
-            certifiedC: this.formData.certifiedC,
-            certifiedD: this.formData.certifiedD,
-            certifiedE: this.formData.certifiedE,
-            certifiedF: this.formData.certifiedF,
-            
+            certifiedA: this.formData.certificationA,
+            certifiedB: this.formData.certificationB,
+            certifiedC: this.formData.certificationC,
+            certifiedD: this.formData.certificationD,
+            certifiedE: this.formData.certificationE,
+            certifiedF: this.formData.certificationF,
+
             // References
             refDoc: this.formData.refDoc,
             refNo: this.formData.refNo,
@@ -1850,38 +2483,52 @@ toggleShareBox() {
             refNo6: this.formData.refNo6,
             version6: this.formData.version6,
             revision6: this.formData.revision6,
-            
+
             // Additional fields
-            remarks: this.formData.remarks
-          }
+            remarks: this.formData.dgaqaRemarks,
+          },
         };
 
-        console.log('Submitting memo to backend:', memoData);
+        console.log("Submitting memo to backend:", memoData);
+        console.log("=== DEBUG: Serial numbers data ===");
+        console.log("formData.slNo:", this.formData.slNo);
+        console.log(
+          "slNo1:",
+          this.formData.slNo && this.formData.slNo.includes("1")
+        );
+        console.log(
+          "slNo2:",
+          this.formData.slNo && this.formData.slNo.includes("2")
+        );
+        console.log(
+          "slNo3:",
+          this.formData.slNo && this.formData.slNo.includes("3")
+        );
+        console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch('http://localhost:5000/api/memos', {
-          method: 'POST',
+        const response = await fetch("http://localhost:8000/api/memos", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(memoData)
+          body: JSON.stringify(memoData),
         });
 
         const result = await response.json();
 
         if (result.success) {
           alert(`Memo submitted successfully! Memo ID: ${result.memo_id}`);
-          this.$router.push({ name: 'MemoDashboard' }); // Navigate back to dashboard
+          this.$router.push({ name: "MemoDashboard" }); // Navigate back to dashboard
         } else {
           alert(`Error submitting memo: ${result.message}`);
         }
-
       } catch (error) {
-        console.error('Error submitting memo:', error);
-        alert('Error submitting memo. Please try again.');
+        console.error("Error submitting memo:", error);
+        alert("Error submitting memo. Please try again.");
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -1946,7 +2593,8 @@ toggleShareBox() {
   border: 1px solid #333;
 }
 
-.form-table td, .form-table th {
+.form-table td,
+.form-table th {
   border: 1px solid #333;
   padding: 8px;
   vertical-align: top;
@@ -2015,7 +2663,8 @@ toggleShareBox() {
   border: 1px solid #333;
 }
 
-.details-table th, .details-table td {
+.details-table th,
+.details-table td {
   border: 1px solid #333;
   padding: 8px;
   text-align: left;
@@ -2044,11 +2693,31 @@ toggleShareBox() {
   width: 20%;
 }
 
-.ver-header, .rev-header {
+.source-input {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9em;
+  box-sizing: border-box;
+}
+
+.source-input:focus {
+  border-color: #80bdff;
+  outline: none;
+}
+
+.ver-header,
+.rev-header {
   width: 7.5%;
 }
 
-.lru-cell, .desc-cell, .ref-cell, .refno-cell, .ver-cell, .rev-cell {
+.lru-cell,
+.desc-cell,
+.ref-cell,
+.refno-cell,
+.ver-cell,
+.rev-cell {
   vertical-align: top;
 }
 
@@ -2090,192 +2759,192 @@ toggleShareBox() {
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
- /* Unit Identification Container */
- .unit-identification-container {
-   position: relative;
- }
- 
- .dropdown-wrapper {
-   position: relative;
-   width: 100%;
- }
- 
- /* Tests dropdown (Unit Identification) */
- .test-dropdown {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   border: 1px solid #e1e5e9;
-   border-radius: 8px;
-   padding: 10px 12px;
-   background: #fff;
-   cursor: pointer;
-   width: 100%;
-   box-sizing: border-box;
-   transition: all 0.2s ease;
-   font-size: 0.85em;
- }
- 
- .test-dropdown:hover {
-   border-color: #007bff;
-   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
- }
- 
- .test-dropdown .selected-value {
-   color: #2c3e50;
-   flex: 1;
-   font-weight: 500;
- }
- 
- .test-dropdown .dropdown-icon {
-   color: #6c757d;
-   font-size: 12px;
-   margin-left: 8px;
-   transition: transform 0.2s ease;
- }
- 
- .test-dropdown.active .dropdown-icon {
-   transform: rotate(180deg);
- }
- 
- /* Main dropdown menu */
- .tests-menu {
-   position: absolute;
-   top: 100%;
-   left: 0;
-   right: 0;
-   margin-top: 4px;
-   background: #fff;
-   border: 1px solid #e1e5e9;
-   border-radius: 12px;
-   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-   z-index: 1000;
-   overflow: hidden;
-   animation: menuFadeIn 0.15s ease-out;
- }
- 
- @keyframes menuFadeIn {
-   from {
-     opacity: 0;
-     transform: translateY(-8px);
-   }
-   to {
-     opacity: 1;
-     transform: translateY(0);
-   }
- }
- 
- .menu-item-container {
-   padding: 8px 0;
-   max-height: 240px;
-   overflow-y: auto;
- }
- 
- .menu-item-container::-webkit-scrollbar {
-   width: 6px;
- }
- 
- .menu-item-container::-webkit-scrollbar-track {
-   background: transparent;
- }
- 
- .menu-item-container::-webkit-scrollbar-thumb {
-   background: #d1d5db;
-   border-radius: 3px;
- }
- 
- .menu-item {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   padding: 12px 16px;
-   cursor: pointer;
-   transition: background-color 0.1s ease;
-   font-size: 0.9em;
-   color: #374151;
-   position: relative;
- }
- 
- .menu-item:hover {
-   background-color: #f8fafc;
- }
- 
- .menu-item.has-submenu:hover {
-   background-color: #e3f2fd;
- }
- 
- .menu-item.active {
-   background-color: #e3f2fd;
-   border-left: 3px solid #2563eb;
- }
- 
- .menu-item.no-data {
-   color: #9ca3af;
-   font-style: italic;
-   cursor: default;
- }
- 
- .menu-item.no-data:hover {
-   background-color: transparent;
- }
- 
- .menu-text {
-   flex: 1;
-   font-weight: 500;
- }
- 
- .menu-arrow {
-   color: #9ca3af;
-   font-size: 12px;
-   margin-left: 8px;
-   transition: color 0.1s ease;
- }
- 
- .menu-item:hover .menu-arrow {
-   color: #6b7280;
- }
- 
- /* Separate Stages Submenu */
- .stages-submenu {
-   position: absolute;
-   top: 0;
-   left: calc(100% + 8px);
-   min-width: 220px;
-   max-width: 320px;
-   background: #fff;
-   border: 1px solid #e1e5e9;
-   border-radius: 12px;
-   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-   animation: submenuSlideIn 0.2s ease-out;
-   z-index: 1003;
-   overflow: hidden;
-   transform: translateY(var(--submenu-offset, 0));
- }
- 
- @keyframes submenuSlideIn {
-   from {
-     opacity: 0;
-     transform: translateX(-8px);
-   }
-   to {
-     opacity: 1;
-     transform: translateX(0);
-   }
- }
- 
- .submenu-header {
-   padding: 12px 16px 8px;
-   border-bottom: 1px solid #f1f5f9;
-   background-color: #f8fafc;
- }
- 
- .submenu-title {
-   font-size: 0.75em;
-   font-weight: 600;
-   color: #64748b;
-   text-transform: uppercase;
-   letter-spacing: 0.5px;
- }
+/* Unit Identification Container */
+.unit-identification-container {
+  position: relative;
+}
+
+.dropdown-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* Tests dropdown (Unit Identification) */
+.test-dropdown {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  cursor: pointer;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  font-size: 0.85em;
+}
+
+.test-dropdown:hover {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.test-dropdown .selected-value {
+  color: #2c3e50;
+  flex: 1;
+  font-weight: 500;
+}
+
+.test-dropdown .dropdown-icon {
+  color: #6c757d;
+  font-size: 12px;
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.test-dropdown.active .dropdown-icon {
+  transform: rotate(180deg);
+}
+
+/* Main dropdown menu */
+.tests-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  overflow: hidden;
+  animation: menuFadeIn 0.15s ease-out;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-item-container {
+  padding: 8px 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.menu-item-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu-item-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.menu-item-container::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+  font-size: 0.9em;
+  color: #374151;
+  position: relative;
+}
+
+.menu-item:hover {
+  background-color: #f8fafc;
+}
+
+.menu-item.has-submenu:hover {
+  background-color: #e3f2fd;
+}
+
+.menu-item.active {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2563eb;
+}
+
+.menu-item.no-data {
+  color: #9ca3af;
+  font-style: italic;
+  cursor: default;
+}
+
+.menu-item.no-data:hover {
+  background-color: transparent;
+}
+
+.menu-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.menu-arrow {
+  color: #9ca3af;
+  font-size: 12px;
+  margin-left: 8px;
+  transition: color 0.1s ease;
+}
+
+.menu-item:hover .menu-arrow {
+  color: #6b7280;
+}
+
+/* Separate Stages Submenu */
+.stages-submenu {
+  position: absolute;
+  top: 0;
+  left: calc(100% + 8px);
+  min-width: 220px;
+  max-width: 320px;
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  animation: submenuSlideIn 0.2s ease-out;
+  z-index: 1003;
+  overflow: hidden;
+  transform: translateY(var(--submenu-offset, 0));
+}
+
+@keyframes submenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.submenu-header {
+  padding: 12px 16px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: #f8fafc;
+}
+
+.submenu-title {
+  font-size: 0.75em;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 .loading-indicator {
   font-size: 0.7em;
@@ -2283,45 +2952,45 @@ toggleShareBox() {
   font-style: italic;
   margin-left: 8px;
 }
- 
- .submenu-item-container {
-   max-height: 200px;
-   overflow-y: auto;
- }
- 
- .submenu-item {
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   padding: 12px 16px;
-   cursor: pointer;
-   transition: all 0.15s ease;
-   font-size: 0.85em;
-   color: #374151;
-   border-bottom: 1px solid #f8fafc;
- }
- 
- .submenu-item:last-child {
-   border-bottom: none;
- }
- 
- .submenu-item:hover {
-   background-color: #f0f9ff;
-   color: #0369a1;
-   padding-left: 20px;
- }
- 
- .submenu-text {
-   flex: 1;
-   font-weight: 500;
- }
- 
- .check-icon {
-   color: #10b981;
-   font-weight: bold;
-   font-size: 14px;
-   margin-left: 8px;
- }
+
+.submenu-item-container {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 0.85em;
+  color: #374151;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.submenu-item:last-child {
+  border-bottom: none;
+}
+
+.submenu-item:hover {
+  background-color: #f0f9ff;
+  color: #0369a1;
+  padding-left: 20px;
+}
+
+.submenu-text {
+  flex: 1;
+  font-weight: 500;
+}
+
+.check-icon {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 8px;
+}
 
 .stage-info {
   display: flex;
@@ -2364,27 +3033,27 @@ toggleShareBox() {
   font-weight: 500;
   color: #374151;
 }
- 
- /* Responsive adjustments */
- @media (max-width: 768px) {
-   .submenu {
-     position: fixed;
-     top: 50%;
-     left: 50%;
-     transform: translate(-50%, -50%);
-     margin: 0;
-     max-width: 280px;
-     width: 90vw;
-   }
-   
-   .tests-menu {
-     max-width: 95vw;
-   }
-   
-   .menu-item-container {
-     max-height: 200px;
-   }
- }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .submenu {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    max-width: 280px;
+    width: 90vw;
+  }
+
+  .tests-menu {
+    max-width: 95vw;
+  }
+
+  .menu-item-container {
+    max-height: 200px;
+  }
+}
 
 .lru-select option {
   padding: 4px 6px;
@@ -2762,7 +3431,10 @@ toggleShareBox() {
   font-style: italic;
 }
 
-.ref-cell input, .refno-cell input, .ver-cell input, .rev-cell input {
+.ref-cell input,
+.refno-cell input,
+.ver-cell input,
+.rev-cell input {
   width: 100%;
   padding: 4px 6px;
   border: 1px solid #ccc;
@@ -2810,7 +3482,9 @@ toggleShareBox() {
   width: 33.33%;
 }
 
-.test-left, .test-middle, .test-right {
+.test-left,
+.test-middle,
+.test-right {
   vertical-align: top;
 }
 
@@ -3096,41 +3770,48 @@ toggleShareBox() {
     gap: 20px;
     text-align: center;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .wide-field {
     grid-column: span 1;
   }
-  
-  .table-header, .table-row {
+
+  .table-header,
+  .table-row {
     grid-template-columns: 1fr;
     gap: 10px;
   }
-  
-  .lru-column, .desc-column, .checkbox-column, .ref-column, .refno-column, .ver-column, .rev-column {
+
+  .lru-column,
+  .desc-column,
+  .checkbox-column,
+  .ref-column,
+  .refno-column,
+  .ver-column,
+  .rev-column {
     grid-column: span 1;
   }
-  
+
   .stage-header {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .test-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .btn {
     width: 100%;
     max-width: 300px;
@@ -3431,31 +4112,31 @@ toggleShareBox() {
     width: 95%;
     margin: 20px;
   }
-  
+
   .overlay-body .form-row {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .detail-row {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .detail-field.wide-field {
     grid-column: span 1;
   }
-  
+
   .rejection-section {
     flex-direction: column;
     text-align: center;
     gap: 10px;
   }
-  
+
   .notification-icon {
     margin-left: 0;
   }
-  
+
   .status-badge {
     flex-direction: column;
     gap: 10px;
@@ -3643,7 +4324,8 @@ toggleShareBox() {
 
 .email-input:focus {
   border-color: #6c757d;
-  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
   outline: none;
   background-color: #ffffff;
   transform: translateY(-2px);
@@ -3727,12 +4409,13 @@ toggleShareBox() {
     width: 95%;
     margin: 20px;
   }
-  
+
   .share-actions {
     flex-direction: column;
   }
-  
-  .send-btn, .cancel-btn {
+
+  .send-btn,
+  .cancel-btn {
     width: 100%;
     min-width: auto;
   }
@@ -3833,7 +4516,8 @@ toggleShareBox() {
 
 .email-input:focus {
   border-color: #6c757d;
-  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
   outline: none;
   background-color: #ffffff;
   transform: translateY(-2px);
@@ -3917,12 +4601,13 @@ toggleShareBox() {
     width: 95%;
     margin: 20px;
   }
-  
+
   .share-actions {
     flex-direction: column;
   }
-  
-  .send-btn, .cancel-btn {
+
+  .send-btn,
+  .cancel-btn {
     width: 100%;
     min-width: auto;
   }
@@ -3978,7 +4663,8 @@ toggleShareBox() {
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.time-select, .ampm-select {
+.time-select,
+.ampm-select {
   border: none;
   background: transparent;
   font-size: 0.9em;
@@ -3988,7 +4674,8 @@ toggleShareBox() {
   min-width: 45px;
 }
 
-.time-select:focus, .ampm-select:focus {
+.time-select:focus,
+.ampm-select:focus {
   background: rgba(0, 123, 255, 0.1);
   border-radius: 3px;
 }
@@ -4011,15 +4698,14 @@ toggleShareBox() {
     gap: 4px;
     align-items: stretch;
   }
-  
+
   .date-input {
     width: 100%;
     min-width: unset;
   }
-  
+
   .time-picker {
     justify-content: center;
   }
 }
 </style>
-

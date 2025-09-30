@@ -18,6 +18,7 @@ from routes.tests import tests_bp
 from routes.news import news_bp
 from routes.files import files_bp
 from routes.memos import memos_bp
+from routes.reports import reports_bp
 
 def create_app():
     """Application factory pattern"""
@@ -27,15 +28,14 @@ def create_app():
     app.config.from_object(Config)
     
     # Enable CORS
-    #CORS(app)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
     
 
     # Create upload directories
     create_upload_directories()
     
-    # Initialize database
-    initialize_database()
+    # Initialize database - DISABLED: Tables are managed manually in pgAdmin
+    # initialize_database()
     
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -46,6 +46,7 @@ def create_app():
     app.register_blueprint(news_bp)
     app.register_blueprint(files_bp)
     app.register_blueprint(memos_bp)
+    app.register_blueprint(reports_bp)
     
     return app
 
@@ -511,4 +512,4 @@ def test_database():
         return jsonify({"success": False, "message": f"Database test failed: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=8000)

@@ -3,14 +3,21 @@
     <!-- Header with document info -->
     <div class="document-header">
       <div class="header-info">
-        <h2>{{ lruName || 'Document Viewer' }}</h2>
+        <h2>{{ lruName || "Document Viewer" }}</h2>
         <div class="meta-info">
-          <span><strong>Project:</strong> {{ projectName || 'N/A' }}</span>
-          <span><strong>Document ID:</strong> {{ documentId || 'N/A' }}</span>
-          <span><strong>Status:</strong> <span :class="'status-' + (status || 'pending')">{{ status || 'Pending' }}</span></span>
-           <!-- <span><strong>Status:</strong> <span :class="getStatusClass(status)">{{ status || 'Pending' }}</span></span> -->
+          <span><strong>Project:</strong> {{ projectName || "N/A" }}</span>
+          <span><strong>Document ID:</strong> {{ documentId || "N/A" }}</span>
+          <span
+            ><strong>Status:</strong>
+            <span :class="'status-' + (status || 'pending')">{{
+              status || "Pending"
+            }}</span></span
+          >
+          <!-- <span><strong>Status:</strong> <span :class="getStatusClass(status)">{{ status || 'Pending' }}</span></span> -->
           <span><strong>Created:</strong> {{ formatDate(createdDate) }}</span>
-          <span><strong>Modified:</strong> {{ formatDate(lastModifiedDate) }}</span>
+          <span
+            ><strong>Modified:</strong> {{ formatDate(lastModifiedDate) }}</span
+          >
         </div>
       </div>
     </div>
@@ -19,25 +26,27 @@
     <div class="action-bar" v-if="currentUserRole">
       <!-- QA Head Actions -->
       <template v-if="currentUserRole === 'QA Head'">
-        <button 
-          v-if="!hasAssignedReviewer" 
-          @click="assignReviewer" 
+        <button
+          v-if="!hasAssignedReviewer"
+          @click="assignReviewer"
           class="action-btn"
           :disabled="loadingReviewerStatus"
         >
-          {{ loadingReviewerStatus ? 'Loading...' : 'Assign Reviewer' }}
+          {{ loadingReviewerStatus ? "Loading..." : "Assign Reviewer" }}
         </button>
-        <button 
-          v-if="hasAssignedReviewer" 
-          @click="editReviewer" 
+        <button
+          v-if="hasAssignedReviewer"
+          @click="editReviewer"
           class="action-btn action-btn-edit"
           :disabled="loadingReviewerStatus"
         >
-          {{ loadingReviewerStatus ? 'Loading...' : 'Edit Reviewer' }}
+          {{ loadingReviewerStatus ? "Loading..." : "Edit Reviewer" }}
         </button>
         <div v-if="hasAssignedReviewer" class="reviewer-info">
           <span class="reviewer-label">Current Reviewer:</span>
-          <span class="reviewer-name">{{ assignedReviewer?.name || 'Unknown' }}</span>
+          <span class="reviewer-name">{{
+            assignedReviewer?.name || "Unknown"
+          }}</span>
         </div>
         <button @click="viewObservations" class="action-btn">
           View Observations
@@ -48,20 +57,28 @@
       </template>
 
       <!-- Design Head / Designer Actions -->
-      <template v-if="currentUserRole === 'Design Head' || currentUserRole === 'Designer'">
+      <template
+        v-if="
+          currentUserRole === 'Design Head' || currentUserRole === 'Designer'
+        "
+      >
         <div class="upload-section">
-          <label for="file-upload" class="upload-btn" :class="{ 'disabled': !canUploadDocument }">
+          <label
+            for="file-upload"
+            class="upload-btn"
+            :class="{ disabled: !canUploadDocument }"
+          >
             Choose Document
-            <input 
+            <input
               id="file-upload"
-              type="file" 
-              accept=".pdf,.docx,.doc,.txt,.xlsx,.xls" 
+              type="file"
+              accept=".pdf,.docx,.doc,.txt,.xlsx,.xls"
               @change="handleFileSelect"
               :disabled="!canUploadDocument"
               style="display: none"
             />
           </label>
-          
+
           <!-- Upload restriction message -->
           <div v-if="!canUploadDocument" class="upload-restriction-message">
             <div class="restriction-icon">⚠️</div>
@@ -94,15 +111,15 @@
               <p><strong>⚠️ Warning:</strong> This will permanently delete the latest document and all its comments.</p>
             </div>
           </div>
-          
+
           <!-- Document Details Form - Show when file is selected -->
           <div v-if="selectedFile" class="document-form">
             <div class="form-row">
               <div class="form-group">
                 <label>Document Number:</label>
-                <input 
-                  type="text" 
-                  v-model="documentDetails.documentNumber" 
+                <input
+                  type="text"
+                  v-model="documentDetails.documentNumber"
                   placeholder="e.g., DOC-001"
                   class="form-input"
                   required
@@ -110,9 +127,9 @@
               </div>
               <div class="form-group">
                 <label>Version:</label>
-                <input 
-                  type="text" 
-                  v-model="documentDetails.version" 
+                <input
+                  type="text"
+                  v-model="documentDetails.version"
                   placeholder="e.g., v1.0"
                   class="form-input"
                   required
@@ -130,14 +147,13 @@
                 />
               </div>
             </div>
-            <button 
-              @click="submitDocument" 
+            <button
+              @click="submitDocument"
               class="submit-btn"
               :disabled="isUploading || !isFormValid"
             >
-              {{ isUploading ? 'Uploading...' : 'Submit Document' }}
+              {{ isUploading ? "Uploading..." : "Submit Document" }}
             </button>
-            
           </div>
         </div>
       </template>
@@ -153,9 +169,11 @@
         <button @click="zoomIn" class="control-btn">+</button>
 
         <template v-if="fileType === 'pdf'">
-          <button @click="prevPage" :disabled="page <= 1" class="control-btn">← Prev</button>
+          <button @click="prevPage" :disabled="page <= 1" class="control-btn">
+            ← Prev
+          </button>
           <span class="page-info">
-            Page 
+            Page
             <input
               type="number"
               v-model.number="page"
@@ -166,7 +184,13 @@
             />
             of {{ numPages }}
           </span>
-          <button @click="nextPage" :disabled="page >= numPages" class="control-btn">Next →</button>
+          <button
+            @click="nextPage"
+            :disabled="page >= numPages"
+            class="control-btn"
+          >
+            Next →
+          </button>
         </template>
       </div>
       <div class="controls-right">
@@ -188,31 +212,42 @@
             <p>No documents uploaded yet</p>
           </div>
           <div v-else class="documents-list">
-            <div 
-              v-for="doc in existingDocuments" 
+            <div
+              v-for="doc in existingDocuments"
               :key="doc.document_id"
               class="document-item"
               @click="viewDocument(doc)"
             >
               <div class="doc-icon">
-                <span v-if="doc.file_path.toLowerCase().includes('.pdf')">📄</span>
-                <span v-else-if="doc.file_path.toLowerCase().includes('.docx')">📝</span>
+                <span v-if="doc.file_path.toLowerCase().includes('.pdf')"
+                  >📄</span
+                >
+                <span v-else-if="doc.file_path.toLowerCase().includes('.docx')"
+                  >📝</span
+                >
                 <span v-else>📄</span>
               </div>
               <div class="doc-info">
                 <div class="doc-title">
-                  <span class="doc-label">{{ doc.doc_ver || 'A' }}</span>
+                  <span class="doc-label">{{ doc.doc_ver || "A" }}</span>
                   {{ doc.document_number }}
                 </div>
                 <div class="doc-meta">
-                  <span class="doc-version">{{ doc.version }} ({{ doc.revision }})</span>
+                  <span class="doc-version"
+                    >{{ doc.version }} ({{ doc.revision }})</span
+                  >
                   <span class="doc-ver">v{{ doc.doc_ver }}</span>
                 </div>
                 <div class="doc-details">
                   <span class="uploaded-by">{{ doc.uploaded_by_name }}</span>
-                  <span class="upload-date">{{ formatDate(doc.upload_date) }}</span>
+                  <span class="upload-date">{{
+                    formatDate(doc.upload_date)
+                  }}</span>
                 </div>
-                <div class="doc-status" :class="'status-' + doc.status.replace(' ', '-')">
+                <div
+                  class="doc-status"
+                  :class="'status-' + doc.status.replace(' ', '-')"
+                >
                   {{ doc.status }}
                 </div>
               </div>
@@ -253,7 +288,7 @@
                 class="annotation-marker"
                 :style="{
                   left: annotation.x + '%',
-                  top: annotation.y + '%'
+                  top: annotation.y + '%',
                 }"
                 @click="showAnnotationDetails(annotation)"
                 :title="annotation.description"
@@ -283,7 +318,7 @@
               class="annotation-marker"
               :style="{
                 left: annotation.x + '%',
-                top: annotation.y + '%'
+                top: annotation.y + '%',
               }"
               @click="showAnnotationDetails(annotation)"
               :title="annotation.description"
@@ -297,7 +332,9 @@
         <div v-if="!fileType" class="empty-state">
           <div class="empty-icon">📄</div>
           <p class="empty-msg">Select a document to view</p>
-          <p class="empty-sub" v-if="canUpload">Or upload a new PDF or DOCX file</p>
+          <p class="empty-sub" v-if="canUpload">
+            Or upload a new PDF or DOCX file
+          </p>
         </div>
       </div>
 
@@ -306,11 +343,16 @@
         <h3>Comments</h3>
         <div class="comments-container">
           <ul class="comments-list" v-if="comments.length > 0">
-            <li v-for="(comment, index) in comments" :key="index" class="comment-item" :class="'status-' + (comment.status || 'pending')">
-              <button 
-                v-if="canDeleteComments" 
-                @click="deleteComment(index)" 
-                class="delete-btn" 
+            <li
+              v-for="(comment, index) in comments"
+              :key="index"
+              class="comment-item"
+              :class="'status-' + (comment.status || 'pending')"
+            >
+              <button
+                v-if="canDeleteComments"
+                @click="deleteComment(index)"
+                class="delete-btn"
                 title="Delete comment"
               >
                 🗑️
@@ -324,29 +366,47 @@
               </div>
               <div class="comment-content">
                 <div class="comment-meta">
-                  <span v-if="comment.page_no">Page: {{ comment.page_no }}</span>
-                  <span v-if="comment.section">Section: {{ comment.section }}</span>
+                  <span v-if="comment.page_no"
+                    >Page: {{ comment.page_no }}</span
+                  >
+                  <span v-if="comment.section"
+                    >Section: {{ comment.section }}</span
+                  >
                 </div>
                 <p class="comment-text">{{ comment.description }}</p>
                 <!-- <div v-if="comment.annotation" class="annotation-info">
                   <span class="annotation-marker">C Annotation</span>
                 </div> -->
-                
+
                 <!-- Comment Response Section -->
                 <div v-if="comment.justification" class="comment-response">
                   <div class="response-header">
                     {{ comment.status === 'accepted' ? 'Accepted' : 'Rejected' }} by Designer ID {{ comment.accepted_by }}
                     <span v-if="comment.accepted_at" class="response-date">{{ formatDate(comment.accepted_at) }}</span>
                   </div>
-                  <div class="response-content">{{ comment.justification }}</div>
+                  <div class="response-content">
+                    {{ comment.justification }}
+                  </div>
                 </div>
-                
+
                 <!-- Action Buttons (only show for pending comments and for designers/design heads) -->
-                <div v-if="(comment.status === 'pending' || !comment.status) && canAcceptRejectComments" class="comment-actions">
-                  <button @click="acceptComment(comment)" class="action-btn accept">
+                <div
+                  v-if="
+                    (comment.status === 'pending' || !comment.status) &&
+                    canAcceptRejectComments
+                  "
+                  class="comment-actions"
+                >
+                  <button
+                    @click="acceptComment(comment)"
+                    class="action-btn accept"
+                  >
                     ✓ Accept
                   </button>
-                  <button @click="rejectComment(comment)" class="action-btn reject">
+                  <button
+                    @click="rejectComment(comment)"
+                    class="action-btn reject"
+                  >
                     ✗ Reject
                   </button>
                 </div>
@@ -373,22 +433,31 @@
         </div>
 
         <!-- Annotation Mode Indicator (only for reviewers) -->
-        <div v-if="isAnnotationMode && canAddComments" class="annotation-mode-indicator">
+        <div
+          v-if="isAnnotationMode && canAddComments"
+          class="annotation-mode-indicator"
+        >
           <div class="annotation-instruction">
             <span class="annotation-icon">📍</span>
             <span>Click on the document to place your annotation</span>
-            <button @click="cancelAnnotation" class="cancel-annotation-btn">Cancel</button>
+            <button @click="cancelAnnotation" class="cancel-annotation-btn">
+              Cancel
+            </button>
           </div>
         </div>
 
         <!-- Comment Form Modal - Shows after annotation is placed (only for reviewers) -->
-        <div v-if="showCommentForm && canAddComments" class="comment-form-overlay" @click="closeCommentForm">
+        <div
+          v-if="showCommentForm && canAddComments"
+          class="comment-form-overlay"
+          @click="closeCommentForm"
+        >
           <div class="comment-form-container" @click.stop>
             <div class="comment-form-header">
               <h4>Add Comment</h4>
               <button @click="closeCommentForm" class="close-btn">×</button>
             </div>
-            
+
             <div class="comment-form-body">
               <!-- Document Details Flex Box -->
               <div class="document-details-box">
@@ -396,7 +465,9 @@
                 <div class="details-grid">
                   <div class="detail-item">
                     <span class="detail-label">Document ID:</span>
-                    <span class="detail-value">{{ commentForm.document_id }}</span>
+                    <span class="detail-value">{{
+                      commentForm.document_id
+                    }}</span>
                   </div>
                   <div class="detail-item">
                     <span class="detail-label">Version:</span>
@@ -412,22 +483,28 @@
                   </div>
                 </div>
               </div>
-              
+
               <!-- Description Input -->
               <div class="form-group">
                 <label>Comment Description</label>
-                <textarea 
-                  v-model="commentForm.description" 
+                <textarea
+                  v-model="commentForm.description"
                   placeholder="Enter your comment description..."
                   rows="4"
                   class="comment-description"
                 ></textarea>
               </div>
             </div>
-            
+
             <div class="comment-form-footer">
-              <button @click="closeCommentForm" class="cancel-btn">Cancel</button>
-              <button @click="submitComment" class="submit-btn" :disabled="!commentForm.description.trim()">
+              <button @click="closeCommentForm" class="cancel-btn">
+                Cancel
+              </button>
+              <button
+                @click="submitComment"
+                class="submit-btn"
+                :disabled="!commentForm.description.trim()"
+              >
                 Submit Comment
               </button>
             </div>
@@ -437,19 +514,25 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteConfirm" class="delete-confirm-overlay" @click="cancelDelete">
+    <div
+      v-if="showDeleteConfirm"
+      class="delete-confirm-overlay"
+      @click="cancelDelete"
+    >
       <div class="delete-confirm-modal" @click.stop>
         <div class="delete-confirm-header">
           <h4>Delete Comment</h4>
           <button @click="cancelDelete" class="close-btn">×</button>
         </div>
-        
+
         <div class="delete-confirm-body">
           <div class="warning-icon">⚠️</div>
           <p>Are you sure you want to delete this comment?</p>
           <div class="comment-preview" v-if="commentToDelete">
             <strong>Comment:</strong>
-            <p class="comment-text-preview">"{{ commentToDelete.comment.description }}"</p>
+            <p class="comment-text-preview">
+              "{{ commentToDelete.comment.description }}"
+            </p>
             <div class="comment-meta-preview">
               <span>By: Reviewer ID {{ commentToDelete.comment.reviewer_id }}</span>
               <span>Page: {{ commentToDelete.comment.page_no }}</span>
@@ -457,37 +540,51 @@
           </div>
           <p class="warning-text">This action cannot be undone.</p>
         </div>
-        
+
         <div class="delete-confirm-footer">
           <button @click="cancelDelete" class="cancel-btn">Cancel</button>
-          <button @click="confirmDelete" class="delete-confirm-btn">Delete Comment</button>
+          <button @click="confirmDelete" class="delete-confirm-btn">
+            Delete Comment
+          </button>
         </div>
       </div>
     </div>
 
     <!-- Justification Modal -->
-    <div v-if="showJustificationModal" class="justification-overlay" @click="cancelJustification">
+    <div
+      v-if="showJustificationModal"
+      class="justification-overlay"
+      @click="cancelJustification"
+    >
       <div class="justification-modal" @click.stop>
         <div class="justification-header">
-          <h4>{{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}</h4>
+          <h4>
+            {{
+              justificationAction === "accept"
+                ? "Accept Comment"
+                : "Reject Comment"
+            }}
+          </h4>
           <button @click="cancelJustification" class="close-btn">×</button>
         </div>
-        
+
         <div class="justification-body">
           <div class="comment-preview" v-if="selectedComment">
             <strong>Comment:</strong>
-            <p class="comment-text-preview">"{{ selectedComment.description }}"</p>
+            <p class="comment-text-preview">
+              "{{ selectedComment.description }}"
+            </p>
             <div class="comment-meta-preview">
               <span>By: Reviewer ID {{ selectedComment.reviewer_id }}</span>
               <span>Page: {{ selectedComment.page_no }}</span>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="justification">Justification *</label>
-            <textarea 
+            <textarea
               id="justification"
-              v-model="justificationText" 
+              v-model="justificationText"
               placeholder="Please provide justification for your decision..."
               rows="4"
               class="justification-textarea"
@@ -495,18 +592,29 @@
             ></textarea>
           </div>
         </div>
-        
+
         <div class="justification-footer">
-          <button @click="cancelJustification" class="cancel-btn">Cancel</button>
-          <button @click="confirmJustification" class="confirm-btn" :class="justificationAction" :disabled="!justificationText.trim()">
-            {{ justificationAction === 'accept' ? 'Accept Comment' : 'Reject Comment' }}
+          <button @click="cancelJustification" class="cancel-btn">
+            Cancel
+          </button>
+          <button
+            @click="confirmJustification"
+            class="confirm-btn"
+            :class="justificationAction"
+            :disabled="!justificationText.trim()"
+          >
+            {{
+              justificationAction === "accept"
+                ? "Accept Comment"
+                : "Reject Comment"
+            }}
           </button>
         </div>
       </div>
     </div>
 
     <!-- Assign Reviewer Modal -->
-    <QAHeadAssignReviewer 
+    <QAHeadAssignReviewer
       v-if="showAssignReviewerModal"
       :currentLruName="lruName"
       :currentProjectName="projectName"
@@ -517,65 +625,131 @@
     />
 
     <!-- Track Versions Modal -->
-    <div v-if="showTrackVersionsModal" class="track-versions-overlay" @click="closeTrackVersionsModal">
+    <div
+      v-if="showTrackVersionsModal"
+      class="track-versions-overlay"
+      @click="closeTrackVersionsModal"
+    >
       <div class="track-versions-modal" @click.stop>
         <div class="modal-header">
           <h2>TRACK VERSIONS</h2>
           <button class="close-button" @click="closeTrackVersionsModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
+
         <div class="modal-content">
           <div class="versions-list">
-            <div 
-              v-for="version in documentVersions" 
+            <div
+              v-for="version in documentVersions"
               :key="version.id"
               class="version-item"
-              :class="{ 
-                'disabled': version.deleted,
-                'favorite': version.isFavorite 
+              :class="{
+                disabled: version.deleted,
+                favorite: version.isFavorite,
               }"
               @click="version.deleted ? null : selectVersion(version)"
             >
               <div class="version-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                  ></path>
                   <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                 </svg>
               </div>
-              
+
               <div class="version-info">
-                <span class="version-id">{{ version.projectId }} {{ version.version }}</span>
+                <span class="version-id"
+                  >{{ version.projectId }} {{ version.version }}</span
+                >
                 <span class="version-date">{{ version.date }}</span>
               </div>
-              
+
               <div class="version-actions">
-                <button 
+                <button
                   class="star-button"
-                  :class="{ 'starred': version.isFavorite }"
+                  :class="{ starred: version.isFavorite }"
                   @click.stop="toggleFavorite(version)"
                   :disabled="version.deleted"
                 >
-                  <svg v-if="version.isFavorite" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  <svg
+                    v-if="version.isFavorite"
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    ></polygon>
                   </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                    ></polygon>
                   </svg>
                 </button>
-                
-                <button 
+
+                <button
                   class="delete-button"
                   @click.stop="confirmDeleteVersion(version)"
                   :disabled="version.deleted"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <polyline points="3,6 5,6 21,6"></polyline>
-                    <path d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"></path>
+                    <path
+                      d="M19,6v14a2,2,0,0,1-2,2H7a2,2,0,0,1-2-2V6m3,0V4a2,2,0,0,1,2-2h4a2,2,0,0,1,2,2V6"
+                    ></path>
                   </svg>
                 </button>
               </div>
@@ -586,55 +760,93 @@
     </div>
 
     <!-- Delete Confirmation Modal -->
-    <div v-if="showDeleteConfirmModal" class="delete-confirm-overlay" @click="closeDeleteConfirmModal">
+    <div
+      v-if="showDeleteConfirmModal"
+      class="delete-confirm-overlay"
+      @click="closeDeleteConfirmModal"
+    >
       <div class="delete-confirm-modal" @click.stop>
         <div class="modal-header">
           <h3>Confirm Deletion</h3>
           <button class="close-button" @click="closeDeleteConfirmModal">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
+
         <div class="modal-content">
           <div class="confirm-message">
             <div class="warning-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                ></path>
                 <line x1="12" y1="9" x2="12" y2="13"></line>
                 <line x1="12" y1="17" x2="12.01" y2="17"></line>
               </svg>
             </div>
             <h4>Are you sure you want to delete this version?</h4>
-            <p>Version: <strong>{{ versionToDelete?.projectId }} {{ versionToDelete?.version }}</strong></p>
-            <p class="warning-text">This action cannot be undone. The version will be marked as deleted and will no longer be accessible.</p>
+            <p>
+              Version:
+              <strong
+                >{{ versionToDelete?.projectId }}
+                {{ versionToDelete?.version }}</strong
+              >
+            </p>
+            <p class="warning-text">
+              This action cannot be undone. The version will be marked as
+              deleted and will no longer be accessible.
+            </p>
           </div>
-          
+
           <div class="modal-actions">
-            <button @click="closeDeleteConfirmModal" class="btn btn-secondary">Cancel</button>
-            <button @click="deleteVersion" class="btn btn-danger">Delete Version</button>
+            <button @click="closeDeleteConfirmModal" class="btn btn-secondary">
+              Cancel
+            </button>
+            <button @click="deleteVersion" class="btn btn-danger">
+              Delete Version
+            </button>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script>
-import VuePdfEmbed from "vue-pdf-embed"
-import * as mammoth from "mammoth/mammoth.browser"
-import * as pdfjsLib from "pdfjs-dist/build/pdf"
-import { renderAsync as renderDocx } from "docx-preview"
+import VuePdfEmbed from "vue-pdf-embed";
+import * as mammoth from "mammoth/mammoth.browser";
+import * as pdfjsLib from "pdfjs-dist/build/pdf";
+import { renderAsync as renderDocx } from "docx-preview";
 
 // Configure pdf.js worker
-import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url"
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker
+import pdfjsWorker from "pdfjs-dist/build/pdf.worker?url";
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
-import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue"
-import { userStore } from '@/stores/userStore'
+import QAHeadAssignReviewer from "@/views/qahead/QAHeadAssignReviewer.vue";
+import { userStore } from "@/stores/userStore";
 
 export default {
   components: { VuePdfEmbed, QAHeadAssignReviewer },
@@ -647,10 +859,10 @@ export default {
       status: "pending", // pending, approved, rejected, review
       createdDate: null,
       lastModifiedDate: new Date(),
-      
+
       // User role - from user store
       currentUserRole: userStore.getters.roleName() || "Guest",
-      
+
       // Document viewing
       fileType: null,
       pdfUrl: null,
@@ -660,7 +872,7 @@ export default {
       numPages: 0,
       zoom: 1.0,
       fileName: "",
-      
+
       // File upload
       selectedFile: null,
       isUploading: false,
@@ -670,7 +882,7 @@ export default {
         documentNumber: "",
         version: "",
         revision: "",
-        docVer: "A"
+        docVer: "A",
       },
 
       showAssignReviewerModal: false,
@@ -681,47 +893,47 @@ export default {
       // Document list
       loading: false,
       existingDocuments: [],
-      
+
       documentVersions: [
-        { 
-          id: 1, 
-          projectId: 'PRJ-2025-078', 
-          version: 'A', 
-          date: '2025-01-15', 
-          isFavorite: true, 
-          deleted: false 
+        {
+          id: 1,
+          projectId: "PRJ-2025-078",
+          version: "A",
+          date: "2025-01-15",
+          isFavorite: true,
+          deleted: false,
         },
-        { 
-          id: 2, 
-          projectId: 'PRJ-2025-078', 
-          version: 'B', 
-          date: '2025-01-20', 
-          isFavorite: false, 
-          deleted: false 
+        {
+          id: 2,
+          projectId: "PRJ-2025-078",
+          version: "B",
+          date: "2025-01-20",
+          isFavorite: false,
+          deleted: false,
         },
-        { 
-          id: 3, 
-          projectId: 'PRJ-2025-078', 
-          version: 'C', 
-          date: '2025-01-25', 
-          isFavorite: false, 
-          deleted: false 
+        {
+          id: 3,
+          projectId: "PRJ-2025-078",
+          version: "C",
+          date: "2025-01-25",
+          isFavorite: false,
+          deleted: false,
         },
-        { 
-          id: 4, 
-          projectId: 'PRJ-2025-078', 
-          version: 'D', 
-          date: '2025-01-30', 
-          isFavorite: true, 
-          deleted: false 
-        }
+        {
+          id: 4,
+          projectId: "PRJ-2025-078",
+          version: "D",
+          date: "2025-01-30",
+          isFavorite: true,
+          deleted: false,
+        },
       ],
-      
+
       // Reviewer assignment
       hasAssignedReviewer: false,
       assignedReviewer: null,
       loadingReviewerStatus: false,
-      
+
       // Comments
       comments: [],
       allComments: [], // All comments across all documents in the project
@@ -729,60 +941,66 @@ export default {
       newComment: "",
       showCommentForm: false,
       commentForm: {
-        document_name: '',
-        document_id: '',
-        version: '',
-        revision: '',
+        document_name: "",
+        document_id: "",
+        version: "",
+        revision: "",
         page_no: 1,
-        section: '',
-        description: ''
+        section: "",
+        description: "",
       },
-      
+
       // Annotations
       annotations: [],
       isAnnotationMode: false,
       currentAnnotation: null,
-      
+
       // Delete confirmation
       showDeleteConfirm: false,
       commentToDelete: null,
-      
+
       // Justification modal
       showJustificationModal: false,
       selectedComment: null,
-      justificationAction: 'accept', // 'accept' or 'reject'
-      justificationText: '',
-    }
+      justificationAction: "accept", // 'accept' or 'reject'
+      justificationText: "",
+    };
   },
-  
+
   computed: {
     canUpload() {
-      return this.currentUserRole === 'Design Head' || this.currentUserRole === 'Designer';
+      return (
+        this.currentUserRole === "Design Head" ||
+        this.currentUserRole === "Designer"
+      );
     },
     isDesigner() {
-      return this.currentUserRole === 'Designer';
+      return this.currentUserRole === "Designer";
     },
     isDesignHead() {
-      return this.currentUserRole === 'Design Head';
+      return this.currentUserRole === "Design Head";
     },
     isQAHead() {
-      return this.currentUserRole === 'QA Head';
+      return this.currentUserRole === "QA Head";
     },
     isQAAdmin() {
-      return this.currentUserRole === 'Admin';
+      return this.currentUserRole === "Admin";
     },
     isReviewer() {
-      return this.currentUserRole === 'QA Reviewer';
+      return this.currentUserRole === "QA Reviewer";
     },
     // Role-based permissions for commenting
     canAddComments() {
-      return this.currentUserRole === 'QA Reviewer';
+      return this.currentUserRole === "QA Reviewer";
     },
     canDeleteComments() {
-      return this.currentUserRole === 'QA Reviewer';
+      return this.currentUserRole === "QA Reviewer";
     },
     canAcceptRejectComments() {
-      return this.currentUserRole === 'Designer' || this.currentUserRole === 'Design Head';
+      return (
+        this.currentUserRole === "Designer" ||
+        this.currentUserRole === "Design Head"
+      );
     },
     canViewComments() {
       return this.currentUserRole === 'Admin' || 
@@ -811,7 +1029,10 @@ export default {
       return this.canAddComments && this.isLatestDocument;
     },
     docContent() {
-      return (this.fileType === 'pdf' && this.pdfUrl) || (this.fileType === 'docx' && this.docxRendered);
+      return (
+        (this.fileType === "pdf" && this.pdfUrl) ||
+        (this.fileType === "docx" && this.docxRendered)
+      );
     },
     //isFormValid() {
     //return this.commentForm.description.trim();
@@ -820,7 +1041,7 @@ export default {
              this.documentDetails.version.trim() !== '' &&
              this.documentDetails.docVer.trim() !== '';
     },
-    
+
     // Check if user can upload a new document
     canUploadDocument() {
       console.log('=== canUploadDocument DEBUG ===');
@@ -928,7 +1149,7 @@ export default {
       // Fallback to latest document
       const latestDocument = this.getLatestDocument();
       if (!latestDocument) {
-        return 'A';
+        return "A";
       }
       
       return latestDocument.doc_ver || 'A';
@@ -938,8 +1159,12 @@ export default {
   
   async mounted() {
     const { lruId, documentId, projectId } = this.$route.params;
-    console.log('Document Viewer initialized:', { lruId, documentId, projectId });
-    
+    console.log("Document Viewer initialized:", {
+      lruId,
+      documentId,
+      projectId,
+    });
+
     // Set the correct LRU ID from route params
     if (lruId) {
       this.documentDetails.lruId = parseInt(lruId);
@@ -953,83 +1178,87 @@ export default {
       this.loadDocumentVersions(parseInt(lruId));
       this.loadExistingDocuments(parseInt(lruId));
     }
-    
+
     // Load existing document if available
-    if (documentId && documentId !== 'new') {
+    if (documentId && documentId !== "new") {
       this.loadExistingDocument(documentId);
     }
-    
+
     // Check reviewer assignment status for QA Head
-    if (this.currentUserRole === 'QA Head') {
+    if (this.currentUserRole === "QA Head") {
       // Add a delay to ensure LRU metadata is loaded first
       setTimeout(() => {
         this.checkReviewerAssignment();
       }, 1000);
     }
   },
-  
+
   methods: {
     // Helper method to get the latest uploaded document
     getLatestDocument() {
       if (this.existingDocuments.length === 0) {
         return null;
       }
-      
+
       // Sort documents by upload date and get the latest
-      const sortedDocs = [...this.existingDocuments].sort((a, b) => 
-        new Date(b.upload_date) - new Date(a.upload_date)
+      const sortedDocs = [...this.existingDocuments].sort(
+        (a, b) => new Date(b.upload_date) - new Date(a.upload_date)
       );
-      
+
       return sortedDocs[0];
     },
-    
+
     // Helper method to check if a specific document has pending comments
     hasPendingCommentsForDocument(documentId) {
-      return this.comments.some(comment => 
-        comment.document_id === documentId && 
-        (comment.status === 'pending' || !comment.status)
+      return this.comments.some(
+        (comment) =>
+          comment.document_id === documentId &&
+          (comment.status === "pending" || !comment.status)
       );
     },
-    
+
     // Helper method to get the current document being viewed
     getCurrentDocument() {
       // If we have a specific document loaded, return it
       if (this.documentId && this.existingDocuments.length > 0) {
-        return this.existingDocuments.find(doc => 
-          doc.document_id === this.documentId || 
-          doc.document_number === this.documentId
+        return this.existingDocuments.find(
+          (doc) =>
+            doc.document_id === this.documentId ||
+            doc.document_number === this.documentId
         );
       }
-      
+
       // Otherwise return the latest document
       return this.getLatestDocument();
     },
-    
+
     // Load LRU metadata
     async loadLruMetadata(lruId) {
       try {
         console.log(`Attempting to load metadata for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/metadata`);
-        
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${lruId}/metadata`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
-        console.log('API response:', result);
-        
+        console.log("API response:", result);
+
         if (result.success) {
           this.lruName = result.lru.lru_name;
           this.projectName = result.lru.project_name;
           console.log(`✅ Loaded metadata for LRU ${lruId}:`, result.lru);
         } else {
-          console.warn('❌ Failed to load LRU metadata:', result.message);
+          console.warn("❌ Failed to load LRU metadata:", result.message);
           // Set fallback values
           this.lruName = `LRU-${lruId}`;
           this.projectName = "Unknown Project";
         }
       } catch (error) {
-        console.error('❌ Error loading LRU metadata:', error);
+        console.error("❌ Error loading LRU metadata:", error);
         // Set fallback values when API is not available
         this.lruName = `LRU-${lruId}`;
         this.projectName = "Unknown Project";
@@ -1040,55 +1269,63 @@ export default {
     async loadNextDocVer(lruId) {
       try {
         console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
-        const response = await fetch(`http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`);
-        
+        const response = await fetch(
+          `http://localhost:8000/api/plan-documents/next-doc-ver/${lruId}`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
-        console.log('Next doc_ver API response:', result);
-        
+        console.log("Next doc_ver API response:", result);
+
         if (result.success) {
           this.documentDetails.docVer = result.nextDocVer;
           console.log(`✅ Next doc_ver for LRU ${lruId}: ${result.nextDocVer}`);
         } else {
           // If no documents exist for this LRU, start with A
           this.documentDetails.docVer = "A";
-          console.log(`⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = A`);
+          console.log(
+            `⚠️ No existing documents for LRU ${lruId}, starting with doc_ver = A`
+          );
         }
       } catch (error) {
-        console.error('❌ Error loading next doc_ver:', error);
+        console.error("❌ Error loading next doc_ver:", error);
         // Default to A if there's an error
         this.documentDetails.docVer = "A";
         console.log(`⚠️ Error occurred, defaulting to doc_ver = A`);
       }
     },
 
-    // Load existing documents for LRU  
+    // Load existing documents for LRU
     async loadExistingDocuments(lruId) {
       try {
         this.loading = true;
         console.log(`Loading existing documents for LRU ${lruId}...`);
-        
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
-        
+
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
-        console.log('Existing documents API response:', result);
-        
+        console.log("Existing documents API response:", result);
+
         if (result.success) {
           this.existingDocuments = result.documents;
-          console.log(`✅ Loaded ${this.existingDocuments.length} existing documents for LRU ${lruId}`);
+          console.log(
+            `✅ Loaded ${this.existingDocuments.length} existing documents for LRU ${lruId}`
+          );
         } else {
-          console.warn('❌ Failed to load existing documents:', result.message);
+          console.warn("❌ Failed to load existing documents:", result.message);
           this.existingDocuments = [];
         }
       } catch (error) {
-        console.error('❌ Error loading existing documents:', error);
+        console.error("❌ Error loading existing documents:", error);
         this.existingDocuments = [];
       } finally {
         this.loading = false;
@@ -1098,69 +1335,83 @@ export default {
     // Load document versions for LRU and display the latest one
     async loadDocumentVersions(lruId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
+        );
         const result = await response.json();
-        
+
         if (result.success) {
           // Transform the data to match the expected format
-          this.documentVersions = result.documents.map(doc => ({
-            id: doc.document_id,
-            projectId: `${doc.document_number}`,
-            version: doc.version,
-            docVer: doc.doc_ver,
-            revision: doc.revision,
-            date: new Date(doc.upload_date).toLocaleDateString(),
-            filePath: doc.file_path,
-            originalFilename: doc.original_filename,
-            fileSize: doc.file_size,
-            isFavorite: false,
-            deleted: false
-          })).sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
+          this.documentVersions = result.documents
+            .map((doc) => ({
+              id: doc.document_id,
+              projectId: `${doc.document_number}`,
+              version: doc.version,
+              docVer: doc.doc_ver,
+              revision: doc.revision,
+              date: new Date(doc.upload_date).toLocaleDateString(),
+              filePath: doc.file_path,
+              originalFilename: doc.original_filename,
+              fileSize: doc.file_size,
+              isFavorite: false,
+              deleted: false,
+            }))
+            .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date, newest first
 
-          console.log(`Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`);
-          
+          console.log(
+            `Loaded ${this.documentVersions.length} document versions for LRU ${lruId}`
+          );
+
           // If there are existing documents, load the latest one
           if (this.documentVersions.length > 0) {
             const latestDoc = this.documentVersions[0];
             this.loadExistingDocument(latestDoc);
           }
         } else {
-          console.warn('Failed to load document versions:', result.message);
+          console.warn("Failed to load document versions:", result.message);
         }
       } catch (error) {
-        console.error('Error loading document versions:', error);
+        console.error("Error loading document versions:", error);
       }
     },
 
     // View a specific document
     async viewDocument(doc) {
       try {
-        console.log('🔍 Viewing document:', doc);
-        console.log('📁 File path from DB:', doc.file_path);
-        
+        console.log("🔍 Viewing document:", doc);
+        console.log("📁 File path from DB:", doc.file_path);
+
         // Extract filename from file_path - handle both Windows (\) and Unix (/) paths
-        let filename = doc.file_path.split('\\').pop(); // Handle Windows paths
-        filename = filename.split('/').pop(); // Handle Unix paths
-        
-        console.log('📄 Extracted filename:', filename);
-        
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
-        console.log('🌐 File URL:', fileUrl);
-        
+        let filename = doc.file_path.split("\\").pop(); // Handle Windows paths
+        filename = filename.split("/").pop(); // Handle Unix paths
+
+        console.log("📄 Extracted filename:", filename);
+
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
+        console.log("🌐 File URL:", fileUrl);
+
         // Test if file is accessible
         try {
-          const testResponse = await fetch(fileUrl, { method: 'HEAD' });
-          console.log('🔗 File accessibility test:', testResponse.status, testResponse.statusText);
-          
+          const testResponse = await fetch(fileUrl, { method: "HEAD" });
+          console.log(
+            "🔗 File accessibility test:",
+            testResponse.status,
+            testResponse.statusText
+          );
+
           if (!testResponse.ok) {
-            throw new Error(`File not accessible: ${testResponse.status} ${testResponse.statusText}`);
+            throw new Error(
+              `File not accessible: ${testResponse.status} ${testResponse.statusText}`
+            );
           }
         } catch (fetchError) {
-          console.error('❌ File accessibility test failed:', fetchError);
-          alert(`Failed to access file: ${filename}. Please check if the file exists in plan_doc_uploads folder.`);
+          console.error("❌ File accessibility test failed:", fetchError);
+          alert(
+            `Failed to access file: ${filename}. Please check if the file exists in plan_doc_uploads folder.`
+          );
           return;
         }
-        
+
         // Set document metadata
         this.documentId = doc.document_number;
         this.status = doc.status;
@@ -1171,34 +1422,33 @@ export default {
         this.annotations = [];
         
         // Load existing comments and annotations (non-blocking)
-        this.loadCommentsFromBackend().catch(err => {
-          console.warn('Comments loading failed (non-critical):', err);
+        this.loadCommentsFromBackend().catch((err) => {
+          console.warn("Comments loading failed (non-critical):", err);
         });
-        
+
         // Load the file for display based on file extension
-        const extension = filename.split('.').pop().toLowerCase();
-        console.log('📋 File extension:', extension);
-        
-        if (extension === 'pdf') {
-          this.fileType = 'pdf';
+        const extension = filename.split(".").pop().toLowerCase();
+        console.log("📋 File extension:", extension);
+
+        if (extension === "pdf") {
+          this.fileType = "pdf";
           this.fileName = filename;
-          console.log('📄 Loading PDF...');
+          console.log("📄 Loading PDF...");
           await this.loadPdfFromUrl(fileUrl);
-        } else if (extension === 'docx') {
-          this.fileType = 'docx';
+        } else if (extension === "docx") {
+          this.fileType = "docx";
           this.fileName = filename;
-          console.log('📝 Loading DOCX...');
+          console.log("📝 Loading DOCX...");
           await this.loadDocxFromUrl(fileUrl);
         } else {
-          this.fileType = 'other';
+          this.fileType = "other";
           this.fileName = filename;
-          console.log('📄 Other file type, showing filename only');
+          console.log("📄 Other file type, showing filename only");
         }
-        
+
         console.log(`✅ Document ${doc.document_number} loaded successfully`);
-        
       } catch (error) {
-        console.error('❌ Error viewing document:', error);
+        console.error("❌ Error viewing document:", error);
         alert(`Failed to load document: ${error.message}`);
       }
     },
@@ -1207,27 +1457,29 @@ export default {
     async loadDocxFromUrl(fileUrl) {
       try {
         this.clearDocument();
-        this.fileType = 'docx';
+        this.fileType = "docx";
 
         const response = await fetch(fileUrl);
         if (!response.ok) {
-          throw new Error(`Failed to fetch DOCX: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch DOCX: ${response.status} ${response.statusText}`
+          );
         }
         const arrayBuffer = await response.arrayBuffer();
         const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
         if (!container) return;
-        container.innerHTML = '';
+        container.innerHTML = "";
         await renderDocx(arrayBuffer, container, undefined, {
           inWrapper: true,
-          className: 'docx-preview-root'
+          className: "docx-preview-root",
         });
         this.docxRendered = true;
         this.$nextTick(() => {
           this.numPages = 1;
         });
       } catch (err) {
-        console.error('❌ Failed to load DOCX from URL:', err);
-        alert('Failed to load DOCX file from server.');
+        console.error("❌ Failed to load DOCX from URL:", err);
+        alert("Failed to load DOCX file from server.");
       }
     },
 
@@ -1236,7 +1488,7 @@ export default {
       try {
         // Reset previous document state and set up for PDF
         this.clearDocument();
-        this.fileType = 'pdf';
+        this.fileType = "pdf";
         this.pdfUrl = fileUrl;
         this.page = 1;
 
@@ -1244,8 +1496,8 @@ export default {
         const pdf = await loadingTask.promise;
         this.numPages = pdf.numPages;
       } catch (err) {
-        console.error('Failed to load PDF from URL', err);
-        alert('Failed to load PDF file.');
+        console.error("Failed to load PDF from URL", err);
+        alert("Failed to load PDF file.");
       }
     },
 
@@ -1253,7 +1505,7 @@ export default {
     async loadExistingDocument(input) {
       try {
         // If a full document object was passed, delegate to viewDocument
-        if (input && typeof input === 'object' && input.file_path) {
+        if (input && typeof input === "object" && input.file_path) {
           await this.viewDocument(input);
           return;
         }
@@ -1261,32 +1513,40 @@ export default {
         // Otherwise, fetch list and find by document_number or document_id
         const lruId = this.documentDetails.lruId;
         if (!lruId) {
-          console.warn('loadExistingDocument called without LRU ID');
+          console.warn("loadExistingDocument called without LRU ID");
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/lrus/${lruId}/plan-documents`);
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
+        );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
         if (!data.success) {
-          console.warn('Failed to load documents for selecting existing document:', data.message);
+          console.warn(
+            "Failed to load documents for selecting existing document:",
+            data.message
+          );
           return;
         }
 
         const targetIdNum = Number(input);
-        const doc = (data.documents || []).find(d =>
-          d.document_number === input || d.document_id === targetIdNum
+        const doc = (data.documents || []).find(
+          (d) => d.document_number === input || d.document_id === targetIdNum
         );
 
         if (doc) {
           await this.viewDocument(doc);
         } else {
-          console.warn('Requested document not found among existing documents:', input);
+          console.warn(
+            "Requested document not found among existing documents:",
+            input
+          );
         }
       } catch (err) {
-        console.error('Error in loadExistingDocument:', err);
+        console.error("Error in loadExistingDocument:", err);
       }
     },
 
@@ -1294,7 +1554,7 @@ export default {
     /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         
         // Determine file type from extension
         const extension = originalFilename.split('.').pop().toLowerCase();
@@ -1316,20 +1576,20 @@ export default {
 
     // Date formatting
     formatDate(date) {
-      if (!date) return 'N/A';
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric'
+      if (!date) return "N/A";
+      return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
       });
     },
 
     // Comment handling
     handleAccept(comment) {
-      comment.status = 'accepted';
-      comment.response = 'Comment accepted and changes will be implemented.';
+      comment.status = "accepted";
+      comment.response = "Comment accepted and changes will be implemented.";
       // TODO: Update on server
     },
 
@@ -1340,7 +1600,7 @@ export default {
 
     confirmReject() {
       if (this.selectedComment && this.rejectJustification) {
-        this.selectedComment.status = 'rejected';
+        this.selectedComment.status = "rejected";
         this.selectedComment.response = this.rejectJustification;
         // TODO: Update on server
         this.cancelReject();
@@ -1349,74 +1609,80 @@ export default {
 
     cancelReject() {
       this.showRejectModal = false;
-      this.rejectJustification = '';
+      this.rejectJustification = "";
       this.selectedComment = null;
     },
 
     // Accept/Reject Comment Methods
     acceptComment(comment) {
       this.selectedComment = comment;
-      this.justificationAction = 'accept';
-      this.justificationText = '';
+      this.justificationAction = "accept";
+      this.justificationText = "";
       this.showJustificationModal = true;
     },
 
     rejectComment(comment) {
       this.selectedComment = comment;
-      this.justificationAction = 'reject';
-      this.justificationText = '';
+      this.justificationAction = "reject";
+      this.justificationText = "";
       this.showJustificationModal = true;
     },
 
     cancelJustification() {
       this.showJustificationModal = false;
       this.selectedComment = null;
-      this.justificationText = '';
-      this.justificationAction = 'accept';
+      this.justificationText = "";
+      this.justificationAction = "accept";
     },
 
     async confirmJustification() {
       if (!this.justificationText.trim()) {
-        alert('Please provide justification for your decision.');
+        alert("Please provide justification for your decision.");
         return;
       }
 
       if (!this.selectedComment) {
-        alert('No comment selected.');
+        alert("No comment selected.");
         return;
       }
 
       try {
         // Get current user info
-        let currentUser = 'Anonymous';
+        let currentUser = "Anonymous";
         let currentUserId = null;
         try {
           if (userStore && userStore.getters && userStore.getters.userName) {
-            currentUser = userStore.getters.userName() || 'Anonymous';
+            currentUser = userStore.getters.userName() || "Anonymous";
           }
           if (userStore && userStore.getters && userStore.getters.currentUser) {
             const user = userStore.getters.currentUser();
             currentUserId = user?.id || user?.user_id || null;
           }
         } catch (error) {
-          console.log('Error getting user info:', error);
+          console.log("Error getting user info:", error);
         }
 
-        const endpoint = this.justificationAction === 'accept' 
-          ? `/api/comments/${this.selectedComment.id}/accept`
-          : `/api/comments/${this.selectedComment.id}/reject`;
+        const endpoint =
+          this.justificationAction === "accept"
+            ? `/api/comments/${this.selectedComment.id}/accept`
+            : `/api/comments/${this.selectedComment.id}/reject`;
 
         // Get current document details
         const currentDocument = this.getCurrentDocument();
         const documentDetails = {
-          document_id: this.selectedComment.document_id || currentDocument?.document_id,
-          document_name: this.selectedComment.document_name || currentDocument?.document_number,
-          document_version: this.selectedComment.version || currentDocument?.version,
-          document_revision: this.selectedComment.revision || currentDocument?.revision,
-          document_doc_ver: currentDocument?.doc_ver || 'A',
+          document_id:
+            this.selectedComment.document_id || currentDocument?.document_id,
+          document_name:
+            this.selectedComment.document_name ||
+            currentDocument?.document_number,
+          document_version:
+            this.selectedComment.version || currentDocument?.version,
+          document_revision:
+            this.selectedComment.revision || currentDocument?.revision,
+          document_doc_ver: currentDocument?.doc_ver || "A",
           lru_id: this.documentDetails.lruId,
           project_name: this.projectName,
-          lru_name: this.lruName
+          lru_name: this.lruName,
         };
 
         const requestData = {
@@ -1425,27 +1691,27 @@ export default {
           user_role: this.currentUserRole,
           action: this.justificationAction, // 'accept' or 'reject'
           action_date: new Date().toISOString(),
-          ...documentDetails
+          ...documentDetails,
         };
 
-        console.log('Sending comment acceptance/rejection data:', requestData);
-        console.log('API endpoint:', endpoint);
+        console.log("Sending comment acceptance/rejection data:", requestData);
+        console.log("API endpoint:", endpoint);
 
-        const response = await fetch(`http://localhost:5000${endpoint}`, {
-          method: 'POST',
+        const response = await fetch(`http://localhost:8000${endpoint}`, {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(requestData)
+          body: JSON.stringify(requestData),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to update comment');
+          throw new Error(errorData.message || "Failed to update comment");
         }
 
         const result = await response.json();
-        console.log('Comment updated successfully:', result);
+        console.log("Comment updated successfully:", result);
 
         // Reload comments from backend to get updated status
         await this.loadCommentsFromBackend();
@@ -1462,16 +1728,22 @@ export default {
         alert(`Comment ${action} successfully! ${uploadStatus}`);
 
       } catch (error) {
-        console.error('Error updating comment:', error);
-        alert(`Failed to ${this.justificationAction} comment: ${error.message}`);
+        console.error("Error updating comment:", error);
+        alert(
+          `Failed to ${this.justificationAction} comment: ${error.message}`
+        );
       }
     },
 
     scrollToPage(pageNum) {
-      if (this.fileType === 'pdf' && this.$refs.pdfScroll && this.$refs.pdfPages) {
+      if (
+        this.fileType === "pdf" &&
+        this.$refs.pdfScroll &&
+        this.$refs.pdfPages
+      ) {
         const targetPage = this.$refs.pdfPages[pageNum - 1];
         if (targetPage && targetPage.$el) {
-          targetPage.$el.scrollIntoView({ behavior: 'smooth' });
+          targetPage.$el.scrollIntoView({ behavior: "smooth" });
         }
       }
     },
@@ -1480,56 +1752,60 @@ export default {
       this.isEditReviewerMode = false;
       this.showAssignReviewerModal = true;
     },
-    
+
     async editReviewer() {
       this.isEditReviewerMode = true;
       this.showAssignReviewerModal = true;
     },
-    
+
     async checkReviewerAssignment() {
       if (!this.lruName || !this.projectName) {
         return;
       }
-      
+
       try {
         this.loadingReviewerStatus = true;
-        const response = await fetch(`http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(this.lruName)}&project_name=${encodeURIComponent(this.projectName)}`);
+        const response = await fetch(
+          `http://localhost:8000/api/assigned-reviewer?lru_name=${encodeURIComponent(
+            this.lruName
+          )}&project_name=${encodeURIComponent(this.projectName)}`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.hasAssignedReviewer = data.has_reviewer;
           this.assignedReviewer = data.reviewer;
         } else {
-          console.error('Error checking reviewer assignment:', data.message);
+          console.error("Error checking reviewer assignment:", data.message);
           this.hasAssignedReviewer = false;
           this.assignedReviewer = null;
         }
       } catch (error) {
-        console.error('Error checking reviewer assignment:', error);
+        console.error("Error checking reviewer assignment:", error);
         this.hasAssignedReviewer = false;
         this.assignedReviewer = null;
       } finally {
         this.loadingReviewerStatus = false;
       }
     },
-    
+
     closeReviewerModal() {
       this.showAssignReviewerModal = false;
       this.isEditReviewerMode = false;
     },
-    
+
     onReviewerUpdated() {
       // Refresh reviewer status after assignment/update
       this.checkReviewerAssignment();
       this.closeReviewerModal();
     },
     viewObservations() {
-      this.$router.push({ 
-        name: 'ObservationReport', 
-        params: { 
+      this.$router.push({
+        name: "ObservationReport",
+        params: {
           lruName: this.lruName,
-          projectName: this.projectName
-        } 
+          projectName: this.projectName,
+        },
       });
     },
     trackVersions() {
@@ -1539,15 +1815,15 @@ export default {
       this.showTrackVersionsModal = false;
     },
     selectVersion(version) {
-      console.log('Selected version:', version);
+      console.log("Selected version:", version);
       // Navigate to the document version view page
       this.$router.push({
-        name: 'QAHeadDocumentVersionView',
+        name: "QAHeadDocumentVersionView",
         params: {
           projectName: this.projectName,
           lruName: this.lruName,
-          versionId: `${version.projectId}-${version.version}`
-        }
+          versionId: `${version.projectId}-${version.version}`,
+        },
       });
     },
     toggleFavorite(version) {
@@ -1569,14 +1845,14 @@ export default {
     },
     getStatusClass(status) {
       const statusMap = {
-        'Under Review': 'status-under-review',
-        'Approved': 'status-approved',
-        'Rejected': 'status-reject',
-        'Pending': 'status-pending'
+        "Under Review": "status-under-review",
+        Approved: "status-approved",
+        Rejected: "status-reject",
+        Pending: "status-pending",
       };
-      return statusMap[status] || 'status-default';
+      return statusMap[status] || "status-default";
     },
-    
+
     // File handling
     handleFileSelect(event) {
       const file = event.target.files?.[0];
@@ -1590,11 +1866,13 @@ export default {
         "application/msword",
         "text/plain",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "application/vnd.ms-excel"
+        "application/vnd.ms-excel",
       ];
 
       if (!allowedTypes.includes(fileType)) {
-        alert("Unsupported file type. Please upload a PDF, DOCX, DOC, TXT, XLSX, or XLS file.");
+        alert(
+          "Unsupported file type. Please upload a PDF, DOCX, DOC, TXT, XLSX, or XLS file."
+        );
         return;
       }
 
@@ -1614,7 +1892,10 @@ export default {
       if (fileType === "application/pdf") {
         this.fileType = "pdf";
         this.loadPdf(file);
-      } else if (fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+      } else if (
+        fileType ===
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
         this.fileType = "docx";
         this.loadDocx(file);
       } else {
@@ -1630,23 +1911,31 @@ export default {
 
       try {
         const formData = new FormData();
-        formData.append('file', this.selectedFile);
-        formData.append('lru_id', this.documentDetails.lruId);
-        formData.append('document_number', this.documentDetails.documentNumber);
-        formData.append('version', this.documentDetails.version);
-        formData.append('revision', this.documentDetails.revision);
-        formData.append('doc_ver', this.documentDetails.docVer);
-        formData.append('uploaded_by', userStore.getters.currentUser()?.id || userStore.getters.currentUser()?.user_id || 1001);
+        formData.append("file", this.selectedFile);
+        formData.append("lru_id", this.documentDetails.lruId);
+        formData.append("document_number", this.documentDetails.documentNumber);
+        formData.append("version", this.documentDetails.version);
+        formData.append("revision", this.documentDetails.revision);
+        formData.append("doc_ver", this.documentDetails.docVer);
+        formData.append(
+          "uploaded_by",
+          userStore.getters.currentUser()?.id ||
+            userStore.getters.currentUser()?.user_id ||
+            1001
+        );
 
-        const response = await fetch('http://localhost:5000/api/plan-documents', {
-          method: 'POST',
-          body: formData
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/plan-documents",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         const result = await response.json();
 
         if (result.success) {
-          alert('Document uploaded successfully!');
+          alert("Document uploaded successfully!");
           this.selectedFile = null;
           this.$emit('document-uploaded', result);
           
@@ -1658,7 +1947,7 @@ export default {
           
           // Update modified date and reload data
           this.lastModifiedDate = new Date();
-          
+
           // Reload the next doc_ver, document versions, and existing documents list
           this.loadNextDocVer(this.documentDetails.lruId);
           this.loadDocumentVersions(this.documentDetails.lruId);
@@ -1683,8 +1972,8 @@ export default {
           alert(`Upload failed: ${result.message}`);
         }
       } catch (error) {
-        console.error('Upload error:', error);
-        alert('Failed to upload document. Please try again.');
+        console.error("Upload error:", error);
+        alert("Failed to upload document. Please try again.");
       } finally {
         this.isUploading = false;
       }
@@ -1706,7 +1995,7 @@ export default {
       this.isDeleting = true;
 
       try {
-        const response = await fetch(`http://localhost:5000/api/plan-documents/${latestDocument.document_id}`, {
+        const response = await fetch(`http://localhost:8000/api/plan-documents/${latestDocument.document_id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
@@ -1762,39 +2051,42 @@ export default {
         const arrayBuffer = await file.arrayBuffer();
         const container = this.$refs.docxRenderRoot || this.$refs.docxContainer;
         if (!container) return;
-        container.innerHTML = '';
+        container.innerHTML = "";
         await renderDocx(arrayBuffer, container, undefined, {
           inWrapper: true,
-          className: 'docx-preview-root'
+          className: "docx-preview-root",
         });
         this.docxRendered = true;
         this.$nextTick(() => {
           this.numPages = 1;
         });
       } catch (err) {
-        console.error('Error rendering DOCX with docx-preview:', err);
-        alert('Failed to render DOCX file.');
+        console.error("Error rendering DOCX with docx-preview:", err);
+        alert("Failed to render DOCX file.");
       }
     },
 
     processDocxHtml(html) {
-      console.log('Processing DOCX HTML...');
+      console.log("Processing DOCX HTML...");
       try {
         // Create a temporary container
-        const temp = document.createElement('div');
+        const temp = document.createElement("div");
         temp.innerHTML = html;
-        
+
         // Get approximate content per page (A4 size)
         const CHARS_PER_PAGE = 3000; // Rough estimate of characters per page
         const totalContent = temp.textContent;
-        const estimatedPages = Math.max(Math.ceil(totalContent.length / CHARS_PER_PAGE), 1);
-        console.log('Estimated pages:', { 
-          totalChars: totalContent.length, 
-          estimatedPages 
+        const estimatedPages = Math.max(
+          Math.ceil(totalContent.length / CHARS_PER_PAGE),
+          1
+        );
+        console.log("Estimated pages:", {
+          totalChars: totalContent.length,
+          estimatedPages,
         });
 
         // Initialize result container
-        const result = document.createElement('div');
+        const result = document.createElement("div");
         let pageCount = 0;
         let currentPage = null;
         let currentChars = 0;
@@ -1804,9 +2096,9 @@ export default {
             result.appendChild(currentPage);
           }
           pageCount++;
-          currentPage = document.createElement('div');
-          currentPage.className = 'page';
-          currentPage.setAttribute('data-page', pageCount.toString());
+          currentPage = document.createElement("div");
+          currentPage.className = "page";
+          currentPage.setAttribute("data-page", pageCount.toString());
           currentChars = 0;
         }
 
@@ -1815,26 +2107,30 @@ export default {
 
         // Process each element
         const elements = Array.from(temp.children);
-        console.log('Processing elements:', { totalElements: elements.length });
+        console.log("Processing elements:", { totalElements: elements.length });
 
         elements.forEach((element, index) => {
           // Check for explicit page breaks
           const style = window.getComputedStyle(element);
-          const hasPageBreak = style.pageBreakBefore === 'always' || 
-                              style.pageBreakAfter === 'always' ||
-                              element.tagName === 'HR';
+          const hasPageBreak =
+            style.pageBreakBefore === "always" ||
+            style.pageBreakAfter === "always" ||
+            element.tagName === "HR";
 
           // Force a new page on headings for better content organization
           const isHeading = /^H[1-6]$/.test(element.tagName);
           const elementContent = element.textContent;
-          
+
           // Start new page if:
           // 1. There's an explicit page break, or
           // 2. Current page has enough content and we're at a good break point, or
           // 3. We're at a heading and current page has some content
-          if (hasPageBreak || 
-              (currentChars > CHARS_PER_PAGE && (isHeading || element.tagName === 'P')) ||
-              (isHeading && currentChars > CHARS_PER_PAGE * 0.5)) {
+          if (
+            hasPageBreak ||
+            (currentChars > CHARS_PER_PAGE &&
+              (isHeading || element.tagName === "P")) ||
+            (isHeading && currentChars > CHARS_PER_PAGE * 0.5)
+          ) {
             startNewPage();
           }
 
@@ -1848,27 +2144,27 @@ export default {
           result.appendChild(currentPage);
         }
 
-        console.log('HTML processing complete', { 
+        console.log("HTML processing complete", {
           actualPages: pageCount,
           estimatedPages,
-          finalHtmlLength: result.innerHTML.length 
+          finalHtmlLength: result.innerHTML.length,
         });
 
         // Add page numbers
-        result.querySelectorAll('.page').forEach((page, index) => {
-          const pageNum = document.createElement('div');
-          pageNum.className = 'page-number';
+        result.querySelectorAll(".page").forEach((page, index) => {
+          const pageNum = document.createElement("div");
+          pageNum.className = "page-number";
           pageNum.textContent = `Page ${index + 1} of ${pageCount}`;
           page.appendChild(pageNum);
         });
 
         return result.innerHTML;
       } catch (err) {
-        console.error('Error in processDocxHtml:', {
+        console.error("Error in processDocxHtml:", {
           error: err,
           errorName: err.name,
           errorMessage: err.message,
-          errorStack: err.stack
+          errorStack: err.stack,
         });
         // Return original HTML if processing fails
         return html;
@@ -1885,7 +2181,7 @@ export default {
     zoomIn() {
       if (this.zoom < 2.0) this.zoom += 0.1;
     },
-    
+
     zoomOut() {
       if (this.zoom > 0.3) this.zoom -= 0.1;
     },
@@ -1898,14 +2194,14 @@ export default {
         alert(`Please enter a page between 1 and ${this.numPages}`);
       }
     },
-    
+
     nextPage() {
       if (this.page < this.numPages) {
         this.page++;
         this.scrollToPage(this.page);
       }
     },
-    
+
     prevPage() {
       if (this.page > 1) {
         this.page--;
@@ -1915,7 +2211,7 @@ export default {
 
     // scrollToPage(pageNum) {
     //   console.log('Attempting to scroll to page:', pageNum, { fileType: this.fileType });
-      
+
     //   this.$nextTick(() => {
     //     if (this.fileType === 'pdf' && this.$refs.pdfPages) {
     //       const pageEl = this.$refs.pdfPages[pageNum - 1]?.$el;
@@ -1966,7 +2262,7 @@ export default {
         this.newComment = "";
       }
     },
-    
+
     removeComment(index) {
       this.comments.splice(index, 1);
     },
@@ -1974,7 +2270,7 @@ export default {
     deleteComment(index) {
       const comment = this.comments[index];
       if (!comment) return;
-      
+
       // Store comment to delete and show confirmation modal
       this.commentToDelete = { comment, index };
       this.showDeleteConfirm = true;
@@ -1982,25 +2278,29 @@ export default {
 
     confirmDelete() {
       if (!this.commentToDelete) return;
-      
+
       const { comment, index } = this.commentToDelete;
-      
+
       // Delete comment from local array
       this.comments.splice(index, 1);
-      
+
       // If comment has annotation, also delete the annotation
-      if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+      if (
+        comment.annotation &&
+        comment.x !== undefined &&
+        comment.y !== undefined
+      ) {
         this.deleteAnnotationForComment(comment);
       }
-      
+
       // Delete from backend if comment has an ID
       if (comment.id) {
         this.deleteCommentFromBackend(comment.id);
       }
-      
-      console.log('Comment deleted:', comment);
-      console.log('Remaining comments:', this.comments.length);
-      
+
+      console.log("Comment deleted:", comment);
+      console.log("Remaining comments:", this.comments.length);
+
       // Close confirmation modal
       this.showDeleteConfirm = false;
       this.commentToDelete = null;
@@ -2013,37 +2313,41 @@ export default {
 
     deleteAnnotationForComment(comment) {
       // Find and remove the corresponding annotation
-      const annotationIndex = this.annotations.findIndex(ann => 
-        ann.description === comment.description && 
-        ann.x === comment.x && 
-        ann.y === comment.y
+      const annotationIndex = this.annotations.findIndex(
+        (ann) =>
+          ann.description === comment.description &&
+          ann.x === comment.x &&
+          ann.y === comment.y
       );
-      
+
       if (annotationIndex !== -1) {
         this.annotations.splice(annotationIndex, 1);
-        console.log('Annotation deleted for comment:', comment);
+        console.log("Annotation deleted for comment:", comment);
       }
     },
 
     async deleteCommentFromBackend(commentId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/comments/${commentId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_role: this.currentUserRole
-          })
-        });
-        
+        const response = await fetch(
+          `http://localhost:8000/api/comments/${commentId}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_role: this.currentUserRole,
+            }),
+          }
+        );
+
         if (response.ok) {
-          console.log('Comment deleted from backend successfully');
+          console.log("Comment deleted from backend successfully");
         } else {
-          console.error('Failed to delete comment from backend');
+          console.error("Failed to delete comment from backend");
         }
       } catch (error) {
-        console.error('Error deleting comment from backend:', error);
+        console.error("Error deleting comment from backend:", error);
       }
     },
 
@@ -2057,13 +2361,19 @@ export default {
       this.showCommentForm = false;
       this.isAnnotationMode = false;
       this.commentForm = {
-        document_name: this.fileName || '',
-        document_id: this.documentId || '',
-        version: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '',
-        revision: this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '',
+        document_name: this.fileName || "",
+        document_id: this.documentId || "",
+        version:
+          this.existingDocuments.find(
+            (doc) => doc.document_number === this.documentId
+          )?.version || "",
+        revision:
+          this.existingDocuments.find(
+            (doc) => doc.document_number === this.documentId
+          )?.revision || "",
         page_no: this.page || 1,
-        section: '',
-        description: ''
+        section: "",
+        description: "",
       };
     },
 
@@ -2073,15 +2383,15 @@ export default {
     },
 
     submitComment() {
-      console.log('Submit button clicked!');
-      console.log('Form data:', this.commentForm);
-      
+      console.log("Submit button clicked!");
+      console.log("Form data:", this.commentForm);
+
       // Validate required fields
       if (!this.commentForm.description.trim()) {
-        alert('Please enter description');
+        alert("Please enter description");
         return;
       }
-      
+
       // Get current user info
       let currentUser = 'Anonymous';
       let currentUserId = null;
@@ -2104,11 +2414,11 @@ export default {
         ...this.commentForm,
         reviewer_id: currentUserId,
         created_at: new Date().toISOString(),
-        annotation: !!this.currentAnnotation  // Only true if there's an annotation
+        annotation: !!this.currentAnnotation, // Only true if there's an annotation
       };
-      
-      console.log('Created comment object:', comment);
-      
+
+      console.log("Created comment object:", comment);
+
       // Create annotation if we have position data
       if (this.currentAnnotation) {
         const annotation = {
@@ -2117,42 +2427,41 @@ export default {
           y: this.currentAnnotation.y,
           page: this.currentAnnotation.page,
           description: this.commentForm.description,
-          document_id: this.documentId
+          document_id: this.documentId,
         };
-        
+
         this.annotations.push(annotation);
         comment.x = this.currentAnnotation.x;
         comment.y = this.currentAnnotation.y;
-        
-        console.log('Annotation created:', annotation);
-        console.log('Total annotations:', this.annotations.length);
-        
-        
+
+        console.log("Annotation created:", annotation);
+        console.log("Total annotations:", this.annotations.length);
+
         // Clear current annotation after creating it
         this.currentAnnotation = null;
       }
-      
+
       // Add comment to the comments array
       this.comments.push(comment);
-      console.log('Comment added to comments array:', comment);
-      console.log('Total comments now:', this.comments.length);
-      console.log('Comments array:', this.comments);
-      
+      console.log("Comment added to comments array:", comment);
+      console.log("Total comments now:", this.comments.length);
+      console.log("Comments array:", this.comments);
+
       // Close the form
       this.closeCommentForm();
-      
+
       // Save to backend
       this.saveCommentToBackend(comment);
-      
+
       // Show success message
-      console.log('Comment submitted successfully with annotation');
-      alert('Comment submitted successfully!');
-      
+      console.log("Comment submitted successfully with annotation");
+      alert("Comment submitted successfully!");
+
       // Show user feedback
       this.$nextTick(() => {
-        console.log('Comment and annotation added successfully!');
-        console.log('Comments in panel:', this.comments);
-        console.log('Annotations on document:', this.annotations);
+        console.log("Comment and annotation added successfully!");
+        console.log("Comments in panel:", this.comments);
+        console.log("Annotations on document:", this.annotations);
       });
     },
 
@@ -2164,14 +2473,14 @@ export default {
       let y = 0;
       let pageNo = 1;
 
-      if (this.fileType === 'pdf') {
+      if (this.fileType === "pdf") {
         // For PDFs, position relative to the clicked page wrapper
-        const pageEl = event.target.closest('.pdf-page-wrapper');
+        const pageEl = event.target.closest(".pdf-page-wrapper");
         if (!pageEl) return;
         const rect = pageEl.getBoundingClientRect();
         x = ((event.clientX - rect.left) / rect.width) * 100;
         y = ((event.clientY - rect.top) / rect.height) * 100;
-        pageNo = Number(pageEl.getAttribute('data-page')) || this.page || 1;
+        pageNo = Number(pageEl.getAttribute("data-page")) || this.page || 1;
       } else {
         // For DOCX and others, position relative to the container
         const rect = event.currentTarget.getBoundingClientRect();
@@ -2179,28 +2488,36 @@ export default {
         y = ((event.clientY - rect.top) / rect.height) * 100;
         pageNo = 1;
       }
-      
+
       // Update comment form with click position and document details
       this.commentForm.page_no = pageNo;
-      this.commentForm.document_name = this.fileName || '';
-      this.commentForm.document_id = this.documentId || '';
-      this.commentForm.version = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.version || '';
-      this.commentForm.revision = this.existingDocuments.find(doc => doc.document_number === this.documentId)?.revision || '';
-      
+      this.commentForm.document_name = this.fileName || "";
+      this.commentForm.document_id = this.documentId || "";
+      this.commentForm.version =
+        this.existingDocuments.find(
+          (doc) => doc.document_number === this.documentId
+        )?.version || "";
+      this.commentForm.revision =
+        this.existingDocuments.find(
+          (doc) => doc.document_number === this.documentId
+        )?.revision || "";
+
       // Store annotation position for later use
       this.currentAnnotation = {
         x: x,
         y: y,
-        page: pageNo
+        page: pageNo,
       };
-      
+
       // Exit annotation mode and show comment form
       this.isAnnotationMode = false;
       this.showCommentForm = true;
     },
 
     getAnnotationsForPage(pageNum) {
-      const pageAnnotations = this.annotations.filter(ann => ann.page === pageNum);
+      const pageAnnotations = this.annotations.filter(
+        (ann) => ann.page === pageNum
+      );
       console.log(`Annotations for page ${pageNum}:`, pageAnnotations);
       return pageAnnotations;
     },
@@ -2222,39 +2539,43 @@ export default {
           section: comment.section,
           description: comment.description,
           is_annotation: comment.annotation || false,
-          user_role: this.currentUserRole
+          user_role: this.currentUserRole,
         };
-        
+
         // Add annotation position data if it's an annotation
-        if (comment.annotation && comment.x !== undefined && comment.y !== undefined) {
+        if (
+          comment.annotation &&
+          comment.x !== undefined &&
+          comment.y !== undefined
+        ) {
           commentData.x = comment.x;
           commentData.y = comment.y;
         }
-        
-        console.log('Sending comment data to backend:', commentData);
-        console.log('Annotation data:', {
+
+        console.log("Sending comment data to backend:", commentData);
+        console.log("Annotation data:", {
           is_annotation: commentData.is_annotation,
           x: commentData.x,
           y: commentData.y,
-          page_no: commentData.page_no
+          page_no: commentData.page_no,
         });
-        
-        const response = await fetch('http://localhost:5000/api/comments', {
-          method: 'POST',
+
+        const response = await fetch("http://localhost:8000/api/comments", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(commentData)
+          body: JSON.stringify(commentData),
         });
-        
+
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to save comment');
+          throw new Error(errorData.message || "Failed to save comment");
         }
-        
+
         const result = await response.json();
-        console.log('Comment saved successfully:', result);
-        
+        console.log("Comment saved successfully:", result);
+
         // Reload comments from backend to get the correct IDs
         await this.loadCommentsFromBackend();
         
@@ -2262,7 +2583,7 @@ export default {
         await this.loadAllCommentsForProject();
         
       } catch (error) {
-        console.error('Error saving comment:', error);
+        console.error("Error saving comment:", error);
         alert(`Failed to save comment: ${error.message}`);
       }
     },
@@ -2270,23 +2591,32 @@ export default {
     async loadCommentsFromBackend() {
       try {
         if (!this.documentId) {
-          console.log('No document ID available for loading comments');
+          console.log("No document ID available for loading comments");
           return;
         }
-        
-        const response = await fetch(`http://localhost:5000/api/comments?document_id=${this.documentId}`);
-        
+
+        const response = await fetch(
+          `http://localhost:8000/api/comments?document_id=${this.documentId}`
+        );
+
         if (response.ok) {
           const data = await response.json();
           this.comments = data.comments || [];
           this.annotations = data.annotations || [];
-          console.log(`Loaded ${this.comments.length} comments and ${this.annotations.length} annotations`);
+          console.log(
+            `Loaded ${this.comments.length} comments and ${this.annotations.length} annotations`
+          );
         } else {
-          console.warn(`Failed to load comments: ${response.status} ${response.statusText}`);
+          console.warn(
+            `Failed to load comments: ${response.status} ${response.statusText}`
+          );
           // Don't show error to user as comments are optional
         }
       } catch (error) {
-        console.warn('Error loading comments (optional feature):', error.message);
+        console.warn(
+          "Error loading comments (optional feature):",
+          error.message
+        );
         // Don't show error to user as comments are optional
       }
     },
@@ -2302,7 +2632,7 @@ export default {
         }
         
         // Get all documents for this LRU/project
-        const documentsResponse = await fetch(`http://localhost:5000/api/lrus/${this.documentDetails.lruId}/plan-documents`);
+        const documentsResponse = await fetch(`http://localhost:8000/api/lrus/${this.documentDetails.lruId}/plan-documents`);
         console.log('Documents response status:', documentsResponse.status);
         
         if (!documentsResponse.ok) {
@@ -2325,7 +2655,7 @@ export default {
         for (const doc of documentsData.documents) {
           console.log('Loading comments for document:', doc.document_id);
           try {
-            const commentsResponse = await fetch(`http://localhost:5000/api/comments?document_id=${doc.document_id}`);
+            const commentsResponse = await fetch(`http://localhost:8000/api/comments?document_id=${doc.document_id}`);
             if (commentsResponse.ok) {
               const commentsData = await commentsResponse.json();
               console.log('Comments data for doc', doc.document_id, ':', commentsData);
@@ -2443,61 +2773,61 @@ export default {
 
     // Test method - can be called from browser console
     testCommentAndAnnotation() {
-      console.log('Testing comment and annotation functionality...');
-      
+      console.log("Testing comment and annotation functionality...");
+
       // Create a test comment
       const testComment = {
         id: Date.now(),
-        document_name: 'test-document.pdf',
-        document_id: 'TEST-001',
-        version: '1.0',
-        revision: 'A',
+        document_name: "test-document.pdf",
+        document_id: "TEST-001",
+        version: "1.0",
+        revision: "A",
         page_no: 1,
-        section: 'Test Section',
-        description: 'This is a test comment with annotation',
-        commented_by: 'Test User',
+        section: "Test Section",
+        description: "This is a test comment with annotation",
+        commented_by: "Test User",
         created_at: new Date().toISOString(),
-        annotation: true
+        annotation: true,
       };
-      
+
       // Create a test annotation
       const testAnnotation = {
         id: Date.now(),
         x: 50,
         y: 30,
         page: 1,
-        description: 'This is a test comment with annotation',
-        document_id: 'TEST-001'
+        description: "This is a test comment with annotation",
+        document_id: "TEST-001",
       };
-      
+
       this.comments.push(testComment);
       this.annotations.push(testAnnotation);
-      
-      console.log('Test comment added:', testComment);
-      console.log('Test annotation added:', testAnnotation);
-      console.log('Total comments:', this.comments.length);
-      console.log('Total annotations:', this.annotations.length);
+
+      console.log("Test comment added:", testComment);
+      console.log("Test annotation added:", testAnnotation);
+      console.log("Total comments:", this.comments.length);
+      console.log("Total annotations:", this.annotations.length);
     },
 
     // Simple test method to add a comment directly
     addTestComment() {
       const testComment = {
         id: Date.now(),
-        document_name: 'test-document.pdf',
-        document_id: 'TEST-001',
-        version: '1.0',
-        revision: 'A',
+        document_name: "test-document.pdf",
+        document_id: "TEST-001",
+        version: "1.0",
+        revision: "A",
         page_no: 1,
-        section: 'Test Section',
-        description: 'This is a simple test comment',
-        commented_by: 'Test User',
+        section: "Test Section",
+        description: "This is a simple test comment",
+        commented_by: "Test User",
         created_at: new Date().toISOString(),
-        annotation: false
+        annotation: false,
       };
-      
+
       this.comments.push(testComment);
-      console.log('Simple test comment added:', testComment);
-      console.log('Comments array length:', this.comments.length);
+      console.log("Simple test comment added:", testComment);
+      console.log("Comments array length:", this.comments.length);
     },
 
     // Cleanup
@@ -2515,18 +2845,19 @@ export default {
 
     // (duplicate removed) loadExistingDocuments is defined earlier
   },
-  
+
   beforeUnmount() {
     if (this.pdfUrl) {
       URL.revokeObjectURL(this.pdfUrl);
     }
   },
-}
+};
 </script>
 
 <style scoped>
 .pdf-viewer-container {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, sans-serif;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2560,10 +2891,18 @@ export default {
   margin-right: 0.5rem;
 }
 
-.status-pending { color: #f59e0b; }
-.status-approved { color: #10b981; }
-.status-reject { color: #ef4444; }
-.status-review { color: #3b82f6; }
+.status-pending {
+  color: #f59e0b;
+}
+.status-approved {
+  color: #10b981;
+}
+.status-reject {
+  color: #ef4444;
+}
+.status-review {
+  color: #3b82f6;
+}
 
 /* Action Bar */
 .action-bar {
@@ -2572,8 +2911,8 @@ export default {
   border-bottom: 1px solid #e0e0e0;
   display: flex;
   justify-content: center; /* Center the items horizontally */
-  align-items: center;     /* Align items vertically in the center */
-  gap: 1rem;               /* Space between buttons */
+  align-items: center; /* Align items vertically in the center */
+  gap: 1rem; /* Space between buttons */
 }
 
 .action-btn {
@@ -2662,7 +3001,7 @@ export default {
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
-  
+
   /* Center horizontally */
   display: block;
   margin: 0 auto;
@@ -3095,7 +3434,6 @@ export default {
   font-size: 1.1rem;
 }
 
-
 .comments-container {
   flex: 1;
   overflow-y: auto;
@@ -3506,7 +3844,8 @@ export default {
   border-radius: 12px;
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
 }
 
@@ -3748,7 +4087,7 @@ export default {
 .track-versions-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -3762,7 +4101,7 @@ export default {
   width: 600px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   animation: fadeIn 0.2s ease-in-out;
 }
 
@@ -3775,7 +4114,8 @@ export default {
   border-bottom: 1px solid #eee;
 }
 
-.modal-header h2, .modal-header h3 {
+.modal-header h2,
+.modal-header h3 {
   margin: 0;
   font-size: 1.3rem;
   font-weight: bold;
@@ -3818,7 +4158,7 @@ export default {
 
 .version-item:hover {
   background: #f3f4f6;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* Active favorite */
@@ -3862,14 +4202,16 @@ export default {
   align-items: center;
 }
 
-.star-button, .delete-button {
+.star-button,
+.delete-button {
   background: none;
   border: none;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-.star-button:hover, .delete-button:hover {
+.star-button:hover,
+.delete-button:hover {
   transform: scale(1.2);
 }
 
@@ -3890,7 +4232,7 @@ export default {
 }
 
 .comments-section::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -3922,7 +4264,7 @@ export default {
 }
 
 .comments-header h3::before {
-  content: '';
+  content: "";
   display: block;
   width: 4px;
   height: 24px;
@@ -4118,8 +4460,14 @@ export default {
 
 /* Animation */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Justification Modal Styles */
@@ -4141,7 +4489,8 @@ export default {
   border-radius: 12px;
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   overflow: hidden;
   animation: fadeIn 0.3s ease;
 }
@@ -4343,5 +4692,5 @@ export default {
   border-radius: 4px;
   border: 1px solid #e5e7eb;
 }
-
 </style>
+ts

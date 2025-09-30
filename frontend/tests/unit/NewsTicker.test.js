@@ -1,181 +1,300 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mount } from "@vue/test-utils";
-import NewsTicker from "@/components/NewsTicker.vue";
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { mount } from '@vue/test-utils'
+import NewsTicker from '@/components/NewsTicker.vue'
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = vi.fn()
 
-describe("NewsTicker.vue", () => {
-  let wrapper;
-
-  const mockNewsData = {
-    success: true,
-    news: [
-      { news_text: "Breaking: New project milestone achieved!" },
-      { news_text: "Update: System maintenance scheduled for weekend" },
-      { news_text: "Announcement: Team meeting moved to next week" },
-    ],
-  };
+describe('NewsTicker.vue', () => {
+  let wrapper
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    fetch.mockResolvedValue({
-      json: () => Promise.resolve(mockNewsData),
-    });
-  });
+    vi.clearAllMocks()
+    global.fetch.mockClear()
+  })
 
-  it("renders correctly when there is no news", () => {
-    wrapper = mount(NewsTicker, {
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount()
+    }
+  })
+
+  const createWrapper = (props = {}) => {
+    return mount(NewsTicker, {
       props: {
-        height: "60px",
-        speed: 50,
-      },
-    });
+        height: '50px',
+        speed: 100,
+        backgroundColor: '#2c3e50',
+        textColor: '#ffffff',
+        showWhenEmpty: true,
+        fallbackText: 'Welcome to Aviatrax',
+        ...props
+      }
+    })
+  }
 
-    // Component should not render when there's no news
-    expect(wrapper.find(".news-ticker-container").exists()).toBe(false);
-  });
+  describe('Component Rendering', () => {
+    it('renders with default props', () => {
+      wrapper = createWrapper()
+      expect(wrapper.find('.news-ticker-container').exists()).toBe(true)
+      expect(wrapper.find('.news-ticker').exists()).toBe(true)
+      expect(wrapper.find('.news-content').exists()).toBe(true)
+    })
 
-  it("renders news ticker when news is available", async () => {
-    wrapper = mount(NewsTicker);
+    it('applies custom height and background color', () => {
+      wrapper = createWrapper({
+        height: '60px',
+        backgroundColor: '#ff0000'
+      })
+      
+      const container = wrapper.find('.news-ticker-container')
+      expect(container.attributes('style')).toContain('height: 60px')
+      expect(container.attributes('style')).toContain('background-color: rgb(255, 0, 0)')
+    })
 
-    // Wait for component to load news
-    await wrapper.vm.$nextTick();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    it('applies custom text color', () => {
+      wrapper = createWrapper({
+        textColor: '#00ff00'
+      })
+      
+      const content = wrapper.find('.news-content')
+      expect(content.attributes('style')).toContain('color: rgb(0, 255, 0)')
+    })
+  })
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8000/api/news");
+  describe('News Loading', () => {
+    it('loads news on mount', async () => {
+      const mockNews = [
+        { news_text: 'Test news 1' },
+        { news_text: 'Test news 2' }
+      ]
+      
+      global.fetch.mockResolvedValueOnce({
+        json: () => Promise.resolve(mockNews)
+      })
 
-    // Update component data manually since we're mocking the API
-    await wrapper.setData({ news: mockNewsData.news });
+      wrapper = createWrapper()
+      await wrapper.vm.$nextTick()
 
-    expect(wrapper.find(".news-ticker-container").exists()).toBe(true);
-    expect(wrapper.find(".news-content").exists()).toBe(true);
-  });
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/news')
+    })
 
-  it("displays correct number of news items", async () => {
-    wrapper = mount(NewsTicker);
+    it('handles successful news loading', async () => {
+      const mockNews = [
+        { news_text: 'Breaking news' },
+        { news_text: 'Important update' }
+      ]
+      
+      global.fetch.mockResolvedValueOnce({
+        json: () => Promise.resolve(mockNews)
+      })
 
-    // Set news data manually
-    await wrapper.setData({ news: mockNewsData.news });
+      wrapper = createWrapper()
+      await wrapper.vm.loadNews()
+      await wrapper.vm.$nextTick()
 
-    const newsItems = wrapper.findAll(".news-item");
-    // Should have 9 items (3 original items repeated 3 times for scrolling effect)
-    expect(newsItems).toHaveLength(9);
-  });
+      expect(wrapper.vm.news).toEqual(mockNews)
+      expect(wrapper.vm.loading).toBe(false)
+    })
 
-  it("applies custom styling props correctly", () => {
-    const customProps = {
-      height: "80px",
-      speed: 150,
-      backgroundColor: "#ff0000",
-      textColor: "#ffffff",
-    };
+    it('handles news loading errors gracefully', async () => {
+      global.fetch.mockRejectedValueOnce(new Error('Network error'))
 
-    wrapper = mount(NewsTicker, {
-      props: customProps,
-    });
+      wrapper = createWrapper()
+      await wrapper.vm.loadNews()
+      await wrapper.vm.$nextTick()
 
-    const container = wrapper.find(".news-ticker-container");
-    expect(container.exists()).toBe(false); // No news initially
+      expect(wrapper.vm.news).toEqual([])
+      expect(wrapper.vm.loading).toBe(false)
+    })
 
-    // Test that props are correctly passed
-    expect(wrapper.props("height")).toBe("80px");
-    expect(wrapper.props("speed")).toBe(150);
-    expect(wrapper.props("backgroundColor")).toBe("#ff0000");
-    expect(wrapper.props("textColor")).toBe("#ffffff");
-  });
+    it('prevents multiple simultaneous loading requests', async () => {
+      global.fetch.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
 
-  it("handles API errors gracefully", async () => {
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockImplementation(() => {});
+      wrapper = createWrapper()
+      
+      // Start multiple load requests
+      const promise1 = wrapper.vm.loadNews()
+      const promise2 = wrapper.vm.loadNews()
+      
+      await Promise.all([promise1, promise2])
 
-    fetch.mockRejectedValue(new Error("Network error"));
+      // Should only call fetch once
+      expect(global.fetch).toHaveBeenCalledTimes(1)
+    })
+  })
 
-    wrapper = mount(NewsTicker);
+  describe('Display Logic', () => {
+    it('shows fallback text when no news and showWhenEmpty is true', () => {
+      wrapper = createWrapper({
+        showWhenEmpty: true,
+        fallbackText: 'Custom fallback'
+      })
+      
+      wrapper.setData({ news: [] })
+      
+      expect(wrapper.vm.displayNews).toEqual(['Custom fallback', 'Custom fallback'])
+    })
 
-    // Wait for error handling
-    await wrapper.vm.$nextTick();
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    it('shows empty array when no news and showWhenEmpty is false', () => {
+      wrapper = createWrapper({
+        showWhenEmpty: false
+      })
+      
+      wrapper.setData({ news: [] })
+      
+      expect(wrapper.vm.displayNews).toEqual([])
+    })
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Error loading news:",
-      expect.any(Error)
-    );
+    it('repeats news items for continuous scrolling', () => {
+      const mockNews = [
+        { news_text: 'News 1' },
+        { news_text: 'News 2' }
+      ]
+      
+      wrapper = createWrapper()
+      wrapper.setData({ news: mockNews })
+      
+      const expected = [...mockNews, ...mockNews, ...mockNews]
+      expect(wrapper.vm.displayNews).toEqual(expected)
+    })
 
-    consoleErrorSpy.mockRestore();
-  });
+    it('handles string news items', () => {
+      wrapper = createWrapper()
+      wrapper.setData({ news: ['String news 1', 'String news 2'] })
+      
+      const newsItems = wrapper.findAll('.news-item')
+      expect(newsItems[0].text()).toContain('String news 1')
+      expect(newsItems[1].text()).toContain('String news 2')
+    })
+  })
 
-  it("calculates animation duration based on content length", async () => {
-    wrapper = mount(NewsTicker);
+  describe('Computed Properties', () => {
+    it('hasNews returns true when news array has items', () => {
+      wrapper = createWrapper()
+      wrapper.setData({ news: [{ news_text: 'Test' }] })
+      
+      expect(wrapper.vm.hasNews).toBe(true)
+    })
 
-    await wrapper.setData({ news: mockNewsData.news });
+    it('hasNews returns false when news array is empty', () => {
+      wrapper = createWrapper()
+      wrapper.setData({ news: [] })
+      
+      expect(wrapper.vm.hasNews).toBe(false)
+    })
 
-    // Call the method directly
-    wrapper.vm.calculateAnimationDuration();
+    it('animationStyle returns correct CSS properties', () => {
+      wrapper = createWrapper()
+      
+      const style = wrapper.vm.animationStyle
+      expect(style.animationDuration).toBe('30s')
+      expect(style.animationTimingFunction).toBe('linear')
+      expect(style.animationIterationCount).toBe('infinite')
+    })
+  })
 
-    // Should have calculated a duration
-    expect(wrapper.vm.animationDuration).toBeGreaterThan(20);
-    expect(typeof wrapper.vm.animationDuration).toBe("number");
-  });
+  describe('Component Visibility', () => {
+    it('shows component when hasNews is true', () => {
+      wrapper = createWrapper()
+      wrapper.setData({ news: [{ news_text: 'Test' }] })
+      
+      expect(wrapper.find('.news-ticker-container').isVisible()).toBe(true)
+    })
 
-  it("has correct computed properties", async () => {
-    wrapper = mount(NewsTicker);
+    it('shows component when showWhenEmpty is true and no news', () => {
+      wrapper = createWrapper({
+        showWhenEmpty: true
+      })
+      wrapper.setData({ news: [] })
+      
+      expect(wrapper.find('.news-ticker-container').isVisible()).toBe(true)
+    })
 
-    // Initially no news
-    expect(wrapper.vm.hasNews).toBe(false);
-    expect(wrapper.vm.displayNews).toHaveLength(0);
+    it('hides component when showWhenEmpty is false and no news', () => {
+      wrapper = createWrapper({
+        showWhenEmpty: false
+      })
+      wrapper.setData({ news: [] })
+      
+      expect(wrapper.find('.news-ticker-container').isVisible()).toBe(false)
+    })
+  })
 
-    // Add news
-    await wrapper.setData({ news: mockNewsData.news });
+  describe('News Items Rendering', () => {
+    it('renders news items with correct format', () => {
+      const mockNews = [
+        { news_text: 'First news item' },
+        { news_text: 'Second news item' }
+      ]
+      
+      wrapper = createWrapper()
+      wrapper.setData({ news: mockNews })
+      
+      const newsItems = wrapper.findAll('.news-item')
+      expect(newsItems.length).toBeGreaterThan(0)
+      expect(newsItems[0].text()).toContain('📰 First news item')
+    })
 
-    expect(wrapper.vm.hasNews).toBe(true);
-    expect(wrapper.vm.displayNews).toHaveLength(9); // 3 items × 3 repetitions
-  });
+    it('handles empty news text gracefully', () => {
+      wrapper = createWrapper()
+      wrapper.setData({ news: [{ news_text: '' }] })
+      
+      const newsItems = wrapper.findAll('.news-item')
+      expect(newsItems[0].text()).toContain('📰')
+    })
+  })
 
-  it("sets up interval for news refresh on mount", () => {
-    const setIntervalSpy = vi.spyOn(global, "setInterval");
+  describe('Auto-refresh Functionality', () => {
+    it('sets up interval for news refresh', () => {
+      vi.useFakeTimers()
+      
+      wrapper = createWrapper()
+      
+      // Fast-forward time to trigger interval
+      vi.advanceTimersByTime(30000)
+      
+      expect(global.fetch).toHaveBeenCalledTimes(2) // Initial call + interval call
+      
+      vi.useRealTimers()
+    })
+  })
 
-    wrapper = mount(NewsTicker);
+  describe('Edge Cases', () => {
+    it('handles null news response', async () => {
+      global.fetch.mockResolvedValueOnce({
+        json: () => Promise.resolve(null)
+      })
 
-    expect(setIntervalSpy).toHaveBeenCalledWith(wrapper.vm.loadNews, 30000);
+      wrapper = createWrapper()
+      await wrapper.vm.loadNews()
+      
+      expect(wrapper.vm.news).toEqual([])
+    })
 
-    setIntervalSpy.mockRestore();
-  });
+    it('handles malformed news response', async () => {
+      global.fetch.mockResolvedValueOnce({
+        json: () => Promise.resolve('invalid data')
+      })
 
-  it("handles successful API response", async () => {
-    wrapper = mount(NewsTicker);
+      wrapper = createWrapper()
+      await wrapper.vm.loadNews()
+      
+      expect(wrapper.vm.news).toEqual([])
+    })
 
-    // Call loadNews directly
-    await wrapper.vm.loadNews();
+    it('handles network timeout', async () => {
+      global.fetch.mockImplementation(() => 
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 100)
+        )
+      )
 
-    expect(fetch).toHaveBeenCalledWith("http://localhost:8000/api/news");
-    expect(wrapper.vm.news).toEqual(mockNewsData.news);
-  });
-
-  it("handles API response with no news", async () => {
-    fetch.mockResolvedValue({
-      json: () => Promise.resolve({ success: true, news: [] }),
-    });
-
-    wrapper = mount(NewsTicker);
-
-    await wrapper.vm.loadNews();
-
-    expect(wrapper.vm.news).toEqual([]);
-    expect(wrapper.vm.hasNews).toBe(false);
-  });
-
-  it("prevents multiple simultaneous loading operations", async () => {
-    wrapper = mount(NewsTicker);
-
-    // Set loading to true
-    await wrapper.setData({ loading: true });
-
-    // Try to load news - should return early
-    await wrapper.vm.loadNews();
-
-    // fetch should not be called because loading is true
-    expect(fetch).not.toHaveBeenCalled();
-  });
-});
+      wrapper = createWrapper()
+      await wrapper.vm.loadNews()
+      
+      expect(wrapper.vm.news).toEqual([])
+      expect(wrapper.vm.loading).toBe(false)
+    })
+  })
+})

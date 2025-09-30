@@ -132,6 +132,8 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore'
+
 export default {
   name: 'ReviewerMemoDashboard',
   data() {
@@ -146,12 +148,13 @@ export default {
       selectedMemo: null,
       projects: [],
       memoStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'NOT ASSIGNED', color: 'not-assigned' },
+        { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
+        { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
+        { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
+        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
+        { name: 'TEST NOT CONDUCTED', color: 'not-conducted', dbValue: 'test_not_conducted' },
+        { name: 'NOT ASSIGNED', color: 'not-assigned', dbValue: 'not_assigned' },
+        { name: 'TEST FAILED', color: 'test-failed', dbValue: 'test_failed' },
       ],
       memos: [],
       loading: true,
@@ -188,7 +191,18 @@ export default {
         this.loading = true;
         this.error = null;
         
-        const response = await fetch('/api/memos');
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (currentUser && currentUserRole) {
+          params.append('user_id', currentUser.id);
+          params.append('user_role', currentUserRole);
+        }
+        
+        const response = await fetch(`/api/memos?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }
@@ -241,7 +255,29 @@ export default {
     },
 
     determineStatus(memo) {
-      // Determine status based on memo data
+      // Use memo_status field if available, otherwise fall back to legacy logic
+      if (memo.memo_status) {
+        switch (memo.memo_status) {
+          case 'not_assigned':
+            return 'NOT ASSIGNED';
+          case 'assigned':
+            return 'ASSIGNED';
+          case 'disapproved':
+            return 'DISAPPROVED';
+          case 'successfully_completed':
+            return 'SUCCESSFULLY COMPLETED';
+          case 'test_not_conducted':
+            return 'TEST NOT CONDUCTED';
+          case 'completed_with_observations':
+            return 'COMPLETED WITH OBSERVATIONS';
+          case 'test_failed':
+            return 'TEST FAILED';
+          default:
+            return memo.memo_status.toUpperCase().replace(/_/g, ' ');
+        }
+      }
+      
+      // Fallback to legacy logic for backward compatibility
       if (memo.accepted_at) {
         return 'SUCCESSFULLY COMPLETED';
       } else if (memo.submitted_at) {
@@ -489,6 +525,10 @@ export default {
 .not-assigned {
   background-color: #fff1d6; /* Light Orange */
 }
+.test-failed {
+  background-color: #ff6b6b; /* Red */
+  color: white;
+}
 
 .memo-list {
   padding: 20px;
@@ -498,6 +538,7 @@ export default {
 }
 
 .memo-card {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -552,9 +593,9 @@ export default {
 /* Memo Actions */
 .memo-actions {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
 }
 
 .share-btn {

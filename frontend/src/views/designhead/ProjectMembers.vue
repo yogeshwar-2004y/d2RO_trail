@@ -140,7 +140,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}/members`
+          `http://localhost:8000/api/projects/${this.projectId}/members`
         );
         const data = await response.json();
 
@@ -176,7 +176,7 @@ export default {
           this.removing = true;
 
           const response = await fetch(
-            `http://localhost:5000/api/projects/${this.projectId}/members/${member.user_id}`,
+            `http://localhost:8000/api/projects/${this.projectId}/members/${member.user_id}`,
             {
               method: "DELETE",
               headers: {

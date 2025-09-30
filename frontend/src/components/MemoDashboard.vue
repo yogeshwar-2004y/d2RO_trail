@@ -148,6 +148,49 @@
           <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
           <div class="memo-scheduled">TEST SCHEDULED ON : {{ memo.scheduledDate }}</div>
         </div>
+        <!-- Share button for QA Reviewers -->
+        <div v-if="currentUserRole === 3" class="memo-actions">
+          <button class="share-btn" @click.stop="shareMemo(memo)" title="Share memo">
+            <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+            </svg>
+            <span class="share-text">Share</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
+      <div class="share-modal-content">
+        <h2>Share Memo</h2>
+        <p>Select a QA reviewer to share this memo with.</p>
+        <div class="memo-info">
+          <strong>Project:</strong> {{ selectedMemo?.project }}<br>
+          <strong>Author:</strong> {{ selectedMemo?.author }}<br>
+          <strong>Memo ID:</strong> {{ selectedMemo?.id }}
+        </div>
+        <div class="form-group">
+          <label for="reviewer-select">Select QA Reviewer:</label>
+          <select id="reviewer-select" v-model="selectedReviewerId" class="reviewer-select" @change="onReviewerChange">
+            <option value="">Choose a reviewer...</option>
+            <option v-for="reviewer in reviewers" :key="reviewer.user_id" :value="reviewer.user_id">
+              {{ reviewer.name }} ({{ reviewer.email }})
+            </option>
+          </select>
+        </div>
+        <div class="form-group" v-if="selectedReviewerId">
+          <label>Selected Reviewer Details:</label>
+          <div class="reviewer-details">
+            <strong>Username:</strong> {{ getSelectedReviewerName() }}<br>
+            <strong>User ID:</strong> {{ selectedReviewerId }}<br>
+            <strong>Email:</strong> {{ getSelectedReviewerEmail() }}
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button @click="shareMemoWithReviewer" class="send-btn" :disabled="!selectedReviewerId">Share</button>
+          <button @click="toggleShareModal" class="cancel-btn">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -167,16 +210,21 @@ export default {
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'NOT ASSIGNED', color: 'not-assigned' },
+        { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
+        { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
+        { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
+        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
+        { name: 'TEST NOT CONDUCTED', color: 'not-conducted', dbValue: 'test_not_conducted' },
+        { name: 'NOT ASSIGNED', color: 'not-assigned', dbValue: 'not_assigned' },
+        { name: 'TEST FAILED', color: 'test-failed', dbValue: 'test_failed' },
       ],
       memos: [],
       loading: true,
       error: null,
+      showShareModal: false,
+      selectedMemo: null,
+      selectedReviewerId: '',
+      reviewers: [],
       notifications: [
         { id: 1, project: 'PROJ001', serialNumber: '15,16', lru: 'LRU Name', completedStage: 'stage 1', requiredStage: 'stage3', justification: 'justification', status: 'pending', isRead: false },
         { id: 2, project: 'PROJ002', serialNumber: '17,18', lru: 'LRU Component', completedStage: 'stage 2', requiredStage: 'stage4', justification: 'Technical review required', status: 'pending', isRead: false },
@@ -211,6 +259,7 @@ export default {
   async mounted() {
     await this.fetchMemos();
     await this.fetchProjects();
+    await this.fetchReviewers();
   },
   methods: {
     async fetchMemos() {
@@ -218,7 +267,18 @@ export default {
         this.loading = true;
         this.error = null;
         
-        const response = await fetch('/api/memos');
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        const currentUserRole = userStore.getters.currentUserRole();
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (currentUser && currentUserRole) {
+          params.append('user_id', currentUser.id);
+          params.append('user_role', currentUserRole);
+        }
+        
+        const response = await fetch(`/api/memos?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }
@@ -271,7 +331,29 @@ export default {
     },
 
     determineStatus(memo) {
-      // Determine status based on memo data
+      // Use memo_status field if available, otherwise fall back to legacy logic
+      if (memo.memo_status) {
+        switch (memo.memo_status) {
+          case 'not_assigned':
+            return 'NOT ASSIGNED';
+          case 'assigned':
+            return 'ASSIGNED';
+          case 'disapproved':
+            return 'DISAPPROVED';
+          case 'successfully_completed':
+            return 'SUCCESSFULLY COMPLETED';
+          case 'test_not_conducted':
+            return 'TEST NOT CONDUCTED';
+          case 'completed_with_observations':
+            return 'COMPLETED WITH OBSERVATIONS';
+          case 'test_failed':
+            return 'TEST FAILED';
+          default:
+            return memo.memo_status.toUpperCase().replace(/_/g, ' ');
+        }
+      }
+      
+      // Fallback to legacy logic for backward compatibility
       if (memo.accepted_at) {
         return 'SUCCESSFULLY COMPLETED';
       } else if (memo.submitted_at) {
@@ -362,6 +444,104 @@ export default {
     },
     openSharedMemos() {
       this.$router.push({ name: 'SharedMemoDashboard' }); 
+    },
+    shareMemo(memo) {
+      this.selectedMemo = memo;
+      this.showShareModal = true;
+    },
+    toggleShareModal() {
+      this.showShareModal = !this.showShareModal;
+      if (!this.showShareModal) {
+        this.selectedReviewerId = '';
+        this.selectedMemo = null;
+      }
+    },
+    async fetchReviewers() {
+      try {
+        // Get current user information
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser) {
+          console.error('No current user found');
+          this.reviewers = [];
+          return;
+        }
+
+        // Build query parameters to exclude current user
+        const params = new URLSearchParams();
+        params.append('current_user_id', currentUser.id);
+
+        const response = await fetch(`/api/reviewers?${params.toString()}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        if (data.success) {
+          this.reviewers = data.reviewers;
+          console.log(`Fetched ${this.reviewers.length} reviewers (excluding current user)`);
+        } else {
+          throw new Error(data.message || 'Failed to fetch reviewers');
+        }
+      } catch (error) {
+        console.error('Error fetching reviewers:', error);
+        this.reviewers = [];
+      }
+    },
+    onReviewerChange() {
+      // This method is called when reviewer selection changes
+      // The selectedReviewerId is automatically updated by v-model
+      console.log('Selected reviewer ID:', this.selectedReviewerId);
+    },
+    getSelectedReviewerName() {
+      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
+      return reviewer ? reviewer.name : '';
+    },
+    getSelectedReviewerEmail() {
+      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
+      return reviewer ? reviewer.email : '';
+    },
+    async shareMemoWithReviewer() {
+      if (!this.selectedReviewerId) {
+        alert('Please select a reviewer to share with.');
+        return;
+      }
+
+      try {
+        const currentUser = userStore.getters.currentUser();
+        if (!currentUser) {
+          alert('User not logged in.');
+          return;
+        }
+
+        // Prepare the sharing data
+        const shareData = {
+          memo_id: this.selectedMemo.id,
+          shared_by: currentUser.id,
+          shared_with: parseInt(this.selectedReviewerId)
+        };
+
+        console.log('Sharing memo with data:', shareData);
+
+        const response = await fetch('/api/memos/share', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(shareData)
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
+          alert(`Memo ID ${this.selectedMemo.id} shared successfully with ${reviewer.name} (${reviewer.email})!`);
+          this.toggleShareModal();
+        } else {
+          alert(`Error sharing memo: ${data.message}`);
+        }
+      } catch (error) {
+        console.error('Error sharing memo:', error);
+        alert('Error sharing memo. Please try again.');
+      }
     }
   }
 };
@@ -503,6 +683,13 @@ export default {
 .observation, .completed-with-observations { background-color: #fdddfa; }
 .not-conducted, .test-not-conducted { background-color: #fdd8d6; }
 .not-assigned { background-color: #fff1d6; }
+.test-failed { background-color: #ff6b6b; color: white; }
+
+/* Specific status classes for dynamic status values */
+.successfully-completed { background-color: #e2fbdc; }
+.test-not-conducted { background-color: #fdd8d6; }
+.completed-with-observations { background-color: #fdddfa; }
+.test-failed { background-color: #ff6b6b; color: white; }
 
 .memo-list {
   padding: 20px;
@@ -511,6 +698,7 @@ export default {
   gap: 15px;
 }
 .memo-card {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -619,6 +807,184 @@ export default {
   font-size: 0.9em;
   color: #999;
   margin-top: 10px;
+}
+
+/* Memo Actions */
+.memo-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  margin-right: 300px;
+}
+
+.share-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.share-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.share-text {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Share Modal Styles */
+.share-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.share-modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.share-modal-content h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  text-align: center;
+}
+
+.share-modal-content p {
+  margin: 0 0 20px 0;
+  color: #666;
+  text-align: center;
+}
+
+.memo-info {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e9ecef;
+}
+
+.memo-info strong {
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.reviewer-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  background-color: white;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.reviewer-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.reviewer-details {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #bae6fd;
+  margin-top: 8px;
+  font-size: 0.9em;
+  line-height: 1.6;
+}
+
+.reviewer-details strong {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.send-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.send-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+}
+
+.send-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
 }
 
 </style>

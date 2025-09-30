@@ -40,17 +40,18 @@
             <th>USER MAIL</th>
             <th>USER NAME</th>
             <th>ROLE</th>
+            <th>SIGNATURE</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="4" class="loading-cell">Loading users...</td>
+              <td colspan="5" class="loading-cell">Loading users...</td>
             </tr>
           </template>
           <template v-else-if="users.length === 0">
             <tr>
-              <td colspan="4" class="no-data-cell">No users found</td>
+              <td colspan="5" class="no-data-cell">No users found</td>
             </tr>
           </template>
           <template v-else>
@@ -60,6 +61,21 @@
               <td>{{ user.name }}</td>
               <td :class="{ 'no-role': user.role === 'No Role Assigned' }">
                 {{ user.role }}
+              </td>
+              <td class="signature-cell">
+                <div v-if="user.has_signature" class="signature-container">
+                  <img
+                    :src="`http://localhost:8000${user.signature_url}`"
+                    alt="User Signature"
+                    class="signature-thumbnail"
+                    @error="handleImageError"
+                  />
+                  <span class="signature-status">✓</span>
+                </div>
+                <div v-else class="no-signature">
+                  <span class="signature-status">✗</span>
+                  <span class="no-signature-text">No Signature</span>
+                </div>
               </td>
             </tr>
           </template>
@@ -88,7 +104,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:5000/api/users/manage");
+        const response = await fetch("http://localhost:8000/api/users/manage");
         const data = await response.json();
 
         if (data.success) {
@@ -105,6 +121,12 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    handleImageError(event) {
+      // Hide image if it fails to load
+      event.target.style.display = "none";
+      console.error("Failed to load signature image");
     },
   },
 };
@@ -179,7 +201,53 @@ th {
   text-align: center;
   font-style: italic;
   color: #666;
-  padding: 30px;
+}
+
+.signature-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.signature-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.signature-thumbnail {
+  width: 60px;
+  height: 30px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.signature-status {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.signature-container .signature-status {
+  color: #28a745;
+}
+
+.no-signature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #dc3545;
+}
+
+.no-signature .signature-status {
+  color: #dc3545;
+}
+
+.no-signature-text {
+  font-size: 12px;
+  font-style: italic;
 }
 
 .no-data-cell {
