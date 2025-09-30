@@ -88,11 +88,15 @@
 
 <script>
 import ObservationReport from '@/templates/ObservationReport.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
 
 export default {
   name: 'TemplateViewer',
   components: {
-    ObservationReport
+    ObservationReport,
+    MechanicalInspection,
+    KitOfPartInsp
   },
   data() {
     return {
@@ -115,7 +119,9 @@ export default {
       try {
         // Map template names to components
         const templateComponents = {
-          'ObservationReport': ObservationReport
+          'ObservationReport': ObservationReport,
+          'MechanicalInspection': MechanicalInspection,
+          'KitOfPartInsp': KitOfPartInsp
         };
         
         this.templateComponent = templateComponents[this.templateName] || null;
