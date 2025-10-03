@@ -93,6 +93,8 @@ import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspec
 import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
 import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
 import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
 
 export default {
   name: 'TemplateViewer',
@@ -102,7 +104,9 @@ export default {
     Conformalcoatinginspectionreport,
     RawMaterialInspectionReport,
     CotsScreeningInspectionReport,
-    AssembledBoardInspectionReport
+    AssembledBoardInspectionReport,
+    KitOfPartInsp,
+    MechanicalInspection
   },
   data() {
     return {
@@ -130,7 +134,9 @@ export default {
           'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport,
           'RawMaterialInspectionReport': RawMaterialInspectionReport,
           'CotsScreeningInspectionReport': CotsScreeningInspectionReport,
-          'AssembledBoardInspectionReport': AssembledBoardInspectionReport
+          'AssembledBoardInspectionReport': AssembledBoardInspectionReport,
+          'KitOfPartInsp': KitOfPartInsp,
+          'MechanicalInspection': MechanicalInspection
         };
         
         this.templateComponent = templateComponents[this.templateName] || null;
@@ -200,6 +206,24 @@ export default {
         // Navigate to assembled board inspection report form
         this.$router.push({ 
           name: 'AssembledBoardInspectionReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'KitOfPartInsp') {
+        // Navigate to kit of part inspection report form
+        this.$router.push({ 
+          name: 'KitOfPartInsp',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'MechanicalInspection') {
+        // Navigate to mechanical inspection report form
+        this.$router.push({ 
+          name: 'MechanicalInspection',
           params: { 
             projectName: 'Default Project',
             lruName: 'Default LRU'
