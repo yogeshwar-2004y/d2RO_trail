@@ -331,3 +331,18 @@ CREATE TABLE shared_memos (
     shared_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT chk_not_self_share CHECK (shared_by <> shared_with)
 );
+
+CREATE TABLE report_templates ( 
+    template_id SERIAL PRIMARY KEY, 
+    template_name VARCHAR(50) NOT NULL
+);
+
+INSERT INTO report_templates (template_name) 
+VALUES
+('conformal coating inspection report'),
+('cots screening inspection report'),
+('bare pcb inspection report'),
+('mechanical inspection report'),
+('assembled board inspection report'), 
+('raw material inspection report'),
+('kit of part inspection report');
