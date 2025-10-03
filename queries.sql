@@ -346,3 +346,70 @@ VALUES
 ('assembled board inspection report'), 
 ('raw material inspection report'),
 ('kit of part inspection report');
+
+-- 1. Create the table
+CREATE TABLE bare_pcb_inspection_report (
+    report_id SERIAL PRIMARY KEY,
+
+    -- Header info
+    project_name TEXT,
+    report_ref_no VARCHAR(100),
+    memo_ref_no VARCHAR(100),
+    lru_name TEXT,
+    sru_name TEXT,
+    dp_name TEXT,
+    part_no VARCHAR(100),
+    inspection_stage TEXT,
+    test_venue TEXT,
+    quantity INT,
+    sl_nos TEXT,
+    serial_number VARCHAR(100),
+    inspection_count VARCHAR(50),
+    start_date DATE,
+    end_date DATE,
+    dated1 DATE,
+    dated2 DATE,
+
+    -- Parameters (12 fixed checklist items)
+    obs1 TEXT,  rem1 VARCHAR(20),  upload1 TEXT,
+    obs2 TEXT,  rem2 VARCHAR(20),  upload2 TEXT,
+    obs3 TEXT,  rem3 VARCHAR(20),  upload3 TEXT,
+    obs4 TEXT,  rem4 VARCHAR(20),  upload4 TEXT,
+    obs5 TEXT,  rem5 VARCHAR(20),  upload5 TEXT,
+    obs6 TEXT,  rem6 VARCHAR(20),  upload6 TEXT,
+    obs7 TEXT,  rem7 VARCHAR(20),  upload7 TEXT,
+    obs8 TEXT,  rem8 VARCHAR(20),  upload8 TEXT,
+    obs9 TEXT,  rem9 VARCHAR(20),  upload9 TEXT,
+    obs10 TEXT, rem10 VARCHAR(20), upload10 TEXT,
+    obs11 TEXT, rem11 VARCHAR(20), upload11 TEXT,
+    obs12 TEXT, rem12 VARCHAR(20), upload12 TEXT,
+
+    -- Footer / Summary
+    overall_status TEXT,
+    quality_rating INT,
+    recommendations TEXT,
+
+    -- Signatories
+    prepared_by TEXT,
+    verified_by TEXT,
+    approved_by TEXT,
+
+    -- Metadata
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Create a function to update the updated_at column
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3. Create the trigger
+CREATE TRIGGER trg_update_updated_at
+BEFORE UPDATE ON bare_pcb_inspection_report
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
