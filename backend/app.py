@@ -34,8 +34,8 @@ def create_app():
     # Create upload directories
     create_upload_directories()
     
-    # Initialize database
-    initialize_database()
+    # Initialize database - DISABLED: Tables are managed manually in pgAdmin
+    # initialize_database()
     
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -529,4 +529,4 @@ def test_database():
         return jsonify({"success": False, "message": f"Database test failed: {str(e)}"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=8000)

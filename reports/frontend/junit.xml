@@ -1,0 +1,1462 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="204" failures="98" errors="0" time="3.488">
+    <testsuite name="tests/unit/DocumentViewer.test.js" timestamp="2025-09-29T04:31:55.864Z" hostname="192.168.1.75" tests="27" failures="12" errors="0" skipped="0" time="0.746">
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; renders correctly" time="0.105">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/DocumentViewer.test.js:79:55
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes with default document metadata" time="0.01">
+            <failure message="expected &apos;LRU-1&apos; to be &apos;&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;LRU-1&apos; to be &apos;&apos; // Object.is equality
+
+- Expected
++ Received
+
++ LRU-1
+
+ ❯ tests/unit/DocumentViewer.test.js:83:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes with user role from store" time="0.01">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes document viewing properties" time="0.009">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; computes canUpload correctly for authorized roles" time="0.055">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/DocumentViewer.vue:758:58
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; computes canUpload correctly for Designer role" time="0.034">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/DocumentViewer.vue:758:58
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; computes canUpload correctly for unauthorized roles" time="0.011">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/DocumentViewer.vue:758:58
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; handles file selection for upload" time="0.021">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; increases zoom level" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; decreases zoom level" time="0.016">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; prevents zoom from going below minimum" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; goes to next page" time="0.039">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; goes to previous page" time="0.024">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; prevents going beyond last page" time="0.016">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; prevents going before first page" time="0.029">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes document details with default values" time="0.018">
+            <failure message="expected { lruId: 1, documentNumber: &apos;&apos;, …(3) } to have property &quot;docVer&quot; with value 1" type="AssertionError">
+AssertionError: expected { lruId: 1, documentNumber: &apos;&apos;, …(3) } to have property &quot;docVer&quot; with value 1
+
+- Expected: 
+1
+
++ Received: 
+&quot;A&quot;
+
+ ❯ tests/unit/DocumentViewer.test.js:218:21
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes modal states as closed" time="0.033">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; opens assign reviewer modal" time="0.164">
+            <failure message="wrapper.vm.openAssignReviewerModal is not a function" type="TypeError">
+TypeError: wrapper.vm.openAssignReviewerModal is not a function
+ ❯ tests/unit/DocumentViewer.test.js:228:22
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; opens edit reviewer modal" time="0.048">
+            <failure message="wrapper.vm.openEditReviewerModal is not a function" type="TypeError">
+TypeError: wrapper.vm.openEditReviewerModal is not a function
+ ❯ tests/unit/DocumentViewer.test.js:235:22
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; closes assign reviewer modal" time="0.019">
+            <failure message="wrapper.vm.closeAssignReviewerModal is not a function" type="TypeError">
+TypeError: wrapper.vm.closeAssignReviewerModal is not a function
+ ❯ tests/unit/DocumentViewer.test.js:243:22
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; opens track versions modal" time="0.012">
+            <failure message="wrapper.vm.openTrackVersionsModal is not a function" type="TypeError">
+TypeError: wrapper.vm.openTrackVersionsModal is not a function
+ ❯ tests/unit/DocumentViewer.test.js:249:22
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; closes track versions modal" time="0.026">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; adds new comment to comments array" time="0.009">
+            <failure message="expected &apos;This is a test comment&apos; to have property &quot;text&quot; with value &apos;This is a test comment&apos;" type="AssertionError">
+AssertionError: expected &apos;This is a test comment&apos; to have property &quot;text&quot; with value &apos;This is a test comment&apos;
+
+- Expected: 
+&quot;This is a test comment&quot;
+
++ Received: 
+undefined
+
+ ❯ tests/unit/DocumentViewer.test.js:266:36
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; does not add empty comments" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; initializes with empty arrays and default states" time="0.013">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; handles reviewer assignment status" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/DocumentViewer.test.js" name="DocumentViewer.vue &gt; sets document status correctly" time="0.007">
+            <failure message="wrapper.vm.setDocumentStatus is not a function" type="TypeError">
+TypeError: wrapper.vm.setDocumentStatus is not a function
+ ❯ tests/unit/DocumentViewer.test.js:292:22
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/LruDashboard.test.js" timestamp="2025-09-29T04:31:55.882Z" hostname="192.168.1.75" tests="28" failures="15" errors="0" skipped="0" time="0.767">
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Component Rendering &gt; renders the dashboard with header elements" time="0.05">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Component Rendering &gt; displays correct page title" time="0.02">
+            <failure message="expected &apos;- LRUs&apos; to be &apos;LRU DASHBOARD&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;- LRUs&apos; to be &apos;LRU DASHBOARD&apos; // Object.is equality
+
+- Expected
++ Received
+
+- LRU DASHBOARD
++ - LRUs
+
+ ❯ tests/unit/LruDashboard.test.js:94:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Component Rendering &gt; renders search functionality" time="0.027">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Loading States &gt; shows loading spinner when loading is true" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Loading States &gt; shows error state when error exists" time="0.033">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/LruDashboard.test.js:118:57
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Data Loading &gt; loads LRUs on mount" time="0.043">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Data Loading &gt; handles successful LRU loading" time="0.027">
+            <failure message="expected [] to deeply equal [ { id: 1, …(6) }, { id: 2, …(6) } ]" type="AssertionError">
+AssertionError: expected [] to deeply equal [ { id: 1, …(6) }, { id: 2, …(6) } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     &quot;created_date&quot;: &quot;2024-01-01&quot;,
+-     &quot;id&quot;: 1,
+-     &quot;last_modified&quot;: &quot;2024-01-15&quot;,
+-     &quot;lru_name&quot;: &quot;LRU001&quot;,
+-     &quot;name&quot;: &quot;LRU001&quot;,
+-     &quot;project_id&quot;: &quot;PROJ001&quot;,
+-     &quot;status&quot;: &quot;active&quot;,
+-   },
+-   Object {
+-     &quot;created_date&quot;: &quot;2024-01-02&quot;,
+-     &quot;id&quot;: 2,
+-     &quot;last_modified&quot;: &quot;2024-01-16&quot;,
+-     &quot;lru_name&quot;: &quot;LRU002&quot;,
+-     &quot;name&quot;: &quot;LRU002&quot;,
+-     &quot;project_id&quot;: &quot;PROJ002&quot;,
+-     &quot;status&quot;: &quot;completed&quot;,
+-   },
+- ]
++ Array []
+
+ ❯ tests/unit/LruDashboard.test.js:145:31
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Data Loading &gt; handles LRU loading errors" time="0.015">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to fetch LRUs
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/LruDashboard.test.js:157:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Data Loading &gt; retries loading when retry button is clicked" time="0.025">
+            <failure message="expected &quot;spy&quot; to be called 2 times, but got 3 times" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called 2 times, but got 3 times
+ ❯ tests/unit/LruDashboard.test.js:174:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Search Functionality &gt; filters LRUs by name" time="0.006">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Search Functionality &gt; shows all LRUs when search is empty" time="0.017">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Search Functionality &gt; shows no LRUs when search matches nothing" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Search Functionality &gt; is case insensitive" time="0.006">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.013">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Navigation &gt; navigates to LRU details when LRU is clicked" time="0.012">
+            <failure message="Cannot call trigger on an empty DOMWrapper." type="Error">
+Error: Cannot call trigger on an empty DOMWrapper.
+ ❯ Object.get node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:1574:27
+ ❯ tests/unit/LruDashboard.test.js:233:20
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Status Display &gt; displays LRU status correctly" time="0.004">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/LruDashboard.test.js:250:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Status Display &gt; applies correct CSS classes for different statuses" time="0.004">
+            <failure message="Cannot read properties of undefined (reading &apos;classes&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;classes&apos;)
+ ❯ tests/unit/LruDashboard.test.js:256:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Empty States &gt; shows empty state when no LRUs" time="0.005">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/LruDashboard.test.js:266:53
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Empty States &gt; shows empty state when search returns no results" time="0.007">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/LruDashboard.test.js:277:53
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Information Display &gt; displays LRU name correctly" time="0.036">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/LruDashboard.test.js:289:26
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Information Display &gt; displays project ID correctly" time="0.035">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/LruDashboard.test.js:295:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Information Display &gt; formats dates correctly" time="0.039">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/LruDashboard.test.js:301:23
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Role-based Functionality &gt; shows appropriate content for different roles" time="0.014">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Error Handling &gt; handles malformed LRU data gracefully" time="0.154">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to fetch LRUs
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/LruDashboard.test.js:324:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Error Handling &gt; handles network timeout" time="0.14">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to fetch LRUs&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to fetch LRUs
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/LruDashboard.test.js:337:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; Responsive Design &gt; adapts to different screen sizes" time="0.006">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Actions &gt; shows action buttons for appropriate roles" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/LruDashboard.test.js" name="LruDashboard.vue &gt; LRU Actions &gt; handles LRU creation" time="0.007">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/MemoDashboard.test.js" timestamp="2025-09-29T04:31:55.888Z" hostname="192.168.1.75" tests="8" failures="3" errors="0" skipped="0" time="0.165">
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Component Rendering &gt; renders the dashboard with header elements" time="0.074">
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Component Rendering &gt; displays correct page title" time="0.015">
+            <failure message="Cannot call text on an empty DOMWrapper." type="Error">
+Error: Cannot call text on an empty DOMWrapper.
+ ❯ Object.get node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:1574:27
+ ❯ tests/unit/MemoDashboard.test.js:96:24
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Role-based Features &gt; shows shared with me button for QA Reviewer role" time="0.013">
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Role-based Features &gt; shows notification bell for QA Head role" time="0.022">
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Data Loading &gt; loads memos on mount" time="0.01">
+            <failure message="expected &quot;spy&quot; to be called at least once" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called at least once
+ ❯ tests/unit/MemoDashboard.test.js:128:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Data Loading &gt; handles loading errors" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.01">
+        </testcase>
+        <testcase classname="tests/unit/MemoDashboard.test.js" name="MemoDashboard.vue &gt; Search Functionality &gt; filters memos by title" time="0.013">
+            <failure message="Cannot read properties of undefined (reading &apos;toLowerCase&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;toLowerCase&apos;)
+ ❯ src/components/MemoDashboard.vue:188:57
+ ❯ wrappedFn node_modules/@vue/reactivity/dist/reactivity.cjs.js:878:19
+ ❯ apply node_modules/@vue/reactivity/dist/reactivity.cjs.js:886:27
+ ❯ Proxy.filter node_modules/@vue/reactivity/dist/reactivity.cjs.js:778:12
+ ❯ Proxy.filteredMemos src/components/MemoDashboard.vue:188:29
+ ❯ refreshComputed node_modules/@vue/reactivity/dist/reactivity.cjs.js:395:28
+ ❯ ComputedRefImpl.get value [as value] node_modules/@vue/reactivity/dist/reactivity.cjs.js:1648:5
+ ❯ Object.get [as filteredMemos] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3573:22
+ ❯ Proxy._sfc_render src/components/MemoDashboard.vue:115:24
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/MemoForm.test.js" timestamp="2025-09-29T04:31:55.889Z" hostname="192.168.1.75" tests="10" failures="2" errors="0" skipped="0" time="0.322">
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Component Rendering &gt; renders the memo form with all sections" time="0.085">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Component Rendering &gt; displays correct form title" time="0.039">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Component Rendering &gt; renders share button" time="0.028">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Form Fields &gt; renders all required input fields" time="0.021">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Form Fields &gt; renders textarea for description" time="0.027">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Form Validation &gt; validates required fields" time="0.028">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Form Submission &gt; submits form with valid data" time="0.032">
+            <failure message="Failed to submit memo" type="Error">
+Error: Failed to submit memo
+ ❯ Proxy.&lt;anonymous&gt; tests/unit/MemoForm.test.js:74:17
+ ❯ tests/unit/MemoForm.test.js:149:7
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Form Submission &gt; handles submission errors" time="0.016">
+            <failure message="Network error" type="Error">
+Error: Network error
+ ❯ tests/unit/MemoForm.test.js:155:42
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Share Functionality &gt; toggles share box when share button is clicked" time="0.023">
+        </testcase>
+        <testcase classname="tests/unit/MemoForm.test.js" name="MemoForm.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.021">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/NewsTicker.test.js" timestamp="2025-09-29T04:31:55.890Z" hostname="192.168.1.75" tests="23" failures="7" errors="0" skipped="0" time="0.366">
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Rendering &gt; renders with default props" time="0.103">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Rendering &gt; applies custom height and background color" time="0.011">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Rendering &gt; applies custom text color" time="0.009">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Loading &gt; loads news on mount" time="0.039">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Loading &gt; handles successful news loading" time="0.065">
+            <failure message="expected [] to deeply equal [ Array(2) ]" type="AssertionError">
+AssertionError: expected [] to deeply equal [ Array(2) ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     &quot;news_text&quot;: &quot;Breaking news&quot;,
+-   },
+-   Object {
+-     &quot;news_text&quot;: &quot;Important update&quot;,
+-   },
+- ]
++ Array []
+
+ ❯ tests/unit/NewsTicker.test.js:96:31
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Loading &gt; handles news loading errors gracefully" time="0.003">
+            <failure message="expected true to be false // Object.is equality" type="AssertionError">
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/NewsTicker.test.js:108:34
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Loading &gt; prevents multiple simultaneous loading requests" time="0.002">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Display Logic &gt; shows fallback text when no news and showWhenEmpty is true" time="0.003">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Display Logic &gt; shows empty array when no news and showWhenEmpty is false" time="0.003">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Display Logic &gt; repeats news items for continuous scrolling" time="0.009">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Display Logic &gt; handles string news items" time="0.025">
+            <failure message="expected &apos;📰 Welcome to Aviatrax&apos; to contain &apos;String news 1&apos;" type="AssertionError">
+AssertionError: expected &apos;📰 Welcome to Aviatrax&apos; to contain &apos;String news 1&apos;
+
+- Expected
++ Received
+
+- String news 1
++ 📰 Welcome to Aviatrax
+
+ ❯ tests/unit/NewsTicker.test.js:167:35
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Computed Properties &gt; hasNews returns true when news array has items" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Computed Properties &gt; hasNews returns false when news array is empty" time="0.001">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Computed Properties &gt; animationStyle returns correct CSS properties" time="0.002">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Visibility &gt; shows component when hasNews is true" time="0.02">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Visibility &gt; shows component when showWhenEmpty is true and no news" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Component Visibility &gt; hides component when showWhenEmpty is false and no news" time="0.003">
+            <failure message="Cannot call isVisible on an empty DOMWrapper." type="Error">
+Error: Cannot call isVisible on an empty DOMWrapper.
+ ❯ Object.get node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:1574:27
+ ❯ tests/unit/NewsTicker.test.js:220:52
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Items Rendering &gt; renders news items with correct format" time="0.017">
+            <failure message="expected &apos;📰 Welcome to Aviatrax&apos; to contain &apos;📰 First news item&apos;" type="AssertionError">
+AssertionError: expected &apos;📰 Welcome to Aviatrax&apos; to contain &apos;📰 First news item&apos;
+
+- Expected
++ Received
+
+- 📰 First news item
++ 📰 Welcome to Aviatrax
+
+ ❯ tests/unit/NewsTicker.test.js:236:35
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; News Items Rendering &gt; handles empty news text gracefully" time="0.006">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Auto-refresh Functionality &gt; sets up interval for news refresh" time="0.01">
+            <failure message="expected &quot;spy&quot; to be called 2 times, but got 1 times" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called 2 times, but got 1 times
+ ❯ tests/unit/NewsTicker.test.js:257:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Edge Cases &gt; handles null news response" time="0.006">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Edge Cases &gt; handles malformed news response" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/NewsTicker.test.js" name="NewsTicker.vue &gt; Edge Cases &gt; handles network timeout" time="0.002">
+            <failure message="expected true to be false // Object.is equality" type="AssertionError">
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ tests/unit/NewsTicker.test.js:297:34
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/ObservationReport.test.js" timestamp="2025-09-29T04:31:55.894Z" hostname="192.168.1.75" tests="15" failures="15" errors="0" skipped="0" time="0.254">
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Component Rendering &gt; renders the observation report page" time="0.056">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Component Rendering &gt; displays correct page title" time="0.084">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Component Rendering &gt; renders export button" time="0.016">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Report Header &gt; displays document path correctly" time="0.006">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Report Header &gt; displays current date" time="0.008">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Subject Line &gt; displays subject line with LRU name" time="0.015">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Subject Line &gt; shows version information when version specific" time="0.005">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Export Functionality &gt; handles export button click" time="0.005">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Export Functionality &gt; exports report as PDF" time="0.006">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.01">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Data Loading &gt; loads report data on mount" time="0.018">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Data Loading &gt; handles loading errors" time="0.007">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Report Content &gt; displays observation details" time="0.009">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Report Content &gt; shows report status" time="0.005">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ObservationReport.test.js" name="ObservationReport.vue &gt; Responsive Design &gt; adapts to different screen sizes" time="0.003">
+            <failure message="Cannot read properties of undefined (reading &apos;params&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;params&apos;)
+ ❯ Proxy.mounted src/components/ObservationReport.vue:214:32
+ ❯ node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2861:40
+ ❯ callWithErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ hook.__weh.hook.__weh node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:2841:19
+ ❯ flushPostFlushCbs node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:382:28
+ ❯ render node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6018:7
+ ❯ mount node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3984:13
+ ❯ Object.app.mount node_modules/@vue/runtime-dom/dist/runtime-dom.cjs.js:1708:19
+ ❯ Proxy.mount node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:8415:18
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/PlanDocsTestComponent.test.js" timestamp="2025-09-29T04:31:55.899Z" hostname="192.168.1.75" tests="12" failures="0" errors="0" skipped="0" time="0.109">
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Component Rendering &gt; renders the test component" time="0.044">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Component Rendering &gt; displays current user information" time="0.01">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; User Information Display &gt; shows logged in status" time="0.012">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; User Information Display &gt; displays user details" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; User Information Display &gt; shows role information" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Role-Based Access Tests &gt; shows role-based access tests section" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Role-Based Access Tests &gt; displays access test results" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Role-Based Access Tests &gt; shows success/fail indicators" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Computed Properties &gt; calculates canUpload correctly" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Computed Properties &gt; calculates isQAHead correctly" time="0.004">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; User Store Integration &gt; uses user store getters" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/PlanDocsTestComponent.test.js" name="PlanDocsTestComponent.vue &gt; Test Actions &gt; handles test button clicks" time="0.004">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/ProjectsDashboard.test.js" timestamp="2025-09-29T04:31:55.900Z" hostname="192.168.1.75" tests="29" failures="18" errors="0" skipped="0" time="0.882">
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Component Rendering &gt; renders the dashboard with header elements" time="0.074">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Component Rendering &gt; displays correct page title" time="0.013">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Component Rendering &gt; shows search input with correct placeholder" time="0.025">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Loading States &gt; shows loading spinner when loading is true" time="0.015">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Loading States &gt; shows appropriate loading message for different roles" time="0.05">
+            <failure message="expected &apos;Loading projects...&apos; to contain &apos;Loading your assigned projects&apos;" type="AssertionError">
+AssertionError: expected &apos;Loading projects...&apos; to contain &apos;Loading your assigned projects&apos;
+
+- Expected
++ Received
+
+- Loading your assigned projects
++ Loading projects...
+
+ ❯ tests/unit/ProjectsDashboard.test.js:109:34
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Loading States &gt; shows error state when error exists" time="0.012">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/ProjectsDashboard.test.js:116:57
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Data Loading &gt; loads projects on mount" time="0.02">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Data Loading &gt; handles successful project loading" time="0.029">
+            <failure message="expected [] to deeply equal [ { id: 1, …(5) }, { id: 2, …(5) } ]" type="AssertionError">
+AssertionError: expected [] to deeply equal [ { id: 1, …(5) }, { id: 2, …(5) } ]
+
+- Expected
++ Received
+
+- Array [
+-   Object {
+-     &quot;assigned_reviewer&quot;: &quot;John Doe&quot;,
+-     &quot;created_date&quot;: &quot;2024-01-01&quot;,
+-     &quot;id&quot;: 1,
+-     &quot;name&quot;: &quot;Test Project 1&quot;,
+-     &quot;project_id&quot;: &quot;PROJ001&quot;,
+-     &quot;status&quot;: &quot;active&quot;,
+-   },
+-   Object {
+-     &quot;assigned_reviewer&quot;: &quot;Jane Smith&quot;,
+-     &quot;created_date&quot;: &quot;2024-01-02&quot;,
+-     &quot;id&quot;: 2,
+-     &quot;name&quot;: &quot;Test Project 2&quot;,
+-     &quot;project_id&quot;: &quot;PROJ002&quot;,
+-     &quot;status&quot;: &quot;completed&quot;,
+-   },
+- ]
++ Array []
+
+ ❯ tests/unit/ProjectsDashboard.test.js:143:35
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Data Loading &gt; handles project loading errors" time="0.021">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to connect to server. Please check your connection and try again.
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/ProjectsDashboard.test.js:155:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Data Loading &gt; retries loading when retry button is clicked" time="0.015">
+            <failure message="expected &quot;spy&quot; to be called 2 times, but got 3 times" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called 2 times, but got 3 times
+ ❯ tests/unit/ProjectsDashboard.test.js:172:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Search Functionality &gt; filters projects by project ID" time="0.019">
+            <failure message="expected [] to have a length of 1 but got +0" type="AssertionError">
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/unit/ProjectsDashboard.test.js:187:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Search Functionality &gt; shows all projects when search is empty" time="0.041">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Search Functionality &gt; shows no projects when search matches nothing" time="0.009">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Search Functionality &gt; is case insensitive" time="0.007">
+            <failure message="expected [] to have a length of 1 but got +0" type="AssertionError">
+AssertionError: expected [] to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ tests/unit/ProjectsDashboard.test.js:212:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.031">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Navigation &gt; navigates to project details when project is clicked" time="0.014">
+            <failure message="Cannot call trigger on an empty DOMWrapper." type="Error">
+Error: Cannot call trigger on an empty DOMWrapper.
+ ❯ Object.get node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:1574:27
+ ❯ tests/unit/ProjectsDashboard.test.js:231:24
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Role-based Functionality &gt; shows appropriate content for reviewer role" time="0.016">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Role-based Functionality &gt; shows appropriate content for designer role" time="0.014">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Status Display &gt; displays project status correctly" time="0.052">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:268:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Status Display &gt; applies correct CSS classes for different statuses" time="0.154">
+            <failure message="Cannot read properties of undefined (reading &apos;classes&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;classes&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:274:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Empty States &gt; shows empty state when no projects" time="0.087">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/ProjectsDashboard.test.js:284:53
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Empty States &gt; shows empty state when search returns no results" time="0.009">
+            <failure message="expected false to be true // Object.is equality" type="AssertionError">
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ tests/unit/ProjectsDashboard.test.js:295:53
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Information Display &gt; displays project ID correctly" time="0.008">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:307:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Information Display &gt; displays project name correctly" time="0.01">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:313:30
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Information Display &gt; displays assigned reviewer correctly" time="0.006">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:319:27
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Project Information Display &gt; formats dates correctly" time="0.006">
+            <failure message="Cannot read properties of undefined (reading &apos;text&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;text&apos;)
+ ❯ tests/unit/ProjectsDashboard.test.js:325:23
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Responsive Design &gt; adapts to different screen sizes" time="0.008">
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Error Handling &gt; handles malformed project data gracefully" time="0.005">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to connect to server. Please check your connection and try again.
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/ProjectsDashboard.test.js:347:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ProjectsDashboard.test.js" name="ProjectsDashboard.vue &gt; Error Handling &gt; handles network timeout" time="0.108">
+            <failure message="expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Failed to connect to server. Please c…&apos; to be &apos;Failed to connect to server. Please c…&apos; // Object.is equality
+
+- Expected
++ Received
+
+- Failed to connect to server. Please check your connection and try again.
++ Failed to connect to server. Please check if the backend is running.
+
+ ❯ tests/unit/ProjectsDashboard.test.js:360:32
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/ReportDashboard.test.js" timestamp="2025-09-29T04:31:55.903Z" hostname="192.168.1.75" tests="9" failures="3" errors="0" skipped="0" time="0.238">
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Component Rendering &gt; renders the dashboard with header elements" time="0.069">
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Component Rendering &gt; displays correct page title" time="0.026">
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Component Rendering &gt; renders search and filter functionality" time="0.052">
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Filter Functionality &gt; toggles project filter dropdown" time="0.017">
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Filter Functionality &gt; selects project filter" time="0.03">
+            <failure message="Cannot call trigger on an empty DOMWrapper." type="Error">
+Error: Cannot call trigger on an empty DOMWrapper.
+ ❯ Object.get node_modules/@vue/test-utils/dist/vue-test-utils.cjs.js:1574:27
+ ❯ tests/unit/ReportDashboard.test.js:125:26
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Data Loading &gt; loads reports on mount" time="0.009">
+            <failure message="expected &quot;spy&quot; to be called at least once" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called at least once
+ ❯ tests/unit/ReportDashboard.test.js:140:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Data Loading &gt; handles loading errors" time="0.008">
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Search Functionality &gt; filters reports by title" time="0.011">
+            <failure message="Cannot read properties of undefined (reading &apos;toLowerCase&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;toLowerCase&apos;)
+ ❯ src/components/ReportDashboard.vue:152:58
+ ❯ wrappedFn node_modules/@vue/reactivity/dist/reactivity.cjs.js:878:19
+ ❯ apply node_modules/@vue/reactivity/dist/reactivity.cjs.js:886:27
+ ❯ Proxy.filter node_modules/@vue/reactivity/dist/reactivity.cjs.js:778:12
+ ❯ Proxy.filteredReports src/components/ReportDashboard.vue:152:29
+ ❯ refreshComputed node_modules/@vue/reactivity/dist/reactivity.cjs.js:395:28
+ ❯ ComputedRefImpl.get value [as value] node_modules/@vue/reactivity/dist/reactivity.cjs.js:1648:5
+ ❯ Object.get [as filteredReports] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:3573:22
+ ❯ Proxy._sfc_render src/components/ReportDashboard.vue:81:26
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/ReportDashboard.test.js" name="ReportDashboard.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.014">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/RoleTestComponent.test.js" timestamp="2025-09-29T04:31:55.904Z" hostname="192.168.1.75" tests="16" failures="16" errors="0" skipped="0" time="0.076">
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Component Rendering &gt; renders the role test component" time="0.033">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Component Rendering &gt; displays user information when logged in" time="0.002">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; User Information Display &gt; shows user details" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Role-based Access Checks &gt; shows role checks section" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Role-based Access Checks &gt; displays role check items" time="0.004">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Role-based Access Checks &gt; shows access results" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; hasRole Method &gt; checks role access correctly" time="0">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; hasRole Method &gt; returns true for current user role" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Computed Properties &gt; calculates isLoggedIn correctly" time="0.005">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Computed Properties &gt; gets current user data" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Computed Properties &gt; gets current user role" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Computed Properties &gt; gets role name" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; User Store Integration &gt; uses user store getters" time="0">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Role Check Items &gt; applies correct CSS classes based on access" time="0">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Edge Cases &gt; handles undefined user data" time="0.001">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/RoleTestComponent.test.js" name="RoleTestComponent.vue &gt; Edge Cases &gt; handles null role data" time="0">
+            <failure message="Cannot read properties of undefined (reading &apos;hasRole&apos;)" type="TypeError">
+TypeError: Cannot read properties of undefined (reading &apos;hasRole&apos;)
+ ❯ Proxy.hasRole src/components/RoleTestComponent.vue:101:32
+ ❯ Proxy._sfc_render src/components/RoleTestComponent.vue:15:55
+ ❯ renderComponentRoot node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6532:16
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5332:46
+ ❯ ReactiveEffect.run node_modules/@vue/reactivity/dist/reactivity.cjs.js:241:19
+ ❯ setupRenderEffect node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5467:5
+ ❯ mountComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5241:7
+ ❯ processComponent node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5193:9
+ ❯ patch node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:4720:11
+ ❯ ReactiveEffect.componentUpdateFn [as fn] node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:5339:11
+            </failure>
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/SubmitMemo.test.js" timestamp="2025-09-29T04:31:55.908Z" hostname="192.168.1.75" tests="27" failures="7" errors="0" skipped="0" time="0.809">
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Component Rendering &gt; renders the memo form with all sections" time="0.084">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Component Rendering &gt; displays correct form title" time="0.025">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Component Rendering &gt; renders header with logos and back button" time="0.032">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Fields &gt; renders all required input fields" time="0.033">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Fields &gt; renders textarea for description" time="0.011">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Fields &gt; has locked input fields with correct values" time="0.011">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Fields &gt; binds form data to input fields" time="0.021">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Validation &gt; validates required fields" time="0.036">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Validation &gt; shows validation errors for empty required fields" time="0.014">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Validation &gt; passes validation when required fields are filled" time="0.031">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Submission &gt; submits form with valid data" time="0.043">
+            <failure message="expected &quot;spy&quot; to be called with arguments: [ …(2) ]
+
+Received: 
+
+
+
+Number of calls: 0
+" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called with arguments: [ …(2) ]
+
+Received: 
+
+
+
+Number of calls: 0
+
+ ❯ tests/unit/SubmitMemo.test.js:212:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Submission &gt; handles successful submission" time="0.095">
+            <failure message="expected undefined to be false // Object.is equality" type="AssertionError">
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected: 
+false
+
++ Received: 
+undefined
+
+ ❯ tests/unit/SubmitMemo.test.js:240:37
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Submission &gt; handles submission errors" time="0.044">
+            <failure message="expected undefined to be false // Object.is equality" type="AssertionError">
+AssertionError: expected undefined to be false // Object.is equality
+
+- Expected: 
+false
+
++ Received: 
+undefined
+
+ ❯ tests/unit/SubmitMemo.test.js:258:37
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Submission &gt; prevents multiple submissions" time="0.161">
+            <failure message="expected &quot;spy&quot; to be called 1 times, but got 0 times" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called 1 times, but got 0 times
+ ❯ tests/unit/SubmitMemo.test.js:282:28
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Navigation &gt; goes back when back button is clicked" time="0.045">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Navigation &gt; navigates to success page after successful submission" time="0.008">
+            <failure message="expected &quot;spy&quot; to be called with arguments: [ &apos;/memos/success&apos; ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   &quot;/memos/success&quot;,
++   Object {
++     &quot;name&quot;: &quot;DesignerMemo&quot;,
++     &quot;params&quot;: Object {
++       &quot;newMemo&quot;: &quot;{\&quot;id\&quot;:1759120314644,\&quot;project\&quot;:\&quot;NEW PROJECT\&quot;,\&quot;author\&quot;:\&quot;Design Team\&quot;,\&quot;assignedDate\&quot;:\&quot;01-07-2025\&quot;,\&quot;scheduledDate\&quot;:\&quot;04-07-2025\&quot;,\&quot;status\&quot;:\&quot;NOT ASSIGNED\&quot;,\&quot;formData\&quot;:{\&quot;casdicRef\&quot;:\&quot;REF001\&quot;,\&quot;casdic\&quot;:\&quot;\&quot;,\&quot;casdicDate\&quot;:\&quot;\&quot;,\&quot;wingRef\&quot;:\&quot;\&quot;,\&quot;coordinator\&quot;:\&quot;\&quot;,\&quot;partNo\&quot;:\&quot;PART001\&quot;,\&quot;manufacturer\&quot;:\&quot;Test Manufacturer\&quot;,\&quot;description\&quot;:\&quot;Test Description\&quot;,\&quot;refDoc\&quot;:\&quot;\&quot;,\&quot;refNo\&quot;:\&quot;\&quot;,\&quot;version\&quot;:\&quot;\&quot;,\&quot;revision\&quot;:\&quot;\&quot;,\&quot;slNo\&quot;:\&quot;\&quot;,\&quot;drawingNo\&quot;:\&quot;\&quot;,\&quot;refDoc2\&quot;:\&quot;\&quot;,\&quot;refNo2\&quot;:\&quot;\&quot;,\&quot;version2\&quot;:\&quot;\&quot;,\&quot;revision2\&quot;:\&quot;\&quot;,\&quot;qtyOffered\&quot;:\&quot;\&quot;,\&quot;description3\&quot;:\&quot;\&quot;,\&quot;refDoc3\&quot;:\&quot;\&quot;,\&quot;refNo3\&quot;:\&quot;\&quot;,\&quot;version3\&quot;:\&quot;\&quot;,\&quot;revision3\&quot;:\&quot;\&quot;,\&quot;mechanicalInspn\&quot;:\&quot;\&quot;,\&quot;refDoc4\&quot;:\&quot;\&quot;,\&quot;refNo4\&quot;:\&quot;\&quot;,\&quot;version4\&quot;:\&quot;\&quot;,\&quot;revision4\&quot;:\&quot;\&quot;,\&quot;inspectionStage\&quot;:\&quot;\&quot;,\&quot;stteStatus\&quot;:\&quot;\&quot;,\&quot;refDoc5\&quot;:\&quot;\&quot;,\&quot;refNo5\&quot;:\&quot;\&quot;,\&quot;version5\&quot;:\&quot;\&quot;,\&quot;revision5\&quot;:\&quot;\&quot;,\&quot;testStageCleared\&quot;:\&quot;\&quot;,\&quot;refDoc6\&quot;:\&quot;\&quot;,\&quot;refNo6\&quot;:\&quot;\&quot;,\&quot;version6\&quot;:\&quot;\&quot;,\&quot;revision6\&quot;:\&quot;\&quot;,\&quot;quantity\&quot;:\&quot;\&quot;,\&quot;remarks\&quot;:\&quot;\&quot;}}&quot;,
++     },
++   },
+  ]
+
+
+Number of calls: 1
+" type="AssertionError">
+AssertionError: expected &quot;spy&quot; to be called with arguments: [ &apos;/memos/success&apos; ]
+
+Received: 
+
+  1st spy call:
+
+  Array [
+-   &quot;/memos/success&quot;,
++   Object {
++     &quot;name&quot;: &quot;DesignerMemo&quot;,
++     &quot;params&quot;: Object {
++       &quot;newMemo&quot;: &quot;{\&quot;id\&quot;:1759120314644,\&quot;project\&quot;:\&quot;NEW PROJECT\&quot;,\&quot;author\&quot;:\&quot;Design Team\&quot;,\&quot;assignedDate\&quot;:\&quot;01-07-2025\&quot;,\&quot;scheduledDate\&quot;:\&quot;04-07-2025\&quot;,\&quot;status\&quot;:\&quot;NOT ASSIGNED\&quot;,\&quot;formData\&quot;:{\&quot;casdicRef\&quot;:\&quot;REF001\&quot;,\&quot;casdic\&quot;:\&quot;\&quot;,\&quot;casdicDate\&quot;:\&quot;\&quot;,\&quot;wingRef\&quot;:\&quot;\&quot;,\&quot;coordinator\&quot;:\&quot;\&quot;,\&quot;partNo\&quot;:\&quot;PART001\&quot;,\&quot;manufacturer\&quot;:\&quot;Test Manufacturer\&quot;,\&quot;description\&quot;:\&quot;Test Description\&quot;,\&quot;refDoc\&quot;:\&quot;\&quot;,\&quot;refNo\&quot;:\&quot;\&quot;,\&quot;version\&quot;:\&quot;\&quot;,\&quot;revision\&quot;:\&quot;\&quot;,\&quot;slNo\&quot;:\&quot;\&quot;,\&quot;drawingNo\&quot;:\&quot;\&quot;,\&quot;refDoc2\&quot;:\&quot;\&quot;,\&quot;refNo2\&quot;:\&quot;\&quot;,\&quot;version2\&quot;:\&quot;\&quot;,\&quot;revision2\&quot;:\&quot;\&quot;,\&quot;qtyOffered\&quot;:\&quot;\&quot;,\&quot;description3\&quot;:\&quot;\&quot;,\&quot;refDoc3\&quot;:\&quot;\&quot;,\&quot;refNo3\&quot;:\&quot;\&quot;,\&quot;version3\&quot;:\&quot;\&quot;,\&quot;revision3\&quot;:\&quot;\&quot;,\&quot;mechanicalInspn\&quot;:\&quot;\&quot;,\&quot;refDoc4\&quot;:\&quot;\&quot;,\&quot;refNo4\&quot;:\&quot;\&quot;,\&quot;version4\&quot;:\&quot;\&quot;,\&quot;revision4\&quot;:\&quot;\&quot;,\&quot;inspectionStage\&quot;:\&quot;\&quot;,\&quot;stteStatus\&quot;:\&quot;\&quot;,\&quot;refDoc5\&quot;:\&quot;\&quot;,\&quot;refNo5\&quot;:\&quot;\&quot;,\&quot;version5\&quot;:\&quot;\&quot;,\&quot;revision5\&quot;:\&quot;\&quot;,\&quot;testStageCleared\&quot;:\&quot;\&quot;,\&quot;refDoc6\&quot;:\&quot;\&quot;,\&quot;refNo6\&quot;:\&quot;\&quot;,\&quot;version6\&quot;:\&quot;\&quot;,\&quot;revision6\&quot;:\&quot;\&quot;,\&quot;quantity\&quot;:\&quot;\&quot;,\&quot;remarks\&quot;:\&quot;\&quot;}}&quot;,
++     },
++   },
+  ]
+
+
+Number of calls: 1
+
+ ❯ tests/unit/SubmitMemo.test.js:313:31
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Reset &gt; resets form to default values" time="0.026">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Reset &gt; clears error messages on reset" time="0.007">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Loading States &gt; shows loading state during submission" time="0.002">
+            <failure message="expected undefined to be true // Object.is equality" type="AssertionError">
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ tests/unit/SubmitMemo.test.js:360:37
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Loading States &gt; disables submit button during submission" time="0.003">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Error Handling &gt; displays error messages" time="0.009">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Error Handling &gt; clears error messages when form is modified" time="0.01">
+            <failure message="expected &apos;Test error&apos; to be null // Object.is equality" type="AssertionError">
+AssertionError: expected &apos;Test error&apos; to be null // Object.is equality
+
+- Expected: 
+null
+
++ Received: 
+&quot;Test error&quot;
+
+ ❯ tests/unit/SubmitMemo.test.js:401:32
+            </failure>
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Sections &gt; renders general requisition information section" time="0.01">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Sections &gt; renders LRU/SRU details section" time="0.005">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Form Sections &gt; renders section dividers" time="0.008">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Date Handling &gt; handles date input correctly" time="0.011">
+        </testcase>
+        <testcase classname="tests/unit/SubmitMemo.test.js" name="SubmitMemo.vue &gt; Responsive Design &gt; adapts to different screen sizes" time="0.018">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -64,9 +64,9 @@
               </td>
               <td class="signature-cell">
                 <div v-if="user.has_signature" class="signature-container">
-                  <img 
-                    :src="`http://localhost:5000${user.signature_url}`" 
-                    alt="User Signature" 
+                  <img
+                    :src="`http://localhost:8000${user.signature_url}`"
+                    alt="User Signature"
                     class="signature-thumbnail"
                     @error="handleImageError"
                   />
@@ -104,7 +104,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:5000/api/users/manage");
+        const response = await fetch("http://localhost:8000/api/users/manage");
         const data = await response.json();
 
         if (data.success) {
@@ -125,8 +125,8 @@ export default {
 
     handleImageError(event) {
       // Hide image if it fails to load
-      event.target.style.display = 'none';
-      console.error('Failed to load signature image');
+      event.target.style.display = "none";
+      console.error("Failed to load signature image");
     },
   },
 };

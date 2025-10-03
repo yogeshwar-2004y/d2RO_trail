@@ -210,12 +210,13 @@ export default {
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'NOT ASSIGNED', color: 'not-assigned' },
+        { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
+        { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
+        { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
+        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
+        { name: 'TEST NOT CONDUCTED', color: 'not-conducted', dbValue: 'test_not_conducted' },
+        { name: 'NOT ASSIGNED', color: 'not-assigned', dbValue: 'not_assigned' },
+        { name: 'TEST FAILED', color: 'test-failed', dbValue: 'test_failed' },
       ],
       memos: [],
       loading: true,
@@ -339,8 +340,16 @@ export default {
             return 'ASSIGNED';
           case 'disapproved':
             return 'DISAPPROVED';
+          case 'successfully_completed':
+            return 'SUCCESSFULLY COMPLETED';
+          case 'test_not_conducted':
+            return 'TEST NOT CONDUCTED';
+          case 'completed_with_observations':
+            return 'COMPLETED WITH OBSERVATIONS';
+          case 'test_failed':
+            return 'TEST FAILED';
           default:
-            return memo.memo_status.toUpperCase();
+            return memo.memo_status.toUpperCase().replace(/_/g, ' ');
         }
       }
       
@@ -674,6 +683,13 @@ export default {
 .observation, .completed-with-observations { background-color: #fdddfa; }
 .not-conducted, .test-not-conducted { background-color: #fdd8d6; }
 .not-assigned { background-color: #fff1d6; }
+.test-failed { background-color: #ff6b6b; color: white; }
+
+/* Specific status classes for dynamic status values */
+.successfully-completed { background-color: #e2fbdc; }
+.test-not-conducted { background-color: #fdd8d6; }
+.completed-with-observations { background-color: #fdddfa; }
+.test-failed { background-color: #ff6b6b; color: white; }
 
 .memo-list {
   padding: 20px;

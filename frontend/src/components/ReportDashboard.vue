@@ -3,20 +3,51 @@
     <div class="header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
         <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+          <img
+            src="@/assets/images/aviatrax-logo.png"
+            alt="Aviatrax Logo"
+            class="logo"
+          />
+          <img
+            src="@/assets/images/vista_logo.png"
+            alt="Vista Logo"
+            class="logo vista-logo"
+          />
         </div>
       </div>
       <div class="header-center">
         <div class="page-title">
-          <svg class="title-icon" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            class="title-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -27,8 +58,24 @@
       </div>
       <div class="header-right">
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search Reports" class="search-input">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search Reports"
+            class="search-input"
+          />
+          <svg
+            class="search-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -42,7 +89,7 @@
               v-for="project in projects"
               :key="project"
               class="filter-option"
-              :class="{ 'selected': activeProjectFilter === project }"
+              :class="{ selected: activeProjectFilter === project }"
               @click="selectProject(project)"
             >
               {{ project }}
@@ -58,7 +105,10 @@
               v-for="status in reportStatuses"
               :key="status.name"
               class="filter-option"
-              :class="[status.color, { 'selected': activeReportFilter === status.name }]"
+              :class="[
+                status.color,
+                { selected: activeReportFilter === status.name },
+              ]"
               @click="selectReportStatus(status.name)"
             >
               {{ status.name }}
@@ -66,7 +116,17 @@
           </div>
         </div>
         <button class="export-all-button" @click="exportAllReports">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -75,15 +135,25 @@
         </button>
       </div>
     </div>
-    
+
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>Loading reports...</p>
     </div>
-    
+
     <div v-else-if="error" class="error-container">
       <div class="error-message">
-        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="15" y1="9" x2="9" y2="15"></line>
           <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -93,28 +163,52 @@
         <button @click="fetchReports" class="retry-button">Retry</button>
       </div>
     </div>
-    
+
     <div v-else class="report-grid">
-      <div 
-        v-for="report in filteredReports" 
-        :key="report.id" 
-        class="report-card" 
+      <div
+        v-for="report in filteredReports"
+        :key="report.id"
+        class="report-card"
         :class="report.status.toLowerCase().replace(/ /g, '-')"
         @click="viewReport(report)"
       >
         <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
         <span class="card-title">{{ report.name }}</span>
       </div>
-      
+
       <div v-if="filteredReports.length === 0" class="no-reports">
         <div class="no-reports-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
@@ -122,12 +216,24 @@
         <p>No reports match your current filters.</p>
       </div>
     </div>
-    
+
     <!-- View Templates Button - Only for Design Head -->
     <div v-if="canViewTemplates" class="view-templates-container">
       <button class="view-templates-button" @click="viewTemplates">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          ></path>
           <polyline points="14 2 14 8 20 8"></polyline>
           <line x1="16" y1="13" x2="8" y2="13"></line>
           <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -140,24 +246,24 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
-import { userStore } from '@/stores/userStore'
+import jsPDF from "jspdf";
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'QAHeadReportDashboard',
+  name: "QAHeadReportDashboard",
   data() {
     return {
-      searchQuery: '',
+      searchQuery: "",
       showProjectFilter: false,
       showReportFilter: false,
       activeProjectFilter: null,
       activeReportFilter: null,
       projects: [],
       reportStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
-        { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'TEST FAILED', color: 'failed' },
+        { name: "SUCCESSFULLY COMPLETED", color: "success" },
+        { name: "ASSIGNED", color: "assigned" },
+        { name: "TEST NOT CONDUCTED", color: "not-conducted" },
+        { name: "TEST FAILED", color: "failed" },
       ],
       reports: [],
       loading: true,
@@ -169,16 +275,22 @@ export default {
       let filtered = this.reports;
 
       if (this.activeProjectFilter) {
-        filtered = filtered.filter(report => report.project === this.activeProjectFilter);
+        filtered = filtered.filter(
+          (report) => report.project === this.activeProjectFilter
+        );
       }
 
       if (this.activeReportFilter) {
-        filtered = filtered.filter(report => report.status === this.activeReportFilter);
+        filtered = filtered.filter(
+          (report) => report.status === this.activeReportFilter
+        );
       }
-      
+
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(report => report.name.toLowerCase().includes(query));
+        filtered = filtered.filter((report) =>
+          report.name.toLowerCase().includes(query)
+        );
       }
 
       return filtered;
@@ -197,65 +309,67 @@ export default {
     async fetchReports() {
       try {
         this.loading = true;
-        
+
         // Get user context from the store
         const currentUser = userStore.getters.currentUser();
         const currentUserRole = userStore.getters.currentUserRole();
-        
-        console.log('Current user:', currentUser);
-        console.log('Current user role:', currentUserRole);
-        
+
+        console.log("Current user:", currentUser);
+        console.log("Current user role:", currentUserRole);
+
         // Build API URL with user context
-        let apiUrl = 'http://localhost:5000/api/reports';
+        let apiUrl = "http://localhost:8000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
-        
-        console.log('API URL:', apiUrl);
-        
+
+        console.log("API URL:", apiUrl);
+
         const response = await fetch(apiUrl);
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch reports: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
           this.reports = data.reports;
-          console.log(`Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`);
+          console.log(
+            `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
+          );
         } else {
-          throw new Error(data.message || 'Failed to fetch reports');
+          throw new Error(data.message || "Failed to fetch reports");
         }
       } catch (error) {
-        console.error('Error fetching reports:', error);
+        console.error("Error fetching reports:", error);
         this.error = error.message;
       } finally {
         this.loading = false;
       }
     },
-    
+
     async fetchProjects() {
       try {
-        const response = await fetch('http://localhost:5000/api/projects');
-        
+        const response = await fetch("http://localhost:8000/api/projects");
+
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
-        
+
         if (data.success) {
-          this.projects = data.projects.map(project => project.name);
+          this.projects = data.projects.map((project) => project.name);
         } else {
-          throw new Error(data.message || 'Failed to fetch projects');
+          throw new Error(data.message || "Failed to fetch projects");
         }
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error("Error fetching projects:", error);
         // Don't set error state for projects as it's not critical
       }
     },
-    
+
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
       this.showReportFilter = false;
@@ -265,164 +379,202 @@ export default {
       this.showProjectFilter = false;
     },
     selectProject(project) {
-      this.activeProjectFilter = this.activeProjectFilter === project ? null : project;
+      this.activeProjectFilter =
+        this.activeProjectFilter === project ? null : project;
       this.showProjectFilter = false;
     },
     selectReportStatus(status) {
-      this.activeReportFilter = this.activeReportFilter === status ? null : status;
+      this.activeReportFilter =
+        this.activeReportFilter === status ? null : status;
       this.showReportFilter = false;
     },
     viewReport(report) {
       // Navigate to the individual report page
       this.$router.push({
-        name: 'IndividualReport',
+        name: "IndividualReport",
         params: {
           reportId: report.id,
           reportName: report.name,
-          projectName: report.project
-        }
+          projectName: report.project,
+        },
       });
     },
-    
+
     exportAllReports() {
       try {
         // Create new PDF document
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // Header - Reports Summary
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('QA HEAD REPORTS SUMMARY', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("QA HEAD REPORTS SUMMARY", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Date
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'normal');
-        const currentDate = new Date().toLocaleDateString('en-GB');
-        doc.text(`Generated on: ${currentDate}`, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "normal");
+        const currentDate = new Date().toLocaleDateString("en-GB");
+        doc.text(`Generated on: ${currentDate}`, pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 20;
-        
+
         // Filter information
         if (this.activeProjectFilter || this.activeReportFilter) {
           doc.setFontSize(10);
-          doc.setFont('helvetica', 'bold');
-          doc.text('Applied Filters:', margin, yPosition);
+          doc.setFont("helvetica", "bold");
+          doc.text("Applied Filters:", margin, yPosition);
           yPosition += 8;
-          
+
           if (this.activeProjectFilter) {
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Project: ${this.activeProjectFilter}`, margin + 10, yPosition);
+            doc.setFont("helvetica", "normal");
+            doc.text(
+              `Project: ${this.activeProjectFilter}`,
+              margin + 10,
+              yPosition
+            );
             yPosition += 6;
           }
-          
+
           if (this.activeReportFilter) {
-            doc.setFont('helvetica', 'normal');
-            doc.text(`Status: ${this.activeReportFilter}`, margin + 10, yPosition);
+            doc.setFont("helvetica", "normal");
+            doc.text(
+              `Status: ${this.activeReportFilter}`,
+              margin + 10,
+              yPosition
+            );
             yPosition += 6;
           }
           yPosition += 10;
         }
-        
+
         // Reports table
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('REPORTS LIST', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("REPORTS LIST", pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // Table headers
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont("helvetica", "bold");
         const tableStartX = margin;
         const snoWidth = 15;
         const projectWidth = 30;
         const nameWidth = 50;
         const statusWidth = 60;
-        
-        doc.text('SNO', tableStartX, yPosition);
-        doc.text('Project', tableStartX + snoWidth, yPosition);
-        doc.text('Report Name', tableStartX + snoWidth + projectWidth, yPosition);
-        doc.text('Status', tableStartX + snoWidth + projectWidth + nameWidth, yPosition);
+
+        doc.text("SNO", tableStartX, yPosition);
+        doc.text("Project", tableStartX + snoWidth, yPosition);
+        doc.text(
+          "Report Name",
+          tableStartX + snoWidth + projectWidth,
+          yPosition
+        );
+        doc.text(
+          "Status",
+          tableStartX + snoWidth + projectWidth + nameWidth,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Draw table lines
         doc.line(margin, yPosition - 5, pageWidth - margin, yPosition - 5);
         doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        
+
         // Table data
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
         this.filteredReports.forEach((report, index) => {
           yPosition += 8;
-          
+
           // Check if we need a new page
           if (yPosition > pageHeight - 40) {
             doc.addPage();
             yPosition = margin + 20;
           }
-          
+
           doc.text((index + 1).toString(), tableStartX, yPosition);
           doc.text(report.project, tableStartX + snoWidth, yPosition);
-          doc.text(report.name, tableStartX + snoWidth + projectWidth, yPosition);
-          doc.text(report.status, tableStartX + snoWidth + projectWidth + nameWidth, yPosition);
-          
+          doc.text(
+            report.name,
+            tableStartX + snoWidth + projectWidth,
+            yPosition
+          );
+          doc.text(
+            report.status,
+            tableStartX + snoWidth + projectWidth + nameWidth,
+            yPosition
+          );
+
           yPosition += 8;
         });
-        
+
         // Summary statistics
         yPosition += 15;
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('SUMMARY STATISTICS', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("SUMMARY STATISTICS", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
+        doc.setFont("helvetica", "normal");
+
         const totalReports = this.filteredReports.length;
         const statusCounts = {};
-        
-        this.filteredReports.forEach(report => {
+
+        this.filteredReports.forEach((report) => {
           statusCounts[report.status] = (statusCounts[report.status] || 0) + 1;
         });
-        
+
         doc.text(`Total Reports: ${totalReports}`, margin, yPosition);
         yPosition += 8;
-        
+
         Object.entries(statusCounts).forEach(([status, count]) => {
           doc.text(`${status}: ${count}`, margin + 10, yPosition);
           yPosition += 6;
         });
-        
+
         // Save the PDF
-        const fileName = `QA_Head_Reports_Summary_${currentDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `QA_Head_Reports_Summary_${currentDate.replace(
+          /\//g,
+          "-"
+        )}.pdf`;
         doc.save(fileName);
-        
+
         // Show success message
         this.$nextTick(() => {
-          alert('Reports summary exported successfully as PDF!');
+          alert("Reports summary exported successfully as PDF!");
         });
-        
       } catch (error) {
-        console.error('Error exporting PDF:', error);
+        console.error("Error exporting PDF:", error);
         this.$nextTick(() => {
-          alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+          alert(
+            `Error exporting PDF: ${
+              error.message || "Unknown error"
+            }. Please try again.`
+          );
         });
       }
     },
-    
+
     viewTemplates() {
       // Navigate to template dashboard
-      console.log('Navigating to template dashboard');
-      this.$router.push({ name: 'TemplateDashboard' });
-    }
-  }
+      console.log("Navigating to template dashboard");
+      this.$router.push({ name: "TemplateDashboard" });
+    },
+  },
 };
 </script>
 
@@ -579,16 +731,19 @@ export default {
 }
 
 /* Status-based colors for Report Filters */
-.success, .successfully-completed {
+.success,
+.successfully-completed {
   background-color: #e2fbdc;
 }
 .assigned {
   background-color: #c0f4f9;
 }
-.not-conducted, .test-not-conducted {
+.not-conducted,
+.test-not-conducted {
   background-color: #e8d0fd;
 }
-.failed, .test-failed {
+.failed,
+.test-failed {
   background-color: #ffc4be;
 }
 
@@ -670,8 +825,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -791,51 +950,51 @@ export default {
     gap: 20px;
     padding: 15px 20px;
   }
-  
+
   .header-right {
     flex-direction: column;
     gap: 15px;
     width: 100%;
   }
-  
+
   .search-box {
     width: 100%;
   }
-  
+
   .search-input {
     width: 100%;
   }
-  
+
   .filter-dropdown {
     width: 100%;
   }
-  
+
   .filter-button {
     width: 100%;
     text-align: center;
   }
-  
+
   .export-all-button {
     width: 100%;
     justify-content: center;
   }
-  
+
   .report-grid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 15px;
     padding: 20px;
   }
-  
+
   .report-card {
     height: 150px;
     padding: 15px;
   }
-  
+
   .view-templates-container {
     bottom: 20px;
     right: 20px;
   }
-  
+
   .view-templates-button {
     padding: 12px 20px;
     font-size: 13px;

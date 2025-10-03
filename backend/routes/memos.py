@@ -146,7 +146,7 @@ def submit_memo():
                 form_data.get('remarks'),
                 datetime.now(),
                 data.get('submitted_by'),
-                'not assigned'  # Initial memo_status
+                'not_assigned'  # Initial memo_status
             ))
         except Exception as e:
             print(f"Database insertion error: {str(e)}")
@@ -265,16 +265,16 @@ def get_memos():
                     m.memo_id, m.from_person, m.to_person, m.thru_person,
                     m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
                     m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                    m.memo_date, m.submitted_at, m.accepted_at,
+                    m.memo_date, ma.approval_date as submitted_at, ma.approval_date as accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
                     m.coordinator, m.memo_status
                 FROM memos m
-                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-                LEFT JOIN users u2 ON m.accepted_by = u2.user_id
                 INNER JOIN memo_approval ma ON m.memo_id = ma.memo_id
+                LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+                LEFT JOIN users u2 ON ma.approved_by = u2.user_id
                 WHERE ma.user_id = %s AND ma.status = 'accepted'
-                ORDER BY m.submitted_at DESC
+                ORDER BY ma.approval_date DESC
             """
             
             count_query = """
@@ -291,35 +291,34 @@ def get_memos():
             # Get memos for QA reviewer
             cur.execute(base_query + " LIMIT %s OFFSET %s", (current_user_id, limit, offset))
         elif current_user_role == 5:  # Designer role
-            # For designers, only show memos they submitted
+            # For designers, show all memos (since there's no submitted_by column)
             base_query = """
                 SELECT 
                     m.memo_id, m.from_person, m.to_person, m.thru_person,
                     m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
                     m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                    m.memo_date, m.submitted_at, m.accepted_at,
+                    m.memo_date, ma.approval_date as submitted_at, ma.approval_date as accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
                     m.coordinator, m.memo_status
                 FROM memos m
-                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-                LEFT JOIN users u2 ON m.accepted_by = u2.user_id
-                WHERE m.submitted_by = %s
-                ORDER BY m.submitted_at DESC
+                LEFT JOIN memo_approval ma ON m.memo_id = ma.memo_id
+                LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+                LEFT JOIN users u2 ON ma.approved_by = u2.user_id
+                ORDER BY COALESCE(ma.approval_date, m.memo_date) DESC
             """
             
             count_query = """
                 SELECT COUNT(*) 
                 FROM memos m
-                WHERE m.submitted_by = %s
             """
             
             # Get total count for designer
-            cur.execute(count_query, (current_user_id,))
+            cur.execute(count_query)
             total_count = cur.fetchone()[0]
             
             # Get memos for designer
-            cur.execute(base_query + " LIMIT %s OFFSET %s", (current_user_id, limit, offset))
+            cur.execute(base_query + " LIMIT %s OFFSET %s", (limit, offset))
         else:
             # For all other roles, show all memos
             base_query = """
@@ -327,14 +326,15 @@ def get_memos():
                     m.memo_id, m.from_person, m.to_person, m.thru_person,
                     m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
                     m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                    m.memo_date, m.submitted_at, m.accepted_at,
+                    m.memo_date, ma.approval_date as submitted_at, ma.approval_date as accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
                     m.coordinator, m.memo_status
                 FROM memos m
-                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-                LEFT JOIN users u2 ON m.accepted_by = u2.user_id
-                ORDER BY m.submitted_at DESC
+                LEFT JOIN memo_approval ma ON m.memo_id = ma.memo_id
+                LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+                LEFT JOIN users u2 ON ma.approved_by = u2.user_id
+                ORDER BY COALESCE(ma.approval_date, m.memo_date) DESC
             """
             
             # Get total count for all other roles
@@ -405,8 +405,9 @@ def get_memo_details(memo_id):
                 u1.name as submitted_by_name,
                 u2.name as accepted_by_name
             FROM memos m
-            LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-            LEFT JOIN users u2 ON m.accepted_by = u2.user_id
+            LEFT JOIN memo_approval ma ON m.memo_id = ma.memo_id
+            LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+            LEFT JOIN users u2 ON ma.approved_by = u2.user_id
             WHERE m.memo_id = %s
         """, (memo_id,))
 
@@ -435,7 +436,7 @@ def get_memo_details(memo_id):
             return str(date_obj)  # If it's already a string, return as is
 
         # Convert memo to dictionary
-        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, submitted_at, submitted_by, accepted_at, accepted_by, coordinator, memo_status, submitted_by_name, accepted_by_name
+        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, memo_status, submitted_by_name, accepted_by_name
         memo_dict = {
             "memo_id": memo[0],
             "from_person": memo[1],
@@ -469,14 +470,14 @@ def get_memo_details(memo_id):
             "func_check_end": safe_isoformat(memo[29]),
             "certified": memo[30],
             "remarks": memo[31],
-            "submitted_at": safe_isoformat(memo[32]),
-            "submitted_by": memo[33],
-            "accepted_at": safe_isoformat(memo[34]),
-            "accepted_by": memo[35],
-            "coordinator": memo[36],
-            "memo_status": memo[37],
-            "submitted_by_name": memo[38],
-            "accepted_by_name": memo[39]
+            "submitted_at": None,  # Not available in current schema
+            "submitted_by": None,  # Not available in current schema
+            "accepted_at": None,   # Not available in current schema
+            "accepted_by": None,   # Not available in current schema
+            "coordinator": memo[32],
+            "memo_status": memo[33],
+            "submitted_by_name": memo[34],
+            "accepted_by_name": memo[35]
         }
 
         # Convert references to list
@@ -916,15 +917,16 @@ def get_shared_memos():
                 m.memo_id, m.from_person, m.to_person, m.thru_person,
                 m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
                 m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                m.memo_date, m.submitted_at, m.accepted_at,
+                m.memo_date, ma.approval_date as submitted_at, ma.approval_date as accepted_at,
                 u1.name as submitted_by_name,
                 u2.name as accepted_by_name,
                 m.coordinator, m.memo_status,
                 sm.shared_at, u3.name as shared_by_name
             FROM shared_memos sm
             JOIN memos m ON sm.memo_id = m.memo_id
-            LEFT JOIN users u1 ON m.submitted_by = u1.user_id
-            LEFT JOIN users u2 ON m.accepted_by = u2.user_id
+            LEFT JOIN memo_approval ma ON m.memo_id = ma.memo_id
+            LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+            LEFT JOIN users u2 ON ma.approved_by = u2.user_id
             LEFT JOIN users u3 ON sm.shared_by = u3.user_id
             WHERE sm.shared_with = %s
             ORDER BY sm.shared_at DESC
@@ -975,3 +977,66 @@ def get_shared_memos():
     except Exception as e:
         print(f"Error fetching shared memos: {str(e)}")
         return jsonify({"success": False, "message": f"Error fetching shared memos: {str(e)}"}), 500
+
+@memos_bp.route('/api/memos/<int:memo_id>/status', methods=['PUT'])
+def update_memo_status(memo_id):
+    """Update memo status based on reviewer's test status selection"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        if 'test_status' not in data:
+            return jsonify({"success": False, "message": "test_status is required"}), 400
+        
+        if 'reviewer_comments' not in data:
+            return jsonify({"success": False, "message": "reviewer_comments is required"}), 400
+        
+        # Map frontend test status to database memo_status
+        status_mapping = {
+            'Successfully completed': 'successfully_completed',
+            'Test not conducted': 'test_not_conducted', 
+            'Completed with observations': 'completed_with_observations',
+            'Test failed': 'test_failed'
+        }
+        
+        test_status = data['test_status']
+        if test_status not in status_mapping:
+            return jsonify({"success": False, "message": "Invalid test status"}), 400
+        
+        memo_status = status_mapping[test_status]
+        
+        print(f"=== DEBUG: Updating memo status ===")
+        print(f"memo_id: {memo_id}")
+        print(f"test_status: {test_status}")
+        print(f"memo_status: {memo_status}")
+        print(f"reviewer_comments: {data.get('reviewer_comments', '')}")
+        print(f"=== END DEBUG ===")
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Update memo status and reviewer comments
+        reviewer_comments = data.get('reviewer_comments', '')
+        cur.execute("""
+            UPDATE memos 
+            SET memo_status = %s, qa_remarks = %s
+            WHERE memo_id = %s
+        """, (memo_status, reviewer_comments, memo_id))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Memo not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Memo status updated to {test_status}",
+            "memo_status": memo_status
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error updating memo status: {str(e)}")

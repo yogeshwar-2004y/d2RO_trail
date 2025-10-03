@@ -167,7 +167,7 @@ export default {
 
         // Fetch complete configuration matrix from the new endpoint
         const response = await fetch(
-          "http://localhost:5000/api/tests-configuration"
+          "http://localhost:8000/api/tests-configuration"
         );
         const data = await response.json();
 
@@ -213,7 +213,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/tests", {
+        const response = await fetch("http://localhost:8000/api/tests", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -248,7 +248,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/tests/${testId}`,
+          `http://localhost:8000/api/tests/${testId}`,
           {
             method: "DELETE",
           }
@@ -276,7 +276,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/stages", {
+        const response = await fetch("http://localhost:8000/api/stages", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -311,7 +311,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/stages/${stageId}`,
+          `http://localhost:8000/api/stages/${stageId}`,
           {
             method: "DELETE",
           }
@@ -355,7 +355,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/test-stage-types",
+          "http://localhost:8000/api/test-stage-types",
           {
             method: "POST",
             headers: {

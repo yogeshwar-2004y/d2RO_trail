@@ -124,8 +124,16 @@
             class="signature-input"
           />
           <div class="signature-preview" v-if="signaturePreview">
-            <img :src="signaturePreview" alt="Signature Preview" class="signature-image" />
-            <button type="button" @click="removeSignature" class="remove-signature-btn">
+            <img
+              :src="signaturePreview"
+              alt="Signature Preview"
+              class="signature-image"
+            />
+            <button
+              type="button"
+              @click="removeSignature"
+              class="remove-signature-btn"
+            >
               ×
             </button>
           </div>
@@ -167,7 +175,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:5000/api/roles");
+        const response = await fetch("http://localhost:8000/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -186,16 +194,16 @@ export default {
       const file = event.target.files[0];
       if (file) {
         // Validate file type
-        if (!file.type.startsWith('image/png')) {
+        if (!file.type.startsWith("image/png")) {
           alert("Please select a PNG file for the signature.");
-          event.target.value = '';
+          event.target.value = "";
           return;
         }
 
         // Validate file size (5MB limit)
         if (file.size > 5 * 1024 * 1024) {
           alert("Signature file size must be less than 5MB.");
-          event.target.value = '';
+          event.target.value = "";
           return;
         }
 
@@ -214,9 +222,9 @@ export default {
       this.signatureFile = null;
       this.signaturePreview = null;
       // Clear the file input
-      const fileInput = document.getElementById('signature');
+      const fileInput = document.getElementById("signature");
       if (fileInput) {
-        fileInput.value = '';
+        fileInput.value = "";
       }
     },
 
@@ -251,18 +259,18 @@ export default {
 
         // Create FormData for multipart form submission
         const formData = new FormData();
-        formData.append('name', this.user.name);
-        formData.append('id', this.user.id);
-        formData.append('email', this.user.email);
-        formData.append('password', this.user.password);
-        formData.append('roleId', this.user.roleId);
+        formData.append("name", this.user.name);
+        formData.append("id", this.user.id);
+        formData.append("email", this.user.email);
+        formData.append("password", this.user.password);
+        formData.append("roleId", this.user.roleId);
 
         // Add signature file if selected
         if (this.signatureFile) {
-          formData.append('signature', this.signatureFile);
+          formData.append("signature", this.signatureFile);
         }
 
-        const response = await fetch("http://localhost:5000/api/users", {
+        const response = await fetch("http://localhost:8000/api/users", {
           method: "POST",
           body: formData, // No Content-Type header for FormData
         });
@@ -275,7 +283,7 @@ export default {
             message += " Signature uploaded.";
           }
           alert(message);
-          
+
           // Reset form
           this.user = {
             name: "",

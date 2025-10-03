@@ -224,13 +224,13 @@ export default {
   computed: {
     // Get current user role from global store
     currentUserRole() {
-      return userStore.getters.currentUserRole()
+      return userStore.getters.currentUserRole();
     },
     currentUser() {
       return userStore.getters.currentUser();
     },
     roleName() {
-      return userStore.getters.roleName()
+      return userStore.getters.roleName();
     },
     isReviewer() {
       return this.roleName?.toLowerCase() === "qa reviewer";
@@ -281,7 +281,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}/lrus`
+          `http://localhost:8000/api/projects/${this.projectId}/lrus`
         );
         const data = await response.json();
 

@@ -118,12 +118,13 @@ export default {
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success' },
-        { name: 'DISAPPROVED', color: 'disapproved' },
-        { name: 'ASSIGNED', color: 'assigned' },
-        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted' },
-        { name: 'NOT ASSIGNED', color: 'not-assigned' },
+        { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
+        { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
+        { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
+        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
+        { name: 'TEST NOT CONDUCTED', color: 'not-conducted', dbValue: 'test_not_conducted' },
+        { name: 'NOT ASSIGNED', color: 'not-assigned', dbValue: 'not_assigned' },
+        { name: 'TEST FAILED', color: 'test-failed', dbValue: 'test_failed' },
       ],
       sharedMemos: [],
       loading: true,
@@ -233,8 +234,16 @@ export default {
             return 'ASSIGNED';
           case 'disapproved':
             return 'DISAPPROVED';
+          case 'successfully_completed':
+            return 'SUCCESSFULLY COMPLETED';
+          case 'test_not_conducted':
+            return 'TEST NOT CONDUCTED';
+          case 'completed_with_observations':
+            return 'COMPLETED WITH OBSERVATIONS';
+          case 'test_failed':
+            return 'TEST FAILED';
           default:
-            return memo.memo_status.toUpperCase();
+            return memo.memo_status.toUpperCase().replace(/_/g, ' ');
         }
       }
       // Fallback to legacy logic
@@ -414,6 +423,10 @@ export default {
 }
 .not-assigned {
   background-color: #fff1d6; /* Light Orange */
+}
+.test-failed {
+  background-color: #ff6b6b; /* Red */
+  color: white;
 }
 
 .memo-list {

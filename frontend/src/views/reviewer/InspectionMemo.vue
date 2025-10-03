@@ -120,12 +120,24 @@
         <div class="section-header">
           <h3 class="section-title">TEST STATUS</h3>
         </div>
-        <div class="grid-layout one-col-checkbox">
-          <label><input type="checkbox" v-model="memoData.testStatus.successfullyCompleted" />Successfully completed</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.completedWithObservations" />Completed with observations</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.testNotConducted" />Test not conducted</label>
-          <label><input type="checkbox" v-model="memoData.testStatus.testFailed" />Test failed</label>
-        </div>
+       <div class="grid-layout one-col-radio">
+  <label>
+    <input type="radio" value="Successfully completed" v-model="memoData.testStatus" />
+    Successfully completed
+  </label>
+  <label>
+    <input type="radio" value="Completed with observations" v-model="memoData.testStatus" />
+    Completed with observations
+  </label>
+  <label>
+    <input type="radio" value="Test not conducted" v-model="memoData.testStatus" />
+    Test not conducted
+  </label>
+  <label>
+    <input type="radio" value="Test failed" v-model="memoData.testStatus" />
+    Test failed
+  </label>
+</div>
       </div>
       <div class="form-card editable-section">
         <div class="section-header">
@@ -230,12 +242,7 @@ export default {
           cascicQAInspected: true
         },
         reviewerComments: '',
-        testStatus: {
-          successfullyCompleted: false,
-          completedWithObservations: false,
-          testNotConducted: false,
-          testFailed: false
-        }
+        testStatus: ''
       }
     };
   },
@@ -326,13 +333,8 @@ export default {
           cascicQAInspected: backendMemo.certified?.includes('f') || false,
         },
         
-        // Test Status object with all required properties
-        testStatus: {
-          successfullyCompleted: false,
-          completedWithObservations: false,
-          testNotConducted: false,
-          testFailed: false
-        },
+        // Test Status - single string value for radio button selection
+        testStatus: '',
         
         // Reviewer comments (empty for view-only)
         reviewerComments: ''
@@ -398,12 +400,10 @@ export default {
       alert(`Memo sent successfully to: ${emails.join(', ')}`);
       this.toggleShareModal(); // Close the modal after "sending"
     },*/ 
-    submitMemo() {
-      // Validate that at least one test status is selected
-      const testStatusSelected = Object.values(this.memoData.testStatus).some(status => status);
-      
-      if (!testStatusSelected) {
-        alert('Please select at least one test status.');
+    async submitMemo() {
+      // Validate that a test status is selected
+      if (!this.memoData.testStatus) {
+        alert('Please select a test status.');
         return;
       }
       
@@ -412,15 +412,34 @@ export default {
         return;
       }
       
-      // Here you would add the logic to submit the memo, for example, making an API call.
-      console.log('Submitting memo:', {
-        memoId: this.id,
-        testStatus: this.memoData.testStatus,
-        reviewerComments: this.memoData.reviewerComments
-      });
-      
-      alert('Memo submitted successfully!');
-      this.goBack(); // Navigate back after successful submission
+      try {
+        // Update memo status via API
+        const response = await fetch(`/api/memos/${this.id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            test_status: this.memoData.testStatus,
+            reviewer_comments: this.memoData.reviewerComments
+          })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to update memo status: ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          alert('Memo status updated successfully!');
+          this.goBack(); // Navigate back after successful submission
+        } else {
+          throw new Error(result.message || 'Failed to update memo status');
+        }
+      } catch (error) {
+        console.error('Error updating memo status:', error);
+        alert(`Error updating memo status: ${error.message}`);
+      }
     }
   }
 };
@@ -542,6 +561,10 @@ export default {
   grid-template-columns: 1fr;
 }
 
+.grid-layout.one-col-radio {
+  grid-template-columns: 1fr;
+}
+
 .grid-item {
   display: flex;
   flex-direction: column;
@@ -626,6 +649,21 @@ export default {
 .one-col-checkbox input[type="checkbox"][disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.one-col-radio label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.one-col-radio input[type="radio"] {
+  margin-right: 10px;
+  transform: scale(1.2);
+  accent-color: #000;
 }
 
 .share-modal-overlay {

@@ -109,7 +109,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:5000/api/users/manage");
+        const response = await fetch("http://localhost:8000/api/users/manage");
         const data = await response.json();
 
         if (data.success) {

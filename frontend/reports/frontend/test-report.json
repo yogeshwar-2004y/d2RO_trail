@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-09-29T04:00:22.516Z",
+  "summary": {
+    "unitTests": {
+      "error": "Coverage data not available"
+    },
+    "e2eTests": {
+      "error": "E2E test data not available"
+    },
+    "coverage": {
+      "error": "Coverage summary not available"
+    }
+  },
+  "details": {
+    "unitTestResults": {
+      "error": "Unit test results not available"
+    },
+    "e2eTestResults": {
+      "error": "E2E test results not available"
+    },
+    "coverageDetails": {
+      "error": "Coverage details not available"
+    }
+  }
+}
