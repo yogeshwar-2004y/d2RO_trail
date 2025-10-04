@@ -48,17 +48,46 @@
         
         <!-- Different messages based on user role -->
         <div v-if="canSelectTemplate" class="template-message">
-          <h3>Template not yet chosen</h3>
-          <p>Please select a template to proceed with this report.</p>
+          <div v-if="!selectedTemplate">
+            <h3>Template not yet chosen</h3>
+            <p>Please select a template to proceed with this report.</p>
+            
+            <!-- Single Choose Template Button for QA Head/Design Head -->
+            <div class="template-action">
+              <button 
+                @click="selectTemplate"
+                class="choose-template-btn"
+              >
+                Choose Template
+              </button>
+            </div>
+          </div>
           
-          <!-- Single Choose Template Button for QA Head/Design Head -->
-          <div class="template-action">
-            <button 
-              @click="selectTemplate"
-              class="choose-template-btn"
-            >
-              Choose Template
-            </button>
+          <div v-else class="selected-template-info">
+            <h3>Selected Template</h3>
+            <div class="template-display">
+              <div class="template-icon-display">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14,2 14,8 20,8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+              </div>
+              <div class="template-details">
+                <h4>{{ selectedTemplate.displayName }}</h4>
+                <p>{{ selectedTemplate.description }}</p>
+              </div>
+              <div class="template-actions">
+                <button @click="selectTemplate" class="change-template-btn">
+                  Change Template
+                </button>
+                <button @click="openTemplate" class="open-template-btn">
+                  Open Template
+                </button>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -72,6 +101,10 @@
     <!-- Template Selection Overlay -->
     <div v-if="showTemplateOverlay" class="template-overlay" @click="closeOverlay">
       <div class="template-overlay-content" @click.stop>
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="loading-overlay">
+          <div class="loading-spinner"></div>
+        </div>
         <div class="template-overlay-header">
           <h2>Choose Report Template</h2>
           <button class="close-btn" @click="closeOverlay">
@@ -129,54 +162,57 @@ export default {
       showTemplateOverlay: false,
       availableTemplates: [
         {
-          name: 'ObservationReport',
-          displayName: 'Observation Report',
-          description: 'Template for creating observation reports with detailed analysis',
-          component: 'ObservationReport'
-        },
-        {
-          name: 'BarePcbInspectionReport',
-          displayName: 'Bare PCB Inspection Report',
-          description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
-          component: 'BarePcbInspectionReport'
-        },
-        {
+          template_id: 1,
           name: 'Conformalcoatinginspectionreport',
           displayName: 'Conformal Coating Inspection Report',
           description: 'Template for creating conformal coating inspection reports with quality testing criteria',
           component: 'Conformalcoatinginspectionreport'
         },
         {
-          name: 'RawMaterialInspectionReport',
-          displayName: 'Raw Material Inspection Report',
-          description: 'Template for creating raw material inspection reports with compliance checking',
-          component: 'RawMaterialInspectionReport'
-        },
-        {
+          template_id: 2,
           name: 'CotsScreeningInspectionReport',
           displayName: 'COTS Screening Inspection Report',
           description: 'Template for creating COTS screening inspection reports with test case validation',
           component: 'CotsScreeningInspectionReport'
         },
         {
+          template_id: 3,
+          name: 'BarePcbInspectionReport',
+          displayName: 'Bare PCB Inspection Report',
+          description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
+          component: 'BarePcbInspectionReport'
+        },
+        {
+          template_id: 4,
+          name: 'MechanicalInspection',
+          displayName: 'Mechanical Inspection Report',
+          description: 'Template for creating mechanical inspection reports with structural testing criteria',
+          component: 'MechanicalInspection'
+        },
+        {
+          template_id: 5,
           name: 'AssembledBoardInspectionReport',
           displayName: 'Assembled Board Inspection Report',
           description: 'Template for creating assembled board inspection reports with comprehensive testing criteria',
           component: 'AssembledBoardInspectionReport'
         },
         {
+          template_id: 6,
+          name: 'RawMaterialInspectionReport',
+          displayName: 'Raw Material Inspection Report',
+          description: 'Template for creating raw material inspection reports with compliance checking',
+          component: 'RawMaterialInspectionReport'
+        },
+        {
+          template_id: 7,
           name: 'KitOfPartInsp',
           displayName: 'Kit of Part Inspection Report',
           description: 'Template for creating kit of part inspection reports with component verification',
           component: 'KitOfPartInsp'
-        },
-        {
-          name: 'MechanicalInspection',
-          displayName: 'Mechanical Inspection Report',
-          description: 'Template for creating mechanical inspection reports with structural testing criteria',
-          component: 'MechanicalInspection'
         }
-      ]
+      ],
+      selectedTemplate: null,
+      loading: false
     };
   },
   computed: {
@@ -191,6 +227,9 @@ export default {
     this.reportId = this.$route.params.reportId || '';
     this.reportName = this.$route.params.reportName || '';
     this.projectName = this.$route.params.projectName || '';
+    
+    // Load report details to check if template is already selected
+    this.loadReportDetails();
   },
   methods: {
     selectTemplate() {
@@ -202,21 +241,76 @@ export default {
       this.showTemplateOverlay = false;
     },
     
-    selectTemplateOption(template) {
+    async selectTemplateOption(template) {
       console.log('Selected template:', template.name, 'for report:', this.reportId);
       
-      // Close the overlay
-      this.closeOverlay();
-      
-      // Navigate to the selected template with report context
-      this.$router.push({
-        name: template.component,
-        params: {
-          projectName: this.projectName,
-          reportId: this.reportId,
-          reportName: this.reportName
+      try {
+        this.loading = true;
+        
+        // Update report with selected template_id
+        const response = await fetch(`/api/reports/${this.reportId}/template`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            template_id: template.template_id
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Set the selected template
+          this.selectedTemplate = template;
+          
+          // Close the overlay
+          this.closeOverlay();
+          
+          // Show success message
+          alert(`Template "${template.displayName}" has been selected successfully!`);
+        } else {
+          alert(`Error: ${result.message}`);
         }
-      });
+      } catch (error) {
+        console.error('Error selecting template:', error);
+        alert('An error occurred while selecting the template. Please try again.');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async loadReportDetails() {
+      if (!this.reportId) return;
+      
+      try {
+        const response = await fetch(`/api/reports/${this.reportId}`);
+        const result = await response.json();
+        
+        if (result.success && result.report.template_id) {
+          // Find the template that matches the template_id
+          const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
+          if (template) {
+            this.selectedTemplate = template;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading report details:', error);
+      }
+    },
+    
+    openTemplate() {
+      if (this.selectedTemplate) {
+        // Navigate to the selected template with report context
+        this.$router.push({
+          name: this.selectedTemplate.component,
+          params: {
+            projectName: this.projectName,
+            reportId: this.reportId,
+            reportName: this.reportName
+          }
+        });
+      }
     },
     
     uploadReport() {
@@ -487,6 +581,149 @@ export default {
     padding: 15px 30px;
     font-size: 1.1em;
     width: 250px;
+  }
+}
+
+/* Selected Template Styles */
+.selected-template-info {
+  text-align: center;
+}
+
+.selected-template-info h3 {
+  color: #28a745;
+  font-size: 2.2em;
+  margin: 0 0 30px 0;
+  font-weight: 600;
+}
+
+.template-display {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  max-width: 800px;
+  margin: 0 auto;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.template-icon-display {
+  color: #28a745;
+  flex-shrink: 0;
+}
+
+.template-details {
+  flex: 1;
+  text-align: left;
+}
+
+.template-details h4 {
+  color: #2d3748;
+  font-size: 1.4em;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+}
+
+.template-details p {
+  color: #6c757d;
+  font-size: 1em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.template-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.change-template-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.change-template-btn:hover {
+  background: #5a6268;
+  transform: scale(1.05);
+}
+
+.open-template-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.open-template-btn:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+/* Loading state */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design for Selected Template */
+@media (max-width: 768px) {
+  .template-display {
+    flex-direction: column;
+    text-align: center;
+    padding: 20px;
+    gap: 20px;
+  }
+  
+  .template-details {
+    text-align: center;
+  }
+  
+  .template-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+  
+  .change-template-btn,
+  .open-template-btn {
+    padding: 12px 20px;
+    font-size: 0.9em;
   }
 }
 

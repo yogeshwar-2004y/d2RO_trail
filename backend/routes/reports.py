@@ -204,7 +204,7 @@ def get_report_details(report_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch report details with memo information
+        # Fetch report details with memo and template information
         cur.execute("""
             SELECT 
                 r.report_id,
@@ -218,6 +218,7 @@ def get_report_details(report_id):
                 r.reference_document,
                 r.status,
                 r.created_at,
+                r.template_id,
                 p.project_name,
                 l.lru_name,
                 m.wing_proj_ref_no,
@@ -243,11 +244,13 @@ def get_report_details(report_id):
                 m.perf_check_during,
                 m.func_check_end,
                 m.certified,
-                m.remarks
+                m.remarks,
+                rt.template_name
             FROM reports r
             LEFT JOIN projects p ON r.project_id = p.project_id
             LEFT JOIN lrus l ON r.lru_id = l.lru_id
             LEFT JOIN memos m ON r.memo_id = m.memo_id
+            LEFT JOIN report_templates rt ON r.template_id = rt.template_id
             WHERE r.report_id = %s
         """, (report_id,))
         
@@ -270,32 +273,34 @@ def get_report_details(report_id):
             "reference_document": report[8],
             "status": report[9],
             "created_at": report[10].isoformat() if report[10] else None,
-            "project_name": report[11],
-            "lru_name": report[12],
-            "wing_proj_ref_no": report[13],
-            "lru_sru_desc": report[14],
-            "part_number": report[15],
-            "from_person": report[16],
-            "to_person": report[17],
-            "thru_person": report[18],
-            "casdic_ref_no": report[19],
-            "dated": report[20].isoformat() if report[20] else None,
-            "manufacturer": report[21],
-            "drawing_no_rev": report[22],
-            "source": report[23],
-            "venue": report[24],
-            "memo_date": report[25].isoformat() if report[25] else None,
-            "name_designation": report[26],
-            "test_facility": report[27],
-            "test_cycle_duration": report[28],
-            "test_start_on": report[29].isoformat() if report[29] else None,
-            "test_complete_on": report[30].isoformat() if report[30] else None,
-            "calibration_status": report[31],
-            "func_check_initial": report[32].isoformat() if report[32] else None,
-            "perf_check_during": report[33].isoformat() if report[33] else None,
-            "func_check_end": report[34].isoformat() if report[34] else None,
-            "certified": report[35],
-            "remarks": report[36]
+            "template_id": report[11],
+            "project_name": report[12],
+            "lru_name": report[13],
+            "wing_proj_ref_no": report[14],
+            "lru_sru_desc": report[15],
+            "part_number": report[16],
+            "from_person": report[17],
+            "to_person": report[18],
+            "thru_person": report[19],
+            "casdic_ref_no": report[20],
+            "dated": report[21].isoformat() if report[21] else None,
+            "manufacturer": report[22],
+            "drawing_no_rev": report[23],
+            "source": report[24],
+            "venue": report[25],
+            "memo_date": report[26].isoformat() if report[26] else None,
+            "name_designation": report[27],
+            "test_facility": report[28],
+            "test_cycle_duration": report[29],
+            "test_start_on": report[30].isoformat() if report[30] else None,
+            "test_complete_on": report[31].isoformat() if report[31] else None,
+            "calibration_status": report[32],
+            "func_check_initial": report[33].isoformat() if report[33] else None,
+            "perf_check_during": report[34].isoformat() if report[34] else None,
+            "func_check_end": report[35].isoformat() if report[35] else None,
+            "certified": report[36],
+            "remarks": report[37],
+            "template_name": report[38]
         }
         
         return jsonify({
@@ -306,6 +311,48 @@ def get_report_details(report_id):
     except Exception as e:
         print(f"Error fetching report details: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching report details: {str(e)}")
+
+@reports_bp.route('/api/reports/<int:report_id>/template', methods=['PUT'])
+def update_report_template(report_id):
+    """Update report template"""
+    try:
+        data = request.json
+        if not data or 'template_id' not in data:
+            return jsonify({"success": False, "message": "Template ID is required"}), 400
+        
+        template_id = data['template_id']
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verify template exists
+        cur.execute("SELECT template_id FROM report_templates WHERE template_id = %s", (template_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Invalid template ID"}), 400
+        
+        # Update report with template_id
+        cur.execute("""
+            UPDATE reports 
+            SET template_id = %s 
+            WHERE report_id = %s
+        """, (template_id, report_id))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Report template updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error updating report template: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error updating report template: {str(e)}")
 
 @reports_bp.route('/api/reports/<int:report_id>', methods=['PUT'])
 def update_report_status(report_id):
