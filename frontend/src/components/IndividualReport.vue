@@ -68,6 +68,51 @@
         </div>
       </div>
     </div>
+
+    <!-- Template Selection Overlay -->
+    <div v-if="showTemplateOverlay" class="template-overlay" @click="closeOverlay">
+      <div class="template-overlay-content" @click.stop>
+        <div class="template-overlay-header">
+          <h2>Choose Report Template</h2>
+          <button class="close-btn" @click="closeOverlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="template-overlay-body">
+          <p class="template-description">Select a template for your report. Each template is designed for specific inspection types.</p>
+          
+          <div class="templates-grid">
+            <div 
+              v-for="template in availableTemplates" 
+              :key="template.name"
+              class="template-card"
+              @click="selectTemplateOption(template)"
+            >
+              <div class="template-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14,2 14,8 20,8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+              </div>
+              <div class="template-info">
+                <h3>{{ template.displayName }}</h3>
+                <p>{{ template.description }}</p>
+              </div>
+              <div class="template-action">
+                <button class="select-template-btn">Select</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -80,7 +125,58 @@ export default {
     return {
       reportId: '',
       reportName: '',
-      projectName: ''
+      projectName: '',
+      showTemplateOverlay: false,
+      availableTemplates: [
+        {
+          name: 'ObservationReport',
+          displayName: 'Observation Report',
+          description: 'Template for creating observation reports with detailed analysis',
+          component: 'ObservationReport'
+        },
+        {
+          name: 'BarePcbInspectionReport',
+          displayName: 'Bare PCB Inspection Report',
+          description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
+          component: 'BarePcbInspectionReport'
+        },
+        {
+          name: 'Conformalcoatinginspectionreport',
+          displayName: 'Conformal Coating Inspection Report',
+          description: 'Template for creating conformal coating inspection reports with quality testing criteria',
+          component: 'Conformalcoatinginspectionreport'
+        },
+        {
+          name: 'RawMaterialInspectionReport',
+          displayName: 'Raw Material Inspection Report',
+          description: 'Template for creating raw material inspection reports with compliance checking',
+          component: 'RawMaterialInspectionReport'
+        },
+        {
+          name: 'CotsScreeningInspectionReport',
+          displayName: 'COTS Screening Inspection Report',
+          description: 'Template for creating COTS screening inspection reports with test case validation',
+          component: 'CotsScreeningInspectionReport'
+        },
+        {
+          name: 'AssembledBoardInspectionReport',
+          displayName: 'Assembled Board Inspection Report',
+          description: 'Template for creating assembled board inspection reports with comprehensive testing criteria',
+          component: 'AssembledBoardInspectionReport'
+        },
+        {
+          name: 'KitOfPartInsp',
+          displayName: 'Kit of Part Inspection Report',
+          description: 'Template for creating kit of part inspection reports with component verification',
+          component: 'KitOfPartInsp'
+        },
+        {
+          name: 'MechanicalInspection',
+          displayName: 'Mechanical Inspection Report',
+          description: 'Template for creating mechanical inspection reports with structural testing criteria',
+          component: 'MechanicalInspection'
+        }
+      ]
     };
   },
   computed: {
@@ -98,8 +194,29 @@ export default {
   },
   methods: {
     selectTemplate() {
-      console.log('Choosing template for report:', this.reportId);
-      alert(`Choose template for Report ID: ${this.reportId} will be implemented soon!`);
+      console.log('Opening template selection overlay for report:', this.reportId);
+      this.showTemplateOverlay = true;
+    },
+    
+    closeOverlay() {
+      this.showTemplateOverlay = false;
+    },
+    
+    selectTemplateOption(template) {
+      console.log('Selected template:', template.name, 'for report:', this.reportId);
+      
+      // Close the overlay
+      this.closeOverlay();
+      
+      // Navigate to the selected template with report context
+      this.$router.push({
+        name: template.component,
+        params: {
+          projectName: this.projectName,
+          reportId: this.reportId,
+          reportName: this.reportName
+        }
+      });
     },
     
     uploadReport() {
@@ -370,6 +487,237 @@ export default {
     padding: 15px 30px;
     font-size: 1.1em;
     width: 250px;
+  }
+}
+
+/* Template Overlay Styles */
+.template-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.template-overlay-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.template-overlay-header {
+  background: #2d3748;
+  color: white;
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.template-overlay-header h2 {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.template-overlay-body {
+  padding: 30px;
+  max-height: calc(80vh - 100px);
+  overflow-y: auto;
+}
+
+.template-description {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  padding: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.template-card:hover {
+  border-color: #007bff;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
+}
+
+.template-card:hover::before {
+  opacity: 1;
+}
+
+.template-icon {
+  color: #007bff;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.template-card:hover .template-icon {
+  transform: scale(1.1);
+}
+
+.template-info {
+  flex: 1;
+  z-index: 1;
+  position: relative;
+}
+
+.template-info h3 {
+  color: #2d3748;
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.template-info p {
+  color: #6c757d;
+  font-size: 0.95em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.template-action {
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+}
+
+.select-template-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.select-template-btn:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design for Overlay */
+@media (max-width: 768px) {
+  .template-overlay-content {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .template-overlay-header {
+    padding: 20px;
+  }
+  
+  .template-overlay-header h2 {
+    font-size: 1.5em;
+  }
+  
+  .template-overlay-body {
+    padding: 20px;
+  }
+  
+  .templates-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .template-card {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .template-info h3 {
+    font-size: 1.2em;
+  }
+  
+  .template-info p {
+    font-size: 0.9em;
   }
 }
 </style>
