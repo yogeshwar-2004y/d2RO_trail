@@ -85,21 +85,30 @@
 
         <!-- Template Form Content -->
         <div class="template-form-content">
-          <!-- This will be replaced with the actual template component -->
-          <div class="template-placeholder">
-            <div class="template-icon-large">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14,2 14,8 20,8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10,9 9,9 8,9"></polyline>
+          <!-- Dynamic Template Component -->
+          <component 
+            v-if="currentTemplateComponent"
+            :is="currentTemplateComponent"
+            :projectName="projectName"
+            :reportId="reportId"
+            :reportName="reportName"
+            :templateId="selectedTemplate.template_id"
+            :templateName="selectedTemplate.name"
+          />
+          
+          <!-- Fallback if component not found -->
+          <div v-else class="template-error">
+            <div class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
               </svg>
             </div>
-            <h4>Template Form Ready</h4>
-            <p>The {{ selectedTemplate.displayName }} form is ready for data entry.</p>
-            <button @click="openTemplate" class="open-template-btn">
-              Open Template Form
+            <h4>Template Component Not Found</h4>
+            <p>The template "{{ selectedTemplate.displayName }}" could not be loaded.</p>
+            <button @click="selectTemplate" class="change-template-btn">
+              Select Different Template
             </button>
           </div>
         </div>
@@ -160,8 +169,28 @@
 <script>
 import { userStore } from '@/stores/userStore';
 
+// Import all template components
+import ObservationReport from '@/templates/ObservationReport.vue'
+import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
+import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
+import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
+import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+
 export default {
   name: 'IndividualReport',
+  components: {
+    ObservationReport,
+    BarePcbInspectionReport,
+    Conformalcoatinginspectionreport,
+    RawMaterialInspectionReport,
+    CotsScreeningInspectionReport,
+    AssembledBoardInspectionReport,
+    KitOfPartInsp,
+    MechanicalInspection
+  },
   data() {
     return {
       reportId: '',
@@ -233,6 +262,24 @@ export default {
     isDesignHead() {
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 4;
+    },
+    
+    currentTemplateComponent() {
+      if (!this.selectedTemplate) return null;
+      
+      // Map template names to component names
+      const componentMap = {
+        'ObservationReport': 'ObservationReport',
+        'BarePcbInspectionReport': 'BarePcbInspectionReport',
+        'Conformalcoatinginspectionreport': 'Conformalcoatinginspectionreport',
+        'RawMaterialInspectionReport': 'RawMaterialInspectionReport',
+        'CotsScreeningInspectionReport': 'CotsScreeningInspectionReport',
+        'AssembledBoardInspectionReport': 'AssembledBoardInspectionReport',
+        'KitOfPartInsp': 'KitOfPartInsp',
+        'MechanicalInspection': 'MechanicalInspection'
+      };
+      
+      return componentMap[this.selectedTemplate.name] || null;
     }
   },
   mounted() {
@@ -312,19 +359,6 @@ export default {
       }
     },
     
-    openTemplate() {
-      if (this.selectedTemplate) {
-        // Navigate to the selected template with report context
-        this.$router.push({
-          name: this.selectedTemplate.component,
-          params: {
-            projectName: this.projectName,
-            reportId: this.reportId,
-            reportName: this.reportName
-          }
-        });
-      }
-    },
     
     uploadReport() {
       console.log('Uploading report:', this.reportId);
@@ -633,7 +667,7 @@ export default {
 }
 
 .template-form-content {
-  padding: 40px 30px;
+  padding: 0;
 }
 
 .template-placeholder {
@@ -679,6 +713,33 @@ export default {
   background: #0056b3;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Template Error State */
+.template-error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-icon {
+  color: #dc3545;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.template-error h4 {
+  color: #dc3545;
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.template-error p {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
 }
 
 .change-template-btn {
@@ -736,7 +797,7 @@ export default {
   }
   
   .template-form-content {
-    padding: 30px 20px;
+    padding: 0;
   }
   
   .template-placeholder {
