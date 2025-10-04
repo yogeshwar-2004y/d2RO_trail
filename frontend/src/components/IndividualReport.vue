@@ -42,58 +42,66 @@
         </div>
       </div>
 
-      <!-- No Reports Uploaded State -->
-      <div class="no-reports-state">
+      <!-- Template Selection State -->
+      <div v-if="!selectedTemplate" class="no-reports-state">
         <div class="empty-icon">📄</div>
         
-        <!-- Different messages based on user role -->
-        <div v-if="canSelectTemplate" class="template-message">
-          <div v-if="!selectedTemplate">
-            <h3>Template not yet chosen</h3>
-            <p>Please select a template to proceed with this report.</p>
-            
-            <!-- Single Choose Template Button for QA Head/Design Head -->
-            <div class="template-action">
-              <button 
-                @click="selectTemplate"
-                class="choose-template-btn"
-              >
-                Choose Template
-              </button>
-            </div>
-          </div>
+        <!-- Design Head can select template -->
+        <div v-if="isDesignHead" class="template-message">
+          <h3>Template not yet chosen</h3>
+          <p>Please select a template to proceed with this report.</p>
           
-          <div v-else class="selected-template-info">
-            <h3>Selected Template</h3>
-            <div class="template-display">
-              <div class="template-icon-display">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14,2 14,8 20,8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10,9 9,9 8,9"></polyline>
-                </svg>
-              </div>
-              <div class="template-details">
-                <h4>{{ selectedTemplate.displayName }}</h4>
-                <p>{{ selectedTemplate.description }}</p>
-              </div>
-              <div class="template-actions">
-                <button @click="selectTemplate" class="change-template-btn">
-                  Change Template
-                </button>
-                <button @click="openTemplate" class="open-template-btn">
-                  Open Template
-                </button>
-              </div>
-            </div>
+          <div class="template-action">
+            <button 
+              @click="selectTemplate"
+              class="choose-template-btn"
+            >
+              Choose Template
+            </button>
           </div>
         </div>
         
+        <!-- Other roles wait for Design Head to select template -->
         <div v-else class="report-message">
-          <h3>Report not uploaded yet</h3>
-          <p>This report is currently empty and needs to be populated with observations and data.</p>
+          <h3>Waiting for template selection</h3>
+          <p>The Design Head needs to select a template before this report can be accessed.</p>
+        </div>
+      </div>
+
+      <!-- Template Form Display -->
+      <div v-else class="template-form-container">
+        <!-- Template Header -->
+        <div class="template-form-header">
+          <div class="template-info">
+            <h3>{{ selectedTemplate.displayName }}</h3>
+            <p>{{ selectedTemplate.description }}</p>
+          </div>
+          <div v-if="isDesignHead" class="template-actions">
+            <button @click="selectTemplate" class="change-template-btn">
+              Change Template
+            </button>
+          </div>
+        </div>
+
+        <!-- Template Form Content -->
+        <div class="template-form-content">
+          <!-- This will be replaced with the actual template component -->
+          <div class="template-placeholder">
+            <div class="template-icon-large">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14,2 14,8 20,8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10,9 9,9 8,9"></polyline>
+              </svg>
+            </div>
+            <h4>Template Form Ready</h4>
+            <p>The {{ selectedTemplate.displayName }} form is ready for data entry.</p>
+            <button @click="openTemplate" class="open-template-btn">
+              Open Template Form
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -217,9 +225,14 @@ export default {
   },
   computed: {
     canSelectTemplate() {
-      // Only QA Head (role_id = 2) and Design Head (role_id = 4) can select templates
+      // Only Design Head (role_id = 4) can select templates
       const currentUserRole = userStore.getters.currentUserRole();
-      return currentUserRole === 2 || currentUserRole === 4;
+      return currentUserRole === 4;
+    },
+    
+    isDesignHead() {
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 4;
     }
   },
   mounted() {
@@ -584,60 +597,88 @@ export default {
   }
 }
 
-/* Selected Template Styles */
-.selected-template-info {
-  text-align: center;
-}
-
-.selected-template-info h3 {
-  color: #28a745;
-  font-size: 2.2em;
-  margin: 0 0 30px 0;
-  font-weight: 600;
-}
-
-.template-display {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+/* Template Form Container Styles */
+.template-form-container {
+  background: white;
   border-radius: 15px;
-  padding: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.template-form-header {
+  background: #f8f9fa;
+  padding: 25px 30px;
+  border-bottom: 1px solid #e9ecef;
   display: flex;
   align-items: center;
-  gap: 25px;
-  max-width: 800px;
-  margin: 0 auto;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  justify-content: space-between;
 }
 
-.template-icon-display {
-  color: #28a745;
-  flex-shrink: 0;
-}
-
-.template-details {
-  flex: 1;
-  text-align: left;
-}
-
-.template-details h4 {
+.template-info h3 {
   color: #2d3748;
-  font-size: 1.4em;
+  font-size: 1.8em;
   font-weight: 600;
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
 }
 
-.template-details p {
+.template-info p {
   color: #6c757d;
   font-size: 1em;
   margin: 0;
   line-height: 1.5;
 }
 
-.template-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.template-form-header .template-actions {
   flex-shrink: 0;
+}
+
+.template-form-content {
+  padding: 40px 30px;
+}
+
+.template-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.template-icon-large {
+  color: #007bff;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.template-placeholder h4 {
+  color: #2d3748;
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.template-placeholder p {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.template-placeholder .open-template-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.template-placeholder .open-template-btn:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
 .change-template-btn {
@@ -654,23 +695,6 @@ export default {
 
 .change-template-btn:hover {
   background: #5a6268;
-  transform: scale(1.05);
-}
-
-.open-template-btn {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.9em;
-}
-
-.open-template-btn:hover {
-  background: #218838;
   transform: scale(1.05);
 }
 
@@ -702,28 +726,43 @@ export default {
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive Design for Selected Template */
+/* Responsive Design for Template Form */
 @media (max-width: 768px) {
-  .template-display {
+  .template-form-header {
     flex-direction: column;
     text-align: center;
-    padding: 20px;
     gap: 20px;
+    padding: 20px;
   }
   
-  .template-details {
-    text-align: center;
+  .template-form-content {
+    padding: 30px 20px;
   }
   
-  .template-actions {
-    flex-direction: row;
-    justify-content: center;
+  .template-placeholder {
+    padding: 30px 15px;
   }
   
-  .change-template-btn,
-  .open-template-btn {
+  .template-placeholder h4 {
+    font-size: 1.3em;
+  }
+  
+  .template-placeholder p {
+    font-size: 1em;
+  }
+  
+  .template-placeholder .open-template-btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .change-template-btn {
     padding: 12px 20px;
     font-size: 0.9em;
+    width: 100%;
+    max-width: 200px;
   }
 }
 
