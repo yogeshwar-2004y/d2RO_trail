@@ -172,11 +172,10 @@
               <thead>
                 <tr>
                   <th>SL NO</th>
-                  <th>PARAMETERS</th>
-                  <th>ALLOWED / NOT ALLOWED</th>
-                  <th>YES/NO</th>
+                  <th>CHECK POINTS</th>
                   <th>EXPECTED</th>
-                  <th>REMARKS / OBSERVATIONS</th>
+                  <th>COMPLIANCE OBSERVATIONS</th>
+                  <th>REMARKS (OK / NOT OK)</th>
                   <th>UPLOAD</th>
                 </tr>
               </thead>
@@ -185,20 +184,13 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.allowed" placeholder="Enter allowed/not allowed">
+                    <input type="text" v-model="item.expected" readonly class="readonly-input">
                   </td>
                   <td>
-                    <select v-model="item.yesNo">
-                      <option value="">Select</option>
-                      <option value="Yes">Yes</option>
-                      <option value="No">No</option>
-                    </select>
+                    <input type="text" v-model="item.complianceObservation" placeholder="Enter compliance observations">
                   </td>
                   <td>
-                    <input type="text" v-model="item.expected" placeholder="Enter expected">
-                  </td>
-                  <td>
-                    <input type="text" v-model="item.remarks" placeholder="Enter remarks">
+                    <input type="text" v-model="item.remarks" placeholder="Enter remarks (OK/NOT OK)">
                   </td>
                   <td>
                     <input type="file" @change="handleFileUpload($event, item, 'param')">
@@ -276,14 +268,14 @@ export default {
         { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
       ],
       parameterChecklist: [
-        { parameter: 'Burrs', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Damages', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Name Plate', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Engraving', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Passivation', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Chromate', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Electro-less Nickel plating', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
-        { parameter: 'Fasteners', allowed: '', yesNo: '', expected: '', remarks: '', fileName: null },
+        { parameter: 'Burrs', complianceObservation: '', expected: 'Not Expected', remarks: '', fileName: null },
+        { parameter: 'Damages', complianceObservation: '', expected: 'Not Expected', remarks: '', fileName: null },
+        { parameter: 'Name Plate', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        { parameter: 'Engraving', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        { parameter: 'Passivation', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        { parameter: 'Chromate', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        { parameter: 'Electro-less Nickel plating', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        { parameter: 'Fasteners', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
       ],
       currentDate: new Date(),
     };
@@ -352,9 +344,8 @@ export default {
           item.fileName = null;
         });
         this.parameterChecklist.forEach(item => {
-          item.allowed = '';
-          item.yesNo = '';
-          item.expected = '';
+          item.complianceObservation = '';
+          item.expected = item.parameter === 'Burrs' || item.parameter === 'Damages' ? 'Not Expected' : 'As per Drawing';
           item.remarks = '';
           item.fileName = null;
         });
@@ -409,50 +400,42 @@ export default {
           dim3_upload: this.dimensionalChecklist[2].fileName,
           
           // Parameter Checklist
-          param1_allowed: this.parameterChecklist[0].allowed,
-          param1_yes_no: this.parameterChecklist[0].yesNo,
+          param1_compliance_observation: this.parameterChecklist[0].complianceObservation,
           param1_expected: this.parameterChecklist[0].expected,
           param1_remarks: this.parameterChecklist[0].remarks,
           param1_upload: this.parameterChecklist[0].fileName,
           
-          param2_allowed: this.parameterChecklist[1].allowed,
-          param2_yes_no: this.parameterChecklist[1].yesNo,
+          param2_compliance_observation: this.parameterChecklist[1].complianceObservation,
           param2_expected: this.parameterChecklist[1].expected,
           param2_remarks: this.parameterChecklist[1].remarks,
           param2_upload: this.parameterChecklist[1].fileName,
           
-          param3_allowed: this.parameterChecklist[2].allowed,
-          param3_yes_no: this.parameterChecklist[2].yesNo,
+          param3_compliance_observation: this.parameterChecklist[2].complianceObservation,
           param3_expected: this.parameterChecklist[2].expected,
           param3_remarks: this.parameterChecklist[2].remarks,
           param3_upload: this.parameterChecklist[2].fileName,
           
-          param4_allowed: this.parameterChecklist[3].allowed,
-          param4_yes_no: this.parameterChecklist[3].yesNo,
+          param4_compliance_observation: this.parameterChecklist[3].complianceObservation,
           param4_expected: this.parameterChecklist[3].expected,
           param4_remarks: this.parameterChecklist[3].remarks,
           param4_upload: this.parameterChecklist[3].fileName,
           
-          param5_allowed: this.parameterChecklist[4].allowed,
-          param5_yes_no: this.parameterChecklist[4].yesNo,
+          param5_compliance_observation: this.parameterChecklist[4].complianceObservation,
           param5_expected: this.parameterChecklist[4].expected,
           param5_remarks: this.parameterChecklist[4].remarks,
           param5_upload: this.parameterChecklist[4].fileName,
           
-          param6_allowed: this.parameterChecklist[5].allowed,
-          param6_yes_no: this.parameterChecklist[5].yesNo,
+          param6_compliance_observation: this.parameterChecklist[5].complianceObservation,
           param6_expected: this.parameterChecklist[5].expected,
           param6_remarks: this.parameterChecklist[5].remarks,
           param6_upload: this.parameterChecklist[5].fileName,
           
-          param7_allowed: this.parameterChecklist[6].allowed,
-          param7_yes_no: this.parameterChecklist[6].yesNo,
+          param7_compliance_observation: this.parameterChecklist[6].complianceObservation,
           param7_expected: this.parameterChecklist[6].expected,
           param7_remarks: this.parameterChecklist[6].remarks,
           param7_upload: this.parameterChecklist[6].fileName,
           
-          param8_allowed: this.parameterChecklist[7].allowed,
-          param8_yes_no: this.parameterChecklist[7].yesNo,
+          param8_compliance_observation: this.parameterChecklist[7].complianceObservation,
           param8_expected: this.parameterChecklist[7].expected,
           param8_remarks: this.parameterChecklist[7].remarks,
           param8_upload: this.parameterChecklist[7].fileName,
@@ -740,6 +723,13 @@ export default {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.readonly-input {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  font-weight: 500;
 }
 
 .signatures-layout {
