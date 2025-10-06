@@ -580,7 +580,7 @@ def approve_memo(memo_id):
             print(f"Updating memo {memo_id} with rejected status...")
             cur.execute("""
                 UPDATE memos 
-                SET memo_status = 'disapproved'
+                SET memo_status = 'rejected'
                 WHERE memo_id = %s
             """, (memo_id,))
             

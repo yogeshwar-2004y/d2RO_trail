@@ -1533,6 +1533,12 @@ export default {
         comments: "",
         authentication: "",
         attachment: null,
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: ""
       };
     },
 
@@ -1547,6 +1553,12 @@ export default {
         attachment: null,
         approval_date: "",
         test_date: "",
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: ""
       };
     },
 
