@@ -16,7 +16,7 @@ def create_mechanical_inspection():
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         # Validate required fields
-        required_fields = ['project_name', 'report_no', 'document_no', 'product_name', 'dp_name', 'sru_name', 'part_no']
+        required_fields = ['project_name', 'report_ref_no', 'lru_name', 'dp_name', 'part_no', 'quantity']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
@@ -30,30 +30,30 @@ def create_mechanical_inspection():
                 report_id SERIAL PRIMARY KEY,
                 project_name TEXT,
                 report_ref_no VARCHAR(100),
-                document_no VARCHAR(100),
-                date_of_issue DATE,
-                issue_level VARCHAR(50),
-                customer_name TEXT,
-                memo_id VARCHAR(100),
-                product_name TEXT,
+                memo_ref_no VARCHAR(100),
+                lru_name TEXT,
+                inspection_stage TEXT,
+                test_venue TEXT,
+                sl_nos TEXT,
                 dp_name TEXT,
-                sl_no VARCHAR(100),
+                dated1 DATE,
+                dated2 DATE,
                 sru_name TEXT,
                 part_no VARCHAR(100),
                 quantity INT,
-                test_started_on TIMESTAMP,
-                test_ended_on TIMESTAMP,
+                start_date DATE,
+                end_date DATE,
                 dim1_dimension TEXT, dim1_tolerance TEXT, dim1_observed_value TEXT, dim1_instrument_used TEXT, dim1_remarks TEXT, dim1_upload TEXT,
                 dim2_dimension TEXT, dim2_tolerance TEXT, dim2_observed_value TEXT, dim2_instrument_used TEXT, dim2_remarks TEXT, dim2_upload TEXT,
                 dim3_dimension TEXT, dim3_tolerance TEXT, dim3_observed_value TEXT, dim3_instrument_used TEXT, dim3_remarks TEXT, dim3_upload TEXT,
-                param1_allowed TEXT, param1_yes_no VARCHAR(10), param1_expected TEXT, param1_remarks TEXT, param1_upload TEXT,
-                param2_allowed TEXT, param2_yes_no VARCHAR(10), param2_expected TEXT, param2_remarks TEXT, param2_upload TEXT,
-                param3_allowed TEXT, param3_yes_no VARCHAR(10), param3_expected TEXT, param3_remarks TEXT, param3_upload TEXT,
-                param4_allowed TEXT, param4_yes_no VARCHAR(10), param4_expected TEXT, param4_remarks TEXT, param4_upload TEXT,
-                param5_allowed TEXT, param5_yes_no VARCHAR(10), param5_expected TEXT, param5_remarks TEXT, param5_upload TEXT,
-                param6_allowed TEXT, param6_yes_no VARCHAR(10), param6_expected TEXT, param6_remarks TEXT, param6_upload TEXT,
-                param7_allowed TEXT, param7_yes_no VARCHAR(10), param7_expected TEXT, param7_remarks TEXT, param7_upload TEXT,
-                param8_allowed TEXT, param8_yes_no VARCHAR(10), param8_expected TEXT, param8_remarks TEXT, param8_upload TEXT,
+                param1_name TEXT DEFAULT 'Burrs', param1_allowed TEXT, param1_yes_no VARCHAR(10), param1_expected TEXT, param1_remarks TEXT, param1_upload TEXT,
+                param2_name TEXT DEFAULT 'Damages', param2_allowed TEXT, param2_yes_no VARCHAR(10), param2_expected TEXT, param2_remarks TEXT, param2_upload TEXT,
+                param3_name TEXT DEFAULT 'Name Plate', param3_allowed TEXT, param3_yes_no VARCHAR(10), param3_expected TEXT, param3_remarks TEXT, param3_upload TEXT,
+                param4_name TEXT DEFAULT 'Engraving', param4_allowed TEXT, param4_yes_no VARCHAR(10), param4_expected TEXT, param4_remarks TEXT, param4_upload TEXT,
+                param5_name TEXT DEFAULT 'Passivation', param5_allowed TEXT, param5_yes_no VARCHAR(10), param5_expected TEXT, param5_remarks TEXT, param5_upload TEXT,
+                param6_name TEXT DEFAULT 'Chromate', param6_allowed TEXT, param6_yes_no VARCHAR(10), param6_expected TEXT, param6_remarks TEXT, param6_upload TEXT,
+                param7_name TEXT DEFAULT 'Electro-less Nickel plating', param7_allowed TEXT, param7_yes_no VARCHAR(10), param7_expected TEXT, param7_remarks TEXT, param7_upload TEXT,
+                param8_name TEXT DEFAULT 'Fasteners', param8_allowed TEXT, param8_yes_no VARCHAR(10), param8_expected TEXT, param8_remarks TEXT, param8_upload TEXT,
                 prepared_by TEXT,
                 verified_by TEXT,
                 approved_by TEXT,
@@ -65,28 +65,28 @@ def create_mechanical_inspection():
         # Insert new mechanical inspection report with basic fields first
         cur.execute("""
             INSERT INTO mechanical_inspection_report (
-                project_name, report_ref_no, document_no, date_of_issue, issue_level,
-                customer_name, memo_id, product_name, dp_name, sl_no, sru_name, part_no,
-                quantity, test_started_on, test_ended_on
+                project_name, report_ref_no, memo_ref_no, lru_name, inspection_stage,
+                test_venue, sl_nos, dp_name, dated1, dated2, sru_name, part_no, quantity,
+                start_date, end_date
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
             ) RETURNING report_id
         """, (
             data['project_name'], 
-            data.get('report_no'), 
-            data.get('document_no'), 
-            data.get('date_of_issue'),
-            data.get('issue_level'), 
-            data.get('customer_name'), 
-            data.get('memo_id'), 
-            data['product_name'],
-            data['dp_name'], 
-            data.get('sl_no'), 
+            data['report_ref_no'], 
+            data.get('memo_ref_no'), 
+            data['lru_name'],
+            data.get('inspection_stage'), 
+            data.get('test_venue'), 
+            data.get('sl_nos'), 
+            data['dp_name'],
+            data.get('dated1'),
+            data.get('dated2'), 
             data.get('sru_name'), 
             data['part_no'], 
-            data.get('quantity'),
-            data.get('test_started_on'), 
-            data.get('test_ended_on')
+            data['quantity'],
+            data.get('start_date'), 
+            data.get('end_date')
         ))
         
         report_id = cur.fetchone()[0]
