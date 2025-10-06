@@ -34,7 +34,7 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ reportData.project }}/{{ reportData.lruName }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{ currentYear }}
+          CASDIC/{{ reportData.projectName || 'Project' }}/{{ reportData.lruName }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{ currentYear }}
         </div>
         <div class="report-date">
           Date: {{ currentDate }}
@@ -48,63 +48,75 @@
       <!-- Inspection Form -->
       <form @submit.prevent="handleSubmit" class="inspection-form">
       
-        <!-- General Information Section -->
+        <!-- Report Details Section -->
         <div class="form-section">
-          <h2 class="section-title">General Information</h2>
+          <h2 class="section-title">Report Details</h2>
           <div class="general-info-grid">
             <!-- Left Column -->
             <div class="info-column">
               <div class="form-group">
-                <label for="project">Project Name:</label>
-                <input id="project" type="text" v-model="reportData.project" required>
-              </div>
-              <div class="form-group">
-                <label for="dpName">DP Name:</label>
-                <input id="dpName" type="text" v-model="reportData.dpName" required>
+                <label for="projectName">Project Name:</label>
+                <input type="text" id="projectName" v-model="reportData.projectName" required>
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input id="reportRefNo" type="text" v-model="reportData.reportRefNo" required>
+                <input type="text" id="reportRefNo" v-model="reportData.reportRefNo" required>
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input id="memoRefNo" type="text" v-model="reportData.memoRefNo">
+                <input type="text" id="memoRefNo" v-model="reportData.memoRefNo">
               </div>
               <div class="form-group">
-                <label for="lruName">LRU Name / Part No:</label>
-                <input id="lruName" type="text" v-model="reportData.lruName" required>
+                <label for="lruName">LRU Name:</label>
+                <input type="text" id="lruName" v-model="reportData.lruName" required>
               </div>
               <div class="form-group">
-                <label for="sruName">SRU Name:</label>
-                <input id="sruName" type="text" v-model="reportData.sruName">
+                <label for="inspectionStage">Inspection Stage:</label>
+                <input type="text" id="inspectionStage" v-model="reportData.inspectionStage">
+              </div>
+              <div class="form-group">
+                <label for="testVenue">Test Venue:</label>
+                <input type="text" id="testVenue" v-model="reportData.testVenue">
+              </div>
+              <div class="form-group">
+                <label for="slNos">SL.NO'S:</label>
+                <input type="text" id="slNos" v-model="reportData.slNos">
               </div>
             </div>
             
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
+                <label for="dpName">DP Name:</label>
+                <input type="text" id="dpName" v-model="reportData.dpName" required>
+              </div>
+              <div class="form-group">
+                <label for="dated1">Dated:</label>
+                <input type="date" id="dated1" v-model="reportData.dated1">
+              </div>
+              <div class="form-group">
+                <label for="dated2">Dated:</label>
+                <input type="date" id="dated2" v-model="reportData.dated2">
+              </div>
+              <div class="form-group">
+                <label for="sruName">SRU Name:</label>
+                <input type="text" id="sruName" v-model="reportData.sruName">
+              </div>
+              <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input id="partNo" type="text" v-model="reportData.partNo">
+                <input type="text" id="partNo" v-model="reportData.partNo" required>
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input id="quantity" type="number" v-model.number="reportData.quantity" min="1" required>
+                <input type="number" id="quantity" v-model.number="reportData.quantity" min="1" required>
               </div>
               <div class="form-group">
-                <label for="slNos">SL No's:</label>
-                <input id="slNos" type="text" v-model="reportData.slNos">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate" v-model="reportData.startDate">
               </div>
               <div class="form-group">
-                <label for="testVenue">Test Venue:</label>
-                <input id="testVenue" type="text" v-model="reportData.testVenue" required>
-              </div>
-              <div class="form-group">
-                <label for="startDate">Start Date/Time:</label>
-                <input id="startDate" type="datetime-local" v-model="reportData.startDate" required>
-              </div>
-              <div class="form-group">
-                <label for="endDate">End Date/Time:</label>
-                <input id="endDate" type="datetime-local" v-model="reportData.endDate" required>
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate" v-model="reportData.endDate">
               </div>
             </div>
           </div>
@@ -200,18 +212,21 @@ export default {
       currentDate: new Date().toISOString().split('T')[0],
       reportData: {
         // Header fields
-        project: '',
-        dpName: '',
+        projectName: '',
         reportRefNo: '',
         memoRefNo: '',
         lruName: '',
+        inspectionStage: '',
+        testVenue: '',
+        slNos: '',
+        dpName: '',
+        dated1: '',
+        dated2: '',
         sruName: '',
         partNo: '',
         quantity: null,
-        slNos: '',
-        testVenue: '',
-        startDate: new Date().toISOString().slice(0, 16),
-        endDate: new Date().toISOString().slice(0, 16), 
+        startDate: '',
+        endDate: '', 
 
         // Table data
         inspectionItems: [
@@ -233,11 +248,11 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.reportData.project &&
-             this.reportData.dpName &&
+      return this.reportData.projectName &&
              this.reportData.reportRefNo &&
              this.reportData.lruName &&
-             this.reportData.testVenue &&
+             this.reportData.dpName &&
+             this.reportData.partNo &&
              this.reportData.quantity;
     }
   },
@@ -247,8 +262,9 @@ export default {
     const lruName = this.$route.params.lruName || '';
     
     // Set default values
-    this.reportData.project = projectName;
+    this.reportData.projectName = projectName;
     this.reportData.lruName = lruName;
+    this.reportData.startDate = this.currentDate;
   },
   methods: {
     handleFileUpload(event, item) {
@@ -267,18 +283,21 @@ export default {
     resetForm() {
       if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
         this.reportData = {
-          project: this.$route.params.projectName || '',
-          dpName: '',
+          projectName: this.$route.params.projectName || '',
           reportRefNo: '',
           memoRefNo: '',
           lruName: this.$route.params.lruName || '',
+          inspectionStage: '',
+          testVenue: '',
+          slNos: '',
+          dpName: '',
+          dated1: '',
+          dated2: '',
           sruName: '',
           partNo: '',
           quantity: null,
-          slNos: '',
-          testVenue: '',
-          startDate: new Date().toISOString().slice(0, 16),
-          endDate: new Date().toISOString().slice(0, 16),
+          startDate: this.currentDate,
+          endDate: '',
           inspectionItems: [
             { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
             { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
@@ -294,12 +313,90 @@ export default {
         };
       }
     },
-    handleSubmit() {
-      if (this.isFormValid) {
-        console.log('Report Submitted:', this.reportData);
-        alert('Inspection Report Submitted!');
-      } else {
+    async handleSubmit() {
+      if (!this.isFormValid) {
         alert('Please fill in all required fields.');
+        return;
+      }
+
+      try {
+        // Prepare data for submission
+        const submissionData = {
+          // Report Details
+          projectName: this.reportData.projectName,
+          reportRefNo: this.reportData.reportRefNo,
+          memoRefNo: this.reportData.memoRefNo,
+          lruName: this.reportData.lruName,
+          inspectionStage: this.reportData.inspectionStage,
+          testVenue: this.reportData.testVenue,
+          slNos: this.reportData.slNos,
+          dpName: this.reportData.dpName,
+          dated1: this.reportData.dated1,
+          dated2: this.reportData.dated2,
+          sruName: this.reportData.sruName,
+          partNo: this.reportData.partNo,
+          quantity: this.reportData.quantity || 0,
+          startDate: this.reportData.startDate,
+          endDate: this.reportData.endDate,
+          
+          // Test Cases
+          test1Observations: this.reportData.inspectionItems[0].observations,
+          test1Remarks: this.reportData.inspectionItems[0].remarks,
+          test1Upload: this.reportData.inspectionItems[0].fileName,
+          
+          test2Observations: this.reportData.inspectionItems[1].observations,
+          test2Remarks: this.reportData.inspectionItems[1].remarks,
+          test2Upload: this.reportData.inspectionItems[1].fileName,
+          
+          test3Observations: this.reportData.inspectionItems[2].observations,
+          test3Remarks: this.reportData.inspectionItems[2].remarks,
+          test3Upload: this.reportData.inspectionItems[2].fileName,
+          
+          test4Observations: this.reportData.inspectionItems[3].observations,
+          test4Remarks: this.reportData.inspectionItems[3].remarks,
+          test4Upload: this.reportData.inspectionItems[3].fileName,
+          
+          test5Observations: this.reportData.inspectionItems[4].observations,
+          test5Remarks: this.reportData.inspectionItems[4].remarks,
+          test5Upload: this.reportData.inspectionItems[4].fileName,
+          
+          test6Observations: this.reportData.inspectionItems[5].observations,
+          test6Remarks: this.reportData.inspectionItems[5].remarks,
+          test6Upload: this.reportData.inspectionItems[5].fileName,
+          
+          test7Observations: this.reportData.inspectionItems[6].observations,
+          test7Remarks: this.reportData.inspectionItems[6].remarks,
+          test7Upload: this.reportData.inspectionItems[6].fileName,
+          
+          // Signatures
+          preparedBy: this.reportData.preparedBy,
+          verifiedBy: this.reportData.verifiedBy,
+          approvedBy: this.reportData.approvedBy
+        };
+
+        console.log('Submitting kit of parts inspection report:', submissionData);
+
+        const response = await fetch('http://localhost:8000/api/kit-of-parts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Kit of parts inspection report submitted successfully!');
+          console.log('Report ID:', result.report_id);
+          this.resetForm();
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+        
+      } catch (error) {
+        console.error('Error submitting report:', error);
+        alert('Error submitting report. Please try again.');
       }
     },
     exportReport() {
@@ -323,7 +420,7 @@ export default {
         // Document path and date
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.reportData.project || 'PROJECT'}/${this.reportData.lruName || 'LRU'}/SL.${this.reportData.slNos || '001'}/${this.reportData.reportRefNo || '001'}/${this.currentYear}`;
+        const documentPath = `CASDIC/${this.reportData.projectName || 'PROJECT'}/${this.reportData.lruName || 'LRU'}/SL.${this.reportData.slNos || '001'}/${this.reportData.reportRefNo || '001'}/${this.currentYear}`;
         doc.text(documentPath, margin, yPosition);
         
         const dateText = `Date: ${this.currentDate}`;
