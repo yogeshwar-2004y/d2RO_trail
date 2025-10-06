@@ -566,9 +566,15 @@
           </div>
           <div class="test-review-field">
             <label>Authentication</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.authentication || "Not provided"
-            }}</span>
+            <div class="test-review-value">
+              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
+                <img :src="memoApprovalStatus.authentication" alt="QA Head Signature" class="signature-image-footer" />
+                <span class="signature-label">QA Head Signature</span>
+              </div>
+              <span v-else class="no-signature">
+                {{ memoApprovalStatus.authentication || "Not provided" }}
+              </span>
+            </div>
           </div>
           <div class="test-review-field">
             <label>Attachments</label>
@@ -619,9 +625,15 @@
           </div>
           <div class="test-review-field">
             <label>Authentication</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.authentication || "Not provided"
-            }}</span>
+            <div class="test-review-value">
+              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
+                <img :src="memoApprovalStatus.authentication" alt="QA Head Signature" class="signature-image-footer" />
+                <span class="signature-label">QA Head Signature</span>
+              </div>
+              <span v-else class="no-signature">
+                {{ memoApprovalStatus.authentication || "Not provided" }}
+              </span>
+            </div>
           </div>
           <div class="test-review-field">
             <label>Attachments</label>
@@ -1031,6 +1043,11 @@ export default {
     await this.fetchMemoApprovalStatus();
   },
   methods: {
+    // Check if the authentication field contains a signature URL
+    isSignatureUrl(authentication) {
+      return authentication && authentication.includes('/api/users/signature/');
+    },
+
     async fetchMemoData() {
       try {
         // If memo data is passed as props (from dashboard navigation), use it
@@ -2181,6 +2198,49 @@ export default {
   .signature-image {
     max-width: 120px;
     max-height: 60px;
+  }
+}
+
+/* Signature display in footer */
+.signature-display-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.signature-image-footer {
+  max-width: 120px;
+  max-height: 60px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.signature-label {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.no-signature {
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive design for footer signature */
+@media (max-width: 768px) {
+  .signature-image-footer {
+    max-width: 100px;
+    max-height: 50px;
+  }
+  
+  .signature-label {
+    font-size: 11px;
   }
 }
 </style>
