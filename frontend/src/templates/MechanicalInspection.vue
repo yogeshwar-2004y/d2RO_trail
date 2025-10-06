@@ -94,8 +94,8 @@
                 <input type="text" id="dpName" v-model="reportData.dpName" required>
               </div>
               <div class="form-group">
-                <label for="skuName">SRU Name:</label>
-                <input type="text" id="skuName" v-model="reportData.skuName" required>
+                <label for="sruName">SRU Name:</label>
+                <input type="text" id="sruName" v-model="reportData.sruName" required>
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
@@ -275,7 +275,7 @@ export default {
         productName: '',
         dpName: '',
         slNo: '',
-        skuName: '',
+        sruName: '',
         partNo: '',
         qty: '',
         testStartedOn: '',
@@ -309,7 +309,7 @@ export default {
              this.reportData.documentNo &&
              this.reportData.productName &&
              this.reportData.dpName &&
-             this.reportData.skuName &&
+             this.reportData.sruName &&
              this.reportData.partNo;
     }
   },
@@ -350,7 +350,7 @@ export default {
           productName: this.$route.params.lruName || '',
           dpName: '',
           slNo: '',
-          skuName: '',
+          sruName: '',
           partNo: '',
           qty: '',
           testStartedOn: '',
@@ -374,12 +374,136 @@ export default {
         });
       }
     },
-    submitForm() {
-      if (this.isFormValid) {
-        console.log('Submitting form:', this.reportData);
-        alert('Report submitted successfully!');
-      } else {
+    async submitForm() {
+      if (!this.isFormValid) {
         alert('Please fill in all required fields.');
+        return;
+      }
+
+      try {
+        // Prepare data for submission
+        const submissionData = {
+          // General Information
+          project_name: this.reportData.projectName,
+          report_no: this.reportData.reportNo,
+          document_no: this.reportData.documentNo,
+          date_of_issue: this.reportData.dateOfIssue,
+          issue_level: this.reportData.issueLevel,
+          customer_name: this.reportData.customerName,
+          memo_id: this.reportData.memoId,
+          product_name: this.reportData.productName,
+          dp_name: this.reportData.dpName,
+          sl_no: this.reportData.slNo,
+          sru_name: this.reportData.sruName,
+          part_no: this.reportData.partNo,
+          quantity: parseInt(this.reportData.qty) || 0,
+          
+          // Test Timeline
+          test_started_on: this.reportData.testStartedOn,
+          test_ended_on: this.reportData.testEndedOn,
+          
+          // Dimensional Checklist
+          dim1_dimension: this.dimensionalChecklist[0].dimension,
+          dim1_tolerance: this.dimensionalChecklist[0].tolerance,
+          dim1_observed_value: this.dimensionalChecklist[0].observedValue,
+          dim1_instrument_used: this.dimensionalChecklist[0].instrumentUsed,
+          dim1_remarks: this.dimensionalChecklist[0].remarks,
+          dim1_upload: this.dimensionalChecklist[0].fileName,
+          
+          dim2_dimension: this.dimensionalChecklist[1].dimension,
+          dim2_tolerance: this.dimensionalChecklist[1].tolerance,
+          dim2_observed_value: this.dimensionalChecklist[1].observedValue,
+          dim2_instrument_used: this.dimensionalChecklist[1].instrumentUsed,
+          dim2_remarks: this.dimensionalChecklist[1].remarks,
+          dim2_upload: this.dimensionalChecklist[1].fileName,
+          
+          dim3_dimension: this.dimensionalChecklist[2].dimension,
+          dim3_tolerance: this.dimensionalChecklist[2].tolerance,
+          dim3_observed_value: this.dimensionalChecklist[2].observedValue,
+          dim3_instrument_used: this.dimensionalChecklist[2].instrumentUsed,
+          dim3_remarks: this.dimensionalChecklist[2].remarks,
+          dim3_upload: this.dimensionalChecklist[2].fileName,
+          
+          // Parameter Checklist
+          param1_allowed: this.parameterChecklist[0].allowed,
+          param1_yes_no: this.parameterChecklist[0].yesNo,
+          param1_expected: this.parameterChecklist[0].expected,
+          param1_remarks: this.parameterChecklist[0].remarks,
+          param1_upload: this.parameterChecklist[0].fileName,
+          
+          param2_allowed: this.parameterChecklist[1].allowed,
+          param2_yes_no: this.parameterChecklist[1].yesNo,
+          param2_expected: this.parameterChecklist[1].expected,
+          param2_remarks: this.parameterChecklist[1].remarks,
+          param2_upload: this.parameterChecklist[1].fileName,
+          
+          param3_allowed: this.parameterChecklist[2].allowed,
+          param3_yes_no: this.parameterChecklist[2].yesNo,
+          param3_expected: this.parameterChecklist[2].expected,
+          param3_remarks: this.parameterChecklist[2].remarks,
+          param3_upload: this.parameterChecklist[2].fileName,
+          
+          param4_allowed: this.parameterChecklist[3].allowed,
+          param4_yes_no: this.parameterChecklist[3].yesNo,
+          param4_expected: this.parameterChecklist[3].expected,
+          param4_remarks: this.parameterChecklist[3].remarks,
+          param4_upload: this.parameterChecklist[3].fileName,
+          
+          param5_allowed: this.parameterChecklist[4].allowed,
+          param5_yes_no: this.parameterChecklist[4].yesNo,
+          param5_expected: this.parameterChecklist[4].expected,
+          param5_remarks: this.parameterChecklist[4].remarks,
+          param5_upload: this.parameterChecklist[4].fileName,
+          
+          param6_allowed: this.parameterChecklist[5].allowed,
+          param6_yes_no: this.parameterChecklist[5].yesNo,
+          param6_expected: this.parameterChecklist[5].expected,
+          param6_remarks: this.parameterChecklist[5].remarks,
+          param6_upload: this.parameterChecklist[5].fileName,
+          
+          param7_allowed: this.parameterChecklist[6].allowed,
+          param7_yes_no: this.parameterChecklist[6].yesNo,
+          param7_expected: this.parameterChecklist[6].expected,
+          param7_remarks: this.parameterChecklist[6].remarks,
+          param7_upload: this.parameterChecklist[6].fileName,
+          
+          param8_allowed: this.parameterChecklist[7].allowed,
+          param8_yes_no: this.parameterChecklist[7].yesNo,
+          param8_expected: this.parameterChecklist[7].expected,
+          param8_remarks: this.parameterChecklist[7].remarks,
+          param8_upload: this.parameterChecklist[7].fileName,
+          
+          // Signatures
+          prepared_by: '',
+          verified_by: '',
+          approved_by: ''
+        };
+
+        console.log('Submitting mechanical inspection report:', submissionData);
+
+        // Submit to backend
+        const response = await fetch('http://localhost:8000/api/mechanical-inspection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(submissionData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Mechanical inspection report submitted successfully!');
+          console.log('Report ID:', result.report_id);
+          // Optionally redirect or reset form
+          this.resetForm();
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+
+      } catch (error) {
+        console.error('Error submitting report:', error);
+        alert('Error submitting report. Please try again.');
       }
     },
     exportReport() {

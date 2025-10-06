@@ -115,12 +115,24 @@ export default {
   mounted() {
     // Get template parameters from route
     this.templateName = this.$route.params.templateName || '';
-    this.templateDisplayName = this.$route.params.templateDisplayName || 'Unknown Template';
+    this.templateDisplayName = this.getTemplateDisplayName(this.templateName);
     
     // Load the appropriate template component
     this.loadTemplateComponent();
   },
   methods: {
+    getTemplateDisplayName(templateName) {
+      const displayNames = {
+        'BarePcbInspectionReport': 'Bare PCB Inspection Report',
+        'Conformalcoatinginspectionreport': 'Conformal Coating Inspection Report',
+        'RawMaterialInspectionReport': 'Raw Material Inspection Report',
+        'MechanicalInspection': 'Mechanical Inspection Report',
+        'KitOfPartInsp': 'Kit of Parts Inspection Report',
+        'ObservationReport': 'Observation Report'
+      };
+      return displayNames[templateName] || templateName;
+    },
+    
     loadTemplateComponent() {
       try {
         // Map template names to components
@@ -182,6 +194,24 @@ export default {
         // Navigate to raw material inspection report form
         this.$router.push({ 
           name: 'RawMaterialInspectionReport',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'MechanicalInspection') {
+        // Navigate to mechanical inspection report form
+        this.$router.push({ 
+          name: 'MechanicalInspection',
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else if (this.templateName === 'KitOfPartInsp') {
+        // Navigate to kit of parts inspection report form
+        this.$router.push({ 
+          name: 'KitOfPartInsp',
           params: { 
             projectName: 'Default Project',
             lruName: 'Default LRU'

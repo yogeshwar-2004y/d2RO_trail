@@ -19,6 +19,7 @@ from routes.news import news_bp
 from routes.files import files_bp
 from routes.memos import memos_bp
 from routes.reports import reports_bp
+from routes.mechanical_inspection import mechanical_inspection_bp
 
 def create_app():
     """Application factory pattern"""
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(files_bp)
     app.register_blueprint(memos_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(mechanical_inspection_bp)
     
     return app
 

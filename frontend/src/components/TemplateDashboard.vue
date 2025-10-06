@@ -235,8 +235,7 @@ export default {
       this.$router.push({
         name: 'TemplateViewer',
         params: {
-          templateName: template.name,
-          templateDisplayName: template.displayName
+          templateName: template.name
         }
       });
     }

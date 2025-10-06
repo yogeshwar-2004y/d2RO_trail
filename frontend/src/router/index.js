@@ -37,6 +37,8 @@ import TemplateViewer from '@/components/TemplateViewer.vue'
 import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
 import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
 import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -217,6 +219,18 @@ const router = createRouter({
         path: '/templates/raw-material-inspection/:projectName?/:lruName?',
         name: 'RawMaterialInspectionReport',
         component: RawMaterialInspectionReport,
+        props: true,
+      },
+      {
+        path: '/templates/mechanical-inspection/:projectName?/:lruName?',
+        name: 'MechanicalInspection',
+        component: MechanicalInspection,
+        props: true,
+      },
+      {
+        path: '/templates/kit-of-parts-inspection/:projectName?/:lruName?',
+        name: 'KitOfPartInsp',
+        component: KitOfPartInsp,
         props: true,
       },
     ...reviewerRoutes,
