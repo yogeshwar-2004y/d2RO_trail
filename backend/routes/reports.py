@@ -4,7 +4,7 @@ Report management routes
 import os
 import uuid
 from functools import wraps
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from config import get_db_connection, Config
 from utils.helpers import handle_database_error, allowed_file, validate_file_size
 import json
