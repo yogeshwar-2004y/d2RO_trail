@@ -42,12 +42,34 @@
             <span>Settings</span>
           </div>
           
-          <div class="nav-item" @click="navigateToSignature">
+          <div class="nav-item signature-item" @click="toggleSignatureSubmenu" :class="{ 'active': showSignatureSubmenu }">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 20h9"></path>
               <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
             </svg>
             <span>Signature</span>
+            <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+          
+          <!-- Signature Submenu -->
+          <div class="signature-submenu" v-if="showSignatureSubmenu">
+            <div class="submenu-item" @click="changeLoginPassword">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <circle cx="12" cy="16" r="1"></circle>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>Change Login Password</span>
+            </div>
+            <div class="submenu-item" @click="changeSignaturePassword">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              <span>Change Signature Password</span>
+            </div>
           </div>
           
           <div class="nav-divider"></div>
@@ -77,6 +99,11 @@ export default {
       default: false
     }
   },
+  data() {
+    return {
+      showSignatureSubmenu: false
+    }
+  },
   computed: {
     userInfo() {
       return userStore.getters.currentUser() || { name: 'User', role: 'Unknown' }
@@ -94,8 +121,15 @@ export default {
       this.$emit('navigate', 'settings')
       this.closeNav()
     },
-    navigateToSignature() {
-      this.$emit('navigate', 'signature')
+    toggleSignatureSubmenu() {
+      this.showSignatureSubmenu = !this.showSignatureSubmenu
+    },
+    changeLoginPassword() {
+      this.$emit('navigate', 'change-login-password')
+      this.closeNav()
+    },
+    changeSignaturePassword() {
+      this.$emit('navigate', 'change-signature-password')
       this.closeNav()
     },
     logout() {
@@ -234,6 +268,66 @@ export default {
 
 .nav-item span {
   font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.signature-item {
+  position: relative;
+}
+
+.signature-item.active {
+  background-color: #f3f4f6;
+}
+
+.dropdown-arrow {
+  margin-left: auto;
+  color: #6b7280;
+  transition: transform 0.2s ease;
+}
+
+.signature-item.active .dropdown-arrow {
+  transform: rotate(180deg);
+  color: #3b82f6;
+}
+
+.signature-submenu {
+  background-color: #f8fafc;
+  border-left: 3px solid #3b82f6;
+  margin-left: 20px;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submenu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 24px 10px 44px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #374151;
+  font-size: 0.8rem;
+}
+
+.submenu-item:hover {
+  background-color: #e5e7eb;
+}
+
+.submenu-item svg {
+  margin-right: 10px;
+  color: #6b7280;
+}
+
+.submenu-item span {
   font-weight: 500;
 }
 

@@ -132,9 +132,13 @@ export default {
           // Navigate to settings page
           console.log('Navigate to settings');
           break;
-        case 'signature':
-          // Navigate to signature page
-          console.log('Navigate to signature');
+        case 'change-login-password':
+          // Navigate to change login password page
+          console.log('Navigate to change login password');
+          break;
+        case 'change-signature-password':
+          // Navigate to change signature password page
+          console.log('Navigate to change signature password');
           break;
         default:
           console.log('Unknown navigation action:', action);
