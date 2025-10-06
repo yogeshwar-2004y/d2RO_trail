@@ -8,12 +8,21 @@
           <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo-image vista-logo">
         </div>
       </div>
-      <div class="logout-btn" @click="() => $router.push({ name: 'login' })" title="Logout">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
+      <div class="header-actions">
+        <button class="menu-button" @click="toggleMenu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <button class="logout-btn" @click="logout" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
       </div>
     </header>
 
@@ -65,16 +74,31 @@
       textColor="#ffffff"
       class="dashboard-news-ticker"
     />
+    
+    <!-- Vertical Navigation Bar -->
+    <VerticalNavBar 
+      :isOpen="isMenuOpen" 
+      @close="closeMenu"
+      @navigate="handleNavigation"
+      @logout="logout"
+    />
   </div>
 </template>
 
 <script>
 import NewsTicker from '@/components/NewsTicker.vue'
+import VerticalNavBar from '@/components/VerticalNavBar.vue'
 
 export default {
   name: "HomePageDesigner",
   components: {
-    NewsTicker
+    NewsTicker,
+    VerticalNavBar
+  },
+  data() {
+    return {
+      isMenuOpen: false
+    }
   },
   methods: {
     navigateToDocuments() {
@@ -89,6 +113,27 @@ export default {
     navigateToTestReports() {
       // Navigate to the test reports page
       this.$router.push({ name: 'ReportDashboard' });
+    },
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen;
+    },
+    closeMenu() {
+      this.isMenuOpen = false;
+    },
+    handleNavigation(action) {
+      switch(action) {
+        case 'profile':
+          console.log('Navigate to profile');
+          break;
+        case 'settings':
+          console.log('Navigate to settings');
+          break;
+        case 'signature':
+          console.log('Navigate to signature');
+          break;
+        default:
+          console.log('Unknown navigation action:', action);
+      }
     },
     logout() {
       // alert('Logging out...');
@@ -127,14 +172,39 @@ export default {
   width: 150px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.menu-button svg {
+  width: 24px;
+  height: 24px;
+}
+
 .logout-btn {
   background: transparent;
   border: none;
   cursor: pointer;
   color: #000;
-  padding: 10px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
 }
 
 .logout-btn:hover {
@@ -143,8 +213,8 @@ export default {
 
 .logout-btn svg {
   transform: rotate(180deg);
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 /* Main Content Styles */

@@ -5,13 +5,22 @@
         <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
         <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
       </div>
-      <button class="logout-button" @click="logout">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-      </button>
+      <div class="header-actions">
+        <button class="menu-button" @click="toggleMenu">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <button class="logout-button" @click="logout">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+      </div>
     </header>
     
     <div class="card-container">
@@ -65,16 +74,31 @@
       textColor="#ffffff"
       class="dashboard-news-ticker"
     />
+    
+    <!-- Vertical Navigation Bar -->
+    <VerticalNavBar 
+      :isOpen="isMenuOpen" 
+      @close="closeMenu"
+      @navigate="handleNavigation"
+      @logout="logout"
+    />
   </div>
 </template>
 
 <script>
 import NewsTicker from '@/components/NewsTicker.vue'
+import VerticalNavBar from '@/components/VerticalNavBar.vue'
 
 export default {
   name: 'HomePageDesignHead',
   components: {
-    NewsTicker
+    NewsTicker,
+    VerticalNavBar
+  },
+  data() {
+    return {
+      isMenuOpen: false
+    }
   },
   methods: {
     goToPage(pageName) {
@@ -87,6 +111,27 @@ export default {
       } else if (pageName === 'AssignProject') {
         // alert('Navigating to Assign Project page.');
         this.$router.push({ name: 'ProjectsForAssigning' });
+      }
+    },
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen;
+    },
+    closeMenu() {
+      this.isMenuOpen = false;
+    },
+    handleNavigation(action) {
+      switch(action) {
+        case 'profile':
+          console.log('Navigate to profile');
+          break;
+        case 'settings':
+          console.log('Navigate to settings');
+          break;
+        case 'signature':
+          console.log('Navigate to signature');
+          break;
+        default:
+          console.log('Unknown navigation action:', action);
       }
     },
     logout() {
@@ -128,17 +173,49 @@ export default {
   width: 120px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-button {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #000;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.menu-button svg {
+  width: 24px;
+  height: 24px;
+}
+
 .logout-button {
   background: transparent;
   border: none;
   cursor: pointer;
   color: #000;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .logout-button svg {
   transform: rotate(180deg);
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
 }
 
 .card-container {

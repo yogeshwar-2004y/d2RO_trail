@@ -261,7 +261,7 @@ def get_user(user_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch user with role information and signature
+        # Fetch user with role information, signature, and signature password
         cur.execute("""
             SELECT 
                 u.user_id,
@@ -269,7 +269,8 @@ def get_user(user_id):
                 u.email,
                 r.role_id,
                 r.role_name,
-                u.signature_path
+                u.signature_path,
+                u.signature_password
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -296,7 +297,8 @@ def get_user(user_id):
                 "role_id": user[3],
                 "role_name": user[4] if user[4] else "No Role Assigned",
                 "signature_path": signature_path,
-                "has_signature": user[5] is not None
+                "has_signature": user[5] is not None,
+                "signature_password": user[6]
             }
         })
         

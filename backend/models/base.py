@@ -26,7 +26,8 @@ class User(BaseModel):
     
     def __init__(self, user_id: str, name: str, email: str, 
                  password_hash: str = None, role_id: int = None, 
-                 role_name: str = None, signature_path: str = None, **kwargs):
+                 role_name: str = None, signature_path: str = None, 
+                 signature_password: str = None, **kwargs):
         self.user_id = user_id
         self.name = name
         self.email = email
@@ -34,6 +35,7 @@ class User(BaseModel):
         self.role_id = role_id
         self.role_name = role_name
         self.signature_path = signature_path
+        self.signature_password = signature_password
         super().__init__(**kwargs)
 
 class Project(BaseModel):
