@@ -186,7 +186,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/upload-login-background",
+          "http://127.0.0.1:5000/api/upload-login-background",
           {
             method: "POST",
             body: formData,
@@ -218,7 +218,7 @@ export default {
     async resetToDefault() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/reset-login-background",
+          "http://127.0.0.1:5000/api/reset-login-background",
           {
             method: "POST",
           }
@@ -257,7 +257,7 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 8000);
+      }, 5000);
     },
   },
 
@@ -265,7 +265,7 @@ export default {
     // Load current background on component mount
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/get-current-background"
+        "http://127.0.0.1:5000/api/get-current-background"
       );
       const data = await response.json();
       if (data.success && data.background_url) {

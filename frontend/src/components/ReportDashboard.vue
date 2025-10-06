@@ -318,7 +318,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:8000/api/reports";
+        let apiUrl = "http://localhost:5000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
@@ -351,7 +351,7 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch("http://localhost:8000/api/projects");
+        const response = await fetch("http://localhost:5000/api/projects");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
