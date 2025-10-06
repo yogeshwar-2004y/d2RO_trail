@@ -42,16 +42,15 @@
         </div>
       </div>
 
-      <!-- No Reports Uploaded State -->
-      <div class="no-reports-state">
+      <!-- Template Selection State -->
+      <div v-if="!selectedTemplate" class="no-reports-state">
         <div class="empty-icon">📄</div>
         
-        <!-- Different messages based on user role -->
-        <div v-if="canSelectTemplate" class="template-message">
+        <!-- Design Head can select template -->
+        <div v-if="isDesignHead" class="template-message">
           <h3>Template not yet chosen</h3>
           <p>Please select a template to proceed with this report.</p>
           
-          <!-- Single Choose Template Button for QA Head/Design Head -->
           <div class="template-action">
             <button 
               @click="selectTemplate"
@@ -62,9 +61,105 @@
           </div>
         </div>
         
+        <!-- Other roles wait for Design Head to select template -->
         <div v-else class="report-message">
-          <h3>Report not uploaded yet</h3>
-          <p>This report is currently empty and needs to be populated with observations and data.</p>
+          <h3>Waiting for template selection</h3>
+          <p>The Design Head needs to select a template before this report can be accessed.</p>
+        </div>
+      </div>
+
+      <!-- Template Form Display -->
+      <div v-else class="template-form-container">
+        <!-- Template Header -->
+        <div class="template-form-header">
+          <div class="template-info">
+            <h3>{{ selectedTemplate.displayName }}</h3>
+            <p>{{ selectedTemplate.description }}</p>
+          </div>
+          <div v-if="isDesignHead" class="template-actions">
+            <button @click="selectTemplate" class="change-template-btn">
+              Change Template
+            </button>
+          </div>
+        </div>
+
+        <!-- Template Form Content -->
+        <div class="template-form-content">
+          <!-- Dynamic Template Component -->
+          <component 
+            v-if="currentTemplateComponent"
+            :is="currentTemplateComponent"
+            :projectName="projectName"
+            :reportId="reportId"
+            :reportName="reportName"
+            :templateId="selectedTemplate.template_id"
+            :templateName="selectedTemplate.name"
+          />
+          
+          <!-- Fallback if component not found -->
+          <div v-else class="template-error">
+            <div class="error-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <h4>Template Component Not Found</h4>
+            <p>The template "{{ selectedTemplate.displayName }}" could not be loaded.</p>
+            <button @click="selectTemplate" class="change-template-btn">
+              Select Different Template
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template Selection Overlay -->
+    <div v-if="showTemplateOverlay" class="template-overlay" @click="closeOverlay">
+      <div class="template-overlay-content" @click.stop>
+        <!-- Loading Overlay -->
+        <div v-if="loading" class="loading-overlay">
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="template-overlay-header">
+          <h2>Choose Report Template</h2>
+          <button class="close-btn" @click="closeOverlay">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="template-overlay-body">
+          <p class="template-description">Select a template for your report. Each template is designed for specific inspection types.</p>
+          
+          <div class="templates-grid">
+            <div 
+              v-for="template in availableTemplates" 
+              :key="template.name"
+              class="template-card"
+              @click="selectTemplateOption(template)"
+            >
+              <div class="template-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14,2 14,8 20,8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10,9 9,9 8,9"></polyline>
+                </svg>
+              </div>
+              <div class="template-info">
+                <h3>{{ template.displayName }}</h3>
+                <p>{{ template.description }}</p>
+              </div>
+              <div class="template-action">
+                <button class="select-template-btn">Select</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -74,20 +169,117 @@
 <script>
 import { userStore } from '@/stores/userStore';
 
+// Import all template components
+import ObservationReport from '@/templates/ObservationReport.vue'
+import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
+import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
+import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
+import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+
 export default {
   name: 'IndividualReport',
+  components: {
+    ObservationReport,
+    BarePcbInspectionReport,
+    Conformalcoatinginspectionreport,
+    RawMaterialInspectionReport,
+    CotsScreeningInspectionReport,
+    AssembledBoardInspectionReport,
+    KitOfPartInsp,
+    MechanicalInspection
+  },
   data() {
     return {
       reportId: '',
       reportName: '',
-      projectName: ''
+      projectName: '',
+      showTemplateOverlay: false,
+      availableTemplates: [
+        {
+          template_id: 1,
+          name: 'Conformalcoatinginspectionreport',
+          displayName: 'Conformal Coating Inspection Report',
+          description: 'Template for creating conformal coating inspection reports with quality testing criteria',
+          component: 'Conformalcoatinginspectionreport'
+        },
+        {
+          template_id: 2,
+          name: 'CotsScreeningInspectionReport',
+          displayName: 'COTS Screening Inspection Report',
+          description: 'Template for creating COTS screening inspection reports with test case validation',
+          component: 'CotsScreeningInspectionReport'
+        },
+        {
+          template_id: 3,
+          name: 'BarePcbInspectionReport',
+          displayName: 'Bare PCB Inspection Report',
+          description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
+          component: 'BarePcbInspectionReport'
+        },
+        {
+          template_id: 4,
+          name: 'MechanicalInspection',
+          displayName: 'Mechanical Inspection Report',
+          description: 'Template for creating mechanical inspection reports with structural testing criteria',
+          component: 'MechanicalInspection'
+        },
+        {
+          template_id: 5,
+          name: 'AssembledBoardInspectionReport',
+          displayName: 'Assembled Board Inspection Report',
+          description: 'Template for creating assembled board inspection reports with comprehensive testing criteria',
+          component: 'AssembledBoardInspectionReport'
+        },
+        {
+          template_id: 6,
+          name: 'RawMaterialInspectionReport',
+          displayName: 'Raw Material Inspection Report',
+          description: 'Template for creating raw material inspection reports with compliance checking',
+          component: 'RawMaterialInspectionReport'
+        },
+        {
+          template_id: 7,
+          name: 'KitOfPartInsp',
+          displayName: 'Kit of Part Inspection Report',
+          description: 'Template for creating kit of part inspection reports with component verification',
+          component: 'KitOfPartInsp'
+        }
+      ],
+      selectedTemplate: null,
+      loading: false
     };
   },
   computed: {
     canSelectTemplate() {
-      // Only QA Head (role_id = 2) and Design Head (role_id = 4) can select templates
+      // Only Design Head (role_id = 4) can select templates
       const currentUserRole = userStore.getters.currentUserRole();
-      return currentUserRole === 2 || currentUserRole === 4;
+      return currentUserRole === 4;
+    },
+    
+    isDesignHead() {
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 4;
+    },
+    
+    currentTemplateComponent() {
+      if (!this.selectedTemplate) return null;
+      
+      // Map template names to component names
+      const componentMap = {
+        'ObservationReport': 'ObservationReport',
+        'BarePcbInspectionReport': 'BarePcbInspectionReport',
+        'Conformalcoatinginspectionreport': 'Conformalcoatinginspectionreport',
+        'RawMaterialInspectionReport': 'RawMaterialInspectionReport',
+        'CotsScreeningInspectionReport': 'CotsScreeningInspectionReport',
+        'AssembledBoardInspectionReport': 'AssembledBoardInspectionReport',
+        'KitOfPartInsp': 'KitOfPartInsp',
+        'MechanicalInspection': 'MechanicalInspection'
+      };
+      
+      return componentMap[this.selectedTemplate.name] || null;
     }
   },
   mounted() {
@@ -95,12 +287,78 @@ export default {
     this.reportId = this.$route.params.reportId || '';
     this.reportName = this.$route.params.reportName || '';
     this.projectName = this.$route.params.projectName || '';
+    
+    // Load report details to check if template is already selected
+    this.loadReportDetails();
   },
   methods: {
     selectTemplate() {
-      console.log('Choosing template for report:', this.reportId);
-      alert(`Choose template for Report ID: ${this.reportId} will be implemented soon!`);
+      console.log('Opening template selection overlay for report:', this.reportId);
+      this.showTemplateOverlay = true;
     },
+    
+    closeOverlay() {
+      this.showTemplateOverlay = false;
+    },
+    
+    async selectTemplateOption(template) {
+      console.log('Selected template:', template.name, 'for report:', this.reportId);
+      
+      try {
+        this.loading = true;
+        
+        // Update report with selected template_id
+        const response = await fetch(`/api/reports/${this.reportId}/template`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            template_id: template.template_id
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // Set the selected template
+          this.selectedTemplate = template;
+          
+          // Close the overlay
+          this.closeOverlay();
+          
+          // Show success message
+          alert(`Template "${template.displayName}" has been selected successfully!`);
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error selecting template:', error);
+        alert('An error occurred while selecting the template. Please try again.');
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    async loadReportDetails() {
+      if (!this.reportId) return;
+      
+      try {
+        const response = await fetch(`/api/reports/${this.reportId}`);
+        const result = await response.json();
+        
+        if (result.success && result.report.template_id) {
+          // Find the template that matches the template_id
+          const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
+          if (template) {
+            this.selectedTemplate = template;
+          }
+        }
+      } catch (error) {
+        console.error('Error loading report details:', error);
+      }
+    },
+    
     
     uploadReport() {
       console.log('Uploading report:', this.reportId);
@@ -370,6 +628,433 @@ export default {
     padding: 15px 30px;
     font-size: 1.1em;
     width: 250px;
+  }
+}
+
+/* Template Form Container Styles */
+.template-form-container {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.template-form-header {
+  background: #f8f9fa;
+  padding: 25px 30px;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.template-info h3 {
+  color: #2d3748;
+  font-size: 1.8em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.template-info p {
+  color: #6c757d;
+  font-size: 1em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.template-form-header .template-actions {
+  flex-shrink: 0;
+}
+
+.template-form-content {
+  padding: 0;
+}
+
+.template-placeholder {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.template-icon-large {
+  color: #007bff;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.template-placeholder h4 {
+  color: #2d3748;
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.template-placeholder p {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.template-placeholder .open-template-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.template-placeholder .open-template-btn:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* Template Error State */
+.template-error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.error-icon {
+  color: #dc3545;
+  margin: 0 auto 20px auto;
+  display: flex;
+  justify-content: center;
+}
+
+.template-error h4 {
+  color: #dc3545;
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+}
+
+.template-error p {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  line-height: 1.6;
+}
+
+.change-template-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.change-template-btn:hover {
+  background: #5a6268;
+  transform: scale(1.05);
+}
+
+/* Loading state */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design for Template Form */
+@media (max-width: 768px) {
+  .template-form-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .template-form-content {
+    padding: 0;
+  }
+  
+  .template-placeholder {
+    padding: 30px 15px;
+  }
+  
+  .template-placeholder h4 {
+    font-size: 1.3em;
+  }
+  
+  .template-placeholder p {
+    font-size: 1em;
+  }
+  
+  .template-placeholder .open-template-btn {
+    padding: 12px 25px;
+    font-size: 1em;
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .change-template-btn {
+    padding: 12px 20px;
+    font-size: 0.9em;
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Template Overlay Styles */
+.template-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.template-overlay-content {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.template-overlay-header {
+  background: #2d3748;
+  color: white;
+  padding: 25px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.template-overlay-header h2 {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.template-overlay-body {
+  padding: 30px;
+  max-height: calc(80vh - 100px);
+  overflow-y: auto;
+}
+
+.template-description {
+  color: #6c757d;
+  font-size: 1.1em;
+  margin: 0 0 30px 0;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 15px;
+  padding: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.1) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.template-card:hover {
+  border-color: #007bff;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.2);
+}
+
+.template-card:hover::before {
+  opacity: 1;
+}
+
+.template-icon {
+  color: #007bff;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.template-card:hover .template-icon {
+  transform: scale(1.1);
+}
+
+.template-info {
+  flex: 1;
+  z-index: 1;
+  position: relative;
+}
+
+.template-info h3 {
+  color: #2d3748;
+  font-size: 1.3em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.template-info p {
+  color: #6c757d;
+  font-size: 0.95em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.template-action {
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+}
+
+.select-template-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9em;
+}
+
+.select-template-btn:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design for Overlay */
+@media (max-width: 768px) {
+  .template-overlay-content {
+    width: 95%;
+    margin: 20px;
+  }
+  
+  .template-overlay-header {
+    padding: 20px;
+  }
+  
+  .template-overlay-header h2 {
+    font-size: 1.5em;
+  }
+  
+  .template-overlay-body {
+    padding: 20px;
+  }
+  
+  .templates-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .template-card {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .template-info h3 {
+    font-size: 1.2em;
+  }
+  
+  .template-info p {
+    font-size: 0.9em;
   }
 }
 </style>

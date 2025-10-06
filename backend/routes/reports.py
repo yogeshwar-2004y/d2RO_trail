@@ -217,7 +217,7 @@ def get_report_details(report_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch report details with memo information
+        # Fetch report details with memo and template information
         cur.execute("""
             SELECT 
                 r.report_id,
@@ -231,6 +231,7 @@ def get_report_details(report_id):
                 r.reference_document,
                 r.status,
                 r.created_at,
+                r.template_id,
                 p.project_name,
                 l.lru_name,
                 m.wing_proj_ref_no,
@@ -256,11 +257,13 @@ def get_report_details(report_id):
                 m.perf_check_during,
                 m.func_check_end,
                 m.certified,
-                m.remarks
+                m.remarks,
+                rt.template_name
             FROM reports r
             LEFT JOIN projects p ON r.project_id = p.project_id
             LEFT JOIN lrus l ON r.lru_id = l.lru_id
             LEFT JOIN memos m ON r.memo_id = m.memo_id
+            LEFT JOIN report_templates rt ON r.template_id = rt.template_id
             WHERE r.report_id = %s
         """, (report_id,))
         
@@ -283,32 +286,34 @@ def get_report_details(report_id):
             "reference_document": report[8],
             "status": report[9],
             "created_at": report[10].isoformat() if report[10] else None,
-            "project_name": report[11],
-            "lru_name": report[12],
-            "wing_proj_ref_no": report[13],
-            "lru_sru_desc": report[14],
-            "part_number": report[15],
-            "from_person": report[16],
-            "to_person": report[17],
-            "thru_person": report[18],
-            "casdic_ref_no": report[19],
-            "dated": report[20].isoformat() if report[20] else None,
-            "manufacturer": report[21],
-            "drawing_no_rev": report[22],
-            "source": report[23],
-            "venue": report[24],
-            "memo_date": report[25].isoformat() if report[25] else None,
-            "name_designation": report[26],
-            "test_facility": report[27],
-            "test_cycle_duration": report[28],
-            "test_start_on": report[29].isoformat() if report[29] else None,
-            "test_complete_on": report[30].isoformat() if report[30] else None,
-            "calibration_status": report[31],
-            "func_check_initial": report[32].isoformat() if report[32] else None,
-            "perf_check_during": report[33].isoformat() if report[33] else None,
-            "func_check_end": report[34].isoformat() if report[34] else None,
-            "certified": report[35],
-            "remarks": report[36]
+            "template_id": report[11],
+            "project_name": report[12],
+            "lru_name": report[13],
+            "wing_proj_ref_no": report[14],
+            "lru_sru_desc": report[15],
+            "part_number": report[16],
+            "from_person": report[17],
+            "to_person": report[18],
+            "thru_person": report[19],
+            "casdic_ref_no": report[20],
+            "dated": report[21].isoformat() if report[21] else None,
+            "manufacturer": report[22],
+            "drawing_no_rev": report[23],
+            "source": report[24],
+            "venue": report[25],
+            "memo_date": report[26].isoformat() if report[26] else None,
+            "name_designation": report[27],
+            "test_facility": report[28],
+            "test_cycle_duration": report[29],
+            "test_start_on": report[30].isoformat() if report[30] else None,
+            "test_complete_on": report[31].isoformat() if report[31] else None,
+            "calibration_status": report[32],
+            "func_check_initial": report[33].isoformat() if report[33] else None,
+            "perf_check_during": report[34].isoformat() if report[34] else None,
+            "func_check_end": report[35].isoformat() if report[35] else None,
+            "certified": report[36],
+            "remarks": report[37],
+            "template_name": report[38]
         }
         
         return jsonify({
@@ -319,6 +324,48 @@ def get_report_details(report_id):
     except Exception as e:
         print(f"Error fetching report details: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching report details: {str(e)}")
+
+@reports_bp.route('/api/reports/<int:report_id>/template', methods=['PUT'])
+def update_report_template(report_id):
+    """Update report template"""
+    try:
+        data = request.json
+        if not data or 'template_id' not in data:
+            return jsonify({"success": False, "message": "Template ID is required"}), 400
+        
+        template_id = data['template_id']
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verify template exists
+        cur.execute("SELECT template_id FROM report_templates WHERE template_id = %s", (template_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Invalid template ID"}), 400
+        
+        # Update report with template_id
+        cur.execute("""
+            UPDATE reports 
+            SET template_id = %s 
+            WHERE report_id = %s
+        """, (template_id, report_id))
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Report template updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error updating report template: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error updating report template: {str(e)}")
 
 @reports_bp.route('/api/reports/<int:report_id>', methods=['PUT'])
 def update_report_status(report_id):
@@ -1421,3 +1468,192 @@ def serve_cot_screening_file(filename):
     except Exception as e:
         print(f"Error serving file: {str(e)}")
         return jsonify({"success": False, "message": f"Error serving file: {str(e)}"}), 500
+
+@reports_bp.route('/api/reports/bare-pcb-inspection', methods=['POST'])
+def create_bare_pcb_inspection_report():
+    """Create a new bare PCB inspection report"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        required_fields = ['project_name', 'report_ref_no', 'memo_ref_no', 'lru_name', 'dp_name', 'sru_name', 'part_no']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Insert bare PCB inspection report
+        cur.execute("""
+            INSERT INTO bare_pcb_inspection_report (
+                project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name, 
+                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number, 
+                inspection_count, start_date, end_date, dated1, dated2,
+                obs1, rem1, upload1, obs2, rem2, upload2, obs3, rem3, upload3,
+                obs4, rem4, upload4, obs5, rem5, upload5, obs6, rem6, upload6,
+                obs7, rem7, upload7, obs8, rem8, upload8, obs9, rem9, upload9,
+                obs10, rem10, upload10, obs11, rem11, upload11, obs12, rem12, upload12,
+                overall_status, quality_rating, recommendations,
+                prepared_by, verified_by, approved_by, created_at, updated_at
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, NOW(), NOW()
+            )
+        """, (
+            data['project_name'],
+            data['report_ref_no'],
+            data['memo_ref_no'],
+            data['lru_name'],
+            data['sru_name'],
+            data['dp_name'],
+            data['part_no'],
+            data.get('inspection_stage'),
+            data.get('test_venue'),
+            data.get('quantity'),
+            data.get('sl_nos'),
+            data.get('serial_number'),
+            data.get('inspection_count'),
+            data.get('start_date'),
+            data.get('end_date'),
+            data.get('dated1'),
+            data.get('dated2'),
+            # Visual Inspection (10 items)
+            data.get('visual_inspection', [{}])[0].get('observation', ''),
+            data.get('visual_inspection', [{}])[0].get('remarks', ''),
+            data.get('visual_inspection', [{}])[0].get('upload', ''),
+            data.get('visual_inspection', [{}])[1].get('observation', ''),
+            data.get('visual_inspection', [{}])[1].get('remarks', ''),
+            data.get('visual_inspection', [{}])[1].get('upload', ''),
+            data.get('visual_inspection', [{}])[2].get('observation', ''),
+            data.get('visual_inspection', [{}])[2].get('remarks', ''),
+            data.get('visual_inspection', [{}])[2].get('upload', ''),
+            data.get('visual_inspection', [{}])[3].get('observation', ''),
+            data.get('visual_inspection', [{}])[3].get('remarks', ''),
+            data.get('visual_inspection', [{}])[3].get('upload', ''),
+            data.get('visual_inspection', [{}])[4].get('observation', ''),
+            data.get('visual_inspection', [{}])[4].get('remarks', ''),
+            data.get('visual_inspection', [{}])[4].get('upload', ''),
+            data.get('visual_inspection', [{}])[5].get('observation', ''),
+            data.get('visual_inspection', [{}])[5].get('remarks', ''),
+            data.get('visual_inspection', [{}])[5].get('upload', ''),
+            data.get('visual_inspection', [{}])[6].get('observation', ''),
+            data.get('visual_inspection', [{}])[6].get('remarks', ''),
+            data.get('visual_inspection', [{}])[6].get('upload', ''),
+            data.get('visual_inspection', [{}])[7].get('observation', ''),
+            data.get('visual_inspection', [{}])[7].get('remarks', ''),
+            data.get('visual_inspection', [{}])[7].get('upload', ''),
+            data.get('visual_inspection', [{}])[8].get('observation', ''),
+            data.get('visual_inspection', [{}])[8].get('remarks', ''),
+            data.get('visual_inspection', [{}])[8].get('upload', ''),
+            data.get('visual_inspection', [{}])[9].get('observation', ''),
+            data.get('visual_inspection', [{}])[9].get('remarks', ''),
+            data.get('visual_inspection', [{}])[9].get('upload', ''),
+            # Continuity Check (1 item)
+            data.get('continuity_check', [{}])[0].get('observation', ''),
+            data.get('continuity_check', [{}])[0].get('remarks', ''),
+            data.get('continuity_check', [{}])[0].get('upload', ''),
+            # Fabricator Report (1 item)
+            data.get('fabricator_report', {}).get('observation', ''),
+            data.get('fabricator_report', {}).get('remarks', ''),
+            data.get('fabricator_report', {}).get('upload', ''),
+            # Summary fields
+            data.get('overall_status'),
+            data.get('quality_rating'),
+            data.get('recommendations'),
+            # Signatures
+            data.get('prepared_by'),
+            data.get('verified_by'),
+            data.get('approved_by')
+        ))
+        
+        conn.commit()
+        report_id = cur.lastrowid
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Bare PCB inspection report created successfully",
+            "report_id": report_id
+        })
+        
+    except Exception as e:
+        print(f"Error creating bare PCB inspection report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error creating bare PCB inspection report: {str(e)}")
+
+@reports_bp.route('/api/reports/bare-pcb-inspection/<int:report_id>', methods=['GET'])
+def get_bare_pcb_inspection_report(report_id):
+    """Get bare PCB inspection report details"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT * FROM bare_pcb_inspection_report WHERE report_id = %s
+        """, (report_id,))
+        
+        report = cur.fetchone()
+        cur.close()
+        
+        if not report:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        # Convert to dictionary
+        columns = [desc[0] for desc in cur.description] if cur.description else []
+        report_data = dict(zip(columns, report))
+        
+        # Convert datetime objects to strings
+        for key, value in report_data.items():
+            if hasattr(value, 'isoformat'):
+                report_data[key] = value.isoformat()
+        
+        return jsonify({
+            "success": True,
+            "report": report_data
+        })
+        
+    except Exception as e:
+        print(f"Error fetching bare PCB inspection report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching bare PCB inspection report: {str(e)}")
+
+@reports_bp.route('/api/reports/bare-pcb-inspection', methods=['GET'])
+def get_bare_pcb_inspection_reports():
+    """Get all bare PCB inspection reports"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
+                   created_at, updated_at
+            FROM bare_pcb_inspection_report 
+            ORDER BY created_at DESC
+        """)
+        
+        reports = cur.fetchall()
+        cur.close()
+        
+        report_list = []
+        for report in reports:
+            report_list.append({
+                "report_id": report[0],
+                "project_name": report[1],
+                "lru_name": report[2],
+                "report_ref_no": report[3],
+                "memo_ref_no": report[4],
+                "created_at": report[5].isoformat() if report[5] else None,
+                "updated_at": report[6].isoformat() if report[6] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "reports": report_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching bare PCB inspection reports: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching bare PCB inspection reports: {str(e)}")

@@ -325,9 +325,69 @@ export default {
         // For now, we'll just log it
       }
     },
-    saveDraft() {
-      console.log('Saving draft:', this.formData);
-      alert('Draft saved successfully!');
+    async saveDraft() {
+      try {
+        // Prepare the data for draft submission
+        const draftData = {
+          // Header information
+          project_name: this.formData.projectName,
+          report_ref_no: this.formData.reportRefNo,
+          memo_ref_no: this.formData.memoRefNo,
+          lru_name: this.formData.lruName,
+          sru_name: this.formData.sruName,
+          dp_name: this.formData.dpName,
+          part_no: this.formData.partNo,
+          inspection_stage: this.formData.inspectionStage,
+          test_venue: this.formData.testVenue,
+          quantity: this.formData.quantity,
+          sl_nos: this.formData.slNos,
+          serial_number: this.serialNumber,
+          inspection_count: this.inspectionCount,
+          start_date: this.formData.startDate,
+          end_date: this.formData.endDate,
+          dated1: this.formData.dated1,
+          dated2: this.formData.dated2,
+          
+          // Visual inspection data (10 items)
+          visual_inspection: this.formData.visualInspection,
+          
+          // Continuity check data (1 item)
+          continuity_check: this.formData.continuityCheck,
+          
+          // Fabricator report data
+          fabricator_report: this.formData.fabricatorReport,
+          
+          // Draft status
+          overall_status: 'DRAFT',
+          quality_rating: null,
+          recommendations: '',
+          prepared_by: '',
+          verified_by: '',
+          approved_by: ''
+        };
+
+        console.log('Saving draft data:', draftData);
+
+        // Send data to backend API
+        const response = await fetch('/api/reports/bare-pcb-inspection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(draftData)
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`Draft saved successfully! Report ID: ${result.report_id}`);
+        } else {
+          alert(`Error saving draft: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error saving draft:', error);
+        alert('Error saving draft. Please try again.');
+      }
     },
     resetForm() {
       if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
@@ -369,11 +429,72 @@ export default {
         };
       }
     },
-    submitForm() {
+    async submitForm() {
       if (this.isFormValid) {
-        console.log('Submitting form:', this.formData);
-        alert('Report submitted successfully!');
-        // Here you would typically send the data to your backend API
+        try {
+          // Prepare the data for submission
+          const submissionData = {
+            // Header information
+            project_name: this.formData.projectName,
+            report_ref_no: this.formData.reportRefNo,
+            memo_ref_no: this.formData.memoRefNo,
+            lru_name: this.formData.lruName,
+            sru_name: this.formData.sruName,
+            dp_name: this.formData.dpName,
+            part_no: this.formData.partNo,
+            inspection_stage: this.formData.inspectionStage,
+            test_venue: this.formData.testVenue,
+            quantity: this.formData.quantity,
+            sl_nos: this.formData.slNos,
+            serial_number: this.serialNumber,
+            inspection_count: this.inspectionCount,
+            start_date: this.formData.startDate,
+            end_date: this.formData.endDate,
+            dated1: this.formData.dated1,
+            dated2: this.formData.dated2,
+            
+            // Visual inspection data (10 items)
+            visual_inspection: this.formData.visualInspection,
+            
+            // Continuity check data (1 item)
+            continuity_check: this.formData.continuityCheck,
+            
+            // Fabricator report data
+            fabricator_report: this.formData.fabricatorReport,
+            
+            // Additional fields that might be needed
+            overall_status: 'COMPLETED',
+            quality_rating: null,
+            recommendations: '',
+            prepared_by: '',
+            verified_by: '',
+            approved_by: ''
+          };
+
+          console.log('Submitting form data:', submissionData);
+
+          // Send data to backend API
+          const response = await fetch('/api/reports/bare-pcb-inspection', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(submissionData)
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(`Report submitted successfully! Report ID: ${result.report_id}`);
+            // Optionally redirect or reset form
+            this.resetForm();
+          } else {
+            alert(`Error submitting report: ${result.message}`);
+          }
+        } catch (error) {
+          console.error('Error submitting form:', error);
+          alert('Error submitting report. Please try again.');
+        }
       } else {
         alert('Please fill in all required fields.');
       }

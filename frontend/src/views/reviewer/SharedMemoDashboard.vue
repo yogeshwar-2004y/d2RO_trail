@@ -119,6 +119,7 @@ export default {
       projects: [],
       memoStatuses: [
         { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
+        { name: 'REJECTED', color: 'rejected', dbValue: 'disapproved' },
         { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
         { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
         { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
@@ -233,7 +234,8 @@ export default {
           case 'assigned':
             return 'ASSIGNED';
           case 'disapproved':
-            return 'DISAPPROVED';
+            // Check if this memo was rejected (has rejection in memo_approval)
+            return 'REJECTED';
           case 'successfully_completed':
             return 'SUCCESSFULLY COMPLETED';
           case 'test_not_conducted':
@@ -408,6 +410,10 @@ export default {
 /* Status-based colors for Memo Filters */
 .success, .successfully-completed {
   background-color: #e2fbdc; /* Light Green */
+}
+.rejected {
+  background-color: #ff4757; /* Bright Red */
+  color: white;
 }
 .disapproved {
   background-color: #ffd8d6; /* Light Red */

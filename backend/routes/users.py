@@ -127,11 +127,14 @@ def create_user():
         # Hash the password
         hashed_password = hash_password(password)
         
-        # Insert user into users table with signature path
+        # Hash the user name for signature password
+        signature_password = hash_password(user_name)
+        
+        # Insert user into users table with signature path and signature password
         cur.execute("""
-            INSERT INTO users (user_id, name, email, password_hash, signature_path)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, user_name, email, hashed_password, signature_path))
+            INSERT INTO users (user_id, name, email, password_hash, signature_path, signature_password)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, user_name, email, hashed_password, signature_path, signature_password))
         
         # Insert role assignment into user_roles table
         cur.execute("""
@@ -188,6 +191,9 @@ def update_user(user_id):
         if 'name' in data:
             update_fields.append("name = %s")
             update_values.append(data['name'])
+            # Also update signature password when name changes
+            update_fields.append("signature_password = %s")
+            update_values.append(hash_password(data['name']))
             
         if 'email' in data:
             # Check if email is already taken by another user
@@ -254,6 +260,108 @@ def update_user(user_id):
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error updating user: {str(e)}")
 
+@users_bp.route('/api/users/change-login-password', methods=['POST'])
+def change_login_password():
+    """Change user login password"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not all([user_id, current_password, new_password]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get current user and verify current password
+        cur.execute("""
+            SELECT user_id, password_hash 
+            FROM users 
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify current password by comparing hashed versions
+        current_password_hash = hash_password(current_password)
+        if user[1] != current_password_hash:
+            return jsonify({"success": False, "message": "Current password is incorrect"}), 400
+        
+        # Update password with hashed version
+        new_password_hash = hash_password(new_password)
+        cur.execute("""
+            UPDATE users 
+            SET password_hash = %s, updated_at = NOW()
+            WHERE user_id = %s
+        """, (new_password_hash, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Login password updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error changing login password: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@users_bp.route('/api/users/change-signature-password', methods=['POST'])
+def change_signature_password():
+    """Change user signature password"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not all([user_id, current_password, new_password]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get current user and verify current signature password
+        cur.execute("""
+            SELECT user_id, signature_password 
+            FROM users 
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify current signature password by comparing hashed versions
+        current_password_hash = hash_password(current_password)
+        if user[1] != current_password_hash:
+            return jsonify({"success": False, "message": "Current signature password is incorrect"}), 400
+        
+        # Update signature password with hashed version
+        new_password_hash = hash_password(new_password)
+        cur.execute("""
+            UPDATE users 
+            SET signature_password = %s, updated_at = NOW()
+            WHERE user_id = %s
+        """, (new_password_hash, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Signature password updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error changing signature password: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     """Get single user with role information"""
@@ -261,7 +369,7 @@ def get_user(user_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch user with role information and signature
+        # Fetch user with role information, signature, and signature password
         cur.execute("""
             SELECT 
                 u.user_id,
@@ -269,7 +377,8 @@ def get_user(user_id):
                 u.email,
                 r.role_id,
                 r.role_name,
-                u.signature_path
+                u.signature_path,
+                u.signature_password
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -296,7 +405,8 @@ def get_user(user_id):
                 "role_id": user[3],
                 "role_name": user[4] if user[4] else "No Role Assigned",
                 "signature_path": signature_path,
-                "has_signature": user[5] is not None
+                "has_signature": user[5] is not None,
+                "signature_password": user[6]
             }
         })
         
@@ -375,6 +485,60 @@ def get_signature(filename):
     except Exception as e:
         print(f"Error serving signature {filename}: {str(e)}")
         return jsonify({"success": False, "message": "Error serving signature"}), 500
+
+@users_bp.route('/api/users/verify-signature', methods=['POST'])
+def verify_signature_credentials():
+    """Verify signature credentials and return signature path"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        signature_password = data.get('signature_password')
+        
+        if not username or not signature_password:
+            return jsonify({"success": False, "message": "Username and signature password are required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Find user by username (name field) and verify signature password
+        cur.execute("""
+            SELECT user_id, name, signature_path, signature_password
+            FROM users 
+            WHERE name = %s
+        """, (username,))
+        
+        user = cur.fetchone()
+        cur.close()
+        
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify signature password by comparing hashed versions
+        provided_password_hash = hash_password(signature_password)
+        if user[3] != provided_password_hash:
+            return jsonify({"success": False, "message": "Invalid signature password"}), 401
+        
+        # Return signature path if available
+        signature_path = user[2]
+        if not signature_path:
+            return jsonify({"success": False, "message": "No signature found for this user"}), 404
+        
+        # Normalize signature path for cross-platform compatibility
+        signature_path = signature_path.replace('\\', '/')
+        filename = os.path.basename(signature_path)
+        signature_url = f"/api/users/signature/{filename}"
+        
+        return jsonify({
+            "success": True,
+            "message": "Signature credentials verified successfully",
+            "signature_url": signature_url,
+            "user_id": user[0],
+            "user_name": user[1]
+        })
+        
+    except Exception as e:
+        print(f"Error verifying signature credentials: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
 
 @users_bp.route('/api/available-reviewers', methods=['GET'])
 def get_available_reviewers():
