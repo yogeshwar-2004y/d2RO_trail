@@ -127,11 +127,14 @@ def create_user():
         # Hash the password
         hashed_password = hash_password(password)
         
-        # Insert user into users table with signature path
+        # Hash the user name for signature password
+        signature_password = hash_password(user_name)
+        
+        # Insert user into users table with signature path and signature password
         cur.execute("""
-            INSERT INTO users (user_id, name, email, password_hash, signature_path)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (user_id, user_name, email, hashed_password, signature_path))
+            INSERT INTO users (user_id, name, email, password_hash, signature_path, signature_password)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (user_id, user_name, email, hashed_password, signature_path, signature_password))
         
         # Insert role assignment into user_roles table
         cur.execute("""
@@ -188,6 +191,9 @@ def update_user(user_id):
         if 'name' in data:
             update_fields.append("name = %s")
             update_values.append(data['name'])
+            # Also update signature password when name changes
+            update_fields.append("signature_password = %s")
+            update_values.append(hash_password(data['name']))
             
         if 'email' in data:
             # Check if email is already taken by another user
