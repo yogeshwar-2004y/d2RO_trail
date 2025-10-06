@@ -260,6 +260,108 @@ def update_user(user_id):
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error updating user: {str(e)}")
 
+@users_bp.route('/api/users/change-login-password', methods=['POST'])
+def change_login_password():
+    """Change user login password"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not all([user_id, current_password, new_password]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get current user and verify current password
+        cur.execute("""
+            SELECT user_id, password_hash 
+            FROM users 
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify current password by comparing hashed versions
+        current_password_hash = hash_password(current_password)
+        if user[1] != current_password_hash:
+            return jsonify({"success": False, "message": "Current password is incorrect"}), 400
+        
+        # Update password with hashed version
+        new_password_hash = hash_password(new_password)
+        cur.execute("""
+            UPDATE users 
+            SET password_hash = %s, updated_at = NOW()
+            WHERE user_id = %s
+        """, (new_password_hash, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Login password updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error changing login password: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@users_bp.route('/api/users/change-signature-password', methods=['POST'])
+def change_signature_password():
+    """Change user signature password"""
+    try:
+        data = request.get_json()
+        user_id = data.get('user_id')
+        current_password = data.get('current_password')
+        new_password = data.get('new_password')
+        
+        if not all([user_id, current_password, new_password]):
+            return jsonify({"success": False, "message": "Missing required fields"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get current user and verify current signature password
+        cur.execute("""
+            SELECT user_id, signature_password 
+            FROM users 
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify current signature password by comparing hashed versions
+        current_password_hash = hash_password(current_password)
+        if user[1] != current_password_hash:
+            return jsonify({"success": False, "message": "Current signature password is incorrect"}), 400
+        
+        # Update signature password with hashed version
+        new_password_hash = hash_password(new_password)
+        cur.execute("""
+            UPDATE users 
+            SET signature_password = %s, updated_at = NOW()
+            WHERE user_id = %s
+        """, (new_password_hash, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Signature password updated successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error changing signature password: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/users/<user_id>', methods=['GET'])
 def get_user(user_id):
     """Get single user with role information"""

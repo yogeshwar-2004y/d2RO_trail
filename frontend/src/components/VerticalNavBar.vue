@@ -85,14 +85,25 @@
         </nav>
       </div>
     </div>
+    
+    <!-- Password Change Modal -->
+    <PasswordChangeModal 
+      :isOpen="isPasswordModalOpen"
+      :passwordType="passwordType"
+      @close="closePasswordModal"
+    />
   </div>
 </template>
 
 <script>
 import { userStore } from '@/stores/userStore'
+import PasswordChangeModal from './PasswordChangeModal.vue'
 
 export default {
   name: 'VerticalNavBar',
+  components: {
+    PasswordChangeModal
+  },
   props: {
     isOpen: {
       type: Boolean,
@@ -101,7 +112,9 @@ export default {
   },
   data() {
     return {
-      showSignatureSubmenu: false
+      showSignatureSubmenu: false,
+      isPasswordModalOpen: false,
+      passwordType: 'login'
     }
   },
   computed: {
@@ -125,12 +138,15 @@ export default {
       this.showSignatureSubmenu = !this.showSignatureSubmenu
     },
     changeLoginPassword() {
-      this.$emit('navigate', 'change-login-password')
-      this.closeNav()
+      this.passwordType = 'login'
+      this.isPasswordModalOpen = true
     },
     changeSignaturePassword() {
-      this.$emit('navigate', 'change-signature-password')
-      this.closeNav()
+      this.passwordType = 'signature'
+      this.isPasswordModalOpen = true
+    },
+    closePasswordModal() {
+      this.isPasswordModalOpen = false
     },
     logout() {
       this.$emit('logout')
