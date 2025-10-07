@@ -501,10 +501,13 @@ def verify_signature_credentials():
         cur = conn.cursor()
         
         # Find user by username (name field) and verify signature password
+        # Join with user_roles and roles tables to get role information
         cur.execute("""
-            SELECT user_id, name, signature_path, signature_password
-            FROM users 
-            WHERE name = %s
+            SELECT u.user_id, u.name, u.signature_path, u.signature_password, r.role_id, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE u.name = %s
         """, (username,))
         
         user = cur.fetchone()
@@ -533,7 +536,9 @@ def verify_signature_credentials():
             "message": "Signature credentials verified successfully",
             "signature_url": signature_url,
             "user_id": user[0],
-            "user_name": user[1]
+            "user_name": user[1],
+            "role_id": user[4],
+            "role_name": user[5]
         })
         
     except Exception as e:

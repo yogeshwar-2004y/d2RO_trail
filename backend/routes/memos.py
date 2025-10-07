@@ -742,12 +742,29 @@ def get_memo_approval_status(memo_id):
         
         if reviewer_id:
             cur.execute("""
-                SELECT user_id, name, email
-                FROM users 
-                WHERE user_id = %s
+                SELECT u.user_id, u.name, u.email, r.role_name
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.user_id = %s
             """, (reviewer_id,))
             
             reviewer = cur.fetchone()
+        
+        # Get approver details (person who approved/rejected the memo)
+        approver_id = approval_record[8]  # approved_by
+        approver = None
+        
+        if approver_id:
+            cur.execute("""
+                SELECT u.user_id, u.name, u.email, r.role_name
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.user_id = %s
+            """, (approver_id,))
+            
+            approver = cur.fetchone()
         
         cur.close()
 
@@ -768,8 +785,15 @@ def get_memo_approval_status(memo_id):
             "reviewer": {
                 "id": reviewer[0],
                 "name": reviewer[1],
-                "email": reviewer[2]
-            } if reviewer else None
+                "email": reviewer[2],
+                "role": reviewer[3]
+            } if reviewer else None,
+            "approver": {
+                "id": approver[0],
+                "name": approver[1],
+                "email": approver[2],
+                "role": approver[3]
+            } if approver else None
         }
 
         return jsonify({
