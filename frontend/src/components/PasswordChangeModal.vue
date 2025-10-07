@@ -4,13 +4,23 @@
       <div class="modal-header">
         <h3>{{ modalTitle }}</h3>
         <button class="close-btn" @click="closeModal">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
-      
+
       <div class="modal-body">
         <form @submit.prevent="submitForm">
           <div class="form-group">
@@ -24,19 +34,47 @@
                 required
                 :disabled="loading"
               />
-              <button type="button" class="toggle-password" @click="toggleOldPassword">
-                <svg v-if="!showOldPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                type="button"
+                class="toggle-password"
+                @click="toggleOldPassword"
+              >
+                <svg
+                  v-if="!showOldPassword"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  ></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               </button>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="newPassword">New Password</label>
             <div class="input-wrapper">
@@ -48,19 +86,47 @@
                 required
                 :disabled="loading"
               />
-              <button type="button" class="toggle-password" @click="toggleNewPassword">
-                <svg v-if="!showNewPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                type="button"
+                class="toggle-password"
+                @click="toggleNewPassword"
+              >
+                <svg
+                  v-if="!showNewPassword"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  ></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               </button>
             </div>
           </div>
-          
+
           <div class="form-group">
             <label for="confirmPassword">Confirm New Password</label>
             <div class="input-wrapper">
@@ -72,36 +138,74 @@
                 required
                 :disabled="loading"
               />
-              <button type="button" class="toggle-password" @click="toggleConfirmPassword">
-                <svg v-if="!showConfirmPassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                type="button"
+                class="toggle-password"
+                @click="toggleConfirmPassword"
+              >
+                <svg
+                  v-if="!showConfirmPassword"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
-                <svg v-else xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <svg
+                  v-else
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                  ></path>
                   <line x1="1" y1="1" x2="23" y2="23"></line>
                 </svg>
               </button>
             </div>
           </div>
-          
+
           <div v-if="errorMessage" class="error-message">
             {{ errorMessage }}
           </div>
-          
+
           <div v-if="successMessage" class="success-message">
             {{ successMessage }}
           </div>
         </form>
       </div>
-      
+
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" @click="closeModal" :disabled="loading">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          @click="closeModal"
+          :disabled="loading"
+        >
           Cancel
         </button>
-        <button type="button" class="btn btn-primary" @click="submitForm" :disabled="loading || !isFormValid">
+        <button
+          type="button"
+          class="btn btn-primary"
+          @click="submitForm"
+          :disabled="loading || !isFormValid"
+        >
           <span v-if="loading" class="loading-spinner"></span>
-          {{ loading ? 'Updating...' : 'Update Password' }}
+          {{ loading ? "Updating..." : "Update Password" }}
         </button>
       </div>
     </div>
@@ -109,134 +213,140 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'PasswordChangeModal',
+  name: "PasswordChangeModal",
   props: {
     isOpen: {
       type: Boolean,
-      default: false
+      default: false,
     },
     passwordType: {
       type: String,
-      default: 'login', // 'login' or 'signature'
-      validator: value => ['login', 'signature'].includes(value)
-    }
+      default: "login", // 'login' or 'signature'
+      validator: (value) => ["login", "signature"].includes(value),
+    },
   },
   data() {
     return {
       formData: {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
       },
       showOldPassword: false,
       showNewPassword: false,
       showConfirmPassword: false,
       loading: false,
-      errorMessage: '',
-      successMessage: ''
-    }
+      errorMessage: "",
+      successMessage: "",
+    };
   },
   computed: {
     modalTitle() {
-      return this.passwordType === 'login' 
-        ? 'Change Login Password' 
-        : 'Change Signature Password'
+      return this.passwordType === "login"
+        ? "Change Login Password"
+        : "Change Signature Password";
     },
     isFormValid() {
-      return this.formData.oldPassword && 
-             this.formData.newPassword && 
-             this.formData.confirmPassword &&
-             this.formData.newPassword === this.formData.confirmPassword
-    }
+      return (
+        this.formData.oldPassword &&
+        this.formData.newPassword &&
+        this.formData.confirmPassword &&
+        this.formData.newPassword === this.formData.confirmPassword
+      );
+    },
   },
   watch: {
     isOpen(newVal) {
       if (newVal) {
-        this.resetForm()
+        this.resetForm();
       }
-    }
+    },
   },
   methods: {
     closeModal() {
-      this.$emit('close')
+      this.$emit("close");
     },
     toggleOldPassword() {
-      this.showOldPassword = !this.showOldPassword
+      this.showOldPassword = !this.showOldPassword;
     },
     toggleNewPassword() {
-      this.showNewPassword = !this.showNewPassword
+      this.showNewPassword = !this.showNewPassword;
     },
     toggleConfirmPassword() {
-      this.showConfirmPassword = !this.showConfirmPassword
+      this.showConfirmPassword = !this.showConfirmPassword;
     },
     resetForm() {
       this.formData = {
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }
-      this.showOldPassword = false
-      this.showNewPassword = false
-      this.showConfirmPassword = false
-      this.errorMessage = ''
-      this.successMessage = ''
-      this.loading = false
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      };
+      this.showOldPassword = false;
+      this.showNewPassword = false;
+      this.showConfirmPassword = false;
+      this.errorMessage = "";
+      this.successMessage = "";
+      this.loading = false;
     },
     async submitForm() {
       if (!this.isFormValid) {
-        this.errorMessage = 'Please fill in all fields and ensure passwords match'
-        return
+        this.errorMessage =
+          "Please fill in all fields and ensure passwords match";
+        return;
       }
-      
+
       if (this.formData.newPassword.length < 6) {
-        this.errorMessage = 'New password must be at least 6 characters long'
-        return
+        this.errorMessage = "New password must be at least 6 characters long";
+        return;
       }
-      
-      this.loading = true
-      this.errorMessage = ''
-      this.successMessage = ''
-      
+
+      this.loading = true;
+      this.errorMessage = "";
+      this.successMessage = "";
+
       try {
-        const currentUser = userStore.getters.currentUser()
+        const currentUser = userStore.getters.currentUser();
         if (!currentUser) {
-          throw new Error('User not found')
+          throw new Error("User not found");
         }
-        
-        const response = await fetch(`http://127.0.0.1:5000/api/users/change-${this.passwordType}-password`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            user_id: currentUser.id,
-            current_password: this.formData.oldPassword,
-            new_password: this.formData.newPassword
-          })
-        })
-        
-        const data = await response.json()
-        
+
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/users/change-${this.passwordType}-password`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: currentUser.id,
+              current_password: this.formData.oldPassword,
+              new_password: this.formData.newPassword,
+            }),
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          this.successMessage = data.message
+          this.successMessage = data.message;
           setTimeout(() => {
-            this.closeModal()
-          }, 2000)
+            this.closeModal();
+          }, 2000);
         } else {
-          this.errorMessage = data.message || 'Failed to update password'
+          this.errorMessage = data.message || "Failed to update password";
         }
       } catch (error) {
-        console.error('Error updating password:', error)
-        this.errorMessage = 'An error occurred while updating password'
+        console.error("Error updating password:", error);
+        this.errorMessage = "An error occurred while updating password";
       } finally {
-        this.loading = false
+        this.loading = false;
       }
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -453,7 +563,7 @@ export default {
   .modal-content {
     margin: 0 10px;
   }
-  
+
   .modal-header,
   .modal-body,
   .modal-footer {

@@ -1133,7 +1133,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/available-reviewers"
+          "http://localhost:8000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1151,7 +1151,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.id}/approval-status`
+          `http://localhost:8000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1184,7 +1184,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `http://localhost:8000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1272,7 +1272,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1323,7 +1323,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,

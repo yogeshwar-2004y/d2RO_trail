@@ -1,7 +1,7 @@
 @echo off
 echo Starting AVIATRAX Backend Server...
-echo Server will be available at: http://localhost:5000
-echo API endpoints available at: http://localhost:5000/api
+echo Server will be available at: http://localhost:8000
+echo API endpoints available at: http://localhost:8000/api
 echo Press Ctrl+C to stop the server
 echo ----------------------------------------
 

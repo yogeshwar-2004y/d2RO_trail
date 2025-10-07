@@ -4,14 +4,32 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
         <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="app-logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="app-logo vista-logo">
+          <img
+            src="@/assets/images/aviatrax-logo.png"
+            alt="Aviatrax Logo"
+            class="app-logo"
+          />
+          <img
+            src="@/assets/images/vista_logo.png"
+            alt="Vista Logo"
+            class="app-logo vista-logo"
+          />
         </div>
       </div>
       <div class="header-center">
@@ -19,7 +37,17 @@
       </div>
       <div class="header-right">
         <button class="export-button" @click="exportReport">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -34,11 +62,11 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ inspectionCount }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{
+            inspectionCount
+          }}/{{ currentYear }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -55,69 +83,143 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="formData.projectName" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="formData.projectName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" required>
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" required>
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" required>
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" required>
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
+                  required
+                />
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="formData.dpName" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="formData.dpName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" required>
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" required>
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" required>
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" required>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
+                  required
+                />
               </div>
-              
-              
+
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" required>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -139,9 +241,14 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(checkpoint, index) in formData.checkPoints" :key="index">
+                <tr
+                  v-for="(checkpoint, index) in formData.checkPoints"
+                  :key="index"
+                >
                   <td>{{ index + 1 }}</td>
-                  <td class="checkpoint-description">{{ checkpoint.description }}</td>
+                  <td class="checkpoint-description">
+                    {{ checkpoint.description }}
+                  </td>
                   <td>
                     <select v-model="checkpoint.applicability">
                       <option value="">Select</option>
@@ -164,7 +271,10 @@
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'checkpoint', index)">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'checkpoint', index)"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -199,7 +309,11 @@
           <button type="button" @click="resetForm" class="btn btn-secondary">
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -209,103 +323,106 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'RawMaterialInspectionReport',
+  name: "RawMaterialInspectionReport",
   data() {
     return {
-      projectName: '',
-      lruName: '',
-      serialNumber: 'SL-001',
-      inspectionCount: 'INS-001',
-      currentYear: '2025',
-      currentDate: new Date().toISOString().split('T')[0],
+      projectName: "",
+      lruName: "",
+      serialNumber: "SL-001",
+      inspectionCount: "INS-001",
+      currentYear: "2025",
+      currentDate: new Date().toISOString().split("T")[0],
       formData: {
-        projectName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        dpName: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        quantity: '',
-        startDate: '',
-        partNo: '',
-        slNos: '',
-        endDate: '',
+        projectName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        dpName: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        quantity: "",
+        startDate: "",
+        partNo: "",
+        slNos: "",
+        endDate: "",
         checkPoints: [
           {
-            description: 'Dimensions of the Raw Materials Received as per Certificate',
-            applicability: 'A',
-            compliance: '',
-            remarks: ''
+            description:
+              "Dimensions of the Raw Materials Received as per Certificate",
+            applicability: "A",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'CoC of Raw Materials',
-            applicability: 'A',
-            compliance: '',
-            remarks: ''
+            description: "CoC of Raw Materials",
+            applicability: "A",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'Chemical Reports as specified in QAP',
-            applicability: 'NA',
-            compliance: '',
-            remarks: ''
+            description: "Chemical Reports as specified in QAP",
+            applicability: "NA",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'Tensile Strength',
-            applicability: 'A',
-            compliance: '',
-            remarks: ''
+            description: "Tensile Strength",
+            applicability: "A",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'Hardness Test Results as specified in QAP',
-            applicability: 'NA',
-            compliance: '',
-            remarks: ''
+            description: "Hardness Test Results as specified in QAP",
+            applicability: "NA",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'UT Test',
-            applicability: 'A',
-            compliance: '',
-            remarks: ''
+            description: "UT Test",
+            applicability: "A",
+            compliance: "",
+            remarks: "",
           },
           {
-            description: 'Any Other Observations:',
-            applicability: 'NIL',
-            compliance: '',
-            remarks: ''
-          }
-        ]
+            description: "Any Other Observations:",
+            applicability: "NIL",
+            compliance: "",
+            remarks: "",
+          },
+        ],
       },
-      overallStatus: '',
+      overallStatus: "",
       qualityRating: null,
-      recommendations: '',
-      preparedBy: '',
-      verifiedBy: '',
-      approvedBy: ''
+      recommendations: "",
+      preparedBy: "",
+      verifiedBy: "",
+      approvedBy: "",
     };
   },
   computed: {
     isFormValid() {
-      return this.formData.projectName &&
-             this.formData.reportRefNo &&
-             this.formData.memoRefNo &&
-             this.formData.lruName &&
-             this.formData.dpName &&
-             this.formData.sruName &&
-             this.formData.partNo;
-    }
+      return (
+        this.formData.projectName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.dpName &&
+        this.formData.sruName &&
+        this.formData.partNo
+      );
+    },
   },
   mounted() {
     // Get parameters from route
-    this.lruName = this.$route.params.lruName || '';
-    this.projectName = this.$route.params.projectName || '';
-    
+    this.lruName = this.$route.params.lruName || "";
+    this.projectName = this.$route.params.projectName || "";
+
     // Set default values
     this.formData.lruName = this.lruName;
     this.formData.projectName = this.projectName;
@@ -315,7 +432,10 @@ export default {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        console.log(`File uploaded for ${section} section, item ${index}:`, file.name);
+        console.log(
+          `File uploaded for ${section} section, item ${index}:`,
+          file.name
+        );
         // Here you would typically upload the file to your backend
         // For now, we'll just log it
       }
@@ -323,89 +443,97 @@ export default {
     async saveDraft() {
       try {
         const reportData = this.prepareReportData();
-        const response = await fetch('http://localhost:5000/api/reports/raw-material-inspection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(reportData)
-        });
-        
+        const response = await fetch(
+          "http://localhost:8000/api/reports/raw-material-inspection",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
+
         const result = await response.json();
-        
+
         if (result.success) {
-          alert('Draft saved successfully!');
-          console.log('Report saved with ID:', result.report_id);
+          alert("Draft saved successfully!");
+          console.log("Report saved with ID:", result.report_id);
         } else {
           alert(`Error saving draft: ${result.message}`);
         }
       } catch (error) {
-        console.error('Error saving draft:', error);
-        alert('Error saving draft. Please try again.');
+        console.error("Error saving draft:", error);
+        alert("Error saving draft. Please try again.");
       }
     },
     resetForm() {
-      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+      if (
+        confirm(
+          "Are you sure you want to reset the form? All data will be lost."
+        )
+      ) {
         this.formData = {
           projectName: this.projectName,
           lruName: this.lruName,
-          reportRefNo: '',
-          memoRefNo: '',
-          inspectionStage: '',
-          testVenue: '',
-          dpName: '',
-          dated1: '',
-          dated2: '',
+          reportRefNo: "",
+          memoRefNo: "",
+          inspectionStage: "",
+          testVenue: "",
+          dpName: "",
+          dated1: "",
+          dated2: "",
           sruName: this.lruName,
-          quantity: '',
+          quantity: "",
           startDate: this.currentDate,
-          partNo: '',
-          slNos: '',
-          endDate: '',
+          partNo: "",
+          slNos: "",
+          endDate: "",
           checkPoints: [
             {
-              description: 'Dimensions of the Raw Materials Received as per Certificate',
-              applicability: 'A',
-              compliance: '',
-              remarks: ''
+              description:
+                "Dimensions of the Raw Materials Received as per Certificate",
+              applicability: "A",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'CoC of Raw Materials',
-              applicability: 'A',
-              compliance: '',
-              remarks: ''
+              description: "CoC of Raw Materials",
+              applicability: "A",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'Chemical Reports as specified in QAP',
-              applicability: 'NA',
-              compliance: '',
-              remarks: ''
+              description: "Chemical Reports as specified in QAP",
+              applicability: "NA",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'Tensile Strength',
-              applicability: 'A',
-              compliance: '',
-              remarks: ''
+              description: "Tensile Strength",
+              applicability: "A",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'Hardness Test Results as specified in QAP',
-              applicability: 'NA',
-              compliance: '',
-              remarks: ''
+              description: "Hardness Test Results as specified in QAP",
+              applicability: "NA",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'UT Test',
-              applicability: 'A',
-              compliance: '',
-              remarks: ''
+              description: "UT Test",
+              applicability: "A",
+              compliance: "",
+              remarks: "",
             },
             {
-              description: 'Any Other Observations:',
-              applicability: 'NIL',
-              compliance: '',
-              remarks: ''
-            }
-          ]
+              description: "Any Other Observations:",
+              applicability: "NIL",
+              compliance: "",
+              remarks: "",
+            },
+          ],
         };
       }
     },
@@ -413,30 +541,33 @@ export default {
       if (this.isFormValid) {
         try {
           const reportData = this.prepareReportData();
-          const response = await fetch('http://localhost:5000/api/reports/raw-material-inspection', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(reportData)
-          });
-          
+          const response = await fetch(
+            "http://localhost:8000/api/reports/raw-material-inspection",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(reportData),
+            }
+          );
+
           const result = await response.json();
-          
+
           if (result.success) {
-            alert('Report submitted successfully!');
-            console.log('Report submitted with ID:', result.report_id);
+            alert("Report submitted successfully!");
+            console.log("Report submitted with ID:", result.report_id);
             // Optionally redirect or reset form
             this.resetForm();
           } else {
             alert(`Error submitting report: ${result.message}`);
           }
         } catch (error) {
-          console.error('Error submitting report:', error);
-          alert('Error submitting report. Please try again.');
+          console.error("Error submitting report:", error);
+          alert("Error submitting report. Please try again.");
         }
       } else {
-        alert('Please fill in all required fields.');
+        alert("Please fill in all required fields.");
       }
     },
     prepareReportData() {
@@ -457,138 +588,157 @@ export default {
         end_date: this.formData.endDate,
         dated1: this.formData.dated1,
         dated2: this.formData.dated2,
-        checkPoints: this.formData.checkPoints.map(checkpoint => ({
+        checkPoints: this.formData.checkPoints.map((checkpoint) => ({
           description: checkpoint.description,
           applicability: checkpoint.applicability,
           compliance: checkpoint.compliance,
           remarks: checkpoint.remarks,
-          upload: checkpoint.upload || ''
+          upload: checkpoint.upload || "",
         })),
-        overall_status: this.overallStatus || '',
+        overall_status: this.overallStatus || "",
         quality_rating: this.qualityRating || null,
-        recommendations: this.recommendations || '',
-        prepared_by: this.preparedBy || '',
-        verified_by: this.verifiedBy || '',
-        approved_by: this.approvedBy || ''
+        recommendations: this.recommendations || "",
+        prepared_by: this.preparedBy || "",
+        verified_by: this.verifiedBy || "",
+        approved_by: this.approvedBy || "",
       };
     },
     exportReport() {
       try {
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        const contentWidth = pageWidth - (2 * margin);
-        
+        const contentWidth = pageWidth - 2 * margin;
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // Header
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('RAW MATERIAL INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("RAW MATERIAL INSPECTION REPORT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Document path and date
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.inspectionCount || '001'}/${this.currentYear || '2025'}`;
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
+          this.lruName || "LRU"
+        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
+          this.currentYear || "2025"
+        }`;
         doc.text(documentPath, margin, yPosition);
-        
-        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
+
+        const dateText = `Date: ${
+          this.currentDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
-        
+
         // Subject line
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: Raw Material Inspection Report for ${this.lruName || 'Unknown LRU'}`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Raw Material Inspection Report for ${
+          this.lruName || "Unknown LRU"
+        }`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // Report details
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Report Details:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
+
+        doc.setFont("helvetica", "normal");
         const details = [
-          `Project Name: ${this.formData.projectName || 'Not specified'}`,
-          `Report Ref No: ${this.formData.reportRefNo || 'Not specified'}`,
-          `Memo Ref No: ${this.formData.memoRefNo || 'Not specified'}`,
-          `LRU Name: ${this.formData.lruName || 'Not specified'}`,
-          `DP Name: ${this.formData.dpName || 'Not specified'}`,
-          `SRU Name: ${this.formData.sruName || 'Not specified'}`,
-          `Part No: ${this.formData.partNo || 'Not specified'}`,
-          `Quantity: ${this.formData.quantity || 'Not specified'}`,
-          `Start Date: ${this.formData.startDate || 'Not specified'}`,
-          `End Date: ${this.formData.endDate || 'Not specified'}`
+          `Project Name: ${this.formData.projectName || "Not specified"}`,
+          `Report Ref No: ${this.formData.reportRefNo || "Not specified"}`,
+          `Memo Ref No: ${this.formData.memoRefNo || "Not specified"}`,
+          `LRU Name: ${this.formData.lruName || "Not specified"}`,
+          `DP Name: ${this.formData.dpName || "Not specified"}`,
+          `SRU Name: ${this.formData.sruName || "Not specified"}`,
+          `Part No: ${this.formData.partNo || "Not specified"}`,
+          `Quantity: ${this.formData.quantity || "Not specified"}`,
+          `Start Date: ${this.formData.startDate || "Not specified"}`,
+          `End Date: ${this.formData.endDate || "Not specified"}`,
         ];
-        
-        details.forEach(detail => {
+
+        details.forEach((detail) => {
           doc.text(detail, margin, yPosition);
           yPosition += 6;
         });
-        
+
         yPosition += 10;
-        
+
         // Check points table
-        doc.setFont('helvetica', 'bold');
-        doc.text('Check Points:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Check Points:", margin, yPosition);
         yPosition += 8;
-        
+
         if (this.formData.checkPoints && this.formData.checkPoints.length > 0) {
           doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          
+          doc.setFont("helvetica", "bold");
+
           // Table headers
-          doc.text('SL.NO', margin, yPosition);
-          doc.text('CHECK POINTS', margin + 15, yPosition);
-          doc.text('APPLICABILITY', margin + 100, yPosition);
-          doc.text('COMPLIANCE', margin + 130, yPosition);
-          doc.text('REMARKS', margin + 160, yPosition);
+          doc.text("SL.NO", margin, yPosition);
+          doc.text("CHECK POINTS", margin + 15, yPosition);
+          doc.text("APPLICABILITY", margin + 100, yPosition);
+          doc.text("COMPLIANCE", margin + 130, yPosition);
+          doc.text("REMARKS", margin + 160, yPosition);
           yPosition += 6;
-          
+
           // Table data
-          doc.setFont('helvetica', 'normal');
+          doc.setFont("helvetica", "normal");
           this.formData.checkPoints.forEach((checkpoint, index) => {
             doc.text((index + 1).toString(), margin, yPosition);
-            doc.text(checkpoint.description.substring(0, 30), margin + 15, yPosition);
-            doc.text(checkpoint.applicability || '', margin + 100, yPosition);
-            doc.text(checkpoint.compliance || '', margin + 130, yPosition);
-            doc.text(checkpoint.remarks || '', margin + 160, yPosition);
+            doc.text(
+              checkpoint.description.substring(0, 30),
+              margin + 15,
+              yPosition
+            );
+            doc.text(checkpoint.applicability || "", margin + 100, yPosition);
+            doc.text(checkpoint.compliance || "", margin + 130, yPosition);
+            doc.text(checkpoint.remarks || "", margin + 160, yPosition);
             yPosition += 6;
           });
         }
-        
+
         yPosition += 15;
-        
+
         // Signatures
-        doc.setFont('helvetica', 'bold');
-        doc.text('Signatures:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text('Prepared By: _________________', margin, yPosition);
-        doc.text('Verified By: _________________', margin + 70, yPosition);
-        doc.text('Approved By: _________________', margin + 140, yPosition);
-        
+
+        doc.setFont("helvetica", "normal");
+        doc.text("Prepared By: _________________", margin, yPosition);
+        doc.text("Verified By: _________________", margin + 70, yPosition);
+        doc.text("Approved By: _________________", margin + 140, yPosition);
+
         // Save PDF
-        const fileName = `Raw_Material_Inspection_Report_${this.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `Raw_Material_Inspection_Report_${
+          this.lruName || "Unknown"
+        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
-        
-        alert('Report exported successfully as PDF!');
-        
+
+        alert("Report exported successfully as PDF!");
       } catch (error) {
-        console.error('Error exporting PDF:', error);
-        alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        console.error("Error exporting PDF:", error);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -695,7 +845,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -950,40 +1100,40 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .general-info-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-layout {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .signature-item {
     max-width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .checkpoints-table-container {
     overflow-x: auto;
   }
-  
+
   .checkpoints-table {
     min-width: 800px;
   }
