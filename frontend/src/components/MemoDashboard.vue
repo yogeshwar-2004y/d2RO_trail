@@ -659,7 +659,7 @@ export default {
 .filter-panel {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: -125px;
   margin-top: 10px;
   width: 250px;
   background: #fff;

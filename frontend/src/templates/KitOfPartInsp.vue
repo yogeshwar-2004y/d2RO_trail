@@ -376,7 +376,7 @@ export default {
 
         console.log('Submitting kit of parts inspection report:', submissionData);
 
-        const response = await fetch('http://localhost:8000/api/kit-of-parts', {
+        const response = await fetch('http://localhost:5000/api/kit-of-parts', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

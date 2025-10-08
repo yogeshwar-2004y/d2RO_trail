@@ -559,9 +559,9 @@ export default {
   border-radius: 10px;
   margin: 50px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  position: relative;
-  right: -960px;
-  top: 35px;
+  position: absolute;
+  right: -1090px;
+  top: 51px;
 }
 
 .status-option {
