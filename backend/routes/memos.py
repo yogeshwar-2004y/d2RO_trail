@@ -474,7 +474,7 @@ def get_memo_details(memo_id):
             "submitted_by": None,  # Not available in current schema
             "accepted_at": None,   # Not available in current schema
             "accepted_by": None,   # Not available in current schema
-            "coordinator": memo[32],
+            "coordinator": memo[36],
             "memo_status": memo[33],
             "submitted_by_name": memo[34],
             "accepted_by_name": memo[35]
@@ -1017,13 +1017,19 @@ def update_memo_status(memo_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Update memo status and reviewer comments
+        # Update memo status, reviewer comments, and certification data
         reviewer_comments = data.get('reviewer_comments', '')
+        certified = data.get('certified', [])
+        
+        print(f"=== DEBUG: Certification data ===")
+        print(f"certified: {certified}")
+        print(f"=== END DEBUG ===")
+        
         cur.execute("""
             UPDATE memos 
-            SET memo_status = %s, qa_remarks = %s
+            SET memo_status = %s, qa_remarks = %s, certified = %s
             WHERE memo_id = %s
-        """, (memo_status, reviewer_comments, memo_id))
+        """, (memo_status, reviewer_comments, certified, memo_id))
         
         if cur.rowcount == 0:
             cur.close()
