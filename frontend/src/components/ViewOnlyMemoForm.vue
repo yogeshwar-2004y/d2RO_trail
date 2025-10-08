@@ -967,6 +967,8 @@ export default {
         const data = await response.json();
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
+          console.log("Fetched memo data:", data.memo, data.references);
+          
         } else {
           throw new Error(data.message || "Failed to fetch memo details");
         }
