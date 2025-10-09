@@ -98,12 +98,12 @@
         </div>
         <div class="grid-layout one-col-checkbox">
           <p class="checkbox-title">It is certified that :</p>
-          <label><input type="checkbox" v-model="memoData.certifications.mechanicalQualityRecords" disabled />Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
-          <label><input type="checkbox" v-model="memoData.certifications.cocVerified" disabled />CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
-          <label><input type="checkbox" v-model="memoData.certifications.sruSerialNoted" disabled />Sl no of the SRUs are noted down in the respective log book opened on _________</label>
-          <label><input type="checkbox" v-model="memoData.certifications.noDefectInvestigation" disabled />No Defect investigation is pending against this LRU</label>
-          <label><input type="checkbox" v-model="memoData.certifications.previousTestStagesCleared" disabled />All the previous test stages of this LRU/SRU are cleared</label>
-          <label><input type="checkbox" v-model="memoData.certifications.cascicQAInspected" disabled />CASCIC QA has physically inspected and accepted the LRU on _________</label>
+          <label><input type="checkbox" v-model="memoData.certifications.mechanicalQualityRecords"  />Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
+          <label><input type="checkbox" v-model="memoData.certifications.cocVerified"  />CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
+          <label><input type="checkbox" v-model="memoData.certifications.sruSerialNoted"  />Sl no of the SRUs are noted down in the respective log book opened on _________</label>
+          <label><input type="checkbox" v-model="memoData.certifications.noDefectInvestigation"  />No Defect investigation is pending against this LRU</label>
+          <label><input type="checkbox" v-model="memoData.certifications.previousTestStagesCleared"  />All the previous test stages of this LRU/SRU are cleared</label>
+          <label><input type="checkbox" v-model="memoData.certifications.cascicQAInspected"  />CASCIC QA has physically inspected and accepted the LRU on _________</label>
           <span class="signature-line">SIGNATURE of Rep, IQA CASCIC</span>
         </div>
       </div>
@@ -184,14 +184,6 @@ export default {
     id: {
       type: [String, Number],
       required: true
-    },
-    memoData: {
-      type: Object,
-      default: null
-    },
-    references: {
-      type: Array,
-      default: () => []
     }
   },
   data() {
@@ -255,10 +247,21 @@ export default {
     },
     async fetchMemoData() {
       try {
-        // If memo data is passed as props (from dashboard navigation), use it
-        if (this.$route.params.memoData && this.$route.params.references) {
-          this.transformAndSetMemoData(this.$route.params.memoData, this.$route.params.references);
-          return;
+        // Check if data was passed via sessionStorage (from dashboard navigation)
+        if (this.$route.query.hasData === 'true') {
+          const storedMemoData = sessionStorage.getItem(`memoData_${this.id}`);
+          const storedReferences = sessionStorage.getItem(`references_${this.id}`);
+          
+          if (storedMemoData && storedReferences) {
+            const memoData = JSON.parse(storedMemoData);
+            const references = JSON.parse(storedReferences);
+            this.transformAndSetMemoData(memoData, references);
+            
+            // Clean up sessionStorage after use
+            sessionStorage.removeItem(`memoData_${this.id}`);
+            sessionStorage.removeItem(`references_${this.id}`);
+            return;
+          }
         }
 
         // Otherwise, fetch from API
@@ -413,6 +416,15 @@ export default {
       }
       
       try {
+        // Prepare certification data for backend
+        const certified = [];
+        if (this.memoData.certifications.mechanicalQualityRecords) certified.push('a');
+        if (this.memoData.certifications.cocVerified) certified.push('b');
+        if (this.memoData.certifications.sruSerialNoted) certified.push('c');
+        if (this.memoData.certifications.noDefectInvestigation) certified.push('d');
+        if (this.memoData.certifications.previousTestStagesCleared) certified.push('e');
+        if (this.memoData.certifications.cascicQAInspected) certified.push('f');
+        
         // Update memo status via API
         const response = await fetch(`/api/memos/${this.id}/status`, {
           method: 'PUT',
@@ -421,7 +433,8 @@ export default {
           },
           body: JSON.stringify({
             test_status: this.memoData.testStatus,
-            reviewer_comments: this.memoData.reviewerComments
+            reviewer_comments: this.memoData.reviewerComments,
+            certified: certified
           })
         });
         

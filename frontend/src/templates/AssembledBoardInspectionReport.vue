@@ -439,15 +439,155 @@ export default {
           qcReport: {
             observation: '',
             remarks: ''
-          }
+          },
+          preparedBy: '',
+          verifiedBy: '',
+          approvedBy: ''
         };
       }
     },
-    submitForm() {
+    async submitForm() {
       if (this.isFormValid) {
         console.log('Submitting form:', this.formData);
-        alert('Report submitted successfully!');
-        // Here you would typically send the data to your backend API
+        
+        try {
+          // Prepare data for backend API
+          const apiData = {
+            project_name: this.formData.projectName,
+            report_ref_no: this.formData.reportRefNo,
+            memo_ref_no: this.formData.memoRefNo,
+            lru_name: this.formData.lruName,
+            sru_name: this.formData.sruName,
+            dp_name: this.formData.dpName,
+            part_no: this.formData.partNo,
+            inspection_stage: this.formData.inspectionStage,
+            test_venue: this.formData.testVenue,
+            quantity: this.formData.quantity,
+            sl_nos: this.formData.slNos,
+            serial_number: this.serialNumber,
+            start_date: this.formData.startDate,
+            end_date: this.formData.endDate,
+            dated1: this.formData.dated1,
+            dated2: this.formData.dated2,
+            
+            // Map visual inspection data
+            obs1: this.formData.visualInspection[0]?.observation || '',
+            rem1: this.formData.visualInspection[0]?.remarks || '',
+            upload1: '', // File upload path would go here
+            
+            obs2: this.formData.visualInspection[1]?.observation || '',
+            rem2: this.formData.visualInspection[1]?.remarks || '',
+            upload2: '',
+            
+            obs3: this.formData.visualInspection[2]?.observation || '',
+            rem3: this.formData.visualInspection[2]?.remarks || '',
+            upload3: '',
+            
+            obs4: this.formData.visualInspection[3]?.observation || '',
+            rem4: this.formData.visualInspection[3]?.remarks || '',
+            upload4: '',
+            
+            obs5: this.formData.visualInspection[4]?.observation || '',
+            rem5: this.formData.visualInspection[4]?.remarks || '',
+            upload5: '',
+            
+            // Map component inspection data
+            obs6: this.formData.componentInspection[0]?.observation || '',
+            rem6: this.formData.componentInspection[0]?.remarks || '',
+            upload6: '',
+            
+            obs7: this.formData.componentInspection[1]?.observation || '',
+            rem7: this.formData.componentInspection[1]?.remarks || '',
+            upload7: '',
+            
+            obs8: this.formData.componentInspection[2]?.observation || '',
+            rem8: this.formData.componentInspection[2]?.remarks || '',
+            upload8: '',
+            
+            obs9: this.formData.componentInspection[3]?.observation || '',
+            rem9: this.formData.componentInspection[3]?.remarks || '',
+            upload9: '',
+            
+            obs10: this.formData.componentInspection[4]?.observation || '',
+            rem10: this.formData.componentInspection[4]?.remarks || '',
+            upload10: '',
+            
+            obs11: this.formData.componentInspection[5]?.observation || '',
+            rem11: this.formData.componentInspection[5]?.remarks || '',
+            upload11: '',
+            
+            // Map assembly issues data
+            obs12: this.formData.assemblyIssues[0]?.observation || '',
+            rem12: this.formData.assemblyIssues[0]?.remarks || '',
+            upload12: '',
+            
+            obs13: this.formData.assemblyIssues[1]?.observation || '',
+            rem13: this.formData.assemblyIssues[1]?.remarks || '',
+            upload13: '',
+            
+            obs14: this.formData.assemblyIssues[2]?.observation || '',
+            rem14: this.formData.assemblyIssues[2]?.remarks || '',
+            upload14: '',
+            
+            obs15: this.formData.assemblyIssues[3]?.observation || '',
+            rem15: this.formData.assemblyIssues[3]?.remarks || '',
+            upload15: '',
+            
+            obs16: this.formData.assemblyIssues[4]?.observation || '',
+            rem16: this.formData.assemblyIssues[4]?.remarks || '',
+            upload16: '',
+            
+            obs17: this.formData.assemblyIssues[5]?.observation || '',
+            rem17: this.formData.assemblyIssues[5]?.remarks || '',
+            upload17: '',
+            
+            obs18: this.formData.assemblyIssues[6]?.observation || '',
+            rem18: this.formData.assemblyIssues[6]?.remarks || '',
+            upload18: '',
+            
+            // Map continuity check data
+            obs19: this.formData.continuityCheck[0]?.observation || '',
+            rem19: this.formData.continuityCheck[0]?.remarks || '',
+            upload19: '',
+            
+            // Map QC report data
+            obs20: this.formData.qcReport?.observation || '',
+            rem20: this.formData.qcReport?.remarks || '',
+            upload20: '',
+            
+            // Signatories
+            prepared_by: this.formData.preparedBy || '',
+            verified_by: this.formData.verifiedBy || '',
+            approved_by: this.formData.approvedBy || ''
+          };
+          
+          console.log('Sending data to API:', apiData);
+          
+          // Call the backend API
+          const response = await fetch('http://localhost:5000/api/reports/assembled-board?user_role=4', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(apiData)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert(`Report submitted successfully! Report ID: ${result.report_id}`);
+            console.log('Report created with ID:', result.report_id);
+            // Optionally reset the form or redirect
+            this.resetForm();
+          } else {
+            alert(`Error: ${result.message}`);
+            console.error('API Error:', result);
+          }
+          
+        } catch (error) {
+          console.error('Error submitting form:', error);
+          alert('Error submitting form. Please try again.');
+        }
       } else {
         alert('Please fill in all required fields.');
       }

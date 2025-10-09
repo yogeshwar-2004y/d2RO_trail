@@ -178,15 +178,15 @@
           <div class="signatures-layout">
             <div class="signature-item">
               <label>Prepared By:</label>
-              <div class="signature-line"></div>
+              <input type="text" v-model="preparedBy" class="signature-input" />
             </div>
             <div class="signature-item">
               <label>Verified By:</label>
-              <div class="signature-line"></div>
+              <input type="text" v-model="verifiedBy" class="signature-input" />
             </div>
             <div class="signature-item">
               <label>Approved By:</label>
-              <div class="signature-line"></div>
+              <input type="text" v-model="approvedBy" class="signature-input" />
             </div>
           </div>
         </div>
@@ -281,7 +281,13 @@ export default {
             remarks: ''
           }
         ]
-      }
+      },
+      overallStatus: '',
+      qualityRating: null,
+      recommendations: '',
+      preparedBy: '',
+      verifiedBy: '',
+      approvedBy: ''
     };
   },
   computed: {
@@ -314,9 +320,29 @@ export default {
         // For now, we'll just log it
       }
     },
-    saveDraft() {
-      console.log('Saving draft:', this.formData);
-      alert('Draft saved successfully!');
+    async saveDraft() {
+      try {
+        const reportData = this.prepareReportData();
+        const response = await fetch('http://localhost:5000/api/reports/raw-material-inspection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(reportData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Draft saved successfully!');
+          console.log('Report saved with ID:', result.report_id);
+        } else {
+          alert(`Error saving draft: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error saving draft:', error);
+        alert('Error saving draft. Please try again.');
+      }
     },
     resetForm() {
       if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
@@ -383,14 +409,68 @@ export default {
         };
       }
     },
-    submitForm() {
+    async submitForm() {
       if (this.isFormValid) {
-        console.log('Submitting form:', this.formData);
-        alert('Report submitted successfully!');
-        // Here you would typically send the data to your backend API
+        try {
+          const reportData = this.prepareReportData();
+          const response = await fetch('http://localhost:5000/api/reports/raw-material-inspection', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reportData)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('Report submitted successfully!');
+            console.log('Report submitted with ID:', result.report_id);
+            // Optionally redirect or reset form
+            this.resetForm();
+          } else {
+            alert(`Error submitting report: ${result.message}`);
+          }
+        } catch (error) {
+          console.error('Error submitting report:', error);
+          alert('Error submitting report. Please try again.');
+        }
       } else {
         alert('Please fill in all required fields.');
       }
+    },
+    prepareReportData() {
+      return {
+        project_name: this.formData.projectName,
+        report_ref_no: this.formData.reportRefNo,
+        memo_ref_no: this.formData.memoRefNo,
+        lru_name: this.formData.lruName,
+        sru_name: this.formData.sruName,
+        dp_name: this.formData.dpName,
+        part_no: this.formData.partNo,
+        inspection_stage: this.formData.inspectionStage,
+        test_venue: this.formData.testVenue,
+        quantity: this.formData.quantity || null,
+        sl_nos: this.formData.slNos,
+        serial_number: this.serialNumber,
+        start_date: this.formData.startDate,
+        end_date: this.formData.endDate,
+        dated1: this.formData.dated1,
+        dated2: this.formData.dated2,
+        checkPoints: this.formData.checkPoints.map(checkpoint => ({
+          description: checkpoint.description,
+          applicability: checkpoint.applicability,
+          compliance: checkpoint.compliance,
+          remarks: checkpoint.remarks,
+          upload: checkpoint.upload || ''
+        })),
+        overall_status: this.overallStatus || '',
+        quality_rating: this.qualityRating || null,
+        recommendations: this.recommendations || '',
+        prepared_by: this.preparedBy || '',
+        verified_by: this.verifiedBy || '',
+        approved_by: this.approvedBy || ''
+      };
     },
     exportReport() {
       try {
@@ -795,6 +875,22 @@ export default {
   height: 40px;
   border-bottom: 1px solid #333;
   margin-top: 10px;
+}
+
+.signature-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  font-size: 0.9em;
+  margin-top: 10px;
+  background: white;
+}
+
+.signature-input:focus {
+  outline: none;
+  border-color: #4a5568;
+  box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
 }
 
 /* Form Actions */

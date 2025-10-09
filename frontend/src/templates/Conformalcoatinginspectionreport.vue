@@ -134,6 +134,13 @@ export default {
       preparedBy: "",
       verifiedBy: "",
       approvedBy: "",
+      overallStatus: "",
+      qualityRating: null,
+      recommendations: "",
+      memoRefNo: "",
+      quantity: null,
+      dated1: "",
+      dated2: "",
       
       // Test cases remain to define the report structure
       tests: [
@@ -173,17 +180,29 @@ export default {
     this.startDate = this.currentDate;
   },
   methods: {
-    saveDraft() {
-      console.log('Saving draft:', {
-        projectName: this.projectName,
-        reportRefNo: this.reportRefNo,
-        dpName: this.dpName,
-        partNo: this.partNo,
-        slNo: this.slNo,
-        sruName: this.sruName,
-        tests: this.tests
-      });
-      alert('Draft saved successfully!');
+    async saveDraft() {
+      try {
+        const reportData = this.prepareReportData();
+        const response = await fetch('http://localhost:5000/api/reports/conformal-coating-inspection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(reportData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Draft saved successfully!');
+          console.log('Report saved with ID:', result.report_id);
+        } else {
+          alert(`Error saving draft: ${result.message}`);
+        }
+      } catch (error) {
+        console.error('Error saving draft:', error);
+        alert('Error saving draft. Please try again.');
+      }
     },
     resetForm() {
       if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
@@ -209,22 +228,67 @@ export default {
         });
       }
     },
-    submitForm() {
+    async submitForm() {
       if (this.isFormValid) {
-        console.log('Submitting form:', {
-          projectName: this.projectName,
-          reportRefNo: this.reportRefNo,
-          dpName: this.dpName,
-          partNo: this.partNo,
-          slNo: this.slNo,
-          sruName: this.sruName,
-          tests: this.tests
-        });
-        alert('Report submitted successfully!');
-        // Here you would typically send the data to your backend API
+        try {
+          const reportData = this.prepareReportData();
+          const response = await fetch('http://localhost:5000/api/reports/conformal-coating-inspection', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reportData)
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert('Report submitted successfully!');
+            console.log('Report submitted with ID:', result.report_id);
+            // Optionally redirect or reset form
+            this.resetForm();
+          } else {
+            alert(`Error submitting report: ${result.message}`);
+          }
+        } catch (error) {
+          console.error('Error submitting report:', error);
+          alert('Error submitting report. Please try again.');
+        }
       } else {
         alert('Please fill in all required fields.');
       }
+    },
+    prepareReportData() {
+      return {
+        project_name: this.projectName,
+        report_ref_no: this.reportRefNo,
+        memo_ref_no: this.memoRefNo || '',
+        lru_name: this.lruName,
+        sru_name: this.sruName,
+        dp_name: this.dpName,
+        part_no: this.partNo,
+        inspection_stage: this.inspectionStage,
+        test_venue: this.testVenue,
+        quantity: this.quantity || null,
+        sl_nos: this.slNo,
+        serial_number: this.serialNumber,
+        start_date: this.startDate,
+        end_date: this.endDate,
+        dated1: this.dated1 || null,
+        dated2: this.dated2 || null,
+        tests: this.tests.map(test => ({
+          observation: test.observation,
+          remark: test.remark,
+          upload: test.upload || '',
+          expected: test.expected
+        })),
+        overall_status: this.overallStatus || '',
+        quality_rating: this.qualityRating || null,
+        recommendations: this.recommendations || '',
+        prepared_by: this.preparedBy,
+        verified_by: this.verifiedBy,
+        approved_by: this.approvedBy
+      };
     },
     exportReport() {
       try {

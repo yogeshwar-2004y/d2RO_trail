@@ -206,7 +206,7 @@ export default {
           throw new Error('User not found')
         }
         
-        const response = await fetch(`http://127.0.0.1:8000/api/users/change-${this.passwordType}-password`, {
+        const response = await fetch(`http://127.0.0.1:5000/api/users/change-${this.passwordType}-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

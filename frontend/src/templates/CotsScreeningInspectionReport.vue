@@ -249,7 +249,10 @@ export default {
             testNature: 'Active (Power On Condition)',
             remarks: ''
           }
-        ]
+        ],
+        preparedBy: '',
+        verifiedBy: '',
+        approvedBy: ''
       }
     };
   },
@@ -321,15 +324,92 @@ export default {
               testNature: 'Active (Power On Condition)',
               remarks: ''
             }
-          ]
+          ],
+          preparedBy: '',
+          verifiedBy: '',
+          approvedBy: ''
         };
       }
     },
-    submitForm() {
+    async submitForm() {
+      console.log('🚀 SUBMIT FORM CALLED!');
+      console.log('Form valid:', this.isFormValid);
+      console.log('Form data:', this.formData);
+      
       if (this.isFormValid) {
-        console.log('Submitting form:', this.formData);
-        alert('Report submitted successfully!');
-        // Here you would typically send the data to your backend API
+        console.log('✅ Form is valid, proceeding with submission...');
+        
+        try {
+          // Prepare data for backend API
+          const apiData = {
+            project_name: this.formData.projectName,
+            report_ref_no: this.formData.reportRefNo,
+            memo_ref_no: this.formData.memoRefNo,
+            lru_name: this.formData.lruName,
+            sru_name: this.formData.sruName,
+            dp_name: this.formData.dpName,
+            part_no: this.formData.partNo,
+            inspection_stage: this.formData.inspectionStage,
+            test_venue: this.formData.testVenue,
+            quantity: this.formData.quantity,
+            sl_nos: this.formData.slNos,
+            serial_number: this.serialNumber,
+            start_date: this.formData.startDate,
+            end_date: this.formData.endDate,
+            dated1: this.formData.dated1,
+            dated2: this.formData.dated2,
+            
+            // Map test nature fields from testCases
+            test_nature1: this.formData.testCases[0]?.testNature || '',
+            test_nature2: this.formData.testCases[1]?.testNature || '',
+            test_nature3: this.formData.testCases[2]?.testNature || '',
+            
+            // Map remarks from testCases (these will be rem1, rem2, rem3)
+            rem1: this.formData.testCases[0]?.remarks || '',
+            upload1: '', // File upload path would go here
+            
+            rem2: this.formData.testCases[1]?.remarks || '',
+            upload2: '',
+            
+            rem3: this.formData.testCases[2]?.remarks || '',
+            upload3: '',
+            
+            // Signatories
+            prepared_by: this.formData.preparedBy || '',
+            verified_by: this.formData.verifiedBy || '',
+            approved_by: this.formData.approvedBy || ''
+          };
+          
+          console.log('📤 Sending data to API:', apiData);
+          console.log('🌐 API URL: http://localhost:5000/api/reports/cot-screening?user_role=4');
+          
+          // Call the backend API
+          const response = await fetch('http://localhost:5000/api/reports/cot-screening?user_role=4', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(apiData)
+          });
+          
+          console.log('📥 Response received:', response.status, response.statusText);
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            alert(`Report submitted successfully! Report ID: ${result.report_id}`);
+            console.log('Report created with ID:', result.report_id);
+            // Optionally reset the form or redirect
+            this.resetForm();
+          } else {
+            alert(`Error: ${result.message}`);
+            console.error('API Error:', result);
+          }
+          
+        } catch (error) {
+          console.error('Error submitting form:', error);
+          alert('Error submitting form. Please try again.');
+        }
       } else {
         alert('Please fill in all required fields.');
       }
