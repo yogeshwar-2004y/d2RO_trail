@@ -23,34 +23,67 @@
         </p>
       </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>SUB-TEST TYPES</th>
-              <th v-for="column in columns" :key="column.id">
-                {{ column.name }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="subTest in subTests" :key="subTest.id">
-              <td class="sub-test-name">
-                {{ subTest.number }}. {{ subTest.name }}
-              </td>
-              <td v-for="column in columns" :key="column.id">
-                <div v-if="getItemsForSubTestAndColumn(subTest.id, column.id).length > 0" class="items-container">
-                  <div v-for="item in getItemsForSubTestAndColumn(subTest.id, column.id)" :key="item.id" class="item">
-                    {{ item.name }}
+      <div class="sub-tests-container">
+        <div v-for="subTest in subTests" :key="subTest.id" class="sub-test-row">
+          <div class="sub-test-header">
+            <span class="sub-test-number">{{ subTest.number }}.</span>
+            <span class="sub-test-name">{{ subTest.name }}</span>
+            <div class="sub-test-actions">
+              <button @click="editSubTest(subTest)" class="edit-btn">Edit</button>
+              <button @click="deleteSubTest(subTest.id)" class="delete-btn">Delete</button>
+            </div>
+          </div>
+          <div v-if="getBulletinsForSubTest(subTest.id).length > 0" class="bulletins-container">
+            <div v-for="bulletin in getBulletinsForSubTest(subTest.id)" :key="bulletin.id" class="bulletin-item">
+              <span class="bulletin-text">{{ bulletin.name }}</span>
+              <div class="bulletin-actions">
+                <button @click="editBulletin(bulletin)" class="edit-btn">Edit</button>
+                <button @click="deleteBulletin(bulletin.id)" class="delete-btn">Delete</button>
+              </div>
+              <!-- Sub-bulletins -->
+              <div v-if="getSubBulletinsForBulletin(bulletin.id).length > 0" class="sub-bulletins-container">
+                <div v-for="subBulletin in getSubBulletinsForBulletin(bulletin.id)" :key="subBulletin.id" class="sub-bulletin-item">
+                  <span class="sub-bulletin-text">{{ subBulletin.name }}</span>
+                  <div class="sub-bulletin-actions">
+                    <button @click="editBulletin(subBulletin)" class="edit-btn">Edit</button>
+                    <button @click="deleteBulletin(subBulletin.id)" class="delete-btn">Delete</button>
                   </div>
                 </div>
-                <div v-else class="empty-cell">
-                  -
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </div>
+          </div>
+          <div class="add-bulletin-container">
+            <button @click="addBulletin(subTest.id)" class="add-bulletin-btn">+ Add Bulletin</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="add-sub-test-container">
+        <button @click="addSubTest" class="add-sub-test-btn">+ Add Sub-Test</button>
+      </div>
+    </div>
+
+    <!-- Modal for Sub-Test CRUD -->
+    <div v-if="showSubTestModal" class="modal-overlay" @click="closeSubTestModal">
+      <div class="modal-content" @click.stop>
+        <h3>{{ editingSubTest ? 'Edit Sub-Test' : 'Add Sub-Test' }}</h3>
+        <input v-model="subTestForm.name" placeholder="Sub-Test Name" class="modal-input">
+        <div class="modal-actions">
+          <button @click="saveSubTest" class="save-btn">Save</button>
+          <button @click="closeSubTestModal" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Bulletin CRUD -->
+    <div v-if="showBulletinModal" class="modal-overlay" @click="closeBulletinModal">
+      <div class="modal-content" @click.stop>
+        <h3>{{ editingBulletin ? 'Edit Bulletin' : 'Add Bulletin' }}</h3>
+        <input v-model="bulletinForm.name" placeholder="Bulletin Name" class="modal-input">
+        <div class="modal-actions">
+          <button @click="saveBulletin" class="save-btn">Save</button>
+          <button @click="closeBulletinModal" class="cancel-btn">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -88,167 +121,218 @@ export default {
         { id: 24, number: 24, name: "Humidity Test" },
         { id: 25, number: 25, name: "Post-QT Functional Test" }
       ],
-      columns: [
-        { id: 'visual', name: 'Visual Inspection' },
-        { id: 'functional', name: 'Functional Check' },
-        { id: 'dimensional', name: 'Dimensional Check' },
-        { id: 'insitu', name: 'INSITU Functional Check' },
-        { id: 'post_ht', name: 'Post HT Functional Check' },
-        { id: 'post_lt', name: 'Post LT Functional Check' },
-        { id: 'initial_resonance', name: 'Initial Resonance test' },
-        { id: 'x_axis', name: 'X Axis' },
-        { id: 'y_axis', name: 'Y Axis' },
-        { id: 'z_axis', name: 'Z Axis' },
-        { id: 'final_resonance', name: 'Final Resonance Research' },
-        { id: 'post_rv', name: 'Post RV Functional Check' },
-        { id: 'radiated_emission', name: 'Radiated Emission Test' },
-        { id: 'conducted_emission', name: 'Conducted Emission Test' },
-        { id: 'radiated_susceptibility', name: 'Radiated Susceptibility Test' },
-        { id: 'conducted_susceptibility', name: 'Conducted Susceptibility Test' },
-        { id: 'dc_test', name: 'DC Test (LDC)' },
-        { id: 'single_phase_ac', name: 'Single Phase AC (SAC)' },
-        { id: 'three_phase_ac', name: 'Three Phase AC (TAC)' },
-        { id: 'altitude', name: 'Altitude' },
-        { id: 'low_temp', name: 'Low temperature' },
-        { id: 'high_temp', name: 'High temperature' },
-        { id: 'humidity', name: 'Humidity' },
-        { id: 'post_humidity', name: 'Post Humidity Functional Check' },
-        { id: 'thermal_shock', name: 'Thermal Shock Test' },
-        { id: 'endurance_vibration', name: 'Endurance Vibration Test' },
-        { id: 'fluid_contamination', name: 'Fluid Contamination Test' },
-        { id: 'mould_growth', name: 'Mould Growth (Fungus Test)' },
-        { id: 'salt_fog', name: 'Salt fog Test' },
-        { id: 'rain_drip', name: 'Rain Drip test' },
-        { id: 'cath', name: 'CATH Test' },
-        { id: 'acceleration', name: 'Acceleration Test' },
-        { id: 'shock_crash', name: 'Shock Crash Hazard' },
-        { id: 'transit_drop', name: 'Transit Drop' },
-        { id: 'gunfire_vibration', name: 'Gunfire Vibration' },
-        { id: 'bench_handling', name: 'Bench Handling' },
-        { id: 'mechanical_shock', name: 'Mechanical Shock Test' },
-        { id: 'lightning', name: 'Lightning Test' },
-        { id: 'icing_freezing', name: 'Icing / Freezing Test' },
-        { id: 'explosive_atmosphere', name: 'Explosive Atmosphere Test' },
-        { id: 'acoustic_noise', name: 'Acoustic Noise Test' },
-        { id: 'humidity_test', name: 'Humidity Test' }
-      ],
-      items: [
+      bulletins: [
         // Pre-QT Functional Test
-        { id: 1, subTestId: 1, columnId: 'visual', name: 'Visual Inspection' },
-        { id: 2, subTestId: 1, columnId: 'dimensional', name: 'Dimensional Check' },
-        { id: 3, subTestId: 1, columnId: 'functional', name: 'Functional Check' },
+        { id: 1, subTestId: 1, name: 'Visual Inspection' },
+        { id: 2, subTestId: 1, name: 'Dimensional Check' },
+        { id: 3, subTestId: 1, name: 'Functional Check' },
         
-        // Low Pressure (Altitude Test)
-        { id: 4, subTestId: 2, columnId: 'altitude', name: 'Low Pressure (Altitude Test)' },
+        // Low Pressure (Altitude Test) - No bulletins
         
         // High Temperature Test
-        { id: 5, subTestId: 3, columnId: 'high_temp', name: 'High Temperature Test' },
-        { id: 6, subTestId: 3, columnId: 'insitu', name: 'INSITU Functional Check' },
-        { id: 7, subTestId: 3, columnId: 'post_ht', name: 'Post HT Functional Check' },
+        { id: 5, subTestId: 3, name: 'High Temperature Test' },
+        { id: 6, subTestId: 3, name: 'INSITU Functional Check' },
+        { id: 7, subTestId: 3, name: 'Post HT Functional Check' },
         
         // Low Temperature Test
-        { id: 8, subTestId: 4, columnId: 'low_temp', name: 'Low Temperature Test' },
-        { id: 9, subTestId: 4, columnId: 'insitu', name: 'INSITU Functional Check' },
-        { id: 10, subTestId: 4, columnId: 'post_lt', name: 'Post LT Functional Check' },
+        { id: 8, subTestId: 4, name: 'Low Temperature Test' },
+        { id: 9, subTestId: 4, name: 'INSITU Functional Check' },
+        { id: 10, subTestId: 4, name: 'Post LT Functional Check' },
         
-        // Thermal Shock Test
-        { id: 11, subTestId: 5, columnId: 'thermal_shock', name: 'Thermal Shock Test (Temperature Shock)' },
+        // Thermal Shock Test - No bulletins
         
         // Endurance Vibration Test
-        { id: 12, subTestId: 6, columnId: 'endurance_vibration', name: 'Endurance Vibration Test' },
-        { id: 13, subTestId: 6, columnId: 'initial_resonance', name: 'Initial Resonance test' },
-        { id: 14, subTestId: 6, columnId: 'insitu', name: 'INSITU Functional Check' },
-        { id: 15, subTestId: 6, columnId: 'x_axis', name: 'X Axis' },
-        { id: 16, subTestId: 6, columnId: 'y_axis', name: 'Y Axis' },
-        { id: 17, subTestId: 6, columnId: 'z_axis', name: 'Z Axis' },
-        { id: 18, subTestId: 6, columnId: 'final_resonance', name: 'Final Resonance Research' },
-        { id: 19, subTestId: 6, columnId: 'post_rv', name: 'Post RV Functional Check' },
-        { id: 20, subTestId: 6, columnId: 'visual', name: 'Visual Inspection' },
-        { id: 21, subTestId: 6, columnId: 'dimensional', name: 'Dimensional Check' },
-        { id: 22, subTestId: 6, columnId: 'functional', name: 'Functional Check' },
+        { id: 12, subTestId: 6, name: 'Initial Resonance test' },
+        { id: 13, subTestId: 6, name: 'INSITU Functional Check', parentBulletinId: null },
+        { id: 14, subTestId: 6, name: 'X Axis', parentBulletinId: 13 },
+        { id: 15, subTestId: 6, name: 'Y Axis', parentBulletinId: 13 },
+        { id: 16, subTestId: 6, name: 'Z Axis', parentBulletinId: 13 },
+        { id: 17, subTestId: 6, name: 'Final Resonance Research' },
+        { id: 18, subTestId: 6, name: 'Post RV Functional Check', parentBulletinId: null },
+        { id: 19, subTestId: 6, name: 'Visual Inspection', parentBulletinId: 18 },
+        { id: 20, subTestId: 6, name: 'Dimensional Check', parentBulletinId: 18 },
+        { id: 21, subTestId: 6, name: 'Functional Check', parentBulletinId: 18 },
         
         // EMI / EMC
-        { id: 23, subTestId: 7, columnId: 'radiated_emission', name: 'Radiated Emission Test' },
-        { id: 24, subTestId: 7, columnId: 'conducted_emission', name: 'Conducted Emission Test' },
-        { id: 25, subTestId: 7, columnId: 'radiated_susceptibility', name: 'Radiated Susceptibility Test' },
-        { id: 26, subTestId: 7, columnId: 'conducted_susceptibility', name: 'Conducted Susceptibility Test' },
+        { id: 23, subTestId: 7, name: 'Radiated Emission Test' },
+        { id: 24, subTestId: 7, name: 'Conducted Emission Test' },
+        { id: 25, subTestId: 7, name: 'Radiated Susceptibility Test' },
+        { id: 26, subTestId: 7, name: 'Conducted Susceptibility Test' },
         
         // POWER SUPPLY TEST
-        { id: 27, subTestId: 8, columnId: 'dc_test', name: 'DC Test (LDC)' },
-        { id: 28, subTestId: 8, columnId: 'single_phase_ac', name: 'Single Phase AC (SAC)' },
-        { id: 29, subTestId: 8, columnId: 'three_phase_ac', name: 'Three Phase AC (TAC)' },
+        { id: 27, subTestId: 8, name: 'DC Test (LDC)' },
+        { id: 28, subTestId: 8, name: 'Single Phase AC (SAC)' },
+        { id: 29, subTestId: 8, name: 'Three Phase AC (TAC)' },
         
-        // Fluid Contamination Test
-        { id: 30, subTestId: 9, columnId: 'fluid_contamination', name: 'Fluid Contamination Test' },
+        // Fluid Contamination Test - No bulletins
         
-        // Mould Growth (Fungus Test)
-        { id: 31, subTestId: 10, columnId: 'mould_growth', name: 'Mould Growth (Fungus Test)' },
+        // Mould Growth (Fungus Test) - No bulletins
         
-        // Salt fog Test
-        { id: 32, subTestId: 11, columnId: 'salt_fog', name: 'Salt fog Test' },
+        // Salt fog Test - No bulletins
         
-        // Rain Drip test
-        { id: 33, subTestId: 12, columnId: 'rain_drip', name: 'Rain Drip test' },
+        // Rain Drip test - No bulletins
         
         // CATH Test
-        { id: 34, subTestId: 13, columnId: 'cath', name: 'CATH (Combined Altitude Temperature Humidity Test)' },
-        { id: 35, subTestId: 13, columnId: 'altitude', name: 'Altitude' },
-        { id: 36, subTestId: 13, columnId: 'low_temp', name: 'Low temperature' },
-        { id: 37, subTestId: 13, columnId: 'high_temp', name: 'High temperature' },
-        { id: 38, subTestId: 13, columnId: 'humidity', name: 'Humidity' },
+        { id: 34, subTestId: 13, name: 'CATH (Combined Altitude Temperature Humidity Test)' },
+        { id: 35, subTestId: 13, name: 'Altitude' },
+        { id: 36, subTestId: 13, name: 'Low temperature' },
+        { id: 37, subTestId: 13, name: 'High temperature' },
+        { id: 38, subTestId: 13, name: 'Humidity' },
         
-        // Acceleration Test
-        { id: 39, subTestId: 14, columnId: 'acceleration', name: 'Acceleration Test' },
+        // Acceleration Test - No bulletins
         
-        // Shock Crash Hazard
-        { id: 40, subTestId: 15, columnId: 'shock_crash', name: 'Shock Crash Hazard' },
+        // Shock Crash Hazard - No bulletins
         
-        // Transit Drop
-        { id: 41, subTestId: 16, columnId: 'transit_drop', name: 'Transit Drop' },
+        // Transit Drop - No bulletins
         
-        // Gunfire Vibration
-        { id: 42, subTestId: 17, columnId: 'gunfire_vibration', name: 'Gunfire Vibration' },
+        // Gunfire Vibration - No bulletins
         
-        // Bench Handling
-        { id: 43, subTestId: 18, columnId: 'bench_handling', name: 'Bench Handling' },
+        // Bench Handling - No bulletins
         
-        // Mechanical Shock Test
-        { id: 44, subTestId: 19, columnId: 'mechanical_shock', name: 'Mechanical Shock Test' },
+        // Mechanical Shock Test - No bulletins
         
-        // Lightning Test
-        { id: 45, subTestId: 20, columnId: 'lightning', name: 'Lightning Test' },
+        // Lightning Test - No bulletins
         
-        // Icing / Freezing Test
-        { id: 46, subTestId: 21, columnId: 'icing_freezing', name: 'Icing / Freezing Test' },
+        // Icing / Freezing Test - No bulletins
         
-        // Explosive Atmosphere Test
-        { id: 47, subTestId: 22, columnId: 'explosive_atmosphere', name: 'Explosive Atmosphere Test' },
+        // Explosive Atmosphere Test - No bulletins
         
-        // Acoustic Noise Test
-        { id: 48, subTestId: 23, columnId: 'acoustic_noise', name: 'Acoustic Noise Test' },
+        // Acoustic Noise Test - No bulletins
         
         // Humidity Test
-        { id: 49, subTestId: 24, columnId: 'humidity_test', name: 'Humidity Test' },
-        { id: 50, subTestId: 24, columnId: 'insitu', name: 'INSITU Functional Check' },
-        { id: 51, subTestId: 24, columnId: 'post_humidity', name: 'Post Humidity Functional Check' },
+        { id: 50, subTestId: 24, name: 'INSITU Functional Check' },
+        { id: 51, subTestId: 24, name: 'Post Humidity Functional Check' },
         
         // Post-QT Functional Test
-        { id: 52, subTestId: 25, columnId: 'visual', name: 'Visual Inspection' },
-        { id: 53, subTestId: 25, columnId: 'dimensional', name: 'Dimensional Check' },
-        { id: 54, subTestId: 25, columnId: 'functional', name: 'Functional Check' }
-      ]
+        { id: 52, subTestId: 25, name: 'Visual Inspection' },
+        { id: 53, subTestId: 25, name: 'Dimensional Check' },
+        { id: 54, subTestId: 25, name: 'Functional Check' }
+      ],
+      showSubTestModal: false,
+      showBulletinModal: false,
+      editingSubTest: null,
+      editingBulletin: null,
+      subTestForm: { name: '' },
+      bulletinForm: { name: '', subTestId: null },
+      nextSubTestId: 26,
+      nextBulletinId: 55
     };
   },
   computed: {
     totalItems() {
-      return this.items.length;
+      return this.bulletins.length;
     }
   },
   methods: {
-    getItemsForSubTestAndColumn(subTestId, columnId) {
-      return this.items.filter(item => 
-        item.subTestId === subTestId && item.columnId === columnId
-      );
+    getBulletinsForSubTest(subTestId) {
+      return this.bulletins.filter(bulletin => bulletin.subTestId === subTestId && !bulletin.parentBulletinId);
+    },
+    
+    getSubBulletinsForBulletin(parentBulletinId) {
+      return this.bulletins.filter(bulletin => bulletin.parentBulletinId === parentBulletinId);
+    },
+    
+    // Sub-Test CRUD Operations
+    addSubTest() {
+      this.editingSubTest = null;
+      this.subTestForm = { name: '' };
+      this.showSubTestModal = true;
+    },
+    
+    editSubTest(subTest) {
+      this.editingSubTest = subTest;
+      this.subTestForm = { name: subTest.name };
+      this.showSubTestModal = true;
+    },
+    
+    saveSubTest() {
+      if (!this.subTestForm.name.trim()) {
+        alert('Please enter a sub-test name');
+        return;
+      }
+      
+      if (this.editingSubTest) {
+        // Update existing sub-test
+        this.editingSubTest.name = this.subTestForm.name.trim();
+      } else {
+        // Add new sub-test
+        const newSubTest = {
+          id: this.nextSubTestId++,
+          number: this.subTests.length + 1,
+          name: this.subTestForm.name.trim()
+        };
+        this.subTests.push(newSubTest);
+      }
+      
+      this.closeSubTestModal();
+    },
+    
+    deleteSubTest(subTestId) {
+      if (confirm('Are you sure you want to delete this sub-test? This will also delete all associated bulletins.')) {
+        // Remove bulletins first
+        this.bulletins = this.bulletins.filter(bulletin => bulletin.subTestId !== subTestId);
+        
+        // Remove sub-test
+        this.subTests = this.subTests.filter(subTest => subTest.id !== subTestId);
+        
+        // Renumber remaining sub-tests
+        this.subTests.forEach((subTest, index) => {
+          subTest.number = index + 1;
+        });
+      }
+    },
+    
+    closeSubTestModal() {
+      this.showSubTestModal = false;
+      this.editingSubTest = null;
+      this.subTestForm = { name: '' };
+    },
+    
+    // Bulletin CRUD Operations
+    addBulletin(subTestId) {
+      this.editingBulletin = null;
+      this.bulletinForm = { name: '', subTestId: subTestId };
+      this.showBulletinModal = true;
+    },
+    
+    editBulletin(bulletin) {
+      this.editingBulletin = bulletin;
+      this.bulletinForm = { name: bulletin.name, subTestId: bulletin.subTestId };
+      this.showBulletinModal = true;
+    },
+    
+    saveBulletin() {
+      if (!this.bulletinForm.name.trim()) {
+        alert('Please enter a bulletin name');
+        return;
+      }
+      
+      if (this.editingBulletin) {
+        // Update existing bulletin
+        this.editingBulletin.name = this.bulletinForm.name.trim();
+      } else {
+        // Add new bulletin
+        const newBulletin = {
+          id: this.nextBulletinId++,
+          subTestId: this.bulletinForm.subTestId,
+          name: this.bulletinForm.name.trim()
+        };
+        this.bulletins.push(newBulletin);
+      }
+      
+      this.closeBulletinModal();
+    },
+    
+    deleteBulletin(bulletinId) {
+      if (confirm('Are you sure you want to delete this bulletin?')) {
+        this.bulletins = this.bulletins.filter(bulletin => bulletin.id !== bulletinId);
+      }
+    },
+    
+    closeBulletinModal() {
+      this.showBulletinModal = false;
+      this.editingBulletin = null;
+      this.bulletinForm = { name: '', subTestId: null };
     }
   }
 };
@@ -315,60 +399,6 @@ export default {
   align-items: center;
 }
 
-.table-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-}
-
-th,
-td {
-  border: 1px solid #ccc;
-  padding: 12px;
-  text-align: center;
-  vertical-align: top;
-}
-
-th {
-  background-color: #f8f8f8;
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-.sub-test-name {
-  font-weight: bold;
-  text-align: left;
-  background-color: #f8f9fa;
-  color: #2c3e50;
-  min-width: 200px;
-}
-
-.items-container {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.item {
-  background-color: #e8f4fd;
-  border: 1px solid #b3d9ff;
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 0.9em;
-  color: #2c3e50;
-}
-
-.empty-cell {
-  color: #6c757d;
-  font-style: italic;
-  background: #f8f9fa;
-}
-
 .data-summary {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
@@ -385,6 +415,224 @@ th {
   font-size: 1.1em;
 }
 
+.sub-tests-container {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.sub-test-row {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sub-test-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sub-test-number {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-right: 10px;
+  font-size: 1.1em;
+}
+
+.sub-test-name {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 1.2em;
+  flex-grow: 1;
+}
+
+.sub-test-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bulletins-container {
+  margin-left: 30px;
+  margin-bottom: 15px;
+}
+
+.bulletin-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bulletin-text {
+  flex-grow: 1;
+  color: #495057;
+  font-size: 0.95em;
+}
+
+.bulletin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.sub-bulletins-container {
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.sub-bulletin-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  background: #e8f4fd;
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sub-bulletin-text {
+  flex-grow: 1;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+.sub-bulletin-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.add-bulletin-container {
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.add-sub-test-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.edit-btn, .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #28a745;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #218838;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.add-bulletin-btn, .add-sub-test-btn {
+  padding: 10px 20px;
+  border: 2px dashed #007bff;
+  background: transparent;
+  color: #007bff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.add-bulletin-btn:hover, .add-sub-test-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-width: 400px;
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.save-btn, .cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.save-btn {
+  background: #007bff;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #545b62;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .test-group-page {
@@ -395,14 +643,28 @@ th {
     padding: 20px;
   }
   
-  .sub-test-name {
-    min-width: 150px;
-    font-size: 0.9em;
+  .sub-test-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
   
-  .item {
-    font-size: 0.8em;
-    padding: 4px 6px;
+  .sub-test-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .bulletins-container {
+    margin-left: 15px;
+  }
+  
+  .add-bulletin-container {
+    margin-left: 15px;
+  }
+  
+  .modal-content {
+    min-width: 300px;
+    margin: 20px;
   }
 }
 </style>

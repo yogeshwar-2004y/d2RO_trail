@@ -22,7 +22,6 @@ import EditUser from "@/views/admin/EditUser.vue";
 import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
 import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
-import TestsPage from "@/views/admin/TestsPage.vue";
 import MajorTestGroups from "@/views/admin/MajorTestGroups.vue";
 import ManufacturingTestGroup from "@/views/admin/ManufacturingTestGroup.vue";
 import CoTSScreeningTestGroup from "@/views/admin/CoTSScreeningTestGroup.vue";
@@ -133,11 +132,6 @@ const router = createRouter({
       name: "IndividualReport",
       component: IndividualReport,
       props: true,
-    },
-    {
-      path: "/user-activities/tests",
-      name: "TestsPage",
-      component: TestsPage
     },
     {
       path: "/user-activities/major-test-groups",
