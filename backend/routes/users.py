@@ -486,6 +486,65 @@ def get_signature(filename):
         print(f"Error serving signature {filename}: {str(e)}")
         return jsonify({"success": False, "message": "Error serving signature"}), 500
 
+@users_bp.route('/api/users/verify-signature', methods=['POST'])
+def verify_signature_credentials():
+    """Verify signature credentials and return signature path"""
+    try:
+        data = request.get_json()
+        username = data.get('username')
+        signature_password = data.get('signature_password')
+        
+        if not username or not signature_password:
+            return jsonify({"success": False, "message": "Username and signature password are required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Find user by username (name field) and verify signature password
+        # Join with user_roles and roles tables to get role information
+        cur.execute("""
+            SELECT u.user_id, u.name, u.signature_path, u.signature_password, r.role_id, r.role_name
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            JOIN roles r ON ur.role_id = r.role_id
+            WHERE u.name = %s
+        """, (username,))
+        
+        user = cur.fetchone()
+        cur.close()
+        
+        if not user:
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Verify signature password by comparing hashed versions
+        provided_password_hash = hash_password(signature_password)
+        if user[3] != provided_password_hash:
+            return jsonify({"success": False, "message": "Invalid signature password"}), 401
+        
+        # Return signature path if available
+        signature_path = user[2]
+        if not signature_path:
+            return jsonify({"success": False, "message": "No signature found for this user"}), 404
+        
+        # Normalize signature path for cross-platform compatibility
+        signature_path = signature_path.replace('\\', '/')
+        filename = os.path.basename(signature_path)
+        signature_url = f"/api/users/signature/{filename}"
+        
+        return jsonify({
+            "success": True,
+            "message": "Signature credentials verified successfully",
+            "signature_url": signature_url,
+            "user_id": user[0],
+            "user_name": user[1],
+            "role_id": user[4],
+            "role_name": user[5]
+        })
+        
+    except Exception as e:
+        print(f"Error verifying signature credentials: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/available-reviewers', methods=['GET'])
 def get_available_reviewers():
     """Get list of users who can be assigned as reviewers"""

@@ -448,7 +448,7 @@ export default {
 
         console.log('Submitting mechanical inspection report:', submissionData);
 
-        const response = await fetch('http://localhost:8000/api/mechanical-inspection', {
+        const response = await fetch('http://localhost:5000/api/mechanical-inspection', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

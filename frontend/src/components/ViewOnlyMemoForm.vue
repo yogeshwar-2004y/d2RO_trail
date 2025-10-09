@@ -566,9 +566,15 @@
           </div>
           <div class="test-review-field">
             <label>Authentication</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.authentication || "Not provided"
-            }}</span>
+            <div class="test-review-value">
+              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
+                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+                <span class="signature-label">Signature</span>
+              </div>
+              <span v-else class="no-signature">
+                {{ memoApprovalStatus.authentication || "Not provided" }}
+              </span>
+            </div>
           </div>
           <div class="test-review-field">
             <label>Attachments</label>
@@ -619,9 +625,15 @@
           </div>
           <div class="test-review-field">
             <label>Authentication</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.authentication || "Not provided"
-            }}</span>
+            <div class="test-review-value">
+              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
+                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+                <span class="signature-label">Signature</span>
+              </div>
+              <span v-else class="no-signature">
+                {{ memoApprovalStatus.authentication || "Not provided" }}
+              </span>
+            </div>
           </div>
           <div class="test-review-field">
             <label>Attachments</label>
@@ -699,13 +711,51 @@
         </div>
 
         <div class="form-group">
-          <label>Authentication:</label>
-          <input
-            type="text"
-            v-model="approvalForm.authentication"
-            placeholder="Enter authentication details..."
-            required
-          />
+          <label>Signature Authentication:</label>
+          <div class="signature-auth-container">
+            <div class="signature-inputs">
+              <div class="input-group">
+                <label>Username:</label>
+                <input
+                  type="text"
+                  v-model="approvalForm.signatureUsername"
+                  placeholder="Enter username..."
+                  required
+                />
+              </div>
+              <div class="input-group">
+                <label>Signature Password:</label>
+                <input
+                  type="password"
+                  v-model="approvalForm.signaturePassword"
+                  placeholder="Enter signature password..."
+                  required
+                />
+              </div>
+              <button 
+                type="button" 
+                class="btn btn-verify" 
+                @click="verifySignature('approval')"
+                :disabled="!approvalForm.signatureUsername || !approvalForm.signaturePassword"
+              >
+                Verify & Load Signature
+              </button>
+            </div>
+            <div v-if="approvalForm.signatureUrl" class="signature-display">
+              <label>Verified Signature:</label>
+              <div class="signature-image-container">
+                <img :src="approvalForm.signatureUrl" alt="Verified Signature" class="signature-image" />
+                <div class="signature-info">
+                  <span class="signature-user">{{ approvalForm.verifiedUserName }}</span>
+                  <span class="signature-role">{{ approvalForm.verifiedUserRole }} Signature</span>
+                  <span class="signature-status">✓ Verified</span>
+                </div>
+              </div>
+            </div>
+            <div v-if="approvalForm.signatureError" class="signature-error">
+              {{ approvalForm.signatureError }}
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -748,13 +798,51 @@
         </div>
 
         <div class="form-group">
-          <label>Authentication:</label>
-          <input
-            type="text"
-            v-model="rejectionForm.authentication"
-            placeholder="Enter authentication details..."
-            required
-          />
+          <label>Signature Authentication:</label>
+          <div class="signature-auth-container">
+            <div class="signature-inputs">
+              <div class="input-group">
+                <label>Username:</label>
+                <input
+                  type="text"
+                  v-model="rejectionForm.signatureUsername"
+                  placeholder="Enter username..."
+                  required
+                />
+              </div>
+              <div class="input-group">
+                <label>Signature Password:</label>
+                <input
+                  type="password"
+                  v-model="rejectionForm.signaturePassword"
+                  placeholder="Enter signature password..."
+                  required
+                />
+              </div>
+              <button 
+                type="button" 
+                class="btn btn-verify" 
+                @click="verifySignature('rejection')"
+                :disabled="!rejectionForm.signatureUsername || !rejectionForm.signaturePassword"
+              >
+                Verify & Load Signature
+              </button>
+            </div>
+            <div v-if="rejectionForm.signatureUrl" class="signature-display">
+              <label>Verified Signature:</label>
+              <div class="signature-image-container">
+                <img :src="rejectionForm.signatureUrl" alt="Verified Signature" class="signature-image" />
+                <div class="signature-info">
+                  <span class="signature-user">{{ rejectionForm.verifiedUserName }}</span>
+                  <span class="signature-role">{{ rejectionForm.verifiedUserRole }} Signature</span>
+                  <span class="signature-status">✓ Verified</span>
+                </div>
+              </div>
+            </div>
+            <div v-if="rejectionForm.signatureError" class="signature-error">
+              {{ rejectionForm.signatureError }}
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -809,12 +897,26 @@ export default {
         attachment: null,
         approval_date: "",
         test_date: "",
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        verifiedUserRole: "",
+        signatureError: ""
       },
       rejectionForm: {
         memo_id: null,
         comments: "",
         authentication: "",
         attachment: null,
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        verifiedUserRole: "",
+        signatureError: ""
       },
       formData: {
         // Basic information
@@ -945,6 +1047,11 @@ export default {
     await this.fetchMemoApprovalStatus();
   },
   methods: {
+    // Check if the authentication field contains a signature URL
+    isSignatureUrl(authentication) {
+      return authentication && authentication.includes('/api/users/signature/');
+    },
+
     async fetchMemoData() {
       try {
         // If memo data is passed as props (from dashboard navigation), use it
@@ -967,6 +1074,8 @@ export default {
         const data = await response.json();
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
+          console.log("Fetched memo data:", data.memo, data.references);
+          
         } else {
           throw new Error(data.message || "Failed to fetch memo details");
         }
@@ -1225,6 +1334,51 @@ export default {
       }
     },
 
+    // Verify signature credentials
+    async verifySignature(formType) {
+      const form = formType === 'approval' ? this.approvalForm : this.rejectionForm;
+      
+      if (!form.signatureUsername || !form.signaturePassword) {
+        form.signatureError = "Please enter both username and signature password";
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/users/verify-signature', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: form.signatureUsername,
+            signature_password: form.signaturePassword
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          form.signatureUrl = data.signature_url;
+          form.verifiedUserName = data.user_name;
+          form.verifiedUserRole = data.role_name;
+          form.authentication = data.signature_url; // Store signature URL as authentication
+          form.signatureError = "";
+        } else {
+          form.signatureError = data.message || "Failed to verify signature";
+          form.signatureUrl = "";
+          form.verifiedUserName = "";
+          form.verifiedUserRole = "";
+          form.authentication = "";
+        }
+      } catch (error) {
+        form.signatureError = "Error verifying signature: " + error.message;
+        form.signatureUrl = "";
+        form.verifiedUserName = "";
+        form.verifiedUserRole = "";
+        form.authentication = "";
+      }
+    },
+
     // Validate approval form
     validateApprovalForm() {
       if (!this.approvalForm.user_id) {
@@ -1235,8 +1389,8 @@ export default {
         alert("Please enter comments");
         return false;
       }
-      if (!this.approvalForm.authentication.trim()) {
-        alert("Please enter authentication details");
+      if (!this.approvalForm.signatureUrl) {
+        alert("Please verify your signature before proceeding");
         return false;
       }
       return true;
@@ -1363,8 +1517,8 @@ export default {
         alert("Please enter rejection comments");
         return false;
       }
-      if (!this.rejectionForm.authentication.trim()) {
-        alert("Please enter authentication details");
+      if (!this.rejectionForm.signatureUrl) {
+        alert("Please verify your signature before proceeding");
         return false;
       }
       return true;
@@ -1388,6 +1542,13 @@ export default {
         comments: "",
         authentication: "",
         attachment: null,
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        verifiedUserRole: "",
+        signatureError: ""
       };
     },
 
@@ -1402,6 +1563,13 @@ export default {
         attachment: null,
         approval_date: "",
         test_date: "",
+        // Signature authentication fields
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        verifiedUserRole: "",
+        signatureError: ""
       };
     },
 
@@ -1914,5 +2082,188 @@ export default {
 .required-field {
   color: #dc3545;
   font-weight: bold;
+}
+
+/* Signature Authentication Styles */
+.signature-auth-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  margin-top: 10px;
+}
+
+.signature-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.input-group input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.btn-verify {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-verify:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.btn-verify:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.signature-display {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border: 1px solid #28a745;
+  border-radius: 6px;
+}
+
+.signature-display label {
+  font-weight: 600;
+  color: #155724;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.signature-image-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.signature-image {
+  max-width: 150px;
+  max-height: 80px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  background-color: white;
+  padding: 5px;
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-user {
+  font-weight: 600;
+  color: #155724;
+  font-size: 14px;
+}
+
+.signature-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signature-error {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Responsive design for signature inputs */
+@media (max-width: 768px) {
+  .signature-inputs {
+    gap: 10px;
+  }
+  
+  .signature-image-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .signature-image {
+    max-width: 120px;
+    max-height: 60px;
+  }
+}
+
+/* Signature display in footer */
+.signature-display-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.signature-image-footer {
+  max-width: 120px;
+  max-height: 60px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  padding: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.signature-label {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.no-signature {
+  color: #666;
+  font-style: italic;
+}
+
+/* Responsive design for footer signature */
+@media (max-width: 768px) {
+  .signature-image-footer {
+    max-width: 100px;
+    max-height: 50px;
+  }
+  
+  .signature-label {
+    font-size: 11px;
+  }
 }
 </style>
