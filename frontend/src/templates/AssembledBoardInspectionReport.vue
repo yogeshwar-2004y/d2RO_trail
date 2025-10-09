@@ -564,7 +564,7 @@ export default {
           console.log('Sending data to API:', apiData);
           
           // Call the backend API
-          const response = await fetch('http://localhost:8000/api/reports/assembled-board?user_role=4', {
+          const response = await fetch('http://localhost:5000/api/reports/assembled-board?user_role=4', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

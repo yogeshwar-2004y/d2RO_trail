@@ -56,3 +56,5 @@ TEST_SETUP_SUMMARY.md
 
 # Upload directories
 plan_doc_uploads/
+
+backend/signature_uploads/

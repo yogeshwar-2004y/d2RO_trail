@@ -474,7 +474,7 @@ def get_memo_details(memo_id):
             "submitted_by": None,  # Not available in current schema
             "accepted_at": None,   # Not available in current schema
             "accepted_by": None,   # Not available in current schema
-            "coordinator": memo[32],
+            "coordinator": memo[36],
             "memo_status": memo[33],
             "submitted_by_name": memo[34],
             "accepted_by_name": memo[35]
@@ -742,12 +742,29 @@ def get_memo_approval_status(memo_id):
         
         if reviewer_id:
             cur.execute("""
-                SELECT user_id, name, email
-                FROM users 
-                WHERE user_id = %s
+                SELECT u.user_id, u.name, u.email, r.role_name
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.user_id = %s
             """, (reviewer_id,))
             
             reviewer = cur.fetchone()
+        
+        # Get approver details (person who approved/rejected the memo)
+        approver_id = approval_record[8]  # approved_by
+        approver = None
+        
+        if approver_id:
+            cur.execute("""
+                SELECT u.user_id, u.name, u.email, r.role_name
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.user_id = %s
+            """, (approver_id,))
+            
+            approver = cur.fetchone()
         
         cur.close()
 
@@ -768,8 +785,15 @@ def get_memo_approval_status(memo_id):
             "reviewer": {
                 "id": reviewer[0],
                 "name": reviewer[1],
-                "email": reviewer[2]
-            } if reviewer else None
+                "email": reviewer[2],
+                "role": reviewer[3]
+            } if reviewer else None,
+            "approver": {
+                "id": approver[0],
+                "name": approver[1],
+                "email": approver[2],
+                "role": approver[3]
+            } if approver else None
         }
 
         return jsonify({
@@ -1017,13 +1041,19 @@ def update_memo_status(memo_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Update memo status and reviewer comments
+        # Update memo status, reviewer comments, and certification data
         reviewer_comments = data.get('reviewer_comments', '')
+        certified = data.get('certified', [])
+        
+        print(f"=== DEBUG: Certification data ===")
+        print(f"certified: {certified}")
+        print(f"=== END DEBUG ===")
+        
         cur.execute("""
             UPDATE memos 
-            SET memo_status = %s, qa_remarks = %s
+            SET memo_status = %s, qa_remarks = %s, certified = %s
             WHERE memo_id = %s
-        """, (memo_status, reviewer_comments, memo_id))
+        """, (memo_status, reviewer_comments, certified, memo_id))
         
         if cur.rowcount == 0:
             cur.close()

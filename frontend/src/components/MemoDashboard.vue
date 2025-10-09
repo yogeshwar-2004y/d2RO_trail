@@ -397,21 +397,29 @@ export default {
             this.$router.push({ 
               name: 'InspectionMemo', 
               params: { 
-                id: memo.id,
-                memoData: data.memo,
-                references: data.references
-              } 
+                id: memo.id
+              },
+              query: {
+                hasData: 'true'
+              }
             });
+            // Store the data in sessionStorage for the component to access
+            sessionStorage.setItem(`memoData_${memo.id}`, JSON.stringify(data.memo));
+            sessionStorage.setItem(`references_${memo.id}`, JSON.stringify(data.references || []));
           } else {
             // All other roles use the ViewOnlyMemoForm component
             this.$router.push({ 
               name: 'ViewOnlyMemoForm', 
               params: { 
-                id: memo.id,
-                memoData: data.memo,
-                references: data.references
-              } 
+                id: memo.id
+              },
+              query: {
+                hasData: 'true'
+              }
             });
+            // Store the data in sessionStorage for the component to access
+            sessionStorage.setItem(`memoData_${memo.id}`, JSON.stringify(data.memo));
+            sessionStorage.setItem(`references_${memo.id}`, JSON.stringify(data.references || []));
           }
         } else {
           throw new Error(data.message || 'Failed to fetch memo details');
@@ -651,7 +659,7 @@ export default {
 .filter-panel {
   position: absolute;
   top: 100%;
-  left: 0;
+  left: -125px;
   margin-top: 10px;
   width: 250px;
   background: #fff;

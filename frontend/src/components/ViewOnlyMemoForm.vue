@@ -568,8 +568,8 @@
             <label>Authentication</label>
             <div class="test-review-value">
               <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
-                <img :src="memoApprovalStatus.authentication" alt="QA Head Signature" class="signature-image-footer" />
-                <span class="signature-label">QA Head Signature</span>
+                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+                <span class="signature-label">Signature</span>
               </div>
               <span v-else class="no-signature">
                 {{ memoApprovalStatus.authentication || "Not provided" }}
@@ -627,8 +627,8 @@
             <label>Authentication</label>
             <div class="test-review-value">
               <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
-                <img :src="memoApprovalStatus.authentication" alt="QA Head Signature" class="signature-image-footer" />
-                <span class="signature-label">QA Head Signature</span>
+                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+                <span class="signature-label">Signature</span>
               </div>
               <span v-else class="no-signature">
                 {{ memoApprovalStatus.authentication || "Not provided" }}
@@ -747,6 +747,7 @@
                 <img :src="approvalForm.signatureUrl" alt="Verified Signature" class="signature-image" />
                 <div class="signature-info">
                   <span class="signature-user">{{ approvalForm.verifiedUserName }}</span>
+                  <span class="signature-role">{{ approvalForm.verifiedUserRole }} Signature</span>
                   <span class="signature-status">✓ Verified</span>
                 </div>
               </div>
@@ -833,6 +834,7 @@
                 <img :src="rejectionForm.signatureUrl" alt="Verified Signature" class="signature-image" />
                 <div class="signature-info">
                   <span class="signature-user">{{ rejectionForm.verifiedUserName }}</span>
+                  <span class="signature-role">{{ rejectionForm.verifiedUserRole }} Signature</span>
                   <span class="signature-status">✓ Verified</span>
                 </div>
               </div>
@@ -900,6 +902,7 @@ export default {
         signaturePassword: "",
         signatureUrl: "",
         verifiedUserName: "",
+        verifiedUserRole: "",
         signatureError: ""
       },
       rejectionForm: {
@@ -912,6 +915,7 @@ export default {
         signaturePassword: "",
         signatureUrl: "",
         verifiedUserName: "",
+        verifiedUserRole: "",
         signatureError: ""
       },
       formData: {
@@ -1070,6 +1074,8 @@ export default {
         const data = await response.json();
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
+          console.log("Fetched memo data:", data.memo, data.references);
+          
         } else {
           throw new Error(data.message || "Failed to fetch memo details");
         }
@@ -1236,7 +1242,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/available-reviewers"
+          "http://localhost:5000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1254,7 +1260,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.id}/approval-status`
+          `http://localhost:5000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1287,7 +1293,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/users/${userId}`
+          `http://localhost:5000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1354,18 +1360,21 @@ export default {
         if (data.success) {
           form.signatureUrl = data.signature_url;
           form.verifiedUserName = data.user_name;
+          form.verifiedUserRole = data.role_name;
           form.authentication = data.signature_url; // Store signature URL as authentication
           form.signatureError = "";
         } else {
           form.signatureError = data.message || "Failed to verify signature";
           form.signatureUrl = "";
           form.verifiedUserName = "";
+          form.verifiedUserRole = "";
           form.authentication = "";
         }
       } catch (error) {
         form.signatureError = "Error verifying signature: " + error.message;
         form.signatureUrl = "";
         form.verifiedUserName = "";
+        form.verifiedUserRole = "";
         form.authentication = "";
       }
     },
@@ -1417,7 +1426,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1468,7 +1477,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1538,6 +1547,7 @@ export default {
         signaturePassword: "",
         signatureUrl: "",
         verifiedUserName: "",
+        verifiedUserRole: "",
         signatureError: ""
       };
     },
@@ -1558,6 +1568,7 @@ export default {
         signaturePassword: "",
         signatureUrl: "",
         verifiedUserName: "",
+        verifiedUserRole: "",
         signatureError: ""
       };
     },

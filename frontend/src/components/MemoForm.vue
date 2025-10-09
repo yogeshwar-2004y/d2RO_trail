@@ -552,13 +552,13 @@
     </div>
 
     <!-- Test Details Section -->
-    <div class="form-section test-details">
+    <div class="form-section test-details" :class="{ 'disabled-section': isTestDetailsDisabled }">
       <table class="test-table">
         <tr>
           <td class="test-left">
             <div class="test-field">
               <label>Above Unit is ready for Testing at</label>
-              <input type="text" v-model="formData.testVenue" placeholder="" />
+              <input type="text" v-model="formData.testVenue" placeholder="" :disabled="isTestDetailsDisabled" />
               <span>onwards.</span>
             </div>
             <div class="test-field">
@@ -571,6 +571,7 @@
                 type="text"
                 v-model="formData.signatureName"
                 placeholder=""
+                :disabled="isTestDetailsDisabled"
               />
             </div>
             <div class="test-field">
@@ -584,11 +585,12 @@
                 type="text"
                 v-model="formData.testFacility"
                 placeholder=""
+                :disabled="isTestDetailsDisabled"
               />
             </div>
             <div class="test-field">
               <label>ii. Test cycle / Duration:</label>
-              <input type="text" v-model="formData.testCycle" placeholder="" />
+              <input type="text" v-model="formData.testCycle" placeholder="" :disabled="isTestDetailsDisabled" />
               <span>hrs</span>
             </div>
             <div class="test-field">
@@ -598,9 +600,10 @@
                   type="date"
                   v-model="formData.testStartDate"
                   class="date-input"
+                  :disabled="isTestDetailsDisabled"
                 />
                 <div class="time-picker">
-                  <select v-model="formData.testStartHour" class="time-select">
+                  <select v-model="formData.testStartHour" class="time-select" :disabled="isTestDetailsDisabled">
                     <option value="">HH</option>
                     <option v-for="hour in hours" :key="hour" :value="hour">
                       {{ hour }}
@@ -610,6 +613,7 @@
                   <select
                     v-model="formData.testStartMinute"
                     class="time-select"
+                    :disabled="isTestDetailsDisabled"
                   >
                     <option value="">MM</option>
                     <option
@@ -620,7 +624,7 @@
                       {{ minute }}
                     </option>
                   </select>
-                  <select v-model="formData.testStartAmPm" class="ampm-select">
+                  <select v-model="formData.testStartAmPm" class="ampm-select" :disabled="isTestDetailsDisabled">
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -635,11 +639,13 @@
                   type="date"
                   v-model="formData.testCompleteDate"
                   class="date-input"
+                  :disabled="isTestDetailsDisabled"
                 />
                 <div class="time-picker">
                   <select
                     v-model="formData.testCompleteHour"
                     class="time-select"
+                    :disabled="isTestDetailsDisabled"
                   >
                     <option value="">HH</option>
                     <option v-for="hour in hours" :key="hour" :value="hour">
@@ -650,6 +656,7 @@
                   <select
                     v-model="formData.testCompleteMinute"
                     class="time-select"
+                    :disabled="isTestDetailsDisabled"
                   >
                     <option value="">MM</option>
                     <option
@@ -663,6 +670,7 @@
                   <select
                     v-model="formData.testCompleteAmPm"
                     class="ampm-select"
+                    :disabled="isTestDetailsDisabled"
                   >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
@@ -816,7 +824,7 @@
     </div>
 
     <!-- Certification Section -->
-    <div class="form-section certification">
+    <div class="form-section certification" :class="{ 'disabled-section': isCertificationDisabled }">
       <div class="certification-header">
         <span class="certification-statement">It is certified that:</span>
       </div>
@@ -827,6 +835,7 @@
             v-model="formData.certificationA"
             class="cert-checkbox"
             id="certA"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">a)</span>
           <span class="cert-text"
@@ -843,6 +852,7 @@
             v-model="formData.certificationB"
             class="cert-checkbox"
             id="certB"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">b)</span>
           <span class="cert-text"
@@ -856,6 +866,7 @@
             v-model="formData.certificationC"
             class="cert-checkbox"
             id="certC"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">c)</span>
           <span class="cert-text"
@@ -866,6 +877,7 @@
               v-model="formData.logBookDate"
               placeholder=""
               class="inline-input"
+              :disabled="isCertificationDisabled"
           /></span>
         </div>
         <div class="cert-item">
@@ -874,6 +886,7 @@
             v-model="formData.certificationD"
             class="cert-checkbox"
             id="certD"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">d)</span>
           <span class="cert-text"
@@ -886,6 +899,7 @@
             v-model="formData.certificationE"
             class="cert-checkbox"
             id="certE"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">e)</span>
           <span class="cert-text"
@@ -898,6 +912,7 @@
             v-model="formData.certificationF"
             class="cert-checkbox"
             id="certF"
+            :disabled="isCertificationDisabled"
           />
           <span class="cert-letter">f)</span>
           <span class="cert-text"
@@ -907,6 +922,7 @@
               v-model="formData.qaInspectionDate"
               placeholder=""
               class="inline-input"
+              :disabled="isCertificationDisabled"
           /></span>
         </div>
       </div>
@@ -924,6 +940,7 @@
             v-model="formData.dgaqaRemarks"
             placeholder="Enter DGAQA action taken and remarks..."
             class="dgaqa-textarea"
+            :disabled="isCertificationDisabled"
           ></textarea>
         </div>
       </div>
@@ -1544,6 +1561,14 @@ export default {
       // This ensures only authorized users see the accept/reject buttons.
       return this.currentUserRole === 2;
     },
+    isTestDetailsDisabled() {
+      // Disable test details section for Designer (role 5) and Design Head (role 4)
+      return [4, 5].includes(this.currentUserRole);
+    },
+    isCertificationDisabled() {
+      // Disable certification section for Designer (role 5) and Design Head (role 4)
+      return [4, 5].includes(this.currentUserRole);
+    },
     selectedTestName() {
       return (
         this.formData.unitIdentification ||
@@ -1823,7 +1848,7 @@ export default {
       try {
         console.log("Fetching tests configuration...");
         const res = await fetch(
-          "http://localhost:8000/api/tests-configuration"
+          "http://localhost:5000/api/tests-configuration"
         );
         const data = await res.json();
         console.log("API Response:", data);
@@ -2054,7 +2079,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2152,7 +2177,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:8000/api/lrus", {
+        const response = await fetch("http://localhost:5000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2167,7 +2192,7 @@ export default {
       try {
         console.log(`Fetching stage types for test ID: ${testId}`);
         const response = await fetch(
-          `http://localhost:8000/api/test/${testId}/stage-types`
+          `http://localhost:5000/api/test/${testId}/stage-types`
         );
 
         if (!response.ok) {
@@ -2198,7 +2223,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2507,7 +2532,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:8000/api/memos", {
+        const response = await fetch("http://localhost:5000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -4707,5 +4732,28 @@ export default {
   .time-picker {
     justify-content: center;
   }
+}
+
+/* Disabled section styling */
+.disabled-section {
+  opacity: 0.6;
+  pointer-events: none;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 5px 0;
+}
+
+.disabled-section input,
+.disabled-section select,
+.disabled-section textarea {
+  background-color: #e9ecef !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+}
+
+.disabled-section .cert-checkbox {
+  cursor: not-allowed;
 }
 </style>

@@ -156,6 +156,33 @@
             <path d="M8 4h8M8 8h8M8 12h6"></path>
             <path d="M10 2h4M10 6h4M10 10h2"></path>
           </svg>
+          <!-- Different icons for different template types -->
+          <svg v-if="template.name === 'ObservationReport'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <line x1="10" y1="9" x2="8" y2="9"></line>
+          </svg>
+          <!-- Mechanical/Engineering icon for MechanicalInspection -->
+          <svg v-else-if="template.name === 'MechanicalInspection'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+            <line x1="8" y1="21" x2="16" y2="21"></line>
+            <line x1="12" y1="17" x2="12" y2="21"></line>
+            <circle cx="6" cy="8" r="1"></circle>
+            <circle cx="10" cy="8" r="1"></circle>
+            <circle cx="14" cy="8" r="1"></circle>
+            <circle cx="18" cy="8" r="1"></circle>
+          </svg>
+          <!-- Kit/Package icon for KitOfPartInsp -->
+          <svg v-else-if="template.name === 'KitOfPartInsp'" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+            <circle cx="8" cy="10" r="1"></circle>
+            <circle cx="16" cy="10" r="1"></circle>
+            <circle cx="12" cy="14" r="1"></circle>
+          </svg>
           <!-- Default icon for other templates -->
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -265,6 +292,18 @@ export default {
             displayName: 'Mechanical Inspection Report',
             description: 'Template for creating mechanical inspection reports with structural testing criteria',
             component: 'MechanicalInspection'
+          },
+          {
+            name: 'MechanicalInspection',
+            displayName: 'Mechanical Inspection Report',
+            description: 'Template for mechanical inspection reports with dimensional checks and compliance parameters',
+            component: 'MechanicalInspection'
+          },
+          {
+            name: 'KitOfPartInsp',
+            displayName: 'KIT of Part Inspection',
+            description: 'Template for KIT of Part Inspection reports with comprehensive part analysis',
+            component: 'KitOfPartInsp'
           }
         ];
         
@@ -281,8 +320,7 @@ export default {
       this.$router.push({
         name: 'TemplateViewer',
         params: {
-          templateName: template.name,
-          templateDisplayName: template.displayName
+          templateName: template.name
         }
       });
     }

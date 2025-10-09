@@ -6,7 +6,7 @@ Test script for the comments and annotations API
 import requests
 import json
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:5000"
 
 def test_comments_api():
     """Test the comments and annotations API endpoints"""
@@ -87,7 +87,7 @@ def test_comments_api():
         
     except requests.exceptions.ConnectionError:
         print("❌ Could not connect to the backend server.")
-        print("   Make sure the Flask server is running on http://localhost:8000")
+        print("   Make sure the Flask server is running on http://localhost:5000")
     except Exception as e:
         print(f"❌ An error occurred: {str(e)}")
 

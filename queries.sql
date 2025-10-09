@@ -332,23 +332,8 @@ CREATE TABLE shared_memos (
     CONSTRAINT chk_not_self_share CHECK (shared_by <> shared_with)
 );
 
-CREATE TABLE report_templates ( 
-    template_id SERIAL PRIMARY KEY, 
-    template_name VARCHAR(50) NOT NULL
-);
-
-INSERT INTO report_templates (template_name) 
-VALUES
-('conformal coating inspection report'),
-('cots screening inspection report'),
-('bare pcb inspection report'),
-('mechanical inspection report'),
-('assembled board inspection report'), 
-('raw material inspection report'),
-('kit of part inspection report');
-
--- 1. Create the table
-CREATE TABLE bare_pcb_inspection_report (
+-- 1. Create the mechanical inspection report table
+CREATE TABLE mechanical_inspection_report (
     report_id SERIAL PRIMARY KEY,
 
     -- Header info
@@ -363,26 +348,25 @@ CREATE TABLE bare_pcb_inspection_report (
     test_venue TEXT,
     quantity INT,
     sl_nos TEXT,
-    serial_number VARCHAR(100),
-    inspection_count VARCHAR(50),
     start_date DATE,
     end_date DATE,
     dated1 DATE,
     dated2 DATE,
 
-    -- Parameters (12 fixed checklist items)
-    obs1 TEXT,  rem1 VARCHAR(20),  upload1 TEXT,
-    obs2 TEXT,  rem2 VARCHAR(20),  upload2 TEXT,
-    obs3 TEXT,  rem3 VARCHAR(20),  upload3 TEXT,
-    obs4 TEXT,  rem4 VARCHAR(20),  upload4 TEXT,
-    obs5 TEXT,  rem5 VARCHAR(20),  upload5 TEXT,
-    obs6 TEXT,  rem6 VARCHAR(20),  upload6 TEXT,
-    obs7 TEXT,  rem7 VARCHAR(20),  upload7 TEXT,
-    obs8 TEXT,  rem8 VARCHAR(20),  upload8 TEXT,
-    obs9 TEXT,  rem9 VARCHAR(20),  upload9 TEXT,
-    obs10 TEXT, rem10 VARCHAR(20), upload10 TEXT,
-    obs11 TEXT, rem11 VARCHAR(20), upload11 TEXT,
-    obs12 TEXT, rem12 VARCHAR(20), upload12 TEXT,
+    -- Dimensional Checklist (3 items as per template)
+    dim1_dimension TEXT, dim1_tolerance TEXT, dim1_observed_value TEXT, dim1_instrument_used TEXT, dim1_remarks TEXT, dim1_upload TEXT,
+    dim2_dimension TEXT, dim2_tolerance TEXT, dim2_observed_value TEXT, dim2_instrument_used TEXT, dim2_remarks TEXT, dim2_upload TEXT,
+    dim3_dimension TEXT, dim3_tolerance TEXT, dim3_observed_value TEXT, dim3_instrument_used TEXT, dim3_remarks TEXT, dim3_upload TEXT,
+
+    -- Parameter Checklist (8 fixed parameters as per template)
+    param1_name TEXT DEFAULT 'Burrs', param1_allowed TEXT, param1_yes_no VARCHAR(10), param1_expected TEXT, param1_remarks TEXT, param1_upload TEXT,
+    param2_name TEXT DEFAULT 'Damages', param2_allowed TEXT, param2_yes_no VARCHAR(10), param2_expected TEXT, param2_remarks TEXT, param2_upload TEXT,
+    param3_name TEXT DEFAULT 'Name Plate', param3_allowed TEXT, param3_yes_no VARCHAR(10), param3_expected TEXT, param3_remarks TEXT, param3_upload TEXT,
+    param4_name TEXT DEFAULT 'Engraving', param4_allowed TEXT, param4_yes_no VARCHAR(10), param4_expected TEXT, param4_remarks TEXT, param4_upload TEXT,
+    param5_name TEXT DEFAULT 'Passivation', param5_allowed TEXT, param5_yes_no VARCHAR(10), param5_expected TEXT, param5_remarks TEXT, param5_upload TEXT,
+    param6_name TEXT DEFAULT 'Chromate', param6_allowed TEXT, param6_yes_no VARCHAR(10), param6_expected TEXT, param6_remarks TEXT, param6_upload TEXT,
+    param7_name TEXT DEFAULT 'Electro-less Nickel plating', param7_allowed TEXT, param7_yes_no VARCHAR(10), param7_expected TEXT, param7_remarks TEXT, param7_upload TEXT,
+    param8_name TEXT DEFAULT 'Fasteners', param8_allowed TEXT, param8_yes_no VARCHAR(10), param8_expected TEXT, param8_remarks TEXT, param8_upload TEXT,
 
     -- Footer / Summary
     overall_status TEXT,
@@ -409,191 +393,76 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 3. Create the trigger
-CREATE TRIGGER trg_update_updated_at
-BEFORE UPDATE ON bare_pcb_inspection_report
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
-
-
-CREATE TABLE assembled_board_inspection_report (
-    report_id SERIAL PRIMARY KEY,
-
-    -- Header info
-    project_name TEXT,
-    report_ref_no VARCHAR(100),
-    memo_ref_no VARCHAR(100),
-    lru_name TEXT,
-    sru_name TEXT,
-    dp_name TEXT,
-    part_no VARCHAR(100),
-    inspection_stage TEXT,
-    test_venue TEXT,
-    quantity INT,
-    sl_nos TEXT,
-    serial_number VARCHAR(100),
-    start_date DATE,
-    end_date DATE,
-    dated1 DATE,
-    dated2 DATE,
-
-    -- 20 Parameters (Observation, Remarks, Upload)
-    obs1 TEXT,  rem1 VARCHAR(20) CHECK (rem1 IN ('OK','NOT OK')),  upload1 TEXT,
-    obs2 TEXT,  rem2 VARCHAR(20) CHECK (rem2 IN ('OK','NOT OK')),  upload2 TEXT,
-    obs3 TEXT,  rem3 VARCHAR(20) CHECK (rem3 IN ('OK','NOT OK')),  upload3 TEXT,
-    obs4 TEXT,  rem4 VARCHAR(20) CHECK (rem4 IN ('OK','NOT OK')),  upload4 TEXT,
-    obs5 TEXT,  rem5 VARCHAR(20) CHECK (rem5 IN ('OK','NOT OK')),  upload5 TEXT,
-    obs6 TEXT,  rem6 VARCHAR(20) CHECK (rem6 IN ('OK','NOT OK')),  upload6 TEXT,
-    obs7 TEXT,  rem7 VARCHAR(20) CHECK (rem7 IN ('OK','NOT OK')),  upload7 TEXT,
-    obs8 TEXT,  rem8 VARCHAR(20) CHECK (rem8 IN ('OK','NOT OK')),  upload8 TEXT,
-    obs9 TEXT,  rem9 VARCHAR(20) CHECK (rem9 IN ('OK','NOT OK')),  upload9 TEXT,
-    obs10 TEXT, rem10 VARCHAR(20) CHECK (rem10 IN ('OK','NOT OK')), upload10 TEXT,
-    obs11 TEXT, rem11 VARCHAR(20) CHECK (rem11 IN ('OK','NOT OK')), upload11 TEXT,
-    obs12 TEXT, rem12 VARCHAR(20) CHECK (rem12 IN ('OK','NOT OK')), upload12 TEXT,
-    obs13 TEXT, rem13 VARCHAR(20) CHECK (rem13 IN ('OK','NOT OK')), upload13 TEXT,
-    obs14 TEXT, rem14 VARCHAR(20) CHECK (rem14 IN ('OK','NOT OK')), upload14 TEXT,
-    obs15 TEXT, rem15 VARCHAR(20) CHECK (rem15 IN ('OK','NOT OK')), upload15 TEXT,
-    obs16 TEXT, rem16 VARCHAR(20) CHECK (rem16 IN ('OK','NOT OK')), upload16 TEXT,
-    obs17 TEXT, rem17 VARCHAR(20) CHECK (rem17 IN ('OK','NOT OK')), upload17 TEXT,
-    obs18 TEXT, rem18 VARCHAR(20) CHECK (rem18 IN ('OK','NOT OK')), upload18 TEXT,
-    obs19 TEXT, rem19 VARCHAR(20) CHECK (rem19 IN ('OK','NOT OK')), upload19 TEXT,
-    obs20 TEXT, rem20 VARCHAR(20) CHECK (rem20 IN ('OK','NOT OK')), upload20 TEXT,
-
-    -- Signatories
-    prepared_by TEXT,
-    verified_by TEXT,
-    approved_by TEXT,
-
-    -- Metadata
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- Auto-update trigger for updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_update_updated_at
-BEFORE UPDATE ON assembled_board_inspection_report
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TABLE cot_screening_inspection_report (
-    report_id SERIAL PRIMARY KEY,
-
-    -- Header info
-    project_name TEXT,
-    report_ref_no VARCHAR(100),
-    memo_ref_no VARCHAR(100),
-    lru_name TEXT,
-    sru_name TEXT,
-    dp_name TEXT,
-    part_no VARCHAR(100),
-    inspection_stage TEXT,
-    test_venue TEXT,
-    quantity INT,
-    sl_nos TEXT,
-    serial_number VARCHAR(100),
-    start_date DATE,
-    end_date DATE,
-    dated1 DATE,
-    dated2 DATE,
-
-    -- Checklist parameters
-    rem1 VARCHAR(20) CHECK (rem1 IN ('OK','NOT OK')), upload1 TEXT,
-    rem2 VARCHAR(20) CHECK (rem2 IN ('OK','NOT OK')), upload2 TEXT,
-
-    -- Signatories
-    prepared_by TEXT,
-    verified_by TEXT,
-    approved_by TEXT,
-
-    -- Metadata
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- Trigger to auto-update updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_update_updated_at
-BEFORE UPDATE ON cot_screening_inspection_report
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
-
--- 1. Create the mechanical inspection report table
-CREATE TABLE mechanical_inspection_report (
-    report_id SERIAL PRIMARY KEY,
-
-    -- Header info (from General Information section)
-    project_name TEXT,
-    report_ref_no VARCHAR(100),
-    document_no VARCHAR(100),
-    date_of_issue DATE,
-    issue_level VARCHAR(50),
-    customer_name TEXT,
-    memo_id VARCHAR(100),
-    product_name TEXT,
-    dp_name TEXT,
-    sl_no VARCHAR(100),
-    sru_name TEXT,
-    part_no VARCHAR(100),
-    quantity INT,
-
-    -- Test Timeline
-    test_started_on TIMESTAMP,
-    test_ended_on TIMESTAMP,
-
-    -- Dimensional Checklist (3 items as per template)
-    dim1_dimension TEXT, dim1_tolerance TEXT, dim1_observed_value TEXT, dim1_instrument_used TEXT, dim1_remarks TEXT, dim1_upload TEXT,
-    dim2_dimension TEXT, dim2_tolerance TEXT, dim2_observed_value TEXT, dim2_instrument_used TEXT, dim2_remarks TEXT, dim2_upload TEXT,
-    dim3_dimension TEXT, dim3_tolerance TEXT, dim3_observed_value TEXT, dim3_instrument_used TEXT, dim3_remarks TEXT, dim3_upload TEXT,
-
-    -- Parameter Checklist (8 fixed parameters as per template)
-    param1_name TEXT DEFAULT 'Burrs', param1_allowed TEXT, param1_yes_no VARCHAR(10), param1_expected TEXT, param1_remarks TEXT, param1_upload TEXT,
-    param2_name TEXT DEFAULT 'Damages', param2_allowed TEXT, param2_yes_no VARCHAR(10), param2_expected TEXT, param2_remarks TEXT, param2_upload TEXT,
-    param3_name TEXT DEFAULT 'Name Plate', param3_allowed TEXT, param3_yes_no VARCHAR(10), param3_expected TEXT, param3_remarks TEXT, param3_upload TEXT,
-    param4_name TEXT DEFAULT 'Engraving', param4_allowed TEXT, param4_yes_no VARCHAR(10), param4_expected TEXT, param4_remarks TEXT, param4_upload TEXT,
-    param5_name TEXT DEFAULT 'Passivation', param5_allowed TEXT, param5_yes_no VARCHAR(10), param5_expected TEXT, param5_remarks TEXT, param5_upload TEXT,
-    param6_name TEXT DEFAULT 'Chromate', param6_allowed TEXT, param6_yes_no VARCHAR(10), param6_expected TEXT, param6_remarks TEXT, param6_upload TEXT,
-    param7_name TEXT DEFAULT 'Electro-less Nickel plating', param7_allowed TEXT, param7_yes_no VARCHAR(10), param7_expected TEXT, param7_remarks TEXT, param7_upload TEXT,
-    param8_name TEXT DEFAULT 'Fasteners', param8_allowed TEXT, param8_yes_no VARCHAR(10), param8_expected TEXT, param8_remarks TEXT, param8_upload TEXT,
-
-    -- Signatories
-    prepared_by TEXT,
-    verified_by TEXT,
-    approved_by TEXT,
-
-    -- Metadata
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-);
-
--- 2. Create a function to update the updated_at column
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- 3. Create the trigger
 CREATE TRIGGER trg_update_updated_at_mechanical
 BEFORE UPDATE ON mechanical_inspection_report
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+-- Add comments for documentation
+COMMENT ON TABLE mechanical_inspection_report IS 'Mechanical inspection reports based on MechanicalInspection.vue template';
+COMMENT ON COLUMN mechanical_inspection_report.project_name IS 'Project name from general information';
+COMMENT ON COLUMN mechanical_inspection_report.lru_name IS 'LRU (Line Replaceable Unit) name being inspected';
+COMMENT ON COLUMN mechanical_inspection_report.dp_name IS 'DP (Design Point) name';
+COMMENT ON COLUMN mechanical_inspection_report.start_date IS 'Inspection start date';
+COMMENT ON COLUMN mechanical_inspection_report.end_date IS 'Inspection end date';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_dimension IS 'First dimensional measurement - dimension';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_tolerance IS 'First dimensional measurement - tolerance';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_observed_value IS 'First dimensional measurement - observed value';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_instrument_used IS 'First dimensional measurement - instrument used';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_remarks IS 'First dimensional measurement - remarks';
+COMMENT ON COLUMN mechanical_inspection_report.dim1_upload IS 'First dimensional measurement - uploaded file path';
+COMMENT ON COLUMN mechanical_inspection_report.param1_name IS 'First parameter name (default: Burrs)';
+COMMENT ON COLUMN mechanical_inspection_report.param1_allowed IS 'First parameter - allowed/not allowed';
+COMMENT ON COLUMN mechanical_inspection_report.param1_yes_no IS 'First parameter - Yes/No selection';
+COMMENT ON COLUMN mechanical_inspection_report.param1_expected IS 'First parameter - expected value';
+COMMENT ON COLUMN mechanical_inspection_report.param1_remarks IS 'First parameter - remarks/observations';
+COMMENT ON COLUMN mechanical_inspection_report.param1_upload IS 'First parameter - uploaded file path';
+
+
+-- ALTER query to modify existing mechanical_inspection_report table
+-- Drop the yes_no columns and rename allowed columns to compliance_observation
+
+-- Drop yes_no columns
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param1_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param2_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param3_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param4_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param5_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param6_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param7_yes_no;
+ALTER TABLE mechanical_inspection_report DROP COLUMN IF EXISTS param8_yes_no;
+
+-- Rename allowed columns to compliance_observation
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param1_allowed TO param1_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param2_allowed TO param2_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param3_allowed TO param3_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param4_allowed TO param4_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param5_allowed TO param5_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param6_allowed TO param6_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param7_allowed TO param7_compliance_observation;
+ALTER TABLE mechanical_inspection_report RENAME COLUMN param8_allowed TO param8_compliance_observation;
+
+-- Update expected columns with default values
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param1_expected SET DEFAULT 'Not Expected';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param2_expected SET DEFAULT 'Not Expected';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param3_expected SET DEFAULT 'As per Drawing';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param4_expected SET DEFAULT 'As per Drawing';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param5_expected SET DEFAULT 'As per Drawing';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param6_expected SET DEFAULT 'As per Drawing';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param7_expected SET DEFAULT 'As per Drawing';
+ALTER TABLE mechanical_inspection_report ALTER COLUMN param8_expected SET DEFAULT 'As per Drawing';
+
+-- Update existing records with default expected values
+UPDATE mechanical_inspection_report SET 
+    param1_expected = 'Not Expected',
+    param2_expected = 'Not Expected',
+    param3_expected = 'As per Drawing',
+    param4_expected = 'As per Drawing',
+    param5_expected = 'As per Drawing',
+    param6_expected = 'As per Drawing',
+    param7_expected = 'As per Drawing',
+    param8_expected = 'As per Drawing'
+WHERE param1_expected IS NULL OR param1_expected = '';
 
 -- 1. Create the kit of parts inspection report table
 CREATE TABLE kit_of_parts_inspection_report (
@@ -681,3 +550,44 @@ CREATE TRIGGER trg_update_updated_at_kit_of_parts
 BEFORE UPDATE ON kit_of_parts_inspection_report
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+
+-- ALTER query to update kit_of_parts_inspection_report table based on UI changes
+
+-- Add new fields that were added to match MechanicalInspection.vue structure
+ALTER TABLE kit_of_parts_inspection_report 
+ADD COLUMN IF NOT EXISTS inspection_stage TEXT,
+ADD COLUMN IF NOT EXISTS dated1 DATE,
+ADD COLUMN IF NOT EXISTS dated2 DATE;
+
+-- Update the start_date and end_date columns to be DATE instead of TIMESTAMP
+-- First, add new DATE columns
+ALTER TABLE kit_of_parts_inspection_report 
+ADD COLUMN IF NOT EXISTS start_date_new DATE,
+ADD COLUMN IF NOT EXISTS end_date_new DATE;
+
+-- Copy data from old columns to new columns (if any data exists)
+UPDATE kit_of_parts_inspection_report 
+SET start_date_new = start_date::DATE,
+    end_date_new = end_date::DATE
+WHERE start_date IS NOT NULL OR end_date IS NOT NULL;
+
+-- Drop old columns
+ALTER TABLE kit_of_parts_inspection_report 
+DROP COLUMN IF EXISTS start_date,
+DROP COLUMN IF EXISTS end_date;
+
+-- Rename new columns to original names
+ALTER TABLE kit_of_parts_inspection_report 
+RENAME COLUMN start_date_new TO start_date;
+ALTER TABLE kit_of_parts_inspection_report 
+RENAME COLUMN end_date_new TO end_date;
+
+-- Add comments for the new fields
+COMMENT ON COLUMN kit_of_parts_inspection_report.inspection_stage IS 'Inspection stage from report details';
+COMMENT ON COLUMN kit_of_parts_inspection_report.dated1 IS 'First dated field from report details';
+COMMENT ON COLUMN kit_of_parts_inspection_report.dated2 IS 'Second dated field from report details';
+COMMENT ON COLUMN kit_of_parts_inspection_report.start_date IS 'Inspection start date (changed from TIMESTAMP to DATE)';
+COMMENT ON COLUMN kit_of_parts_inspection_report.end_date IS 'Inspection end date (changed from TIMESTAMP to DATE)';
+
+
