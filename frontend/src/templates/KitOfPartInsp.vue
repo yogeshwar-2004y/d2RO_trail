@@ -4,14 +4,32 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
         <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="app-logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="app-logo vista-logo">
+          <img
+            src="@/assets/images/aviatrax-logo.png"
+            alt="Aviatrax Logo"
+            class="app-logo"
+          />
+          <img
+            src="@/assets/images/vista_logo.png"
+            alt="Vista Logo"
+            class="app-logo vista-logo"
+          />
         </div>
       </div>
       <div class="header-center">
@@ -19,7 +37,17 @@
       </div>
       <div class="header-right">
         <button class="export-button" @click="exportReport">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -34,11 +62,13 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ reportData.projectName || 'Project' }}/{{ reportData.lruName }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{ currentYear }}
+          CASDIC/{{ reportData.projectName || "Project" }}/{{
+            reportData.lruName
+          }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{
+            currentYear
+          }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -47,7 +77,6 @@
 
       <!-- Inspection Form -->
       <form @submit.prevent="handleSubmit" class="inspection-form">
-      
         <!-- Report Details Section -->
         <div class="form-section">
           <h2 class="section-title">Report Details</h2>
@@ -56,67 +85,114 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="reportData.projectName" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="reportData.projectName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="reportData.reportRefNo" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="reportData.reportRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="reportData.memoRefNo">
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="reportData.memoRefNo"
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="reportData.lruName" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="reportData.lruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="reportData.inspectionStage">
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="reportData.inspectionStage"
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="reportData.testVenue">
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="reportData.testVenue"
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="reportData.slNos">
+                <input type="text" id="slNos" v-model="reportData.slNos" />
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="reportData.dpName" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="reportData.dpName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="reportData.dated1">
+                <input type="date" id="dated1" v-model="reportData.dated1" />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="reportData.dated2">
+                <input type="date" id="dated2" v-model="reportData.dated2" />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="reportData.sruName">
+                <input type="text" id="sruName" v-model="reportData.sruName" />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="reportData.partNo" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="reportData.partNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model.number="reportData.quantity" min="1" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model.number="reportData.quantity"
+                  min="1"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="reportData.startDate">
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="reportData.startDate"
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="reportData.endDate">
+                <input type="date" id="endDate" v-model="reportData.endDate" />
               </div>
             </div>
           </div>
@@ -143,9 +219,9 @@
                   <td>{{ item.testCase }}</td>
                   <td>{{ item.expected }}</td>
                   <td>
-                    <textarea 
-                      v-model="item.observations" 
-                      rows="2" 
+                    <textarea
+                      v-model="item.observations"
+                      rows="2"
                       placeholder="Enter observations here..."
                     ></textarea>
                   </td>
@@ -157,7 +233,10 @@
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, item)">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, item)"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -192,7 +271,11 @@
           <button type="button" @click="resetForm" class="btn btn-secondary">
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -202,65 +285,116 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'KitOfPartInsp',
+  name: "KitOfPartInsp",
   data() {
     return {
-      currentYear: '2025',
-      currentDate: new Date().toISOString().split('T')[0],
+      currentYear: "2025",
+      currentDate: new Date().toISOString().split("T")[0],
       reportData: {
         // Header fields
-        projectName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        slNos: '',
-        dpName: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        partNo: '',
+        projectName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        slNos: "",
+        dpName: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        partNo: "",
         quantity: null,
-        startDate: '',
-        endDate: '', 
+        startDate: "",
+        endDate: "",
 
         // Table data
         inspectionItems: [
-          { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
-          { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
-          { slNo: 3, testCase: 'Quantity as BOM', expected: 'Matching', observations: '', remarks: '', fileName: null },
-          { slNo: 4, testCase: 'Quantity as per number of boards to be assembled', expected: 'Matching', observations: '', remarks: '', fileName: null },
-          { slNo: 5, testCase: 'Components storage in ESD cover', expected: 'Stored in ESD', observations: '', remarks: '', fileName: null },
-          { slNo: 6, testCase: 'All connectors to be fitted with screws before assembly', expected: 'Fitted properly', observations: '', remarks: '', fileName: null },
-          { slNo: 7, testCase: 'Any other observations', expected: 'NIL', observations: '', remarks: '', fileName: null },
+          {
+            slNo: 1,
+            testCase: "Any observation pending from previous KOP stage",
+            expected: "NIL",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 2,
+            testCase: "CoC verification of components",
+            expected: "Verified",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 3,
+            testCase: "Quantity as BOM",
+            expected: "Matching",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 4,
+            testCase: "Quantity as per number of boards to be assembled",
+            expected: "Matching",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 5,
+            testCase: "Components storage in ESD cover",
+            expected: "Stored in ESD",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 6,
+            testCase: "All connectors to be fitted with screws before assembly",
+            expected: "Fitted properly",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
+          {
+            slNo: 7,
+            testCase: "Any other observations",
+            expected: "NIL",
+            observations: "",
+            remarks: "",
+            fileName: null,
+          },
         ],
 
         // Footer/Signature fields
-        preparedBy: '',
-        verifiedBy: '',
-        approvedBy: '',
-      }
+        preparedBy: "",
+        verifiedBy: "",
+        approvedBy: "",
+      },
     };
   },
   computed: {
     isFormValid() {
-      return this.reportData.projectName &&
-             this.reportData.reportRefNo &&
-             this.reportData.lruName &&
-             this.reportData.dpName &&
-             this.reportData.partNo &&
-             this.reportData.quantity;
-    }
+      return (
+        this.reportData.projectName &&
+        this.reportData.reportRefNo &&
+        this.reportData.lruName &&
+        this.reportData.dpName &&
+        this.reportData.partNo &&
+        this.reportData.quantity
+      );
+    },
   },
   mounted() {
     // Get parameters from route
-    const projectName = this.$route.params.projectName || '';
-    const lruName = this.$route.params.lruName || '';
-    
+    const projectName = this.$route.params.projectName || "";
+    const lruName = this.$route.params.lruName || "";
+
     // Set default values
     this.reportData.projectName = projectName;
     this.reportData.lruName = lruName;
@@ -277,45 +411,99 @@ export default {
       }
     },
     saveDraft() {
-      console.log('Saving draft:', this.reportData);
-      alert('Draft saved successfully!');
+      console.log("Saving draft:", this.reportData);
+      alert("Draft saved successfully!");
     },
     resetForm() {
-      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+      if (
+        confirm(
+          "Are you sure you want to reset the form? All data will be lost."
+        )
+      ) {
         this.reportData = {
-          projectName: this.$route.params.projectName || '',
-          reportRefNo: '',
-          memoRefNo: '',
-          lruName: this.$route.params.lruName || '',
-          inspectionStage: '',
-          testVenue: '',
-          slNos: '',
-          dpName: '',
-          dated1: '',
-          dated2: '',
-          sruName: '',
-          partNo: '',
+          projectName: this.$route.params.projectName || "",
+          reportRefNo: "",
+          memoRefNo: "",
+          lruName: this.$route.params.lruName || "",
+          inspectionStage: "",
+          testVenue: "",
+          slNos: "",
+          dpName: "",
+          dated1: "",
+          dated2: "",
+          sruName: "",
+          partNo: "",
           quantity: null,
           startDate: this.currentDate,
-          endDate: '',
+          endDate: "",
           inspectionItems: [
-            { slNo: 1, testCase: 'Any observation pending from previous KOP stage', expected: 'NIL', observations: '', remarks: '', fileName: null },
-            { slNo: 2, testCase: 'CoC verification of components', expected: 'Verified', observations: '', remarks: '', fileName: null },
-            { slNo: 3, testCase: 'Quantity as BOM', expected: 'Matching', observations: '', remarks: '', fileName: null },
-            { slNo: 4, testCase: 'Quantity as per number of boards to be assembled', expected: 'Matching', observations: '', remarks: '', fileName: null },
-            { slNo: 5, testCase: 'Components storage in ESD cover', expected: 'Stored in ESD', observations: '', remarks: '', fileName: null },
-            { slNo: 6, testCase: 'All connectors to be fitted with screws before assembly', expected: 'Fitted properly', observations: '', remarks: '', fileName: null },
-            { slNo: 7, testCase: 'Any other observations', expected: 'NIL', observations: '', remarks: '', fileName: null },
+            {
+              slNo: 1,
+              testCase: "Any observation pending from previous KOP stage",
+              expected: "NIL",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 2,
+              testCase: "CoC verification of components",
+              expected: "Verified",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 3,
+              testCase: "Quantity as BOM",
+              expected: "Matching",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 4,
+              testCase: "Quantity as per number of boards to be assembled",
+              expected: "Matching",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 5,
+              testCase: "Components storage in ESD cover",
+              expected: "Stored in ESD",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 6,
+              testCase:
+                "All connectors to be fitted with screws before assembly",
+              expected: "Fitted properly",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
+            {
+              slNo: 7,
+              testCase: "Any other observations",
+              expected: "NIL",
+              observations: "",
+              remarks: "",
+              fileName: null,
+            },
           ],
-          preparedBy: '',
-          verifiedBy: '',
-          approvedBy: '',
+          preparedBy: "",
+          verifiedBy: "",
+          approvedBy: "",
         };
       }
     },
     async handleSubmit() {
       if (!this.isFormValid) {
-        alert('Please fill in all required fields.');
+        alert("Please fill in all required fields.");
         return;
       }
 
@@ -338,115 +526,130 @@ export default {
           quantity: this.reportData.quantity || 0,
           startDate: this.reportData.startDate,
           endDate: this.reportData.endDate,
-          
+
           // Test Cases
           test1Observations: this.reportData.inspectionItems[0].observations,
           test1Remarks: this.reportData.inspectionItems[0].remarks,
           test1Upload: this.reportData.inspectionItems[0].fileName,
-          
+
           test2Observations: this.reportData.inspectionItems[1].observations,
           test2Remarks: this.reportData.inspectionItems[1].remarks,
           test2Upload: this.reportData.inspectionItems[1].fileName,
-          
+
           test3Observations: this.reportData.inspectionItems[2].observations,
           test3Remarks: this.reportData.inspectionItems[2].remarks,
           test3Upload: this.reportData.inspectionItems[2].fileName,
-          
+
           test4Observations: this.reportData.inspectionItems[3].observations,
           test4Remarks: this.reportData.inspectionItems[3].remarks,
           test4Upload: this.reportData.inspectionItems[3].fileName,
-          
+
           test5Observations: this.reportData.inspectionItems[4].observations,
           test5Remarks: this.reportData.inspectionItems[4].remarks,
           test5Upload: this.reportData.inspectionItems[4].fileName,
-          
+
           test6Observations: this.reportData.inspectionItems[5].observations,
           test6Remarks: this.reportData.inspectionItems[5].remarks,
           test6Upload: this.reportData.inspectionItems[5].fileName,
-          
+
           test7Observations: this.reportData.inspectionItems[6].observations,
           test7Remarks: this.reportData.inspectionItems[6].remarks,
           test7Upload: this.reportData.inspectionItems[6].fileName,
-          
+
           // Signatures
           preparedBy: this.reportData.preparedBy,
           verifiedBy: this.reportData.verifiedBy,
-          approvedBy: this.reportData.approvedBy
+          approvedBy: this.reportData.approvedBy,
         };
 
-        console.log('Submitting kit of parts inspection report:', submissionData);
+        console.log(
+          "Submitting kit of parts inspection report:",
+          submissionData
+        );
 
-        const response = await fetch('http://localhost:5000/api/kit-of-parts', {
-          method: 'POST',
+        const response = await fetch("http://localhost:8000/api/kit-of-parts", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(submissionData)
+          body: JSON.stringify(submissionData),
         });
 
         const result = await response.json();
 
         if (result.success) {
-          alert('Kit of parts inspection report submitted successfully!');
-          console.log('Report ID:', result.report_id);
+          alert("Kit of parts inspection report submitted successfully!");
+          console.log("Report ID:", result.report_id);
           this.resetForm();
         } else {
           alert(`Error: ${result.message}`);
         }
-        
       } catch (error) {
-        console.error('Error submitting report:', error);
-        alert('Error submitting report. Please try again.');
+        console.error("Error submitting report:", error);
+        alert("Error submitting report. Please try again.");
       }
     },
     exportReport() {
       try {
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // Header
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('KIT OF PART INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("KIT OF PART INSPECTION REPORT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Document path and date
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.reportData.projectName || 'PROJECT'}/${this.reportData.lruName || 'LRU'}/SL.${this.reportData.slNos || '001'}/${this.reportData.reportRefNo || '001'}/${this.currentYear}`;
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${
+          this.reportData.projectName || "PROJECT"
+        }/${this.reportData.lruName || "LRU"}/SL.${
+          this.reportData.slNos || "001"
+        }/${this.reportData.reportRefNo || "001"}/${this.currentYear}`;
         doc.text(documentPath, margin, yPosition);
-        
+
         const dateText = `Date: ${this.currentDate}`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
-        
+
         // Subject line
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: Kit of Part Inspection Report for ${this.reportData.lruName || 'Unknown LRU'}`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Kit of Part Inspection Report for ${
+          this.reportData.lruName || "Unknown LRU"
+        }`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // Save PDF
-        const fileName = `Kit_of_Part_Inspection_Report_${this.reportData.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `Kit_of_Part_Inspection_Report_${
+          this.reportData.lruName || "Unknown"
+        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
-        
-        alert('Report exported successfully as PDF!');
-        
+
+        alert("Report exported successfully as PDF!");
       } catch (error) {
-        console.error('Error exporting PDF:', error);
-        alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        console.error("Error exporting PDF:", error);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -553,7 +756,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -786,40 +989,40 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .general-info-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-layout {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .signature-item {
     max-width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .inspection-table-container {
     overflow-x: auto;
   }
-  
+
   .inspection-table {
     min-width: 800px;
   }

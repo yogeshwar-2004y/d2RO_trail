@@ -43,7 +43,7 @@ def get_reports():
             base_query = """
                 SELECT 
                     r.report_id,
-                    NULL as memo_id,
+                    r.memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -55,13 +55,14 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
                 WHERE r.project_id IN (
                     SELECT project_id FROM projects WHERE created_by = %s
                 )
@@ -74,7 +75,7 @@ def get_reports():
             base_query = """
                 SELECT 
                     r.report_id,
-                    NULL as memo_id,
+                    r.memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -86,22 +87,25 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
+                LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id
+                WHERE ma.user_id = %s AND ma.status = 'accepted'
                 ORDER BY r.date_of_review DESC
             """
-            query_params = ()
+            query_params = (user_id,)
             
         else:  # Admin, QA Head, Design Head - show all reports
             base_query = """
                 SELECT 
                     r.report_id,
-                    NULL as memo_id,
+                    r.memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -113,13 +117,14 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
                 ORDER BY r.date_of_review DESC
             """
             query_params = ()
