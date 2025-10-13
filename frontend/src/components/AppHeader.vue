@@ -76,14 +76,14 @@ export default {
 .header-center {
   flex: 1;
   text-align: center;
-  margin: 0 30x;
+  margin: 0 10px;
 }
 
 .logo-title-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 1px;
   margin-bottom: 0px; /* Eliminated spacing */
 }
 

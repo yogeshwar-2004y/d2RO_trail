@@ -38,7 +38,7 @@
             <div class="button-group">
               <div class="login-reset-row">
                 <button @click="login" class="action-button1">LOGIN</button>
-                <button @click="resetPassword" class="action-button2">RESET PASSWORD</button>
+                <button @click="resetPassword" class="action-button2">FORGOT PASSWORD</button>
               </div>
               <button @click="techSupport" class="action-button">TECH SUPPORT</button>
             </div>
@@ -223,7 +223,7 @@ export default {
 
 .login-container {
   width: 100%;
-  max-width: 350px;
+  max-width: 450px; /* Increased from 350px */
   padding: 50px;
   background: #fff;
   border-radius: 10px;
@@ -234,9 +234,9 @@ export default {
 .image-gallery {
   display: flex;
   justify-content: space-between;
-  gap: 5px; /* Reduced gap to give more space to images */
+  gap: 7px; /* Reduced gap to give more space to images */
   width: 100%;
-  height: 180px; /* Adjusted height to ensure all 5 images fit */
+  height: 170px; /* Adjusted height to ensure all 5 images fit */
   flex-shrink: 2; /* Prevent shrinking */
 }
 
@@ -293,34 +293,21 @@ export default {
 
 .login-reset-row {
   display: flex;
-  gap: 125px;
+  gap: 10px; /* Reduced gap for better spacing */
 }
 
-.action-button1, .action-button2 {
-  padding: 10px 10px;
+.action-button1, .action-button2, .action-button {
+  flex: 1; /* Make all buttons equal width */
+  padding: 12px 20px; /* Increased padding for better size */
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 0.9rem;
   color: #fff;
   background-color: #162845;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-.action-button1 {
-  width: 100px; /* Increase as needed */
-}
-.action-button{
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #fff;
-  background-color: #162845;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+
 
 .action-button:hover {
   background-color: #51759a;

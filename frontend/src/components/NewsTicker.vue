@@ -129,8 +129,8 @@ export default {
   width: 100%;
   overflow: hidden;
   position: relative;
-  border-top: 2px solid #34495e;
-  border-bottom: 2px solid #34495e;
+  border-top: 0.8px solid #34495e;
+  border-bottom: 0.8px solid #34495e;
 }
 
 .news-ticker {
@@ -145,7 +145,7 @@ export default {
   align-items: center;
   white-space: nowrap;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 14px;
   animation-name: scroll;
   transform: translateX(100%);
 }
