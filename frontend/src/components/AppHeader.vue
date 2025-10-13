@@ -47,7 +47,7 @@ export default {
 .app-header {
   background-color: #DDEFFD; /* Light blue background */
   width: 100%;
-  padding: 10px 10px; /* Reduced from 15px */
+  padding: 15px 15px; /* Reduced from 15px */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin: 0;
 }
@@ -56,7 +56,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
+  max-width: 1350px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -83,15 +83,15 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  margin-bottom: 1px; /* Reduced spacing */
+  gap: 4px;
+  margin-bottom: 0px; /* Eliminated spacing */
 }
 
 .aviatrax-logo {
   height: 120px; /* Increased from 70px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
-  max-width: 100%; /* Prevents image from overflowing */
+  max-width: 1500px; /* Prevents image from overflowing */
 }
 
 .version-text {
@@ -105,10 +105,10 @@ export default {
   font-size: 1.5rem; /* Increased from 0.8rem */
   font-weight: bold; /* Made bold */
   color: #000;
-  margin: 1px 0 0 0; /* Reduced margin */
+  margin: 0px 0 0 0; /* Eliminated margin */
   font-family: Arial, sans-serif;
   width: 100%; /* Cover more horizontal area */
-  max-width: 1000px; /* Allow wider subtitle */
+  max-width: 1100px; /* Allow wider subtitle */
 }
 
 /* Responsive design */

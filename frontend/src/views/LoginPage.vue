@@ -37,8 +37,8 @@
 
             <div class="button-group">
               <div class="login-reset-row">
-                <button @click="login" class="action-button">LOGIN</button>
-                <button @click="resetPassword" class="action-button">RESET PASSWORD</button>
+                <button @click="login" class="action-button1">LOGIN</button>
+                <button @click="resetPassword" class="action-button2">RESET PASSWORD</button>
               </div>
               <button @click="techSupport" class="action-button">TECH SUPPORT</button>
             </div>
@@ -234,26 +234,26 @@ export default {
 .image-gallery {
   display: flex;
   justify-content: space-between;
-  gap: 6px; /* Reduced gap to give more space to images */
+  gap: 5px; /* Reduced gap to give more space to images */
   width: 100%;
-  height: 200px; /* Adjusted height to ensure all 5 images fit */
-  flex-shrink: 0; /* Prevent shrinking */
+  height: 180px; /* Adjusted height to ensure all 5 images fit */
+  flex-shrink: 2; /* Prevent shrinking */
 }
 
 .gallery-image {
-  flex: 1;
+  flex: 2;
   height: 100%; /* Use full height of gallery container */
   object-fit: cover; /* Ensures complete image fits within container, crops if necessary */
   object-position: center; /* Centers the image within the container */
-  border-radius: 8px;
+  border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
-  min-width: 0; /* Allow images to shrink if needed */
+  min-width: 10px; /* Allow images to shrink if needed */
 }
-
-.gallery-image:hover {
+/* .gallery-image:hover {
   transform: scale(1.05);
 }
+ */
 
 
 /* Login Form */
@@ -282,7 +282,7 @@ export default {
 }
 
 .input-field:focus {
-  border-color: #007bff;
+  border-color: #01050a;
 }
 
 .button-group {
@@ -293,10 +293,24 @@ export default {
 
 .login-reset-row {
   display: flex;
-  gap: 10px;
+  gap: 125px;
 }
 
-.action-button {
+.action-button1, .action-button2 {
+  padding: 10px 10px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #162845;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.action-button1 {
+  width: 100px; /* Increase as needed */
+}
+.action-button{
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
