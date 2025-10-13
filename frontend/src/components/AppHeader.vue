@@ -63,7 +63,7 @@ export default {
 }
 
 .logo-image {
-  height: 60px;
+  height: 80px; /* Increased from 60px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
   max-width: 100%; /* Prevents image from overflowing */
@@ -76,7 +76,7 @@ export default {
 }
 
 .aviatrax-logo {
-  height: 80px;
+  height: 100px; /* Increased from 80px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
   max-width: 100%; /* Prevents image from overflowing */
@@ -84,7 +84,7 @@ export default {
 }
 
 .subtitle {
-  font-size: 1rem;
+  font-size: 0.8rem; /* Reduced from 1rem */
   color: #000;
   margin: 5px 0 0 0;
   font-family: Arial, sans-serif;
@@ -98,15 +98,15 @@ export default {
   }
   
   .aviatrax-logo {
-    height: 60px;
+    height: 80px; /* Reduced for mobile but still larger than before */
   }
   
   .subtitle {
-    font-size: 0.9rem;
+    font-size: 0.7rem; /* Further reduced for mobile */
   }
   
   .logo-image {
-    height: 50px;
+    height: 60px; /* Reduced for mobile but still larger than before */
   }
 }
 </style>

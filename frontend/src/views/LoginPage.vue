@@ -178,7 +178,7 @@ export default {
   display: flex;
   flex-direction: column;
   font-family: Arial, sans-serif;
-  background-color: #f0f8ff; /* Very light blue background */
+  background-color: #f0f0f0; /* Very light blue background */
 }
 
 .main-content {
