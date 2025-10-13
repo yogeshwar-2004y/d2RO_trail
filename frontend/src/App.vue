@@ -2,6 +2,7 @@
 import { RouterLink, RouterView } from "vue-router";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
+import NewsTicker from "@/components/NewsTicker.vue";
 </script>
 
 <template>
@@ -10,6 +11,12 @@ import AppFooter from "@/components/AppFooter.vue";
     <main class="main-content">
       <RouterView />
     </main>
+    <NewsTicker
+      height="50px"
+      backgroundColor="#2c3e50"
+      textColor="#ffffff"
+      class="app-news-ticker"
+    />
     <AppFooter />
   </div>
 </template>
@@ -20,12 +27,19 @@ import AppFooter from "@/components/AppFooter.vue";
   display: flex;
   flex-direction: column;
   overflow: hidden; /* Prevent body scroll */
+  margin: 0;
+  padding: 0;
 }
 
 .main-content {
   flex: 1;
-  overflow-y: auto; /* Allow scrolling only in main content */
-  overflow-x: hidden;
+  overflow: hidden; /* Prevent scrolling */
+  display: flex;
+  flex-direction: column;
+}
+
+.app-news-ticker {
+  flex-shrink: 0; /* Prevent shrinking */
 }
 </style>
 

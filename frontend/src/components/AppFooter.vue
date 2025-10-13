@@ -2,7 +2,7 @@
   <footer class="app-footer">
     <div class="footer-content">
       <p class="copyright-text">
-        AVIATRAX - Designed and Developed by VISTA Engineering Solutions Pvt Ltd © Copy Rights Reserved
+        AVIATRAX - Designed and Developed by VISTA Engineering Solutions Pvt Ltd  © Copy Rights Reserved  |  www.vistaes.com  |  info@vistaes.com  
       </p>
     </div>
   </footer>
@@ -18,9 +18,10 @@ export default {
 .app-footer {
   background-color: #ffffff;
   width: 100%;
-  padding: 20px 0;
-  border-top: 1px solid #e0e0e0;
+  padding: 8px 0; /* Reduced from 20px */
+  border-top: 0px solid #e0e0e0;
   margin-top: auto;
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .footer-content {
@@ -31,7 +32,7 @@ export default {
 }
 
 .copyright-text {
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
   color: #000;
   margin: 0;
   font-family: Arial, sans-serif;
@@ -40,11 +41,11 @@ export default {
 /* Responsive design */
 @media (max-width: 768px) {
   .copyright-text {
-    font-size: 0.8rem;
+    font-size: 0.7rem; /* Reduced from 0.8rem */
   }
   
   .app-footer {
-    padding: 15px 0;
+    padding: 6px 0; /* Further reduced for mobile */
   }
 }
 </style>

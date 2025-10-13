@@ -8,7 +8,7 @@
         <div class="main-image-container">
           <!-- Add main fighter jet image path here -->
           <img 
-            src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/login-background.png" 
+            src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/Airforce_1.jpg" 
             alt="Fighter Jet with Indian Flag" 
             class="main-image"
           />
@@ -36,8 +36,10 @@
             </div>
 
             <div class="button-group">
-              <button @click="login" class="action-button">LOGIN</button>
-              <button @click="resetPassword" class="action-button">RESET PASSWORD</button>
+              <div class="login-reset-row">
+                <button @click="login" class="action-button">LOGIN</button>
+                <button @click="resetPassword" class="action-button">RESET PASSWORD</button>
+              </div>
               <button @click="techSupport" class="action-button">TECH SUPPORT</button>
             </div>
           </div>
@@ -77,26 +79,14 @@
         />
       </div>
     </div>
-    
-    <!-- News Ticker -->
-    <NewsTicker
-      height="60px"
-      backgroundColor="#2c3e50"
-      textColor="#ffffff"
-      class="login-news-ticker"
-    />
   </div>
 </template>
 
 <script>
 import { setUser } from "@/stores/userStore";
-import NewsTicker from "@/components/NewsTicker.vue";
 
 export default {
   name: "LoginPage",
-  components: {
-    NewsTicker,
-  },
   data() {
     return {
       email: "",
@@ -173,35 +163,45 @@ export default {
 
 <style scoped>
 .login-page {
-  flex: 1;
+  height: calc(100vh - 120px); /* Account for header (~60px) and news ticker + footer (~60px) */
+  width: 100%; /* Take full width */
   display: flex;
   flex-direction: column;
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0; /* Very light blue background */
+  background-color: #f0f8ff; /* Very light blue background */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
 }
 
 .main-content {
-  flex: 1;
+  flex: 1; /* Take all available space */
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 20px;
+  padding: 0; /* Remove padding to eliminate white space */
+  gap: 0; /* Remove gap */
+  margin: 0;
+  height: 100%;
 }
 
 /* Top Section - Fighter Jet and Login Form Side by Side */
 .top-section {
   display: flex;
-  gap: 20px;
+  gap: 1; /* Remove gap */
   align-items: flex-start;
+  margin: 0;
+  padding: 0;
 }
 
 /* Fighter Jet Image Container */
 .main-image-container {
   flex: 2;
-  height: 350px;
+  height: 338px; /* Reduced to make room for gallery */
   overflow: hidden;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0; /* Remove border radius */
+  box-shadow: none; /* Remove shadow */
+  margin: 0;
+  padding: 0;
 }
 
 .main-image {
@@ -217,15 +217,16 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 350px;
+  min-height: 350px; /* Reduced to match image height */
+  padding: 10px; /* Add padding only to login section */
 }
 
 .login-container {
   width: 100%;
   max-width: 350px;
-  padding: 30px;
+  padding: 50px;
   background: #fff;
-  border-radius: 15px;
+  border-radius: 10px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
@@ -233,27 +234,27 @@ export default {
 .image-gallery {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
+  gap: 6px; /* Reduced gap to give more space to images */
   width: 100%;
+  height: 200px; /* Adjusted height to ensure all 5 images fit */
+  flex-shrink: 0; /* Prevent shrinking */
 }
 
 .gallery-image {
   flex: 1;
-  height: 120px;
+  height: 100%; /* Use full height of gallery container */
   object-fit: cover; /* Ensures complete image fits within container, crops if necessary */
   object-position: center; /* Centers the image within the container */
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease;
+  min-width: 0; /* Allow images to shrink if needed */
 }
 
 .gallery-image:hover {
   transform: scale(1.05);
 }
 
-.login-news-ticker {
-  /* News ticker is now part of the scrollable content */
-}
 
 /* Login Form */
 .login-container {
@@ -290,6 +291,11 @@ export default {
   gap: 12px;
 }
 
+.login-reset-row {
+  display: flex;
+  gap: 10px;
+}
+
 .action-button {
   padding: 12px 20px;
   border: none;
@@ -308,45 +314,59 @@ export default {
 
 /* Responsive Design */
 @media (max-width: 1024px) {
+  .login-page {
+    height: calc(100vh - 140px); /* Account for larger header on tablet */
+  }
+  
   .top-section {
     flex-direction: column;
-    gap: 20px;
+    gap: 0;
   }
   
   .main-image-container {
-    height: 300px;
+    height: 250px; /* Reduced for tablet */
   }
   
   .login-section {
     min-height: auto;
+    padding: 15px;
   }
   
   .image-gallery {
-    flex-wrap: wrap;
+    height: 150px; /* Reduced for tablet but still fits all 5 images */
+    gap: 4px; /* Smaller gap for tablet */
   }
   
   .gallery-image {
-    flex: 1 1 calc(50% - 5px);
+    flex: 1 1 calc(50% - 4px);
     min-width: 150px;
   }
 }
 
 @media (max-width: 768px) {
+  .login-page {
+    height: calc(100vh - 160px); /* Account for stacked header on mobile */
+  }
+  
   .main-content {
-    padding: 10px;
+    padding: 0;
   }
   
   .main-image-container {
-    height: 250px;
+    height: 200px; /* Reduced for mobile */
   }
   
   .login-container {
     padding: 20px;
   }
   
+  .image-gallery {
+    height: 120px; /* Reduced for mobile but still fits all 5 images */
+    gap: 3px; /* Smaller gap for mobile */
+  }
+  
   .gallery-image {
     flex: 1 1 100%;
-    height: 100px;
   }
 }
 </style>

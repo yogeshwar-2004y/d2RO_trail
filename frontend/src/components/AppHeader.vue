@@ -5,7 +5,7 @@
       <div class="logo-left">
 
         <img 
-          src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/DRDO_Logo.png" 
+          src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/DRDO.png" 
           alt="DRDO Logo" 
           class="logo-image"
         />
@@ -14,11 +14,14 @@
       <!-- Center Title/Brand -->
       <div class="header-center">
         <!-- Add Aviatrax logo image here -->
-        <img 
-          src="@/assets/images/aviatrax-logo.png" 
-          alt="Aviatrax Logo" 
-          class="aviatrax-logo"
-        />
+        <div class="logo-title-container">
+          <img 
+            src="@/assets/images/aviatrax-logo.png" 
+            alt="Aviatrax Logo" 
+            class="aviatrax-logo"
+          />
+          <span class="version-text">R1.25</span>
+        </div>
         <p class="subtitle">ERP Software for QA Automation and Compliance Management</p>
       </div>
       
@@ -44,8 +47,9 @@ export default {
 .app-header {
   background-color: #DDEFFD; /* Light blue background */
   width: 100%;
-  padding: 15px 0;
+  padding: 10px 10px; /* Reduced from 15px */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 0;
 }
 
 .header-content {
@@ -63,7 +67,7 @@ export default {
 }
 
 .logo-image {
-  height: 140px; /* Increased from 60px */
+  height: 110px; /* Reduced from 120px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
   max-width: 100%; /* Prevents image from overflowing */
@@ -72,41 +76,62 @@ export default {
 .header-center {
   flex: 1;
   text-align: center;
-  margin: 0 20px;
+  margin: 0 30x;
+}
+
+.logo-title-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 1px; /* Reduced spacing */
 }
 
 .aviatrax-logo {
-  height: 100px; /* Increased from 80px */
+  height: 120px; /* Increased from 70px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
   max-width: 100%; /* Prevents image from overflowing */
-  margin-bottom: 5px;
+}
+
+.version-text {
+  font-size: 1.5rem;
+  font-weight: normal; /* Remove bold */
+  color: #000;
+  font-family: Arial, sans-serif;
 }
 
 .subtitle {
-  font-size: 0.8rem; /* Reduced from 1rem */
+  font-size: 1.5rem; /* Increased from 0.8rem */
+  font-weight: bold; /* Made bold */
   color: #000;
-  margin: 5px 0 0 0;
+  margin: 1px 0 0 0; /* Reduced margin */
   font-family: Arial, sans-serif;
+  width: 100%; /* Cover more horizontal area */
+  max-width: 1000px; /* Allow wider subtitle */
 }
 
 /* Responsive design */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
   }
   
   .aviatrax-logo {
-    height: 80px; /* Reduced for mobile but still larger than before */
+    height: 50px; /* Reduced for mobile */
+  }
+  
+  .version-text {
+    font-size: 1rem;
   }
   
   .subtitle {
-    font-size: 0.7rem; /* Further reduced for mobile */
+    font-size: 0.5rem; /* Further reduced for mobile */
   }
   
   .logo-image {
-    height: 60px; /* Reduced for mobile but still larger than before */
+    height: 40px; /* Reduced for mobile */
   }
 }
 </style>
