@@ -16,13 +16,16 @@ import AppFooter from "@/components/AppFooter.vue";
 
 <style>
 #app {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent body scroll */
 }
 
 .main-content {
   flex: 1;
+  overflow-y: auto; /* Allow scrolling only in main content */
+  overflow-x: hidden;
 }
 </style>
 

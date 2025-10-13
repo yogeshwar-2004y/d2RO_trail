@@ -8,7 +8,7 @@
         <div class="main-image-container">
           <!-- Add main fighter jet image path here -->
           <img 
-            src="" 
+            src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/login-background.png" 
             alt="Fighter Jet with Indian Flag" 
             class="main-image"
           />
@@ -46,33 +46,32 @@
       
       <!-- Row of Five Images - Full Width -->
       <div class="image-gallery">
-        <!-- Add missile launch image path here -->
         <img 
-          src="" 
+          src="@/assets/images/Image3.png" 
           alt="Missile Launch" 
           class="gallery-image"
         />
         <!-- Add radar array image path here -->
         <img 
-          src="" 
+          src="@/assets/images/Image5.jpg" 
           alt="Radar Array" 
           class="gallery-image"
         />
         <!-- Add Tejas fighter image path here -->
         <img 
-          src="" 
+          src="@/assets/images/Image4.jpg" 
           alt="Tejas Fighter" 
           class="gallery-image"
         />
         <!-- Add Mirage fighter image path here -->
         <img 
-          src="" 
+          src="@/assets/images/Image2.png" 
           alt="Mirage Fighter" 
           class="gallery-image"
         />
         <!-- Add industrial machinery image path here -->
         <img 
-          src="" 
+          src="@/assets/images/Image1.png" 
           alt="Industrial Machinery" 
           class="gallery-image"
         />
@@ -253,11 +252,7 @@ export default {
 }
 
 .login-news-ticker {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+  /* News ticker is now part of the scrollable content */
 }
 
 /* Login Form */

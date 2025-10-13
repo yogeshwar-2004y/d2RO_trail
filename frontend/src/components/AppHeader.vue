@@ -3,9 +3,9 @@
     <div class="header-content">
       <!-- Left Logo - DRDO -->
       <div class="logo-left">
-        <!-- Add DRDO logo image path here -->
+
         <img 
-          src="" 
+          src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/DRDO_Logo.png" 
           alt="DRDO Logo" 
           class="logo-image"
         />
@@ -63,7 +63,7 @@ export default {
 }
 
 .logo-image {
-  height: 80px; /* Increased from 60px */
+  height: 140px; /* Increased from 60px */
   width: auto;
   object-fit: contain; /* Ensures complete image fits within container */
   max-width: 100%; /* Prevents image from overflowing */
