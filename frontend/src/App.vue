@@ -1,12 +1,30 @@
 <script setup>
 import { RouterLink, RouterView } from "vue-router";
+import AppHeader from "@/components/AppHeader.vue";
+import AppFooter from "@/components/AppFooter.vue";
 </script>
 
 <template>
-  <RouterView />
+  <div id="app">
+    <AppHeader />
+    <main class="main-content">
+      <RouterView />
+    </main>
+    <AppFooter />
+  </div>
 </template>
 
-<style scoped></style>
+<style>
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+}
+</style>
 
 <!-- simple flask connection -->
 <!-- <template>
