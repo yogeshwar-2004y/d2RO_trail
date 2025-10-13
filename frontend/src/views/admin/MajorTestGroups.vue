@@ -1,5 +1,5 @@
 <template>
-  <div class="user-activities-page">
+  <div class="major-test-groups-page">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -13,67 +13,72 @@
       </div>
     </div>
 
+    <div class="page-title">
+      <h1>Major Test Groups</h1>
+      <p>Select a major test group to view detailed inspection stages</p>
+    </div>
+
     <div class="card-grid">
-      <div class="card" @click="goToPage('AddUpdateProjects')">
+      <div class="card" @click="goToGroup('Manufacturing')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
         </div>
-        <span class="card-title">ADD / UPDATE PROJECTS</span>
+        <span class="card-title">MANUFACTURING</span>
+        <span class="card-subtitle">Raw Material, Machined Parts, Assembly & PCB Inspection</span>
       </div>
-      <div class="card" @click="goToPage('AddUpdateUsers')">
+
+      <div class="card" @click="goToGroup('CoTS Screening')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-            <circle cx="8.5" cy="7" r="4"></circle>
-            <line x1="20" y1="8" x2="20" y2="14"></line>
-            <line x1="23" y1="11" x2="17" y2="11"></line>
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+            <path d="M9 9l3 3 3-3"></path>
           </svg>
         </div>
-        <span class="card-title">ADD / UPDATE USERS</span>
+        <span class="card-title">CoTS SCREENING</span>
+        <span class="card-subtitle">Visual Inspection, Functional Check & Power Burn-In</span>
       </div>
-      <div class="card" @click="goToPage('ActivityLogs')">
+
+      <div class="card" @click="goToGroup('ESS')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-          <line x1="12" y1="1" x2="12" y2="23"></line>
-          <path d="M12 12h-3"></path>
-          <path d="M12 16h-2"></path>
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
           </svg>
         </div>
-        <span class="card-title">ACTIVITY LOGS</span>
+        <span class="card-title">ESS </span>
+        <span class="card-subtitle">Environmental Stress Screening & Thermal Cycling</span>
       </div>
-      <div class="card" @click="goToPage('Tests')">
+
+      <div class="card" @click="goToGroup('QT')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 11 12 14 22 4"></polyline>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            <circle cx="12" cy="12" r="3"></circle>
           </svg>
         </div>
-        <span class="card-title">TESTS</span>
+        <span class="card-title">QT</span>
+        <span class="card-subtitle">Qualification Test - Comprehensive Testing Suite</span>
       </div>
-      <div class="card" @click="goToPage('NewsUpdates')">
+
+      <div class="card" @click="goToGroup('SoFT')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2z"></path>
-            <path d="M6 12h8"></path>
-            <path d="M6 16h8"></path>
-            <path d="M6 8h8"></path>
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
           </svg>
         </div>
-        <span class="card-title">NEWS UPDATES</span>
-      </div>
-      <div class="card" @click="goToPage('CustomiseBackground')">
-        <div class="card-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="9" cy="9" r="2"></circle>
-            <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-          </svg>
-        </div>
-        <span class="card-title">CUSTOMISE BACKGROUND</span>
+        <span class="card-title">SOFT</span>
+        <span class="card-subtitle">Safety of Flight Test - Critical Safety Validation</span>
       </div>
     </div>
   </div>
@@ -81,21 +86,19 @@
 
 <script>
 export default {
-  name: "UserActivities",
+  name: "MajorTestGroups",
   methods: {
-    goToPage(pageName) {
-      if (pageName === "AddUpdateProjects") {
-        this.$router.push({ name: "AddUpdateProjects" });
-      } else if (pageName === "AddUpdateUsers") {
-        this.$router.push({ name: "AddUpdateUser" });
-      } else if (pageName === "ActivityLogs") {
-        this.$router.push({ name: "ActivityLogs" });
-      } else if (pageName === "Tests") {
-        this.$router.push({ name: "MajorTestGroups" });
-      } else if (pageName === "NewsUpdates") {
-        this.$router.push({ name: "NewsUpdates" });
-      } else if (pageName === "CustomiseBackground") {
-        this.$router.push({ name: "CustomiseBackground" });
+    goToGroup(groupName) {
+      if (groupName === "Manufacturing") {
+        this.$router.push({ name: "ManufacturingTestGroup" });
+      } else if (groupName === "CoTS Screening") {
+        this.$router.push({ name: "CoTSScreeningTestGroup" });
+      } else if (groupName === "ESS") {
+        this.$router.push({ name: "ESSTestGroup" });
+      } else if (groupName === "QT") {
+        this.$router.push({ name: "QTTestGroup" });
+      } else if (groupName === "SoFT") {
+        this.$router.push({ name: "SoFTTestGroup" });
       }
     },
   },
@@ -103,7 +106,7 @@ export default {
 </script>
 
 <style scoped>
-.user-activities-page {
+.major-test-groups-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   display: flex;
@@ -143,13 +146,31 @@ export default {
   width: 120px;
 }
 
+.page-title {
+  text-align: center;
+  margin: 40px 0 20px 0;
+  color: #333;
+}
+
+.page-title h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  color: #2c3e50;
+}
+
+.page-title p {
+  font-size: 1.1em;
+  color: #666;
+  margin: 0;
+}
+
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 30px;
-  width: 80%;
-  max-width: 1200px;
-  margin-top: 50px;
+  width: 90%;
+  max-width: 1400px;
+  margin-top: 30px;
 }
 
 .card {
@@ -163,7 +184,8 @@ export default {
   padding: 40px 20px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 180px;
+  min-height: 220px;
+  text-align: center;
 }
 
 .card:hover {
@@ -176,13 +198,39 @@ export default {
 }
 
 .card-icon svg {
-  color: #000;
+  color: #2c3e50;
 }
 
 .card-title {
-  font-size: 1em;
+  font-size: 1.3em;
   font-weight: bold;
   text-align: center;
-  color: #333;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.card-subtitle {
+  font-size: 0.9em;
+  text-align: center;
+  color: #666;
+  line-height: 1.4;
+  max-width: 250px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+    width: 95%;
+  }
+  
+  .page-title h1 {
+    font-size: 2em;
+  }
+  
+  .card {
+    min-height: 200px;
+    padding: 30px 15px;
+  }
 }
 </style>
