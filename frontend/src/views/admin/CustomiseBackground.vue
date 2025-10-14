@@ -1,24 +1,5 @@
 <template>
   <div class="customise-background-page">
-    <div class="header">
-      <button class="back-button" @click="$router.go(-1)">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5"></path>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-    </div>
-
     <div class="content-container">
       <div class="upload-section">
         <h2>Customise Login Background</h2>
@@ -268,28 +249,201 @@ export default {
 
 <style scoped>
 .customise-background-page {
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
+  background-color: #f0f0f0;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  background-color: #f0f0f0;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 20px;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+.content-container {
   width: 100%;
-  padding: 20px 30px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto; /* Allow scrolling within content if needed */
 }
 
-.back-button {
-  background: none;
-  border: none;
+.upload-section {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+}
+
+.upload-section h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.upload-section p {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.current-background {
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.current-background h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.background-preview {
+  text-align: center;
+}
+
+.background-preview img {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.upload-area {
+  border: 2px dashed #007bff;
+  border-radius: 8px;
+  padding: 40px;
+  text-align: center;
   cursor: pointer;
-  margin-right: 20px;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  margin-bottom: 20px;
+}
+
+.upload-area:hover {
+  border-color: #0056b3;
+  background-color: #e3f2fd;
+}
+
+.upload-content svg {
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.upload-content p {
+  margin: 10px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.file-requirements {
+  color: #666;
+  font-size: 0.9em;
+}
+
+.selected-file {
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+  border: 1px solid #c3e6cb;
+}
+
+.selected-file h3 {
+  margin: 0 0 10px 0;
+  color: #155724;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.file-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #155724;
+  font-weight: bold;
+}
+
+.preview-container {
+  text-align: center;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.upload-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.upload-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.reset-button {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.reset-button:hover {
+  background-color: #545b62;
+}
+
+.message {
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
 }
 </style>
 

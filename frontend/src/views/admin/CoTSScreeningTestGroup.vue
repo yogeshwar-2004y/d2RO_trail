@@ -7,6 +7,10 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
+      <div class="logos-container">
+        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
+        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
       <span class="page-title">CoTS SCREENING</span>
     </div>
 
@@ -277,5 +281,322 @@ export default {
   cursor: pointer;
   margin-right: 20px;
 }
-</style>
 
+.logos-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  width: 120px;
+}
+
+.vista-logo {
+  width: 100px;
+}
+
+.page-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  flex-grow: 1;
+  text-align: center;
+  color: #2c3e50;
+}
+
+.test-config-card {
+  width: 100%;
+  max-width: 1200px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.data-summary {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  width: 100%;
+}
+
+.data-summary p {
+  margin: 0;
+  color: #495057;
+  font-size: 1.1em;
+}
+
+.sub-tests-container {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.sub-test-row {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sub-test-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sub-test-number {
+  font-weight: bold;
+  color: #2c3e50;
+  margin-right: 10px;
+  font-size: 1.1em;
+}
+
+.sub-test-name {
+  font-weight: bold;
+  color: #2c3e50;
+  font-size: 1.2em;
+  flex-grow: 1;
+}
+
+.sub-test-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.bulletins-container {
+  margin-left: 30px;
+  margin-bottom: 15px;
+}
+
+.bulletin-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bulletin-text {
+  flex-grow: 1;
+  color: #495057;
+  font-size: 0.95em;
+}
+
+.bulletin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.add-sub-bulletin-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-sub-bulletin-btn:hover {
+  background: #218838;
+}
+
+.sub-bulletins-container {
+  margin-left: 20px;
+  margin-top: 8px;
+}
+
+.sub-bulletin-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+  background: #e8f4fd;
+  border-left: 3px solid #28a745;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.sub-bulletin-text {
+  flex-grow: 1;
+  color: #2c3e50;
+  font-size: 0.9em;
+}
+
+.sub-bulletin-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.add-bulletin-container {
+  margin-left: 30px;
+  margin-top: 10px;
+}
+
+.add-sub-test-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.edit-btn, .delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.edit-btn {
+  background: #28a745;
+  color: white;
+}
+
+.edit-btn:hover {
+  background: #218838;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.add-bulletin-btn, .add-sub-test-btn {
+  padding: 10px 20px;
+  border: 2px dashed #007bff;
+  background: transparent;
+  color: #007bff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.add-bulletin-btn:hover, .add-sub-test-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  min-width: 400px;
+}
+
+.modal-content h3 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.save-btn, .cancel-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.save-btn {
+  background: #007bff;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #0056b3;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background: #545b62;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .test-group-page {
+    padding: 15px;
+  }
+  
+  .test-config-card {
+    padding: 20px;
+  }
+  
+  .sub-test-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .sub-test-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .bulletins-container {
+    margin-left: 15px;
+  }
+  
+  .add-bulletin-container {
+    margin-left: 15px;
+  }
+  
+  .modal-content {
+    min-width: 300px;
+    margin: 20px;
+  }
+}
+</style>
