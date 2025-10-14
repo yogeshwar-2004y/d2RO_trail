@@ -45,7 +45,7 @@ import NewsTicker from "@/components/NewsTicker.vue";
   overflow-y: auto; /* Allow vertical scrolling for other pages */
   overflow-x: hidden;
   min-height: 0; /* Allow flex item to shrink */
-  margin-top: 130px; /* Height of header */
+  margin-top: 150px; /* Increased from 130px to prevent header overlap */
   margin-bottom: 90px; /* Height of news ticker + footer */
 }
 
