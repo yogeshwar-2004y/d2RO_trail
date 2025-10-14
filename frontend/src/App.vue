@@ -3,11 +3,13 @@ import { RouterLink, RouterView } from "vue-router";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import NewsTicker from "@/components/NewsTicker.vue";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
 </script>
 
 <template>
   <div id="app">
     <AppHeader />
+    <BreadcrumbNavigation />
     <main class="main-content">
       <RouterView />
     </main>
@@ -61,7 +63,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:8000/api')
+    axios.get('http://127.0.0.1:5000/api')
       .then(response => {
         this.message = response.data.message;
       })

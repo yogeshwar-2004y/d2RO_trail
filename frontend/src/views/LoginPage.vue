@@ -8,7 +8,7 @@
         <div class="main-image-container">
           <!-- Add main fighter jet image path here -->
           <img 
-            src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/Airforce_1.jpg" 
+            src="@/assets/images/Airforce_1.jpg" 
             alt="Fighter Jet with Indian Flag" 
             class="main-image"
           />
@@ -101,7 +101,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/login", {
+        const response = await fetch("http://127.0.0.1:5000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
