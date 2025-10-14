@@ -28,7 +28,8 @@
       <!-- Right Logo - VISTA -->
       <div class="logo-right">
         <img 
-          src="@/assets/images/vista_logo.png" 
+
+          src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/VISTA_5 Gradient_Sharp Edges.png"
           alt="VISTA Logo" 
           class="logo-image"
         />
