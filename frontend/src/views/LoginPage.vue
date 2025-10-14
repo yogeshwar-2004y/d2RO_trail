@@ -7,13 +7,13 @@
         <!-- Fighter Jet Image -->
         <div class="main-image-container">
           <!-- Add main fighter jet image path here -->
-          <img 
-            src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/Airforce_1.jpg" 
-            alt="Fighter Jet with Indian Flag" 
+          <img
+            src="@/assets/images/Airforce_1.jpg"
+            alt="Fighter Jet with Indian Flag"
             class="main-image"
           />
         </div>
-        
+
         <!-- Login Form -->
         <div class="login-section">
           <div class="login-container">
@@ -38,43 +38,47 @@
             <div class="button-group">
               <div class="login-reset-row">
                 <button @click="login" class="action-button1">LOGIN</button>
-                <button @click="resetPassword" class="action-button2">FORGOT PASSWORD</button>
+                <button @click="resetPassword" class="action-button2">
+                  FORGOT PASSWORD
+                </button>
               </div>
-              <button @click="techSupport" class="action-button">TECH SUPPORT</button>
+              <button @click="techSupport" class="action-button">
+                TECH SUPPORT
+              </button>
             </div>
           </div>
         </div>
       </div>
-      
+
       <!-- Row of Five Images - Full Width -->
       <div class="image-gallery">
-        <img 
-          src="@/assets/images/Image3.png" 
-          alt="Missile Launch" 
+        <img
+          src="@/assets/images/Image3.png"
+          alt="Missile Launch"
           class="gallery-image"
         />
         <!-- Add radar array image path here -->
-        <img 
-          src="@/assets/images/Image5.jpg" 
-          alt="Radar Array" 
+        <img
+          src="@/assets/images/Image5.jpg"
+          alt="Radar Array"
           class="gallery-image"
         />
         <!-- Add Tejas fighter image path here -->
-        <img 
-          src="@/assets/images/Image4.jpg" 
-          alt="Tejas Fighter" 
+        <img
+          src="@/assets/images/Image4.jpg"
+          alt="Tejas Fighter"
           class="gallery-image"
         />
         <!-- Add Mirage fighter image path here -->
-        <img 
-          src="@/assets/images/Image2.png" 
-          alt="Mirage Fighter" 
+        <img
+          src="@/assets/images/Image2.png"
+          alt="Mirage Fighter"
           class="gallery-image"
         />
         <!-- Add industrial machinery image path here -->
-        <img 
-          src="@/assets/images/Image1.png" 
-          alt="Industrial Machinery" 
+        <img
+          src="@/assets/images/Image1.png"
+          alt="Industrial Machinery"
           class="gallery-image"
         />
       </div>
@@ -163,7 +167,9 @@ export default {
 
 <style scoped>
 .login-page {
-  height: calc(100vh - 120px); /* Account for header (~60px) and news ticker + footer (~60px) */
+  height: calc(
+    100vh - 120px
+  ); /* Account for header (~60px) and news ticker + footer (~60px) */
   width: 100%; /* Take full width */
   display: flex;
   flex-direction: column;
@@ -255,7 +261,6 @@ export default {
 }
  */
 
-
 /* Login Form */
 .login-container {
   width: 100%;
@@ -296,7 +301,9 @@ export default {
   gap: 10px; /* Reduced gap for better spacing */
 }
 
-.action-button1, .action-button2, .action-button {
+.action-button1,
+.action-button2,
+.action-button {
   flex: 1; /* Make all buttons equal width */
   padding: 12px 20px; /* Increased padding for better size */
   border: none;
@@ -308,7 +315,6 @@ export default {
   transition: background-color 0.3s ease;
 }
 
-
 .action-button:hover {
   background-color: #51759a;
 }
@@ -318,26 +324,26 @@ export default {
   .login-page {
     height: calc(100vh - 140px); /* Account for larger header on tablet */
   }
-  
+
   .top-section {
     flex-direction: column;
     gap: 0;
   }
-  
+
   .main-image-container {
     height: 250px; /* Reduced for tablet */
   }
-  
+
   .login-section {
     min-height: auto;
     padding: 15px;
   }
-  
+
   .image-gallery {
     height: 150px; /* Reduced for tablet but still fits all 5 images */
     gap: 4px; /* Smaller gap for tablet */
   }
-  
+
   .gallery-image {
     flex: 1 1 calc(50% - 4px);
     min-width: 150px;
@@ -348,24 +354,24 @@ export default {
   .login-page {
     height: calc(100vh - 160px); /* Account for stacked header on mobile */
   }
-  
+
   .main-content {
     padding: 0;
   }
-  
+
   .main-image-container {
     height: 200px; /* Reduced for mobile */
   }
-  
+
   .login-container {
     padding: 20px;
   }
-  
+
   .image-gallery {
     height: 120px; /* Reduced for mobile but still fits all 5 images */
     gap: 3px; /* Smaller gap for mobile */
   }
-  
+
   .gallery-image {
     flex: 1 1 100%;
   }

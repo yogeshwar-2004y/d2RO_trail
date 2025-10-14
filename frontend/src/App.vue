@@ -3,11 +3,13 @@ import { RouterLink, RouterView } from "vue-router";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import NewsTicker from "@/components/NewsTicker.vue";
+import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
 </script>
 
 <template>
   <div id="app">
-    <AppHeader class="app-header" />
+    <AppHeader />
+    <BreadcrumbNavigation />
     <main class="main-content">
       <RouterView />
     </main>
@@ -97,7 +99,9 @@ import NewsTicker from "@/components/NewsTicker.vue";
 .designer-home,
 .home-page-container {
   overflow: hidden !important;
-  height: calc(100vh - 240px) !important; /* Account for header (150px) and news ticker + footer (90px) */
+  height: calc(
+    100vh - 240px
+  ) !important; /* Account for header (150px) and news ticker + footer (90px) */
 }
 
 .home-page .main-content,

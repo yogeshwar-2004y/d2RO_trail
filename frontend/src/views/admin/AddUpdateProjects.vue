@@ -18,7 +18,7 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      
+
       <div class="header-actions">
         <button class="action-btn" @click="goToManageProjects">
           Manage Projects
@@ -194,7 +194,7 @@ export default {
           createdBy: this.currentUser.id,
         };
 
-        const response = await fetch("http://localhost:5000/api/projects", {
+        const response = await fetch("http://localhost:8000/api/projects", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -260,8 +260,6 @@ export default {
   cursor: pointer;
   margin-right: 15px;
 }
-
-
 
 .header-actions {
   display: flex;

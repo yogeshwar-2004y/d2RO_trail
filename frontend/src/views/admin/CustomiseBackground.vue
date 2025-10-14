@@ -446,4 +446,3 @@ export default {
   border: 1px solid #f5c6cb;
 }
 </style>
-

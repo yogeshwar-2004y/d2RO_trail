@@ -237,7 +237,6 @@ export default {
   gap: 20px;
 }
 
-
 .page-title {
   display: flex;
   align-items: center;

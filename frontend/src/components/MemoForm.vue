@@ -540,13 +540,21 @@
     </div>
 
     <!-- Test Details Section -->
-    <div class="form-section test-details" :class="{ 'disabled-section': isTestDetailsDisabled }">
+    <div
+      class="form-section test-details"
+      :class="{ 'disabled-section': isTestDetailsDisabled }"
+    >
       <table class="test-table">
         <tr>
           <td class="test-left">
             <div class="test-field">
               <label>Above Unit is ready for Testing at</label>
-              <input type="text" v-model="formData.testVenue" placeholder="" :disabled="isTestDetailsDisabled" />
+              <input
+                type="text"
+                v-model="formData.testVenue"
+                placeholder=""
+                :disabled="isTestDetailsDisabled"
+              />
               <span>onwards.</span>
             </div>
             <div class="test-field">
@@ -578,7 +586,12 @@
             </div>
             <div class="test-field">
               <label>ii. Test cycle / Duration:</label>
-              <input type="text" v-model="formData.testCycle" placeholder="" :disabled="isTestDetailsDisabled" />
+              <input
+                type="text"
+                v-model="formData.testCycle"
+                placeholder=""
+                :disabled="isTestDetailsDisabled"
+              />
               <span>hrs</span>
             </div>
             <div class="test-field">
@@ -591,7 +604,11 @@
                   :disabled="isTestDetailsDisabled"
                 />
                 <div class="time-picker">
-                  <select v-model="formData.testStartHour" class="time-select" :disabled="isTestDetailsDisabled">
+                  <select
+                    v-model="formData.testStartHour"
+                    class="time-select"
+                    :disabled="isTestDetailsDisabled"
+                  >
                     <option value="">HH</option>
                     <option v-for="hour in hours" :key="hour" :value="hour">
                       {{ hour }}
@@ -612,7 +629,11 @@
                       {{ minute }}
                     </option>
                   </select>
-                  <select v-model="formData.testStartAmPm" class="ampm-select" :disabled="isTestDetailsDisabled">
+                  <select
+                    v-model="formData.testStartAmPm"
+                    class="ampm-select"
+                    :disabled="isTestDetailsDisabled"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -812,7 +833,10 @@
     </div>
 
     <!-- Certification Section -->
-    <div class="form-section certification" :class="{ 'disabled-section': isCertificationDisabled }">
+    <div
+      class="form-section certification"
+      :class="{ 'disabled-section': isCertificationDisabled }"
+    >
       <div class="certification-header">
         <span class="certification-statement">It is certified that:</span>
       </div>

@@ -18,7 +18,6 @@
         </svg>
       </button>
       <div class="header-center">
-
         <div class="page-title">
           <svg
             class="title-icon"

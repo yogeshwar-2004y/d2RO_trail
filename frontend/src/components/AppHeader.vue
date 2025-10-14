@@ -5,7 +5,7 @@
       <div class="logo-left">
 
         <img 
-          src="/Users/avanthika/Documents/vista/Aviatrax/frontend/src/assets/images/DRDO.png" 
+          src="@/assets/images/DRDO.png" 
           alt="DRDO Logo" 
           class="logo-image"
         />

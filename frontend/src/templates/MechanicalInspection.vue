@@ -898,4 +898,3 @@ export default {
   background: #5a6268;
 }
 </style>
-
