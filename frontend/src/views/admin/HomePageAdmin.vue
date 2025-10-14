@@ -33,9 +33,9 @@
       </div>
       <div class="card" @click="goToPage('ReportDashboard')">
         <div class="card-icon">
-          <svg xmlns="" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 20h9"></path>
-            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 3v18h18"></path>
+            <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
           </svg>
         </div>
         <div class="card-title">TEST REPORTS</div>
@@ -135,10 +135,14 @@ export default {
 <style scoped>
 .home-page {
   background-color: #f0f0f0;
-  min-height: 100vh;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
 }
 
@@ -172,68 +176,13 @@ export default {
   height: 24px;
 }
 
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 20px;
-}
-
-
-
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.menu-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.menu-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.menu-button svg {
-  width: 24px;
-  height: 24px;
-}
-
-.logout-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.logout-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.logout-button svg {
-  transform: rotate(180deg);
-  width: 24px;
-  height: 24px;
-}
-
 .card-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
-  gap: 30px;
+  gap: 30px; /* Increased gap for better spacing */
+  width: 100%;
+  max-width: 1000px; /* Increased width for 4 cards horizontally */
 }
 
 .card {
@@ -244,8 +193,8 @@ export default {
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  width: 220px;
-  height: 220px;
+  width: 180px; /* Smaller for 4 cards in horizontal layout */
+  height: 180px; /* Smaller for 4 cards in horizontal layout */
   padding: 20px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -262,15 +211,11 @@ export default {
 }
 
 .card-title {
-  font-size: 1.1em;
+  font-size: 0.9em;
   font-weight: bold;
   text-align: center;
   color: #333;
-}
-
-.dashboard-news-ticker {
-  margin-top: auto;
-  position: sticky;
-  bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 </style>

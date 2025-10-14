@@ -18,7 +18,7 @@ export default {
 .app-footer {
   background-color: #ffffff;
   width: 100%;
-  padding: 8px 0; /* Reduced from 20px */
+  padding: 4px 0; /* Reduced from 20px */
   border-top: 0px solid #e0e0e0;
   margin-top: auto;
   flex-shrink: 0; /* Prevent shrinking */
@@ -27,12 +27,12 @@ export default {
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 10px;
   text-align: center;
 }
 
 .copyright-text {
-  font-size: 0.8rem; /* Reduced from 0.9rem */
+  font-size: 0.7rem; /* Reduced from 0.9rem */
   color: #000;
   margin: 0;
   font-family: Arial, sans-serif;
@@ -45,7 +45,7 @@ export default {
   }
   
   .app-footer {
-    padding: 6px 0; /* Further reduced for mobile */
+    padding: 5px 0; /* Further reduced for mobile */
   }
 }
 </style>

@@ -108,12 +108,15 @@ export default {
 
 <style scoped>
 .home-page {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  min-height: 100vh;
+  background-color: #f0f0f0;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
 }
 
@@ -147,81 +150,13 @@ export default {
   height: 24px;
 }
 
-.app-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 20px;
-  margin-bottom: 40px;
-}
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.menu-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.menu-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.menu-button svg {
-  width: 24px;
-  height: 24px;
-}
-
-.logout-button {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.logout-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.logout-button svg {
-  transform: rotate(180deg);
-  width: 24px;
-  height: 24px;
-}
-
 .card-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
-  gap: 40px;
-  padding: 20px;
+  gap: 40px; /* Increased gap for better spacing */
+  width: 100%;
+  max-width: 900px; /* Limit container width */
 }
 
 .card {
@@ -230,50 +165,31 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  width: 250px;
-  height: 250px;
-  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  width: 200px; /* Slightly smaller for better fit */
+  height: 200px; /* Slightly smaller for better fit */
+  padding: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  border-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card-icon {
   color: #000;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .card-title {
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
   text-align: center;
   color: #333;
-  line-height: 1.3;
-}
-
-@media (max-width: 768px) {
-  .card-container {
-    flex-direction: column;
-    gap: 30px;
-  }
-  
-  .card {
-    width: 220px;
-    height: 220px;
-  }
-}
-
-.dashboard-news-ticker {
-  margin-top: auto;
-  position: sticky;
-  bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 </style>

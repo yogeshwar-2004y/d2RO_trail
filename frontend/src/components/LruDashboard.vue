@@ -18,12 +18,7 @@
         </svg>
       </button>
       <div class="header-center">
-        <div class="logos-container">
-          <img
-            alt="Vista Logo"
-            class="logo vista-logo"
-          />
-        </div>
+
         <div class="page-title">
           <svg
             class="title-icon"

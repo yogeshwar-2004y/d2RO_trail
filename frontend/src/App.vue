@@ -45,14 +45,14 @@ import NewsTicker from "@/components/NewsTicker.vue";
   overflow-y: auto; /* Allow vertical scrolling for other pages */
   overflow-x: hidden;
   min-height: 0; /* Allow flex item to shrink */
-  margin-top: 150px; /* Height of header */
+  margin-top: 130px; /* Height of header */
   margin-bottom: 90px; /* Height of news ticker + footer */
 }
 
 /* Fixed News Ticker */
 .app-news-ticker {
   position: fixed !important;
-  bottom: 40px !important; /* Height of footer */
+  bottom: 20px !important; /* Reduced gap from 40px to 20px */
   left: 0 !important;
   right: 0 !important;
   z-index: 1001 !important; /* Higher than footer to ensure it's visible */
@@ -67,7 +67,7 @@ import NewsTicker from "@/components/NewsTicker.vue";
 /* Fixed Footer */
 .app-footer {
   position: fixed !important;
-  bottom: 0 !important;
+  bottom: 0 !important; /* Position at very bottom */
   left: 0 !important;
   right: 0 !important;
   z-index: 1000 !important;
