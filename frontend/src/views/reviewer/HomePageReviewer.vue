@@ -1,27 +1,14 @@
 <template>
   <div class="home-page">
-    <header class="app-header">
-      <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
-      </div>
-      <div class="header-actions">
-        <button class="menu-button" @click="toggleMenu">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-        <button class="logout-button" @click="logout">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-        </button>
-      </div>
-    </header>
+    <!-- Floating Hamburger Menu Button -->
+    <button class="floating-menu-button" @click="toggleMenu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    
     <div class="card-container">
       <div class="card" @click="goToPage('ProjectsDashboard')">
         <div class="card-icon">
@@ -55,13 +42,6 @@
       </div>
     </div>
     
-    <!-- News Ticker at the bottom -->
-    <NewsTicker 
-      height="60px" 
-      backgroundColor="#34495e" 
-      textColor="#ffffff"
-      class="dashboard-news-ticker"
-    />
     
     <!-- Vertical Navigation Bar -->
     <VerticalNavBar 
@@ -74,13 +54,11 @@
 </template>
 
 <script>
-import NewsTicker from '@/components/NewsTicker.vue'
 import VerticalNavBar from '@/components/VerticalNavBar.vue'
 
 export default {
   name: 'HomePageReviewer',
   components: {
-    NewsTicker,
     VerticalNavBar
   },
   data() {
@@ -142,6 +120,37 @@ export default {
   display: flex;
   flex-direction: column;
   padding: 20px;
+  position: relative; /* For floating menu button */
+}
+
+/* Floating Hamburger Menu Button */
+.floating-menu-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background: #162845;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.floating-menu-button:hover {
+  background: #51759a;
+  transform: scale(1.1);
+}
+
+.floating-menu-button svg {
+  width: 24px;
+  height: 24px;
 }
 
 .app-header {

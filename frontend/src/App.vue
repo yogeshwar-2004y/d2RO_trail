@@ -7,7 +7,7 @@ import NewsTicker from "@/components/NewsTicker.vue";
 
 <template>
   <div id="app">
-    <AppHeader />
+    <AppHeader class="app-header" />
     <main class="main-content">
       <RouterView />
     </main>
@@ -17,29 +17,79 @@ import NewsTicker from "@/components/NewsTicker.vue";
       textColor="#ffffff"
       class="app-news-ticker"
     />
-    <AppFooter />
+    <AppFooter class="app-footer" />
   </div>
 </template>
 
 <style>
 #app {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Prevent body scroll */
   margin: 0;
   padding: 0;
 }
 
-.main-content {
-  flex: 1;
-  overflow: hidden; /* Prevent scrolling */
-  display: flex;
-  flex-direction: column;
+/* Fixed Header */
+.app-header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1002 !important; /* Highest z-index */
+  width: 100% !important;
 }
 
+.main-content {
+  flex: 1;
+  overflow-y: auto; /* Allow vertical scrolling for other pages */
+  overflow-x: hidden;
+  min-height: 0; /* Allow flex item to shrink */
+  margin-top: 150px; /* Height of header */
+  margin-bottom: 90px; /* Height of news ticker + footer */
+}
+
+/* Fixed News Ticker */
 .app-news-ticker {
-  flex-shrink: 0; /* Prevent shrinking */
+  position: fixed !important;
+  bottom: 40px !important; /* Height of footer */
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1001 !important; /* Higher than footer to ensure it's visible */
+  width: 100% !important;
+}
+
+/* Override NewsTicker internal positioning */
+.app-news-ticker .news-ticker-container {
+  position: relative !important;
+}
+
+/* Fixed Footer */
+.app-footer {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+}
+
+/* Special handling for login page - no scrolling */
+.login-page {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
+.login-page .main-content {
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow: hidden !important; /* Prevent scrolling on login page */
+  height: 100vh; /* Full viewport height */
+}
+
+/* Ensure no scrolling anywhere within login page */
+.login-page * {
+  overflow: hidden !important;
 }
 </style>
 
