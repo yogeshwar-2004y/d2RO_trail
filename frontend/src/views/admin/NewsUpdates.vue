@@ -18,18 +18,7 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
+      
       <span class="page-title">NEWS UPDATES</span>
       <button @click="openManageNewsModal" class="btn btn-manage">
         <svg
@@ -905,19 +894,7 @@ export default {
   background-color: #f0f0f0;
 }
 
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
 
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
-}
 
 .page-title {
   font-size: 1.8em;

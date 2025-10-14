@@ -18,19 +18,7 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
-
+      
       <div class="header-actions">
         <button class="action-btn" @click="goToManageProjects">
           Manage Projects
@@ -273,19 +261,7 @@ export default {
   margin-right: 15px;
 }
 
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
 
-.logo {
-  width: 140px;
-}
-
-.vista-logo {
-  width: 120px;
-}
 
 .header-actions {
   display: flex;
