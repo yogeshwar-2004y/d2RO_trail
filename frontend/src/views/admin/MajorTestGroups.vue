@@ -7,10 +7,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
-      </div>
     </div>
 
     <div class="page-title">
@@ -131,106 +127,5 @@ export default {
   cursor: pointer;
   margin-right: 20px;
 }
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
-}
-
-.page-title {
-  text-align: center;
-  margin: 40px 0 20px 0;
-  color: #333;
-}
-
-.page-title h1 {
-  font-size: 2.5em;
-  margin-bottom: 10px;
-  color: #2c3e50;
-}
-
-.page-title p {
-  font-size: 1.1em;
-  color: #666;
-  margin: 0;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  width: 90%;
-  max-width: 1400px;
-  margin-top: 30px;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  padding: 40px 20px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 220px;
-  text-align: center;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.card-icon {
-  margin-bottom: 20px;
-}
-
-.card-icon svg {
-  color: #2c3e50;
-}
-
-.card-title {
-  font-size: 1.3em;
-  font-weight: bold;
-  text-align: center;
-  color: #2c3e50;
-  margin-bottom: 10px;
-}
-
-.card-subtitle {
-  font-size: 0.9em;
-  text-align: center;
-  color: #666;
-  line-height: 1.4;
-  max-width: 250px;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-    width: 95%;
-  }
-  
-  .page-title h1 {
-    font-size: 2em;
-  }
-  
-  .card {
-    min-height: 200px;
-    padding: 30px 15px;
-  }
-}
 </style>
+

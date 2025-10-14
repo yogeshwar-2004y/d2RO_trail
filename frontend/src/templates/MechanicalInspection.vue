@@ -19,18 +19,6 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <div class="logos-container">
-          <img
-            src="@/assets/images/aviatrax-logo.png"
-            alt="Aviatrax Logo"
-            class="app-logo"
-          />
-          <img
-            src="@/assets/images/vista_logo.png"
-            alt="Vista Logo"
-            class="app-logo vista-logo"
-          />
-        </div>
       </div>
       <div class="header-center">
         <h1 class="page-title">MECHANICAL INSPECTION REPORT</h1>
@@ -731,31 +719,15 @@ export default {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.logos-container {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.app-logo {
-  height: 40px;
-  width: auto;
-}
-
-.vista-logo {
-  height: 35px;
-}
-
 .header-center {
   flex: 1;
   text-align: center;
 }
 
 .page-title {
-  margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  margin: 0;
 }
 
 .header-right {
@@ -767,14 +739,13 @@ export default {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.3s;
 }
 
 .export-button:hover {
@@ -782,71 +753,57 @@ export default {
 }
 
 .main-content {
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
 .form-header {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .document-path {
-  font-family: "Courier New", monospace;
-  font-size: 0.9rem;
-  color: #666;
-  background: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
+  font-weight: bold;
+  color: #333;
 }
 
 .report-date {
-  font-weight: 500;
-  color: #495057;
+  color: #666;
 }
 
 .subject-line {
   background: white;
   padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  color: #495057;
-  border-left: 4px solid #667eea;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .inspection-form {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-section {
-  padding: 2rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.form-section:last-child {
-  border-bottom: none;
+  margin-bottom: 2rem;
 }
 
 .section-title {
-  color: #495057;
-  margin-bottom: 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-bottom: 2px solid #e9ecef;
+  color: #333;
+  border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .general-info-grid {
@@ -864,29 +821,25 @@ export default {
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .inspection-table-container {
@@ -898,52 +851,31 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.inspection-table th,
+.inspection-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
 }
 
 .inspection-table th {
   background: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  padding: 1rem 0.75rem;
-  text-align: left;
-  border-bottom: 2px solid #e9ecef;
-  font-size: 0.85rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.inspection-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: top;
-}
-
-.inspection-table tr:hover {
-  background: #f8f9fa;
-}
-
-.inspection-table input,
-.inspection-table select {
+.inspection-table input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #ced4da;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.inspection-table input:focus,
-.inspection-table select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .readonly-input {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
-  font-weight: 500;
+  background: #f8f9fa;
+  color: #666;
 }
 
 .signatures-layout {
@@ -954,39 +886,38 @@ export default {
 }
 
 .signature-item {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .signature-item label {
-  display: block;
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .signature-line {
   height: 2px;
-  background: #e9ecef;
+  background: #333;
   margin-top: 2rem;
-  border-radius: 1px;
 }
 
 .form-actions {
-  padding: 2rem;
-  background: #f8f9fa;
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #ddd;
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: background-color 0.3s;
 }
 
 .btn-primary {
@@ -996,13 +927,11 @@ export default {
 
 .btn-primary:hover:not(:disabled) {
   background: #5a6fd8;
-  transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-  background: #ced4da;
+  background: #ccc;
   cursor: not-allowed;
-  transform: none;
 }
 
 .btn-secondary {
@@ -1012,33 +941,6 @@ export default {
 
 .btn-secondary:hover {
   background: #5a6268;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-  .general-info-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .signatures-layout {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .page-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  .header-left,
-  .header-right {
-    justify-content: center;
-  }
 }
 </style>
+

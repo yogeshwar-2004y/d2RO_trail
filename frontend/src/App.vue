@@ -91,6 +91,30 @@ import NewsTicker from "@/components/NewsTicker.vue";
 .login-page * {
   overflow: hidden !important;
 }
+
+/* Special handling for dashboard pages - no scrolling */
+.home-page,
+.designer-home,
+.home-page-container {
+  overflow: hidden !important;
+  height: calc(100vh - 240px) !important; /* Account for header (150px) and news ticker + footer (90px) */
+}
+
+.home-page .main-content,
+.designer-home .main-content,
+.home-page-container .main-content {
+  margin-top: 0;
+  margin-bottom: 0;
+  overflow: hidden !important; /* Prevent scrolling on dashboard pages */
+  height: 100%;
+}
+
+/* Ensure no scrolling anywhere within dashboard pages */
+.home-page *,
+.designer-home *,
+.home-page-container * {
+  overflow: hidden !important;
+}
 </style>
 
 <!-- simple flask connection -->

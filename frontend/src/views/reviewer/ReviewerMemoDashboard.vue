@@ -8,7 +8,6 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
       </div>
       <div class="header-right">
         <div class="search-box">

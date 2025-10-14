@@ -18,18 +18,6 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <div class="logos-container">
-          <img
-            src="@/assets/images/aviatrax-logo.png"
-            alt="Aviatrax Logo"
-            class="logo"
-          />
-          <img
-            src="@/assets/images/vista_logo.png"
-            alt="Vista Logo"
-            class="logo vista-logo"
-          />
-        </div>
         <div class="page-title">
           <svg
             class="title-icon"
@@ -249,9 +237,6 @@ export default {
   gap: 20px;
 }
 
-.logo {
-  width: 150px;
-}
 
 .page-title {
   display: flex;

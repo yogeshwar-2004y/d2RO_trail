@@ -21,18 +21,6 @@
 
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
       <div class="view-only-badge">VIEW ONLY</div>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
     </div>
 
     <!-- Requisition Details Section -->

@@ -7,10 +7,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
-      </div>
     </div>
 
     <div class="card-grid">
@@ -128,61 +124,5 @@ export default {
   cursor: pointer;
   margin-right: 20px;
 }
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 30px;
-  width: 80%;
-  max-width: 1200px;
-  margin-top: 50px;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: #fff;
-  border-radius: 15px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  padding: 40px 20px;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 180px;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.card-icon {
-  margin-bottom: 20px;
-}
-
-.card-icon svg {
-  color: #000;
-}
-
-.card-title {
-  font-size: 1em;
-  font-weight: bold;
-  text-align: center;
-  color: #333;
-}
 </style>
+
