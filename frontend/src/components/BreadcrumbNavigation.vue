@@ -457,7 +457,7 @@ const breadcrumbs = computed(() => {
 // Determine the home path based on user role or current route
 function getHomePath() {
   const currentPath = route.path
-  
+
   if (currentPath.startsWith('/admin')) {
     return '/admin'
   } else if (currentPath.startsWith('/reviewer')) {
@@ -470,9 +470,9 @@ function getHomePath() {
     return '/designer'
   } else if (currentPath.startsWith('/user-activities')) {
     return '/user-activities'
-  } else {
-    return '/admin' // Default to admin dashboard
-  }
+   } //else {
+  //   return '/admin' // Default to admin dashboard
+  // }
 }
 </script>
 

@@ -12,7 +12,7 @@
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <span class="toggle-text">{{ isOpen ? '' : 'Menu' }}</span>
+        <span class="toggle-text">{{ isOpen ? '' : '' }}</span>
       </div>
     </button>
 
@@ -290,9 +290,9 @@ onMounted(() => {
   top: 30px; /* Position below header */
   left: 30px;
   background: #e74c3c; /* Bright red for visibility */
-  border: 4px solid #fff; /* Thicker white border */
+  border: 2px solid #fff; /* Thicker white border */
   color: white;
-  width: 80px; /* Wider for text */
+  width: 55px; /* Wider for text */
   height: 60px; /* Larger size */
   border-radius: 30px; /* Rounded rectangle */
   cursor: pointer;
