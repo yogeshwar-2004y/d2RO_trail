@@ -38,6 +38,7 @@ def submit_tech_support():
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(255) NOT NULL,
                 user_id INTEGER NOT NULL,
+                issue_date DATE NOT NULL,
                 issue_description TEXT NOT NULL,
                 status VARCHAR(50) DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -60,11 +61,15 @@ def submit_tech_support():
         cur.close()
         
         # Log the activity
-        log_activity(
-            user_id=data['username'],
-            action="TECH_SUPPORT_REQUEST",
-            details=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
-        )
+        try:
+            log_activity(
+                user_id=data['username'],
+                action="TECH_SUPPORT_REQUEST",
+                details=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
+            )
+        except Exception as log_error:
+            print(f"Warning: Failed to log activity: {str(log_error)}")
+            # Continue execution even if logging fails
         
         return jsonify({
             "success": True,
@@ -75,7 +80,9 @@ def submit_tech_support():
         if 'conn' in locals():
             conn.rollback()
         print(f"Error submitting tech support request: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 @tech_support_bp.route('/api/tech-support', methods=['GET'])
 def get_tech_support_requests():
