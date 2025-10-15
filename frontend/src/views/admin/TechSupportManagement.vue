@@ -47,7 +47,14 @@
           <div class="request-header">
             <div class="request-info">
               <h3>{{ request.username }} (ID: {{ request.user_id }})</h3>
-              <span class="request-date">{{ formatDate(request.created_at) }}</span>
+              <div class="date-info">
+                <span class="submitted-date">
+                  <strong>Submitted:</strong> {{ formatDateTime(request.created_at) }}
+                </span>
+                <span v-if="request.updated_at && request.updated_at !== request.created_at" class="updated-date">
+                  <strong>Last Updated:</strong> {{ formatDateTime(request.updated_at) }}
+                </span>
+              </div>
             </div>
             <div class="request-status">
               <span class="status-badge" :class="request.status">{{ request.status.toUpperCase() }}</span>
@@ -56,7 +63,7 @@
           
           <div class="request-content">
             <div class="issue-date">
-              <strong>Issue Date:</strong> {{ formatDate(request.issue_date) }}
+              <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.issue_date) }}
             </div>
             <div class="issue-description">
               <strong>Issue Description:</strong>
@@ -167,10 +174,33 @@ export default {
       this.filteredRequests = filtered;
     },
 
-    formatDate(dateString) {
+    formatDateTime(dateString) {
       if (!dateString) return "N/A";
       const date = new Date(dateString);
-      return date.toLocaleDateString() + " " + date.toLocaleTimeString();
+      // Use local timezone for display
+      const formatted = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+      });
+      // Add timezone info
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      return `${formatted} (${timezone})`;
+    },
+
+    formatDateOnly(dateString) {
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      // Format as date only (user-specified issue date)
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      });
     },
 
     getStatusClass(status) {
@@ -285,14 +315,31 @@ export default {
 }
 
 .request-info h3 {
-  margin: 0 0 5px 0;
+  margin: 0 0 10px 0;
   color: #162845;
   font-size: 1.2rem;
 }
 
-.request-date {
+.date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.submitted-date,
+.updated-date {
   color: #666;
   font-size: 0.9rem;
+}
+
+.submitted-date strong,
+.updated-date strong {
+  color: #162845;
+}
+
+.updated-date {
+  font-style: italic;
+  color: #888;
 }
 
 .status-badge {
@@ -330,6 +377,14 @@ export default {
 .issue-date {
   margin-bottom: 10px;
   color: #666;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 5px;
+  border-left: 3px solid #162845;
+}
+
+.issue-date strong {
+  color: #162845;
 }
 
 .issue-description {
