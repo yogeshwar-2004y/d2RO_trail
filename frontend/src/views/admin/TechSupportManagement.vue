@@ -5,6 +5,24 @@
       <p>Manage and respond to technical support requests</p>
     </div>
 
+    <!-- Success Popup Modal -->
+    <div v-if="showSuccessMessage" class="popup-overlay" @click="hideSuccessMessage">
+      <div class="popup-modal" @click.stop>
+        <div class="popup-header">
+          <div class="popup-icon">
+            <span class="success-checkmark">✓</span>
+          </div>
+          <h3>Success!</h3>
+        </div>
+        <div class="popup-body">
+          <p>{{ successMessage }}</p>
+        </div>
+        <div class="popup-footer">
+          <button @click="hideSuccessMessage" class="popup-btn">OK</button>
+        </div>
+      </div>
+    </div>
+
     <div class="filters-section">
       <div class="filter-group">
         <label for="statusFilter">Filter by Status:</label>
@@ -106,7 +124,9 @@ export default {
       filteredRequests: [],
       loading: true,
       statusFilter: "",
-      searchQuery: ""
+      searchQuery: "",
+      showSuccessMessage: false,
+      successMessage: ""
     };
   },
   async mounted() {
@@ -114,6 +134,14 @@ export default {
     const { initializeUser } = await import('@/stores/userStore');
     initializeUser();
     await this.loadRequests();
+    
+    // Add keyboard event listener for popup
+    document.addEventListener('keydown', this.handleKeydown);
+  },
+
+  beforeUnmount() {
+    // Remove keyboard event listener
+    document.removeEventListener('keydown', this.handleKeydown);
   },
   methods: {
     async loadRequests() {
@@ -175,6 +203,9 @@ export default {
             request.updated_at = new Date().toISOString();
           }
           this.filterRequests();
+          
+          // Show success message
+          this.showSuccessNotification(`Status updated successfully to "${newStatus.toUpperCase()}"`);
         } else {
           alert("Failed to update status: " + data.message);
         }
@@ -235,6 +266,28 @@ export default {
 
     getStatusClass(status) {
       return `status-${status}`;
+    },
+
+    showSuccessNotification(message) {
+      this.successMessage = message;
+      this.showSuccessMessage = true;
+      
+      // Auto-hide after 4 seconds
+      setTimeout(() => {
+        this.hideSuccessMessage();
+      }, 4000);
+    },
+
+    hideSuccessMessage() {
+      this.showSuccessMessage = false;
+      this.successMessage = "";
+    },
+
+    handleKeydown(event) {
+      // Close popup on Escape key
+      if (event.key === 'Escape' && this.showSuccessMessage) {
+        this.hideSuccessMessage();
+      }
     }
   }
 };
@@ -261,6 +314,126 @@ export default {
 .page-header p {
   color: #666;
   font-size: 1.1rem;
+}
+
+/* Success Popup Modal Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.popup-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 90%;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+.popup-header {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.popup-icon {
+  margin-bottom: 10px;
+}
+
+.success-checkmark {
+  background: rgba(255, 255, 255, 0.2);
+  border: 3px solid white;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 auto;
+}
+
+.popup-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.popup-body {
+  padding: 25px 20px;
+  text-align: center;
+}
+
+.popup-body p {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
+.popup-footer {
+  padding: 20px;
+  text-align: center;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.popup-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.popup-btn:hover {
+  background: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.popup-btn:active {
+  transform: translateY(0);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .filters-section {
@@ -473,6 +646,42 @@ export default {
   
   .request-actions {
     justify-content: flex-start;
+  }
+
+  .popup-modal {
+    max-width: 350px;
+    width: 95%;
+  }
+
+  .popup-header {
+    padding: 15px;
+  }
+
+  .success-checkmark {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .popup-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .popup-body {
+    padding: 20px 15px;
+  }
+
+  .popup-body p {
+    font-size: 1rem;
+  }
+
+  .popup-footer {
+    padding: 15px;
+  }
+
+  .popup-btn {
+    padding: 10px 25px;
+    font-size: 0.9rem;
   }
 }
 </style>
