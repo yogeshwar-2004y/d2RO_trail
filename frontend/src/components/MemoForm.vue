@@ -1860,7 +1860,7 @@ export default {
       try {
         console.log("Fetching tests configuration...");
         const res = await fetch(
-          "http://localhost:8000/api/tests-configuration"
+          "http://localhost:5000/api/tests-configuration"
         );
         const data = await res.json();
         console.log("API Response:", data);
@@ -2091,7 +2091,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2189,7 +2189,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:8000/api/lrus", {
+        const response = await fetch("http://localhost:5000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2204,7 +2204,7 @@ export default {
       try {
         console.log(`Fetching stage types for test ID: ${testId}`);
         const response = await fetch(
-          `http://localhost:8000/api/test/${testId}/stage-types`
+          `http://localhost:5000/api/test/${testId}/stage-types`
         );
 
         if (!response.ok) {
@@ -2235,7 +2235,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2544,7 +2544,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:8000/api/memos", {
+        const response = await fetch("http://localhost:5000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -478,10 +478,16 @@ function getHomePath() {
 
 <style scoped>
 .breadcrumb-nav {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
-  padding: 8px 0;
-  margin: 0;
+  position: fixed !important;
+  top: 184px !important;
+  left: 0 !important;
+  right: 0 !important;
+  background-color: #f8f9fa !important;
+  border-bottom: 1px solid #e9ecef !important;
+  padding: 3px 0 !important;
+  margin: 0 !important;
+  z-index: 1001 !important;
+  width: 100% !important;
 }
 
 .breadcrumb-container {
