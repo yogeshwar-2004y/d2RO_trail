@@ -164,6 +164,15 @@ def submit_memo():
 
         memo_id = cur.fetchone()[0]
 
+        # Log memo submission activity
+        from utils.activity_logger import log_activity
+        log_activity(
+            project_id=None,  # Memo operations don't have project_id
+            activity_performed="Memo Submitted",
+            performed_by=data.get('submitted_by'),
+            additional_info=f"ID:{memo_id}|Name:{form_data.get('lruSruDesc', 'Memo')}|Memo '{form_data.get('lruSruDesc', 'Memo')}' (ID: {memo_id}) was submitted"
+        )
+
         # Insert reference documents into memo_references table
         references = []
         
@@ -700,6 +709,22 @@ def approve_memo(memo_id):
                 conn.rollback()
                 conn.commit()  # Re-commit the memo approval
         
+        # Log memo assignment/rejection activity
+        from utils.activity_logger import log_activity
+        
+        # Get memo details for logging
+        cur.execute("SELECT lru_sru_desc FROM memos WHERE memo_id = %s", (memo_id,))
+        memo_name = cur.fetchone()
+        memo_name = memo_name[0] if memo_name else 'Memo'
+        
+        activity_type = "Memo Assigned" if status == 'accepted' else "Memo Rejected"
+        log_activity(
+            project_id=None,  # Memo operations don't have project_id
+            activity_performed=activity_type,
+            performed_by=data.get('approved_by'),
+            additional_info=f"ID:{memo_id}|Name:{memo_name}|Memo '{memo_name}' (ID: {memo_id}) was {status}"
+        )
+
         cur.close()
 
         return jsonify({

@@ -51,6 +51,20 @@ class Project(BaseModel):
         self.created_at = created_at
         super().__init__(**kwargs)
 
+class ActivityLog(BaseModel):
+    """Activity Log model"""
+    
+    def __init__(self, activity_id: int, project_id: int = None, 
+                 activity_performed: str = None, performed_by: int = None,
+                 timestamp: datetime = None, additional_info: str = None, **kwargs):
+        self.activity_id = activity_id
+        self.project_id = project_id
+        self.activity_performed = activity_performed
+        self.performed_by = performed_by
+        self.timestamp = timestamp
+        self.additional_info = additional_info
+        super().__init__(**kwargs)
+
 class LRU(BaseModel):
     """LRU model"""
     

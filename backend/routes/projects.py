@@ -4,6 +4,7 @@ Project and LRU management routes
 from flask import Blueprint, request, jsonify
 from config import get_db_connection
 from utils.helpers import handle_database_error
+from utils.activity_logger import log_activity
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -161,6 +162,14 @@ def create_project():
         conn.commit()
         cur.close()
         
+        # Log the project creation activity
+        log_activity(
+            project_id=project_id,
+            activity_performed="Project Added",
+            performed_by=created_by,
+            additional_info=f"ID:{project_id}|Name:{project_name}|Project '{project_name}' created with {len(lrus)} LRUs"
+        )
+        
         return jsonify({
             "success": True,
             "message": "Project created successfully",
@@ -261,6 +270,19 @@ def update_project(project_id):
         
         conn.commit()
         cur.close()
+        
+        # Log the project update activity
+        # Get the user who performed the update from request data
+        updated_by = data.get('updatedBy', existing_project[1])  # Default to project name if no user specified
+        
+        # For now, we'll use a default user ID since the frontend might not send updatedBy
+        # In a real implementation, you'd get this from the authenticated user session
+        log_activity(
+            project_id=project_id,
+            activity_performed="Project Updated",
+            performed_by=updated_by if isinstance(updated_by, int) else 1002,  # Default to admin user
+            additional_info=f"ID:{project_id}|Name:{existing_project[1]}|Project '{existing_project[1]}' was updated"
+        )
         
         return jsonify({
             "success": True,
@@ -1192,4 +1214,27 @@ def get_project_details(project_id):
         
     except Exception as e:
         print(f"Error fetching project details for project {project_id}: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/activity-logs', methods=['GET'])
+def get_activity_logs():
+    """Get activity logs for admin dashboard"""
+    try:
+        from utils.activity_logger import get_activity_logs
+        
+        # Get query parameters
+        project_id = request.args.get('project_id', type=int)
+        limit = request.args.get('limit', 100, type=int)
+        
+        # Fetch activity logs
+        logs = get_activity_logs(project_id=project_id, limit=limit)
+        
+        return jsonify({
+            "success": True,
+            "logs": logs,
+            "total": len(logs)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching activity logs: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500

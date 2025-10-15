@@ -189,6 +189,7 @@ def create_report():
             INSERT INTO reports (memo_id, project_id, lru_id, serial_id, inspection_stage, 
                                date_of_review, review_venue, reference_document, status, created_at)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            RETURNING report_id
         """, (
             data['memo_id'],
             data['project_id'],
@@ -201,12 +202,24 @@ def create_report():
             data.get('status', 'ASSIGNED')
         ))
         
+        report_id = cur.fetchone()[0]
+        
+        # Log report generation activity
+        from utils.activity_logger import log_activity
+        log_activity(
+            project_id=data['project_id'],
+            activity_performed="Report Generated",
+            performed_by=data.get('created_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:Report {report_id}|Report {report_id} was generated for memo {data['memo_id']}"
+        )
+        
         conn.commit()
         cur.close()
         
         return jsonify({
             "success": True,
-            "message": "Report created successfully"
+            "message": "Report created successfully",
+            "report_id": report_id
         })
         
     except Exception as e:
@@ -532,6 +545,16 @@ def create_assembled_board_report():
         
         # Get the inserted report ID from RETURNING clause
         report_id = cur.fetchone()[0]
+        
+        # Log assembled board report submission activity
+        from utils.activity_logger import log_activity
+        report_name = data.get('report_ref_no') or f"Assembled Board Report {report_id}"
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Report Submitted",
+            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:{report_name}|Assembled Board Report '{report_name}' (ID: {report_id}) was submitted"
+        )
         
         conn.commit()
         cur.close()
@@ -1107,6 +1130,17 @@ def create_cot_screening_report():
         ))
         
         report_id = cur.fetchone()[0]
+        
+        # Log COT screening report submission activity
+        from utils.activity_logger import log_activity
+        report_name = data.get('report_ref_no') or f"COT Screening Report {report_id}"
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Report Submitted",
+            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:{report_name}|COT Screening Report '{report_name}' (ID: {report_id}) was submitted"
+        )
+        
         conn.commit()
         
         print(f"Insert query executed successfully")
@@ -1506,7 +1540,7 @@ def create_bare_pcb_inspection_report():
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, NOW(), NOW()
-            )
+            ) RETURNING report_id
         """, (
             data['project_name'],
             data['report_ref_no'],
@@ -1574,8 +1608,19 @@ def create_bare_pcb_inspection_report():
             data.get('approved_by')
         ))
         
+        report_id = cur.fetchone()[0]
+        
+        # Log bare PCB report submission activity
+        from utils.activity_logger import log_activity
+        report_name = data.get('report_ref_no') or f"Bare PCB Report {report_id}"
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Report Submitted",
+            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:{report_name}|Bare PCB Report '{report_name}' (ID: {report_id}) was submitted"
+        )
+        
         conn.commit()
-        report_id = cur.lastrowid
         cur.close()
         
         return jsonify({
@@ -1702,7 +1747,7 @@ def create_conformal_coating_inspection_report():
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            )
+            ) RETURNING report_id
         """, (
             data['project_name'],
             data['report_ref_no'],
@@ -1767,8 +1812,19 @@ def create_conformal_coating_inspection_report():
             data.get('approved_by')
         ))
         
+        report_id = cur.fetchone()[0]
+        
+        # Log conformal coating report submission activity
+        from utils.activity_logger import log_activity
+        report_name = data.get('report_ref_no') or f"Conformal Coating Report {report_id}"
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Report Submitted",
+            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:{report_name}|Conformal Coating Report '{report_name}' (ID: {report_id}) was submitted"
+        )
+        
         conn.commit()
-        report_id = cur.lastrowid
         cur.close()
         
         return jsonify({
@@ -1893,7 +1949,7 @@ def create_raw_material_inspection_report():
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s
-            )
+            ) RETURNING report_id
         """, (
             data['project_name'],
             data['report_ref_no'],
@@ -1950,8 +2006,19 @@ def create_raw_material_inspection_report():
             data.get('approved_by')
         ))
         
+        report_id = cur.fetchone()[0]
+        
+        # Log raw material report submission activity
+        from utils.activity_logger import log_activity
+        report_name = data.get('report_ref_no') or f"Raw Material Report {report_id}"
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Report Submitted",
+            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
+            additional_info=f"ID:{report_id}|Name:{report_name}|Raw Material Report '{report_name}' (ID: {report_id}) was submitted"
+        )
+        
         conn.commit()
-        report_id = cur.lastrowid
         cur.close()
         
         return jsonify({

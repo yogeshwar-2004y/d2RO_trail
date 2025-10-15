@@ -43,44 +43,138 @@
     </div>
     
     <div class="table-container">
-      <table>
+      <div v-if="loading" class="loading-message">
+        Loading activity logs...
+      </div>
+      <div v-else-if="error" class="error-message">
+        {{ error }}
+        <button @click="loadActivityLogs" class="retry-button">Retry</button>
+      </div>
+      <table v-else>
         <thead>
           <tr>
             <th>ACTIVITY ID</th>
-            <th>PROJECT ID</th>
+            <th>ID</th>
+            <th>NAME</th>
             <th>ACTIVITY PERFORMED</th>
             <th>PERFORMED BY</th>
             <th>TIMESTAMP</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="log in logs" :key="log.activityId">
-            <td>{{ log.activityId }}</td>
-            <td>{{ log.projectId }}</td>
-            <td>{{ log.activityPerformed }}</td>
-            <td>{{ log.performedBy }}</td>
-            <td>{{ log.timestamp }}</td>
+          <tr v-for="log in filteredLogs" :key="log.activity_id">
+            <td>{{ log.activity_id }}</td>
+            <td>{{ extractId(log.additional_info) }}</td>
+            <td>{{ extractName(log.additional_info) }}</td>
+            <td>{{ log.activity_performed }}</td>
+            <td>{{ log.user_name || log.performed_by }}</td>
+            <td>{{ formatTimestamp(log.timestamp) }}</td>
           </tr>
         </tbody>
       </table>
+      <div v-if="!loading && !error && filteredLogs.length === 0" class="no-data-message">
+        No activity logs found.
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'ActivityLogs',
   data() {
     return {
       searchQuery: '',
-      logs: [
-        { activityId: 1, projectId: 'PRJ001', activityPerformed: 'Document Uploaded', performedBy: 'User A', timestamp: '2025-07-15 10:00:00' },
-        { activityId: 2, projectId: 'PRJ002', activityPerformed: 'Memo Approved', performedBy: 'User B', timestamp: '2025-07-15 10:15:30' },
-        { activityId: 3, projectId: 'PRJ001', activityPerformed: 'Test Assigned', performedBy: 'User C', timestamp: '2025-07-15 11:05:45' },
-        { activityId: 4, projectId: 'PRJ003', activityPerformed: 'User Added', performedBy: 'Admin', timestamp: '2025-07-15 11:30:10' },
-      ],
+      logs: [],
+      filteredLogs: [],
+      loading: false,
+      error: null,
     };
   },
+  async mounted() {
+    await this.loadActivityLogs();
+  },
+  methods: {
+    async loadActivityLogs() {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const response = await axios.get('http://localhost:5000/api/activity-logs');
+        
+        if (response.data.success) {
+          this.logs = response.data.logs;
+          this.filteredLogs = [...this.logs];
+        } else {
+          this.error = 'Failed to load activity logs';
+        }
+      } catch (error) {
+        console.error('Error loading activity logs:', error);
+        this.error = 'Error loading activity logs. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
+    
+    filterLogs() {
+      if (!this.searchQuery.trim()) {
+        this.filteredLogs = [...this.logs];
+        return;
+      }
+      
+      const query = this.searchQuery.toLowerCase();
+      this.filteredLogs = this.logs.filter(log => 
+        log.activity_performed.toLowerCase().includes(query) ||
+        log.user_name?.toLowerCase().includes(query) ||
+        log.project_name?.toLowerCase().includes(query) ||
+        log.project_id?.toString().includes(query) ||
+        log.activity_id?.toString().includes(query) ||
+        log.additional_info?.toLowerCase().includes(query)
+      );
+    },
+    
+    formatTimestamp(timestamp) {
+      if (!timestamp) return 'N/A';
+      
+      try {
+        const date = new Date(timestamp);
+        return date.toLocaleString('en-US', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        });
+      } catch (error) {
+        return timestamp;
+      }
+    },
+    
+    extractId(additionalInfo) {
+      if (!additionalInfo) return '-';
+      
+      // Look for pattern "ID:123|" in additional_info
+      const idMatch = additionalInfo.match(/ID:([^|]+)\|/);
+      return idMatch ? idMatch[1] : '-';
+    },
+    
+    extractName(additionalInfo) {
+      if (!additionalInfo) return '-';
+      
+      // Look for pattern "Name:SomeName|" in additional_info
+      const nameMatch = additionalInfo.match(/Name:([^|]+)\|/);
+      return nameMatch ? nameMatch[1] : '-';
+    }
+  },
+  
+  watch: {
+    searchQuery() {
+      this.filterLogs();
+    }
+  }
 };
 </script>
 
@@ -199,5 +293,30 @@ th, td {
 th {
   background-color: #444;
   font-weight: bold;
+}
+
+.loading-message, .error-message, .no-data-message {
+  text-align: center;
+  padding: 40px;
+  color: #fff;
+  font-size: 1.1em;
+}
+
+.error-message {
+  color: #ff6b6b;
+}
+
+.retry-button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.retry-button:hover {
+  background-color: #0056b3;
 }
 </style>
