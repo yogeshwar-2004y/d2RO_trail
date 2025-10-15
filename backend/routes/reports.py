@@ -388,6 +388,43 @@ def update_report_template(report_id):
         print(f"Error updating report template: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error updating report template: {str(e)}")
 
+@reports_bp.route('/api/report-templates', methods=['GET'])
+def get_report_templates():
+    """Get all available report templates"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch all report templates
+        cur.execute("""
+            SELECT template_id, template_name
+            FROM report_templates
+            ORDER BY template_name
+        """)
+        
+        templates = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        template_list = []
+        for template in templates:
+            template_list.append({
+                "template_id": template[0],
+                "name": template[1],
+                "displayName": template[1].title(),
+                "description": f"Template for {template[1]}",
+                "component": template[1].replace(" ", "").replace("_", "")
+            })
+        
+        return jsonify({
+            "success": True,
+            "templates": template_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching report templates: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching report templates: {str(e)}")
+
 @reports_bp.route('/api/reports/<int:report_id>', methods=['PUT'])
 def update_report_status(report_id):
     """Update report status"""

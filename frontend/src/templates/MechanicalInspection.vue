@@ -311,6 +311,16 @@ import jsPDF from "jspdf";
 
 export default {
   name: "MechanicalInspection",
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       currentYear: "2025",

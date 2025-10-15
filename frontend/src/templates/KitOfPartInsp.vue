@@ -232,6 +232,16 @@ import jsPDF from "jspdf";
 
 export default {
   name: "KitOfPartInsp",
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       currentYear: "2025",

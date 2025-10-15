@@ -50,7 +50,7 @@
       </div>
     </div>
     
-    <div v-else class="template-grid">
+    <div v-else-if="!selectedTemplate" class="template-grid">
       <div 
         v-for="template in filteredTemplates" 
         :key="template.name" 
@@ -203,18 +203,76 @@
         <p>No templates match your current search.</p>
       </div>
     </div>
+
+    <!-- Template Display Area -->
+    <div v-if="selectedTemplate" class="template-display-container">
+      <div class="template-display-header">
+        <button class="back-to-grid-button" @click="backToGrid">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"></path>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Templates
+        </button>
+        <h2 class="template-display-title">{{ selectedTemplate.displayName }}</h2>
+        <div class="template-actions">
+          <button class="use-template-btn" @click="useTemplate">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+            </svg>
+            Use Template
+          </button>
+        </div>
+      </div>
+      
+      <div class="template-content-wrapper">
+        <component 
+          v-if="selectedTemplateComponent" 
+          :is="selectedTemplateComponent" 
+          :readonly="true"
+          :isTemplatePreview="true"
+          class="template-preview-component"
+        />
+        <div v-else class="template-not-found">
+          <h3>Template Component Not Found</h3>
+          <p>The template component for "{{ selectedTemplate.displayName }}" could not be loaded.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import ObservationReport from '@/templates/ObservationReport.vue'
+import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
+import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
+import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
+import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
+import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
+import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+
 export default {
   name: 'TemplateDashboard',
+  components: {
+    ObservationReport,
+    BarePcbInspectionReport,
+    Conformalcoatinginspectionreport,
+    RawMaterialInspectionReport,
+    CotsScreeningInspectionReport,
+    AssembledBoardInspectionReport,
+    KitOfPartInsp,
+    MechanicalInspection
+  },
   data() {
     return {
       searchQuery: '',
       templates: [],
       loading: true,
       error: null,
+      selectedTemplate: null,
+      selectedTemplateComponent: null,
     };
   },
   computed: {
@@ -234,91 +292,111 @@ export default {
     this.loadTemplates();
   },
   methods: {
-    loadTemplates() {
+    async loadTemplates() {
       try {
         this.loading = true;
         this.error = null;
         
-        // Define available templates
-        this.templates = [
-          {
-            name: 'ObservationReport',
-            displayName: 'Observation Report',
-            description: 'Template for creating observation reports with detailed analysis',
-            component: 'ObservationReport'
-          },
-          {
-            name: 'BarePcbInspectionReport',
-            displayName: 'Bare PCB Inspection Report',
-            description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
-            component: 'BarePcbInspectionReport'
-          },
-          {
-            name: 'Conformalcoatinginspectionreport',
-            displayName: 'Conformal Coating Inspection Report',
-            description: 'Template for creating conformal coating inspection reports with quality testing criteria',
-            component: 'Conformalcoatinginspectionreport'
-          },
-          {
-            name: 'RawMaterialInspectionReport',
-            displayName: 'Raw Material Inspection Report',
-            description: 'Template for creating raw material inspection reports with compliance checking',
-            component: 'RawMaterialInspectionReport'
-          },
-          {
-            name: 'CotsScreeningInspectionReport',
-            displayName: 'COTS Screening Inspection Report',
-            description: 'Template for creating COTS screening inspection reports with test case validation',
-            component: 'CotsScreeningInspectionReport'
-          },
-          {
-            name: 'AssembledBoardInspectionReport',
-            displayName: 'Assembled Board Inspection Report',
-            description: 'Template for creating assembled board inspection reports with comprehensive testing criteria',
-            component: 'AssembledBoardInspectionReport'
-          },
-          {
-            name: 'KitOfPartInsp',
-            displayName: 'Kit of Part Inspection Report',
-            description: 'Template for creating kit of part inspection reports with component verification',
-            component: 'KitOfPartInsp'
-          },
-          {
-            name: 'MechanicalInspection',
-            displayName: 'Mechanical Inspection Report',
-            description: 'Template for creating mechanical inspection reports with structural testing criteria',
-            component: 'MechanicalInspection'
-          },
-          {
-            name: 'MechanicalInspection',
-            displayName: 'Mechanical Inspection Report',
-            description: 'Template for mechanical inspection reports with dimensional checks and compliance parameters',
-            component: 'MechanicalInspection'
-          },
-          {
-            name: 'KitOfPartInsp',
-            displayName: 'KIT of Part Inspection',
-            description: 'Template for KIT of Part Inspection reports with comprehensive part analysis',
-            component: 'KitOfPartInsp'
-          }
-        ];
+        // Fetch templates from API
+        const response = await fetch('http://localhost:5000/api/report-templates');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.templates = data.templates;
+        } else {
+          this.error = data.message || 'Failed to load templates';
+        }
         
         this.loading = false;
       } catch (error) {
         console.error('Error loading templates:', error);
-        this.error = error.message;
+        this.error = 'Error loading templates. Please try again.';
         this.loading = false;
       }
     },
     
     viewTemplate(template) {
-      // Navigate to template viewer
-      this.$router.push({
-        name: 'TemplateViewer',
-        params: {
-          templateName: template.name
+      // Set the selected template and load its component
+      this.selectedTemplate = template;
+      this.loadTemplateComponent(template);
+    },
+    
+    loadTemplateComponent(template) {
+      try {
+        // Map template names to components
+        const templateComponents = {
+          'ObservationReport': ObservationReport,
+          'BarePcbInspectionReport': BarePcbInspectionReport,
+          'Conformalcoatinginspectionreport': Conformalcoatinginspectionreport,
+          'RawMaterialInspectionReport': RawMaterialInspectionReport,
+          'CotsScreeningInspectionReport': CotsScreeningInspectionReport,
+          'AssembledBoardInspectionReport': AssembledBoardInspectionReport,
+          'KitOfPartInsp': KitOfPartInsp,
+          'MechanicalInspection': MechanicalInspection
+        };
+        
+        // Map API template names to component names
+        const componentName = this.getComponentName(template.name);
+        this.selectedTemplateComponent = templateComponents[componentName] || null;
+        
+        if (!this.selectedTemplateComponent) {
+          console.error(`Template component not found: ${componentName}`);
         }
-      });
+      } catch (error) {
+        console.error('Error loading template component:', error);
+        this.selectedTemplateComponent = null;
+      }
+    },
+    
+    getComponentName(templateName) {
+      // Map API template names to component names
+      const nameMapping = {
+        'assembled board inspection report': 'AssembledBoardInspectionReport',
+        'bare pcb inspection report': 'BarePcbInspectionReport',
+        'conformal coating inspection report': 'Conformalcoatinginspectionreport',
+        'cots screening inspection report': 'CotsScreeningInspectionReport',
+        'kit of part inspection report': 'KitOfPartInsp',
+        'mechanical inspection report': 'MechanicalInspection',
+        'raw material inspection report': 'RawMaterialInspectionReport'
+      };
+      
+      return nameMapping[templateName.toLowerCase()] || templateName;
+    },
+    
+    backToGrid() {
+      this.selectedTemplate = null;
+      this.selectedTemplateComponent = null;
+    },
+    
+    useTemplate() {
+      if (!this.selectedTemplate) return;
+      
+      // Navigate to the actual form based on template type
+      const componentName = this.getComponentName(this.selectedTemplate.name);
+      
+      const routeMapping = {
+        'BarePcbInspectionReport': 'BarePcbInspectionReport',
+        'ObservationReport': 'ObservationReport',
+        'Conformalcoatinginspectionreport': 'Conformalcoatinginspectionreport',
+        'RawMaterialInspectionReport': 'RawMaterialInspectionReport',
+        'CotsScreeningInspectionReport': 'CotsScreeningInspectionReport',
+        'AssembledBoardInspectionReport': 'AssembledBoardInspectionReport',
+        'KitOfPartInsp': 'KitOfPartInsp',
+        'MechanicalInspection': 'MechanicalInspection'
+      };
+      
+      const routeName = routeMapping[componentName];
+      if (routeName) {
+        this.$router.push({ 
+          name: routeName,
+          params: { 
+            projectName: 'Default Project',
+            lruName: 'Default LRU'
+          }
+        });
+      } else {
+        alert(`Template "${this.selectedTemplate.displayName}" will be used to create a new report. This functionality will be implemented soon!`);
+      }
     }
   }
 };
@@ -554,6 +632,109 @@ export default {
   color: #95a5a6;
 }
 
+/* Template Display Styles */
+.template-display-container {
+  padding: 30px;
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 120px);
+}
+
+.template-display-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-grid-button {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-to-grid-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.template-display-title {
+  color: #2d3748;
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: bold;
+}
+
+.template-actions {
+  display: flex;
+  gap: 15px;
+}
+
+.use-template-btn {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.use-template-btn:hover {
+  background: linear-gradient(135deg, #218838, #1ea085);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.template-content-wrapper {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.template-preview-component {
+  /* Styles for the template component */
+  border: none;
+  border-radius: 0;
+}
+
+.template-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.template-not-found h3 {
+  color: #e74c3c;
+  margin-bottom: 10px;
+}
+
+.template-not-found p {
+  color: #6c757d;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header {
@@ -585,6 +766,27 @@ export default {
   .template-card {
     height: 180px;
     padding: 20px;
+  }
+  
+  .template-display-container {
+    padding: 20px;
+  }
+  
+  .template-display-header {
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .template-actions {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .back-to-grid-button,
+  .use-template-btn {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

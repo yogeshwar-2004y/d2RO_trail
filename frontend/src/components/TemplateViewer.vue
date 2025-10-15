@@ -63,6 +63,7 @@
           <component 
             v-if="templateComponent" 
             :is="templateComponent" 
+            :readonly="true"
             :isTemplatePreview="true"
             class="template-component"
           />
