@@ -23,7 +23,7 @@
           <div class="form-group">
             <label for="userId">User ID *</label>
             <input
-              type="text"
+              type="number"
               id="userId"
               v-model="formData.userId"
               placeholder="Enter your user ID"
@@ -127,8 +127,8 @@ export default {
         alert("Please enter your username.");
         return false;
       }
-      if (!this.formData.userId.trim()) {
-        alert("Please enter your user ID.");
+      if (!this.formData.userId || this.formData.userId <= 0) {
+        alert("Please enter a valid user ID (positive number).");
         return false;
       }
       if (!this.formData.date) {

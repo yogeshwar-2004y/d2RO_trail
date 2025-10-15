@@ -23,6 +23,12 @@ def submit_tech_support():
             if not data.get(field):
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
         
+        # Validate user_id is a valid integer
+        try:
+            user_id = int(data['userId'])
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "message": "User ID must be a valid number"}), 400
+        
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -31,8 +37,7 @@ def submit_tech_support():
             CREATE TABLE IF NOT EXISTS tech_support_requests (
                 id SERIAL PRIMARY KEY,
                 username VARCHAR(255) NOT NULL,
-                user_id VARCHAR(255) NOT NULL,
-                issue_date DATE NOT NULL,
+                user_id INTEGER NOT NULL,
                 issue_description TEXT NOT NULL,
                 status VARCHAR(50) DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -46,7 +51,7 @@ def submit_tech_support():
             VALUES (%s, %s, %s, %s)
         """, (
             data['username'],
-            data['userId'],
+            user_id,  # Use validated user_id
             data['date'],
             data['issue']
         ))
