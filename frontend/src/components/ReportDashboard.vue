@@ -893,7 +893,7 @@ export default {
 /* View Templates Button */
 .view-templates-container {
   position: fixed;
-  bottom: 30px;
+  bottom: 80px;
   right: 30px;
   z-index: 1000;
 }
