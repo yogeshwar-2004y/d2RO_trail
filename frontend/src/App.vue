@@ -1,25 +1,35 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
+import { RouterLink, RouterView, useRoute } from "vue-router";
+import { computed } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import NewsTicker from "@/components/NewsTicker.vue";
 import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
+import AppSidebar from "@/components/AppSidebar.vue";
+
+const route = useRoute();
+
+// Show sidebar on all pages except login
+const showSidebar = computed(() => {
+  return route.name !== 'login';
+});
 </script>
 
 <template>
   <div id="app">
+    <AppSidebar v-if="showSidebar" />
     <AppHeader />
     <BreadcrumbNavigation />
-    <main class="main-content">
+    <main class="main-content" :class="{ 'with-sidebar': showSidebar }">
       <RouterView />
     </main>
-    <NewsTicker
+      <NewsTicker
       height="50px"
       backgroundColor="#2c3e50"
       textColor="#ffffff"
       class="app-news-ticker"
-    />
-    <AppFooter class="app-footer" />
+      />
+      <AppFooter class="app-footer" />
   </div>
 </template>
 
@@ -47,8 +57,9 @@ import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
   overflow-y: auto; /* Allow vertical scrolling for other pages */
   overflow-x: hidden;
   min-height: 0; /* Allow flex item to shrink */
-  margin-top: 220px; /* Account for header (170px) + breadcrumb (50px) */
+  margin-top: 234px; /* Account for header (184px) + breadcrumb (50px) */
   margin-bottom: 90px; /* Height of news ticker + footer */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Fixed News Ticker */
