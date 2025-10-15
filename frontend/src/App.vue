@@ -47,7 +47,7 @@ import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
   overflow-y: auto; /* Allow vertical scrolling for other pages */
   overflow-x: hidden;
   min-height: 0; /* Allow flex item to shrink */
-  margin-top: 150px; /* Increased from 130px to prevent header overlap */
+  margin-top: 220px; /* Account for header (170px) + breadcrumb (50px) */
   margin-bottom: 90px; /* Height of news ticker + footer */
 }
 
@@ -100,8 +100,8 @@ import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
 .home-page-container {
   overflow: hidden !important;
   height: calc(
-    100vh - 240px
-  ) !important; /* Account for header (150px) and news ticker + footer (90px) */
+    100vh - 310px
+  ) !important; /* Account for header (170px), breadcrumb (50px), and news ticker + footer (90px) */
 }
 
 .home-page .main-content,
@@ -139,7 +139,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:8000/api')
+    axios.get('http://127.0.0.1:5000/api')
       .then(response => {
         this.message = response.data.message;
       })
