@@ -245,7 +245,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions">
+        <div class="form-actions" v-if="!readonly">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -270,6 +270,16 @@ import jsPDF from "jspdf";
 
 export default {
   name: "RawMaterialInspectionReport",
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       projectName: "",
