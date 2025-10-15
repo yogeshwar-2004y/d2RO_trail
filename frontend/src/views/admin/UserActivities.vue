@@ -62,6 +62,16 @@
         </div>
         <span class="card-title">CUSTOMISE BACKGROUND</span>
       </div>
+      <div class="card" @click="goToPage('TechSupport')">
+        <div class="card-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
+            <path d="M3 12v6c0 .552.448 1 1 1h16c.552 0 1-.448 1-1v-6"></path>
+          </svg>
+        </div>
+        <span class="card-title">TECH SUPPORT</span>
+      </div>
     </div>
   </div>
 </template>
@@ -83,6 +93,8 @@ export default {
         this.$router.push({ name: "NewsUpdates" });
       } else if (pageName === "CustomiseBackground") {
         this.$router.push({ name: "CustomiseBackground" });
+      } else if (pageName === "TechSupport") {
+        this.$router.push({ name: "TechSupportManagement" });
       }
     },
   },
@@ -107,7 +119,7 @@ export default {
   grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   width: 100%;
-  max-width: 900px; /* Adjusted for 3x2 grid */
+  max-width: 1000px; /* Adjusted for 3x3 grid */
   justify-items: center;
 }
 
@@ -143,6 +155,33 @@ export default {
   color: #333;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    max-width: 600px;
+  }
+  
+  .card {
+    width: 160px;
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    max-width: 300px;
+  }
+  
+  .card {
+    width: 200px;
+    height: 160px;
+  }
 }
 </style>
 

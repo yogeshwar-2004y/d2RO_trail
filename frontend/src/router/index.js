@@ -31,6 +31,7 @@ import QTTestGroup from "@/views/admin/QTTestGroup.vue";
 import SoFTTestGroup from "@/views/admin/SoFTTestGroup.vue";
 import NewsUpdates from "@/views/admin/NewsUpdates.vue";
 import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
+import TechSupportManagement from "@/views/admin/TechSupportManagement.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
 import ViewOnlyMemoForm from "@/components/ViewOnlyMemoForm.vue";
@@ -178,6 +179,11 @@ const router = createRouter({
       path: "/user-activities/customise-background",
       name: "CustomiseBackground",
       component: CustomiseBackground
+    },
+    {
+      path: "/user-activities/tech-support",
+      name: "TechSupportManagement",
+      component: TechSupportManagement
     },
     {
       path: "/user-activities",
