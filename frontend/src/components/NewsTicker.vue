@@ -144,8 +144,8 @@ export default {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 300;
+  font-size: 15px;
   animation-name: scroll;
   transform: translateX(100%);
 }
