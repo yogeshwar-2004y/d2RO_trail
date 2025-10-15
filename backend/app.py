@@ -21,6 +21,7 @@ from routes.memos import memos_bp
 from routes.reports import reports_bp
 from routes.mechanical_inspection import mechanical_inspection_bp
 from routes.kit_of_parts import kit_of_parts_bp
+from routes.tech_support import tech_support_bp
 
 def create_app():
     """Application factory pattern"""
@@ -51,6 +52,7 @@ def create_app():
     app.register_blueprint(reports_bp)
     app.register_blueprint(mechanical_inspection_bp)
     app.register_blueprint(kit_of_parts_bp)
+    app.register_blueprint(tech_support_bp)
     
     return app
 

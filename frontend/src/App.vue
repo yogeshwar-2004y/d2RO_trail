@@ -9,9 +9,9 @@ import AppSidebar from "@/components/AppSidebar.vue";
 
 const route = useRoute();
 
-// Show sidebar on all pages except login
+// Show sidebar on all pages except login and tech support
 const showSidebar = computed(() => {
-  return route.name !== 'login';
+  return route.name !== 'login' && route.name !== 'TechSupport';
 });
 </script>
 
@@ -103,6 +103,12 @@ const showSidebar = computed(() => {
 /* Ensure no scrolling anywhere within login page */
 .login-page * {
   overflow: hidden !important;
+}
+
+/* Special handling for tech support page */
+.tech-support-page {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* Special handling for dashboard pages - no scrolling */

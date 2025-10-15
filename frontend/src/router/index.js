@@ -6,6 +6,7 @@ import designheadRoutes from './designhead'
 import designerRoutes from './designer'
 
 import LoginPage from '@/views/LoginPage.vue'
+import TechSupportPage from '@/views/TechSupportPage.vue'
 import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
 import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
 import LruDashboard from '@/components/LruDashboard.vue'
@@ -54,6 +55,11 @@ const router = createRouter({
       path: "/",
       name: "login",
       component: LoginPage,
+    },
+    {
+      path: "/tech-support",
+      name: "TechSupport",
+      component: TechSupportPage,
     },
     {
       path: "/user-activities/activity-logs",
