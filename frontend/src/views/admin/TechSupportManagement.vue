@@ -54,6 +54,12 @@
                 <span v-if="request.updated_at && request.updated_at !== request.created_at" class="updated-date">
                   <strong>Last Updated:</strong> {{ formatDateTime(request.updated_at) }}
                 </span>
+                <span v-if="request.status_updated_at && request.status_updated_at !== request.created_at" class="status-updated-info">
+                  <strong>Status Updated:</strong> {{ formatDateTime(request.status_updated_at) }}
+                  <span v-if="request.status_updated_by" class="updated-by">
+                    by User ID {{ request.status_updated_by }}
+                  </span>
+                </span>
               </div>
             </div>
             <div class="request-status">
@@ -90,6 +96,8 @@
 </template>
 
 <script>
+import { currentUser } from '@/stores/userStore'
+
 export default {
   name: "TechSupportManagement",
   data() {
@@ -102,6 +110,9 @@ export default {
     };
   },
   async mounted() {
+    // Initialize user store if not already done
+    const { initializeUser } = await import('@/stores/userStore');
+    initializeUser();
     await this.loadRequests();
   },
   methods: {
@@ -126,22 +137,41 @@ export default {
 
     async updateStatus(requestId, newStatus) {
       try {
+        // Get current admin user ID
+        const currentAdmin = currentUser();
+        console.log("Current admin user:", currentAdmin); // Debug log
+        
+        // Try to get user ID from different possible field names
+        const adminUserId = currentAdmin?.id || currentAdmin?.user_id || currentAdmin?.userId;
+        
+        if (!currentAdmin || !adminUserId) {
+          console.error("User object structure:", currentAdmin);
+          alert("Unable to identify admin user. Please refresh the page and try again.");
+          return;
+        }
+
         const response = await fetch(`http://127.0.0.1:5000/api/tech-support/${requestId}/status`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ status: newStatus }),
+          body: JSON.stringify({ 
+            status: newStatus,
+            admin_user_id: adminUserId
+          }),
           mode: "cors",
         });
 
         const data = await response.json();
+        console.log("Status update response:", data); // Debug log
         
         if (data.success) {
           // Update the local request status
           const request = this.requests.find(r => r.id === requestId);
           if (request) {
             request.status = newStatus;
+            request.status_updated_by = adminUserId;
+            request.status_updated_at = new Date().toISOString();
             request.updated_at = new Date().toISOString();
           }
           this.filterRequests();
@@ -340,6 +370,25 @@ export default {
 .updated-date {
   font-style: italic;
   color: #888;
+}
+
+.status-updated-info {
+  color: #666;
+  font-size: 0.9rem;
+  background: #e8f4fd;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border-left: 3px solid #17a2b8;
+}
+
+.status-updated-info strong {
+  color: #17a2b8;
+}
+
+.updated-by {
+  font-style: italic;
+  color: #555;
+  margin-left: 5px;
 }
 
 .status-badge {

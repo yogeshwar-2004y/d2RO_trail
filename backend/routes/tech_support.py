@@ -93,7 +93,7 @@ def get_tech_support_requests():
         
         cur.execute("""
             SELECT id, username, user_id, issue_date, issue_description, 
-                   status, created_at, updated_at
+                   status, created_at, updated_at, status_updated_by, status_updated_at
             FROM tech_support_requests
             ORDER BY created_at DESC
         """)
@@ -111,7 +111,9 @@ def get_tech_support_requests():
                 "issue_description": req[4],
                 "status": req[5],
                 "created_at": req[6].isoformat() if req[6] else None,
-                "updated_at": req[7].isoformat() if req[7] else None
+                "updated_at": req[7].isoformat() if req[7] else None,
+                "status_updated_by": req[8],
+                "status_updated_at": req[9].isoformat() if req[9] else None
             })
         
         return jsonify({
@@ -124,12 +126,17 @@ def get_tech_support_requests():
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 @tech_support_bp.route('/api/tech-support/<int:request_id>/status', methods=['PUT'])
-def update_tech_support_status():
+def update_tech_support_status(request_id):
     """Update tech support request status (admin only)"""
     try:
         data = request.json
         if not data or 'status' not in data:
             return jsonify({"success": False, "message": "Status is required"}), 400
+        
+        # Get admin user info from request headers or body
+        admin_user_id = data.get('admin_user_id')
+        if not admin_user_id:
+            return jsonify({"success": False, "message": "Admin user ID is required"}), 400
         
         valid_statuses = ['pending', 'in_progress', 'resolved', 'closed']
         if data['status'] not in valid_statuses:
@@ -138,17 +145,31 @@ def update_tech_support_status():
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Update the status with tracking information
         cur.execute("""
             UPDATE tech_support_requests 
-            SET status = %s, updated_at = CURRENT_TIMESTAMP
+            SET status = %s, 
+                status_updated_by = %s,
+                status_updated_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
             WHERE id = %s
-        """, (data['status'], request_id))
+        """, (data['status'], admin_user_id, request_id))
         
         if cur.rowcount == 0:
             return jsonify({"success": False, "message": "Request not found"}), 404
         
         conn.commit()
         cur.close()
+        
+        # Log the activity
+        try:
+            log_activity(
+                user_id=str(admin_user_id),
+                action="TECH_SUPPORT_STATUS_UPDATE",
+                details=f"Updated tech support request #{request_id} status to {data['status']}"
+            )
+        except Exception as log_error:
+            print(f"Warning: Failed to log activity: {str(log_error)}")
         
         return jsonify({
             "success": True,
@@ -159,4 +180,6 @@ def update_tech_support_status():
         if 'conn' in locals():
             conn.rollback()
         print(f"Error updating tech support status: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
