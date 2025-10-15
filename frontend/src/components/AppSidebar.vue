@@ -1,7 +1,7 @@
 <template>
   <div class="sidebar-container" :class="{ 'open': isOpen, 'collapsed': isCollapsed }">
     <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" @click="toggleSidebar">
+    <button class="sidebar-toggle" v-if="isCollapsed" @click="toggleSidebar">
       <div class="toggle-content">
         <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -12,7 +12,7 @@
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
-        <span class="toggle-text">{{ isOpen ? 'Close' : 'Menu' }}</span>
+        <span class="toggle-text">{{ isOpen ? '' : 'Menu' }}</span>
       </div>
     </button>
 
@@ -168,15 +168,17 @@ const userInfo = computed(() => {
 
 // Role-based cards configuration
 const roleBasedCards = computed(() => {
-  const userRole = userInfo.value.role?.toLowerCase()
+  // const userRole = userInfo.value.role?.toLowerCase()
+  const userRole = userInfo.value.role?.toLowerCase().replace(/\s+/g, '');
+
+  console.log('User Role:', userRole) // Debugging line
   
   const cardDefinitions = {
     admin: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'users', title: 'Users', route: 'ManageUsers', icon: UserIcon },
-      { id: 'projects', title: 'Projects', route: 'ManageProjects', icon: AssignIcon }
+      { id: 'user activities', title: 'User Activities', route: 'UserActivities', icon: UserIcon },
     ],
     reviewer: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
@@ -187,7 +189,6 @@ const roleBasedCards = computed(() => {
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'assign', title: 'Assign Reviewer', route: 'QAHeadAssignReviewer', icon: AssignIcon }
     ],
     designhead: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
@@ -202,15 +203,15 @@ const roleBasedCards = computed(() => {
     ]
   }
   
-  return cardDefinitions[userRole] || cardDefinitions.admin
+  return cardDefinitions[userRole] || []
 })
 
 // Methods
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value
-  // if (!isOpen.value) {
-  //   showPasswordSubmenu.value = false // Close submenu when closing sidebar
-  // }
+  if (!isOpen.value) {
+    showPasswordSubmenu.value = false // Close submenu when closing sidebar
+  }
 }
 
 const toggleCollapse = () => {

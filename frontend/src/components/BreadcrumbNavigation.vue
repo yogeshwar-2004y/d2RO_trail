@@ -479,12 +479,12 @@ function getHomePath() {
 <style scoped>
 .breadcrumb-nav {
   position: fixed !important;
-  top: 184px !important;
+  top: 177px !important;
   left: 0 !important;
   right: 0 !important;
   background-color: #f8f9fa !important;
   border-bottom: 1px solid #e9ecef !important;
-  padding: 3px 0 !important;
+  padding: 2px 0 !important;
   margin: 0 !important;
   z-index: 1001 !important;
   width: 100% !important;
