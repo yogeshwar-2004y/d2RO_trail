@@ -22,7 +22,12 @@ import EditUser from "@/views/admin/EditUser.vue";
 import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
 import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
-import TestsPage from "@/views/admin/TestsPage.vue";
+import MajorTestGroups from "@/views/admin/MajorTestGroups.vue";
+import ManufacturingTestGroup from "@/views/admin/ManufacturingTestGroup.vue";
+import CoTSScreeningTestGroup from "@/views/admin/CoTSScreeningTestGroup.vue";
+import ESSTestGroup from "@/views/admin/ESSTestGroup.vue";
+import QTTestGroup from "@/views/admin/QTTestGroup.vue";
+import SoFTTestGroup from "@/views/admin/SoFTTestGroup.vue";
 import NewsUpdates from "@/views/admin/NewsUpdates.vue";
 import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
@@ -129,9 +134,34 @@ const router = createRouter({
       props: true,
     },
     {
-      path: "/user-activities/tests",
-      name: "TestsPage",
-      component: TestsPage
+      path: "/user-activities/major-test-groups",
+      name: "MajorTestGroups",
+      component: MajorTestGroups
+    },
+    {
+      path: "/user-activities/manufacturing-test-group",
+      name: "ManufacturingTestGroup",
+      component: ManufacturingTestGroup
+    },
+    {
+      path: "/user-activities/cots-screening-test-group",
+      name: "CoTSScreeningTestGroup",
+      component: CoTSScreeningTestGroup
+    },
+    {
+      path: "/user-activities/ess-test-group",
+      name: "ESSTestGroup",
+      component: ESSTestGroup
+    },
+    {
+      path: "/user-activities/qt-test-group",
+      name: "QTTestGroup",
+      component: QTTestGroup
+    },
+    {
+      path: "/user-activities/soft-test-group",
+      name: "SoFTTestGroup",
+      component: SoFTTestGroup
     },
     {
       path: "/user-activities/news-updates",

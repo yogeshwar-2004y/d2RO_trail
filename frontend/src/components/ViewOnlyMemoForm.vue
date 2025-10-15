@@ -21,18 +21,6 @@
 
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
       <div class="view-only-badge">VIEW ONLY</div>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
     </div>
 
     <!-- Requisition Details Section -->
@@ -567,8 +555,18 @@
           <div class="test-review-field">
             <label>Authentication</label>
             <div class="test-review-value">
-              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
-                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+              <div
+                v-if="
+                  memoApprovalStatus.authentication &&
+                  isSignatureUrl(memoApprovalStatus.authentication)
+                "
+                class="signature-display-footer"
+              >
+                <img
+                  :src="memoApprovalStatus.authentication"
+                  alt="Signature"
+                  class="signature-image-footer"
+                />
                 <span class="signature-label">Signature</span>
               </div>
               <span v-else class="no-signature">
@@ -626,8 +624,18 @@
           <div class="test-review-field">
             <label>Authentication</label>
             <div class="test-review-value">
-              <div v-if="memoApprovalStatus.authentication && isSignatureUrl(memoApprovalStatus.authentication)" class="signature-display-footer">
-                <img :src="memoApprovalStatus.authentication" alt="Signature" class="signature-image-footer" />
+              <div
+                v-if="
+                  memoApprovalStatus.authentication &&
+                  isSignatureUrl(memoApprovalStatus.authentication)
+                "
+                class="signature-display-footer"
+              >
+                <img
+                  :src="memoApprovalStatus.authentication"
+                  alt="Signature"
+                  class="signature-image-footer"
+                />
                 <span class="signature-label">Signature</span>
               </div>
               <span v-else class="no-signature">
@@ -732,11 +740,14 @@
                   required
                 />
               </div>
-              <button 
-                type="button" 
-                class="btn btn-verify" 
+              <button
+                type="button"
+                class="btn btn-verify"
                 @click="verifySignature('approval')"
-                :disabled="!approvalForm.signatureUsername || !approvalForm.signaturePassword"
+                :disabled="
+                  !approvalForm.signatureUsername ||
+                  !approvalForm.signaturePassword
+                "
               >
                 Verify & Load Signature
               </button>
@@ -744,10 +755,18 @@
             <div v-if="approvalForm.signatureUrl" class="signature-display">
               <label>Verified Signature:</label>
               <div class="signature-image-container">
-                <img :src="approvalForm.signatureUrl" alt="Verified Signature" class="signature-image" />
+                <img
+                  :src="approvalForm.signatureUrl"
+                  alt="Verified Signature"
+                  class="signature-image"
+                />
                 <div class="signature-info">
-                  <span class="signature-user">{{ approvalForm.verifiedUserName }}</span>
-                  <span class="signature-role">{{ approvalForm.verifiedUserRole }} Signature</span>
+                  <span class="signature-user">{{
+                    approvalForm.verifiedUserName
+                  }}</span>
+                  <span class="signature-role"
+                    >{{ approvalForm.verifiedUserRole }} Signature</span
+                  >
                   <span class="signature-status">✓ Verified</span>
                 </div>
               </div>
@@ -819,11 +838,14 @@
                   required
                 />
               </div>
-              <button 
-                type="button" 
-                class="btn btn-verify" 
+              <button
+                type="button"
+                class="btn btn-verify"
                 @click="verifySignature('rejection')"
-                :disabled="!rejectionForm.signatureUsername || !rejectionForm.signaturePassword"
+                :disabled="
+                  !rejectionForm.signatureUsername ||
+                  !rejectionForm.signaturePassword
+                "
               >
                 Verify & Load Signature
               </button>
@@ -831,10 +853,18 @@
             <div v-if="rejectionForm.signatureUrl" class="signature-display">
               <label>Verified Signature:</label>
               <div class="signature-image-container">
-                <img :src="rejectionForm.signatureUrl" alt="Verified Signature" class="signature-image" />
+                <img
+                  :src="rejectionForm.signatureUrl"
+                  alt="Verified Signature"
+                  class="signature-image"
+                />
                 <div class="signature-info">
-                  <span class="signature-user">{{ rejectionForm.verifiedUserName }}</span>
-                  <span class="signature-role">{{ rejectionForm.verifiedUserRole }} Signature</span>
+                  <span class="signature-user">{{
+                    rejectionForm.verifiedUserName
+                  }}</span>
+                  <span class="signature-role"
+                    >{{ rejectionForm.verifiedUserRole }} Signature</span
+                  >
                   <span class="signature-status">✓ Verified</span>
                 </div>
               </div>
@@ -903,7 +933,7 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         verifiedUserRole: "",
-        signatureError: ""
+        signatureError: "",
       },
       rejectionForm: {
         memo_id: null,
@@ -916,7 +946,7 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         verifiedUserRole: "",
-        signatureError: ""
+        signatureError: "",
       },
       formData: {
         // Basic information
@@ -1049,7 +1079,7 @@ export default {
   methods: {
     // Check if the authentication field contains a signature URL
     isSignatureUrl(authentication) {
-      return authentication && authentication.includes('/api/users/signature/');
+      return authentication && authentication.includes("/api/users/signature/");
     },
 
     async fetchMemoData() {
@@ -1075,7 +1105,6 @@ export default {
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
           console.log("Fetched memo data:", data.memo, data.references);
-          
         } else {
           throw new Error(data.message || "Failed to fetch memo details");
         }
@@ -1242,7 +1271,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/available-reviewers"
+          "http://localhost:8000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1260,7 +1289,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.id}/approval-status`
+          `http://localhost:8000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1293,7 +1322,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `http://localhost:8000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1336,23 +1365,25 @@ export default {
 
     // Verify signature credentials
     async verifySignature(formType) {
-      const form = formType === 'approval' ? this.approvalForm : this.rejectionForm;
-      
+      const form =
+        formType === "approval" ? this.approvalForm : this.rejectionForm;
+
       if (!form.signatureUsername || !form.signaturePassword) {
-        form.signatureError = "Please enter both username and signature password";
+        form.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
       try {
-        const response = await fetch('/api/users/verify-signature', {
-          method: 'POST',
+        const response = await fetch("/api/users/verify-signature", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             username: form.signatureUsername,
-            signature_password: form.signaturePassword
-          })
+            signature_password: form.signaturePassword,
+          }),
         });
 
         const data = await response.json();
@@ -1426,7 +1457,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1477,7 +1508,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1548,7 +1579,7 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         verifiedUserRole: "",
-        signatureError: ""
+        signatureError: "",
       };
     },
 
@@ -1569,7 +1600,7 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         verifiedUserRole: "",
-        signatureError: ""
+        signatureError: "",
       };
     },
 
@@ -2212,12 +2243,12 @@ export default {
   .signature-inputs {
     gap: 10px;
   }
-  
+
   .signature-image-container {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .signature-image {
     max-width: 120px;
     max-height: 60px;
@@ -2261,7 +2292,7 @@ export default {
     max-width: 100px;
     max-height: 50px;
   }
-  
+
   .signature-label {
     font-size: 11px;
   }

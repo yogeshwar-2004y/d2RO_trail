@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">USERS</span>
     </div>
 
@@ -65,7 +53,7 @@
               <td class="signature-cell">
                 <div v-if="user.has_signature" class="signature-container">
                   <img
-                    :src="`http://localhost:5000${user.signature_url}`"
+                    :src="`http://localhost:8000${user.signature_url}`"
                     alt="User Signature"
                     class="signature-thumbnail"
                     @error="handleImageError"
@@ -104,7 +92,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:5000/api/users/manage");
+        const response = await fetch("http://localhost:8000/api/users/manage");
         const data = await response.json();
 
         if (data.success) {

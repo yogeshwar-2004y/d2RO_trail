@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">EDIT USER</span>
     </div>
 
@@ -174,7 +162,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:5000/api/roles");
+        const response = await fetch("http://localhost:8000/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -200,7 +188,7 @@ export default {
     async fetchUserDetails() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${this.userId}`
+          `http://localhost:8000/api/users/${this.userId}`
         );
         const data = await response.json();
 
@@ -218,7 +206,7 @@ export default {
             }
 
             // Set the signature preview URL
-            this.signaturePreview = `http://localhost:5000/api/users/signature/${filename}`;
+            this.signaturePreview = `http://localhost:8000/api/users/signature/${filename}`;
           }
         } else {
           console.error("Error fetching user details:", data.message);
@@ -330,7 +318,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/users/${this.userId}`,
+          `http://localhost:8000/api/users/${this.userId}`,
           {
             method: "PUT",
             body: formData, // No Content-Type header for FormData

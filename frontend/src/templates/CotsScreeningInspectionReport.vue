@@ -1,44 +1,15 @@
 <template>
   <div class="cots-screening-inspection-page">
-    <!-- Header -->
-    <div class="page-header">
-      <div class="header-left">
-        <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5"></path>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-        </button>
-        <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="app-logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="app-logo vista-logo">
-        </div>
-      </div>
-      <div class="header-center">
-        <h1 class="page-title">COTS SCREENING INSPECTION REPORT</h1>
-      </div>
-      <div class="header-right">
-        <button class="export-button" @click="exportReport">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7,10 12,15 17,10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          EXPORT
-        </button>
-      </div>
-    </div>
-
     <!-- Main Content -->
     <div class="main-content">
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ inspectionCount }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{
+            inspectionCount
+          }}/{{ currentYear }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -52,11 +23,21 @@
           <div class="header-info-grid">
             <div class="form-group">
               <label for="projectName">Project Name:</label>
-              <input type="text" id="projectName" v-model="formData.projectName" required>
+              <input
+                type="text"
+                id="projectName"
+                v-model="formData.projectName"
+                required
+              />
             </div>
             <div class="form-group">
               <label for="dpName">DP Name:</label>
-              <input type="text" id="dpName" v-model="formData.dpName" required>
+              <input
+                type="text"
+                id="dpName"
+                v-model="formData.dpName"
+                required
+              />
             </div>
           </div>
         </div>
@@ -69,59 +50,124 @@
             <div class="details-column">
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" required>
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" required>
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" required>
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" required>
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
+                  required
+                />
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="details-column">
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" required>
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" required>
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" required>
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" required>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" required>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -142,14 +188,23 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(testCase, index) in formData.testCases" :key="index">
+                <tr
+                  v-for="(testCase, index) in formData.testCases"
+                  :key="index"
+                >
                   <td>{{ index + 1 }}</td>
-                  <td class="test-case-description">{{ testCase.description }}</td>
+                  <td class="test-case-description">
+                    {{ testCase.description }}
+                  </td>
                   <td>
                     <select v-model="testCase.testNature">
                       <option value="">Select</option>
-                      <option value="Passive (Power Off Condition)">Passive (Power Off Condition)</option>
-                      <option value="Active (Power On Condition)">Active (Power On Condition)</option>
+                      <option value="Passive (Power Off Condition)">
+                        Passive (Power Off Condition)
+                      </option>
+                      <option value="Active (Power On Condition)">
+                        Active (Power On Condition)
+                      </option>
                     </select>
                   </td>
                   <td>
@@ -160,7 +215,10 @@
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'testCase', index)">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'testCase', index)"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -195,7 +253,11 @@
           <button type="button" @click="resetForm" class="btn btn-secondary">
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -205,73 +267,77 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'CotsScreeningInspectionReport',
+  name: "CotsScreeningInspectionReport",
   data() {
     return {
-      projectName: '',
-      lruName: '',
-      serialNumber: 'SL-001',
-      inspectionCount: 'INS-001',
-      currentYear: '2025',
-      currentDate: new Date().toISOString().split('T')[0],
+      projectName: "",
+      lruName: "",
+      serialNumber: "SL-001",
+      inspectionCount: "INS-001",
+      currentYear: "2025",
+      currentDate: new Date().toISOString().split("T")[0],
       formData: {
-        projectName: '',
-        dpName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        partNo: '',
-        quantity: '',
-        slNos: '',
-        startDate: '',
-        endDate: '',
+        projectName: "",
+        dpName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        partNo: "",
+        quantity: "",
+        slNos: "",
+        startDate: "",
+        endDate: "",
         testCases: [
           {
-            description: 'High Temperature Storage (Stabilization Bake) Test: Populated PCB Stabilization bake +85°C, 24Hrs.',
-            testNature: 'Passive (Power Off Condition)',
-            remarks: ''
+            description:
+              "High Temperature Storage (Stabilization Bake) Test: Populated PCB Stabilization bake +85°C, 24Hrs.",
+            testNature: "Passive (Power Off Condition)",
+            remarks: "",
           },
           {
-            description: 'Thermal Shock Test: Populated PCB Thermal shock -40°C, +85°C, Dwell time 30 minutes each, Temperature Transfer time 2 minutes, 10 cycles In Power Off Condition.',
-            testNature: 'Passive (Power Off Condition)',
-            remarks: ''
+            description:
+              "Thermal Shock Test: Populated PCB Thermal shock -40°C, +85°C, Dwell time 30 minutes each, Temperature Transfer time 2 minutes, 10 cycles In Power Off Condition.",
+            testNature: "Passive (Power Off Condition)",
+            remarks: "",
           },
           {
-            description: 'Burn-in Test',
-            testNature: 'Active (Power On Condition)',
-            remarks: ''
-          }
+            description: "Burn-in Test",
+            testNature: "Active (Power On Condition)",
+            remarks: "",
+          },
         ],
-        preparedBy: '',
-        verifiedBy: '',
-        approvedBy: ''
-      }
+        preparedBy: "",
+        verifiedBy: "",
+        approvedBy: "",
+      },
     };
   },
   computed: {
     isFormValid() {
-      return this.formData.projectName &&
-             this.formData.dpName &&
-             this.formData.reportRefNo &&
-             this.formData.memoRefNo &&
-             this.formData.lruName &&
-             this.formData.sruName &&
-             this.formData.partNo;
-    }
+      return (
+        this.formData.projectName &&
+        this.formData.dpName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.sruName &&
+        this.formData.partNo
+      );
+    },
   },
   mounted() {
     // Get parameters from route
-    this.lruName = this.$route.params.lruName || '';
-    this.projectName = this.$route.params.projectName || '';
-    
+    this.lruName = this.$route.params.lruName || "";
+    this.projectName = this.$route.params.projectName || "";
+
     // Set default values
     this.formData.lruName = this.lruName;
     this.formData.projectName = this.projectName;
@@ -281,64 +347,73 @@ export default {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        console.log(`File uploaded for ${section} section, item ${index}:`, file.name);
+        console.log(
+          `File uploaded for ${section} section, item ${index}:`,
+          file.name
+        );
         // Here you would typically upload the file to your backend
         // For now, we'll just log it
       }
     },
     saveDraft() {
-      console.log('Saving draft:', this.formData);
-      alert('Draft saved successfully!');
+      console.log("Saving draft:", this.formData);
+      alert("Draft saved successfully!");
     },
     resetForm() {
-      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+      if (
+        confirm(
+          "Are you sure you want to reset the form? All data will be lost."
+        )
+      ) {
         this.formData = {
           projectName: this.projectName,
-          dpName: '',
-          reportRefNo: '',
-          memoRefNo: '',
+          dpName: "",
+          reportRefNo: "",
+          memoRefNo: "",
           lruName: this.lruName,
-          inspectionStage: '',
-          testVenue: '',
-          dated1: '',
-          dated2: '',
+          inspectionStage: "",
+          testVenue: "",
+          dated1: "",
+          dated2: "",
           sruName: this.lruName,
-          partNo: '',
-          quantity: '',
-          slNos: '',
+          partNo: "",
+          quantity: "",
+          slNos: "",
           startDate: this.currentDate,
-          endDate: '',
+          endDate: "",
           testCases: [
             {
-              description: 'High Temperature Storage (Stabilization Bake) Test: Populated PCB Stabilization bake +85°C, 24Hrs.',
-              testNature: 'Passive (Power Off Condition)',
-              remarks: ''
+              description:
+                "High Temperature Storage (Stabilization Bake) Test: Populated PCB Stabilization bake +85°C, 24Hrs.",
+              testNature: "Passive (Power Off Condition)",
+              remarks: "",
             },
             {
-              description: 'Thermal Shock Test: Populated PCB Thermal shock -40°C, +85°C, Dwell time 30 minutes each, Temperature Transfer time 2 minutes, 10 cycles In Power Off Condition.',
-              testNature: 'Passive (Power Off Condition)',
-              remarks: ''
+              description:
+                "Thermal Shock Test: Populated PCB Thermal shock -40°C, +85°C, Dwell time 30 minutes each, Temperature Transfer time 2 minutes, 10 cycles In Power Off Condition.",
+              testNature: "Passive (Power Off Condition)",
+              remarks: "",
             },
             {
-              description: 'Burn-in Test',
-              testNature: 'Active (Power On Condition)',
-              remarks: ''
-            }
+              description: "Burn-in Test",
+              testNature: "Active (Power On Condition)",
+              remarks: "",
+            },
           ],
-          preparedBy: '',
-          verifiedBy: '',
-          approvedBy: ''
+          preparedBy: "",
+          verifiedBy: "",
+          approvedBy: "",
         };
       }
     },
     async submitForm() {
-      console.log('🚀 SUBMIT FORM CALLED!');
-      console.log('Form valid:', this.isFormValid);
-      console.log('Form data:', this.formData);
-      
+      console.log("🚀 SUBMIT FORM CALLED!");
+      console.log("Form valid:", this.isFormValid);
+      console.log("Form data:", this.formData);
+
       if (this.isFormValid) {
-        console.log('✅ Form is valid, proceeding with submission...');
-        
+        console.log("✅ Form is valid, proceeding with submission...");
+
         try {
           // Prepare data for backend API
           const apiData = {
@@ -358,177 +433,206 @@ export default {
             end_date: this.formData.endDate,
             dated1: this.formData.dated1,
             dated2: this.formData.dated2,
-            
+
             // Map test nature fields from testCases
-            test_nature1: this.formData.testCases[0]?.testNature || '',
-            test_nature2: this.formData.testCases[1]?.testNature || '',
-            test_nature3: this.formData.testCases[2]?.testNature || '',
-            
+            test_nature1: this.formData.testCases[0]?.testNature || "",
+            test_nature2: this.formData.testCases[1]?.testNature || "",
+            test_nature3: this.formData.testCases[2]?.testNature || "",
+
             // Map remarks from testCases (these will be rem1, rem2, rem3)
-            rem1: this.formData.testCases[0]?.remarks || '',
-            upload1: '', // File upload path would go here
-            
-            rem2: this.formData.testCases[1]?.remarks || '',
-            upload2: '',
-            
-            rem3: this.formData.testCases[2]?.remarks || '',
-            upload3: '',
-            
+            rem1: this.formData.testCases[0]?.remarks || "",
+            upload1: "", // File upload path would go here
+
+            rem2: this.formData.testCases[1]?.remarks || "",
+            upload2: "",
+
+            rem3: this.formData.testCases[2]?.remarks || "",
+            upload3: "",
+
             // Signatories
-            prepared_by: this.formData.preparedBy || '',
-            verified_by: this.formData.verifiedBy || '',
-            approved_by: this.formData.approvedBy || ''
+            prepared_by: this.formData.preparedBy || "",
+            verified_by: this.formData.verifiedBy || "",
+            approved_by: this.formData.approvedBy || "",
           };
-          
-          console.log('📤 Sending data to API:', apiData);
-          console.log('🌐 API URL: http://localhost:5000/api/reports/cot-screening?user_role=4');
-          
+
+          console.log("📤 Sending data to API:", apiData);
+          console.log(
+            "🌐 API URL: http://localhost:8000/api/reports/cot-screening?user_role=4"
+          );
+
           // Call the backend API
-          const response = await fetch('http://localhost:5000/api/reports/cot-screening?user_role=4', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(apiData)
-          });
-          
-          console.log('📥 Response received:', response.status, response.statusText);
-          
+          const response = await fetch(
+            "http://localhost:8000/api/reports/cot-screening?user_role=4",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(apiData),
+            }
+          );
+
+          console.log(
+            "📥 Response received:",
+            response.status,
+            response.statusText
+          );
+
           const result = await response.json();
-          
+
           if (result.success) {
-            alert(`Report submitted successfully! Report ID: ${result.report_id}`);
-            console.log('Report created with ID:', result.report_id);
+            alert(
+              `Report submitted successfully! Report ID: ${result.report_id}`
+            );
+            console.log("Report created with ID:", result.report_id);
             // Optionally reset the form or redirect
             this.resetForm();
           } else {
             alert(`Error: ${result.message}`);
-            console.error('API Error:', result);
+            console.error("API Error:", result);
           }
-          
         } catch (error) {
-          console.error('Error submitting form:', error);
-          alert('Error submitting form. Please try again.');
+          console.error("Error submitting form:", error);
+          alert("Error submitting form. Please try again.");
         }
       } else {
-        alert('Please fill in all required fields.');
+        alert("Please fill in all required fields.");
       }
     },
     exportReport() {
       try {
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        const contentWidth = pageWidth - (2 * margin);
-        
+        const contentWidth = pageWidth - 2 * margin;
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // Header
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('COTS SCREENING INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("COTS SCREENING INSPECTION REPORT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Document path and date
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.inspectionCount || '001'}/${this.currentYear || '2025'}`;
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
+          this.lruName || "LRU"
+        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
+          this.currentYear || "2025"
+        }`;
         doc.text(documentPath, margin, yPosition);
-        
-        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
+
+        const dateText = `Date: ${
+          this.currentDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
-        
+
         // Subject line
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: COTS Screening Inspection Report for ${this.lruName || 'Unknown LRU'}`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: COTS Screening Inspection Report for ${
+          this.lruName || "Unknown LRU"
+        }`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // Report details
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Report Details:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
+
+        doc.setFont("helvetica", "normal");
         const details = [
-          `Project Name: ${this.formData.projectName || 'Not specified'}`,
-          `DP Name: ${this.formData.dpName || 'Not specified'}`,
-          `Report Ref No: ${this.formData.reportRefNo || 'Not specified'}`,
-          `Memo Ref No: ${this.formData.memoRefNo || 'Not specified'}`,
-          `LRU Name: ${this.formData.lruName || 'Not specified'}`,
-          `SRU Name: ${this.formData.sruName || 'Not specified'}`,
-          `Part No: ${this.formData.partNo || 'Not specified'}`,
-          `Quantity: ${this.formData.quantity || 'Not specified'}`,
-          `Start Date: ${this.formData.startDate || 'Not specified'}`,
-          `End Date: ${this.formData.endDate || 'Not specified'}`
+          `Project Name: ${this.formData.projectName || "Not specified"}`,
+          `DP Name: ${this.formData.dpName || "Not specified"}`,
+          `Report Ref No: ${this.formData.reportRefNo || "Not specified"}`,
+          `Memo Ref No: ${this.formData.memoRefNo || "Not specified"}`,
+          `LRU Name: ${this.formData.lruName || "Not specified"}`,
+          `SRU Name: ${this.formData.sruName || "Not specified"}`,
+          `Part No: ${this.formData.partNo || "Not specified"}`,
+          `Quantity: ${this.formData.quantity || "Not specified"}`,
+          `Start Date: ${this.formData.startDate || "Not specified"}`,
+          `End Date: ${this.formData.endDate || "Not specified"}`,
         ];
-        
-        details.forEach(detail => {
+
+        details.forEach((detail) => {
           doc.text(detail, margin, yPosition);
           yPosition += 6;
         });
-        
+
         yPosition += 10;
-        
+
         // Test cases table
-        doc.setFont('helvetica', 'bold');
-        doc.text('Test Cases:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Test Cases:", margin, yPosition);
         yPosition += 8;
-        
+
         if (this.formData.testCases && this.formData.testCases.length > 0) {
           doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          
+          doc.setFont("helvetica", "bold");
+
           // Table headers
-          doc.text('SL.NO', margin, yPosition);
-          doc.text('TEST CASES', margin + 15, yPosition);
-          doc.text('TEST NATURE', margin + 100, yPosition);
-          doc.text('REMARKS', margin + 160, yPosition);
+          doc.text("SL.NO", margin, yPosition);
+          doc.text("TEST CASES", margin + 15, yPosition);
+          doc.text("TEST NATURE", margin + 100, yPosition);
+          doc.text("REMARKS", margin + 160, yPosition);
           yPosition += 6;
-          
+
           // Table data
-          doc.setFont('helvetica', 'normal');
+          doc.setFont("helvetica", "normal");
           this.formData.testCases.forEach((testCase, index) => {
             doc.text((index + 1).toString(), margin, yPosition);
-            doc.text(testCase.description.substring(0, 40), margin + 15, yPosition);
-            doc.text(testCase.testNature || '', margin + 100, yPosition);
-            doc.text(testCase.remarks || '', margin + 160, yPosition);
+            doc.text(
+              testCase.description.substring(0, 40),
+              margin + 15,
+              yPosition
+            );
+            doc.text(testCase.testNature || "", margin + 100, yPosition);
+            doc.text(testCase.remarks || "", margin + 160, yPosition);
             yPosition += 6;
           });
         }
-        
+
         yPosition += 15;
-        
+
         // Signatures
-        doc.setFont('helvetica', 'bold');
-        doc.text('Signatures:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text('Prepared By: _________________', margin, yPosition);
-        doc.text('Verified By: _________________', margin + 70, yPosition);
-        doc.text('Approved By: _________________', margin + 140, yPosition);
-        
+
+        doc.setFont("helvetica", "normal");
+        doc.text("Prepared By: _________________", margin, yPosition);
+        doc.text("Verified By: _________________", margin + 70, yPosition);
+        doc.text("Approved By: _________________", margin + 140, yPosition);
+
         // Save PDF
-        const fileName = `COTS_Screening_Inspection_Report_${this.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `COTS_Screening_Inspection_Report_${
+          this.lruName || "Unknown"
+        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
-        
-        alert('Report exported successfully as PDF!');
-        
+
+        alert("Report exported successfully as PDF!");
       } catch (error) {
-        console.error('Error exporting PDF:', error);
-        alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        console.error("Error exporting PDF:", error);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -635,7 +739,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -882,41 +986,41 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .header-info-grid,
   .report-details-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-layout {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .signature-item {
     max-width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .test-cases-table-container {
     overflow-x: auto;
   }
-  
+
   .test-cases-table {
     min-width: 800px;
   }

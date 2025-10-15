@@ -1,36 +1,5 @@
 <template>
   <div class="customise-background-page">
-    <div class="header">
-      <button class="back-button" @click="$router.go(-1)">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5"></path>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
-    </div>
-
     <div class="content-container">
       <div class="upload-section">
         <h2>Customise Login Background</h2>
@@ -186,7 +155,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/upload-login-background",
+          "http://127.0.0.1:8000/api/upload-login-background",
           {
             method: "POST",
             body: formData,
@@ -218,7 +187,7 @@ export default {
     async resetToDefault() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/reset-login-background",
+          "http://127.0.0.1:8000/api/reset-login-background",
           {
             method: "POST",
           }
@@ -257,7 +226,7 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 5000);
+      }, 8000);
     },
   },
 
@@ -265,7 +234,7 @@ export default {
     // Load current background on component mount
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/api/get-current-background"
+        "http://127.0.0.1:8000/api/get-current-background"
       );
       const data = await response.json();
       if (data.success && data.background_url) {
@@ -280,116 +249,99 @@ export default {
 
 <style scoped>
 .customise-background-page {
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
+  background-color: #f0f0f0;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  background-color: #f0f0f0;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 20px 30px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.back-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-right: 20px;
-}
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 20px;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
 }
 
 .content-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto; /* Allow scrolling within content if needed */
 }
 
 .upload-section {
-  background: white;
+  background-color: #fff;
   border-radius: 15px;
-  padding: 40px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  width: 100%;
+  padding: 30px;
 }
 
 .upload-section h2 {
+  text-align: center;
   color: #333;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .upload-section p {
+  text-align: center;
   color: #666;
   margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 .current-background {
   margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
 }
 
 .current-background h3 {
+  margin: 0 0 15px 0;
   color: #333;
-  margin-bottom: 15px;
+  font-size: 1.1em;
+  font-weight: bold;
 }
 
 .background-preview {
-  width: 200px;
-  height: 120px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
+  text-align: center;
 }
 
 .background-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .upload-area {
-  border: 2px dashed #ddd;
-  border-radius: 15px;
+  border: 2px dashed #007bff;
+  border-radius: 8px;
   padding: 40px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.3s ease;
-  margin-bottom: 30px;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  margin-bottom: 20px;
 }
 
 .upload-area:hover {
-  border-color: #888;
+  border-color: #0056b3;
+  background-color: #e3f2fd;
 }
 
 .upload-content svg {
-  color: #888;
+  color: #007bff;
   margin-bottom: 15px;
 }
 
 .upload-content p {
+  margin: 10px 0;
   color: #333;
-  font-size: 1.1em;
-  margin-bottom: 10px;
+  font-weight: bold;
 }
 
 .file-requirements {
@@ -398,76 +350,81 @@ export default {
 }
 
 .selected-file {
-  margin-bottom: 30px;
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: #e8f5e8;
+  border-radius: 8px;
+  border: 1px solid #c3e6cb;
 }
 
 .selected-file h3 {
-  color: #333;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
+  color: #155724;
+  font-size: 1.1em;
+  font-weight: bold;
 }
 
 .file-info {
   display: flex;
   justify-content: space-between;
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
   margin-bottom: 15px;
+  color: #155724;
+  font-weight: bold;
 }
 
 .preview-container {
-  max-width: 300px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  overflow: hidden;
+  text-align: center;
 }
 
 .preview-image {
-  width: 100%;
-  height: auto;
-  display: block;
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .action-buttons {
   display: flex;
-  gap: 20px;
+  gap: 15px;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
-.upload-button,
-.reset-button {
-  padding: 15px 30px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1em;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
 .upload-button {
-  background: linear-gradient(to right, #4caf50, #45a049);
+  background-color: #007bff;
   color: white;
-  flex: 1;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
 }
 
 .upload-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #0056b3;
 }
 
 .upload-button:disabled {
-  background: #ccc;
+  background-color: #6c757d;
   cursor: not-allowed;
 }
 
 .reset-button {
-  background: linear-gradient(to right, #f44336, #da190b);
+  background-color: #6c757d;
   color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
 }
 
 .reset-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background-color: #545b62;
 }
 
 .message {
@@ -478,13 +435,13 @@ export default {
 }
 
 .message.success {
-  background: #d4edda;
+  background-color: #d4edda;
   color: #155724;
   border: 1px solid #c3e6cb;
 }
 
 .message.error {
-  background: #f8d7da;
+  background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
 }

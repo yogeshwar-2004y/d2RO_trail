@@ -18,18 +18,6 @@
         </svg>
       </button>
       <div class="header-center">
-        <div class="logos-container">
-          <img
-            src="@/assets/images/aviatrax-logo.png"
-            alt="Aviatrax Logo"
-            class="logo"
-          />
-          <img
-            src="@/assets/images/vista_logo.png"
-            alt="Vista Logo"
-            class="logo vista-logo"
-          />
-        </div>
         <div class="page-title">
           <svg
             class="title-icon"
@@ -281,7 +269,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}/lrus`
+          `http://localhost:8000/api/projects/${this.projectId}/lrus`
         );
         const data = await response.json();
 

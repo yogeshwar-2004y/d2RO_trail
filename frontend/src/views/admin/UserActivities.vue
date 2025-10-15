@@ -1,19 +1,6 @@
 <template>
   <div class="user-activities-page">
-    <div class="header">
-      <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 12H5"></path>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-      <div class="logos-container">
-        <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-        <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
-      </div>
-    </div>
-
-    <div class="card-grid">
+    <div class="card-container">
       <div class="card" @click="goToPage('AddUpdateProjects')">
         <div class="card-icon">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -91,7 +78,7 @@ export default {
       } else if (pageName === "ActivityLogs") {
         this.$router.push({ name: "ActivityLogs" });
       } else if (pageName === "Tests") {
-        this.$router.push({ name: "TestsPage" });
+        this.$router.push({ name: "MajorTestGroups" });
       } else if (pageName === "NewsUpdates") {
         this.$router.push({ name: "NewsUpdates" });
       } else if (pageName === "CustomiseBackground") {
@@ -104,52 +91,24 @@ export default {
 
 <style scoped>
 .user-activities-page {
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
+  background-color: #f0f0f0;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background-color: #f0f0f0;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100%;
-  padding: 20px 30px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.back-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  margin-right: 20px;
-}
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 150px;
-}
-
-.vista-logo {
-  width: 120px;
-}
-
-.card-grid {
+.card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
-  width: 80%;
-  max-width: 1200px;
-  margin-top: 50px;
+  width: 100%;
+  max-width: 900px; /* Adjusted for 3x2 grid */
+  justify-items: center;
 }
 
 .card {
@@ -160,10 +119,11 @@ export default {
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  padding: 40px 20px;
+  width: 180px; /* Smaller for 6 cards */
+  height: 180px; /* Smaller for 6 cards */
+  padding: 20px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  min-height: 180px;
 }
 
 .card:hover {
@@ -172,17 +132,17 @@ export default {
 }
 
 .card-icon {
-  margin-bottom: 20px;
-}
-
-.card-icon svg {
   color: #000;
+  margin-bottom: 15px;
 }
 
 .card-title {
-  font-size: 1em;
+  font-size: 0.8em;
   font-weight: bold;
   text-align: center;
   color: #333;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 </style>
+

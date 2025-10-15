@@ -1,72 +1,100 @@
 <template>
   <div class="login-page">
-    <div
-      class="login-left-panel"
-      :style="{ backgroundImage: `url(${backgroundImageUrl})` }"
-    ></div>
-    <div class="login-right-panel">
-      <div class="login-container">
-        <div class="logos-container">
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Fighter Jet Image and Login Form Side by Side -->
+      <div class="top-section">
+        <!-- Fighter Jet Image -->
+        <div class="main-image-container">
+          <!-- Add main fighter jet image path here -->
           <img
-            src="@/assets/images/aviatrax-logo.png"
-            alt="Aviatrax Logo"
-            class="logo"
-          />
-          <img
-            src="@/assets/images/vista_logo.png"
-            alt="Vista Logo"
-            class="logo vista-logo"
+            src="@/assets/images/Airforce_1.jpg"
+            alt="Fighter Jet with Indian Flag"
+            class="main-image"
           />
         </div>
 
-        <div class="input-group">
-          <span class="input-icon">✉</span>
-          <input
-            type="text"
-            v-model="email"
-            placeholder="email id"
-            class="input-field"
-          />
-        </div>
+        <!-- Login Form -->
+        <div class="login-section">
+          <div class="login-container">
+            <div class="input-group">
+              <input
+                type="text"
+                v-model="email"
+                placeholder="Username/Email"
+                class="input-field"
+              />
+            </div>
 
-        <div class="input-group">
-          <span class="input-icon">🔒</span>
-          <input
-            type="password"
-            v-model="password"
-            placeholder="password"
-            class="input-field"
-          />
-        </div>
+            <div class="input-group">
+              <input
+                type="password"
+                v-model="password"
+                placeholder="Password"
+                class="input-field"
+              />
+            </div>
 
-        <button @click="login" class="login-button">LOGIN</button>
+            <div class="button-group">
+              <div class="login-reset-row">
+                <button @click="login" class="action-button1">LOGIN</button>
+                <button @click="resetPassword" class="action-button2">
+                  FORGOT PASSWORD
+                </button>
+              </div>
+              <button @click="techSupport" class="action-button">
+                TECH SUPPORT
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row of Five Images - Full Width -->
+      <div class="image-gallery">
+        <img
+          src="@/assets/images/Image3.png"
+          alt="Missile Launch"
+          class="gallery-image"
+        />
+        <!-- Add radar array image path here -->
+        <img
+          src="@/assets/images/Image5.jpg"
+          alt="Radar Array"
+          class="gallery-image"
+        />
+        <!-- Add Tejas fighter image path here -->
+        <img
+          src="@/assets/images/Image4.jpg"
+          alt="Tejas Fighter"
+          class="gallery-image"
+        />
+        <!-- Add Mirage fighter image path here -->
+        <img
+          src="@/assets/images/Image2.png"
+          alt="Mirage Fighter"
+          class="gallery-image"
+        />
+        <!-- Add industrial machinery image path here -->
+        <img
+          src="@/assets/images/Image1.png"
+          alt="Industrial Machinery"
+          class="gallery-image"
+        />
       </div>
     </div>
-
-    <!-- News Ticker -->
-    <NewsTicker
-      height="60px"
-      backgroundColor="#2c3e50"
-      textColor="#ffffff"
-      class="login-news-ticker"
-    />
   </div>
 </template>
 
 <script>
 import { setUser } from "@/stores/userStore";
-import NewsTicker from "@/components/NewsTicker.vue";
 
 export default {
   name: "LoginPage",
-  components: {
-    NewsTicker,
-  },
   data() {
     return {
       email: "",
       password: "",
-      backgroundImageUrl: "/src/assets/images/login-background.png",
     };
   },
   methods: {
@@ -77,7 +105,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/login", {
+        const response = await fetch("http://127.0.0.1:8000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -124,129 +152,228 @@ export default {
       }
     },
 
-    async loadBackgroundImage() {
-      try {
-        const response = await fetch(
-          "http://127.0.0.1:5000/api/get-current-background"
-        );
-        const data = await response.json();
-
-        if (data.success && data.background_url) {
-          this.backgroundImageUrl = data.background_url;
-        }
-      } catch (error) {
-        console.error("Error loading background:", error);
-        // Keep default background on error
-      }
+    resetPassword() {
+      // Add reset password functionality
+      alert("Reset password functionality will be implemented");
     },
-  },
 
-  async mounted() {
-    await this.loadBackgroundImage();
+    techSupport() {
+      // Add tech support functionality
+      alert("Tech support functionality will be implemented");
+    },
   },
 };
 </script>
 
 <style scoped>
 .login-page {
+  height: calc(
+    100vh - 120px
+  ); /* Account for header (~60px) and news ticker + footer (~60px) */
+  width: 100%; /* Take full width */
   display: flex;
-  height: 829px;
-  width: 98vw;
+  flex-direction: column;
   font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  background-color: #f0f8ff; /* Very light blue background */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevent scrolling */
 }
 
-.login-left-panel {
-  flex: 1;
-  background-size: cover;
-  background-position: center;
-  border-top-left-radius: 20px;
-  border-bottom-left-radius: 20px;
-  margin: 20px 0 20px 20px;
+.main-content {
+  flex: 1; /* Take all available space */
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* Remove padding to eliminate white space */
+  gap: 0; /* Remove gap */
+  margin: 0;
+  height: 100%;
 }
 
-.login-right-panel {
+/* Top Section - Fighter Jet and Login Form Side by Side */
+.top-section {
+  display: flex;
+  gap: 1; /* Remove gap */
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fighter Jet Image Container */
+.main-image-container {
+  flex: 2;
+  height: 338px; /* Reduced to make room for gallery */
+  overflow: hidden;
+  border-radius: 0; /* Remove border radius */
+  box-shadow: none; /* Remove shadow */
+  margin: 0;
+  padding: 0;
+}
+
+.main-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures complete image fits within container, crops if necessary */
+  object-position: center; /* Centers the image within the container */
+}
+
+/* Login Form Section */
+.login-section {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 350px; /* Reduced to match image height */
+  padding: 10px; /* Add padding only to login section */
 }
 
 .login-container {
-  width: 350px;
-  padding: 40px;
+  width: 100%;
+  max-width: 450px; /* Increased from 350px */
+  padding: 50px;
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.logos-container {
+/* Image Gallery - Full Width */
+.image-gallery {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  margin-bottom: 50px;
+  justify-content: space-between;
+  gap: 7px; /* Reduced gap to give more space to images */
+  width: 100%;
+  height: 170px; /* Adjusted height to ensure all 5 images fit */
+  flex-shrink: 2; /* Prevent shrinking */
 }
 
-.logo {
-  width: 180px;
+.gallery-image {
+  flex: 2;
+  height: 100%; /* Use full height of gallery container */
+  object-fit: cover; /* Ensures complete image fits within container, crops if necessary */
+  object-position: center; /* Centers the image within the container */
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  min-width: 10px; /* Allow images to shrink if needed */
 }
+/* .gallery-image:hover {
+  transform: scale(1.05);
+}
+ */
 
-.vista-logo {
-  width: 150px;
+/* Login Form */
+.login-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .input-group {
-  display: flex;
-  align-items: center;
   margin-bottom: 20px;
-  border: 1px solid #ccc;
-  border-radius: 25px;
-  padding: 5px 15px;
-  background-color: #f5f5f5;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.input-icon {
-  font-size: 1.2em;
-  color: #888;
-  margin-right: 10px;
 }
 
 .input-field {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 10px 0;
-  font-size: 1em;
-  outline: none;
-}
-
-.login-button {
   width: 100%;
-  padding: 15px;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.input-field:focus {
+  border-color: #01050a;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-reset-row {
+  display: flex;
+  gap: 10px; /* Reduced gap for better spacing */
+}
+
+.action-button1,
+.action-button2,
+.action-button {
+  flex: 1; /* Make all buttons equal width */
+  padding: 12px 20px; /* Increased padding for better size */
   border: none;
-  border-radius: 25px;
-  font-size: 1.1em;
+  border-radius: 8px;
+  font-size: 0.9rem;
   color: #fff;
-  background: linear-gradient(to right, #ccc, #888);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  background-color: #162845;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 20px;
+  transition: background-color 0.3s ease;
 }
 
-.login-button:hover {
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
+.action-button:hover {
+  background-color: #51759a;
 }
 
-.login-news-ticker {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .login-page {
+    height: calc(100vh - 140px); /* Account for larger header on tablet */
+  }
+
+  .top-section {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .main-image-container {
+    height: 250px; /* Reduced for tablet */
+  }
+
+  .login-section {
+    min-height: auto;
+    padding: 15px;
+  }
+
+  .image-gallery {
+    height: 150px; /* Reduced for tablet but still fits all 5 images */
+    gap: 4px; /* Smaller gap for tablet */
+  }
+
+  .gallery-image {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-page {
+    height: calc(100vh - 160px); /* Account for stacked header on mobile */
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  .main-image-container {
+    height: 200px; /* Reduced for mobile */
+  }
+
+  .login-container {
+    padding: 20px;
+  }
+
+  .image-gallery {
+    height: 120px; /* Reduced for mobile but still fits all 5 images */
+    gap: 3px; /* Smaller gap for mobile */
+  }
+
+  .gallery-image {
+    flex: 1 1 100%;
+  }
 }
 </style>

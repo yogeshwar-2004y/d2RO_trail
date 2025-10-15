@@ -8,9 +8,30 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo vista-logo">
+      </div>
+       <div class="header-center">
+        <div class="page-title">
+          <svg
+            class="title-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <line x1="10" y1="9" x2="8" y2="9"></line>
+          </svg>
+          <span class="title-text">MEMO</span>
         </div>
       </div>
       <div class="header-right">
@@ -588,8 +609,28 @@ export default {
   cursor: pointer;
 }
 
-.logo {
-  width: 150px;
+.header-center {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-icon {
+  color: #555;
+  width: 32px;
+  height: 32px;
+}
+
+.title-text {
+  font-size: 1.5em;
+  font-weight: bold;
 }
 
 .header-right {

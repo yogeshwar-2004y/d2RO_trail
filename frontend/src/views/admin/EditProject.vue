@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">EDIT PROJECT</span>
     </div>
 
@@ -272,7 +260,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}`,
+          `http://localhost:8000/api/projects/${this.projectId}`,
           {
             method: "PUT",
             headers: {

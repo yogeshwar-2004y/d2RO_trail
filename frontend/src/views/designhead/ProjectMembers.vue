@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">ASSIGN PROJECT</span>
       <span class="project-id">{{ projectName || projectId }}</span>
       <button class="add-member-button" @click="addMember">
@@ -140,7 +128,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}/members`
+          `http://localhost:8000/api/projects/${this.projectId}/members`
         );
         const data = await response.json();
 
@@ -176,7 +164,7 @@ export default {
           this.removing = true;
 
           const response = await fetch(
-            `http://localhost:5000/api/projects/${this.projectId}/members/${member.user_id}`,
+            `http://localhost:8000/api/projects/${this.projectId}/members/${member.user_id}`,
             {
               method: "DELETE",
               headers: {

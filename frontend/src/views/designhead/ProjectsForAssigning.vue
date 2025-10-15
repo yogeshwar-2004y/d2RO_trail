@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">ASSIGN PROJECT</span>
     </div>
 
@@ -99,7 +87,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:5000/api/projects");
+        const response = await fetch("http://localhost:8000/api/projects");
         const data = await response.json();
 
         if (data.success) {

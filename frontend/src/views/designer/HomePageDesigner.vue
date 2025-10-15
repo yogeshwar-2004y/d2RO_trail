@@ -1,31 +1,14 @@
 <template>
   <div class="designer-home">
-    <!-- Header -->
-    <header class="header">
-      <div class="brand">
-        <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="AVIATRAX Logo" class="logo-image">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="logo-image vista-logo">
-        </div>
-      </div>
-      <div class="header-actions">
-        <button class="menu-button" @click="toggleMenu">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-        <button class="logout-btn" @click="logout" title="Logout">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-        </button>
-      </div>
-    </header>
-
+    <!-- Floating Hamburger Menu Button -->
+    <button class="floating-menu-button" @click="toggleMenu">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+    
     <!-- Main Content -->
     <main class="main-content">
       <div class="cards-container">
@@ -67,13 +50,6 @@
       </div>
     </main>
     
-    <!-- News Ticker at the bottom -->
-    <NewsTicker 
-      height="60px" 
-      backgroundColor="#34495e" 
-      textColor="#ffffff"
-      class="dashboard-news-ticker"
-    />
     
     <!-- Vertical Navigation Bar -->
     <VerticalNavBar 
@@ -86,13 +62,11 @@
 </template>
 
 <script>
-import NewsTicker from '@/components/NewsTicker.vue'
 import VerticalNavBar from '@/components/VerticalNavBar.vue'
 
 export default {
   name: "HomePageDesigner",
   components: {
-    NewsTicker,
     VerticalNavBar
   },
   data() {
@@ -148,74 +122,44 @@ export default {
 
 <style scoped>
 .designer-home {
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  min-height: 100vh;
+  background-color: #f0f0f0;
+  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 0;
+  margin: 0;
+  overflow: hidden; /* Prevent any scrolling */
+  position: relative; /* For floating menu button */
 }
 
-/* Header Styles */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 20px;
-  margin-bottom: 40px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-}
-
-.logo-image {
-  width: 150px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.menu-button {
-  background: transparent;
+/* Floating Hamburger Menu Button */
+.floating-menu-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background: #162845;
+  color: white;
   border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
-.menu-button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+.floating-menu-button:hover {
+  background: #51759a;
+  transform: scale(1.1);
 }
 
-.menu-button svg {
-  width: 24px;
-  height: 24px;
-}
-
-.logout-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #000;
-  padding: 8px;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.logout-btn:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.logout-btn svg {
-  transform: rotate(180deg);
+.floating-menu-button svg {
   width: 24px;
   height: 24px;
 }
@@ -225,16 +169,17 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
-  padding: 20px;
+  width: 100%;
+  height: 100%;
 }
 
 .cards-container {
   display: flex;
-  gap: 40px;
+  gap: 40px; /* Increased gap for better spacing */
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
+  width: 100%;
+  max-width: 900px; /* Limit container width */
 }
 
 /* Navigation Card Styles */
@@ -244,51 +189,31 @@ export default {
   align-items: center;
   justify-content: center;
   background-color: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-  width: 250px;
-  height: 250px;
-  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  width: 200px; /* Slightly smaller for better fit */
+  height: 200px; /* Slightly smaller for better fit */
+  padding: 20px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .nav-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-  border-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 .card-icon {
   color: #000;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .card-label {
-  font-size: 1.2em;
+  font-size: 1em;
   font-weight: bold;
   text-align: center;
   color: #333;
-  line-height: 1.3;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .cards-container {
-    flex-direction: column;
-    gap: 30px;
-  }
-  
-  .nav-card {
-    width: 220px;
-    height: 220px;
-  }
-}
-
-.dashboard-news-ticker {
-  margin-top: auto;
-  position: sticky;
-  bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 </style>

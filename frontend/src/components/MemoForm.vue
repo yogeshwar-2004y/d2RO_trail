@@ -35,18 +35,6 @@
           />
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
     </div>
 
     <!-- Requisition Details Section -->
@@ -552,13 +540,21 @@
     </div>
 
     <!-- Test Details Section -->
-    <div class="form-section test-details" :class="{ 'disabled-section': isTestDetailsDisabled }">
+    <div
+      class="form-section test-details"
+      :class="{ 'disabled-section': isTestDetailsDisabled }"
+    >
       <table class="test-table">
         <tr>
           <td class="test-left">
             <div class="test-field">
               <label>Above Unit is ready for Testing at</label>
-              <input type="text" v-model="formData.testVenue" placeholder="" :disabled="isTestDetailsDisabled" />
+              <input
+                type="text"
+                v-model="formData.testVenue"
+                placeholder=""
+                :disabled="isTestDetailsDisabled"
+              />
               <span>onwards.</span>
             </div>
             <div class="test-field">
@@ -590,7 +586,12 @@
             </div>
             <div class="test-field">
               <label>ii. Test cycle / Duration:</label>
-              <input type="text" v-model="formData.testCycle" placeholder="" :disabled="isTestDetailsDisabled" />
+              <input
+                type="text"
+                v-model="formData.testCycle"
+                placeholder=""
+                :disabled="isTestDetailsDisabled"
+              />
               <span>hrs</span>
             </div>
             <div class="test-field">
@@ -603,7 +604,11 @@
                   :disabled="isTestDetailsDisabled"
                 />
                 <div class="time-picker">
-                  <select v-model="formData.testStartHour" class="time-select" :disabled="isTestDetailsDisabled">
+                  <select
+                    v-model="formData.testStartHour"
+                    class="time-select"
+                    :disabled="isTestDetailsDisabled"
+                  >
                     <option value="">HH</option>
                     <option v-for="hour in hours" :key="hour" :value="hour">
                       {{ hour }}
@@ -624,7 +629,11 @@
                       {{ minute }}
                     </option>
                   </select>
-                  <select v-model="formData.testStartAmPm" class="ampm-select" :disabled="isTestDetailsDisabled">
+                  <select
+                    v-model="formData.testStartAmPm"
+                    class="ampm-select"
+                    :disabled="isTestDetailsDisabled"
+                  >
                     <option value="">AM/PM</option>
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
@@ -824,7 +833,10 @@
     </div>
 
     <!-- Certification Section -->
-    <div class="form-section certification" :class="{ 'disabled-section': isCertificationDisabled }">
+    <div
+      class="form-section certification"
+      :class="{ 'disabled-section': isCertificationDisabled }"
+    >
       <div class="certification-header">
         <span class="certification-statement">It is certified that:</span>
       </div>
@@ -1848,7 +1860,7 @@ export default {
       try {
         console.log("Fetching tests configuration...");
         const res = await fetch(
-          "http://localhost:5000/api/tests-configuration"
+          "http://localhost:8000/api/tests-configuration"
         );
         const data = await res.json();
         console.log("API Response:", data);
@@ -2079,7 +2091,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2177,7 +2189,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:5000/api/lrus", {
+        const response = await fetch("http://localhost:8000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2192,7 +2204,7 @@ export default {
       try {
         console.log(`Fetching stage types for test ID: ${testId}`);
         const response = await fetch(
-          `http://localhost:5000/api/test/${testId}/stage-types`
+          `http://localhost:8000/api/test/${testId}/stage-types`
         );
 
         if (!response.ok) {
@@ -2223,7 +2235,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2532,7 +2544,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:5000/api/memos", {
+        const response = await fetch("http://localhost:8000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -18,18 +18,6 @@
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <div class="logos-container">
-          <img
-            src="@/assets/images/aviatrax-logo.png"
-            alt="Aviatrax Logo"
-            class="logo"
-          />
-          <img
-            src="@/assets/images/vista_logo.png"
-            alt="Vista Logo"
-            class="logo vista-logo"
-          />
-        </div>
       </div>
       <div class="header-center">
         <div class="page-title">
@@ -318,7 +306,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:5000/api/reports";
+        let apiUrl = "http://localhost:8000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
@@ -351,7 +339,7 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch("http://localhost:5000/api/projects");
+        const response = await fetch("http://localhost:8000/api/projects");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);

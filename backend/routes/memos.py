@@ -674,12 +674,69 @@ def approve_memo(memo_id):
                 
                 memo_details = cur.fetchone()
                 if memo_details:
-                    # For now, we'll use default values for project_id, lru_id, and serial_id
-                    # In a real implementation, these would be derived from the memo data
-                    # or provided by the user during memo submission
+                    # Try to determine project_id based on wing_proj_ref_no
                     default_project_id = 1  # Default project
-                    default_lru_id = 1       # Default LRU
-                    default_serial_id = 1   # Default serial
+                    try:
+                        cur.execute("""
+                            SELECT project_id FROM projects 
+                            WHERE LOWER(project_name) = ANY(
+                                SELECT LOWER(unnest(string_to_array(%s, '/')))
+                            )
+                            LIMIT 1
+                        """, (memo_details[0],))  # wing_proj_ref_no
+                        project_result = cur.fetchone()
+                        if project_result:
+                            default_project_id = project_result[0]
+                    except Exception as e:
+                        print(f"Error determining project_id: {e}")
+                    
+                    # Try to determine lru_id based on lru_sru_desc
+                    default_lru_id = 1  # Default LRU
+                    try:
+                        cur.execute("""
+                            SELECT lru_id FROM lrus 
+                            WHERE LOWER(lru_name) = LOWER(%s)
+                            LIMIT 1
+                        """, (memo_details[1],))  # lru_sru_desc
+                        lru_result = cur.fetchone()
+                        if lru_result:
+                            default_lru_id = lru_result[0]
+                    except Exception as e:
+                        print(f"Error determining lru_id: {e}")
+                    
+                    # Find or create a serial_id for the LRU
+                    default_serial_id = None
+                    try:
+                        # First, try to find an existing serial_id for this LRU
+                        cur.execute("""
+                            SELECT serial_id FROM serial_numbers 
+                            WHERE lru_id = %s 
+                            ORDER BY serial_id 
+                            LIMIT 1
+                        """, (default_lru_id,))
+                        serial_result = cur.fetchone()
+                        
+                        if serial_result:
+                            default_serial_id = serial_result[0]
+                        else:
+                            # Create a new serial number entry if none exists
+                            cur.execute("""
+                                INSERT INTO serial_numbers (lru_id, serial_number)
+                                VALUES (%s, 1)
+                                RETURNING serial_id
+                            """, (default_lru_id,))
+                            serial_result = cur.fetchone()
+                            if serial_result:
+                                default_serial_id = serial_result[0]
+                                print(f"Created new serial number with serial_id={default_serial_id} for lru_id={default_lru_id}")
+                    except Exception as e:
+                        print(f"Error determining serial_id: {e}")
+                        # Fallback to a safe default
+                        default_serial_id = 1
+                    
+                    if default_serial_id is None:
+                        print(f"Could not determine serial_id for memo {memo_id}, skipping report creation")
+                        return jsonify({"success": False, "message": "Could not determine serial_id for report creation"}), 500
                     
                     # Check if report already exists for this memo
                     cur.execute("SELECT report_id FROM reports WHERE memo_id = %s", (memo_id,))
@@ -698,7 +755,7 @@ def approve_memo(memo_id):
                             memo_details[3],  # venue as review_venue
                             'ASSIGNED'
                         ))
-                        print(f"Report created successfully for memo {memo_id}")
+                        print(f"Report created successfully for memo {memo_id} with serial_id={default_serial_id}")
                     else:
                         print(f"Report already exists for memo {memo_id}")
                 

@@ -17,18 +17,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
       <span class="page-title">ADD USER</span>
       <div class="header-buttons">
         <button class="header-button" @click="goToManageUsers">
@@ -175,7 +163,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:5000/api/roles");
+        const response = await fetch("http://localhost:8000/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -270,7 +258,7 @@ export default {
           formData.append("signature", this.signatureFile);
         }
 
-        const response = await fetch("http://localhost:5000/api/users", {
+        const response = await fetch("http://localhost:8000/api/users", {
           method: "POST",
           body: formData, // No Content-Type header for FormData
         });

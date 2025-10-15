@@ -1,44 +1,17 @@
 <template>
   <div class="mechanical-inspection-page">
-    <!-- Header -->
-    <div class="page-header">
-      <div class="header-left">
-        <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M19 12H5"></path>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-        </button>
-        <div class="logos-container">
-          <img src="@/assets/images/aviatrax-logo.png" alt="Aviatrax Logo" class="app-logo">
-          <img src="@/assets/images/vista_logo.png" alt="Vista Logo" class="app-logo vista-logo">
-        </div>
-      </div>
-      <div class="header-center">
-        <h1 class="page-title">MECHANICAL INSPECTION REPORT</h1>
-      </div>
-      <div class="header-right">
-        <button class="export-button" @click="exportReport">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7,10 12,15 17,10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          EXPORT
-        </button>
-      </div>
-    </div>
-
     <!-- Main Content -->
     <div class="main-content">
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ reportData.projectName || 'Project' }}/{{ reportData.lruName }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{ currentYear }}
+          CASDIC/{{ reportData.projectName || "Project" }}/{{
+            reportData.lruName
+          }}/SL.{{ reportData.slNos }}/{{ reportData.reportRefNo }}/{{
+            currentYear
+          }}
         </div>
-        <div class="report-date">
-          Date: {{ formattedDate }}
-        </div>
+        <div class="report-date">Date: {{ formattedDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -55,67 +28,114 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="reportData.projectName" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="reportData.projectName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="reportData.reportRefNo" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="reportData.reportRefNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="reportData.memoRefNo">
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="reportData.memoRefNo"
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="reportData.lruName" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="reportData.lruName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="reportData.inspectionStage">
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="reportData.inspectionStage"
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="reportData.testVenue">
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="reportData.testVenue"
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="reportData.slNos">
+                <input type="text" id="slNos" v-model="reportData.slNos" />
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="reportData.dpName" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="reportData.dpName"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="reportData.dated1">
+                <input type="date" id="dated1" v-model="reportData.dated1" />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="reportData.dated2">
+                <input type="date" id="dated2" v-model="reportData.dated2" />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="reportData.sruName">
+                <input type="text" id="sruName" v-model="reportData.sruName" />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="reportData.partNo" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="reportData.partNo"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model.number="reportData.quantity" min="1" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model.number="reportData.quantity"
+                  min="1"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="reportData.startDate">
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="reportData.startDate"
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="reportData.endDate">
+                <input type="date" id="endDate" v-model="reportData.endDate" />
               </div>
             </div>
           </div>
@@ -138,25 +158,51 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in dimensionalChecklist" :key="'dim-'+index">
+                <tr
+                  v-for="(item, index) in dimensionalChecklist"
+                  :key="'dim-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>
-                    <input type="text" v-model="item.dimension" placeholder="Enter dimension">
+                    <input
+                      type="text"
+                      v-model="item.dimension"
+                      placeholder="Enter dimension"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.tolerance" placeholder="Enter tolerance">
+                    <input
+                      type="text"
+                      v-model="item.tolerance"
+                      placeholder="Enter tolerance"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.observedValue" placeholder="Enter observed value">
+                    <input
+                      type="text"
+                      v-model="item.observedValue"
+                      placeholder="Enter observed value"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.instrumentUsed" placeholder="Enter instrument">
+                    <input
+                      type="text"
+                      v-model="item.instrumentUsed"
+                      placeholder="Enter instrument"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.remarks" placeholder="Enter remarks">
+                    <input
+                      type="text"
+                      v-model="item.remarks"
+                      placeholder="Enter remarks"
+                    />
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, item, 'dim')">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, item, 'dim')"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -180,20 +226,39 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in parameterChecklist" :key="'param-'+index">
+                <tr
+                  v-for="(item, index) in parameterChecklist"
+                  :key="'param-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.expected" readonly class="readonly-input">
+                    <input
+                      type="text"
+                      v-model="item.expected"
+                      readonly
+                      class="readonly-input"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.complianceObservation" placeholder="Enter compliance observations">
+                    <input
+                      type="text"
+                      v-model="item.complianceObservation"
+                      placeholder="Enter compliance observations"
+                    />
                   </td>
                   <td>
-                    <input type="text" v-model="item.remarks" placeholder="Enter remarks (OK/NOT OK)">
+                    <input
+                      type="text"
+                      v-model="item.remarks"
+                      placeholder="Enter remarks (OK/NOT OK)"
+                    />
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, item, 'param')">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, item, 'param')"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -228,7 +293,11 @@
           <button type="button" @click="resetForm" class="btn btn-secondary">
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -238,66 +307,137 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'MechanicalInspection',
+  name: "MechanicalInspection",
   data() {
     return {
-      currentYear: '2025',
+      currentYear: "2025",
       reportData: {
-        projectName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        slNos: '',
-        dpName: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        partNo: '',
+        projectName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        slNos: "",
+        dpName: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        partNo: "",
         quantity: null,
-        startDate: '',
-        endDate: '',
+        startDate: "",
+        endDate: "",
       },
       dimensionalChecklist: [
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
-        { dimension: '', tolerance: '', observedValue: '', instrumentUsed: '', remarks: '', fileName: null },
+        {
+          dimension: "",
+          tolerance: "",
+          observedValue: "",
+          instrumentUsed: "",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          dimension: "",
+          tolerance: "",
+          observedValue: "",
+          instrumentUsed: "",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          dimension: "",
+          tolerance: "",
+          observedValue: "",
+          instrumentUsed: "",
+          remarks: "",
+          fileName: null,
+        },
       ],
       parameterChecklist: [
-        { parameter: 'Burrs', complianceObservation: '', expected: 'Not Expected', remarks: '', fileName: null },
-        { parameter: 'Damages', complianceObservation: '', expected: 'Not Expected', remarks: '', fileName: null },
-        { parameter: 'Name Plate', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
-        { parameter: 'Engraving', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
-        { parameter: 'Passivation', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
-        { parameter: 'Chromate', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
-        { parameter: 'Electro-less Nickel plating', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
-        { parameter: 'Fasteners', complianceObservation: '', expected: 'As per Drawing', remarks: '', fileName: null },
+        {
+          parameter: "Burrs",
+          complianceObservation: "",
+          expected: "Not Expected",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Damages",
+          complianceObservation: "",
+          expected: "Not Expected",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Name Plate",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Engraving",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Passivation",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Chromate",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Electro-less Nickel plating",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
+        {
+          parameter: "Fasteners",
+          complianceObservation: "",
+          expected: "As per Drawing",
+          remarks: "",
+          fileName: null,
+        },
       ],
       currentDate: new Date(),
     };
   },
   computed: {
     formattedDate() {
-      return this.currentDate.toISOString().split('T')[0];
+      return this.currentDate.toISOString().split("T")[0];
     },
     isFormValid() {
-      return this.reportData.projectName &&
-             this.reportData.reportRefNo &&
-             this.reportData.lruName &&
-             this.reportData.dpName &&
-             this.reportData.partNo &&
-             this.reportData.quantity;
-    }
+      return (
+        this.reportData.projectName &&
+        this.reportData.reportRefNo &&
+        this.reportData.lruName &&
+        this.reportData.dpName &&
+        this.reportData.partNo &&
+        this.reportData.quantity
+      );
+    },
   },
   mounted() {
     // Get parameters from route
-    const projectName = this.$route.params.projectName || '';
-    const lruName = this.$route.params.lruName || '';
-    
+    const projectName = this.$route.params.projectName || "";
+    const lruName = this.$route.params.lruName || "";
+
     // Set default values
     this.reportData.projectName = projectName;
     this.reportData.lruName = lruName;
@@ -312,48 +452,55 @@ export default {
       }
     },
     saveDraft() {
-      console.log('Saving draft:', this.reportData);
-      alert('Draft saved successfully!');
+      console.log("Saving draft:", this.reportData);
+      alert("Draft saved successfully!");
     },
     resetForm() {
-      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+      if (
+        confirm(
+          "Are you sure you want to reset the form? All data will be lost."
+        )
+      ) {
         this.reportData = {
-          projectName: this.$route.params.projectName || '',
-          reportRefNo: '',
-          memoRefNo: '',
-          lruName: this.$route.params.lruName || '',
-          inspectionStage: '',
-          testVenue: '',
-          slNos: '',
-          dpName: '',
-          dated1: '',
-          dated2: '',
-          sruName: '',
-          partNo: '',
+          projectName: this.$route.params.projectName || "",
+          reportRefNo: "",
+          memoRefNo: "",
+          lruName: this.$route.params.lruName || "",
+          inspectionStage: "",
+          testVenue: "",
+          slNos: "",
+          dpName: "",
+          dated1: "",
+          dated2: "",
+          sruName: "",
+          partNo: "",
           quantity: null,
           startDate: this.formattedDate,
-          endDate: '',
+          endDate: "",
         };
         // Reset checklists
-        this.dimensionalChecklist.forEach(item => {
-          item.dimension = '';
-          item.tolerance = '';
-          item.observedValue = '';
-          item.instrumentUsed = '';
-          item.remarks = '';
+        this.dimensionalChecklist.forEach((item) => {
+          item.dimension = "";
+          item.tolerance = "";
+          item.observedValue = "";
+          item.instrumentUsed = "";
+          item.remarks = "";
           item.fileName = null;
         });
-        this.parameterChecklist.forEach(item => {
-          item.complianceObservation = '';
-          item.expected = item.parameter === 'Burrs' || item.parameter === 'Damages' ? 'Not Expected' : 'As per Drawing';
-          item.remarks = '';
+        this.parameterChecklist.forEach((item) => {
+          item.complianceObservation = "";
+          item.expected =
+            item.parameter === "Burrs" || item.parameter === "Damages"
+              ? "Not Expected"
+              : "As per Drawing";
+          item.remarks = "";
           item.fileName = null;
         });
       }
     },
     async submitForm() {
       if (!this.isFormValid) {
-        alert('Please fill in all required fields.');
+        alert("Please fill in all required fields.");
         return;
       }
 
@@ -376,7 +523,7 @@ export default {
           quantity: this.reportData.quantity || 0,
           start_date: this.reportData.startDate,
           end_date: this.reportData.endDate,
-          
+
           // Dimensional Checklist
           dim1_dimension: this.dimensionalChecklist[0].dimension,
           dim1_tolerance: this.dimensionalChecklist[0].tolerance,
@@ -384,99 +531,109 @@ export default {
           dim1_instrument_used: this.dimensionalChecklist[0].instrumentUsed,
           dim1_remarks: this.dimensionalChecklist[0].remarks,
           dim1_upload: this.dimensionalChecklist[0].fileName,
-          
+
           dim2_dimension: this.dimensionalChecklist[1].dimension,
           dim2_tolerance: this.dimensionalChecklist[1].tolerance,
           dim2_observed_value: this.dimensionalChecklist[1].observedValue,
           dim2_instrument_used: this.dimensionalChecklist[1].instrumentUsed,
           dim2_remarks: this.dimensionalChecklist[1].remarks,
           dim2_upload: this.dimensionalChecklist[1].fileName,
-          
+
           dim3_dimension: this.dimensionalChecklist[2].dimension,
           dim3_tolerance: this.dimensionalChecklist[2].tolerance,
           dim3_observed_value: this.dimensionalChecklist[2].observedValue,
           dim3_instrument_used: this.dimensionalChecklist[2].instrumentUsed,
           dim3_remarks: this.dimensionalChecklist[2].remarks,
           dim3_upload: this.dimensionalChecklist[2].fileName,
-          
+
           // Parameter Checklist
-          param1_compliance_observation: this.parameterChecklist[0].complianceObservation,
+          param1_compliance_observation:
+            this.parameterChecklist[0].complianceObservation,
           param1_expected: this.parameterChecklist[0].expected,
           param1_remarks: this.parameterChecklist[0].remarks,
           param1_upload: this.parameterChecklist[0].fileName,
-          
-          param2_compliance_observation: this.parameterChecklist[1].complianceObservation,
+
+          param2_compliance_observation:
+            this.parameterChecklist[1].complianceObservation,
           param2_expected: this.parameterChecklist[1].expected,
           param2_remarks: this.parameterChecklist[1].remarks,
           param2_upload: this.parameterChecklist[1].fileName,
-          
-          param3_compliance_observation: this.parameterChecklist[2].complianceObservation,
+
+          param3_compliance_observation:
+            this.parameterChecklist[2].complianceObservation,
           param3_expected: this.parameterChecklist[2].expected,
           param3_remarks: this.parameterChecklist[2].remarks,
           param3_upload: this.parameterChecklist[2].fileName,
-          
-          param4_compliance_observation: this.parameterChecklist[3].complianceObservation,
+
+          param4_compliance_observation:
+            this.parameterChecklist[3].complianceObservation,
           param4_expected: this.parameterChecklist[3].expected,
           param4_remarks: this.parameterChecklist[3].remarks,
           param4_upload: this.parameterChecklist[3].fileName,
-          
-          param5_compliance_observation: this.parameterChecklist[4].complianceObservation,
+
+          param5_compliance_observation:
+            this.parameterChecklist[4].complianceObservation,
           param5_expected: this.parameterChecklist[4].expected,
           param5_remarks: this.parameterChecklist[4].remarks,
           param5_upload: this.parameterChecklist[4].fileName,
-          
-          param6_compliance_observation: this.parameterChecklist[5].complianceObservation,
+
+          param6_compliance_observation:
+            this.parameterChecklist[5].complianceObservation,
           param6_expected: this.parameterChecklist[5].expected,
           param6_remarks: this.parameterChecklist[5].remarks,
           param6_upload: this.parameterChecklist[5].fileName,
-          
-          param7_compliance_observation: this.parameterChecklist[6].complianceObservation,
+
+          param7_compliance_observation:
+            this.parameterChecklist[6].complianceObservation,
           param7_expected: this.parameterChecklist[6].expected,
           param7_remarks: this.parameterChecklist[6].remarks,
           param7_upload: this.parameterChecklist[6].fileName,
-          
-          param8_compliance_observation: this.parameterChecklist[7].complianceObservation,
+
+          param8_compliance_observation:
+            this.parameterChecklist[7].complianceObservation,
           param8_expected: this.parameterChecklist[7].expected,
           param8_remarks: this.parameterChecklist[7].remarks,
           param8_upload: this.parameterChecklist[7].fileName,
-          
+
           // Signatures
-          prepared_by: '',
-          verified_by: '',
-          approved_by: ''
+          prepared_by: "",
+          verified_by: "",
+          approved_by: "",
         };
 
-        console.log('Submitting mechanical inspection report:', submissionData);
+        console.log("Submitting mechanical inspection report:", submissionData);
 
-        const response = await fetch('http://localhost:5000/api/mechanical-inspection', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(submissionData)
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/mechanical-inspection",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
 
         if (result.success) {
-          alert('Mechanical inspection report submitted successfully!');
-          console.log('Report ID:', result.report_id);
+          alert("Mechanical inspection report submitted successfully!");
+          console.log("Report ID:", result.report_id);
           this.resetForm();
         } else {
           alert(`Error: ${result.message}`);
         }
-        
       } catch (error) {
-        console.error('Error submitting report:', error);
-        alert('Error submitting report. Please try again.');
+        console.error("Error submitting report:", error);
+        alert("Error submitting report. Please try again.");
       }
     },
     exportReport() {
-      console.log('Exporting report...');
+      console.log("Exporting report...");
       // TODO: Implement PDF export functionality
-      alert('Export functionality will be implemented soon!');
-    }
-  }
+      alert("Export functionality will be implemented soon!");
+    },
+  },
 };
 </script>
 
@@ -484,7 +641,7 @@ export default {
 .mechanical-inspection-page {
   min-height: 100vh;
   background-color: #f5f5f5;
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 .page-header {
@@ -494,7 +651,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .header-left {
@@ -504,7 +661,7 @@ export default {
 }
 
 .back-button {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
   padding: 0.5rem;
@@ -514,22 +671,7 @@ export default {
 }
 
 .back-button:hover {
-  background: rgba(255,255,255,0.3);
-}
-
-.logos-container {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.app-logo {
-  height: 40px;
-  width: auto;
-}
-
-.vista-logo {
-  height: 35px;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .header-center {
@@ -538,10 +680,9 @@ export default {
 }
 
 .page-title {
-  margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin: 0;
 }
 
 .header-right {
@@ -550,89 +691,74 @@ export default {
 }
 
 .export-button {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 1rem;
   border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 500;
-  transition: background-color 0.3s;
 }
 
 .export-button:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .main-content {
+  padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
 }
 
 .form-header {
   background: white;
   padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
-  font-size: 0.9rem;
-  color: #666;
-  background: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
+  font-weight: bold;
+  color: #333;
 }
 
 .report-date {
-  font-weight: 500;
-  color: #495057;
+  color: #666;
 }
 
 .subject-line {
   background: white;
   padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
-  font-weight: 600;
-  color: #495057;
-  border-left: 4px solid #667eea;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .inspection-form {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  overflow: hidden;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .form-section {
-  padding: 2rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.form-section:last-child {
-  border-bottom: none;
+  margin-bottom: 2rem;
 }
 
 .section-title {
-  color: #495057;
-  margin-bottom: 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-  border-bottom: 2px solid #e9ecef;
+  color: #333;
+  border-bottom: 2px solid #667eea;
   padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .general-info-grid {
@@ -650,29 +776,25 @@ export default {
 .form-group {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 .form-group label {
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.form-group input,
-.form-group select {
+.form-group input {
   padding: 0.75rem;
-  border: 1px solid #ced4da;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group input:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
 .inspection-table-container {
@@ -684,52 +806,31 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.inspection-table th,
+.inspection-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
 }
 
 .inspection-table th {
   background: #f8f9fa;
-  color: #495057;
-  font-weight: 600;
-  padding: 1rem 0.75rem;
-  text-align: left;
-  border-bottom: 2px solid #e9ecef;
-  font-size: 0.85rem;
+  font-weight: bold;
+  color: #333;
 }
 
-.inspection-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: top;
-}
-
-.inspection-table tr:hover {
-  background: #f8f9fa;
-}
-
-.inspection-table input,
-.inspection-table select {
+.inspection-table input {
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid #ced4da;
+  border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 0.85rem;
-}
-
-.inspection-table input:focus,
-.inspection-table select:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .readonly-input {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
-  font-weight: 500;
+  background: #f8f9fa;
+  color: #666;
 }
 
 .signatures-layout {
@@ -740,39 +841,38 @@ export default {
 }
 
 .signature-item {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .signature-item label {
-  display: block;
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 0.5rem;
+  font-weight: bold;
+  color: #333;
 }
 
 .signature-line {
   height: 2px;
-  background: #e9ecef;
+  background: #333;
   margin-top: 2rem;
-  border-radius: 1px;
 }
 
 .form-actions {
-  padding: 2rem;
-  background: #f8f9fa;
   display: flex;
-  gap: 1rem;
   justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #ddd;
 }
 
 .btn {
   padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  transition: background-color 0.3s;
 }
 
 .btn-primary {
@@ -782,13 +882,11 @@ export default {
 
 .btn-primary:hover:not(:disabled) {
   background: #5a6fd8;
-  transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-  background: #ced4da;
+  background: #ccc;
   cursor: not-allowed;
-  transform: none;
 }
 
 .btn-secondary {
@@ -798,33 +896,5 @@ export default {
 
 .btn-secondary:hover {
   background: #5a6268;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-  .general-info-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .signatures-layout {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .page-header {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-  
-  .header-left,
-  .header-right {
-    justify-content: center;
-  }
 }
 </style>

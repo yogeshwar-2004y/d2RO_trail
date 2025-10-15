@@ -18,18 +18,6 @@
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      <div class="logos-container">
-        <img
-          src="@/assets/images/aviatrax-logo.png"
-          alt="Aviatrax Logo"
-          class="logo"
-        />
-        <img
-          src="@/assets/images/vista_logo.png"
-          alt="Vista Logo"
-          class="logo vista-logo"
-        />
-      </div>
 
       <div class="header-actions">
         <button class="action-btn" @click="goToManageProjects">
@@ -206,7 +194,7 @@ export default {
           createdBy: this.currentUser.id,
         };
 
-        const response = await fetch("http://localhost:5000/api/projects", {
+        const response = await fetch("http://localhost:8000/api/projects", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -271,20 +259,6 @@ export default {
   border: none;
   cursor: pointer;
   margin-right: 15px;
-}
-
-.logos-container {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-}
-
-.logo {
-  width: 140px;
-}
-
-.vista-logo {
-  width: 120px;
 }
 
 .header-actions {
