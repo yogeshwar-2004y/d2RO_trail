@@ -165,7 +165,7 @@ const roleBasedCards = computed(() => {
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
       { id: 'user activities', title: 'User Activities', route: 'UserActivities', icon: UserIcon },
     ],
-    reviewer: [
+    qareviewer: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon }

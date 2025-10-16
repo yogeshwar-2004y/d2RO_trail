@@ -136,12 +136,12 @@ const breadcrumbs = computed(() => {
   const getHomeName = () => {
     const roleToHomeName = {
       admin: 'Admin Dashboard',
-      reviewer: 'Reviewer Dashboard',
+      qareviewer: 'QA Reviewer Dashboard',
       qahead: 'QA Head Dashboard', 
       designhead: 'Design Head Dashboard',
       designer: 'Designer Dashboard'
     }
-    return roleToHomeName[userRole] || 'Admin Dashboard'
+    return roleToHomeName[userRole]
   }
   
   // Always start with role-appropriate Home
@@ -231,6 +231,11 @@ const breadcrumbs = computed(() => {
         } else if (pathSegments[1] === 'notifications') {
           crumbs.push({
             name: routeMappings['QAHeadNotifications'] || 'Notifications',
+            path: currentRoute.path
+          })
+        } else if (pathSegments[1] === 'shared-memos') {
+          crumbs.push({
+            name: routeMappings['SharedMemoDashboard'] || 'Shared Memos',
             path: currentRoute.path
           })
         } else if (pathSegments[1] !== 'memos') {
@@ -383,6 +388,20 @@ const breadcrumbs = computed(() => {
         })
       }
     }
+    // Handle shared-memo-view route
+    else if (currentRoute.path.startsWith('/shared-memo-view/')) {
+      // Add Memos breadcrumb
+      crumbs.push({
+        name: routeMappings['MemoDashboard'] || 'Memos',
+        path: '/memos'
+      })
+      
+      // Add Shared Memo View breadcrumb
+      crumbs.push({
+        name: routeMappings['SharedMemoView'] || 'Shared Memo View',
+        path: currentRoute.path
+      })
+    }
     // Handle specific role-based routes
     else if (currentRoute.path.startsWith('/qahead/')) {
       if (pathSegments[1] === 'assign-reviewer') {
@@ -398,6 +417,12 @@ const breadcrumbs = computed(() => {
       }
     }
     else if (currentRoute.path.startsWith('/reviewer/')) {
+      // Add Memos breadcrumb for reviewer routes
+      crumbs.push({
+        name: routeMappings['MemoDashboard'] || 'Memos',
+        path: '/memos'
+      })
+      
       if (pathSegments[1] === 'memo-dashboard') {
         crumbs.push({
           name: routeMappings['ReviewerMemoDashboard'] || 'Memo Dashboard',
@@ -496,13 +521,13 @@ function getHomePath() {
   // Map user roles to their corresponding home paths
   const roleToHomePath = {
     admin: '/admin',
-    reviewer: '/reviewer', 
+    qareviewer: '/reviewer', 
     qahead: '/qahead',
     designhead: '/designhead',
     designer: '/designer'
   }
   
-  return roleToHomePath[userRole] || '/admin' // Default to admin if role not found
+  return roleToHomePath[userRole] // Default to admin if role not found
 }
 </script>
 
