@@ -27,11 +27,12 @@
       <div class="filter-group">
         <label for="statusFilter">Filter by Status:</label>
         <select id="statusFilter" v-model="statusFilter" @change="filterRequests">
-          <option value="">All Status</option>
+          <option value="">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
           <option value="resolved">Resolved</option>
           <option value="closed">Closed</option>
+          <option value="offline_pending">Offline Pending</option>
         </select>
       </div>
       <div class="filter-group">
@@ -41,8 +42,28 @@
           type="text" 
           v-model="searchQuery" 
           @input="filterRequests"
-          placeholder="Search by username or issue..."
+          placeholder="Search by username, user ID, or issue..."
         />
+      </div>
+      <div class="export-controls">
+        <div class="export-group">
+          <label for="exportLimit">Export Limit:</label>
+          <select id="exportLimit" v-model="exportLimit">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50">50</option>
+            <option value="60">60</option>
+            <option value="70">70</option>
+            <option value="80">80</option>
+            <option value="90">90</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <button @click="exportToPDF" class="export-btn">
+          📄 Export to PDF
+        </button>
       </div>
     </div>
 
@@ -50,63 +71,124 @@
       <div v-if="loading" class="loading">
         <p>Loading tech support requests...</p>
       </div>
-      
-      <div v-else-if="filteredRequests.length === 0" class="no-requests">
-        <p>No tech support requests found.</p>
-      </div>
-      
-      <div v-else class="requests-list">
-        <div 
-          v-for="request in filteredRequests" 
-          :key="request.id" 
-          class="request-card"
-          :class="getStatusClass(request.status)"
-        >
-          <div class="request-header">
-            <div class="request-info">
-              <h3>{{ request.username }} (ID: {{ request.user_id }})</h3>
-              <div class="date-info">
-                <span class="submitted-date">
-                  <strong>Submitted:</strong> {{ formatDateTime(request.created_at) }}
-                </span>
-                <span v-if="request.updated_at && request.updated_at !== request.created_at" class="updated-date">
-                  <strong>Last Updated:</strong> {{ formatDateTime(request.updated_at) }}
-                </span>
-                <span v-if="request.status_updated_at && request.status_updated_at !== request.created_at" class="status-updated-info">
-                  <strong>Status Updated:</strong> {{ formatDateTime(request.status_updated_at) }}
-                  <span v-if="request.status_updated_by" class="updated-by">
-                    by User ID {{ request.status_updated_by }}
-                  </span>
-                </span>
+
+      <div v-else>
+        <!-- Online Requests Section -->
+        <div v-if="filteredRequests.length > 0" class="requests-section">
+          <div class="section-header">
+            <h3>Online Requests ({{ filteredRequests.length }})</h3>
+          </div>
+          <div class="requests-list">
+            <div 
+              v-for="request in filteredRequests" 
+              :key="request.id" 
+              class="request-card"
+              :class="getStatusClass(request.status)"
+            >
+              <div class="request-header">
+                <div class="request-info">
+                  <h3>{{ request.username }} (ID: {{ request.user_id }})</h3>
+                  <div class="date-info">
+                    <span class="submitted-date">
+                      <strong>Submitted:</strong> {{ formatDateTime(request.created_at) }}
+                    </span>
+                    <span v-if="request.updated_at && request.updated_at !== request.created_at" class="updated-date">
+                      <strong>Last Updated:</strong> {{ formatDateTime(request.updated_at) }}
+                    </span>
+                    <span v-if="request.status_updated_at && request.status_updated_at !== request.created_at" class="status-updated-info">
+                      <strong>Status Updated:</strong> {{ formatDateTime(request.status_updated_at) }}
+                      <span v-if="request.status_updated_by" class="updated-by">
+                        by User ID {{ request.status_updated_by }}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="request-status">
+                  <span class="status-badge" :class="request.status">{{ request.status.toUpperCase() }}</span>
+                </div>
+              </div>
+              
+              <div class="request-content">
+                <div class="issue-date">
+                  <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.issue_date) }}
+                </div>
+                <div class="issue-description">
+                  <strong>Issue Description:</strong>
+                  <p>{{ request.issue_description }}</p>
+                </div>
+              </div>
+              
+              <div class="request-actions">
+                <select 
+                  v-model="request.status" 
+                  @change="updateStatus(request.id, request.status)"
+                  class="status-select"
+                >
+                  <option value="pending">Pending</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
+                </select>
               </div>
             </div>
-            <div class="request-status">
-              <span class="status-badge" :class="request.status">{{ request.status.toUpperCase() }}</span>
-            </div>
           </div>
-          
-          <div class="request-content">
-            <div class="issue-date">
-              <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.issue_date) }}
-            </div>
-            <div class="issue-description">
-              <strong>Issue Description:</strong>
-              <p>{{ request.issue_description }}</p>
-            </div>
+        </div>
+
+        <!-- Offline Requests Section -->
+        <div v-if="filteredOfflineRequests.length > 0" class="requests-section">
+          <div class="section-header">
+            <h3>Offline Requests ({{ filteredOfflineRequests.length }})</h3>
+            <span class="offline-indicator">⚠️ Stored locally - will sync when backend is available</span>
           </div>
-          
-          <div class="request-actions">
-            <select 
-              v-model="request.status" 
-              @change="updateStatus(request.id, request.status)"
-              class="status-select"
+          <div class="requests-list">
+            <div 
+              v-for="request in filteredOfflineRequests" 
+              :key="request.id" 
+              class="request-card offline-request"
             >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="closed">Closed</option>
-            </select>
+              <div class="request-header">
+                <div class="request-info">
+                  <h3>{{ request.username }} (ID: {{ request.userId }})</h3>
+                  <div class="date-info">
+                    <span class="submitted-date">
+                      <strong>Stored Locally:</strong> {{ formatDateTime(request.created_at) }}
+                    </span>
+                    <span v-if="request.submission_attempts > 0" class="attempts-info">
+                      <strong>Sync Attempts:</strong> {{ request.submission_attempts }}
+                    </span>
+                  </div>
+                </div>
+                <div class="request-status">
+                  <span class="status-badge offline-pending">OFFLINE PENDING</span>
+                </div>
+              </div>
+              
+              <div class="request-content">
+                <div class="issue-date">
+                  <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.date) }}
+                </div>
+                <div class="issue-description">
+                  <strong>Issue Description:</strong>
+                  <p>{{ request.issue }}</p>
+                </div>
+              </div>
+              
+              <div class="request-actions">
+                <button 
+                  @click="syncOfflineRequest(request.id)"
+                  class="sync-btn"
+                  :disabled="loading"
+                >
+                  🔄 Sync Now
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- No Requests Message -->
+        <div v-if="filteredRequests.length === 0 && filteredOfflineRequests.length === 0" class="no-requests">
+          <p>No tech support requests found matching your criteria.</p>
         </div>
       </div>
     </div>
@@ -121,12 +203,16 @@ export default {
   data() {
     return {
       requests: [],
+      offlineRequests: [],
       filteredRequests: [],
+      filteredOfflineRequests: [],
       loading: true,
       statusFilter: "",
       searchQuery: "",
       showSuccessMessage: false,
-      successMessage: ""
+      successMessage: "",
+      showOfflineRequests: true,
+      exportLimit: 50
     };
   },
   async mounted() {
@@ -134,6 +220,7 @@ export default {
     const { initializeUser } = await import('@/stores/userStore');
     initializeUser();
     await this.loadRequests();
+    this.loadOfflineRequests();
     
     // Add keyboard event listener for popup
     document.addEventListener('keydown', this.handleKeydown);
@@ -161,6 +248,175 @@ export default {
       } finally {
         this.loading = false;
       }
+    },
+
+    loadOfflineRequests() {
+      try {
+        const offlineData = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
+        this.offlineRequests = offlineData.map(request => ({
+          ...request,
+          isOffline: true,
+          status: 'offline_pending'
+        }));
+        this.filteredOfflineRequests = [...this.offlineRequests];
+        console.log(`Loaded ${this.offlineRequests.length} offline requests`);
+      } catch (error) {
+        console.error("Error loading offline requests:", error);
+        this.offlineRequests = [];
+        this.filteredOfflineRequests = [];
+      }
+    },
+
+    async syncOfflineRequest(requestId) {
+      try {
+        const request = this.offlineRequests.find(r => r.id === requestId);
+        if (!request) return;
+
+        const requestData = {
+          username: request.username,
+          userId: request.userId,
+          date: request.date,
+          issue: request.issue
+        };
+
+        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+          mode: "cors",
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Remove from offline requests
+          this.offlineRequests = this.offlineRequests.filter(r => r.id !== requestId);
+          this.filteredOfflineRequests = this.filteredOfflineRequests.filter(r => r.id !== requestId);
+          
+          // Update localStorage
+          const updatedOffline = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
+          const filteredOffline = updatedOffline.filter(r => r.id !== requestId);
+          localStorage.setItem('tech_support_offline', JSON.stringify(filteredOffline));
+          
+          this.showSuccessNotification(`Offline request synced successfully`);
+          await this.loadRequests(); // Reload online requests
+        } else {
+          throw new Error(data.message || "Sync failed");
+        }
+      } catch (error) {
+        console.error("Error syncing offline request:", error);
+        alert("Failed to sync offline request. Please try again.");
+      }
+    },
+
+    async exportToPDF() {
+      try {
+        // Get all requests (online + offline) up to the limit
+        const allRequests = [
+          ...this.filteredRequests.slice(0, this.exportLimit),
+          ...this.filteredOfflineRequests.slice(0, Math.max(0, this.exportLimit - this.filteredRequests.length))
+        ];
+
+        if (allRequests.length === 0) {
+          alert("No requests to export");
+          return;
+        }
+
+        // Create PDF content
+        const pdfContent = this.generatePDFContent(allRequests);
+        
+        // Create and download PDF
+        this.downloadPDF(pdfContent, `tech_support_requests_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+        this.showSuccessNotification(`Exported ${allRequests.length} requests to PDF`);
+      } catch (error) {
+        console.error("Error exporting to PDF:", error);
+        alert("Failed to export PDF. Please try again.");
+      }
+    },
+
+    generatePDFContent(requests) {
+      const currentDate = new Date().toLocaleDateString();
+      const totalRequests = requests.length;
+      const onlineRequests = requests.filter(r => !r.isOffline).length;
+      const offlineRequests = requests.filter(r => r.isOffline).length;
+
+      let content = `
+        <html>
+          <head>
+            <title>Tech Support Requests Report</title>
+            <style>
+              body { font-family: Arial, sans-serif; margin: 20px; }
+              .header { text-align: center; margin-bottom: 30px; }
+              .summary { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+              .request { border: 1px solid #ddd; margin-bottom: 15px; padding: 15px; border-radius: 5px; }
+              .request-header { font-weight: bold; color: #333; margin-bottom: 10px; }
+              .request-details { margin-left: 10px; }
+              .offline { background: #fff3cd; border-color: #ffeaa7; }
+              .status-pending { color: #856404; }
+              .status-in_progress { color: #0c5460; }
+              .status-resolved { color: #155724; }
+              .status-closed { color: #721c24; }
+              .status-offline_pending { color: #856404; font-style: italic; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Tech Support Requests Report</h1>
+              <p>Generated on: ${currentDate}</p>
+            </div>
+            
+            <div class="summary">
+              <h3>Summary</h3>
+              <p><strong>Total Requests:</strong> ${totalRequests}</p>
+              <p><strong>Online Requests:</strong> ${onlineRequests}</p>
+              <p><strong>Offline Requests:</strong> ${offlineRequests}</p>
+            </div>
+      `;
+
+      requests.forEach((request, index) => {
+        const statusClass = `status-${request.status}`;
+        const requestClass = request.isOffline ? 'offline' : '';
+        
+        content += `
+          <div class="request ${requestClass}">
+            <div class="request-header">
+              Request #${index + 1} - ${request.username} (ID: ${request.userId})
+              <span class="${statusClass}">[${request.status.toUpperCase()}]</span>
+              ${request.isOffline ? '<span style="color: #856404;">[OFFLINE]</span>' : ''}
+            </div>
+            <div class="request-details">
+              <p><strong>Issue Date:</strong> ${this.formatDateOnly(request.date)}</p>
+              <p><strong>Submitted:</strong> ${this.formatDateTime(request.created_at)}</p>
+              ${request.status_updated_at ? `<p><strong>Last Updated:</strong> ${this.formatDateTime(request.status_updated_at)}</p>` : ''}
+              <p><strong>Issue Description:</strong></p>
+              <p style="margin-left: 20px; white-space: pre-wrap;">${request.issue}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      content += `
+          </body>
+        </html>
+      `;
+
+      return content;
+    },
+
+    downloadPDF(htmlContent, filename) {
+      // Create a new window with the HTML content
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      
+      // Wait for content to load, then print
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+      };
     },
 
     async updateStatus(requestId, newStatus) {
@@ -216,6 +472,7 @@ export default {
     },
 
     filterRequests() {
+      // Filter online requests
       let filtered = [...this.requests];
 
       // Filter by status
@@ -228,11 +485,32 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(request => 
           request.username.toLowerCase().includes(query) ||
+          request.user_id.toString().includes(query) ||
           request.issue_description.toLowerCase().includes(query)
         );
       }
 
       this.filteredRequests = filtered;
+
+      // Filter offline requests
+      let filteredOffline = [...this.offlineRequests];
+
+      // Filter by status (offline requests are always 'offline_pending')
+      if (this.statusFilter && this.statusFilter !== 'offline_pending') {
+        filteredOffline = [];
+      }
+
+      // Filter by search query
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        filteredOffline = filteredOffline.filter(request => 
+          request.username.toLowerCase().includes(query) ||
+          request.userId.toString().includes(query) ||
+          request.issue.toLowerCase().includes(query)
+        );
+      }
+
+      this.filteredOfflineRequests = filteredOffline;
     },
 
     formatDateTime(dateString) {
@@ -683,5 +961,125 @@ export default {
     padding: 10px 25px;
     font-size: 0.9rem;
   }
+}
+
+/* Export Controls */
+.export-controls {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.export-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.export-group label {
+  font-weight: bold;
+  color: #162845;
+}
+
+.export-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 14px;
+}
+
+.export-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.export-btn:hover {
+  background: #218838;
+}
+
+/* Section Headers */
+.requests-section {
+  margin-bottom: 30px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.section-header h3 {
+  margin: 0;
+  color: #162845;
+  font-size: 1.3rem;
+}
+
+.offline-indicator {
+  background: #fff3cd;
+  color: #856404;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Offline Request Styles */
+.offline-request {
+  background: #fff9e6;
+  border-left: 4px solid #ffc107;
+}
+
+.offline-request .request-header h3 {
+  color: #856404;
+}
+
+.attempts-info {
+  color: #856404;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.attempts-info strong {
+  color: #6c5b00;
+}
+
+.status-badge.offline-pending {
+  background: #ffc107;
+  color: #212529;
+}
+
+.sync-btn {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.sync-btn:hover:not(:disabled) {
+  background: #138496;
+  transform: translateY(-1px);
+}
+
+.sync-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>

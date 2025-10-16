@@ -5,6 +5,21 @@
         <div class="form-header">
           <h1>Technical Support</h1>
           <p>Please fill out the form below to report any technical issues you're experiencing.</p>
+          
+          <!-- Offline Indicator -->
+          <div v-if="!isOnline" class="offline-indicator">
+            <span class="offline-icon">⚠️</span>
+            <span class="offline-text">You're currently offline. Your request will be saved locally and submitted when connection is restored.</span>
+          </div>
+        </div>
+
+        <!-- Success Message -->
+        <div v-if="showSuccessMessage" class="success-message">
+          <div class="success-content">
+            <span class="success-icon">✓</span>
+            <span class="success-text">{{ successMessage }}</span>
+            <button @click="hideSuccessMessage" class="close-btn">&times;</button>
+          </div>
         </div>
         
         <form @submit.prevent="submitForm" class="support-form">
@@ -70,6 +85,8 @@
 </template>
 
 <script>
+import techSupportSync from '@/services/techSupportSync.js'
+
 export default {
   name: "TechSupportPage",
   data() {
@@ -80,8 +97,27 @@ export default {
         date: new Date().toISOString().split('T')[0], // Today's date as default
         issue: ""
       },
-      isSubmitting: false
+      isSubmitting: false,
+      showSuccessMessage: false,
+      successMessage: "",
+      isOnline: navigator.onLine
     };
+  },
+  mounted() {
+    // Trigger sync when page loads (in case we just came back online)
+    if (navigator.onLine) {
+      techSupportSync.syncOfflineRequests();
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', this.handleOnline);
+    window.addEventListener('offline', this.handleOffline);
+  },
+
+  beforeUnmount() {
+    // Clean up event listeners
+    window.removeEventListener('online', this.handleOnline);
+    window.removeEventListener('offline', this.handleOffline);
   },
   methods: {
     async submitForm() {
@@ -92,7 +128,7 @@ export default {
       this.isSubmitting = true;
 
       try {
-        // Here you would typically send the data to your backend
+        // Try to submit to backend first
         const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
           method: "POST",
           headers: {
@@ -105,18 +141,20 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          alert("Your technical support request has been submitted successfully. We will get back to you soon.");
+          this.showSuccessMessage("Your technical support request has been submitted successfully. We will get back to you soon.");
           this.resetForm();
-          this.goBack();
+          setTimeout(() => this.goBack(), 2000);
         } else {
-          alert("Failed to submit your request. Please try again later.");
+          throw new Error(data.message || "Backend submission failed");
         }
       } catch (error) {
-        console.error("Error submitting tech support request:", error);
-        // For now, show success message even if backend is not available
-        alert("Your technical support request has been submitted successfully. We will get back to you soon.");
+        console.log("Backend unavailable, storing locally:", error.message);
+        
+        // Backend is down - store locally and show success
+        this.storeLocally();
+        this.showSuccessMessage("Your technical support request has been saved locally and will be submitted when the system is back online. We will get back to you soon.");
         this.resetForm();
-        this.goBack();
+        setTimeout(() => this.goBack(), 2000);
       } finally {
         this.isSubmitting = false;
       }
@@ -153,6 +191,61 @@ export default {
 
     goBack() {
       this.$router.push({ name: "login" });
+    },
+
+    storeLocally() {
+      // Create a unique ID for this request
+      const requestId = 'tech_support_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      
+      // Prepare the request data
+      const requestData = {
+        id: requestId,
+        username: this.formData.username,
+        userId: parseInt(this.formData.userId),
+        date: this.formData.date,
+        issue: this.formData.issue,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        stored_locally: true,
+        submission_attempts: 0
+      };
+
+      // Get existing local requests
+      const existingRequests = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
+      
+      // Add new request
+      existingRequests.push(requestData);
+      
+      // Save back to localStorage
+      localStorage.setItem('tech_support_offline', JSON.stringify(existingRequests));
+      
+      console.log('Tech support request stored locally:', requestData);
+    },
+
+    showSuccessMessage(message) {
+      this.successMessage = message;
+      this.showSuccessMessage = true;
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        this.hideSuccessMessage();
+      }, 5000);
+    },
+
+    hideSuccessMessage() {
+      this.showSuccessMessage = false;
+      this.successMessage = "";
+    },
+
+    handleOnline() {
+      this.isOnline = true;
+      console.log('Back online - syncing offline requests');
+      techSupportSync.syncOfflineRequests();
+    },
+
+    handleOffline() {
+      this.isOnline = false;
+      console.log('Gone offline');
     }
   }
 };
@@ -199,6 +292,98 @@ export default {
   color: #666;
   font-size: 1.1rem;
   margin: 0;
+}
+
+/* Success Message Styles */
+.success-message {
+  margin-bottom: 20px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success-content {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  background: #28a745;
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.success-text {
+  color: #155724;
+  font-weight: 500;
+  flex: 1;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #155724;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.close-btn:hover {
+  background-color: rgba(21, 87, 36, 0.1);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Offline Indicator Styles */
+.offline-indicator {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.offline-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.offline-text {
+  color: #856404;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 .support-form {
