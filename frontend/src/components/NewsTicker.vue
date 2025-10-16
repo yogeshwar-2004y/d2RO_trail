@@ -40,7 +40,7 @@ export default {
     },
     speed: {
       type: Number,
-      default: 100, // pixels per second
+      default: 30, // pixels per second
     },
     backgroundColor: {
       type: String,
@@ -116,8 +116,11 @@ export default {
           .map((item) => item.news_text)
           .join(" 📰 ");
         const contentLength = totalContent.length;
-        // Adjust duration based on content length and desired speed
-        this.animationDuration = Math.max(20, contentLength * 0.1);
+        // Remove character constraints - allow unlimited content length
+        // Use speed prop to control animation: slower speed = longer duration
+        // Base calculation: 1 second per 30 characters, adjusted by speed factor
+        const baseDuration = Math.ceil(contentLength / 30);
+        this.animationDuration = Math.max(20, baseDuration * (100 / this.speed));
       }
     },
   },
@@ -144,10 +147,12 @@ export default {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-weight: 300;
-  font-size: 15px;
+  font-weight: 500;
+  font-size: 14px;
   animation-name: scroll;
   transform: translateX(100%);
+  /* Remove any width constraints to allow unlimited content */
+  min-width: max-content;
 }
 
 .news-item {
