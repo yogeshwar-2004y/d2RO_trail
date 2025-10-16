@@ -225,7 +225,7 @@ const router = createRouter({
         component: PlanDocsTestComponent,
       },
       {
-        path: '/templates',
+        path: '/reports/templates',
         name: 'TemplateDashboard',
         component: TemplateDashboard,
       },
