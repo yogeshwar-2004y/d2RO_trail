@@ -7,9 +7,65 @@ from utils.helpers import handle_database_error
 
 news_bp = Blueprint('news', __name__)
 
+# @news_bp.route('/api/news/debug', methods=['GET'])
+# def debug_news():
+#     """Debug endpoint to check news data and timing"""
+#     try:
+#         conn = get_db_connection()
+#         conn.rollback()
+#         cur = conn.cursor()
+        
+#         # Get current time
+#         cur.execute("SELECT NOW()")
+#         current_time = cur.fetchone()[0]
+        
+#         # Get all news records
+#         cur.execute("SELECT id, news_text, created_at, updated_at, hidden FROM news_updates ORDER BY id")
+#         all_news = cur.fetchall()
+        
+#         # Get news within 24 hours
+#         cur.execute("""
+#             SELECT id, news_text, created_at, updated_at, hidden
+#             FROM news_updates
+#             WHERE updated_at >= NOW() - INTERVAL '24 hours'
+#             AND (hidden = FALSE OR hidden IS NULL)
+#             ORDER BY updated_at DESC
+#         """)
+#         recent_news = cur.fetchall()
+        
+#         cur.close()
+        
+#         return jsonify({
+#             "success": True,
+#             "current_time": current_time.isoformat(),
+#             "all_news": [
+#                 {
+#                     "id": item[0],
+#                     "news_text": item[1],
+#                     "created_at": item[2].isoformat() if item[2] else None,
+#                     "updated_at": item[3].isoformat() if item[3] else None,
+#                     "hidden": item[4]
+#                 } for item in all_news
+#             ],
+#             "recent_news": [
+#                 {
+#                     "id": item[0],
+#                     "news_text": item[1],
+#                     "created_at": item[2].isoformat() if item[2] else None,
+#                     "updated_at": item[3].isoformat() if item[3] else None,
+#                     "hidden": item[4]
+#                 } for item in recent_news
+#             ]
+#         })
+        
+#     except Exception as e:
+#         conn.rollback()
+#         print(f"Error in debug endpoint: {str(e)}")
+#         return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @news_bp.route('/api/news', methods=['GET'])
 def get_news():
-    """Get news updates for frontend display (last 24 hours, not hidden)"""
+    """Get news updates for frontend display (all non-hidden news)"""
     try:
         conn = get_db_connection()
         conn.rollback()  # Clear any previous transaction errors
@@ -18,8 +74,7 @@ def get_news():
         cur.execute("""
             SELECT id, news_text, created_at, updated_at, hidden
             FROM news_updates
-            WHERE updated_at >= NOW() - INTERVAL '24 hours'
-            AND hidden = FALSE
+            WHERE hidden = FALSE
             ORDER BY updated_at DESC
         """)
         
@@ -222,11 +277,10 @@ def delete_all_news():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Count visible news items in last 24 hours
+        # Count visible news items
         cur.execute("""
             SELECT COUNT(*) FROM news_updates 
-            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
-            AND hidden = FALSE
+            WHERE hidden = FALSE
         """)
         count = cur.fetchone()[0]
         
@@ -234,12 +288,11 @@ def delete_all_news():
             cur.close()
             return jsonify({"success": False, "message": "No visible news items to hide"}), 400
         
-        # Hide all visible news items from last 24 hours
+        # Hide all visible news items
         cur.execute("""
             UPDATE news_updates 
             SET hidden = TRUE 
-            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
-            AND hidden = FALSE
+            WHERE hidden = FALSE
         """)
         
         conn.commit()

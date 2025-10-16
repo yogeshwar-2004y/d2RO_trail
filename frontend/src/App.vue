@@ -11,7 +11,20 @@ const route = useRoute();
 
 // Show sidebar on all pages except login
 const showSidebar = computed(() => {
-  return route.name !== 'login';
+  return route.name !== "login";
+});
+
+// Check if current route is login or dashboard pages
+const isLoginOrDashboard = computed(() => {
+  const routeName = route.name;
+  return (
+    routeName === "login" ||
+    routeName === "HomePageAdmin" ||
+    routeName === "HomePageDesigner" ||
+    routeName === "HomePageQAHead" ||
+    routeName === "HomePageReviewer" ||
+    routeName === "HomePageDesignHead"
+  );
 });
 </script>
 
@@ -20,16 +33,22 @@ const showSidebar = computed(() => {
     <AppSidebar v-if="showSidebar" />
     <AppHeader />
     <BreadcrumbNavigation />
-    <main class="main-content" :class="{ 'with-sidebar': showSidebar }">
+    <main
+      class="main-content"
+      :class="{
+        'with-sidebar': showSidebar,
+        'compact-header-margin': !isLoginOrDashboard,
+      }"
+    >
       <RouterView />
     </main>
-      <NewsTicker
+    <NewsTicker
       height="50px"
       backgroundColor="#2c3e50"
       textColor="#ffffff"
       class="app-news-ticker"
-      />
-      <AppFooter class="app-footer" />
+    />
+    <AppFooter class="app-footer" />
   </div>
 </template>
 
@@ -40,6 +59,7 @@ const showSidebar = computed(() => {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  margin-left: 17px;
 }
 
 /* Fixed Header */
@@ -57,9 +77,14 @@ const showSidebar = computed(() => {
   overflow-y: auto; /* Allow vertical scrolling for other pages */
   overflow-x: hidden;
   min-height: 0; /* Allow flex item to shrink */
-  margin-top: 234px; /* Account for header (184px) + breadcrumb (50px) */
+  margin-top: 234px; /* Account for header (184px) + breadcrumb (50px) - default for login/dashboard */
   margin-bottom: 90px; /* Height of news ticker + footer */
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Compact header margin for non-login and non-dashboard pages */
+.main-content.compact-header-margin {
+  margin-top: 144px; /* Account for compact header (94px/2.5cm) + breadcrumb (50px) */
 }
 
 /* Fixed News Ticker */
@@ -150,7 +175,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:5000/api')
+    axios.get('http://127.0.0.1:8000/api')
       .then(response => {
         this.message = response.data.message;
       })

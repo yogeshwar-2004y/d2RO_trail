@@ -1,20 +1,5 @@
 <template>
   <div class="sidebar-container" :class="{ 'open': isOpen, 'collapsed': isCollapsed }">
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" @click="toggleSidebar">
-      <div class="toggle-content">
-        <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-        <span class="toggle-text">{{ isOpen ? 'Close' : 'Menu' }}</span>
-      </div>
-    </button>
 
     <!-- Sidebar Content -->
     <div class="sidebar-content" :class="{ 'collapsed': isCollapsed }">
@@ -120,7 +105,7 @@
       <!-- Collapse/Expand Button -->
       <div class="collapse-section">
         <button class="collapse-btn" @click="toggleCollapse">
-          <svg v-if="!isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -146,6 +131,7 @@ import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
 
 // Import icon components
+
 import DocumentIcon from './icons/DocumentIcon.vue'
 import MemoIcon from './icons/MemoIcon.vue'
 import ReportIcon from './icons/ReportIcon.vue'
@@ -155,8 +141,8 @@ import AssignIcon from './icons/AssignIcon.vue'
 const router = useRouter()
 
 // Reactive data
-const isOpen = ref(true) // Open by default
-const isCollapsed = ref(false)
+const isOpen = ref(true) // Collapsed by default
+const isCollapsed = ref(true) // Collapsed by default
 const showPasswordSubmenu = ref(false)
 const isPasswordModalOpen = ref(false)
 const passwordType = ref('login')
@@ -168,15 +154,18 @@ const userInfo = computed(() => {
 
 // Role-based cards configuration
 const roleBasedCards = computed(() => {
-  const userRole = userInfo.value.role?.toLowerCase()
+  // const userRole = userInfo.value.role?.toLowerCase()
+  const userRole = userInfo.value.role?.toLowerCase().replace(/\s+/g, '');
+
+  console.log('User Role:', userRole) // Debugging line
   
   const cardDefinitions = {
     admin: [
+      { id: 'home', title: 'Home' },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'users', title: 'Users', route: 'ManageUsers', icon: UserIcon },
-      { id: 'projects', title: 'Projects', route: 'ManageProjects', icon: AssignIcon }
+      { id: 'user activities', title: 'User Activities', route: 'UserActivities', icon: UserIcon },
     ],
     reviewer: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
@@ -187,7 +176,6 @@ const roleBasedCards = computed(() => {
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'assign', title: 'Assign Reviewer', route: 'QAHeadAssignReviewer', icon: AssignIcon }
     ],
     designhead: [
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
@@ -202,15 +190,15 @@ const roleBasedCards = computed(() => {
     ]
   }
   
-  return cardDefinitions[userRole] || cardDefinitions.admin
+  return cardDefinitions[userRole] || []
 })
 
 // Methods
 const toggleSidebar = () => {
   isOpen.value = !isOpen.value
-  // if (!isOpen.value) {
-  //   showPasswordSubmenu.value = false // Close submenu when closing sidebar
-  // }
+  if (!isOpen.value) {
+    showPasswordSubmenu.value = false // Close submenu when closing sidebar
+  }
 }
 
 const toggleCollapse = () => {
@@ -289,9 +277,9 @@ onMounted(() => {
   top: 30px; /* Position below header */
   left: 30px;
   background: #e74c3c; /* Bright red for visibility */
-  border: 4px solid #fff; /* Thicker white border */
+  border: 2px solid #fff; /* Thicker white border */
   color: white;
-  width: 80px; /* Wider for text */
+  width: 55px; /* Wider for text */
   height: 60px; /* Larger size */
   border-radius: 30px; /* Rounded rectangle */
   cursor: pointer;
@@ -569,6 +557,7 @@ onMounted(() => {
 .collapse-section {
   padding: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  bottom: 50px;
 }
 
 .collapse-btn {

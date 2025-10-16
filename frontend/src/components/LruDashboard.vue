@@ -49,12 +49,6 @@
           </button>
         </div>
 
-        <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleStatusFilter">
-            Filter by Status
-          </button>
-        </div>
-
         <div class="search-box">
           <input
             type="text"
@@ -269,7 +263,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}/lrus`
+          `http://localhost:8000/api/projects/${this.projectId}/lrus`
         );
         const data = await response.json();
 
@@ -313,6 +307,7 @@ export default {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   background-color: #f0f0f0;
+  padding-left: 50px;
 }
 
 .header {

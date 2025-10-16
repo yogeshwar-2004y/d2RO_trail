@@ -457,12 +457,12 @@ export default {
 
           console.log("📤 Sending data to API:", apiData);
           console.log(
-            "🌐 API URL: http://localhost:5000/api/reports/cot-screening?user_role=4"
+            "🌐 API URL: http://localhost:8000/api/reports/cot-screening?user_role=4"
           );
 
           // Call the backend API
           const response = await fetch(
-            "http://localhost:5000/api/reports/cot-screening?user_role=4",
+            "http://localhost:8000/api/reports/cot-screening?user_role=4",
             {
               method: "POST",
               headers: {

@@ -40,7 +40,7 @@ export default {
     },
     speed: {
       type: Number,
-      default: 100, // pixels per second
+      default: 30, // pixels per second
     },
     backgroundColor: {
       type: String,
@@ -101,6 +101,8 @@ export default {
 
         if (data.success && data.news.length > 0) {
           this.news = data.news;
+          console.log("Debugging News loaded:", this.news);
+
           this.calculateAnimationDuration();
         }
       } catch (error) {
@@ -116,8 +118,14 @@ export default {
           .map((item) => item.news_text)
           .join(" 📰 ");
         const contentLength = totalContent.length;
-        // Adjust duration based on content length and desired speed
-        this.animationDuration = Math.max(20, contentLength * 0.1);
+        // Remove character constraints - allow unlimited content length
+        // Use speed prop to control animation: slower speed = longer duration
+        // Base calculation: 1 second per 30 characters, adjusted by speed factor
+        const baseDuration = Math.ceil(contentLength / 30);
+        this.animationDuration = Math.max(
+          20,
+          baseDuration * (100 / this.speed)
+        );
       }
     },
   },
@@ -138,16 +146,19 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
+  padding-left: 50px;
 }
 
 .news-content {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 300;
+  font-size: 16px;
   animation-name: scroll;
   transform: translateX(100%);
+  /* Remove any width constraints to allow unlimited content */
+  min-width: max-content;
 }
 
 .news-item {
@@ -178,9 +189,9 @@ export default {
 }
 
 .news-ticker-container::before {
-  content: "🔴 LIVE NEWS";
+  content: "📰 NEWS";
   position: absolute;
-  left: 0;
+  left: 33px;
   top: 0;
   height: 100%;
   background: linear-gradient(45deg, #e74c3c, #c0392b);

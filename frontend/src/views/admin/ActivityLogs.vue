@@ -209,7 +209,7 @@ export default {
 .activity-logs-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #8f6c6c;
+  background-color: #f0f0f0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -224,7 +224,7 @@ export default {
   max-width: 1200px;
   margin-bottom: 30px;
   padding: 20px 0;
-  color: #fff;
+  color: #121111;
 }
 
 .header-left {
@@ -237,7 +237,7 @@ export default {
   border: none;
   cursor: pointer;
   margin-right: 20px;
-  color: #fff;
+  color: #060505;
 }
 
 .logo {
@@ -272,7 +272,7 @@ export default {
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #888;
+  color: #050505;
 }
 
 .search-input {
@@ -280,8 +280,8 @@ export default {
   padding: 10px 15px;
   padding-left: 40px;
   border: none;
-  background-color: #444;
-  color: #fff;
+  background-color: #e2e0e0;
+  color: #0f0f0f;
   border-radius: 25px;
   outline: none;
 }
@@ -290,7 +290,7 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  color: #fff;
+  color: #050505;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -299,11 +299,11 @@ export default {
 .table-container {
   width: 100%;
   max-width: 1200px;
-  background: #333;
+  background: #e9e5e5;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   padding: 20px;
-  color: #fff;
+  color: #060505;
 }
 
 table {
@@ -312,13 +312,13 @@ table {
 }
 
 th, td {
-  border: 1px solid #444;
+  border: 1px solid #9f9c9c;
   padding: 15px;
   text-align: left;
 }
 
 th {
-  background-color: #444;
+  background-color: #d6d1d1;
   font-weight: bold;
 }
 
