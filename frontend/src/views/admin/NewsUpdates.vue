@@ -483,7 +483,6 @@ export default {
       return this.allNews.filter((news) => this.isNewsActive(news)).length;
     },
 
-
     hiddenNewsCount() {
       return this.allNews.filter((news) => news.hidden).length;
     },
@@ -521,7 +520,7 @@ export default {
 
       this.saving = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news", {
+        const response = await fetch("http://localhost:8000/api/news", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -554,7 +553,7 @@ export default {
     async loadExistingNews() {
       this.loadingNews = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("http://localhost:8000/api/news");
         const data = await response.json();
         console.log("loadExistingNews data after jsonify:", data);
 
@@ -581,7 +580,7 @@ export default {
 
       this.deleting = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news/all", {
+        const response = await fetch("http://localhost:8000/api/news/all", {
           method: "DELETE",
         });
 
@@ -612,7 +611,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}`,
+          `http://localhost:8000/api/news/${newsId}`,
           {
             method: "DELETE",
           }
@@ -645,7 +644,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}/permanent`,
+          `http://localhost:8000/api/news/${newsId}/permanent`,
           {
             method: "DELETE",
           }
@@ -680,7 +679,7 @@ export default {
       this.reposting = true;
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}/repost`,
+          `http://localhost:8000/api/news/${newsId}/repost`,
           {
             method: "PUT",
           }
@@ -689,9 +688,7 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          alert(
-            "News item reposted successfully! It will be visible again."
-          );
+          alert("News item reposted successfully! It will be visible again.");
           // Refresh both the main news and all news data
           await Promise.all([this.loadExistingNews(), this.loadAllNews()]);
         } else {
@@ -723,7 +720,6 @@ export default {
       if (news.hidden) return "Hidden";
       return "Active";
     },
-
 
     formatDate(dateString) {
       if (!dateString) return "";
@@ -760,7 +756,7 @@ export default {
     async loadAllNews() {
       this.loadingAllNews = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news/all");
+        const response = await fetch("http://localhost:8000/api/news/all");
         const data = await response.json();
 
         if (data.success) {
@@ -787,7 +783,7 @@ export default {
       this.deleting = true;
       try {
         const response = await fetch(
-          "http://localhost:5000/api/news/permanent/all",
+          "http://localhost:8000/api/news/permanent/all",
           {
             method: "DELETE",
           }

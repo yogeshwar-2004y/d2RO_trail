@@ -17,12 +17,14 @@ const showSidebar = computed(() => {
 // Check if current route is login or dashboard pages
 const isLoginOrDashboard = computed(() => {
   const routeName = route.name;
-  return routeName === "login" || 
-         routeName === "HomePageAdmin" || 
-         routeName === "HomePageDesigner" || 
-         routeName === "HomePageQAHead" || 
-         routeName === "HomePageReviewer" || 
-         routeName === "HomePageDesignHead";
+  return (
+    routeName === "login" ||
+    routeName === "HomePageAdmin" ||
+    routeName === "HomePageDesigner" ||
+    routeName === "HomePageQAHead" ||
+    routeName === "HomePageReviewer" ||
+    routeName === "HomePageDesignHead"
+  );
 });
 </script>
 
@@ -31,7 +33,13 @@ const isLoginOrDashboard = computed(() => {
     <AppSidebar v-if="showSidebar" />
     <AppHeader />
     <BreadcrumbNavigation />
-    <main class="main-content" :class="{ 'with-sidebar': showSidebar, 'compact-header-margin': !isLoginOrDashboard }">
+    <main
+      class="main-content"
+      :class="{
+        'with-sidebar': showSidebar,
+        'compact-header-margin': !isLoginOrDashboard,
+      }"
+    >
       <RouterView />
     </main>
     <NewsTicker
@@ -167,7 +175,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:5000/api')
+    axios.get('http://127.0.0.1:8000/api')
       .then(response => {
         this.message = response.data.message;
       })

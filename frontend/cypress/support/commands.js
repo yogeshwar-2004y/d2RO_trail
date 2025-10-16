@@ -14,7 +14,7 @@
 Cypress.Commands.add("loginWithCredentials", (email, password) => {
   cy.request({
     method: "POST",
-    url: "http://localhost:5000/api/login",
+    url: "http://localhost:8000/api/login",
     body: {
       email: email,
       password: password,

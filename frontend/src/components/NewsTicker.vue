@@ -96,13 +96,13 @@ export default {
 
       this.loading = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("http://localhost:8000/api/news");
         const data = await response.json();
 
         if (data.success && data.news.length > 0) {
           this.news = data.news;
           console.log("Debugging News loaded:", this.news);
-          
+
           this.calculateAnimationDuration();
         }
       } catch (error) {
@@ -122,7 +122,10 @@ export default {
         // Use speed prop to control animation: slower speed = longer duration
         // Base calculation: 1 second per 30 characters, adjusted by speed factor
         const baseDuration = Math.ceil(contentLength / 30);
-        this.animationDuration = Math.max(20, baseDuration * (100 / this.speed));
+        this.animationDuration = Math.max(
+          20,
+          baseDuration * (100 / this.speed)
+        );
       }
     },
   },
@@ -136,7 +139,6 @@ export default {
   position: relative;
   border-top: 0.8px solid #34495e;
   border-bottom: 0.8px solid #34495e;
-  
 }
 
 .news-ticker {
