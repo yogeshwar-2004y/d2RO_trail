@@ -194,7 +194,7 @@ export default {
           createdBy: this.currentUser.id,
         };
 
-        const response = await fetch("http://localhost:8000/api/projects", {
+        const response = await fetch("http://localhost:5000/api/projects", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -258,7 +258,8 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  margin-right: 15px;
+  /* margin-right: 50px; */
+  padding-left: 40px;
 }
 
 .header-actions {

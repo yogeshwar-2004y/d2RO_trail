@@ -1,16 +1,23 @@
 <template>
   <div class="major-test-groups-page">
-    <div class="header">
+    
+    <div class="page-title">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
       </button>
-      
-    </div>
-
-    <div class="page-title">
       <h1>Major Test Groups</h1>
       <p>Select a major test group to view detailed inspection stages</p>
     </div>
@@ -126,7 +133,9 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  margin-right: 20px;
+  position: relative;
+  right: 600px;
+  top: 10px;
 }
 
 

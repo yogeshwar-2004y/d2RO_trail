@@ -33,6 +33,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { userStore } from '@/stores/userStore'
 
 const route = useRoute()
 const router = useRouter()
@@ -118,9 +119,25 @@ const breadcrumbs = computed(() => {
   const crumbs = []
   const currentRoute = route
   
-  // Always start with Home
+  // Get user info for role-based home naming
+  const userInfo = userStore.getters.currentUser()
+  const userRole = userInfo?.role?.toLowerCase().replace(/\s+/g, '') || 'admin'
+  
+  // Determine the correct home name based on user role
+  const getHomeName = () => {
+    const roleToHomeName = {
+      admin: 'Admin Dashboard',
+      reviewer: 'Reviewer Dashboard',
+      qahead: 'QA Head Dashboard', 
+      designhead: 'Design Head Dashboard',
+      designer: 'Designer Dashboard'
+    }
+    return roleToHomeName[userRole] || 'Admin Dashboard'
+  }
+  
+  // Always start with role-appropriate Home
   crumbs.push({
-    name: 'Home',
+    name: getHomeName(),
     path: getHomePath()
   })
   
@@ -132,359 +149,70 @@ const breadcrumbs = computed(() => {
   // Handle different route patterns
   const pathSegments = currentRoute.path.split('/').filter(segment => segment)
   
-  // Handle admin routes
-  if (currentRoute.path.startsWith('/admin')) {
-    crumbs.push({
-      name: routeMappings['HomePageAdmin'] || 'Admin Dashboard',
-      path: '/admin'
-    })
-  }
-  
-  // Handle reviewer routes
-  if (currentRoute.path.startsWith('/reviewer')) {
-    crumbs.push({
-      name: routeMappings['HomePageReviewer'] || 'Reviewer Dashboard',
-      path: '/reviewer'
-    })
-  }
-  
-  // Handle QA Head routes
-  if (currentRoute.path.startsWith('/qahead')) {
-    crumbs.push({
-      name: routeMappings['HomePageQAHead'] || 'QA Head Dashboard',
-      path: '/qahead'
-    })
-  }
-  
-  // Handle Design Head routes
-  if (currentRoute.path.startsWith('/designhead')) {
-    crumbs.push({
-      name: routeMappings['HomePageDesignHead'] || 'Design Head Dashboard',
-      path: '/designhead'
-    })
-  }
-  
-  // Handle Designer routes
-  if (currentRoute.path.startsWith('/designer')) {
-    crumbs.push({
-      name: routeMappings['HomePageDesigner'] || 'Designer Dashboard',
-      path: '/designer'
-    })
-  }
-  
-  // Handle user activities routes
-  if (currentRoute.path.startsWith('/user-activities')) {
-    crumbs.push({
-      name: routeMappings['UserActivities'] || 'User Activities',
-      path: '/user-activities'
-    })
-  }
-  
-  // Handle projects routes
-  if (currentRoute.path.startsWith('/projects')) {
-    crumbs.push({
-      name: routeMappings['ProjectsDashboard'] || 'Projects',
-      path: '/projects'
-    })
-    
-    // Add LRU level if present
-    if (pathSegments.length > 1 && pathSegments[1] !== 'projects') {
+  // Only add additional breadcrumbs if we're not already on the home page
+  const homePath = getHomePath()
+  if (currentRoute.path !== homePath) {
+    // Handle specific sub-routes based on current path
+    if (currentRoute.path.startsWith('/projects')) {
       crumbs.push({
-        name: routeMappings['LruDashboard'] || 'LRUs',
-        path: currentRoute.path
+        name: routeMappings['ProjectsDashboard'] || 'Projects',
+        path: '/projects'
+      })
+    } else if (currentRoute.path.startsWith('/memos')) {
+      crumbs.push({
+        name: routeMappings['MemoDashboard'] || 'Memos',
+        path: '/memos'
+      })
+    } else if (currentRoute.path.startsWith('/reports')) {
+      crumbs.push({
+        name: routeMappings['ReportDashboard'] || 'Reports',
+        path: '/reports'
+      })
+    } else if (currentRoute.path.startsWith('/user-activities')) {
+      crumbs.push({
+        name: routeMappings['UserActivities'] || 'User Activities',
+        path: '/user-activities'
+      })
+    } else if (currentRoute.path.startsWith('/assign-projects')) {
+      crumbs.push({
+        name: routeMappings['ProjectsForAssigning'] || 'Assign Projects',
+        path: '/assign-projects'
       })
     }
-  }
-  
-  // Handle memos routes
-  if (currentRoute.path.startsWith('/memos')) {
-    crumbs.push({
-      name: routeMappings['MemoDashboard'] || 'Memos',
-      path: '/memos'
-    })
-    
-    // Add specific memo actions
-    if (pathSegments.length > 1) {
-      if (pathSegments[1] === 'submit') {
-        crumbs.push({
-          name: routeMappings['SubmitMemo'] || 'Submit Memo',
-          path: currentRoute.path
-        })
-      } else if (pathSegments[1] === 'notifications') {
-        crumbs.push({
-          name: routeMappings['QAHeadNotifications'] || 'Notifications',
-          path: currentRoute.path
-        })
-      } else if (pathSegments[1] === 'view') {
-        crumbs.push({
-          name: routeMappings['ViewOnlyMemoForm'] || 'View Memo',
-          path: currentRoute.path
-        })
-      } else if (pathSegments[1] !== 'memos') {
-        crumbs.push({
-          name: routeMappings['MemoForm'] || 'Memo Form',
-          path: currentRoute.path
-        })
-      }
-    }
-  }
-  
-  // Handle reports routes
-  if (currentRoute.path.startsWith('/reports')) {
-    crumbs.push({
-      name: routeMappings['ReportDashboard'] || 'Reports',
-      path: '/reports'
-    })
-    
-    // Add specific report types
-    if (pathSegments.length > 1) {
-      if (pathSegments[1] === 'individual') {
-        crumbs.push({
-          name: routeMappings['IndividualReport'] || 'Report Details',
-          path: currentRoute.path
-        })
-      } else if (pathSegments[1] === 'memo-id') {
-        crumbs.push({
-          name: routeMappings['TestReports'] || 'Test Reports',
-          path: currentRoute.path
-        })
-      } else if (pathSegments[1] === 'view-observations') {
-        crumbs.push({
-          name: routeMappings['ObservationReport'] || 'Observation Report',
-          path: currentRoute.path
-        })
-      }
-    }
-  }
-  
-  // Handle templates routes
-  if (currentRoute.path.startsWith('/templates')) {
-    crumbs.push({
-      name: routeMappings['TemplateDashboard'] || 'Templates',
-      path: '/templates'
-    })
-    
-    // Add specific template types
-    if (pathSegments.length > 1) {
-      if (pathSegments[1] === 'view') {
-        crumbs.push({
-          name: routeMappings['TemplateViewer'] || 'Template Viewer',
-          path: currentRoute.path
-        })
-      } else {
-        // Handle specific template types
-        const templateName = pathSegments[1]
-        const templateMapping = {
-          'bare-pcb-inspection': 'Bare PCB Inspection',
-          'conformal-coating-inspection': 'Conformal Coating Inspection',
-          'raw-material-inspection': 'Raw Material Inspection',
-          'cots-screening-inspection': 'COTS Screening Inspection',
-          'assembled-board-inspection': 'Assembled Board Inspection',
-          'kit-of-part-inspection': 'Kit of Parts Inspection',
-          'mechanical-inspection': 'Mechanical Inspection'
-        }
-        
-        if (templateMapping[templateName]) {
-          crumbs.push({
-            name: templateMapping[templateName],
-            path: currentRoute.path
-          })
-        }
-      }
-    }
-  }
-  
-  // Handle assign projects routes
-  if (currentRoute.path.startsWith('/assign-projects')) {
-    crumbs.push({
-      name: routeMappings['ProjectsForAssigning'] || 'Assign Projects',
-      path: '/assign-projects'
-    })
-    
-    if (pathSegments.length > 2) {
-      if (pathSegments[2] === 'members') {
-        crumbs.push({
-          name: routeMappings['ProjectMembers'] || 'Project Members',
-          path: currentRoute.path
-        })
-        
-        if (pathSegments[3] === 'add') {
-          crumbs.push({
-            name: routeMappings['AddMember'] || 'Add Member',
-            path: currentRoute.path
-          })
-        }
-      }
-    }
-  }
-  
-  // Handle shared memos routes
-  if (currentRoute.path.startsWith('/shared-memos')) {
-    crumbs.push({
-      name: routeMappings['SharedMemoDashboard'] || 'Shared Memos',
-      path: '/shared-memos'
-    })
-    
-    if (pathSegments.length > 1 && pathSegments[1] === 'view') {
-      crumbs.push({
-        name: routeMappings['SharedMemoView'] || 'Shared Memo',
-        path: currentRoute.path
-      })
-    }
-  }
-  
-  // Handle specific admin sub-routes
-  if (currentRoute.path.startsWith('/user-activities/')) {
-    const subRoute = pathSegments[1]
-    const subRouteMapping = {
-      'add-update-projects': 'Add/Update Projects',
-      'manage-projects': 'Manage Projects',
-      'add-update-users': 'Add/Update Users',
-      'manage-users': 'Manage Users',
-      'activity-logs': 'Activity Logs',
-      'major-test-groups': 'Major Test Groups',
-      'manufacturing-test-group': 'Manufacturing Test Group',
-      'cots-screening-test-group': 'COTS Screening Test Group',
-      'ess-test-group': 'ESS Test Group',
-      'qt-test-group': 'QT Test Group',
-      'soft-test-group': 'SoFT Test Group',
-      'news-updates': 'News Updates',
-      'customise-background': 'Customize Background'
-    }
-    
-    if (subRouteMapping[subRoute]) {
-      crumbs.push({
-        name: subRouteMapping[subRoute],
-        path: currentRoute.path
-      })
-    }
-  }
-  
-  // Handle edit routes
-  if (currentRoute.path.startsWith('/edit-user/')) {
-    crumbs.push({
-      name: routeMappings['EditUser'] || 'Edit User',
-      path: currentRoute.path
-    })
-  }
-  
-  if (currentRoute.path.startsWith('/edit-project/')) {
-    crumbs.push({
-      name: routeMappings['EditProject'] || 'Edit Project',
-      path: currentRoute.path
-    })
-  }
-  
-  // Handle select routes
-  if (currentRoute.path === '/select-user-to-edit') {
-    crumbs.push({
-      name: routeMappings['SelectUserToEdit'] || 'Select User',
-      path: currentRoute.path
-    })
-  }
-  
-  if (currentRoute.path === '/select-project-to-edit') {
-    crumbs.push({
-      name: routeMappings['SelectProjectToEdit'] || 'Select Project',
-      path: currentRoute.path
-    })
-  }
-  
-  // Handle document viewer
-  if (currentRoute.path.startsWith('/document-viewer/')) {
-    crumbs.push({
-      name: routeMappings['DocumentViewer'] || 'Document Viewer',
-      path: currentRoute.path
-    })
-  }
-  
-  // Handle QA Head specific routes
-  if (currentRoute.path.startsWith('/qahead/')) {
-    if (pathSegments[1] === 'assign-reviewer') {
-      crumbs.push({
-        name: routeMappings['QAHeadAssignReviewer'] || 'Assign Reviewer',
-        path: currentRoute.path
-      })
-    } else if (pathSegments[1] === 'projects') {
-      crumbs.push({
-        name: routeMappings['QAHeadDocumentVersionView'] || 'Document Version',
-        path: currentRoute.path
-      })
-    }
-  }
-  
-  // Handle reviewer specific routes
-  if (currentRoute.path.startsWith('/reviewer/')) {
-    if (pathSegments[1] === 'memo-dashboard') {
-      crumbs.push({
-        name: routeMappings['ReviewerMemoDashboard'] || 'Memo Dashboard',
-        path: currentRoute.path
-      })
-    } else if (pathSegments[1] === 'InspectionMemo') {
-      crumbs.push({
-        name: routeMappings['InspectionMemo'] || 'Inspection Memo',
-        path: currentRoute.path
-      })
-    }
-  }
-  
-  // Handle designer specific routes
-  if (currentRoute.path.startsWith('/designer/iqa-observation-report/')) {
-    crumbs.push({
-      name: routeMappings['DesignerIqaObservationReport'] || 'IQA Observation Report',
-      path: currentRoute.path
-    })
-  }
-  
-  // Handle test routes
-  if (currentRoute.path === '/test-role-system') {
-    crumbs.push({
-      name: routeMappings['RoleTestComponent'] || 'Role Test',
-      path: currentRoute.path
-    })
-  }
-  
-  if (currentRoute.path === '/test-plan-docs') {
-    crumbs.push({
-      name: routeMappings['PlanDocsTestComponent'] || 'Plan Docs Test',
-      path: currentRoute.path
-    })
   }
   
   return crumbs
 })
 
-// Determine the home path based on user role or current route
+// Determine the home path based on user role
 function getHomePath() {
-  const currentPath = route.path
+  const userInfo = userStore.getters.currentUser()
+  const userRole = userInfo?.role?.toLowerCase().replace(/\s+/g, '') || 'admin'
   
-  if (currentPath.startsWith('/admin')) {
-    return '/admin'
-  } else if (currentPath.startsWith('/reviewer')) {
-    return '/reviewer'
-  } else if (currentPath.startsWith('/qahead')) {
-    return '/qahead'
-  } else if (currentPath.startsWith('/designhead')) {
-    return '/designhead'
-  } else if (currentPath.startsWith('/designer')) {
-    return '/designer'
-  } else if (currentPath.startsWith('/user-activities')) {
-    return '/user-activities'
-  } else {
-    return '/admin' // Default to admin dashboard
+  console.log('Breadcrumb - User Role:', userRole) // Debug log
+  
+  // Map user roles to their corresponding home paths
+  const roleToHomePath = {
+    admin: '/admin',
+    reviewer: '/reviewer', 
+    qahead: '/qahead',
+    designhead: '/designhead',
+    designer: '/designer'
   }
+  
+  return roleToHomePath[userRole] || '/admin' // Default to admin if role not found
 }
 </script>
 
 <style scoped>
 .breadcrumb-nav {
   position: fixed !important;
-  top: 184px !important;
+  top: 100px !important;
   left: 0 !important;
   right: 0 !important;
   background-color: #f8f9fa !important;
   border-bottom: 1px solid #e9ecef !important;
-  padding: 3px 0 !important;
+  padding: 2px 0 !important;
   margin: 0 !important;
   z-index: 1001 !important;
   width: 100% !important;

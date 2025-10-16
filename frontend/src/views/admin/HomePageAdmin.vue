@@ -134,6 +134,14 @@ export default {
 </script>
 
 <style scoped>
+
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Prevents scrolling on the entire page */
+  height: 100%;
+}
+
 .home-page {
   background-color: #f0f0f0;
   height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
@@ -184,6 +192,7 @@ export default {
   gap: 30px; /* Increased gap for better spacing */
   width: 100%;
   max-width: 1000px; /* Increased width for 4 cards horizontally */
+  margin-top: -70px;
 }
 
 .card {

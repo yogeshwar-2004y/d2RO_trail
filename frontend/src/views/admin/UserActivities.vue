@@ -1,5 +1,21 @@
 <template>
   <div class="user-activities-page">
+    <button class="back-button" @click="$router.go(-1)">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M19 12H5"></path>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+      </button>
     <div class="card-container">
       <div class="card" @click="goToPage('AddUpdateProjects')">
         <div class="card-icon">
@@ -143,6 +159,19 @@ export default {
   color: #333;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 90px;
+  top: 180px;
+}
+.back-button :hover {
+  color: #0056b3;
+  background-color: #e9ecef;
 }
 </style>
 

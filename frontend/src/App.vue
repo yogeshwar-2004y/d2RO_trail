@@ -51,6 +51,7 @@ const isLoginOrDashboard = computed(() => {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  margin-left: 17px;
 }
 
 /* Fixed Header */
@@ -166,7 +167,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:8000/api')
+    axios.get('http://127.0.0.1:5000/api')
       .then(response => {
         this.message = response.data.message;
       })

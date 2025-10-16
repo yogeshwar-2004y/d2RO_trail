@@ -521,7 +521,7 @@ export default {
 
       this.saving = true;
       try {
-        const response = await fetch("http://localhost:8000/api/news", {
+        const response = await fetch("http://localhost:5000/api/news", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -554,7 +554,7 @@ export default {
     async loadExistingNews() {
       this.loadingNews = true;
       try {
-        const response = await fetch("http://localhost:8000/api/news");
+        const response = await fetch("http://localhost:5000/api/news");
         const data = await response.json();
         console.log("loadExistingNews data after jsonify:", data);
 
@@ -581,7 +581,7 @@ export default {
 
       this.deleting = true;
       try {
-        const response = await fetch("http://localhost:8000/api/news/all", {
+        const response = await fetch("http://localhost:5000/api/news/all", {
           method: "DELETE",
         });
 
@@ -612,7 +612,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/news/${newsId}`,
+          `http://localhost:5000/api/news/${newsId}`,
           {
             method: "DELETE",
           }
@@ -645,7 +645,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/news/${newsId}/permanent`,
+          `http://localhost:5000/api/news/${newsId}/permanent`,
           {
             method: "DELETE",
           }
@@ -680,7 +680,7 @@ export default {
       this.reposting = true;
       try {
         const response = await fetch(
-          `http://localhost:8000/api/news/${newsId}/repost`,
+          `http://localhost:5000/api/news/${newsId}/repost`,
           {
             method: "PUT",
           }
@@ -760,7 +760,7 @@ export default {
     async loadAllNews() {
       this.loadingAllNews = true;
       try {
-        const response = await fetch("http://localhost:8000/api/news/all");
+        const response = await fetch("http://localhost:5000/api/news/all");
         const data = await response.json();
 
         if (data.success) {
@@ -787,7 +787,7 @@ export default {
       this.deleting = true;
       try {
         const response = await fetch(
-          "http://localhost:8000/api/news/permanent/all",
+          "http://localhost:5000/api/news/permanent/all",
           {
             method: "DELETE",
           }
@@ -836,7 +836,7 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  margin-left: 30px;
   border-radius: 5px;
   transition: background-color 0.3s ease;
 }
