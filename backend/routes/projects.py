@@ -1,10 +1,17 @@
 """
 Project and LRU management routes
 """
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, Response
 from config import get_db_connection
 from utils.helpers import handle_database_error
 from utils.activity_logger import log_activity
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from datetime import datetime
+import io
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -1238,3 +1245,111 @@ def get_activity_logs():
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/activity-logs/pdf', methods=['GET'])
+def download_activity_logs_pdf():
+    """Generate and download activity logs as PDF"""
+    try:
+        from utils.activity_logger import get_activity_logs
+        from reportlab.lib.pagesizes import A4
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib import colors
+        from reportlab.lib.units import inch
+        from datetime import datetime
+        import io
+        
+        # Get all activity logs
+        logs = get_activity_logs(limit=1000)  # Get more logs for PDF
+        
+        # Create PDF
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        story = []
+        
+        # Styles
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            spaceAfter=30,
+            alignment=1  # Center alignment
+        )
+        
+        # Title
+        title = Paragraph("Activity Logs Report", title_style)
+        story.append(title)
+        story.append(Spacer(1, 12))
+        
+        # Date
+        date_para = Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
+        story.append(date_para)
+        story.append(Spacer(1, 20))
+        
+        # Table data
+        table_data = [['ID', 'User', 'Activity', 'Project', 'Timestamp']]
+        
+        for log in logs:
+            # Format timestamp properly
+            timestamp_str = 'N/A'
+            if log.get('timestamp'):
+                try:
+                    if isinstance(log['timestamp'], str):
+                        dt = datetime.fromisoformat(log['timestamp'].replace('Z', '+00:00'))
+                        timestamp_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+                    else:
+                        timestamp_str = log['timestamp'].strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    timestamp_str = str(log['timestamp'])
+            
+            # Clean up activity and project names - use correct field names
+            activity = str(log.get('activity_performed', 'N/A')).strip()
+            project = str(log.get('project_name', 'N/A')).strip()
+            
+            table_data.append([
+                str(log.get('activity_id', 'N/A')),
+                str(log.get('user_name', 'Unknown')).strip(),
+                activity,
+                project,
+                timestamp_str
+            ])
+        
+        # Create table with better column widths (removed details column)
+        table = Table(table_data, colWidths=[0.6*inch, 1.5*inch, 2*inch, 1.5*inch, 1.8*inch])
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+            ('ALIGN', (0, 0), (-1, 0), 'CENTER'),  # Headers centered
+            ('ALIGN', (0, 1), (0, -1), 'CENTER'),   # ID column centered
+            ('ALIGN', (1, 1), (1, -1), 'LEFT'),     # User column left-aligned
+            ('ALIGN', (2, 1), (2, -1), 'LEFT'),     # Activity column left-aligned
+            ('ALIGN', (3, 1), (3, -1), 'LEFT'),     # Project column left-aligned
+            ('ALIGN', (4, 1), (4, -1), 'CENTER'),   # Timestamp column centered
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 10),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('FONTSIZE', (0, 1), (-1, -1), 8),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.beige]),
+        ]))
+        
+        story.append(table)
+        
+        # Build PDF
+        doc.build(story)
+        buffer.seek(0)
+        
+        return Response(
+            buffer.getvalue(),
+            mimetype='application/pdf',
+            headers={
+                'Content-Disposition': f'attachment; filename=activity_logs_{datetime.now().strftime("%Y%m%d")}.pdf'
+            }
+        )
+        
+    except Exception as e:
+        print(f"Error generating PDF: {str(e)}")
+        return jsonify({"success": False, "message": "Error generating PDF"}), 500

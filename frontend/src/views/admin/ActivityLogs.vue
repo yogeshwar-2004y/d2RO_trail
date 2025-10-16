@@ -20,20 +20,21 @@
           </svg>
           <input type="text" v-model="searchQuery" placeholder="Search Projects" class="search-input">
         </div>
-        <button class="icon-button">
+        <button class="icon-button" @click="goToLoginLogs">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 20.73l-1.39-1.39C5.39 16.03 3 13.5 3 10a7 7 0 1 1 14 0c0 3.5-2.39 6.03-5.61 9.34l-1.39 1.39z"></path>
-            <circle cx="10" cy="10" r="3"></circle>
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.65 0 3.2.45 4.54 1.24"></path>
           </svg>
-          <span class="button-label">QUERIES</span>
+          <span class="button-label">LOGIN LOGS</span>
         </button>
-        <button class="icon-button">
+        <button class="icon-button" @click="downloadPDF">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="12" y1="12" x2="12" y2="18"></line>
             <polyline points="9 15 12 18 15 15"></polyline>
           </svg>
+          <span class="button-label">DOWNLOAD PDF</span>
         </button>
       </div>
     </div>
@@ -49,22 +50,22 @@
       <table v-else>
         <thead>
           <tr>
-            <th>ACTIVITY ID</th>
-            <th>ID</th>
-            <th>NAME</th>
-            <th>ACTIVITY PERFORMED</th>
-            <th>PERFORMED BY</th>
-            <th>TIMESTAMP</th>
+            <th class="activity-id">ACTIVITY ID</th>
+            <th class="project-id">PROJECT ID</th>
+            <th class="project-name">PROJECT NAME</th>
+            <th class="activity">ACTIVITY PERFORMED</th>
+            <th class="performed-by">PERFORMED BY</th>
+            <th class="timestamp">TIMESTAMP</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="log in filteredLogs" :key="log.activity_id">
-            <td>{{ log.activity_id }}</td>
-            <td>{{ extractId(log.additional_info) }}</td>
-            <td>{{ extractName(log.additional_info) }}</td>
-            <td>{{ log.activity_performed }}</td>
-            <td>{{ log.user_name || log.performed_by }}</td>
-            <td>{{ formatTimestamp(log.timestamp) }}</td>
+            <td class="activity-id">{{ log.activity_id || 'N/A' }}</td>
+            <td class="project-id">{{ extractId(log.additional_info) }}</td>
+            <td class="project-name">{{ extractName(log.additional_info) }}</td>
+            <td class="activity">{{ log.activity_performed || 'N/A' }}</td>
+            <td class="performed-by">{{ log.user_name || log.performed_by || 'Unknown' }}</td>
+            <td class="timestamp">{{ formatTimestamp(log.timestamp) }}</td>
           </tr>
         </tbody>
       </table>
@@ -146,6 +147,36 @@ export default {
         });
       } catch (error) {
         return timestamp;
+      }
+    },
+    
+    goToLoginLogs() {
+      this.$router.push({ name: 'LoginLogs' });
+    },
+    
+    async downloadPDF() {
+      try {
+        this.loading = true;
+        const response = await axios.get('http://localhost:8000/api/activity-logs/pdf', {
+          responseType: 'blob'
+        });
+        
+        // Create blob link to download
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `activity_logs_${new Date().toISOString().split('T')[0]}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+        
+        alert('Activity logs PDF downloaded successfully!');
+      } catch (error) {
+        console.error('Error downloading PDF:', error);
+        alert('Failed to download PDF. Please try again.');
+      } finally {
+        this.loading = false;
       }
     },
     
@@ -289,6 +320,49 @@ th, td {
 th {
   background-color: #444;
   font-weight: bold;
+}
+
+.activity-id {
+  text-align: center;
+  width: 120px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.project-id {
+  text-align: center;
+  width: 100px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.project-name {
+  text-align: left;
+  width: 200px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.activity {
+  text-align: left;
+  width: 250px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.performed-by {
+  text-align: left;
+  width: 180px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.timestamp {
+  text-align: left;
+  width: 200px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
 }
 
 .loading-message, .error-message, .no-data-message {

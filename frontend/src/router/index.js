@@ -22,6 +22,7 @@ import EditUser from "@/views/admin/EditUser.vue";
 import SelectProjectToEdit from "@/views/admin/SelectProjectToEdit.vue";
 import EditProject from "@/views/admin/EditProject.vue";
 import ActivityLogs from "@/views/admin/ActivityLogs.vue";
+import LoginLogs from "@/views/admin/LoginLogs.vue";
 import MajorTestGroups from "@/views/admin/MajorTestGroups.vue";
 import ManufacturingTestGroup from "@/views/admin/ManufacturingTestGroup.vue";
 import CoTSScreeningTestGroup from "@/views/admin/CoTSScreeningTestGroup.vue";
@@ -59,6 +60,11 @@ const router = createRouter({
       path: "/user-activities/activity-logs",
       name: "ActivityLogs",
       component: ActivityLogs
+    },
+    {
+      path: "/user-activities/login-logs",
+      name: "LoginLogs",
+      component: LoginLogs
     },
     {
       path: "/user-activities/add-update-projects",

@@ -254,9 +254,9 @@ const closePasswordModal = () => {
   isPasswordModalOpen.value = false
 }
 
-const handleLogout = () => {
+const handleLogout = async () => {
   // Handle logout
-  userStore.actions.logout()
+  await userStore.actions.logout()
   router.push({ name: 'login' })
 }
 
