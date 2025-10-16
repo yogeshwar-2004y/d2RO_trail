@@ -1,20 +1,5 @@
 <template>
   <div class="sidebar-container" :class="{ 'open': isOpen, 'collapsed': isCollapsed }">
-    <!-- Sidebar Toggle Button -->
-    <button class="sidebar-toggle" v-if="isCollapsed" @click="toggleSidebar">
-      <div class="toggle-content">
-        <svg v-if="!isOpen" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="3" y1="6" x2="21" y2="6"></line>
-          <line x1="3" y1="12" x2="21" y2="12"></line>
-          <line x1="3" y1="18" x2="21" y2="18"></line>
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-        <span class="toggle-text">{{ isOpen ? '' : '' }}</span>
-      </div>
-    </button>
 
     <!-- Sidebar Content -->
     <div class="sidebar-content" :class="{ 'collapsed': isCollapsed }">
@@ -120,7 +105,7 @@
       <!-- Collapse/Expand Button -->
       <div class="collapse-section">
         <button class="collapse-btn" @click="toggleCollapse">
-          <svg v-if="!isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
           <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -570,6 +555,7 @@ onMounted(() => {
 .collapse-section {
   padding: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  bottom: 50px;
 }
 
 .collapse-btn {

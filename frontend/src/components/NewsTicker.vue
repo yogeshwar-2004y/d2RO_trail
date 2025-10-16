@@ -131,6 +131,7 @@ export default {
   position: relative;
   border-top: 0.8px solid #34495e;
   border-bottom: 0.8px solid #34495e;
+  
 }
 
 .news-ticker {
@@ -138,6 +139,7 @@ export default {
   display: flex;
   align-items: center;
   position: relative;
+  padding-left: 50px;
 }
 
 .news-content {

@@ -571,6 +571,7 @@ export default {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   background-color: #f0f0f0;
+  padding-left: 50px;
 }
 
 .header {
@@ -893,7 +894,7 @@ export default {
 /* View Templates Button */
 .view-templates-container {
   position: fixed;
-  bottom: 30px;
+  bottom: 80px;
   right: 30px;
   z-index: 1000;
 }

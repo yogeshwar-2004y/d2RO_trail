@@ -219,7 +219,8 @@ export default {
 <style scoped>
 .projects-dashboard {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  padding-left: 60px;
+  padding-top: 15px;
   background-color: #f0f0f0;
   min-height: 100vh;
 }
