@@ -9,7 +9,7 @@ news_bp = Blueprint('news', __name__)
 
 @news_bp.route('/api/news', methods=['GET'])
 def get_news():
-    """Get news updates for frontend display (last 24 hours, not hidden)"""
+    """Get news updates for frontend display (all non-hidden news)"""
     try:
         conn = get_db_connection()
         conn.rollback()  # Clear any previous transaction errors
@@ -18,8 +18,7 @@ def get_news():
         cur.execute("""
             SELECT id, news_text, created_at, updated_at, hidden
             FROM news_updates
-            WHERE updated_at >= NOW() - INTERVAL '24 hours'
-            AND hidden = FALSE
+            WHERE hidden = FALSE
             ORDER BY updated_at DESC
         """)
         
@@ -222,11 +221,10 @@ def delete_all_news():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Count visible news items in last 24 hours
+        # Count visible news items
         cur.execute("""
             SELECT COUNT(*) FROM news_updates 
-            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
-            AND hidden = FALSE
+            WHERE hidden = FALSE
         """)
         count = cur.fetchone()[0]
         
@@ -234,12 +232,11 @@ def delete_all_news():
             cur.close()
             return jsonify({"success": False, "message": "No visible news items to hide"}), 400
         
-        # Hide all visible news items from last 24 hours
+        # Hide all visible news items
         cur.execute("""
             UPDATE news_updates 
             SET hidden = TRUE 
-            WHERE updated_at >= NOW() - INTERVAL '24 hours' 
-            AND hidden = FALSE
+            WHERE hidden = FALSE
         """)
         
         conn.commit()

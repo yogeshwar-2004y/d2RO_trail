@@ -147,8 +147,8 @@ export default {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 300;
+  font-size: 16px;
   animation-name: scroll;
   transform: translateX(100%);
   /* Remove any width constraints to allow unlimited content */
@@ -183,7 +183,7 @@ export default {
 }
 
 .news-ticker-container::before {
-  content: "🔴 LIVE NEWS";
+  content: "📰 NEWS";
   position: absolute;
   left: 0;
   top: 0;

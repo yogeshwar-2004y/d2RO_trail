@@ -149,7 +149,7 @@
       <!-- Existing News List -->
       <div class="existing-news-section">
         <div class="section-header">
-          <h2>Recent News Updates (Last 24 Hours)</h2>
+          <h2>All News Updates</h2>
           <button
             @click="deleteAllNews"
             class="btn btn-delete-all"
@@ -184,7 +184,7 @@
         </div>
 
         <div v-else-if="recentNews.length === 0" class="no-data-message">
-          <p>No news updates found in the last 24 hours.</p>
+          <p>No news updates found.</p>
         </div>
 
         <div v-else class="news-list">
@@ -267,12 +267,6 @@
               :class="['filter-tab', { active: newsFilter === 'active' }]"
             >
               Active ({{ activeNewsCount }})
-            </button>
-            <button
-              @click="setNewsFilter('expired')"
-              :class="['filter-tab', { active: newsFilter === 'expired' }]"
-            >
-              Expired ({{ expiredNewsCount }})
             </button>
             <button
               @click="setNewsFilter('hidden')"
@@ -412,12 +406,6 @@
                     {{ getNewsStatusText(news) }}
                   </span>
                 </div>
-                <div v-if="isNewsActive(news)" class="meta-row">
-                  <span class="meta-label">Expires:</span>
-                  <span class="meta-value expiry-time">{{
-                    getTimeUntilExpiry(news)
-                  }}</span>
-                </div>
               </div>
             </div>
           </div>
@@ -476,13 +464,8 @@ export default {
   },
   computed: {
     recentNews() {
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-
-      return this.existingNews.filter((news) => {
-        const newsDate = new Date(news.updated_at || news.created_at);
-        return newsDate >= twentyFourHoursAgo && !news.hidden;
-      });
+      // Show all non-hidden news instead of just recent ones
+      return this.existingNews.filter((news) => !news.hidden);
     },
 
     filteredNews() {
@@ -490,8 +473,6 @@ export default {
         return this.allNews;
       } else if (this.newsFilter === "active") {
         return this.allNews.filter((news) => this.isNewsActive(news));
-      } else if (this.newsFilter === "expired") {
-        return this.allNews.filter((news) => this.isNewsExpired(news));
       } else if (this.newsFilter === "hidden") {
         return this.allNews.filter((news) => news.hidden);
       }
@@ -502,9 +483,6 @@ export default {
       return this.allNews.filter((news) => this.isNewsActive(news)).length;
     },
 
-    expiredNewsCount() {
-      return this.allNews.filter((news) => this.isNewsExpired(news)).length;
-    },
 
     hiddenNewsCount() {
       return this.allNews.filter((news) => news.hidden).length;
@@ -693,7 +671,7 @@ export default {
     async repostNewsItem(newsId) {
       if (
         !confirm(
-          "Are you sure you want to repost this news item? It will be visible for another 24 hours."
+          "Are you sure you want to repost this news item? It will be visible again."
         )
       ) {
         return;
@@ -712,7 +690,7 @@ export default {
 
         if (data.success) {
           alert(
-            "News item reposted successfully! It will be visible for 24 hours."
+            "News item reposted successfully! It will be visible again."
           );
           // Refresh both the main news and all news data
           await Promise.all([this.loadExistingNews(), this.loadAllNews()]);
@@ -728,20 +706,13 @@ export default {
     },
 
     isNewsExpired(news) {
-      if (!news.updated_at) return false;
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-      const newsDate = new Date(news.updated_at);
-      return newsDate < twentyFourHoursAgo && !news.hidden;
+      // News no longer expires automatically - only when manually hidden
+      return false;
     },
 
     isNewsActive(news) {
-      if (news.hidden) return false;
-      if (!news.updated_at) return false;
-      const twentyFourHoursAgo = new Date();
-      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
-      const newsDate = new Date(news.updated_at);
-      return newsDate >= twentyFourHoursAgo;
+      // News is active if it's not hidden
+      return !news.hidden;
     },
 
     setNewsFilter(filter) {
@@ -750,29 +721,9 @@ export default {
 
     getNewsStatusText(news) {
       if (news.hidden) return "Hidden";
-      if (this.isNewsActive(news)) return "Active";
-      if (this.isNewsExpired(news)) return "Expired";
-      return "Inactive";
+      return "Active";
     },
 
-    getTimeUntilExpiry(news) {
-      if (!news.updated_at) return "";
-      const expiryTime = new Date(news.updated_at);
-      expiryTime.setHours(expiryTime.getHours() + 24);
-      const now = new Date();
-      const timeDiff = expiryTime - now;
-
-      if (timeDiff <= 0) return "Expired";
-
-      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
-      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-      if (hours > 0) {
-        return `${hours}h ${minutes}m remaining`;
-      } else {
-        return `${minutes}m remaining`;
-      }
-    },
 
     formatDate(dateString) {
       if (!dateString) return "";
