@@ -101,6 +101,8 @@ export default {
 
         if (data.success && data.news.length > 0) {
           this.news = data.news;
+          console.log("Debugging News loaded:", this.news);
+          
           this.calculateAnimationDuration();
         }
       } catch (error) {
@@ -182,7 +184,7 @@ export default {
 .news-ticker-container::before {
   content: "🔴 LIVE NEWS";
   position: absolute;
-  left: 0;
+  left: 33px;
   top: 0;
   height: 100%;
   background: linear-gradient(45deg, #e74c3c, #c0392b);

@@ -140,8 +140,8 @@ import AssignIcon from './icons/AssignIcon.vue'
 const router = useRouter()
 
 // Reactive data
-const isOpen = ref(true) // Open by default
-const isCollapsed = ref(false)
+const isOpen = ref(true) // Collapsed by default
+const isCollapsed = ref(true) // Collapsed by default
 const showPasswordSubmenu = ref(false)
 const isPasswordModalOpen = ref(false)
 const passwordType = ref('login')
