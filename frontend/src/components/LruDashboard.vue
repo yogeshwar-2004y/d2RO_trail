@@ -49,12 +49,6 @@
           </button>
         </div>
 
-        <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleStatusFilter">
-            Filter by Status
-          </button>
-        </div>
-
         <div class="search-box">
           <input
             type="text"

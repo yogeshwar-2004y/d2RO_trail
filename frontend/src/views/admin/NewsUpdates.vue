@@ -885,7 +885,7 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  margin-left: 30px;
   border-radius: 5px;
   transition: background-color 0.3s ease;
 }

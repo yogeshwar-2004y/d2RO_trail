@@ -51,6 +51,7 @@ const isLoginOrDashboard = computed(() => {
   flex-direction: column;
   margin: 0;
   padding: 0;
+  margin-left: 17px;
 }
 
 /* Fixed Header */

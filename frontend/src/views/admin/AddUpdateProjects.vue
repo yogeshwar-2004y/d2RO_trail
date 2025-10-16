@@ -258,7 +258,8 @@ export default {
   background: none;
   border: none;
   cursor: pointer;
-  margin-right: 15px;
+  /* margin-right: 50px; */
+  padding-left: 40px;
 }
 
 .header-actions {
