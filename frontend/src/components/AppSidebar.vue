@@ -453,7 +453,7 @@ onMounted(() => {
 .profile-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 5px;
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 6px;
