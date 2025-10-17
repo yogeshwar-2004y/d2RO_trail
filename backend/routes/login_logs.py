@@ -23,16 +23,15 @@ def get_login_logs():
         
         # Fetch login logs with user information
         cur.execute("""
-            SELECT ll.serial_number, ll.user_id, ll.activity_performed, 
-                   ll.performed_by, ll.timestamp, ll.ip_address, ll.user_agent,
-                   ll.is_suspicious, ll.suspicion_reason, ll.failed_attempts_count,
+            SELECT ll.serial_num, ll.user_id, ll.activity_performed, 
+                   ll.performed_by, ll.timestamp,
                    COALESCE(u.name, 'Unknown User') as user_name, 
                    COALESCE(u.email, 'N/A') as user_email,
                    COALESCE(p.name, 'Unknown User') as performed_by_name
             FROM login_logs ll
             LEFT JOIN users u ON ll.user_id = u.user_id
             LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.serial_number ASC
+            ORDER BY ll.serial_num ASC
             LIMIT %s OFFSET %s
         """, (limit, offset))
         
@@ -48,19 +47,14 @@ def get_login_logs():
         log_list = []
         for log in logs:
             log_list.append({
-                'serial_number': log[0],
+                'serial_num': log[0],
                 'user_id': log[1],
                 'activity_performed': log[2],
                 'performed_by': log[3],
                 'timestamp': log[4].isoformat() if log[4] else None,
-                'ip_address': log[5],
-                'user_agent': log[6],
-                'is_suspicious': log[7],
-                'suspicion_reason': log[8],
-                'failed_attempts_count': log[9],
-                'user_name': log[10],
-                'user_email': log[11],
-                'performed_by_name': log[12]
+                'user_name': log[5],
+                'user_email': log[6],
+                'performed_by_name': log[7]
             })
         
         return jsonify({
@@ -90,8 +84,8 @@ def log_login_activity():
         if not user_id or not activity_performed:
             return jsonify({"success": False, "message": "user_id and activity_performed are required"}), 400
             
-        if activity_performed not in ['logged_in', 'logged_out']:
-            return jsonify({"success": False, "message": "activity_performed must be 'logged_in' or 'logged_out'"}), 400
+        if activity_performed not in ['LOGIN', 'LOGOUT']:
+            return jsonify({"success": False, "message": "activity_performed must be 'LOGIN' or 'LOGOUT'"}), 400
         
         conn = get_db_connection()
         cur = conn.cursor()
@@ -123,16 +117,15 @@ def download_login_logs_pdf():
         
         # Get all login logs
         cur.execute("""
-            SELECT ll.serial_number, ll.user_id, ll.activity_performed,
-                   ll.performed_by, ll.timestamp, ll.ip_address, ll.user_agent,
-                   ll.is_suspicious, ll.suspicion_reason, ll.failed_attempts_count,
+            SELECT ll.serial_num, ll.user_id, ll.activity_performed,
+                   ll.performed_by, ll.timestamp,
                    COALESCE(u.name, 'Unknown User') as user_name,
                    COALESCE(u.email, 'N/A') as user_email,
                    COALESCE(p.name, 'Unknown User') as performed_by_name
             FROM login_logs ll
             LEFT JOIN users u ON ll.user_id = u.user_id
             LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.serial_number ASC
+            ORDER BY ll.serial_num ASC
         """)
         
         logs = cur.fetchall()
@@ -167,14 +160,14 @@ def download_login_logs_pdf():
         table_data = [['Serial', 'User ID', 'Activity', 'Performed By', 'Timestamp']]
         
         for log in logs:
-            activity_display = 'LOGIN' if log[2] == 'logged_in' else 'LOGOUT' if log[2] == 'logged_out' else 'FAILED LOGIN'
+            activity_display = log[2]  # Use the activity_performed value directly
             timestamp = log[4].strftime('%Y-%m-%d %H:%M:%S') if log[4] else 'N/A'
             
             table_data.append([
                 str(log[0]),
                 str(log[1]) if log[1] != 0 else 'N/A',
                 activity_display,
-                log[12] if log[12] else 'Unknown',
+                log[7] if log[7] else 'Unknown',
                 timestamp
             ])
         

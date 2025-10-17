@@ -140,3 +140,15 @@ class StageType(BaseModel):
         self.type_id = type_id
         self.type_name = type_name
         super().__init__(**kwargs)
+
+class LoginLog(BaseModel):
+    """Login Log model"""
+    
+    def __init__(self, serial_num: int, user_id: int, activity_performed: str,
+                 performed_by: int, timestamp: datetime = None, **kwargs):
+        self.serial_num = serial_num
+        self.user_id = user_id
+        self.activity_performed = activity_performed
+        self.performed_by = performed_by
+        self.timestamp = timestamp
+        super().__init__(**kwargs)
