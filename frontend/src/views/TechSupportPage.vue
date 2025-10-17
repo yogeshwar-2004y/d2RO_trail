@@ -129,7 +129,7 @@ export default {
 
       try {
         // Try to submit to backend first
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -229,7 +229,7 @@ export default {
       // Auto-hide after 5 seconds
       setTimeout(() => {
         this.hideSuccessMessage();
-      }, 5000);
+      }, 8000);
     },
 
     hideSuccessMessage() {

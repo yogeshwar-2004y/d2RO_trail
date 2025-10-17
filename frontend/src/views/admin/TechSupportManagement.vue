@@ -234,7 +234,7 @@ export default {
     async loadRequests() {
       try {
         this.loading = true;
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support");
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support");
         const data = await response.json();
         
         if (data.success) {
@@ -279,7 +279,7 @@ export default {
           issue: request.issue
         };
 
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -434,7 +434,7 @@ export default {
           return;
         }
 
-        const response = await fetch(`http://127.0.0.1:5000/api/tech-support/${requestId}/status`, {
+        const response = await fetch(`http://127.0.0.1:8000/api/tech-support/${requestId}/status`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
