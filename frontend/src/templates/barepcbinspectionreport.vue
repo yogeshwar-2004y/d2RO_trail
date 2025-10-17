@@ -26,31 +26,31 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="formData.projectName" required>
+                <input type="text" id="projectName" v-model="formData.projectName" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" required>
+                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" required>
+                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" required>
+                <input type="text" id="lruName" v-model="formData.lruName" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" required>
+                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" required>
+                <input type="text" id="testVenue" v-model="formData.testVenue" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO's:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" required>
+                <input type="text" id="slNos" v-model="formData.slNos" :readonly="readonly" required>
               </div>
             </div>
             
@@ -58,35 +58,35 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="formData.dpName" required>
+                <input type="text" id="dpName" v-model="formData.dpName" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" required>
+                <input type="date" id="dated1" v-model="formData.dated1" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" required>
+                <input type="date" id="dated2" v-model="formData.dated2" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" required>
+                <input type="text" id="sruName" v-model="formData.sruName" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" required>
+                <input type="text" id="partNo" v-model="formData.partNo" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" required>
+                <input type="number" id="quantity" v-model="formData.quantity" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" required>
+                <input type="date" id="startDate" v-model="formData.startDate" :readonly="readonly" required>
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" required>
+                <input type="date" id="endDate" v-model="formData.endDate" :readonly="readonly" required>
               </div>
             </div>
           </div>
@@ -115,17 +115,17 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" placeholder="Enter observation">
+                    <input type="text" v-model="item.observation" :readonly="readonly" placeholder="Enter observation">
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'visual', index)">
+                    <input type="file" @change="handleFileUpload($event, 'visual', index)" :disabled="readonly">
                   </td>
                 </tr>
                 
@@ -137,17 +137,17 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" placeholder="Enter observation">
+                    <input type="text" v-model="item.observation" :readonly="readonly" placeholder="Enter observation">
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'continuity', index)">
+                    <input type="file" @change="handleFileUpload($event, 'continuity', index)" :disabled="readonly">
                   </td>
                 </tr>
                 
@@ -161,17 +161,17 @@
                     (Fabricator Report shall be as per Mil 551101 (Mil QML 31032) Group A & B Certificates for Rigid boards and Mil 50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
-                    <input type="text" v-model="formData.fabricatorReport.observation" placeholder="Enter observation">
+                    <input type="text" v-model="formData.fabricatorReport.observation" :readonly="readonly" placeholder="Enter observation">
                   </td>
                   <td>
-                    <select v-model="formData.fabricatorReport.remarks">
+                    <select v-model="formData.fabricatorReport.remarks" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)">
+                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)" :disabled="readonly">
                   </td>
                 </tr>
               </tbody>
@@ -199,7 +199,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions">
+        <div class="form-actions" v-if="!readonly">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -220,6 +220,16 @@ import jsPDF from 'jspdf';
 
 export default {
   name: 'BarePcbInspectionReport',
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       projectName: '',
@@ -1035,6 +1045,19 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Readonly styles */
+input[readonly], select:disabled, input:disabled {
+  background-color: #f8f9fa;
+  color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+input[readonly]:focus, select:disabled:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 /* Responsive Design */

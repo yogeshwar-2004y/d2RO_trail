@@ -9,22 +9,9 @@ import AppSidebar from "@/components/AppSidebar.vue";
 
 const route = useRoute();
 
-// Show sidebar on all pages except login
+// Show sidebar on all pages except login and tech support
 const showSidebar = computed(() => {
-  return route.name !== "login";
-});
-
-// Check if current route is login or dashboard pages
-const isLoginOrDashboard = computed(() => {
-  const routeName = route.name;
-  return (
-    routeName === "login" ||
-    routeName === "HomePageAdmin" ||
-    routeName === "HomePageDesigner" ||
-    routeName === "HomePageQAHead" ||
-    routeName === "HomePageReviewer" ||
-    routeName === "HomePageDesignHead"
-  );
+  return route.name !== 'login' && route.name !== 'TechSupport';
 });
 </script>
 
@@ -128,6 +115,12 @@ const isLoginOrDashboard = computed(() => {
 /* Ensure no scrolling anywhere within login page */
 .login-page * {
   overflow: hidden !important;
+}
+
+/* Special handling for tech support page */
+.tech-support-page {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* Special handling for dashboard pages - no scrolling */

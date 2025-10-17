@@ -158,8 +158,8 @@ export default {
     },
 
     techSupport() {
-      // Add tech support functionality
-      alert("Tech support functionality will be implemented");
+      // Navigate to tech support page
+      this.$router.push({ name: "TechSupport" });
     },
   },
 };
