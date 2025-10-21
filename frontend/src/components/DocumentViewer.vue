@@ -84,7 +84,11 @@
             <div class="restriction-icon">⚠️</div>
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
-              <p v-if="!isLatestDocument">
+              <p v-if="hasAcceptedDocument">
+                This document has been accepted as the final version by a reviewer. 
+                No further uploads are allowed for this LRU.
+              </p>
+              <p v-else-if="!isLatestDocument">
                 You are viewing a previous version of the document. Upload is
                 only available for the latest version.
               </p>
@@ -260,6 +264,7 @@
                 <div class="doc-title">
                   <span class="doc-label">{{ doc.doc_ver || "A" }}</span>
                   {{ doc.document_number }}
+                  <span v-if="doc.status === 'accepted'" class="accepted-badge">✅ ACCEPTED</span>
                 </div>
                 <div class="doc-meta">
                   <span class="doc-version"
@@ -924,7 +929,8 @@ export default {
       // Document metadata - will be loaded dynamically
       lruName: "",
       projectName: "",
-      documentId: null,
+      documentId: null, // Numeric document_id for API calls
+      documentNumber: null, // String document_number for display
       status: "pending", // pending, approved, rejected, review
       createdDate: null,
       lastModifiedDate: new Date(),
@@ -1118,7 +1124,7 @@ export default {
       // Check if current document matches the latest document
       return (
         this.documentId === latestDocument.document_id ||
-        this.documentId === latestDocument.document_number
+        this.documentNumber === latestDocument.document_number
       );
     },
 
@@ -1142,6 +1148,11 @@ export default {
       );
     },
 
+    // Check if any document in this LRU is accepted (final version)
+    hasAcceptedDocument() {
+      return this.existingDocuments.some(doc => doc.status === 'accepted');
+    },
+
     // Check if user can upload a new document
     canUploadDocument() {
       console.log("=== canUploadDocument DEBUG ===");
@@ -1152,11 +1163,18 @@ export default {
         this.comments?.length || 0
       );
       console.log("isLatestDocument:", this.isLatestDocument);
+      console.log("hasAcceptedDocument:", this.hasAcceptedDocument);
 
       // If no documents exist, allow upload
       if (this.existingDocuments.length === 0) {
         console.log("No documents exist, allowing upload");
         return true;
+      }
+
+      // If any document is already accepted, prevent further uploads
+      if (this.hasAcceptedDocument) {
+        console.log("Document already accepted as final version - upload disabled");
+        return false;
       }
 
       // Only allow upload for the latest document version
@@ -1494,7 +1512,7 @@ export default {
         return this.existingDocuments.find(
           (doc) =>
             doc.document_id === this.documentId ||
-            doc.document_number === this.documentId
+            doc.document_number === this.documentNumber
         );
       }
 
@@ -1683,7 +1701,8 @@ export default {
         }
 
         // Set document metadata
-        this.documentId = doc.document_number;
+        this.documentId = doc.document_id; // Use numeric document_id for API calls
+        this.documentNumber = doc.document_number; // Store document_number separately
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
 
@@ -1907,6 +1926,9 @@ export default {
 
     async acceptDocument() {
       try {
+        console.log('Accepting document with ID:', this.documentId);
+        console.log('Document number:', this.documentNumber);
+        
         // Show confirmation dialog
         const confirmed = confirm(
           "Are you sure you want to accept this document? This action will mark the document as approved."
@@ -1917,32 +1939,41 @@ export default {
         }
 
         // Make API call to accept the document
-        const response = await fetch(`/api/documents/${this.documentId}/accept`, {
+        const url = `http://localhost:8000/api/documents/${this.documentId}/accept`;
+        console.log('Making request to:', url);
+        
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+            'Content-Type': 'application/json'
           }
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
         if (!response.ok) {
-          throw new Error('Failed to accept document');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
         const result = await response.json();
         
         // Show success message
-        alert('Document has been accepted successfully!');
+        alert(`Document has been accepted successfully! ${result.message}`);
         
         // Refresh the document data or emit event to parent component
         this.$emit('document-accepted', result);
+        
+        // Reload existing documents to show updated status
+        await this.loadExistingDocuments(this.documentDetails.lruId);
         
         // Optionally reload the page or refresh data
         this.$router.go(0); // Reload the current page
         
       } catch (error) {
         console.error('Error accepting document:', error);
-        alert('Failed to accept document. Please try again.');
+        alert(`Failed to accept document: ${error.message}`);
       }
     },
 
@@ -2258,6 +2289,7 @@ export default {
           // Clear current document state (but preserve comments in database)
           this.clearDocument();
           this.documentId = null;
+          this.documentNumber = null;
           this.fileType = null;
           this.fileName = null;
 
@@ -2684,14 +2716,14 @@ export default {
       this.isAnnotationMode = false;
       this.commentForm = {
         document_name: this.fileName || "",
-        document_id: this.documentId || "",
+        document_id: this.documentNumber || "",
         version:
           this.existingDocuments.find(
-            (doc) => doc.document_number === this.documentId
+            (doc) => doc.document_number === this.documentNumber
           )?.version || "",
         revision:
           this.existingDocuments.find(
-            (doc) => doc.document_number === this.documentId
+            (doc) => doc.document_number === this.documentNumber
           )?.revision || "",
         page_no: this.page || 1,
         section: "",
@@ -2749,7 +2781,7 @@ export default {
           y: this.currentAnnotation.y,
           page: this.currentAnnotation.page,
           description: this.commentForm.description,
-          document_id: this.documentId,
+          document_id: this.documentNumber,
         };
 
         this.annotations.push(annotation);
@@ -2814,14 +2846,14 @@ export default {
       // Update comment form with click position and document details
       this.commentForm.page_no = pageNo;
       this.commentForm.document_name = this.fileName || "";
-      this.commentForm.document_id = this.documentId || "";
+      this.commentForm.document_id = this.documentNumber || "";
       this.commentForm.version =
         this.existingDocuments.find(
-          (doc) => doc.document_number === this.documentId
+          (doc) => doc.document_number === this.documentNumber
         )?.version || "";
       this.commentForm.revision =
         this.existingDocuments.find(
-          (doc) => doc.document_number === this.documentId
+          (doc) => doc.document_number === this.documentNumber
         )?.revision || "";
 
       // Store annotation position for later use
@@ -2914,13 +2946,13 @@ export default {
 
     async loadCommentsFromBackend() {
       try {
-        if (!this.documentId) {
-          console.log("No document ID available for loading comments");
+        if (!this.documentNumber) {
+          console.log("No document number available for loading comments");
           return;
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/comments?document_id=${this.documentId}`
+          `http://localhost:8000/api/comments?document_id=${this.documentNumber}`
         );
 
         if (response.ok) {
@@ -3536,6 +3568,30 @@ export default {
   border-radius: 0.25rem;
   font-size: 0.75rem;
   margin-right: 0.5rem;
+}
+
+.accepted-badge {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  font-weight: bold;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 /* Document Form */
