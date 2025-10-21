@@ -42,9 +42,31 @@ def submit_tech_support():
                 issue_description TEXT NOT NULL,
                 status VARCHAR(50) DEFAULT 'pending',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                status_updated_by INTEGER,
+                status_updated_at TIMESTAMP
             )
         """)
+        
+        # Check for duplicate requests (same user, same date, same issue)
+        cur.execute("""
+            SELECT id, status FROM tech_support_requests 
+            WHERE username = %s AND user_id = %s AND issue_date = %s AND issue_description = %s
+            ORDER BY created_at DESC
+            LIMIT 1
+        """, (data['username'], str(user_id), data['date'], data['issue']))
+        
+        existing_request = cur.fetchone()
+        
+        if existing_request:
+            # Request already exists, return existing request info
+            return jsonify({
+                "success": True,
+                "message": "Request already exists",
+                "existing_request_id": existing_request[0],
+                "existing_status": existing_request[1],
+                "duplicate": True
+            })
         
         # Insert the tech support request
         cur.execute("""
@@ -52,7 +74,7 @@ def submit_tech_support():
             VALUES (%s, %s, %s, %s)
         """, (
             data['username'],
-            user_id,  # Use validated user_id
+            str(user_id),  # Convert to string to match database type
             data['date'],
             data['issue']
         ))
