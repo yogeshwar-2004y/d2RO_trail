@@ -84,7 +84,7 @@ def submit_tech_support():
         traceback.print_exc()
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
-@tech_support_bp.route('/api/tech-support/user/<int:user_id>', methods=['GET'])
+@tech_support_bp.route('/api/tech-support/user/<user_id>', methods=['GET'])
 def get_user_tech_support_requests(user_id):
     """Get tech support requests for a specific user"""
     try:

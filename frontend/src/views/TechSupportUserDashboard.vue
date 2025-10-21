@@ -190,12 +190,12 @@ export default {
         this.error = null
         
         const currentUser = userStore.getters.currentUser()
-        if (!currentUser || !currentUser.user_id) {
+        if (!currentUser || !currentUser.id) {
           this.error = 'User information not available'
           return
         }
         
-        const response = await fetch(`http://127.0.0.1:8000/api/tech-support/user/${currentUser.user_id}`)
+        const response = await fetch(`http://127.0.0.1:8000/api/tech-support/user/${currentUser.id}`)
         const data = await response.json()
         
         if (data.success) {
