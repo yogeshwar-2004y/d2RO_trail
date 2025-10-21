@@ -90,8 +90,13 @@ export default {
         case 'profile':
           console.log('Navigate to profile');
           break;
-        case 'settings':
-          console.log('Navigate to settings');
+        case 'tech-support':
+          // Navigate to tech support form page (for regular users)
+          this.$router.push({ name: 'TechSupport' });
+          break;
+        case 'tech-support-management':
+          // Navigate to tech support management page (for admin users)
+          this.$router.push({ name: 'TechSupportManagement' });
           break;
         case 'change-login-password':
           console.log('Navigate to change login password');
