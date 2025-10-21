@@ -466,13 +466,22 @@
 
         <!-- Add Comment Button (only for reviewers and only on latest version) -->
         <div class="add-comment-section" v-if="canAddCommentsOnCurrentDocument">
-          <button
-            @click="startAnnotationMode"
-            class="add-comment-btn"
-            v-if="!isAnnotationMode && !showCommentForm"
-          >
-            Add Comment
-          </button>
+          <div class="button-group">
+            <button
+              @click="startAnnotationMode"
+              class="add-comment-btn"
+              v-if="!isAnnotationMode && !showCommentForm"
+            >
+              Add Comment
+            </button>
+            <button
+              @click="acceptDocument"
+              class="accept-document-btn"
+              v-if="!isAnnotationMode && !showCommentForm"
+            >
+              Accept Document
+            </button>
+          </div>
         </div>
 
         <!-- Message for reviewers when viewing older versions -->
@@ -1894,6 +1903,47 @@ export default {
       this.selectedComment = null;
       this.justificationText = "";
       this.justificationAction = "accept";
+    },
+
+    async acceptDocument() {
+      try {
+        // Show confirmation dialog
+        const confirmed = confirm(
+          "Are you sure you want to accept this document? This action will mark the document as approved."
+        );
+        
+        if (!confirmed) {
+          return;
+        }
+
+        // Make API call to accept the document
+        const response = await fetch(`/api/documents/${this.documentId}/accept`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to accept document');
+        }
+
+        const result = await response.json();
+        
+        // Show success message
+        alert('Document has been accepted successfully!');
+        
+        // Refresh the document data or emit event to parent component
+        this.$emit('document-accepted', result);
+        
+        // Optionally reload the page or refresh data
+        this.$router.go(0); // Reload the current page
+        
+      } catch (error) {
+        console.error('Error accepting document:', error);
+        alert('Failed to accept document. Please try again.');
+      }
     },
 
     async confirmJustification() {
@@ -3867,8 +3917,13 @@ export default {
   margin-top: 1rem;
 }
 
+.button-group {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .add-comment-btn {
-  width: 100%;
+  flex: 1;
   padding: 0.75rem;
   background: #3b82f6;
   color: white;
@@ -3881,6 +3936,22 @@ export default {
 
 .add-comment-btn:hover {
   background: #2563eb;
+}
+
+.accept-document-btn {
+  flex: 1;
+  padding: 0.75rem;
+  background: #10b981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+}
+
+.accept-document-btn:hover {
+  background: #059669;
 }
 
 /* Comment Form Modal */
