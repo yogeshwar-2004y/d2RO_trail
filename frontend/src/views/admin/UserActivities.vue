@@ -134,7 +134,7 @@ export default {
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   justify-items: center;
   align-items: start;
 }
@@ -148,7 +148,7 @@ export default {
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 250px;
+  max-width: 220px;
   height: 200px;
   padding: 20px;
   cursor: pointer;
@@ -156,11 +156,6 @@ export default {
 }
 
 /* Center the last 3 cards in the bottom row */
-.card:nth-child(n+5) {
-  grid-column: span 1;
-}
-
-/* Center the bottom row with 3 cards */
 .card:nth-child(5) {
   grid-column: 1;
 }
@@ -215,7 +210,7 @@ export default {
   }
   
   .card {
-    max-width: 220px;
+    max-width: 200px;
     height: 180px;
   }
   
@@ -237,17 +232,11 @@ export default {
   .card-container {
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
-    padding: 0 10px;
   }
   
   .card {
-    max-width: 200px;
-    height: 180px;
-    padding: 15px;
-  }
-  
-  .card-title {
-    font-size: 0.75em;
+    max-width: 180px;
+    height: 160px;
   }
   
   /* Reset grid positioning for mobile */
@@ -264,8 +253,8 @@ export default {
   
   .card {
     width: 100%;
-    max-width: 280px;
-    height: 160px;
+    max-width: 250px;
+    height: 150px;
   }
 }
 </style>
