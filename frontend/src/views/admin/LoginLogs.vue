@@ -145,7 +145,7 @@ export default {
       this.error = null;
       
       try {
-        const response = await axios.get('http://localhost:8000/api/login-logs', {
+        const response = await axios.get('http://localhost:5000/api/login-logs', {
           params: {
             limit: this.limit,
             offset: this.offset
@@ -222,7 +222,7 @@ export default {
     async downloadPDF() {
       try {
         this.loading = true;
-        const response = await axios.get('http://localhost:8000/api/login-logs/pdf', {
+        const response = await axios.get('http://localhost:5000/api/login-logs/pdf', {
           responseType: 'blob'
         });
         
