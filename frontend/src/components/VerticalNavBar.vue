@@ -140,8 +140,8 @@ export default {
         // Admin users go to tech support management page
         this.$emit('navigate', 'tech-support-management')
       } else {
-        // Regular users go to tech support form page
-        this.$emit('navigate', 'tech-support')
+        // Regular users go to their tech support dashboard
+        this.$emit('navigate', 'tech-support-user-dashboard')
       }
       this.closeNav()
     },

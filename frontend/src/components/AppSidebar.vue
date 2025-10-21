@@ -229,8 +229,8 @@ const handleProfileAction = (action) => {
         // Admin users go to tech support management page
         router.push({ name: 'TechSupportManagement' })
       } else {
-        // Regular users go to tech support form page
-        router.push({ name: 'TechSupport' })
+        // Regular users go to their tech support dashboard
+        router.push({ name: 'TechSupportUserDashboard' })
       }
       
       // Close sidebar after navigation on mobile

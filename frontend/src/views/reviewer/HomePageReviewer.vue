@@ -94,6 +94,10 @@ export default {
           // Navigate to tech support form page (for regular users)
           this.$router.push({ name: 'TechSupport' });
           break;
+        case 'tech-support-user-dashboard':
+          // Navigate to user tech support dashboard (for regular users)
+          this.$router.push({ name: 'TechSupportUserDashboard' });
+          break;
         case 'tech-support-management':
           // Navigate to tech support management page (for admin users)
           this.$router.push({ name: 'TechSupportManagement' });

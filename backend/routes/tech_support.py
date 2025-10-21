@@ -84,6 +84,49 @@ def submit_tech_support():
         traceback.print_exc()
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
+@tech_support_bp.route('/api/tech-support/user/<int:user_id>', methods=['GET'])
+def get_user_tech_support_requests(user_id):
+    """Get tech support requests for a specific user"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT id, username, user_id, issue_date, issue_description, 
+                   status, created_at, updated_at, status_updated_by, status_updated_at
+            FROM tech_support_requests
+            WHERE user_id = %s
+            ORDER BY created_at DESC
+        """, (user_id,))
+        
+        requests = cur.fetchall()
+        cur.close()
+        
+        request_list = []
+        for req in requests:
+            request_list.append({
+                "id": req[0],
+                "username": req[1],
+                "user_id": req[2],
+                "issue_date": req[3].isoformat() if req[3] else None,
+                "issue_description": req[4],
+                "status": req[5],
+                "created_at": req[6].isoformat() if req[6] else None,
+                "updated_at": req[7].isoformat() if req[7] else None,
+                "status_updated_by": req[8],
+                "status_updated_at": req[9].isoformat() if req[9] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "requests": request_list,
+            "total_count": len(request_list)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching user tech support requests: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @tech_support_bp.route('/api/tech-support', methods=['GET'])
 def get_tech_support_requests():
     """Get all tech support requests (admin only)"""
