@@ -319,9 +319,13 @@ const breadcrumbs = computed(() => {
       // Add specific assign project sub-routes
       if (pathSegments.length > 2) {
         if (pathSegments[2] === 'members') {
+          // Always point Project Members breadcrumb to the members page (not add page)
+          const projectId = pathSegments[1]
+          const membersPath = `/assign-projects/${projectId}/members`
+          
           crumbs.push({
             name: routeMappings['ProjectMembers'] || 'Project Members',
-            path: currentRoute.path
+            path: membersPath
           })
           
           if (pathSegments[3] === 'add') {
