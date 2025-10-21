@@ -207,7 +207,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions">
+        <div class="form-actions" v-if="!readonly">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -232,6 +232,16 @@ import jsPDF from "jspdf";
 
 export default {
   name: "KitOfPartInsp",
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       currentYear: "2025",
@@ -510,7 +520,7 @@ export default {
           submissionData
         );
 
-        const response = await fetch("http://localhost:5000/api/kit-of-parts", {
+        const response = await fetch("http://localhost:8000/api/kit-of-parts", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

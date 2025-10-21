@@ -7,6 +7,7 @@ from flask import Blueprint, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 from config import get_db_connection, Config
 from utils.helpers import hash_password, handle_database_error
+from utils.activity_logger import log_activity
 
 users_bp = Blueprint('users', __name__)
 
@@ -145,6 +146,18 @@ def create_user():
         conn.commit()
         cur.close()
         
+        # Log the user creation activity
+        # For user operations, we need to get the admin user who created the user
+        # Since we don't have session management yet, we'll use a default admin user ID
+        admin_user_id = 1002  # Default admin user ID
+        
+        log_activity(
+            project_id=None,  # User operations don't have project_id
+            activity_performed="User Added",
+            performed_by=admin_user_id,
+            additional_info=f"ID:{user_id}|Name:{user_name}|User '{user_name}' (ID: {user_id}) with role ID {role_id} was created"
+        )
+        
         return jsonify({
             "success": True,
             "message": "User created successfully",
@@ -250,6 +263,33 @@ def update_user(user_id):
         
         conn.commit()
         cur.close()
+        
+        # Log the user update activity
+        # For user operations, we need to get the admin user who updated the user
+        # Since we don't have session management yet, we'll use a default admin user ID
+        admin_user_id = 1002  # Default admin user ID
+        
+        # Build additional info about what was updated
+        update_details = []
+        if 'name' in data:
+            update_details.append(f"name to '{data['name']}'")
+        if 'email' in data:
+            update_details.append(f"email to '{data['email']}'")
+        if 'password' in data and data['password']:
+            update_details.append("password")
+        if 'roleId' in data:
+            update_details.append(f"role to ID {data['roleId']}")
+        if signature_updated:
+            update_details.append("signature")
+        
+        additional_info = f"ID:{user_id}|Name:{existing_user[1]}|User '{existing_user[1]}' (ID: {user_id}) was updated: {', '.join(update_details)}"
+        
+        log_activity(
+            project_id=None,  # User operations don't have project_id
+            activity_performed="User Updated",
+            performed_by=admin_user_id,
+            additional_info=additional_info
+        )
         
         return jsonify({
             "success": True,

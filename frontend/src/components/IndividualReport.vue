@@ -61,6 +61,16 @@
         <div v-else class="report-message">
           <h3>Waiting for template selection</h3>
           <p>The Design Head needs to select a template before this report can be accessed.</p>
+          
+          <!-- Show different messages based on role -->
+          <div v-if="isQAReviewer" class="role-message qa-reviewer">
+            <div class="role-icon">🔍</div>
+            <p><strong>QA Reviewer Access:</strong> Once the Design Head assigns a template, you will be able to fill out and submit this report.</p>
+          </div>
+          <div v-else class="role-message other-role">
+            <div class="role-icon">👁️</div>
+            <p><strong>View-Only Access:</strong> You can view this report once a template is assigned, but only QA Reviewers can edit it.</p>
+          </div>
         </div>
       </div>
 
@@ -81,6 +91,20 @@
 
         <!-- Template Form Content -->
         <div class="template-form-content">
+          <!-- Role-based access message -->
+          <div v-if="!canEditReport && selectedTemplate" class="access-message">
+            <div v-if="isQAReviewer" class="access-info qa-reviewer">
+              <div class="access-icon">🔍</div>
+              <h4>QA Reviewer Access</h4>
+              <p>You can edit and submit this report. All fields are enabled for input.</p>
+            </div>
+            <div v-else class="access-info view-only">
+              <div class="access-icon">👁️</div>
+              <h4>View-Only Access</h4>
+              <p>You can view this report but cannot edit it. Only QA Reviewers can make changes.</p>
+            </div>
+          </div>
+          
           <!-- Dynamic Template Component -->
           <component 
             v-if="currentTemplateComponent"
@@ -90,6 +114,8 @@
             :reportName="reportName"
             :templateId="selectedTemplate.template_id"
             :templateName="selectedTemplate.name"
+            :readonly="!canEditReport"
+            :isTemplatePreview="false"
           />
           
           <!-- Fallback if component not found -->
@@ -258,6 +284,17 @@ export default {
     isDesignHead() {
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 4;
+    },
+    
+    isQAReviewer() {
+      // QA Reviewer has role_id = 3
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 3;
+    },
+    
+    canEditReport() {
+      // Only QA Reviewer can edit reports when template is assigned
+      return this.isQAReviewer && this.selectedTemplate;
     },
     
     currentTemplateComponent() {
@@ -1051,6 +1088,117 @@ export default {
   
   .template-info p {
     font-size: 0.9em;
+  }
+}
+
+/* Role-based Access Messages */
+.role-message {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.role-message.qa-reviewer {
+  background: linear-gradient(135deg, #e8f5e8, #f0f8f0);
+  border: 2px solid #28a745;
+  border-left: 6px solid #28a745;
+}
+
+.role-message.other-role {
+  background: linear-gradient(135deg, #fff3cd, #fef9e7);
+  border: 2px solid #ffc107;
+  border-left: 6px solid #ffc107;
+}
+
+.role-icon {
+  font-size: 2em;
+  flex-shrink: 0;
+}
+
+.role-message p {
+  margin: 0;
+  color: #2d3748;
+  font-size: 0.95em;
+  line-height: 1.6;
+}
+
+.role-message strong {
+  color: #1a202c;
+  font-weight: 600;
+}
+
+/* Access Message in Template Form */
+.access-message {
+  margin-bottom: 25px;
+  padding: 20px;
+  border-radius: 12px;
+  animation: slideIn 0.6s ease-out;
+}
+
+.access-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.access-info.qa-reviewer {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border: 2px solid #28a745;
+  border-left: 6px solid #28a745;
+}
+
+.access-info.view-only {
+  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+  border: 2px solid #dc3545;
+  border-left: 6px solid #dc3545;
+}
+
+.access-icon {
+  font-size: 1.8em;
+  flex-shrink: 0;
+}
+
+.access-info h4 {
+  margin: 0 0 5px 0;
+  color: #1a202c;
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.access-info p {
+  margin: 0;
+  color: #2d3748;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Responsive Design for Role Messages */
+@media (max-width: 768px) {
+  .role-message,
+  .access-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .role-icon,
+  .access-icon {
+    font-size: 1.5em;
+  }
+  
+  .access-info h4 {
+    font-size: 1em;
+  }
+  
+  .role-message p,
+  .access-info p {
+    font-size: 0.85em;
   }
 }
 </style>

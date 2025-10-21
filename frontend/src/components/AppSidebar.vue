@@ -131,6 +131,7 @@ import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
 
 // Import icon components
+
 import DocumentIcon from './icons/DocumentIcon.vue'
 import MemoIcon from './icons/MemoIcon.vue'
 import ReportIcon from './icons/ReportIcon.vue'
@@ -160,6 +161,7 @@ const roleBasedCards = computed(() => {
   
   const cardDefinitions = {
     admin: [
+      { id: 'home', title: 'Home' },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
@@ -240,9 +242,9 @@ const closePasswordModal = () => {
   isPasswordModalOpen.value = false
 }
 
-const handleLogout = () => {
+const handleLogout = async () => {
   // Handle logout
-  userStore.actions.logout()
+  await userStore.actions.logout()
   router.push({ name: 'login' })
 }
 

@@ -141,6 +141,16 @@ import jsPDF from 'jspdf';
 
 export default {
   name: 'ObservationReport',
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       lruName: '',

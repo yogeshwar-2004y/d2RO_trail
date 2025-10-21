@@ -1,22 +1,21 @@
 <template>
-  
   <div class="customise-background-page">
     <button class="back-button" @click="$router.go(-1)">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M19 12H5"></path>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M19 12H5"></path>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
     <div class="content-container">
       <div class="upload-section">
         <h2>Customise Login Background</h2>
@@ -172,7 +171,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/upload-login-background",
+          "http://127.0.0.1:8000/api/upload-login-background",
           {
             method: "POST",
             body: formData,
@@ -204,7 +203,7 @@ export default {
     async resetToDefault() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/reset-login-background",
+          "http://127.0.0.1:8000/api/reset-login-background",
           {
             method: "POST",
           }
@@ -243,7 +242,7 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 5000);
+      }, 8000);
     },
   },
 
@@ -251,7 +250,7 @@ export default {
     // Load current background on component mount
     try {
       const response = await fetch(
-        "http://127.0.0.1:5000/api/get-current-background"
+        "http://127.0.0.1:8000/api/get-current-background"
       );
       const data = await response.json();
       if (data.success && data.background_url) {

@@ -286,7 +286,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions">
+        <div class="form-actions" v-if="!readonly">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -311,6 +311,16 @@ import jsPDF from "jspdf";
 
 export default {
   name: "MechanicalInspection",
+  props: {
+    readonly: {
+      type: Boolean,
+      default: false
+    },
+    isTemplatePreview: {
+      type: Boolean,
+      default: false
+    }
+  },
   data() {
     return {
       currentYear: "2025",
@@ -604,7 +614,7 @@ export default {
         console.log("Submitting mechanical inspection report:", submissionData);
 
         const response = await fetch(
-          "http://localhost:5000/api/mechanical-inspection",
+          "http://localhost:8000/api/mechanical-inspection",
           {
             method: "POST",
             headers: {

@@ -40,7 +40,7 @@ export default {
     },
     speed: {
       type: Number,
-      default: 100, // pixels per second
+      default: 30, // pixels per second
     },
     backgroundColor: {
       type: String,
@@ -96,13 +96,13 @@ export default {
 
       this.loading = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("http://localhost:8000/api/news");
         const data = await response.json();
 
         if (data.success && data.news.length > 0) {
           this.news = data.news;
           console.log("Debugging News loaded:", this.news);
-          
+
           this.calculateAnimationDuration();
         }
       } catch (error) {
@@ -118,8 +118,14 @@ export default {
           .map((item) => item.news_text)
           .join(" 📰 ");
         const contentLength = totalContent.length;
-        // Adjust duration based on content length and desired speed
-        this.animationDuration = Math.max(20, contentLength * 0.1);
+        // Remove character constraints - allow unlimited content length
+        // Use speed prop to control animation: slower speed = longer duration
+        // Base calculation: 1 second per 30 characters, adjusted by speed factor
+        const baseDuration = Math.ceil(contentLength / 30);
+        this.animationDuration = Math.max(
+          20,
+          baseDuration * (100 / this.speed)
+        );
       }
     },
   },
@@ -133,7 +139,6 @@ export default {
   position: relative;
   border-top: 0.8px solid #34495e;
   border-bottom: 0.8px solid #34495e;
-  
 }
 
 .news-ticker {
@@ -148,10 +153,12 @@ export default {
   display: flex;
   align-items: center;
   white-space: nowrap;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 300;
+  font-size: 16px;
   animation-name: scroll;
   transform: translateX(100%);
+  /* Remove any width constraints to allow unlimited content */
+  min-width: max-content;
 }
 
 .news-item {
@@ -182,7 +189,7 @@ export default {
 }
 
 .news-ticker-container::before {
-  content: "🔴 LIVE NEWS";
+  content: "📰 NEWS";
   position: absolute;
   left: 33px;
   top: 0;
