@@ -96,7 +96,10 @@ const routeMappings = {
   'CotsScreeningInspectionReport': 'COTS Screening Inspection',
   'AssembledBoardInspectionReport': 'Assembled Board Inspection',
   'KitOfPartInsp': 'Kit of Parts Inspection',
-  'MechanicalInspection': 'Mechanical Inspection'
+  'MechanicalInspection': 'Mechanical Inspection',
+  'TechSupport': 'Tech Support Form',
+  'TechSupportUserDashboard': 'Tech Support Dashboard',
+  'TechSupportManagement': 'Tech Support Management'
 }
 
 // Define parent-child relationships for hierarchical breadcrumbs
@@ -123,15 +126,22 @@ const breadcrumbs = computed(() => {
   const userInfo = userStore.getters.currentUser()
   const userRole = userInfo?.role?.toLowerCase().replace(/\s+/g, '') || 'admin'
   
+  // Debug logging
+  console.log('Breadcrumb Debug - User Info:', userInfo)
+  console.log('Breadcrumb Debug - User Role:', userRole)
+  console.log('Breadcrumb Debug - Current Route:', currentRoute.name, currentRoute.path)
+  
   // Determine the correct home name based on user role
   const getHomeName = () => {
     const roleToHomeName = {
       admin: 'Admin Dashboard',
-      reviewer: 'Reviewer Dashboard',
-      qahead: 'QA Head Dashboard', 
-      designhead: 'Design Head Dashboard',
-      designer: 'Designer Dashboard'
+      'qareviewer': 'Reviewer Dashboard',  // Handle "qa reviewer" role
+      'qahead': 'QA Head Dashboard', 
+      'designhead': 'Design Head Dashboard',
+      designer: 'Designer Dashboard',
+      reviewer: 'Reviewer Dashboard'  // Fallback for reviewer
     }
+    console.log('Breadcrumb Debug - Role mapping for:', userRole, '=', roleToHomeName[userRole])
     return roleToHomeName[userRole] || 'Admin Dashboard'
   }
   
@@ -152,8 +162,27 @@ const breadcrumbs = computed(() => {
   // Only add additional breadcrumbs if we're not already on the home page
   const homePath = getHomePath()
   if (currentRoute.path !== homePath) {
-    // Handle specific sub-routes based on current path
-    if (currentRoute.path.startsWith('/projects')) {
+    // Handle tech support routes first
+    if (currentRoute.name === 'TechSupportUserDashboard') {
+      crumbs.push({
+        name: routeMappings['TechSupportUserDashboard'] || 'Tech Support Dashboard',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.name === 'TechSupportManagement') {
+      crumbs.push({
+        name: routeMappings['UserActivities'] || 'User Activities',
+        path: '/user-activities'
+      })
+      crumbs.push({
+        name: routeMappings['TechSupportManagement'] || 'Tech Support Management',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.name === 'TechSupport') {
+      crumbs.push({
+        name: routeMappings['TechSupport'] || 'Tech Support Form',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.path.startsWith('/projects')) {
       crumbs.push({
         name: routeMappings['ProjectsDashboard'] || 'Projects',
         path: '/projects'
@@ -194,12 +223,14 @@ function getHomePath() {
   // Map user roles to their corresponding home paths
   const roleToHomePath = {
     admin: '/admin',
-    reviewer: '/reviewer', 
+    reviewer: '/reviewer',
+    'qareviewer': '/reviewer',  // Handle "qa reviewer" role
     qahead: '/qahead',
     designhead: '/designhead',
     designer: '/designer'
   }
   
+  console.log('Breadcrumb Debug - Home path for role:', userRole, '=', roleToHomePath[userRole])
   return roleToHomePath[userRole] || '/admin' // Default to admin if role not found
 }
 </script>
