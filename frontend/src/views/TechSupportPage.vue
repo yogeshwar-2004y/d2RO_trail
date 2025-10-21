@@ -4,12 +4,18 @@
       <div class="form-container">
         <div class="form-header">
           <h1>Technical Support</h1>
-          <p>Please fill out the form below to report any technical issues you're experiencing.</p>
-          
+          <p>
+            Please fill out the form below to report any technical issues you're
+            experiencing.
+          </p>
+
           <!-- Offline Indicator -->
           <div v-if="!isOnline" class="offline-indicator">
             <span class="offline-icon">⚠️</span>
-            <span class="offline-text">You're currently offline. Your request will be saved locally and submitted when connection is restored.</span>
+            <span class="offline-text"
+              >You're currently offline. Your request will be saved locally and
+              submitted when connection is restored.</span
+            >
           </div>
         </div>
 
@@ -18,10 +24,12 @@
           <div class="success-content">
             <span class="success-icon">✓</span>
             <span class="success-text">{{ successMessage }}</span>
-            <button @click="hideSuccessMessage" class="close-btn">&times;</button>
+            <button @click="hideSuccessMessage" class="close-btn">
+              &times;
+            </button>
           </div>
         </div>
-        
+
         <form @submit.prevent="submitForm" class="support-form">
           <div class="form-group">
             <label for="username">Username *</label>
@@ -75,7 +83,7 @@
               Back to Login
             </button>
             <button type="submit" class="btn-primary" :disabled="isSubmitting">
-              {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+              {{ isSubmitting ? "Submitting..." : "Submit" }}
             </button>
           </div>
         </form>
@@ -85,7 +93,7 @@
 </template>
 
 <script>
-import techSupportSync from '@/services/techSupportSync.js'
+import techSupportSync from "@/services/techSupportSync.js";
 
 export default {
   name: "TechSupportPage",
@@ -94,13 +102,13 @@ export default {
       formData: {
         username: "",
         userId: "",
-        date: new Date().toISOString().split('T')[0], // Today's date as default
-        issue: ""
+        date: new Date().toISOString().split("T")[0], // Today's date as default
+        issue: "",
       },
       isSubmitting: false,
       showSuccessMessage: false,
       successMessage: "",
-      isOnline: navigator.onLine
+      isOnline: navigator.onLine,
     };
   },
   mounted() {
@@ -110,14 +118,14 @@ export default {
     }
 
     // Listen for online/offline events
-    window.addEventListener('online', this.handleOnline);
-    window.addEventListener('offline', this.handleOffline);
+    window.addEventListener("online", this.handleOnline);
+    window.addEventListener("offline", this.handleOffline);
   },
 
   beforeUnmount() {
     // Clean up event listeners
-    window.removeEventListener('online', this.handleOnline);
-    window.removeEventListener('offline', this.handleOffline);
+    window.removeEventListener("online", this.handleOnline);
+    window.removeEventListener("offline", this.handleOffline);
   },
   methods: {
     async submitForm() {
@@ -129,7 +137,7 @@ export default {
 
       try {
         // Try to submit to backend first
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -141,7 +149,9 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.showSuccessMessage("Your technical support request has been submitted successfully. We will get back to you soon.");
+          this.showSuccessMessage(
+            "Your technical support request has been submitted successfully. We will get back to you soon."
+          );
           this.resetForm();
           setTimeout(() => this.goBack(), 2000);
         } else {
@@ -149,10 +159,12 @@ export default {
         }
       } catch (error) {
         console.log("Backend unavailable, storing locally:", error.message);
-        
+
         // Backend is down - store locally and show success
         this.storeLocally();
-        this.showSuccessMessage("Your technical support request has been saved locally and will be submitted when the system is back online. We will get back to you soon.");
+        this.showSuccessMessage(
+          "Your technical support request has been saved locally and will be submitted when the system is back online. We will get back to you soon."
+        );
         this.resetForm();
         setTimeout(() => this.goBack(), 2000);
       } finally {
@@ -184,8 +196,8 @@ export default {
       this.formData = {
         username: "",
         userId: "",
-        date: new Date().toISOString().split('T')[0],
-        issue: ""
+        date: new Date().toISOString().split("T")[0],
+        issue: "",
       };
     },
 
@@ -195,8 +207,12 @@ export default {
 
     storeLocally() {
       // Create a unique ID for this request
-      const requestId = 'tech_support_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-      
+      const requestId =
+        "tech_support_" +
+        Date.now() +
+        "_" +
+        Math.random().toString(36).substr(2, 9);
+
       // Prepare the request data
       const requestData = {
         id: requestId,
@@ -204,32 +220,37 @@ export default {
         userId: parseInt(this.formData.userId),
         date: this.formData.date,
         issue: this.formData.issue,
-        status: 'pending',
+        status: "pending",
         created_at: new Date().toISOString(),
         stored_locally: true,
-        submission_attempts: 0
+        submission_attempts: 0,
       };
 
       // Get existing local requests
-      const existingRequests = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
-      
+      const existingRequests = JSON.parse(
+        localStorage.getItem("tech_support_offline") || "[]"
+      );
+
       // Add new request
       existingRequests.push(requestData);
-      
+
       // Save back to localStorage
-      localStorage.setItem('tech_support_offline', JSON.stringify(existingRequests));
-      
-      console.log('Tech support request stored locally:', requestData);
+      localStorage.setItem(
+        "tech_support_offline",
+        JSON.stringify(existingRequests)
+      );
+
+      console.log("Tech support request stored locally:", requestData);
     },
 
     showSuccessMessage(message) {
       this.successMessage = message;
       this.showSuccessMessage = true;
-      
+
       // Auto-hide after 5 seconds
       setTimeout(() => {
         this.hideSuccessMessage();
-      }, 5000);
+      }, 8000);
     },
 
     hideSuccessMessage() {
@@ -239,21 +260,23 @@ export default {
 
     handleOnline() {
       this.isOnline = true;
-      console.log('Back online - syncing offline requests');
+      console.log("Back online - syncing offline requests");
       techSupportSync.syncOfflineRequests();
     },
 
     handleOffline() {
       this.isOnline = false;
-      console.log('Gone offline');
-    }
-  }
+      console.log("Gone offline");
+    },
+  },
 };
 </script>
 
 <style scoped>
 .tech-support-page {
-  min-height: calc(100vh - 310px); /* Account for header, breadcrumb, news ticker, and footer */
+  min-height: calc(
+    100vh - 310px
+  ); /* Account for header, breadcrumb, news ticker, and footer */
   background-color: #f0f8ff;
   padding: 20px;
   display: flex;

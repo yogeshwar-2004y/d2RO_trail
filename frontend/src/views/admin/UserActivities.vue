@@ -132,12 +132,14 @@ export default {
 .card-container {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 40px; /* ⬅️ Increased from 20px to 40px */
   width: 100%;
   max-width: 1000px;
   justify-items: center;
   align-items: start;
+  padding: 20px 0; /* ⬅️ Adds vertical breathing space */
 }
+
 
 .card {
   display: flex;
@@ -148,11 +150,12 @@ export default {
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 220px;
+  max-width: 200px;
   height: 200px;
-  padding: 20px;
+  padding: 15px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 5px; /* ⬅️ Adds subtle spacing around each card */
 }
 
 /* Center the last 3 cards in the bottom row */

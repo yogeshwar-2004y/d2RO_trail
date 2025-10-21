@@ -3,7 +3,17 @@
     <div class="header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -14,23 +24,62 @@
       </div>
       <div class="header-right">
         <div class="search-box">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            class="search-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
-          <input type="text" v-model="searchQuery" placeholder="Search Login Logs" class="search-input" @input="filterLogs">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search Login Logs"
+            class="search-input"
+            @input="filterLogs"
+          />
         </div>
         <button class="icon-button" @click="refreshLogs">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
             <path d="M21 3v5h-5"></path>
-            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path
+              d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            ></path>
             <path d="M3 21v-5h5"></path>
           </svg>
           <span class="button-label">REFRESH</span>
         </button>
         <button class="icon-button" @click="downloadPDF" :disabled="loading">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -49,7 +98,17 @@
     <!-- Error State -->
     <div v-if="error" class="error-container">
       <div class="error-message">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="15" y1="9" x2="9" y2="15"></line>
           <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -73,10 +132,24 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="log in filteredLogs" :key="log.serial_number" class="log-row" :class="{ 'suspicious-row': log.is_suspicious }">
+            <tr
+              v-for="log in filteredLogs"
+              :key="log.serial_number"
+              class="log-row"
+              :class="{ 'suspicious-row': log.is_suspicious }"
+            >
               <td class="serial-num">{{ log.serial_number }}</td>
-              <td class="user-id">{{ log.user_id === 0 ? 'N/A' : log.user_id }}</td>
-              <td class="activity" :class="{ 'login': log.activity_performed === 'logged_in', 'logout': log.activity_performed === 'logged_out', 'failed': log.activity_performed === 'login_failed' }">
+              <td class="user-id">
+                {{ log.user_id === 0 ? "N/A" : log.user_id }}
+              </td>
+              <td
+                class="activity"
+                :class="{
+                  login: log.activity_performed === 'logged_in',
+                  logout: log.activity_performed === 'logged_out',
+                  failed: log.activity_performed === 'login_failed',
+                }"
+              >
                 {{ getActivityDisplay(log.activity_performed) }}
               </td>
               <td class="performed-by">{{ log.performed_by_name }}</td>
@@ -84,31 +157,50 @@
             </tr>
           </tbody>
         </table>
-        
+
         <!-- No Data State -->
         <div v-if="filteredLogs.length === 0" class="no-data">
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M9 12l2 2 4-4"></path>
-            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.65 0 3.2.45 4.54 1.24"></path>
+            <path
+              d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.65 0 3.2.45 4.54 1.24"
+            ></path>
           </svg>
-          <p>{{ searchQuery ? 'No login logs match your search criteria' : 'No login logs found' }}</p>
+          <p>
+            {{
+              searchQuery
+                ? "No login logs match your search criteria"
+                : "No login logs found"
+            }}
+          </p>
         </div>
       </div>
 
       <!-- Pagination -->
       <div v-if="totalLogs > limit" class="pagination">
-        <button 
-          @click="previousPage" 
+        <button
+          @click="previousPage"
           :disabled="offset === 0"
           class="page-button"
         >
           Previous
         </button>
         <span class="page-info">
-          Showing {{ offset + 1 }} to {{ Math.min(offset + limit, totalLogs) }} of {{ totalLogs }} logs
+          Showing {{ offset + 1 }} to
+          {{ Math.min(offset + limit, totalLogs) }} of {{ totalLogs }} logs
         </span>
-        <button 
-          @click="nextPage" 
+        <button
+          @click="nextPage"
           :disabled="offset + limit >= totalLogs"
           class="page-button"
         >
@@ -120,20 +212,20 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from "axios";
 
 export default {
-  name: 'LoginLogs',
+  name: "LoginLogs",
   data() {
     return {
-      searchQuery: '',
+      searchQuery: "",
       logs: [],
       filteredLogs: [],
       loading: false,
       error: null,
       totalLogs: 0,
       limit: 50,
-      offset: 0
+      offset: 0,
     };
   },
   async mounted() {
@@ -143,127 +235,137 @@ export default {
     async loadLoginLogs() {
       this.loading = true;
       this.error = null;
-      
+
       try {
-        const response = await axios.get('http://localhost:5000/api/login-logs', {
-          params: {
-            limit: this.limit,
-            offset: this.offset
+        const response = await axios.get(
+          "http://localhost:8000/api/login-logs",
+          {
+            params: {
+              limit: this.limit,
+              offset: this.offset,
+            },
           }
-        });
-        
+        );
+
         if (response.data.success) {
           this.logs = response.data.logs;
           this.filteredLogs = [...this.logs];
           this.totalLogs = response.data.total;
         } else {
-          this.error = 'Failed to load login logs';
+          this.error = "Failed to load login logs";
         }
       } catch (error) {
-        console.error('Error loading login logs:', error);
-        this.error = 'Error loading login logs. Please try again.';
+        console.error("Error loading login logs:", error);
+        this.error = "Error loading login logs. Please try again.";
       } finally {
         this.loading = false;
       }
     },
-    
+
     filterLogs() {
       if (!this.searchQuery.trim()) {
         this.filteredLogs = [...this.logs];
         return;
       }
-      
+
       const query = this.searchQuery.toLowerCase();
-      this.filteredLogs = this.logs.filter(log => 
-        log.serial_number.toString().includes(query) ||
-        log.user_id.toString().includes(query) ||
-        log.activity_performed.toLowerCase().includes(query) ||
-        log.performed_by.toString().includes(query) ||
-        log.performed_by_name?.toLowerCase().includes(query) ||
-        log.user_name?.toLowerCase().includes(query) ||
-        log.user_email?.toLowerCase().includes(query) ||
-        log.suspicion_reason?.toLowerCase().includes(query) ||
-        (log.is_suspicious && 'suspicious'.includes(query)) ||
-        this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
+      this.filteredLogs = this.logs.filter(
+        (log) =>
+          log.serial_number.toString().includes(query) ||
+          log.user_id.toString().includes(query) ||
+          log.activity_performed.toLowerCase().includes(query) ||
+          log.performed_by.toString().includes(query) ||
+          log.performed_by_name?.toLowerCase().includes(query) ||
+          log.user_name?.toLowerCase().includes(query) ||
+          log.user_email?.toLowerCase().includes(query) ||
+          log.suspicion_reason?.toLowerCase().includes(query) ||
+          (log.is_suspicious && "suspicious".includes(query)) ||
+          this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
       );
     },
-    
+
     getActivityDisplay(activity) {
       switch (activity) {
-        case 'logged_in':
-          return 'LOGIN';
-        case 'logged_out':
-          return 'LOGOUT';
-        case 'login_failed':
-          return 'FAILED LOGIN';
+        case "logged_in":
+          return "LOGIN";
+        case "logged_out":
+          return "LOGOUT";
+        case "login_failed":
+          return "FAILED LOGIN";
         default:
-          return activity || 'UNKNOWN';
+          return activity || "UNKNOWN";
       }
     },
-    
+
     formatTimestamp(timestamp) {
-      if (!timestamp) return 'N/A';
-      
+      if (!timestamp) return "N/A";
+
       try {
         const date = new Date(timestamp);
-        return date.toLocaleString('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit'
+        return date.toLocaleString("en-US", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         });
       } catch (error) {
         return timestamp;
       }
     },
-    
+
     async downloadPDF() {
       try {
         this.loading = true;
-        const response = await axios.get('http://localhost:5000/api/login-logs/pdf', {
-          responseType: 'blob'
-        });
-        
+        const response = await axios.get(
+          "http://localhost:8000/api/login-logs/pdf",
+          {
+            responseType: "blob",
+          }
+        );
+
         // Create blob link to download
         const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.setAttribute('download', `login_logs_${new Date().toISOString().split('T')[0]}.pdf`);
+        link.setAttribute(
+          "download",
+          `login_logs_${new Date().toISOString().split("T")[0]}.pdf`
+        );
         document.body.appendChild(link);
         link.click();
         link.remove();
         window.URL.revokeObjectURL(url);
-        
-        alert('Login logs PDF downloaded successfully!');
+
+        alert("Login logs PDF downloaded successfully!");
       } catch (error) {
-        console.error('Error downloading PDF:', error);
-        alert('Failed to download PDF. Please try again.');
+        console.error("Error downloading PDF:", error);
+        alert("Failed to download PDF. Please try again.");
       } finally {
         this.loading = false;
       }
     },
-    
+
     async refreshLogs() {
       this.offset = 0;
       await this.loadLoginLogs();
     },
-    
+
     async previousPage() {
       if (this.offset > 0) {
         this.offset -= this.limit;
         await this.loadLoginLogs();
       }
     },
-    
+
     async nextPage() {
       if (this.offset + this.limit < this.totalLogs) {
         this.offset += this.limit;
         await this.loadLoginLogs();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -395,8 +497,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .error-container {
@@ -548,7 +654,7 @@ export default {
 
 .timestamp {
   color: #2c3e50;
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   text-align: left;
   width: 200px;
   font-size: 13px;
@@ -613,22 +719,22 @@ export default {
     gap: 20px;
     padding: 20px;
   }
-  
+
   .header-right {
     width: 100%;
     justify-content: center;
   }
-  
+
   .search-input {
     width: 200px;
   }
-  
+
   .logs-table th,
   .logs-table td {
     padding: 12px 8px;
     font-size: 12px;
   }
-  
+
   .pagination {
     flex-direction: column;
     gap: 15px;
