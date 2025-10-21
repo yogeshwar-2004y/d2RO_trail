@@ -120,23 +120,23 @@ export default {
 <style scoped>
 .user-activities-page {
   background-color: #f0f0f0;
-  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
+  min-height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center; /* Center content horizontally */
-  padding: 0;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 40px 20px;
   margin: 0;
-  overflow: hidden; /* Prevent any scrolling */
 }
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
   width: 100%;
-  max-width: 1000px; /* Adjusted for 3x3 grid */
+  max-width: 1200px;
   justify-items: center;
+  align-items: start;
 }
 
 .card {
@@ -147,11 +147,30 @@ export default {
   background-color: #fff;
   border-radius: 15px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  width: 180px; /* Smaller for 6 cards */
-  height: 180px; /* Smaller for 6 cards */
+  width: 100%;
+  max-width: 250px;
+  height: 200px;
   padding: 20px;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Center the last 3 cards in the bottom row */
+.card:nth-child(n+5) {
+  grid-column: span 1;
+}
+
+/* Center the bottom row with 3 cards */
+.card:nth-child(5) {
+  grid-column: 1;
+}
+
+.card:nth-child(6) {
+  grid-column: 2;
+}
+
+.card:nth-child(7) {
+  grid-column: 3;
 }
 
 .card:hover {
@@ -165,12 +184,14 @@ export default {
 }
 
 .card-title {
-  font-size: 0.8em;
+  font-size: 0.85em;
   font-weight: bold;
   text-align: center;
   color: #333;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+  margin-top: 10px;
 }
 
 .back-button {
@@ -181,9 +202,71 @@ export default {
   left: 90px;
   top: 180px;
 }
-.back-button :hover {
+.back-button:hover {
   color: #0056b3;
   background-color: #e9ecef;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .card-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+  
+  .card {
+    max-width: 220px;
+    height: 180px;
+  }
+  
+  /* Adjust for 3-3-1 layout on medium screens */
+  .card:nth-child(5) {
+    grid-column: 1;
+  }
+  
+  .card:nth-child(6) {
+    grid-column: 2;
+  }
+  
+  .card:nth-child(7) {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 768px) {
+  .card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0 10px;
+  }
+  
+  .card {
+    max-width: 200px;
+    height: 180px;
+    padding: 15px;
+  }
+  
+  .card-title {
+    font-size: 0.75em;
+  }
+  
+  /* Reset grid positioning for mobile */
+  .card:nth-child(n+5) {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .card {
+    width: 100%;
+    max-width: 280px;
+    height: 160px;
+  }
 }
 </style>
 
