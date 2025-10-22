@@ -216,7 +216,7 @@ def upload_plan_document():
         cur.execute("""
             SELECT COUNT(*) 
             FROM document_comments dc
-            JOIN plan_documents pd ON dc.document_id::INTEGER = pd.document_id
+            JOIN plan_documents pd ON dc.document_id = pd.document_id
             WHERE pd.lru_id = %s 
             AND dc.status NOT IN ('accepted', 'rejected')
         """, (lru_id,))
@@ -1015,14 +1015,14 @@ def delete_plan_document(document_id):
             return jsonify({"success": False, "message": "Document not found"}), 404
         
         # Delete all comments associated with this document
-        cur.execute("DELETE FROM document_comments WHERE document_id = %s", (str(document_id),))
+        cur.execute("DELETE FROM document_comments WHERE document_id = %s", (document_id,))
         comments_deleted = cur.rowcount
         
         # Delete all annotations associated with this document
         cur.execute("""
             DELETE FROM document_annotations 
             WHERE document_id = %s
-        """, (str(document_id),))
+        """, (document_id,))
         annotations_deleted = cur.rowcount
         
         # Delete the document record

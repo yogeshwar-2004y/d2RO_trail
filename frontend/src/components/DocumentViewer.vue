@@ -6,7 +6,7 @@
         <h2>{{ lruName || "Document Viewer" }}</h2>
         <div class="meta-info">
           <span><strong>Project:</strong> {{ projectName || "N/A" }}</span>
-          <span><strong>Document ID:</strong> {{ documentId || "N/A" }}</span>
+          <span><strong>Document ID:</strong> {{ getCurrentDocumentNumber() || "N/A" }}</span>
           <span
             ><strong>Status:</strong>
             <span :class="'status-' + (status || 'pending')">{{
@@ -1478,14 +1478,18 @@ export default {
       );
     },
 
+    // Helper method to get the current document number for display
+    getCurrentDocumentNumber() {
+      const currentDoc = this.getCurrentDocument();
+      return currentDoc ? currentDoc.document_number : null;
+    },
+
     // Helper method to get the current document being viewed
     getCurrentDocument() {
       // If we have a specific document loaded, return it
       if (this.documentId && this.existingDocuments.length > 0) {
         return this.existingDocuments.find(
-          (doc) =>
-            doc.document_id === this.documentId ||
-            doc.document_number === this.documentId
+          (doc) => doc.document_id === this.documentId
         );
       }
 
@@ -1674,7 +1678,7 @@ export default {
         }
 
         // Set document metadata
-        this.documentId = doc.document_number;
+        this.documentId = doc.document_id;  // Use actual document_id (integer) instead of document_number
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
 
@@ -2637,11 +2641,11 @@ export default {
         document_id: this.documentId || "",
         version:
           this.existingDocuments.find(
-            (doc) => doc.document_number === this.documentId
+            (doc) => doc.document_id === this.documentId
           )?.version || "",
         revision:
           this.existingDocuments.find(
-            (doc) => doc.document_number === this.documentId
+            (doc) => doc.document_id === this.documentId
           )?.revision || "",
         page_no: this.page || 1,
         section: "",
@@ -2767,11 +2771,11 @@ export default {
       this.commentForm.document_id = this.documentId || "";
       this.commentForm.version =
         this.existingDocuments.find(
-          (doc) => doc.document_number === this.documentId
+          (doc) => doc.document_id === this.documentId
         )?.version || "";
       this.commentForm.revision =
         this.existingDocuments.find(
-          (doc) => doc.document_number === this.documentId
+          (doc) => doc.document_id === this.documentId
         )?.revision || "";
 
       // Store annotation position for later use
