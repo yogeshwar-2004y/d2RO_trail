@@ -251,6 +251,7 @@
               v-for="doc in existingDocuments"
               :key="doc.document_id"
               class="document-item"
+              :class="{ 'current-document': isCurrentDocument(doc) }"
               @click="viewDocument(doc)"
             >
               <div class="doc-icon">
@@ -267,6 +268,7 @@
                   <span class="doc-label">{{ doc.doc_ver || "A" }}</span>
                   {{ doc.document_number }}
                   <span v-if="doc.status === 'accepted'" class="accepted-badge">✅ ACCEPTED</span>
+                  <span v-if="isCurrentDocument(doc)" class="current-badge">👁️ CURRENTLY VIEWING</span>
                 </div>
                 <div class="doc-meta">
                   <span class="doc-version"
@@ -1524,6 +1526,17 @@ export default {
 
       // Otherwise return the latest document
       return this.getLatestDocument();
+    },
+
+    // Check if a specific document is currently being viewed
+    isCurrentDocument(doc) {
+      if (!this.documentId || !doc) {
+        return false;
+      }
+      
+      // Check if the document matches the currently viewed document
+      // Prioritize document_id comparison since it's unique
+      return this.documentId === doc.document_id;
     },
 
     // Load LRU metadata
@@ -3608,6 +3621,24 @@ export default {
   font-size: 0.75rem;
   margin-left: 0.5rem;
   animation: pulse 2s infinite;
+}
+
+.current-badge {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  font-weight: bold;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.current-document {
+  border: 2px solid #3b82f6 !important;
+  background: #eff6ff !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
 }
 
 @keyframes pulse {
