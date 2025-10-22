@@ -48,9 +48,6 @@
             assignedReviewer?.name || "Unknown"
           }}</span>
         </div>
-        <button @click="viewObservations" class="action-btn">
-          View Observations
-        </button>
         <button @click="trackVersions" class="action-btn">
           Track Versions
         </button>
@@ -190,6 +187,11 @@
           </div>
         </div>
       </template>
+
+      <!-- View Observations button - Available for all roles -->
+      <button @click="viewObservations" class="action-btn">
+        View Observations
+      </button>
 
       <!-- Admin and QA Reviewer don't need action buttons -->
     </div>
