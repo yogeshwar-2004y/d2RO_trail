@@ -54,6 +54,10 @@ reports/
 TEST_FIXES_SUMMARY.md
 TEST_SETUP_SUMMARY.md
 
+# Deployment and requirements files
+DEPLOYMENT_GUIDE.md
+requirements.txt
+
 # Upload directories
 plan_doc_uploads/
 
