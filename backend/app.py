@@ -111,6 +111,12 @@ def get_comments():
         if not document_id:
             return jsonify({"success": False, "message": "Document ID is required"}), 400
         
+        # Convert document_id to integer since it's now an INT foreign key
+        try:
+            document_id = int(document_id)
+        except ValueError:
+            return jsonify({"success": False, "message": "Document ID must be a valid integer"}), 400
+        
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -216,6 +222,12 @@ def create_comment():
             if field not in data or not data[field]:
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
         
+        # Convert document_id to integer since it's now an INT foreign key
+        try:
+            document_id = int(data['document_id'])
+        except (ValueError, TypeError):
+            return jsonify({"success": False, "message": "Document ID must be a valid integer"}), 400
+        
         # Check if user has permission to add comments (only QA Reviewer)
         if data.get('user_role') != 'QA Reviewer':
             return jsonify({"success": False, "message": "Only QA Reviewers can add comments"}), 403
@@ -235,7 +247,7 @@ def create_comment():
             ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             RETURNING comment_id
         """, (
-            data['document_id'],
+            document_id,  # Use the converted integer document_id
             data['document_name'],
             data.get('version'),
             data.get('reviewer_id'),
@@ -257,7 +269,7 @@ def create_comment():
                 ) VALUES (%s, %s, %s, %s, %s)
             """, (
                 comment_id,
-                data['document_id'],
+                document_id,  # Use the converted integer document_id
                 data.get('page_no', 1),
                 data['x'],
                 data['y']

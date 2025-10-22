@@ -54,11 +54,11 @@ def create_comments_tables():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Create document_comments table
+        # Create document_comments table with proper foreign key to plan_documents
         cur.execute("""
             CREATE TABLE IF NOT EXISTS document_comments (
                 comment_id SERIAL PRIMARY KEY,
-                document_id VARCHAR(255) NOT NULL,
+                document_id INT NOT NULL REFERENCES plan_documents(document_id) ON DELETE CASCADE,
                 document_name VARCHAR(255) NOT NULL,
                 version VARCHAR(50),
                 reviewer_id INTEGER,
@@ -67,22 +67,22 @@ def create_comments_tables():
                 description TEXT NOT NULL,
                 commented_by VARCHAR(255) NOT NULL,
                 is_annotation BOOLEAN DEFAULT FALSE,
-                status VARCHAR(20) DEFAULT 'pending',
+                status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
                 justification TEXT,
-                accepted_by INTEGER,
-                designer_id INTEGER,
+                accepted_by INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
+                designer_id INTEGER REFERENCES users(user_id) ON DELETE SET NULL,
                 accepted_at TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
         
-        # Create document_annotations table
+        # Create document_annotations table with proper foreign key to plan_documents
         cur.execute("""
             CREATE TABLE IF NOT EXISTS document_annotations (
                 annotation_id SERIAL PRIMARY KEY,
                 comment_id INTEGER REFERENCES document_comments(comment_id) ON DELETE CASCADE,
-                document_id VARCHAR(255) NOT NULL,
+                document_id INT NOT NULL REFERENCES plan_documents(document_id) ON DELETE CASCADE,
                 page_no INTEGER NOT NULL,
                 x_position DECIMAL(10,2) NOT NULL,
                 y_position DECIMAL(10,2) NOT NULL,
