@@ -569,6 +569,7 @@ onMounted(() => {
 
 .logout-item {
   color: #ff6b6b;
+  margin-bottom: 8px;
 }
 
 .logout-item:hover {

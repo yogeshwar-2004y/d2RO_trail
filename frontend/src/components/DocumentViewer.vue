@@ -1708,6 +1708,7 @@ export default {
 
         // Set document metadata
         this.documentId = doc.document_id;  // Use actual document_id (integer) instead of document_number
+        this.documentNumber = doc.document_number;  // Set document_number for display and API calls
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
 
@@ -2714,6 +2715,16 @@ export default {
     startAnnotationMode() {
       this.isAnnotationMode = true;
       this.showCommentForm = false;
+      
+      // Populate comment form with current document details
+      this.commentForm.document_name = this.fileName || "";
+      this.commentForm.document_id = this.documentId || "";
+      this.commentForm.version = this.existingDocuments.find(
+        (doc) => doc.document_id === this.documentId
+      )?.version || "";
+      this.commentForm.revision = this.existingDocuments.find(
+        (doc) => doc.document_id === this.documentId
+      )?.revision || "";
     },
 
     closeCommentForm() {
@@ -2888,9 +2899,21 @@ export default {
 
     async saveCommentToBackend(comment) {
       try {
+        // Debug: Log the comment object and component state
+        console.log("Comment object:", comment);
+        console.log("Component documentId:", this.documentId, "Type:", typeof this.documentId);
+        console.log("Component documentNumber:", this.documentNumber, "Type:", typeof this.documentNumber);
+        console.log("Component fileName:", this.fileName, "Type:", typeof this.fileName);
+        
+        // Ensure document_id is a valid integer
+        const documentId = parseInt(this.documentId);
+        if (isNaN(documentId)) {
+          throw new Error(`Invalid document ID: ${this.documentId}`);
+        }
+        
         // Prepare data in the format expected by the backend
         const commentData = {
-          document_id: comment.document_id,
+          document_id: documentId,
           document_name: comment.document_name,
           version: comment.version,
           reviewer_id: comment.reviewer_id,
@@ -2951,13 +2974,13 @@ export default {
 
     async loadCommentsFromBackend() {
       try {
-        if (!this.documentNumber) {
+        if (!this.documentId) {
           console.log("No document number available for loading comments");
           return;
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/comments?document_id=${this.documentNumber}`
+          `http://localhost:5000/api/comments?document_id=${this.documentId}`
         );
 
         if (response.ok) {
@@ -4034,7 +4057,7 @@ export default {
   border-radius: 8px;
   width: 90%;
   max-width: 600px;
-  max-height: 80vh;
+  max-height: 65vh;
   overflow-y: auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
