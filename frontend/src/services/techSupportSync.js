@@ -69,8 +69,14 @@ class TechSupportSyncService {
           const data = await response.json();
 
           if (data.success) {
-            console.log(`Successfully synced request ${request.id}`);
-            successfulSubmissions.push(request.id);
+            if (data.duplicate) {
+              console.log(`Request ${request.id} was already submitted (ID: ${data.existing_request_id})`);
+              // Still consider it successful and remove from offline
+              successfulSubmissions.push(request.id);
+            } else {
+              console.log(`Successfully synced request ${request.id}`);
+              successfulSubmissions.push(request.id);
+            }
           } else {
             console.log(`Failed to sync request ${request.id}:`, data.message);
             // Increment attempt counter

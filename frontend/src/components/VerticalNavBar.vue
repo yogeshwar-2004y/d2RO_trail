@@ -34,12 +34,13 @@
             <span>Profile</span>
           </div>
           
-          <div class="nav-item" @click="navigateToSettings">
+          <div class="nav-item" @click="navigateToTechSupport">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              <path d="M9 12l2 2 4-4"></path>
+              <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
+              <path d="M3 12h18v6c0 .552-.448 1-1 1H4c-.552 0-1-.448-1-1v-6z"></path>
             </svg>
-            <span>Settings</span>
+            <span>Tech Support</span>
           </div>
           
           <div class="nav-item signature-item" @click="toggleSignatureSubmenu" :class="{ 'active': showSignatureSubmenu }">
@@ -130,8 +131,18 @@ export default {
       this.$emit('navigate', 'profile')
       this.closeNav()
     },
-    navigateToSettings() {
-      this.$emit('navigate', 'settings')
+    navigateToTechSupport() {
+      // Check if user is admin - if so, go to tech support management, otherwise go to tech support form
+      const userRole = userStore.getters.currentUserRole()
+      const roleName = userStore.getters.roleName()
+      
+      if (userRole === 1 || roleName?.toLowerCase() === 'admin') {
+        // Admin users go to tech support management page
+        this.$emit('navigate', 'tech-support-management')
+      } else {
+        // Regular users go to their tech support dashboard
+        this.$emit('navigate', 'tech-support-user-dashboard')
+      }
       this.closeNav()
     },
     toggleSignatureSubmenu() {

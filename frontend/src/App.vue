@@ -9,7 +9,7 @@ import AppSidebar from "@/components/AppSidebar.vue";
 
 const route = useRoute();
 
-// Show sidebar on all pages except login and tech support
+// Show sidebar on all pages except login and tech support form
 const showSidebar = computed(() => {
   return route.name !== "login" && route.name !== "TechSupport";
 });

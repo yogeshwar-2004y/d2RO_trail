@@ -149,9 +149,11 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.showSuccessMessage(
-            "Your technical support request has been submitted successfully. We will get back to you soon."
-          );
+          if (data.duplicate) {
+            this.showSuccessMessage(`This request already exists (ID: ${data.existing_request_id}). Current status: ${data.existing_status.toUpperCase()}`);
+          } else {
+            this.showSuccessMessage("Your technical support request has been submitted successfully. We will get back to you soon.");
+          }
           this.resetForm();
           setTimeout(() => this.goBack(), 2000);
         } else {

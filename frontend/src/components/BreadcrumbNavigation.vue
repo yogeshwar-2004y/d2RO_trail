@@ -96,7 +96,10 @@ const routeMappings = {
   'CotsScreeningInspectionReport': 'COTS Screening Inspection',
   'AssembledBoardInspectionReport': 'Assembled Board Inspection',
   'KitOfPartInsp': 'Kit of Parts Inspection',
-  'MechanicalInspection': 'Mechanical Inspection'
+  'MechanicalInspection': 'Mechanical Inspection',
+  'TechSupport': 'Tech Support Form',
+  'TechSupportUserDashboard': 'Tech Support Dashboard',
+  'TechSupportManagement': 'Tech Support Management'
 }
 
 // Define parent-child relationships for hierarchical breadcrumbs
@@ -153,11 +156,27 @@ const breadcrumbs = computed(() => {
   
   // Only add additional breadcrumbs if we're not already on the home page
   if (currentRoute.path !== homePath) {
-    // Handle specific sub-routes based on current path
-    const pathSegments = currentRoute.path.split('/').filter(segment => segment)
-    
-    // Main dashboard routes
-    if (currentRoute.path.startsWith('/projects')) {
+    // Handle tech support routes first
+    if (currentRoute.name === 'TechSupportUserDashboard') {
+      crumbs.push({
+        name: routeMappings['TechSupportUserDashboard'] || 'Tech Support Dashboard',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.name === 'TechSupportManagement') {
+      crumbs.push({
+        name: routeMappings['UserActivities'] || 'User Activities',
+        path: '/user-activities'
+      })
+      crumbs.push({
+        name: routeMappings['TechSupportManagement'] || 'Tech Support Management',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.name === 'TechSupport') {
+      crumbs.push({
+        name: routeMappings['TechSupport'] || 'Tech Support Form',
+        path: currentRoute.path
+      })
+    } else if (currentRoute.path.startsWith('/projects')) {
       crumbs.push({
         name: routeMappings['ProjectsDashboard'] || 'Projects',
         path: '/projects'

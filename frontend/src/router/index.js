@@ -7,6 +7,7 @@ import designerRoutes from './designer'
 
 import LoginPage from '@/views/LoginPage.vue'
 import TechSupportPage from '@/views/TechSupportPage.vue'
+import TechSupportUserDashboard from '@/views/TechSupportUserDashboard.vue'
 import HomePageAdmin from '@/views/admin/HomePageAdmin.vue'
 import ProjectsDashboard from '@/components/ProjectsDashboard.vue'
 import LruDashboard from '@/components/LruDashboard.vue'
@@ -62,6 +63,11 @@ const router = createRouter({
       path: "/tech-support",
       name: "TechSupport",
       component: TechSupportPage,
+    },
+    {
+      path: "/my-tech-support",
+      name: "TechSupportUserDashboard",
+      component: TechSupportUserDashboard,
     },
     {
       path: "/user-activities/activity-logs",

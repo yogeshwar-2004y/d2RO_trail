@@ -335,6 +335,7 @@ export default {
         const data = await response.json();
 
         if (data.success) {
+<<<<<<< HEAD
           // Remove from offline requests
           this.offlineRequests = this.offlineRequests.filter(
             (r) => r.id !== requestId
@@ -356,6 +357,31 @@ export default {
           );
 
           this.showSuccessNotification(`Offline request synced successfully`);
+=======
+          if (data.duplicate) {
+            // Request was already submitted, remove from offline anyway
+            this.offlineRequests = this.offlineRequests.filter(r => r.id !== requestId);
+            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(r => r.id !== requestId);
+            
+            // Update localStorage
+            const updatedOffline = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
+            const filteredOffline = updatedOffline.filter(r => r.id !== requestId);
+            localStorage.setItem('tech_support_offline', JSON.stringify(filteredOffline));
+            
+            this.showSuccessNotification(`Request was already submitted (ID: ${data.existing_request_id}). Removed from offline list.`);
+          } else {
+            // Remove from offline requests
+            this.offlineRequests = this.offlineRequests.filter(r => r.id !== requestId);
+            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(r => r.id !== requestId);
+            
+            // Update localStorage
+            const updatedOffline = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
+            const filteredOffline = updatedOffline.filter(r => r.id !== requestId);
+            localStorage.setItem('tech_support_offline', JSON.stringify(filteredOffline));
+            
+            this.showSuccessNotification(`Offline request synced successfully`);
+          }
+>>>>>>> ee696934bcc5827697fb2e3688c741b3ec40bcdb
           await this.loadRequests(); // Reload online requests
         } else {
           throw new Error(data.message || "Sync failed");
