@@ -455,7 +455,7 @@ export default {
           console.log('Submitting form data:', submissionData);
 
           // Send data to backend API
-          const response = await fetch('/api/reports/bare-pcb-inspection', {
+          const response = await fetch('http://localhost:8000/api/reports/bare-pcb-inspection', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

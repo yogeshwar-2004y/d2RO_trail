@@ -2,9 +2,15 @@
 Memo management routes
 """
 from datetime import datetime
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from config import get_db_connection
 from utils.helpers import handle_database_error
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+import io
 
 memos_bp = Blueprint('memos', __name__)
 
@@ -1152,3 +1158,329 @@ def update_memo_status(memo_id):
         
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error updating memo status: {str(e)}")
+
+@memos_bp.route('/api/memos/<int:memo_id>/pdf', methods=['GET'])
+def download_memo_pdf(memo_id):
+    """Generate and download PDF for a specific memo"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch memo details with all related information
+        cur.execute("""
+            SELECT 
+                m.memo_id,
+                m.from_person,
+                m.to_person,
+                m.thru_person,
+                m.casdic_ref_no,
+                m.dated,
+                m.manufacturer,
+                m.drawing_no_rev,
+                m.source,
+                m.venue,
+                m.memo_date,
+                m.name_designation,
+                m.test_facility,
+                m.test_cycle_duration,
+                m.test_start_on,
+                m.test_complete_on,
+                m.calibration_status,
+                m.func_check_initial,
+                m.perf_check_during,
+                m.func_check_end,
+                m.certified,
+                m.qa_remarks,
+                m.memo_status,
+                m.wing_proj_ref_no,
+                m.lru_sru_desc,
+                m.part_number,
+                m.qty_offered,
+                m.slno_units,
+                m.unit_identification,
+                m.mechanical_inspn,
+                m.inspn_test_stage_offered,
+                m.stte_status,
+                m.test_stage_cleared,
+                m.remarks,
+                m.submitted_at,
+                m.submitted_by,
+                m.accepted_at,
+                m.accepted_by,
+                m.qa_signature,
+                m.coordinator
+            FROM memos m
+            WHERE m.memo_id = %s
+        """, (memo_id,))
+        
+        memo = cur.fetchone()
+        if not memo:
+            cur.close()
+            return jsonify({"success": False, "message": "Memo not found"}), 404
+        
+        # Fetch memo references
+        cur.execute("""
+            SELECT ref_doc, ref_no, ver, rev
+            FROM memo_references
+            WHERE memo_id = %s
+            ORDER BY ref_doc
+        """, (memo_id,))
+        
+        references = cur.fetchall()
+        cur.close()
+        
+        # Generate PDF
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.4*inch, bottomMargin=0.4*inch, leftMargin=0.3*inch, rightMargin=0.3*inch)
+        
+        # Define styles
+        styles = getSampleStyleSheet()
+        
+        # Title style
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=14,
+            spaceAfter=12,
+            alignment=1,  # Center alignment
+            textColor=colors.black,
+            fontName='Helvetica-Bold'
+        )
+        
+        # Section heading style
+        section_style = ParagraphStyle(
+            'SectionHeading',
+            parent=styles['Heading2'],
+            fontSize=10,
+            spaceAfter=6,
+            spaceBefore=8,
+            textColor=colors.black,
+            fontName='Helvetica-Bold'
+        )
+        
+        # Build PDF content
+        story = []
+        
+        # Title
+        story.append(Paragraph("REQUISITION FOR DGAQA INSPECTION", title_style))
+        story.append(Spacer(1, 8))
+        
+        # Requisition Details Section
+        story.append(Paragraph("REQUISITION DETAILS", section_style))
+        
+        # Create compact requisition details table
+        req_data = [
+            ['From:', memo[1] or 'N/A', 'CASDIC Ref No.:', 'CASDIC/', memo[4] or 'N/A', 'Dated:', memo[5].strftime('%Y-%m-%d') if memo[5] else 'N/A'],
+            ['To:', memo[2] or 'N/A', '', 'Thru: O I/c, WH', '', 'Wing/Proj Ref No.:', memo[23] or 'N/A'],
+            ['', '', '', 'Name & contact No of CASDIC (Designs) coordinator:', memo[39] or 'N/A', '', '']
+        ]
+        
+        req_table = Table(req_data, colWidths=[0.5*inch, 1.5*inch, 0.5*inch, 1.2*inch, 1.2*inch, 0.4*inch, 1.2*inch])
+        req_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        
+        story.append(req_table)
+        story.append(Spacer(1, 8))
+        
+        # LRU/SRU Details Section
+        story.append(Paragraph("LRU/SRU DETAILS", section_style))
+        
+        # Create compact LRU/SRU table
+        lru_header = [
+            ['LRU/SRU DETAILS', 'LRU/SRU Desc', 'Ref. Docnt', '', '', ''],
+            ['', '', 'Ref Doc', 'Ref No of Document', 'ver', 'rev']
+        ]
+        
+        lru_data = [
+            ['Part No:', memo[25] or 'N/A', '', '', '', ''],
+            ['Manufacturer:', memo[6] or 'N/A', memo[7] or 'N/A', memo[4] or 'N/A', '1.0', 'A']
+        ]
+        
+        # Add additional reference rows (up to 5 more)
+        for i in range(5):
+            lru_data.append(['', '', '', '', '', ''])
+        
+        lru_table_data = lru_header + lru_data
+        lru_table = Table(lru_table_data, colWidths=[1.5*inch, 1.8*inch, 1*inch, 1.2*inch, 0.6*inch, 0.6*inch])
+        lru_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ('BACKGROUND', (0, 0), (-1, 1), colors.lightgrey),
+            ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
+        ]))
+        
+        story.append(lru_table)
+        story.append(Spacer(1, 8))
+        
+        # Additional Details Section
+        story.append(Paragraph("ADDITIONAL DETAILS", section_style))
+        
+        # Create compact additional details table
+        add_details_data = [
+            ['Drawing no/Rev:', memo[7] or 'N/A', 'source:', memo[8] or 'N/A', 'Sl.No of units:', ', '.join(memo[27]) if memo[27] and isinstance(memo[27], list) else str(memo[27]) if memo[27] else 'N/A'],
+            ['Qty Offered:', str(memo[26]) if memo[26] else 'N/A', 'UNIT IDENTIFICATION:', ', '.join(memo[28]) if memo[28] and isinstance(memo[28], list) else str(memo[28]) if memo[28] else 'N/A', '', ''],
+            ['MECHANICAL INSPECTION:', memo[29] or 'N/A', 'INSPECTION /TEST STAGE OFFERED NOW:', memo[30] or 'N/A', '', ''],
+            ['Test stage cleared:', memo[32] or 'N/A', 'STTE Status:', memo[31] or 'N/A', '', '']
+        ]
+        
+        add_table = Table(add_details_data, colWidths=[1.2*inch, 1.8*inch, 1.2*inch, 1.8*inch, 0.5*inch, 0.5*inch])
+        add_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        
+        story.append(add_table)
+        story.append(Spacer(1, 8))
+        
+        # Testing Details Section
+        story.append(Paragraph("TESTING DETAILS", section_style))
+        
+        # Create compact testing details table
+        testing_data = [
+            ['Above Unit is ready for Testing at venue, dated onwards.', memo[9] or 'N/A', 'memo date:', memo[10].strftime('%Y-%m-%d') if memo[10] else 'N/A'],
+            ['Name / designation:', memo[11] or 'N/A', '', ''],
+            ['Test facility to be used:', memo[12] or 'N/A', 'Test cycle / Duration:', memo[13] or 'N/A'],
+            ['Test Start on:', memo[14].strftime('%Y-%m-%d %H:%M') if memo[14] else 'N/A', 'Test complete on:', memo[15].strftime('%Y-%m-%d %H:%M') if memo[15] else 'N/A'],
+            ['Calibration status OK/Due on:', memo[16] or 'N/A', '', ''],
+            ['Func. Check(Initial):', memo[17].strftime('%Y-%m-%d %H:%M') if memo[17] else 'N/A', 'Perf. check (during):', memo[18].strftime('%Y-%m-%d %H:%M') if memo[18] else 'N/A'],
+            ['Func Check (End):', memo[19].strftime('%Y-%m-%d %H:%M') if memo[19] else 'N/A', '', '']
+        ]
+        
+        testing_table = Table(testing_data, colWidths=[1.5*inch, 2*inch, 1*inch, 2*inch])
+        testing_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 3),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+        ]))
+        
+        story.append(testing_table)
+        story.append(Spacer(1, 8))
+        
+        # Certification Section
+        story.append(Paragraph("CERTIFICATION", section_style))
+        story.append(Paragraph("It is certified that:", ParagraphStyle('CertTitle', parent=styles['Normal'], fontSize=8, spaceAfter=6, fontName='Helvetica-Bold')))
+        
+        # Handle certified array properly
+        certified_items = []
+        if memo[20] and isinstance(memo[20], list):
+            certified_items = memo[20]
+        elif memo[20]:
+            certified_items = [memo[20]]
+        
+        certifications = [
+            "Mechanical Quality Records verified thoroughly",
+            "CoC for SRU, fasteners & standard parts verified", 
+            "Sl no of the SRUs noted in log book",
+            "No Defect investigation pending",
+            "All previous test stages cleared",
+            "CASCIC QA has physically inspected and accepted"
+        ]
+        
+        cert_data = []
+        for i, cert in enumerate(certifications):
+            checkbox = "☑" if (i < len(certified_items) and certified_items[i]) else "☐"
+            cert_data.append([checkbox, cert])
+        
+        cert_table = Table(cert_data, colWidths=[0.25*inch, 6.5*inch])
+        cert_table.setStyle(TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 7),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 3),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+            ('TOPPADDING', (0, 0), (-1, -1), 2),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 2),
+        ]))
+        
+        story.append(cert_table)
+        story.append(Spacer(1, 8))
+        
+        # Remarks Section
+        story.append(Paragraph("REMARKS", section_style))
+        remarks_text = memo[33] or 'No remarks provided'
+        story.append(Paragraph(remarks_text, ParagraphStyle('Remarks', parent=styles['Normal'], fontSize=7, spaceAfter=6, fontName='Helvetica')))
+        
+        story.append(Spacer(1, 10))
+        
+        # References section
+        if references:
+            story.append(Paragraph("REFERENCES", section_style))
+            ref_data = [['Reference Document', 'Reference Number', 'Version', 'Revision']]
+            for ref in references:
+                ref_data.append([
+                    ref[0] or 'N/A', 
+                    ref[1] or 'N/A', 
+                    str(ref[2]) if ref[2] is not None else 'N/A',
+                    str(ref[3]) if ref[3] is not None else 'N/A'
+                ])
+            
+            ref_table = Table(ref_data, colWidths=[1.5*inch, 2.5*inch, 0.8*inch, 0.8*inch])
+            ref_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 7),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+                ('FONTSIZE', (0, 1), (-1, -1), 7),
+                ('LEFTPADDING', (0, 0), (-1, -1), 3),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 3),
+                ('TOPPADDING', (0, 0), (-1, -1), 3),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
+            ]))
+            
+            story.append(ref_table)
+            story.append(Spacer(1, 10))
+        
+        # Footer
+        story.append(Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", 
+                              ParagraphStyle('Footer', parent=styles['Normal'], fontSize=6, alignment=2, textColor=colors.grey)))
+        
+        # Build PDF
+        doc.build(story)
+        
+        # Prepare response
+        buffer.seek(0)
+        
+        return send_file(
+            buffer,
+            as_attachment=True,
+            download_name=f'memo_{memo_id}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
+            mimetype='application/pdf'
+        )
+        
+    except Exception as e:
+        print(f"Error generating memo PDF: {str(e)}")
+        return jsonify({"success": False, "message": f"Error generating PDF: {str(e)}"}), 500

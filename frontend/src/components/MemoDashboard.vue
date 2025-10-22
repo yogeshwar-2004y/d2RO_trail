@@ -573,6 +573,59 @@ export default {
         console.error('Error sharing memo:', error);
         alert('Error sharing memo. Please try again.');
       }
+    },
+
+    async downloadMemoPDF(memo) {
+      try {
+        console.log(`Downloading PDF for memo ID: ${memo.id}`);
+        
+        // Show loading state
+        const button = event.target.closest('.download-pdf-btn');
+        const originalText = button.querySelector('.download-text').textContent;
+        button.querySelector('.download-text').textContent = 'Loading...';
+        button.disabled = true;
+        
+        // Make request to backend PDF endpoint
+        const response = await fetch(`http://localhost:8000/api/memos/${memo.id}/pdf`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to generate PDF: ${response.statusText}`);
+        }
+
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `memo_${memo.id}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        
+        console.log(`PDF downloaded successfully for memo ${memo.id}`);
+        
+      } catch (error) {
+        console.error('Error downloading memo PDF:', error);
+        alert(`Error downloading PDF: ${error.message}`);
+      } finally {
+        // Restore button state
+        if (button) {
+          button.querySelector('.download-text').textContent = originalText;
+          button.disabled = false;
+        }
+      }
     }
   }
 };
@@ -868,6 +921,47 @@ export default {
   top: 15px;
   right: 15px;
   z-index: 100;
+  display: flex;
+  gap: 8px;
+}
+
+.download-pdf-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background-color: #28a745;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.download-pdf-btn:hover:not(:disabled) {
+  background-color: #218838;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.download-pdf-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.download-pdf-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.download-text {
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .share-btn {
@@ -884,7 +978,6 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-  margin-right: 300px;
 }
 
 .share-btn:hover {
