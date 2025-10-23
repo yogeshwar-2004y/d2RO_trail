@@ -99,7 +99,8 @@ const routeMappings = {
   'MechanicalInspection': 'Mechanical Inspection',
   'TechSupport': 'Tech Support Form',
   'TechSupportUserDashboard': 'Tech Support Dashboard',
-  'TechSupportManagement': 'Tech Support Management'
+  'TechSupportManagement': 'Tech Support Management',
+  'TestManagement': 'Tests'
 }
 
 // Define parent-child relationships for hierarchical breadcrumbs
@@ -344,10 +345,38 @@ const breadcrumbs = computed(() => {
           'qt-test-group': 'QT Test Group',
           'soft-test-group': 'SoFT Test Group',
           'news-updates': 'News Updates',
-          'customise-background': 'Customize Background'
+          'customise-background': 'Customize Background',
+          'test-management': 'Tests'
         }
         
-        if (subRouteMapping[subRoute]) {
+        // Handle GroupDetail route: /user-activities/test-management/group/:groupId/:groupName
+        if (subRoute === 'test-management' && pathSegments.length > 2 && pathSegments[2] === 'group') {
+          // Add Tests breadcrumb
+          crumbs.push({
+            name: 'Tests',
+            path: '/user-activities/test-management'
+          })
+          
+          // Add Group Name breadcrumb
+          if (pathSegments.length > 4) {
+            const groupId = pathSegments[3]
+            const groupName = decodeURIComponent(pathSegments[4])
+            const groupPath = `/user-activities/test-management/group/${groupId}/${encodeURIComponent(groupName)}`
+            crumbs.push({
+              name: groupName,
+              path: groupPath
+            })
+            
+            // Handle SubTestDetail route: /user-activities/test-management/group/:groupId/:groupName/sub-test/:subTestId/:subTestName
+            if (pathSegments.length > 5 && pathSegments[5] === 'sub-test' && pathSegments.length > 6) {
+              const subTestName = decodeURIComponent(pathSegments[7])
+              crumbs.push({
+                name: subTestName,
+                path: currentRoute.path
+              })
+            }
+          }
+        } else if (subRouteMapping[subRoute]) {
           crumbs.push({
             name: subRouteMapping[subRoute],
             path: currentRoute.path
