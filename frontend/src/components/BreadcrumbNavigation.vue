@@ -283,11 +283,6 @@ const breadcrumbs = computed(() => {
             name: routeMappings['TestReports'] || 'Test Reports',
             path: currentRoute.path
           })
-        } else if (pathSegments[1] === 'view-observations') {
-          crumbs.push({
-            name: routeMappings['ObservationReport'] || 'Observation Report',
-            path: currentRoute.path
-          })
         } else if (pathSegments[1] === 'templates') {
           crumbs.push({
             name: routeMappings['ReportTemplates'] || 'Templates',
@@ -296,6 +291,37 @@ const breadcrumbs = computed(() => {
         }
       }
     } 
+    else if (currentRoute.path.startsWith('/view-observations')) {
+      // Handle view-observations route with proper hierarchy
+      // Extract parameters from /view-observations/:lruId/:lruName/:projectId
+      const lruId = pathSegments[1] // "1"
+      const lruName = decodeURIComponent(pathSegments[2]) // "Flight Computer"
+      const projectId = pathSegments[3] // "2" (actual project ID)
+      
+      // Add Projects breadcrumb
+      crumbs.push({
+        name: routeMappings['ProjectsDashboard'] || 'Projects',
+        path: '/projects'
+      })
+      
+      // Add LRUs breadcrumb
+      crumbs.push({
+        name: routeMappings['LruDashboard'] || 'LRUs',
+        path: `/projects/${projectId}/lrus`
+      })
+      
+      // Add Document Viewer breadcrumb
+      crumbs.push({
+        name: routeMappings['DocumentViewer'] || 'Document Viewer',
+        path: `/document-viewer/${lruId}/${encodeURIComponent(lruName)}/${projectId}`
+      })
+      
+      // Add Observation Report breadcrumb
+      crumbs.push({
+        name: routeMappings['ObservationReport'] || 'Observation Report',
+        path: currentRoute.path
+      })
+    }
     else if (currentRoute.path.startsWith('/user-activities')) {
       crumbs.push({
         name: routeMappings['UserActivities'] || 'User Activities',

@@ -2171,7 +2171,7 @@ export default {
         params: {
           lruId: this.documentDetails.lruId,
           lruName: this.lruName,
-          projectName: this.projectName,
+          projectId: this.$route.params.projectId,
         },
       });
     },
