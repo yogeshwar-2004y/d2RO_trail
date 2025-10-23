@@ -208,7 +208,7 @@ const router = createRouter({
       component: ObservationReport,
     },
     {
-    path: '/view-observations',
+    path: '/view-observations/:lruId/:lruName/:projectName',
     name: 'ObservationReport',
     component: ObservationReport,
     },

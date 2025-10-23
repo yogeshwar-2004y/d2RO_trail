@@ -2169,6 +2169,7 @@ export default {
       this.$router.push({
         name: "ObservationReport",
         params: {
+          lruId: this.documentDetails.lruId,
           lruName: this.lruName,
           projectName: this.projectName,
         },
