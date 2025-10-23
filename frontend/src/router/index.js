@@ -30,6 +30,9 @@ import CoTSScreeningTestGroup from "@/views/admin/CoTSScreeningTestGroup.vue";
 import ESSTestGroup from "@/views/admin/ESSTestGroup.vue";
 import QTTestGroup from "@/views/admin/QTTestGroup.vue";
 import SoFTTestGroup from "@/views/admin/SoFTTestGroup.vue";
+import TestManagement from "@/components/TestManagement.vue";
+import GroupDetail from "@/components/GroupDetail.vue";
+import SubTestDetail from "@/components/SubTestDetail.vue";
 import NewsUpdates from "@/views/admin/NewsUpdates.vue";
 import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
 import TechSupportManagement from "@/views/admin/TechSupportManagement.vue";
@@ -150,6 +153,23 @@ const router = createRouter({
       path: "/user-activities/major-test-groups",
       name: "MajorTestGroups",
       component: MajorTestGroups
+    },
+    {
+      path: "/user-activities/test-management",
+      name: "TestManagement",
+      component: TestManagement
+    },
+    {
+      path: "/user-activities/test-management/group/:groupId/:groupName",
+      name: "GroupDetail",
+      component: GroupDetail,
+      props: true
+    },
+    {
+      path: "/user-activities/test-management/group/:groupId/:groupName/sub-test/:subTestId/:subTestName",
+      name: "SubTestDetail",
+      component: SubTestDetail,
+      props: true
     },
     {
       path: "/user-activities/manufacturing-test-group",

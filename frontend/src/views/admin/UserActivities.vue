@@ -104,7 +104,7 @@ export default {
       } else if (pageName === "ActivityLogs") {
         this.$router.push({ name: "ActivityLogs" });
       } else if (pageName === "Tests") {
-        this.$router.push({ name: "MajorTestGroups" });
+        this.$router.push({ name: "TestManagement" });
       } else if (pageName === "NewsUpdates") {
         this.$router.push({ name: "NewsUpdates" });
       } else if (pageName === "CustomiseBackground") {
