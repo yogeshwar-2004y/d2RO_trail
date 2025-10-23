@@ -509,20 +509,39 @@ export default {
           const data = await response.json()
           
           if (data.success) {
-            // Store all bulletins (both parent and sub-bulletins)
-            this.subTestBulletins[subTest.sub_test_id] = data.bulletins
+            // Process the nested structure from API response
+            const allBulletins = []
+            
+            // Add parent bulletins
+            data.bulletins.forEach(parentBulletin => {
+              // Add the parent bulletin
+              allBulletins.push(parentBulletin)
+              
+              // Add sub-bulletins from the nested structure
+              if (parentBulletin.sub_bulletins && parentBulletin.sub_bulletins.length > 0) {
+                parentBulletin.sub_bulletins.forEach(subBulletin => {
+                  // Ensure sub-bulletin has the correct parent_bulletin_id
+                  subBulletin.parent_bulletin_id = parentBulletin.bulletin_id
+                  allBulletins.push(subBulletin)
+                })
+              }
+            })
+            
+            // Store all bulletins (both parent and sub-bulletins) in flat structure
+            this.subTestBulletins[subTest.sub_test_id] = allBulletins
             
             // Count only parent bulletins for the count display (legacy method)
-            const parentBulletins = data.bulletins.filter(bulletin => !bulletin.parent_bulletin_id)
+            const parentBulletins = allBulletins.filter(bulletin => !bulletin.parent_bulletin_id)
             this.bulletinCounts[subTest.sub_test_id] = parentBulletins.length
             
             console.log(`=== BULLETINS FOR SUB-TEST ${subTest.sub_test_id} ===`)
             console.log(`Sub-test: ${subTest.sub_test_name}`)
-            console.log(`Total bulletins: ${data.bulletins.length}`)
+            console.log(`Total bulletins: ${allBulletins.length}`)
             console.log(`Parent bulletins: ${parentBulletins.length}`)
-            console.log(`Sub-bulletins: ${data.bulletins.length - parentBulletins.length}`)
-            console.log(`Bulletin data:`, data.bulletins)
-            data.bulletins.forEach((bulletin, index) => {
+            console.log(`Sub-bulletins: ${allBulletins.length - parentBulletins.length}`)
+            console.log(`Raw API data:`, data.bulletins)
+            console.log(`Processed flat data:`, allBulletins)
+            allBulletins.forEach((bulletin, index) => {
               console.log(`Bulletin ${index + 1}:`, bulletin)
             })
             console.log(`=== END BULLETINS FOR SUB-TEST ${subTest.sub_test_id} ===`)
@@ -904,18 +923,20 @@ export default {
     },
     
     getSubBulletins(subTestId, parentBulletinId) {
-      // Search across ALL bulletins in ALL sub-tests to find sub-bulletins
-      // This handles cases where sub-bulletins might be in different sub-tests
-      const allBulletins = []
-      for (const testId in this.subTestBulletins) {
-        allBulletins.push(...this.subTestBulletins[testId])
-      }
+      // Get bulletins for the specific sub-test first
+      const subTestBulletins = this.subTestBulletins[subTestId] || []
       
-      const subBulletins = allBulletins.filter(bulletin => bulletin.parent_bulletin_id === parentBulletinId)
+      // Filter for sub-bulletins that belong to this parent bulletin
+      const subBulletins = subTestBulletins.filter(bulletin => 
+        bulletin.parent_bulletin_id === parentBulletinId
+      )
       
       console.log(`=== GET SUB-BULLETINS DEBUG ===`)
-      console.log(`Looking for sub-bulletins of parent bulletin ID: ${parentBulletinId}`)
+      console.log(`Sub-test ID: ${subTestId}`)
+      console.log(`Parent bulletin ID: ${parentBulletinId}`)
+      console.log(`Total bulletins in sub-test: ${subTestBulletins.length}`)
       console.log(`Found ${subBulletins.length} sub-bulletins:`, subBulletins)
+      console.log(`All bulletins in sub-test:`, subTestBulletins)
       console.log(`=== END GET SUB-BULLETINS DEBUG ===`)
       
       return subBulletins
@@ -927,26 +948,11 @@ export default {
     },
     
     getTotalBulletinCount(subTestId) {
-      // Get total count including sub-bulletins that belong to this sub-test
-      // This includes both parent bulletins and sub-bulletins that reference this sub-test
-      const allBulletins = []
-      for (const testId in this.subTestBulletins) {
-        allBulletins.push(...this.subTestBulletins[testId])
-      }
+      // Get bulletins for this specific sub-test
+      const subTestBulletins = this.subTestBulletins[subTestId] || []
       
-      // Count bulletins that either:
-      // 1. Are parent bulletins in this sub-test, OR
-      // 2. Are sub-bulletins whose parent bulletin is in this sub-test
-      const parentBulletins = this.getParentBulletins(subTestId)
-      let totalCount = parentBulletins.length
-      
-      // Add sub-bulletins that belong to parent bulletins in this sub-test
-      for (const parentBulletin of parentBulletins) {
-        const subBulletins = allBulletins.filter(bulletin => bulletin.parent_bulletin_id === parentBulletin.bulletin_id)
-        totalCount += subBulletins.length
-      }
-      
-      return totalCount
+      // Count all bulletins (both parent and sub-bulletins) in this sub-test
+      return subTestBulletins.length
     },
     
     formatDate(dateString) {
