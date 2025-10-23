@@ -482,11 +482,14 @@ export default {
         
         // Table column widths and positions (optimized for single page)
         const tableStartX = margin;
-        const snoWidth = 15;
-        const categoryWidth = 30;
-        const observationWidth = 55;
-        const acceptRejectWidth = 25;
-        const justificationWidth = 40;
+        const snoWidth = 12;
+        const categoryWidth = 25;
+        const observationWidth = 40;
+        const acceptRejectWidth = 20;
+        const justificationWidth = 30;
+        const reviewerWidth = 20;
+        const pageWidth_col = 15;
+        const dateColWidth = 25;
         
         // Table headers with proper spacing
         doc.text('SNO', tableStartX, yPosition);
@@ -494,6 +497,9 @@ export default {
         doc.text('Observations', tableStartX + snoWidth + categoryWidth, yPosition);
         doc.text('Accept/Reject', tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
         doc.text('Justification', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+        doc.text('Reviewer', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
+        doc.text('Page', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
+        doc.text('Date', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
         yPosition += 6;
         
         // Draw table header lines
@@ -520,22 +526,34 @@ export default {
             doc.text((index + 1).toString(), tableStartX, yPosition);
             
             // Category (shortened)
-            const categoryText = (comment.section && comment.section.trim() !== '' ? comment.section : 'General').substring(0, 20);
+            const categoryText = (comment.section && comment.section.trim() !== '' ? comment.section : 'General').substring(0, 15);
             doc.text(categoryText, tableStartX + snoWidth, yPosition);
             
             // Observations - handle long text with proper wrapping
-            const observationText = (comment.description || 'No comment').substring(0, 80);
+            const observationText = (comment.description || 'No comment').substring(0, 60);
             const observationLines = doc.splitTextToSize(observationText, observationWidth - 2);
             doc.text(observationLines, tableStartX + snoWidth + categoryWidth, yPosition);
             
             // Accept/Reject
-            const acceptRejectText = (comment.status || 'Pending').substring(0, 20);
+            const acceptRejectText = (comment.status || 'Pending').substring(0, 15);
             doc.text(acceptRejectText, tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
             
             // Justification - handle long text with proper wrapping
-            const justificationText = (comment.justification || 'No justification provided').substring(0, 60);
+            const justificationText = (comment.justification || 'No justification provided').substring(0, 40);
             const justificationLines = doc.splitTextToSize(justificationText, justificationWidth - 2);
             doc.text(justificationLines, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+            
+            // Reviewer
+            const reviewerText = (comment.reviewer_id ? comment.reviewer_id.toString() : 'Unknown').substring(0, 15);
+            doc.text(reviewerText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
+            
+            // Page
+            const pageText = (comment.page_no ? comment.page_no.toString() : 'N/A').substring(0, 10);
+            doc.text(pageText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
+            
+            // Date
+            const dateText = this.formatDate(comment.created_at) || 'N/A';
+            doc.text(dateText.substring(0, 20), tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
             
             // Calculate row height based on the longest text
             const maxLines = Math.max(observationLines.length, justificationLines.length, 1);
