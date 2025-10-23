@@ -126,7 +126,7 @@
           </div>
 
           <!-- Delete Latest Document Button -->
-          <div v-if="existingDocuments.length > 0" class="delete-section">
+          <!-- <div v-if="existingDocuments.length > 0" class="delete-section">
             <button
               @click="deleteLatestDocument"
               class="delete-btn"
@@ -140,7 +140,7 @@
                 latest document and all its comments.
               </p>
             </div>
-          </div>
+          </div> -->
 
           <!-- Document Details Form - Show when file is selected -->
           <div v-if="selectedFile" class="document-form">
@@ -3519,6 +3519,7 @@ export default {
   display: flex;
   align-items: flex-start;
   gap: 0.75rem;
+  /* width: 50%; */
 }
 
 .restriction-icon {

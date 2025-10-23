@@ -20,7 +20,15 @@
       </button>
 
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
-      <div class="view-only-badge">VIEW ONLY</div>
+      <div class="header-actions">
+        <div class="view-only-badge">VIEW ONLY</div>
+        <button class="download-pdf-btn" @click="downloadMemoPDF" title="Download PDF">
+          <svg class="icon download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          <span class="download-text">Download PDF</span>
+        </button>
+      </div>
     </div>
 
     <!-- Requisition Details Section -->
@@ -1620,6 +1628,60 @@ export default {
         return dateString;
       }
     },
+
+    // Download memo PDF
+    async downloadMemoPDF() {
+      try {
+        console.log(`Downloading PDF for memo ID: ${this.id}`);
+        
+        // Show loading state
+        const button = event.target.closest('.download-pdf-btn');
+        const originalText = button.querySelector('.download-text').textContent;
+        button.querySelector('.download-text').textContent = 'Loading...';
+        button.disabled = true;
+        
+        // Make request to backend PDF endpoint
+        const response = await fetch(`http://localhost:5000/api/memos/${this.id}/pdf`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/pdf'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to generate PDF: ${response.statusText}`);
+        }
+
+        // Get the PDF blob
+        const blob = await response.blob();
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `memo_${this.id}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        
+        console.log(`PDF downloaded successfully for memo ${this.id}`);
+        
+      } catch (error) {
+        console.error('Error downloading memo PDF:', error);
+        alert(`Error downloading PDF: ${error.message}`);
+      } finally {
+        // Restore button state
+        if (button) {
+          button.querySelector('.download-text').textContent = originalText;
+          button.disabled = false;
+        }
+      }
+    },
   },
 };
 </script>
@@ -1663,6 +1725,12 @@ export default {
   flex-grow: 1;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
 .view-only-badge {
   background: #28a745;
   color: white;
@@ -1670,6 +1738,45 @@ export default {
   border-radius: 20px;
   font-size: 0.9em;
   font-weight: bold;
+}
+
+.download-pdf-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.download-pdf-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.download-pdf-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
+}
+
+.download-pdf-btn .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.download-text {
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .logos-container {
