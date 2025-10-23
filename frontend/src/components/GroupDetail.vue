@@ -293,6 +293,18 @@
                         </svg>
                         Add Sub-bulletin
                       </button>
+                      <button @click="editBulletin(bulletin)" class="action-btn edit-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
+                      <button @click="deleteBulletin(bulletin)" class="action-btn delete-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -339,6 +351,48 @@
                   </form>
                 </div>
 
+                <!-- Edit Bulletin Form -->
+                <div v-if="showEditBulletinFormId === bulletin.bulletin_id" class="edit-bulletin-form">
+                  <div class="form-header">
+                    <h5>Edit Bulletin</h5>
+                    <button @click="closeEditBulletinForm" class="close-form-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  <form @submit.prevent="updateBulletinFromForm">
+                    <div class="form-group">
+                      <label for="editBulletinName">Bulletin Name *</label>
+                      <input 
+                        type="text" 
+                        id="editBulletinName"
+                        v-model="editingBulletinForm.bulletin_name" 
+                        placeholder="Enter bulletin name"
+                        required
+                      >
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="editBulletinDescription">Description</label>
+                      <textarea 
+                        id="editBulletinDescription"
+                        v-model="editingBulletinForm.bulletin_description" 
+                        placeholder="Enter bulletin description"
+                        rows="2"
+                      ></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                      <button type="button" @click="closeEditBulletinForm" class="cancel-btn">Cancel</button>
+                      <button type="submit" class="save-btn" :disabled="saving">
+                        {{ saving ? 'Saving...' : 'Update Bulletin' }}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
                 <!-- Sub-bulletins -->
                 <div v-if="getSubBulletins(subTest.sub_test_id, bulletin.bulletin_id).length > 0" class="sub-bulletins-list">
                   <div 
@@ -360,6 +414,62 @@
                           <span class="created-date">Created: {{ formatDate(subBulletin.created_at) }}</span>
                         </div>
                       </div>
+                      <div class="sub-bulletin-actions">
+                        <button @click="editBulletin(subBulletin)" class="action-btn edit-btn">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                          </svg>
+                        </button>
+                        <button @click="deleteBulletin(subBulletin)" class="action-btn delete-btn">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Edit Sub-bulletin Form -->
+                    <div v-if="showEditBulletinFormId === subBulletin.bulletin_id" class="edit-sub-bulletin-form">
+                      <div class="form-header">
+                        <h6>Edit Sub-bulletin</h6>
+                        <button @click="closeEditBulletinForm" class="close-form-btn">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </button>
+                      </div>
+                      <form @submit.prevent="updateBulletinFromForm">
+                        <div class="form-group">
+                          <label for="editSubBulletinName">Sub-bulletin Name *</label>
+                          <input 
+                            type="text" 
+                            id="editSubBulletinName"
+                            v-model="editingBulletinForm.bulletin_name" 
+                            placeholder="Enter sub-bulletin name"
+                            required
+                          >
+                        </div>
+                        
+                        <div class="form-group">
+                          <label for="editSubBulletinDescription">Description</label>
+                          <textarea 
+                            id="editSubBulletinDescription"
+                            v-model="editingBulletinForm.bulletin_description" 
+                            placeholder="Enter sub-bulletin description"
+                            rows="2"
+                          ></textarea>
+                        </div>
+                        
+                        <div class="form-actions">
+                          <button type="button" @click="closeEditBulletinForm" class="cancel-btn">Cancel</button>
+                          <button type="submit" class="save-btn" :disabled="saving">
+                            {{ saving ? 'Saving...' : 'Update Sub-bulletin' }}
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -438,9 +548,11 @@ export default {
       showEditSubTestForm: false,
       showAddBulletinFormForSubTest: null, // Track which sub-test is adding bulletins
       showAddSubBulletinFormId: null, // Track which bulletin is adding sub-bulletins
+      showEditBulletinFormId: null, // Track which bulletin is being edited
       
       // Selected items
       editingSubTest: null,
+      editingBulletin: null,
       
       // Forms
       subTestForm: {
@@ -453,6 +565,11 @@ export default {
         sub_test_description: ''
       },
       bulletinForm: {
+        bulletin_name: '',
+        bulletin_description: '',
+        parent_bulletin_id: null
+      },
+      editingBulletinForm: {
         bulletin_name: '',
         bulletin_description: '',
         parent_bulletin_id: null
@@ -910,6 +1027,129 @@ export default {
         bulletin_name: '',
         bulletin_description: '',
         parent_bulletin_id: null
+      }
+    },
+    
+    // Bulletin CRUD Operations
+    async updateBulletin(bulletin) {
+      this.saving = true
+      
+      try {
+        // Get current user ID
+        const currentUser = userStore.getters.currentUser()
+        const userId = currentUser ? currentUser.id : null
+        
+        const updateData = {
+          bulletin_name: bulletin.bulletin_name,
+          bulletin_description: bulletin.bulletin_description,
+          parent_bulletin_id: bulletin.parent_bulletin_id,
+          updated_by: userId
+        }
+        
+        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        })
+        
+        const data = await response.json()
+        
+        if (data.success) {
+          await this.loadBulletinCounts()
+        } else {
+          alert(data.message || 'Failed to update bulletin')
+        }
+      } catch (error) {
+        console.error('Error updating bulletin:', error)
+        alert('Failed to update bulletin. Please try again.')
+      } finally {
+        this.saving = false
+      }
+    },
+    
+    async deleteBulletin(bulletin) {
+      const bulletinType = bulletin.parent_bulletin_id ? 'sub-bulletin' : 'bulletin'
+      if (!confirm(`Are you sure you want to delete "${bulletin.bulletin_name}"? This will also delete all related ${bulletinType === 'bulletin' ? 'sub-bulletins' : 'data'}.`)) {
+        return
+      }
+      
+      try {
+        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
+          method: 'DELETE'
+        })
+        
+        const data = await response.json()
+        
+        if (data.success) {
+          await this.loadBulletinCounts()
+        } else {
+          alert(data.message || 'Failed to delete bulletin')
+        }
+      } catch (error) {
+        console.error('Error deleting bulletin:', error)
+        alert('Failed to delete bulletin. Please try again.')
+      }
+    },
+    
+    // Bulletin Edit Methods
+    editBulletin(bulletin) {
+      this.editingBulletin = bulletin
+      this.editingBulletinForm = {
+        bulletin_name: bulletin.bulletin_name,
+        bulletin_description: bulletin.bulletin_description || '',
+        parent_bulletin_id: bulletin.parent_bulletin_id
+      }
+      this.showEditBulletinFormId = bulletin.bulletin_id
+    },
+    
+    closeEditBulletinForm() {
+      this.showEditBulletinFormId = null
+      this.editingBulletin = null
+      this.editingBulletinForm = {
+        bulletin_name: '',
+        bulletin_description: '',
+        parent_bulletin_id: null
+      }
+    },
+    
+    async updateBulletinFromForm() {
+      this.saving = true
+      
+      try {
+        // Get current user ID
+        const currentUser = userStore.getters.currentUser()
+        const userId = currentUser ? currentUser.id : null
+        
+        const updateData = {
+          bulletin_name: this.editingBulletinForm.bulletin_name,
+          bulletin_description: this.editingBulletinForm.bulletin_description,
+          parent_bulletin_id: this.editingBulletinForm.parent_bulletin_id,
+          updated_by: userId
+        }
+        
+        const response = await fetch(`http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        })
+        
+        const data = await response.json()
+        
+        if (data.success) {
+          await this.loadBulletinCounts()
+          this.closeEditBulletinForm()
+        } else {
+          alert(data.message || 'Failed to update bulletin')
+        }
+      } catch (error) {
+        console.error('Error updating bulletin:', error)
+        alert('Failed to update bulletin. Please try again.')
+      } finally {
+        this.saving = false
       }
     },
     
@@ -1813,6 +2053,118 @@ export default {
 .sub-bulletin-meta {
   font-size: 0.75em;
   color: #6c757d;
+}
+
+.sub-bulletin-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.sub-bulletin-actions .action-btn {
+  padding: 4px;
+  border-radius: 4px;
+}
+
+/* Edit Bulletin Form */
+.edit-bulletin-form {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.edit-bulletin-form .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.edit-bulletin-form .form-header h5 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 0.95em;
+  font-weight: 600;
+}
+
+.edit-bulletin-form .form-group {
+  margin-bottom: 12px;
+}
+
+.edit-bulletin-form .form-group label {
+  font-size: 0.85em;
+  margin-bottom: 4px;
+}
+
+.edit-bulletin-form .form-group input,
+.edit-bulletin-form .form-group textarea {
+  padding: 6px;
+  font-size: 0.85em;
+}
+
+.edit-bulletin-form .form-actions {
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.edit-bulletin-form .cancel-btn,
+.edit-bulletin-form .save-btn {
+  padding: 8px 15px;
+  font-size: 0.85em;
+}
+
+/* Edit Sub-bulletin Form */
+.edit-sub-bulletin-form {
+  background: #f0f8ff;
+  border: 1px solid #e3f2fd;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+}
+
+.edit-sub-bulletin-form .form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e3f2fd;
+}
+
+.edit-sub-bulletin-form .form-header h6 {
+  margin: 0;
+  color: #2d3748;
+  font-size: 0.9em;
+  font-weight: 600;
+}
+
+.edit-sub-bulletin-form .form-group {
+  margin-bottom: 10px;
+}
+
+.edit-sub-bulletin-form .form-group label {
+  font-size: 0.8em;
+  margin-bottom: 3px;
+}
+
+.edit-sub-bulletin-form .form-group input,
+.edit-sub-bulletin-form .form-group textarea {
+  padding: 5px;
+  font-size: 0.8em;
+}
+
+.edit-sub-bulletin-form .form-actions {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.edit-sub-bulletin-form .cancel-btn,
+.edit-sub-bulletin-form .save-btn {
+  padding: 6px 12px;
+  font-size: 0.8em;
 }
 
 /* Responsive Design */
