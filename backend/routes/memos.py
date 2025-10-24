@@ -38,6 +38,8 @@ def submit_memo():
         print("=== DEBUG: Form data received ===")
         print(f"slNo array: {form_data.get('slNo')}")
         print(f"slNo type: {type(form_data.get('slNo'))}")
+        print(f"unitIdentification: {form_data.get('unitIdentification')}")
+        print(f"unitIdentification type: {type(form_data.get('unitIdentification'))}")
         print("=== END DEBUG ===")
         
         # Get serial numbers array directly from frontend
@@ -53,12 +55,17 @@ def submit_memo():
         print(f"=== DEBUG: slno_units length: {len(slno_units) if slno_units else 0} ===")
 
         # Prepare unit identification array
-        unit_identification = []
-        if form_data.get('unitIdentification'):
-            unit_identification.append(form_data.get('unitIdentification'))
+        unit_identification = form_data.get('unitIdentification', [])
         
-        # Convert to empty array if empty for PostgreSQL
-        unit_identification = unit_identification if unit_identification else []
+        # Ensure it's a list and all elements are strings
+        if not isinstance(unit_identification, list):
+            unit_identification = []
+        else:
+            # Convert all elements to strings to ensure consistent formatting
+            unit_identification = [str(item) if item is not None else "" for item in unit_identification]
+        
+        print(f"=== DEBUG: Processed unit_identification: {unit_identification} ===")
+        print(f"=== DEBUG: unit_identification type: {type(unit_identification)} ===")
 
         # Prepare certified array from checkboxes
         certified = []

@@ -1977,6 +1977,7 @@ export default {
   text-align: center;
   max-width: 400px;
   width: 90%;
+  height: 60%;
 }
 
 .overlay-content h3 {
