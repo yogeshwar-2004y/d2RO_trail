@@ -152,7 +152,7 @@ html, body {
 
 .home-page {
   background-color: #f0f0f0;
-  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
+  /* height: calc(100vh - 240px); Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
   justify-content: center; /* Center content vertically */
@@ -161,6 +161,7 @@ html, body {
   margin: 0;
   overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
+  margin-top: 37px;
 }
 
 /* Floating Hamburger Menu Button */
