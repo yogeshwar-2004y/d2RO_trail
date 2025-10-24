@@ -39,12 +39,6 @@
 
       <div class="subject-line">
         SUB : IQA Observation Report for {{ lruName }}
-        <span v-if="isVersionSpecific" class="version-info">
-          (Version {{ currentVersion }} - Revision {{ reportData.revision }})
-        </span>
-        <span v-if="isReportSpecific" class="report-info">
-          (Report {{ reportData.projectNumber }} - {{ reportData.status || 'Status: Pending' }})
-        </span>
       </div>
 
       <!-- Document Details Grid -->
@@ -52,19 +46,11 @@
         <div class="details-left">
           <div class="detail-item">
             <label>Project Name :</label>
-            <span>{{ reportData.projectName }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Project Number :</label>
-            <span>{{ reportData.projectNumber }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Project Date :</label>
-            <span>{{ reportData.projectDate }}</span>
+            <span>{{ projectName }}</span>
           </div>
           <div class="detail-item">
             <label>LRU Name :</label>
-            <span>{{ reportData.lruName }}</span>
+            <span>{{ lruName }}</span>
           </div>
           <div class="detail-item">
             <label>LRU Part No. :</label>
@@ -76,14 +62,6 @@
           </div>
         </div>
         <div class="details-right">
-          <div class="detail-item">
-            <label>Version :</label>
-            <span class="version-badge">{{ reportData.version }}</span>
-          </div>
-          <div class="detail-item">
-            <label>Revision :</label>
-            <span class="revision-badge">{{ reportData.revision }}</span>
-          </div>
           <div class="detail-item">
             <label>Inspection stage :</label>
             <span class="stage-value">Document review/report</span>
@@ -103,27 +81,90 @@
         </div>
       </div>
 
-      <!-- Observations Table -->
+      <!-- Version Selection -->
+      <div class="version-selection">
+        <h2 class="section-title">Document Version Selection</h2>
+        <div class="version-controls">
+          <div class="version-dropdown">
+            <label for="version-select">Select Document Version:</label>
+            <select 
+              id="version-select" 
+              v-model="selectedDocumentId" 
+              @change="onVersionChange"
+              class="version-select"
+              :disabled="loadingVersions"
+            >
+              <option value="">{{ loadingVersions ? 'Loading versions...' : 'Select a version' }}</option>
+              <option 
+                v-for="document in availableDocuments" 
+                :key="document.document_id" 
+                :value="document.document_id"
+              >
+                {{ document.document_number }} - {{ document.version }} ({{ document.doc_ver }}) - {{ document.uploaded_by_name }}
+              </option>
+            </select>
+          </div>
+          <div class="version-info" v-if="selectedDocument">
+            <span class="version-label">
+              Selected: {{ selectedDocument.document_number }} - {{ selectedDocument.version }} ({{ selectedDocument.doc_ver }}) - Uploaded by {{ selectedDocument.uploaded_by_name }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comments Table -->
       <div class="observations-section">
-        <h2 class="section-title">Observations</h2>
-        <div class="table-container">
+        <h2 class="section-title">Document Comments & Observations</h2>
+        
+        <!-- Loading State -->
+        <div v-if="loadingComments" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p>Loading comments for selected version...</p>
+        </div>
+        
+        <!-- No Version Selected -->
+        <div v-else-if="!selectedDocumentId" class="no-selection">
+          <p>Please select a document version to view comments and observations.</p>
+        </div>
+        
+        <!-- No Comments -->
+        <div v-else-if="documentComments.length === 0" class="no-comments">
+          <p>No comments found for the selected version.</p>
+        </div>
+        
+        <!-- Comments Table -->
+        <div v-else class="table-container">
           <table class="observations-table">
             <thead>
               <tr>
                 <th>SNO</th>
-                <th>Category (Major/Minor)</th>
+                <th>Category</th>
                 <th>Observations</th>
                 <th>Accept/Reject</th>
                 <th>Justification</th>
+                <th>Reviewer</th>
+                <th>Page</th>
+                <th>Date</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(observation, index) in reportData.observations" :key="index">
+              <tr v-for="(comment, index) in documentComments" :key="comment.id">
                 <td>{{ index + 1 }}</td>
-                <td>{{ observation.category }}</td>
-                <td>{{ observation.description }}</td>
-                <td>{{ observation.status }}</td>
-                <td>{{ observation.notes }}</td>
+                <td>
+                  <span class="category-badge" :class="getCategoryClass(comment.section)">
+                    {{ comment.section && comment.section.trim() !== '' ? comment.section : 'General' }}
+                  </span>
+                </td>
+                <td class="comment-text">{{ comment.description || 'No comment' }}</td>
+                <td>
+                  <span class="status-badge" :class="getStatusClass(comment.status)">
+                    {{ comment.status || 'Pending' }}
+                  </span>
+                </td>
+                <td class="justification-text">{{ comment.justification || 'No justification provided' }}</td>
+                <td>{{ comment.reviewer_id || 'Unknown' }}</td>
+                <td>{{ comment.page_no || 'N/A' }}</td>
+                <td>{{ formatDate(comment.created_at) }}</td>
               </tr>
             </tbody>
           </table>
@@ -137,22 +178,20 @@
           <div class="signature-item">
             <label>Reviewed By:</label>
             <div class="signature-display">
-              <span v-if="reportData.reviewedBy" class="signature-name">{{ reportData.reviewedBy }}</span>
-              <span v-else class="no-signature">No signature</span>
+              <span class="signature-name">QA Reviewer</span>
             </div>
-            <div class="signature-date" v-if="reportData.reviewDate">
-              Date: {{ reportData.reviewDate }}
+            <div class="signature-date">
+              Date: {{ currentDate }}
             </div>
           </div>
           
           <div class="signature-item">
             <label>Approved By:</label>
             <div class="signature-display">
-              <span v-if="reportData.approvedBy" class="signature-name">{{ reportData.approvedBy }}</span>
-              <span v-else class="no-signature">No signature</span>
+              <span class="signature-name">Design Team</span>
             </div>
-            <div class="signature-date" v-if="reportData.approvalDate">
-              Date: {{ reportData.approvalDate }}
+            <div class="signature-date">
+              Date: {{ currentDate }}
             </div>
           </div>
         </div>
@@ -170,26 +209,15 @@ export default {
     return {
       lruName: '',
       projectName: '',
-      versionId: '',
-      reportId: '',
-      currentVersion: '',
-      isVersionSpecific: false,
-      isReportSpecific: false,
-      reportData: {
-        projectName: '',
-        projectNumber: '',
-        projectDate: '',
-        version: '',
-        revision: '',
-        lruName: '',
-        status: '',
-        observations: [],
-        reviewedBy: '',
-        approvedBy: '',
-        reviewDate: '',
-        approvalDate: ''
-      },
-      // Sample data for non-version-specific view
+      lruId: null,
+      // Properties for document and comment management
+      selectedDocumentId: '',
+      availableDocuments: [],
+      selectedDocument: null,
+      documentComments: [],
+      loadingComments: false,
+      loadingVersions: false,
+      // Sample data
       serialNumber: 'SL-001',
       observationCount: 'OBS-001',
       currentYear: '2025',
@@ -200,388 +228,137 @@ export default {
       referenceDocument: 'Technical Specification'
     };
   },
-  computed: {
-    canSubmit() {
-      return this.reportData.observations.length > 0;
-    }
-  },
   mounted() {
     // Get parameters from route
     this.lruName = this.$route.params.lruName || 'Unknown LRU';
     this.projectName = this.$route.params.projectName || 'Unknown Project';
-    this.versionId = this.$route.params.versionId || '';
-    this.reportId = this.$route.params.reportId || '';
+    this.lruId = this.$route.params.lruId || null;
     
-    // Check if this is a version-specific observation view
-    if (this.versionId) {
-      this.isVersionSpecific = true;
-      // Parse version from versionId (e.g., "PRJ-2025-078-A" -> "A")
-      const lastDashIndex = this.versionId.lastIndexOf('-');
-      if (lastDashIndex !== -1) {
-        this.currentVersion = this.versionId.substring(lastDashIndex + 1);
-      }
+    console.log('ObservationReport - Route params:', this.$route.params);
+    console.log('ObservationReport - Extracted lruId:', this.lruId);
+    
+    // Load available documents for the LRU
+    if (this.lruId) {
+      this.loadAvailableDocuments();
+    } else {
+      console.warn('No LRU ID provided, cannot load documents');
     }
-    
-    // Check if this is a report-specific view
-    if (this.reportId) {
-      this.isReportSpecific = true;
-    }
-    
-    // Load observation data
-    this.loadObservationData();
   },
   methods: {
-    loadObservationData() {
-      // In a real application, this would fetch data from an API
-      // For now, we'll use sample data
-      if (this.isVersionSpecific) {
-        // Load version-specific observation data
-        this.loadVersionSpecificData();
-      } else if (this.isReportSpecific) {
-        // Load report-specific observation data
-        this.loadReportSpecificData();
-      } else {
-        // Load general observation data
-        this.loadGeneralData();
+    // Load available documents for the LRU from plan_documents table
+    async loadAvailableDocuments() {
+      try {
+        this.loadingVersions = true;
+        
+        console.log('Loading documents for LRU ID:', this.lruId);
+        
+        // API call to fetch documents by LRU ID using the existing endpoint
+        const response = await fetch(`http://localhost:5000/api/lrus/${this.lruId}/plan-documents`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.availableDocuments = data.documents || [];
+          
+          // Update LRU and project info from the response
+          if (data.lru) {
+            this.lruName = data.lru.lru_name || this.lruName;
+            this.projectName = data.lru.project_name || this.projectName;
+          }
+          
+          console.log('Loaded documents:', this.availableDocuments);
+          console.log('LRU info:', data.lru);
+        } else {
+          console.error('Error loading documents:', data.message);
+          this.availableDocuments = [];
+        }
+      } catch (error) {
+        console.error('Error fetching documents:', error);
+        this.availableDocuments = [];
+      } finally {
+        this.loadingVersions = false;
       }
     },
     
-    loadVersionSpecificData() {
-      // Sample version-specific observation data
-      const versionData = {
-        'A': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-078',
-          projectDate: '2025-01-15',
-          version: 'A',
-          revision: '1.0',
-          lruName: this.lruName,
-          observations: [
-            {
-              observationNumber: 'OBS-001',
-              description: 'Initial technical review completed for Version A',
-              category: 'Technical Review',
-              severity: 'Low',
-              status: 'Completed',
-              assignedTo: 'John Smith',
-              dueDate: '2025-01-20',
-              notes: 'All technical requirements met for initial version'
-            },
-            {
-              observationNumber: 'OBS-002',
-              description: 'Document formatting needs standardization',
-              category: 'Documentation',
-              severity: 'Medium',
-              status: 'In Progress',
-              assignedTo: 'Sarah Johnson',
-              dueDate: '2025-01-25',
-              notes: 'Working on standardizing document templates'
-            }
-          ],
-          reviewedBy: 'Mike Wilson',
-          approvedBy: 'Lisa Brown',
-          reviewDate: '2025-01-18',
-          approvalDate: '2025-01-20'
-        },
-        'B': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-078',
-          projectDate: '2025-01-20',
-          version: 'B',
-          revision: '2.0',
-          lruName: this.lruName,
-          observations: [
-            {
-              observationNumber: 'OBS-003',
-              description: 'Technical specifications updated and reviewed',
-              category: 'Technical Review',
-              severity: 'Medium',
-              status: 'Completed',
-              assignedTo: 'Engineering Team',
-              dueDate: '2025-01-25',
-              notes: 'Updated specifications based on feedback'
-            },
-            {
-              observationNumber: 'OBS-004',
-              description: 'Quality assurance checklist verification',
-              category: 'Quality Assurance',
-              severity: 'High',
-              status: 'Completed',
-              assignedTo: 'QA Team',
-              dueDate: '2025-01-28',
-              notes: 'All QA requirements verified and documented'
-            },
-            {
-              observationNumber: 'OBS-005',
-              description: 'Stakeholder review and approval',
-              category: 'Stakeholder Review',
-              severity: 'High',
-              status: 'In Progress',
-              assignedTo: 'Project Manager',
-              dueDate: '2025-02-01',
-              notes: 'Awaiting final stakeholder approval'
-            }
-          ],
-          reviewedBy: 'Sarah Johnson',
-          approvedBy: 'Mike Wilson',
-          reviewDate: '2025-01-22',
-          approvalDate: '2025-01-25'
-        },
-        'C': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-078',
-          projectDate: '2025-01-25',
-          version: 'C',
-          revision: '3.0',
-          lruName: this.lruName,
-          observations: [
-            {
-              observationNumber: 'OBS-006',
-              description: 'QA team review completed with corrections',
-              category: 'Quality Assurance',
-              severity: 'Medium',
-              status: 'Completed',
-              assignedTo: 'QA Team',
-              dueDate: '2025-01-30',
-              notes: 'Minor corrections implemented and verified'
-            },
-            {
-              observationNumber: 'OBS-007',
-              description: 'Final technical validation',
-              category: 'Technical Review',
-              severity: 'High',
-              status: 'Completed',
-              assignedTo: 'Technical Lead',
-              dueDate: '2025-02-02',
-              notes: 'All technical aspects validated and approved'
-            },
-            {
-              observationNumber: 'OBS-008',
-              description: 'Document finalization and formatting',
-              category: 'Documentation',
-              severity: 'Low',
-              status: 'Completed',
-              assignedTo: 'Documentation Team',
-              dueDate: '2025-02-05',
-              notes: 'Final formatting and proofreading completed'
-            }
-          ],
-          reviewedBy: 'Mike Wilson',
-          approvedBy: 'Lisa Brown',
-          reviewDate: '2025-01-27',
-          approvalDate: '2025-01-30'
-        },
-        'D': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-078',
-          projectDate: '2025-01-30',
-          version: 'D',
-          revision: '4.0',
-          lruName: this.lruName,
-          observations: [
-            {
-              observationNumber: 'OBS-009',
-              description: 'Final review board assessment',
-              category: 'Review Board',
-              severity: 'High',
-              status: 'In Progress',
-              assignedTo: 'Review Board',
-              dueDate: '2025-02-10',
-              notes: 'Final assessment in progress'
-            },
-            {
-              observationNumber: 'OBS-010',
-              description: 'Regulatory compliance verification',
-              category: 'Compliance',
-              severity: 'High',
-              status: 'Completed',
-              assignedTo: 'Compliance Team',
-              dueDate: '2025-02-08',
-              notes: 'All regulatory requirements verified'
-            },
-            {
-              observationNumber: 'OBS-011',
-              description: 'Final stakeholder sign-off',
-              category: 'Stakeholder Review',
-              severity: 'Critical',
-              status: 'Pending',
-              assignedTo: 'Project Director',
-              dueDate: '2025-02-15',
-              notes: 'Awaiting final stakeholder sign-off'
-            }
-          ],
-          reviewedBy: 'Lisa Brown',
-          approvedBy: 'Review Board',
-          reviewDate: '2025-02-01',
-          approvalDate: 'Pending'
-        }
-      };
+    // Load document comments for selected document from document_comments table
+    async loadDocumentComments(documentId) {
+      if (!documentId) return;
       
-      const selectedVersionData = versionData[this.currentVersion] || versionData['A'];
-      this.reportData = { ...this.reportData, ...selectedVersionData };
-    },
-    
-    loadGeneralData() {
-      // Load general observation data (existing logic)
-      this.reportData = {
-        projectName: this.projectName,
-        projectNumber: 'PRJ-2025-078',
-        projectDate: '2025-01-15',
-        version: 'General',
-        revision: '1.0',
-        lruName: this.lruName,
-        status: 'In Progress',
-        observations: [
-          {
-            observationNumber: 'OBS-001',
-            description: 'General observation report for LRU document',
-            category: 'General Review',
-            severity: 'Medium',
-            status: 'In Progress',
-            assignedTo: 'QA Team',
-            dueDate: '2025-01-30',
-            notes: 'General observations and recommendations'
-          }
-        ],
-        reviewedBy: '',
-        approvedBy: '',
-        reviewDate: '',
-        approvalDate: ''
-      };
-    },
-    
-    loadReportSpecificData() {
-      // Load report-specific observation data based on reportId
-      const reportData = {
-        '1': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-078',
-          projectDate: '2025-01-15',
-          version: 'A',
-          revision: '1.0',
-          lruName: this.lruName,
-          status: 'SUCCESSFULLY COMPLETED',
-          observations: [
-            {
-              observationNumber: 'OBS-001',
-              description: 'Report MEMO-2025-018 successfully completed with all QA requirements met',
-              category: 'Quality Assurance',
-              severity: 'Low',
-              status: 'Completed',
-              assignedTo: 'QA Team',
-              dueDate: '2025-01-20',
-              notes: 'All quality standards verified and documented'
-            },
-            {
-              observationNumber: 'OBS-002',
-              description: 'Technical specifications reviewed and approved',
-              category: 'Technical Review',
-              severity: 'Medium',
-              status: 'Completed',
-              assignedTo: 'Technical Lead',
-              dueDate: '2025-01-25',
-              notes: 'Technical requirements fully satisfied'
-            }
-          ],
-          reviewedBy: 'Sarah Johnson',
-          approvedBy: 'Mike Wilson',
-          reviewDate: '2025-01-18',
-          approvalDate: '2025-01-20'
-        },
-        '2': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-079',
-          projectDate: '2025-01-18',
-          version: 'B',
-          revision: '2.0',
-          lruName: this.lruName,
-          status: 'ASSIGNED',
-          observations: [
-            {
-              observationNumber: 'OBS-003',
-              description: 'Report MEMO002 assigned and under review',
-              category: 'Assignment',
-              severity: 'Medium',
-              status: 'In Progress',
-              assignedTo: 'QA Team',
-              dueDate: '2025-01-30',
-              notes: 'Currently being reviewed by assigned team members'
-            }
-          ],
-          reviewedBy: 'John Smith',
-          approvedBy: 'Pending',
-          reviewDate: '2025-01-22',
-          approvalDate: 'Pending'
-        },
-        '3': {
-          projectName: this.projectName,
-          projectNumber: 'PRJ-2025-080',
-          projectDate: '2025-01-20',
-          version: 'C',
-          revision: '3.0',
-          lruName: this.lruName,
-          status: 'TEST FAILED',
-          observations: [
-            {
-              observationNumber: 'OBS-004',
-              description: 'Report MEMO003 test failed during execution',
-              category: 'Test Execution',
-              severity: 'High',
-              status: 'Failed',
-              assignedTo: 'Test Team',
-              dueDate: '2025-01-28',
-              notes: 'Test failure analysis in progress, root cause investigation required'
-            }
-          ],
-          reviewedBy: 'Test Lead',
-          approvedBy: 'Pending',
-          reviewDate: '2025-01-25',
-          approvalDate: 'Pending'
+      try {
+        this.loadingComments = true;
+        
+        // API call to fetch comments for the specific document using the existing endpoint
+        const response = await fetch(`http://localhost:5000/api/comments?document_id=${documentId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.documentComments = data.comments || [];
+          console.log('Loaded comments:', this.documentComments);
+        } else {
+          console.error('Error loading comments:', data.message);
+          this.documentComments = [];
         }
-      };
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        this.documentComments = [];
+      } finally {
+        this.loadingComments = false;
+      }
+    },
+    
+    // Handle document selection change
+    onVersionChange() {
+      if (this.selectedDocumentId) {
+        this.selectedDocument = this.availableDocuments.find(d => d.document_id.toString() === this.selectedDocumentId);
+        this.loadDocumentComments(this.selectedDocumentId);
+      } else {
+        this.selectedDocument = null;
+        this.documentComments = [];
+      }
+    },
+    
+    // Get CSS class for category badge based on section
+    getCategoryClass(section) {
+      if (!section || section.trim() === '') return 'category-default';
       
-      // Load data for the specific report, or default to first report if not found
-      const selectedReportData = reportData[this.reportId] || reportData['1'];
-      this.reportData = { ...this.reportData, ...selectedReportData };
+      const sectionLower = section.toLowerCase();
+      if (sectionLower.includes('major') || sectionLower.includes('critical')) return 'category-major';
+      if (sectionLower.includes('minor')) return 'category-minor';
+      if (sectionLower.includes('general')) return 'category-general';
+      return 'category-default';
     },
     
-    saveReport() {
-      // Save report logic
-      console.log('Saving report:', {
-        observations: this.reportData.observations,
-        version: this.currentVersion,
-        projectName: this.projectName,
-        lruName: this.lruName
-      });
-      alert('Report saved successfully!');
+    // Get CSS class for status badge
+    getStatusClass(status) {
+      if (!status) return 'status-pending';
+      
+      const statusLower = status.toLowerCase();
+      if (statusLower.includes('accept') || statusLower.includes('approved')) return 'status-accepted';
+      if (statusLower.includes('reject') || statusLower.includes('rejected')) return 'status-rejected';
+      if (statusLower.includes('pending')) return 'status-pending';
+      return 'status-default';
     },
     
-    submitReport() {
-      // Submit report logic
-      console.log('Submitting report:', {
-        observations: this.reportData.observations,
-        version: this.currentVersion,
-        projectName: this.projectName,
-        lruName: this.lruName
-      });
-      alert('Report submitted successfully!');
+    // Format date for display
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
+      
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } catch (error) {
+        return 'Invalid Date';
+      }
     },
     
     exportReport() {
       try {
         console.log('Starting PDF export...');
-        console.log('Report data:', this.reportData);
-        console.log('Component data:', {
-          lruName: this.lruName,
-          projectName: this.projectName,
-          serialNumber: this.serialNumber,
-          observationCount: this.observationCount,
-          currentYear: this.currentYear,
-          currentDate: this.currentDate,
-          lruPartNumber: this.lruPartNumber,
-          docReviewDate: this.docReviewDate,
-          reviewVenue: this.reviewVenue
-        });
 
         // Create new PDF document
         const doc = new jsPDF('p', 'mm', 'a4');
@@ -619,7 +396,7 @@ export default {
         // ===== SUBJECT LINE =====
         doc.setFontSize(12);
         doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: IQA Observation Report for ${this.lruName || this.reportData.lruName || 'Unknown LRU'}`;
+        const subjectText = `SUB: IQA Observation Report for ${this.lruName || 'Unknown LRU'}`;
         doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 15;
         
@@ -638,32 +415,14 @@ export default {
         doc.setFont('helvetica', 'bold');
         doc.text('Project Name :', leftColumnX, yPosition);
         doc.setFont('helvetica', 'normal');
-        doc.text(this.reportData.projectName || this.projectName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.text(this.projectName || 'Not specified', leftColumnX + labelOffset, yPosition);
         yPosition += 8;
-        
-        // Project Number (if available)
-        if (this.reportData.projectNumber) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Project Number :', leftColumnX, yPosition);
-          doc.setFont('helvetica', 'normal');
-          doc.text(this.reportData.projectNumber, leftColumnX + labelOffset, yPosition);
-          yPosition += 8;
-        }
-        
-        // Project Date (if available)
-        if (this.reportData.projectDate) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Project Date :', leftColumnX, yPosition);
-          doc.setFont('helvetica', 'normal');
-          doc.text(this.reportData.projectDate, leftColumnX + labelOffset, yPosition);
-          yPosition += 8;
-        }
         
         // LRU Name
         doc.setFont('helvetica', 'bold');
         doc.text('LRU Name :', leftColumnX, yPosition);
         doc.setFont('helvetica', 'normal');
-        doc.text(this.reportData.lruName || this.lruName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.text(this.lruName || 'Not specified', leftColumnX + labelOffset, yPosition);
         yPosition += 8;
         
         // LRU Part No
@@ -682,24 +441,6 @@ export default {
         
         // Right column details
         yPosition = margin + 42;
-        
-        // Version
-        if (this.reportData.version) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Version :', rightColumnX, yPosition);
-          doc.setFont('helvetica', 'normal');
-          doc.text(this.reportData.version, rightColumnX + labelOffset, yPosition);
-          yPosition += 8;
-        }
-        
-        // Revision
-        if (this.reportData.revision) {
-          doc.setFont('helvetica', 'bold');
-          doc.text('Revision :', rightColumnX, yPosition);
-          doc.setFont('helvetica', 'normal');
-          doc.text(this.reportData.revision, rightColumnX + labelOffset, yPosition);
-          yPosition += 8;
-        }
         
         // Inspection stage
         doc.setFont('helvetica', 'bold');
@@ -726,11 +467,7 @@ export default {
         doc.setFont('helvetica', 'bold');
         doc.text('Reference Document :', rightColumnX, yPosition);
         doc.setFont('helvetica', 'normal');
-        const revision = this.reportData.revision || 'Not specified';
-        const version = this.reportData.version || 'Not specified';
-        const projectDate = this.reportData.projectDate || 'Not specified';
-        const referenceText = `${this.lruName || 'N/A'}, ${this.lruPartNumber || 'N/A'}, Rev ${revision} & Ver ${version}, dated ${projectDate}`;
-        doc.text(referenceText, rightColumnX + labelOffset, yPosition);
+        doc.text(this.referenceDocument || 'Not specified', rightColumnX + labelOffset, yPosition);
         yPosition += 15;
         
         // ===== OBSERVATIONS SECTION =====
@@ -745,11 +482,14 @@ export default {
         
         // Table column widths and positions (optimized for single page)
         const tableStartX = margin;
-        const snoWidth = 15;
-        const categoryWidth = 30;
-        const observationWidth = 55;
-        const acceptRejectWidth = 25;
-        const justificationWidth = 40;
+        const snoWidth = 12;
+        const categoryWidth = 25;
+        const observationWidth = 40;
+        const acceptRejectWidth = 20;
+        const justificationWidth = 30;
+        const reviewerWidth = 20;
+        const pageWidth_col = 15;
+        const dateColWidth = 25;
         
         // Table headers with proper spacing
         doc.text('SNO', tableStartX, yPosition);
@@ -757,6 +497,9 @@ export default {
         doc.text('Observations', tableStartX + snoWidth + categoryWidth, yPosition);
         doc.text('Accept/Reject', tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
         doc.text('Justification', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+        doc.text('Reviewer', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
+        doc.text('Page', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
+        doc.text('Date', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
         yPosition += 6;
         
         // Draw table header lines
@@ -767,50 +510,62 @@ export default {
         // Table data
         doc.setFont('helvetica', 'normal');
         
-        // Safety check - ensure observations array exists and has items
-        if (!this.reportData.observations || this.reportData.observations.length === 0) {
-          doc.text('No observations available', tableStartX + snoWidth + categoryWidth, yPosition);
+        // Safety check - ensure comments array exists and has items
+        if (!this.documentComments || this.documentComments.length === 0) {
+          doc.text('No comments available', tableStartX + snoWidth + categoryWidth, yPosition);
           yPosition += 15;
         } else {
-          // Limit observations to fit on single page
-          const maxObservations = Math.min(this.reportData.observations.length, 8);
-          const observationsToShow = this.reportData.observations.slice(0, maxObservations);
+          // Limit comments to fit on single page
+          const maxComments = Math.min(this.documentComments.length, 8);
+          const commentsToShow = this.documentComments.slice(0, maxComments);
           
-          observationsToShow.forEach((obs, index) => {
+          commentsToShow.forEach((comment, index) => {
             yPosition += 6;
             
             // SNO
             doc.text((index + 1).toString(), tableStartX, yPosition);
             
             // Category (shortened)
-            const categoryText = (obs.category || 'N/A').substring(0, 20);
+            const categoryText = (comment.section && comment.section.trim() !== '' ? comment.section : 'General').substring(0, 15);
             doc.text(categoryText, tableStartX + snoWidth, yPosition);
             
             // Observations - handle long text with proper wrapping
-            const observationText = (obs.description || obs.observation || 'No observation text').substring(0, 80);
+            const observationText = (comment.description || 'No comment').substring(0, 60);
             const observationLines = doc.splitTextToSize(observationText, observationWidth - 2);
             doc.text(observationLines, tableStartX + snoWidth + categoryWidth, yPosition);
             
             // Accept/Reject
-            const acceptRejectText = (obs.acceptReject || obs.status || 'Pending').substring(0, 20);
+            const acceptRejectText = (comment.status || 'Pending').substring(0, 15);
             doc.text(acceptRejectText, tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
             
             // Justification - handle long text with proper wrapping
-            const justificationText = (obs.justification || obs.notes || 'No justification provided').substring(0, 60);
+            const justificationText = (comment.justification || 'No justification provided').substring(0, 40);
             const justificationLines = doc.splitTextToSize(justificationText, justificationWidth - 2);
             doc.text(justificationLines, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
+            
+            // Reviewer
+            const reviewerText = (comment.reviewer_id ? comment.reviewer_id.toString() : 'Unknown').substring(0, 15);
+            doc.text(reviewerText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
+            
+            // Page
+            const pageText = (comment.page_no ? comment.page_no.toString() : 'N/A').substring(0, 10);
+            doc.text(pageText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
+            
+            // Date
+            const dateText = this.formatDate(comment.created_at) || 'N/A';
+            doc.text(dateText.substring(0, 20), tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
             
             // Calculate row height based on the longest text
             const maxLines = Math.max(observationLines.length, justificationLines.length, 1);
             yPosition += Math.max(maxLines * 3, 8);
           });
           
-          // Show message if observations were truncated
-          if (this.reportData.observations.length > maxObservations) {
+          // Show message if comments were truncated
+          if (this.documentComments.length > maxComments) {
             yPosition += 8;
             doc.setFont('helvetica', 'italic');
             doc.setFontSize(8);
-            doc.text(`Note: Showing ${maxObservations} of ${this.reportData.observations.length} observations. Export detailed report for complete list.`, margin, yPosition);
+            doc.text(`Note: Showing ${maxComments} of ${this.documentComments.length} comments. Export detailed report for complete list.`, margin, yPosition);
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
           }
@@ -829,13 +584,12 @@ export default {
         doc.text('SIGNATURES', pageWidth / 2, yPosition, { align: 'center' });
         yPosition += 15;
         
-        // ===== CORRECTED SIGNATURE AREA =====
-        // Create a single horizontal signature box divided into three sections
+        // ===== SIGNATURE AREA =====
+        // Create a single horizontal signature box divided into two sections
         const totalSignatureWidth = contentWidth - 20; // Leave some margin
         const signatureHeight = 25;
-        const leftSectionWidth = totalSignatureWidth * 0.25; // 25% for left
-        const centerSectionWidth = totalSignatureWidth * 0.5; // 50% for center
-        const rightSectionWidth = totalSignatureWidth * 0.25; // 25% for right
+        const leftSectionWidth = totalSignatureWidth * 0.5; // 50% for left
+        const rightSectionWidth = totalSignatureWidth * 0.5; // 50% for right
         
         const signatureStartX = margin + 10;
         const signatureY = yPosition;
@@ -843,9 +597,8 @@ export default {
         // Draw the main signature box
         doc.rect(signatureStartX, signatureY, totalSignatureWidth, signatureHeight);
         
-        // Draw vertical dividing lines
+        // Draw vertical dividing line
         doc.line(signatureStartX + leftSectionWidth, signatureY, signatureStartX + leftSectionWidth, signatureY + signatureHeight);
-        doc.line(signatureStartX + leftSectionWidth + centerSectionWidth, signatureY, signatureStartX + leftSectionWidth + centerSectionWidth, signatureY + signatureHeight);
         
         // Add labels below the signature box
         yPosition += signatureHeight + 8;
@@ -855,11 +608,8 @@ export default {
         doc.setFont('helvetica', 'bold');
         doc.text('Reviewed by', signatureStartX + (leftSectionWidth / 2), yPosition, { align: 'center' });
         
-        // Center section label
-        doc.text('Approved by', signatureStartX + leftSectionWidth + (centerSectionWidth / 2), yPosition, { align: 'center' });
-        
         // Right section label
-        doc.text('Not specified', signatureStartX + leftSectionWidth + centerSectionWidth + (rightSectionWidth / 2), yPosition, { align: 'center' });
+        doc.text('Approved by', signatureStartX + leftSectionWidth + (rightSectionWidth / 2), yPosition, { align: 'center' });
         
         // Add names inside the signature boxes
         yPosition -= 8;
@@ -867,18 +617,13 @@ export default {
         doc.setFontSize(8);
         
         // Reviewed by name
-        const reviewedByName = this.reportData.reviewedBy || 'Not specified';
-        doc.text(reviewedByName, signatureStartX + (leftSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
+        doc.text('QA Reviewer', signatureStartX + (leftSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
         
         // Approved by name
-        const approvedByName = this.reportData.approvedBy || 'Not specified';
-        doc.text(approvedByName, signatureStartX + leftSectionWidth + (centerSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
-        
-        // Right section (Not specified)
-        doc.text('Not specified', signatureStartX + leftSectionWidth + centerSectionWidth + (rightSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
+        doc.text('Design Team', signatureStartX + leftSectionWidth + (rightSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
         
         // ===== SAVE PDF =====
-        const lruNameForFile = this.lruName || this.reportData.lruName || 'Unknown_LRU';
+        const lruNameForFile = this.lruName || 'Unknown_LRU';
         const currentDateForFile = this.currentDate || new Date().toLocaleDateString('en-GB');
         const fileName = `IQA_Observation_Report_${lruNameForFile}_${currentDateForFile.replace(/\//g, '-')}.pdf`;
         doc.save(fileName);
@@ -934,12 +679,6 @@ export default {
 .back-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: scale(1.05);
-}
-
-.app-logo {
-  width: 120px;
-  height: auto;
-  filter: brightness(0) invert(1);
 }
 
 .header-center {
@@ -1027,37 +766,9 @@ export default {
   border-radius: 4px;
 }
 
-.version-info {
-  font-size: 0.9em;
-  color: #6c757d;
-  font-weight: normal;
-  margin-left: 10px;
-}
-
-.report-info {
-  font-size: 0.9em;
-  color: #6c757d;
-  font-weight: normal;
-  margin-left: 10px;
-}
-
-.version-badge, .revision-badge {
-  background-color: #6c757d;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.9em;
-  display: inline-block;
-  width: fit-content;
-}
-
-.version-badge {
-  background-color: #495057;
-}
-
-.revision-badge {
-  background-color: #6c757d;
+.stage-value {
+  color: #4a5568;
+  font-weight: 600;
 }
 
 /* Document Details */
@@ -1095,9 +806,65 @@ export default {
   font-weight: 500;
 }
 
-.stage-value {
-  color: #4a5568;
+/* Version Selection Styles */
+.version-selection {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.version-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.version-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.version-dropdown label {
   font-weight: 600;
+  color: #4a5568;
+  font-size: 1.1em;
+}
+
+.version-select {
+  padding: 12px 16px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1em;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease;
+}
+
+.version-select:focus {
+  outline: none;
+  border-color: #4a5568;
+  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+.version-select:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.version-info {
+  padding: 10px 15px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border-left: 4px solid #4a5568;
+}
+
+.version-label {
+  font-weight: 600;
+  color: #2d3748;
 }
 
 /* Observations Section */
@@ -1154,25 +921,105 @@ export default {
   background-color: #edf2f7;
 }
 
-.category-select,
-.status-select {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 0.9em;
+/* Loading and State Styles */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
 }
 
-.observation-textarea,
-.justification-textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 0.9em;
-  resize: vertical;
-  font-family: inherit;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #4a5568;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.no-selection, .no-comments {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+  font-size: 1.1em;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+/* Badge Styles */
+.category-badge, .status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.category-major {
+  background-color: #dc3545;
+  color: white;
+}
+
+.category-minor {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.category-general {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.category-default {
+  background-color: #6c757d;
+  color: white;
+}
+
+.status-accepted {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-rejected {
+  background-color: #dc3545;
+  color: white;
+}
+
+.status-pending {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.status-default {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Table Text Styles */
+.comment-text, .justification-text {
+  max-width: 300px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.comment-text {
+  font-style: italic;
+  color: #495057;
+}
+
+.justification-text {
+  color: #6c757d;
 }
 
 /* Signatures Section */
@@ -1202,33 +1049,6 @@ export default {
   font-size: 1.1em;
 }
 
-.signature-area {
-  border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  padding: 30px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background: #f8fafc;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.signature-area:hover {
-  border-color: #4a5568;
-  background: #edf2f7;
-}
-
-.signature-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  color: #a0aec0;
-}
-
 .signature-display {
   background-color: #f8f9fa;
   border: 1px solid #e9ecef;
@@ -1247,62 +1067,11 @@ export default {
   font-size: 1.1em;
 }
 
-.no-signature {
-  color: #a0aec0;
-  font-style: italic;
-}
-
 .signature-date {
   font-size: 0.9em;
   color: #6c757d;
   margin-top: 5px;
   text-align: center;
-}
-
-/* Action Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 6px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.btn-primary {
-  background-color: #333;
-  color: white;
-}
-
-.btn-primary:hover {
-  background-color: #555;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-.btn-success {
-  background-color: #28a745;
-  color: white;
-}
-
-.btn-success:hover {
-  background-color: #218838;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 /* Responsive Design */
@@ -1339,6 +1108,25 @@ export default {
   .observations-table th,
   .observations-table td {
     padding: 10px 8px;
+  }
+  
+  .version-controls {
+    gap: 10px;
+  }
+  
+  .version-select {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+  
+  .comment-text, .justification-text {
+    max-width: 200px;
+    font-size: 0.9em;
+  }
+  
+  .category-badge, .status-badge {
+    font-size: 0.75em;
+    padding: 3px 8px;
   }
 }
 </style>

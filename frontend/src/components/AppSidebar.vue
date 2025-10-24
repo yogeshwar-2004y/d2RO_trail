@@ -3,6 +3,19 @@
 
     <!-- Sidebar Content -->
     <div class="sidebar-content" :class="{ 'collapsed': isCollapsed }">
+
+      <!-- Collapse/Expand Button -->
+      <div class="collapse-section">
+        <button class="collapse-btn" @click="toggleCollapse">
+          <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+      </div>
+
       <!-- User Info Section -->
       <div class="user-info-section">
         <div class="user-avatar">
@@ -103,17 +116,7 @@
         </div>
       </div>
 
-      <!-- Collapse/Expand Button -->
-      <div class="collapse-section">
-        <button class="collapse-btn" @click="toggleCollapse">
-          <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="9 18 15 12 9 6"></polyline>
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg>
-        </button>
-      </div>
+      
     </div>
 
     <!-- Password Change Modal -->
@@ -132,7 +135,7 @@ import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
 
 // Import icon components
-
+import HomeIcon from './icons/HomeIcon.vue'
 import DocumentIcon from './icons/DocumentIcon.vue'
 import MemoIcon from './icons/MemoIcon.vue'
 import ReportIcon from './icons/ReportIcon.vue'
@@ -162,29 +165,33 @@ const roleBasedCards = computed(() => {
   
   const cardDefinitions = {
     admin: [
-      { id: 'home', title: 'Home' },
+      { id: 'home', title: 'Home', route: 'HomePageAdmin', icon: HomeIcon },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
       { id: 'user activities', title: 'User Activities', route: 'UserActivities', icon: UserIcon },
     ],
-    reviewer: [
+    qareviewer: [
+      { id: 'home', title: 'Home', route: 'HomePageReviewer', icon: HomeIcon },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon }
     ],
     qahead: [
+      { id: 'home', title: 'Home', route: 'HomePageQAHead', icon: HomeIcon },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
     ],
     designhead: [
+      { id: 'home', title: 'Home', route: 'HomePageDesignHead', icon: HomeIcon },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
       { id: 'assign', title: 'Assign Projects', route: 'ProjectsForAssigning', icon: AssignIcon }
     ],
     designer: [
+      { id: 'home', title: 'Home', route: 'HomePageDesigner', icon: HomeIcon },
       { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
       { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
       { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon }
@@ -470,7 +477,7 @@ onMounted(() => {
 .profile-item {
   display: flex;
   align-items: center;
-  padding: 10px 12px;
+  padding: 12px 5px;
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 6px;
@@ -562,6 +569,7 @@ onMounted(() => {
 
 .logout-item {
   color: #ff6b6b;
+  margin-bottom: 8px;
 }
 
 .logout-item:hover {
@@ -570,7 +578,7 @@ onMounted(() => {
 
 /* Collapse Section */
 .collapse-section {
-  padding: 20px;
+  padding: 10px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   bottom: 50px;
 }
@@ -580,7 +588,7 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  padding: 10px;
+  padding: 5px;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;

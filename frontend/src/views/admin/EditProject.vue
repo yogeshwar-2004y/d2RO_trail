@@ -260,7 +260,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/projects/${this.projectId}`,
+          `http://localhost:5000/api/projects/${this.projectId}`,
           {
             method: "PUT",
             headers: {

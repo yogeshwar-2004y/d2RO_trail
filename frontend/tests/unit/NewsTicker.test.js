@@ -76,7 +76,7 @@ describe('NewsTicker.vue', () => {
       wrapper = createWrapper()
       await wrapper.vm.$nextTick()
 
-      expect(global.fetch).toHaveBeenCalledWith('http://localhost:8000/api/news')
+      expect(global.fetch).toHaveBeenCalledWith('http://localhost:5000/api/news')
     })
 
     it('handles successful news loading', async () => {

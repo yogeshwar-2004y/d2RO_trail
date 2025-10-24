@@ -96,7 +96,7 @@ export default {
 
       this.loading = true;
       try {
-        const response = await fetch("http://localhost:8000/api/news");
+        const response = await fetch("http://localhost:5000/api/news");
         const data = await response.json();
 
         if (data.success && data.news.length > 0) {
@@ -139,6 +139,7 @@ export default {
   position: relative;
   border-top: 0.8px solid #34495e;
   border-bottom: 0.8px solid #34495e;
+  margin-left: 10px;
 }
 
 .news-ticker {

@@ -314,12 +314,12 @@ export default {
   props: {
     readonly: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isTemplatePreview: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -614,7 +614,7 @@ export default {
         console.log("Submitting mechanical inspection report:", submissionData);
 
         const response = await fetch(
-          "http://localhost:8000/api/mechanical-inspection",
+          "http://localhost:5000/api/mechanical-inspection",
           {
             method: "POST",
             headers: {

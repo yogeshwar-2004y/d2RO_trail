@@ -6,7 +6,11 @@
     </div>
 
     <!-- Success Popup Modal -->
-    <div v-if="showSuccessMessage" class="popup-overlay" @click="hideSuccessMessage">
+    <div
+      v-if="showSuccessMessage"
+      class="popup-overlay"
+      @click="hideSuccessMessage"
+    >
       <div class="popup-modal" @click.stop>
         <div class="popup-header">
           <div class="popup-icon">
@@ -26,7 +30,11 @@
     <div class="filters-section">
       <div class="filter-group">
         <label for="statusFilter">Filter by Status:</label>
-        <select id="statusFilter" v-model="statusFilter" @change="filterRequests">
+        <select
+          id="statusFilter"
+          v-model="statusFilter"
+          @change="filterRequests"
+        >
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
           <option value="in_progress">In Progress</option>
@@ -37,10 +45,10 @@
       </div>
       <div class="filter-group">
         <label for="searchInput">Search:</label>
-        <input 
-          id="searchInput" 
-          type="text" 
-          v-model="searchQuery" 
+        <input
+          id="searchInput"
+          type="text"
+          v-model="searchQuery"
           @input="filterRequests"
           placeholder="Search by username, user ID, or issue..."
         />
@@ -79,9 +87,9 @@
             <h3>Online Requests ({{ filteredRequests.length }})</h3>
           </div>
           <div class="requests-list">
-            <div 
-              v-for="request in filteredRequests" 
-              :key="request.id" 
+            <div
+              v-for="request in filteredRequests"
+              :key="request.id"
               class="request-card"
               :class="getStatusClass(request.status)"
             >
@@ -90,13 +98,28 @@
                   <h3>{{ request.username }} (ID: {{ request.user_id }})</h3>
                   <div class="date-info">
                     <span class="submitted-date">
-                      <strong>Submitted:</strong> {{ formatDateTime(request.created_at) }}
+                      <strong>Submitted:</strong>
+                      {{ formatDateTime(request.created_at) }}
                     </span>
-                    <span v-if="request.updated_at && request.updated_at !== request.created_at" class="updated-date">
-                      <strong>Last Updated:</strong> {{ formatDateTime(request.updated_at) }}
+                    <span
+                      v-if="
+                        request.updated_at &&
+                        request.updated_at !== request.created_at
+                      "
+                      class="updated-date"
+                    >
+                      <strong>Last Updated:</strong>
+                      {{ formatDateTime(request.updated_at) }}
                     </span>
-                    <span v-if="request.status_updated_at && request.status_updated_at !== request.created_at" class="status-updated-info">
-                      <strong>Status Updated:</strong> {{ formatDateTime(request.status_updated_at) }}
+                    <span
+                      v-if="
+                        request.status_updated_at &&
+                        request.status_updated_at !== request.created_at
+                      "
+                      class="status-updated-info"
+                    >
+                      <strong>Status Updated:</strong>
+                      {{ formatDateTime(request.status_updated_at) }}
                       <span v-if="request.status_updated_by" class="updated-by">
                         by User ID {{ request.status_updated_by }}
                       </span>
@@ -104,23 +127,26 @@
                   </div>
                 </div>
                 <div class="request-status">
-                  <span class="status-badge" :class="request.status">{{ request.status.toUpperCase() }}</span>
+                  <span class="status-badge" :class="request.status">{{
+                    request.status.toUpperCase()
+                  }}</span>
                 </div>
               </div>
-              
+
               <div class="request-content">
                 <div class="issue-date">
-                  <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.issue_date) }}
+                  <strong>Issue Date (User Specified):</strong>
+                  {{ formatDateOnly(request.issue_date) }}
                 </div>
                 <div class="issue-description">
                   <strong>Issue Description:</strong>
                   <p>{{ request.issue_description }}</p>
                 </div>
               </div>
-              
+
               <div class="request-actions">
-                <select 
-                  v-model="request.status" 
+                <select
+                  v-model="request.status"
                   @change="updateStatus(request.id, request.status)"
                   class="status-select"
                 >
@@ -138,12 +164,14 @@
         <div v-if="filteredOfflineRequests.length > 0" class="requests-section">
           <div class="section-header">
             <h3>Offline Requests ({{ filteredOfflineRequests.length }})</h3>
-            <span class="offline-indicator">⚠️ Stored locally - will sync when backend is available</span>
+            <span class="offline-indicator"
+              >⚠️ Stored locally - will sync when backend is available</span
+            >
           </div>
           <div class="requests-list">
-            <div 
-              v-for="request in filteredOfflineRequests" 
-              :key="request.id" 
+            <div
+              v-for="request in filteredOfflineRequests"
+              :key="request.id"
               class="request-card offline-request"
             >
               <div class="request-header">
@@ -151,30 +179,38 @@
                   <h3>{{ request.username }} (ID: {{ request.userId }})</h3>
                   <div class="date-info">
                     <span class="submitted-date">
-                      <strong>Stored Locally:</strong> {{ formatDateTime(request.created_at) }}
+                      <strong>Stored Locally:</strong>
+                      {{ formatDateTime(request.created_at) }}
                     </span>
-                    <span v-if="request.submission_attempts > 0" class="attempts-info">
-                      <strong>Sync Attempts:</strong> {{ request.submission_attempts }}
+                    <span
+                      v-if="request.submission_attempts > 0"
+                      class="attempts-info"
+                    >
+                      <strong>Sync Attempts:</strong>
+                      {{ request.submission_attempts }}
                     </span>
                   </div>
                 </div>
                 <div class="request-status">
-                  <span class="status-badge offline-pending">OFFLINE PENDING</span>
+                  <span class="status-badge offline-pending"
+                    >OFFLINE PENDING</span
+                  >
                 </div>
               </div>
-              
+
               <div class="request-content">
                 <div class="issue-date">
-                  <strong>Issue Date (User Specified):</strong> {{ formatDateOnly(request.date) }}
+                  <strong>Issue Date (User Specified):</strong>
+                  {{ formatDateOnly(request.date) }}
                 </div>
                 <div class="issue-description">
                   <strong>Issue Description:</strong>
                   <p>{{ request.issue }}</p>
                 </div>
               </div>
-              
+
               <div class="request-actions">
-                <button 
+                <button
                   @click="syncOfflineRequest(request.id)"
                   class="sync-btn"
                   :disabled="loading"
@@ -187,7 +223,13 @@
         </div>
 
         <!-- No Requests Message -->
-        <div v-if="filteredRequests.length === 0 && filteredOfflineRequests.length === 0" class="no-requests">
+        <div
+          v-if="
+            filteredRequests.length === 0 &&
+            filteredOfflineRequests.length === 0
+          "
+          class="no-requests"
+        >
           <p>No tech support requests found matching your criteria.</p>
         </div>
       </div>
@@ -196,7 +238,7 @@
 </template>
 
 <script>
-import { currentUser } from '@/stores/userStore'
+import { currentUser } from "@/stores/userStore";
 
 export default {
   name: "TechSupportManagement",
@@ -212,31 +254,31 @@ export default {
       showSuccessMessage: false,
       successMessage: "",
       showOfflineRequests: true,
-      exportLimit: 50
+      exportLimit: 50,
     };
   },
   async mounted() {
     // Initialize user store if not already done
-    const { initializeUser } = await import('@/stores/userStore');
+    const { initializeUser } = await import("@/stores/userStore");
     initializeUser();
     await this.loadRequests();
     this.loadOfflineRequests();
-    
+
     // Add keyboard event listener for popup
-    document.addEventListener('keydown', this.handleKeydown);
+    document.addEventListener("keydown", this.handleKeydown);
   },
 
   beforeUnmount() {
     // Remove keyboard event listener
-    document.removeEventListener('keydown', this.handleKeydown);
+    document.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
     async loadRequests() {
       try {
         this.loading = true;
-        const response = await fetch("http://127.0.0.1:8000/api/tech-support");
+        const response = await fetch("http://127.0.0.1:5000/api/tech-support");
         const data = await response.json();
-        
+
         if (data.success) {
           this.requests = data.requests;
           this.filteredRequests = [...this.requests];
@@ -252,11 +294,13 @@ export default {
 
     loadOfflineRequests() {
       try {
-        const offlineData = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
-        this.offlineRequests = offlineData.map(request => ({
+        const offlineData = JSON.parse(
+          localStorage.getItem("tech_support_offline") || "[]"
+        );
+        this.offlineRequests = offlineData.map((request) => ({
           ...request,
           isOffline: true,
-          status: 'offline_pending'
+          status: "offline_pending",
         }));
         this.filteredOfflineRequests = [...this.offlineRequests];
         console.log(`Loaded ${this.offlineRequests.length} offline requests`);
@@ -269,17 +313,17 @@ export default {
 
     async syncOfflineRequest(requestId) {
       try {
-        const request = this.offlineRequests.find(r => r.id === requestId);
+        const request = this.offlineRequests.find((r) => r.id === requestId);
         if (!request) return;
 
         const requestData = {
           username: request.username,
           userId: request.userId,
           date: request.date,
-          issue: request.issue
+          issue: request.issue,
         };
 
-        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -329,7 +373,10 @@ export default {
         // Get all requests (online + offline) up to the limit
         const allRequests = [
           ...this.filteredRequests.slice(0, this.exportLimit),
-          ...this.filteredOfflineRequests.slice(0, Math.max(0, this.exportLimit - this.filteredRequests.length))
+          ...this.filteredOfflineRequests.slice(
+            0,
+            Math.max(0, this.exportLimit - this.filteredRequests.length)
+          ),
         ];
 
         if (allRequests.length === 0) {
@@ -339,11 +386,16 @@ export default {
 
         // Create PDF content
         const pdfContent = this.generatePDFContent(allRequests);
-        
+
         // Create and download PDF
-        this.downloadPDF(pdfContent, `tech_support_requests_${new Date().toISOString().split('T')[0]}.pdf`);
-        
-        this.showSuccessNotification(`Exported ${allRequests.length} requests to PDF`);
+        this.downloadPDF(
+          pdfContent,
+          `tech_support_requests_${new Date().toISOString().split("T")[0]}.pdf`
+        );
+
+        this.showSuccessNotification(
+          `Exported ${allRequests.length} requests to PDF`
+        );
       } catch (error) {
         console.error("Error exporting to PDF:", error);
         alert("Failed to export PDF. Please try again.");
@@ -353,8 +405,8 @@ export default {
     generatePDFContent(requests) {
       const currentDate = new Date().toLocaleDateString();
       const totalRequests = requests.length;
-      const onlineRequests = requests.filter(r => !r.isOffline).length;
-      const offlineRequests = requests.filter(r => r.isOffline).length;
+      const onlineRequests = requests.filter((r) => !r.isOffline).length;
+      const offlineRequests = requests.filter((r) => r.isOffline).length;
 
       let content = `
         <html>
@@ -391,21 +443,39 @@ export default {
 
       requests.forEach((request, index) => {
         const statusClass = `status-${request.status}`;
-        const requestClass = request.isOffline ? 'offline' : '';
-        
+        const requestClass = request.isOffline ? "offline" : "";
+
         content += `
           <div class="request ${requestClass}">
             <div class="request-header">
-              Request #${index + 1} - ${request.username} (ID: ${request.userId})
+              Request #${index + 1} - ${request.username} (ID: ${
+          request.userId
+        })
               <span class="${statusClass}">[${request.status.toUpperCase()}]</span>
-              ${request.isOffline ? '<span style="color: #856404;">[OFFLINE]</span>' : ''}
+              ${
+                request.isOffline
+                  ? '<span style="color: #856404;">[OFFLINE]</span>'
+                  : ""
+              }
             </div>
             <div class="request-details">
-              <p><strong>Issue Date:</strong> ${this.formatDateOnly(request.date)}</p>
-              <p><strong>Submitted:</strong> ${this.formatDateTime(request.created_at)}</p>
-              ${request.status_updated_at ? `<p><strong>Last Updated:</strong> ${this.formatDateTime(request.status_updated_at)}</p>` : ''}
+              <p><strong>Issue Date:</strong> ${this.formatDateOnly(
+                request.date
+              )}</p>
+              <p><strong>Submitted:</strong> ${this.formatDateTime(
+                request.created_at
+              )}</p>
+              ${
+                request.status_updated_at
+                  ? `<p><strong>Last Updated:</strong> ${this.formatDateTime(
+                      request.status_updated_at
+                    )}</p>`
+                  : ""
+              }
               <p><strong>Issue Description:</strong></p>
-              <p style="margin-left: 20px; white-space: pre-wrap;">${request.issue}</p>
+              <p style="margin-left: 20px; white-space: pre-wrap;">${
+                request.issue
+              }</p>
             </div>
           </div>
         `;
@@ -421,12 +491,12 @@ export default {
 
     downloadPDF(htmlContent, filename) {
       // Create a new window with the HTML content
-      const printWindow = window.open('', '_blank');
+      const printWindow = window.open("", "_blank");
       printWindow.document.write(htmlContent);
       printWindow.document.close();
-      
+
       // Wait for content to load, then print
-      printWindow.onload = function() {
+      printWindow.onload = function () {
         printWindow.print();
         printWindow.close();
       };
@@ -437,34 +507,40 @@ export default {
         // Get current admin user ID
         const currentAdmin = currentUser();
         console.log("Current admin user:", currentAdmin); // Debug log
-        
+
         // Try to get user ID from different possible field names
-        const adminUserId = currentAdmin?.id || currentAdmin?.user_id || currentAdmin?.userId;
-        
+        const adminUserId =
+          currentAdmin?.id || currentAdmin?.user_id || currentAdmin?.userId;
+
         if (!currentAdmin || !adminUserId) {
           console.error("User object structure:", currentAdmin);
-          alert("Unable to identify admin user. Please refresh the page and try again.");
+          alert(
+            "Unable to identify admin user. Please refresh the page and try again."
+          );
           return;
         }
 
-        const response = await fetch(`http://127.0.0.1:8000/api/tech-support/${requestId}/status`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ 
-            status: newStatus,
-            admin_user_id: adminUserId
-          }),
-          mode: "cors",
-        });
+        const response = await fetch(
+          `http://127.0.0.1:5000/api/tech-support/${requestId}/status`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              status: newStatus,
+              admin_user_id: adminUserId,
+            }),
+            mode: "cors",
+          }
+        );
 
         const data = await response.json();
         console.log("Status update response:", data); // Debug log
-        
+
         if (data.success) {
           // Update the local request status
-          const request = this.requests.find(r => r.id === requestId);
+          const request = this.requests.find((r) => r.id === requestId);
           if (request) {
             request.status = newStatus;
             request.status_updated_by = adminUserId;
@@ -472,9 +548,11 @@ export default {
             request.updated_at = new Date().toISOString();
           }
           this.filterRequests();
-          
+
           // Show success message
-          this.showSuccessNotification(`Status updated successfully to "${newStatus.toUpperCase()}"`);
+          this.showSuccessNotification(
+            `Status updated successfully to "${newStatus.toUpperCase()}"`
+          );
         } else {
           alert("Failed to update status: " + data.message);
         }
@@ -490,16 +568,19 @@ export default {
 
       // Filter by status
       if (this.statusFilter) {
-        filtered = filtered.filter(request => request.status === this.statusFilter);
+        filtered = filtered.filter(
+          (request) => request.status === this.statusFilter
+        );
       }
 
       // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(request => 
-          request.username.toLowerCase().includes(query) ||
-          request.user_id.toString().includes(query) ||
-          request.issue_description.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (request) =>
+            request.username.toLowerCase().includes(query) ||
+            request.user_id.toString().includes(query) ||
+            request.issue_description.toLowerCase().includes(query)
         );
       }
 
@@ -509,17 +590,18 @@ export default {
       let filteredOffline = [...this.offlineRequests];
 
       // Filter by status (offline requests are always 'offline_pending')
-      if (this.statusFilter && this.statusFilter !== 'offline_pending') {
+      if (this.statusFilter && this.statusFilter !== "offline_pending") {
         filteredOffline = [];
       }
 
       // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filteredOffline = filteredOffline.filter(request => 
-          request.username.toLowerCase().includes(query) ||
-          request.userId.toString().includes(query) ||
-          request.issue.toLowerCase().includes(query)
+        filteredOffline = filteredOffline.filter(
+          (request) =>
+            request.username.toLowerCase().includes(query) ||
+            request.userId.toString().includes(query) ||
+            request.issue.toLowerCase().includes(query)
         );
       }
 
@@ -530,14 +612,14 @@ export default {
       if (!dateString) return "N/A";
       const date = new Date(dateString);
       // Use local timezone for display
-      const formatted = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: true
+      const formatted = date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
       });
       // Add timezone info
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -548,10 +630,10 @@ export default {
       if (!dateString) return "N/A";
       const date = new Date(dateString);
       // Format as date only (user-specified issue date)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       });
     },
 
@@ -562,7 +644,7 @@ export default {
     showSuccessNotification(message) {
       this.successMessage = message;
       this.showSuccessMessage = true;
-      
+
       // Auto-hide after 4 seconds
       setTimeout(() => {
         this.hideSuccessMessage();
@@ -576,11 +658,11 @@ export default {
 
     handleKeydown(event) {
       // Close popup on Escape key
-      if (event.key === 'Escape' && this.showSuccessMessage) {
+      if (event.key === "Escape" && this.showSuccessMessage) {
         this.hideSuccessMessage();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -759,7 +841,8 @@ export default {
   min-height: 400px;
 }
 
-.loading, .no-requests {
+.loading,
+.no-requests {
   text-align: center;
   padding: 40px;
   color: #666;
@@ -929,12 +1012,12 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .request-header {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .request-actions {
     justify-content: flex-start;
   }

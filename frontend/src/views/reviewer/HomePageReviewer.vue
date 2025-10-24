@@ -20,7 +20,7 @@
             <line x1="10" y1="9" x2="8" y2="9"></line>
           </svg>
         </div>
-        <div class="card-title">PLAN DOCUMENTS</div>
+        <div class="card-title">DOCUMENTS</div>
       </div>
       <div class="card" @click="goToPage('MemoDashboard')">
         <div class="card-icon">

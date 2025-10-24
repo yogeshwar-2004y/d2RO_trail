@@ -212,6 +212,21 @@ def upload_plan_document():
             cur.close()
             return jsonify({"success": False, "message": "LRU not found"}), 404
         
+        # Check if any document in this LRU is already accepted (final version)
+        cur.execute("""
+            SELECT document_id, document_number, version
+            FROM plan_documents
+            WHERE lru_id = %s AND status = 'accepted' AND is_active = TRUE
+        """, (lru_id,))
+        
+        accepted_document = cur.fetchone()
+        if accepted_document:
+            cur.close()
+            return jsonify({
+                "success": False, 
+                "message": f"Upload restricted. Document {accepted_document[1]} v{accepted_document[2]} has been accepted as the final version for this LRU. No further uploads are allowed."
+            }), 400
+
         # Check for active comments in this LRU/project before allowing upload
         cur.execute("""
             SELECT COUNT(*) 
@@ -312,6 +327,74 @@ def update_plan_document_status(document_id):
         
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error updating plan document status: {str(e)}")
+
+@documents_bp.route('/api/documents/<int:document_id>/accept', methods=['POST'])
+def accept_document(document_id):
+    """Accept a document as final version - prevents further uploads"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # First verify the document exists and get its LRU
+        cur.execute("""
+            SELECT pd.document_id, pd.lru_id, pd.document_number, pd.version, 
+                   pd.status, l.lru_name, p.project_name
+            FROM plan_documents pd
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.document_id = %s AND pd.is_active = TRUE
+        """, (document_id,))
+        
+        document = cur.fetchone()
+        if not document:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        lru_id = document[1]
+        
+        # Check if any document in this LRU is already accepted
+        cur.execute("""
+            SELECT document_id, document_number, version
+            FROM plan_documents
+            WHERE lru_id = %s AND status = 'accepted' AND is_active = TRUE
+        """, (lru_id,))
+        
+        existing_accepted = cur.fetchone()
+        if existing_accepted:
+            cur.close()
+            return jsonify({
+                "success": False, 
+                "message": f"Document {existing_accepted[1]} v{existing_accepted[2]} is already accepted as final version for this LRU"
+            }), 400
+        
+        # Update document status to 'accepted'
+        cur.execute("""
+            UPDATE plan_documents 
+            SET status = 'accepted'
+            WHERE document_id = %s AND is_active = TRUE
+            RETURNING document_id, document_number, version
+        """, (document_id,))
+        
+        result = cur.fetchone()
+        if not result:
+            cur.close()
+            return jsonify({"success": False, "message": "Failed to update document status"}), 500
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": f"Document {result[1]} v{result[2]} has been accepted as the final version",
+            "document_id": result[0],
+            "document_number": result[1],
+            "version": result[2],
+            "lru_name": document[5],
+            "project_name": document[6]
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error accepting document: {str(e)}")
 
 @documents_bp.route('/api/plan-documents/<int:document_id>', methods=['GET'])
 def get_plan_document(document_id):

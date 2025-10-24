@@ -43,7 +43,7 @@ def get_reports():
             base_query = """
                 SELECT 
                     r.report_id,
-                    r.memo_id,
+                    NULL as memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -55,14 +55,13 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    m.wing_proj_ref_no,
-                    m.lru_sru_desc,
-                    m.part_number,
-                    r.memo_id
+                    NULL as wing_proj_ref_no,
+                    NULL as lru_sru_desc,
+                    NULL as part_number,
+                    NULL as memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                LEFT JOIN memos m ON r.memo_id = m.memo_id
                 WHERE r.project_id IN (
                     SELECT project_id FROM projects WHERE created_by = %s
                 )
@@ -105,7 +104,7 @@ def get_reports():
             base_query = """
                 SELECT 
                     r.report_id,
-                    r.memo_id,
+                    NULL as memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -117,14 +116,13 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    m.wing_proj_ref_no,
-                    m.lru_sru_desc,
-                    m.part_number,
-                    r.memo_id
+                    NULL as wing_proj_ref_no,
+                    NULL as lru_sru_desc,
+                    NULL as part_number,
+                    NULL as memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                LEFT JOIN memos m ON r.memo_id = m.memo_id
                 ORDER BY r.date_of_review DESC
             """
             query_params = ()
@@ -238,11 +236,11 @@ def get_report_details(report_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch report details with memo and template information
+        # Fetch report details with template information
         cur.execute("""
             SELECT 
                 r.report_id,
-                r.memo_id,
+                NULL as memo_id,
                 r.project_id,
                 r.lru_id,
                 r.serial_id,
@@ -250,40 +248,39 @@ def get_report_details(report_id):
                 r.date_of_review,
                 r.review_venue,
                 r.reference_document,
-                r.status,
-                r.created_at,
+                'Active' as status,
+                r.date_of_review as created_at,
                 r.template_id,
                 p.project_name,
                 l.lru_name,
-                m.wing_proj_ref_no,
-                m.lru_sru_desc,
-                m.part_number,
-                m.from_person,
-                m.to_person,
-                m.thru_person,
-                m.casdic_ref_no,
-                m.dated,
-                m.manufacturer,
-                m.drawing_no_rev,
-                m.source,
-                m.venue,
-                m.memo_date,
-                m.name_designation,
-                m.test_facility,
-                m.test_cycle_duration,
-                m.test_start_on,
-                m.test_complete_on,
-                m.calibration_status,
-                m.func_check_initial,
-                m.perf_check_during,
-                m.func_check_end,
-                m.certified,
-                m.remarks,
+                NULL as wing_proj_ref_no,
+                NULL as lru_sru_desc,
+                NULL as part_number,
+                NULL as from_person,
+                NULL as to_person,
+                NULL as thru_person,
+                NULL as casdic_ref_no,
+                NULL as dated,
+                NULL as manufacturer,
+                NULL as drawing_no_rev,
+                NULL as source,
+                NULL as venue,
+                NULL as memo_date,
+                NULL as name_designation,
+                NULL as test_facility,
+                NULL as test_cycle_duration,
+                NULL as test_start_on,
+                NULL as test_complete_on,
+                NULL as calibration_status,
+                NULL as func_check_initial,
+                NULL as perf_check_during,
+                NULL as func_check_end,
+                NULL as certified,
+                NULL as remarks,
                 rt.template_name
             FROM reports r
             LEFT JOIN projects p ON r.project_id = p.project_id
             LEFT JOIN lrus l ON r.lru_id = l.lru_id
-            LEFT JOIN memos m ON r.memo_id = m.memo_id
             LEFT JOIN report_templates rt ON r.template_id = rt.template_id
             WHERE r.report_id = %s
         """, (report_id,))

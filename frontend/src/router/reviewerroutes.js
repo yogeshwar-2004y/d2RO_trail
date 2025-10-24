@@ -24,7 +24,7 @@ const reviewerRoutes = [
     props: true,
   },
   {
-    path: '/shared-memos',
+    path: '/memos/shared-memos',
     name: 'SharedMemoDashboard',
     component: SharedMemoDashboard,
   },

@@ -210,7 +210,7 @@ describe('SubmitMemo.vue', () => {
       await wrapper.vm.submitForm()
       
       expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:8000/api/memos',
+        'http://localhost:5000/api/memos',
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({

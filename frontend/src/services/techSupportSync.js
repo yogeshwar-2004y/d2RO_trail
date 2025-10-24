@@ -9,14 +9,14 @@ class TechSupportSyncService {
 
   setupEventListeners() {
     // Listen for online/offline events
-    window.addEventListener('online', () => {
-      console.log('Back online - starting sync');
+    window.addEventListener("online", () => {
+      console.log("Back online - starting sync");
       this.isOnline = true;
       this.syncOfflineRequests();
     });
 
-    window.addEventListener('offline', () => {
-      console.log('Gone offline');
+    window.addEventListener("offline", () => {
+      console.log("Gone offline");
       this.isOnline = false;
     });
   }
@@ -32,8 +32,10 @@ class TechSupportSyncService {
 
   async syncOfflineRequests() {
     try {
-      const offlineRequests = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
-      
+      const offlineRequests = JSON.parse(
+        localStorage.getItem("tech_support_offline") || "[]"
+      );
+
       if (offlineRequests.length === 0) {
         return;
       }
@@ -41,7 +43,7 @@ class TechSupportSyncService {
       console.log(`Found ${offlineRequests.length} offline requests to sync`);
 
       const successfulSubmissions = [];
-      
+
       for (const request of offlineRequests) {
         try {
           // Prepare data for backend
@@ -49,17 +51,20 @@ class TechSupportSyncService {
             username: request.username,
             userId: request.userId,
             date: request.date,
-            issue: request.issue
+            issue: request.issue,
           };
 
-          const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-            mode: "cors",
-          });
+          const response = await fetch(
+            "http://127.0.0.1:5000/api/tech-support",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(requestData),
+              mode: "cors",
+            }
+          );
 
           const data = await response.json();
 
@@ -75,7 +80,8 @@ class TechSupportSyncService {
           } else {
             console.log(`Failed to sync request ${request.id}:`, data.message);
             // Increment attempt counter
-            request.submission_attempts = (request.submission_attempts || 0) + 1;
+            request.submission_attempts =
+              (request.submission_attempts || 0) + 1;
           }
         } catch (error) {
           console.log(`Error syncing request ${request.id}:`, error.message);
@@ -86,23 +92,27 @@ class TechSupportSyncService {
 
       // Remove successfully submitted requests
       const remainingRequests = offlineRequests.filter(
-        request => !successfulSubmissions.includes(request.id)
+        (request) => !successfulSubmissions.includes(request.id)
       );
 
       // Remove requests that have failed too many times (more than 10 attempts)
       const finalRequests = remainingRequests.filter(
-        request => (request.submission_attempts || 0) < 10
+        (request) => (request.submission_attempts || 0) < 10
       );
 
       // Update localStorage
-      localStorage.setItem('tech_support_offline', JSON.stringify(finalRequests));
+      localStorage.setItem(
+        "tech_support_offline",
+        JSON.stringify(finalRequests)
+      );
 
       if (successfulSubmissions.length > 0) {
-        console.log(`Successfully synced ${successfulSubmissions.length} requests`);
+        console.log(
+          `Successfully synced ${successfulSubmissions.length} requests`
+        );
       }
-
     } catch (error) {
-      console.error('Error during sync:', error);
+      console.error("Error during sync:", error);
     }
   }
 

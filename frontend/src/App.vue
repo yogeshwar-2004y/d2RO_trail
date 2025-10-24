@@ -11,7 +11,7 @@ const route = useRoute();
 
 // Show sidebar on all pages except login and tech support form
 const showSidebar = computed(() => {
-  return route.name !== 'login' && route.name !== 'TechSupport';
+  return route.name !== "login" && route.name !== "TechSupport";
 });
 </script>
 
@@ -168,7 +168,7 @@ export default {
     };
   },
   mounted() {
-    axios.get('http://127.0.0.1:8000/api')
+    axios.get('http://127.0.0.1:5000/api')
       .then(response => {
         this.message = response.data.message;
       })

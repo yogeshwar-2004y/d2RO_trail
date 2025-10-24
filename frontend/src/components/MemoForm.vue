@@ -364,88 +364,92 @@
             <td class="lru-cell">
               <div class="lru-field unit-identification-container">
                 <label>UNIT IDENTIFICATION :</label>
-                <div class="dropdown-wrapper">
-                  <div
-                    class="test-dropdown"
-                    :class="{ active: showTestsDropdown }"
-                    @click="toggleTestsDropdown"
-                  >
-                    <div class="selected-value">
-                      {{ selectedTestName || "Select Test" }}
-                    </div>
-                    <div class="dropdown-icon">▾</div>
+                <div class="cascading-dropdown">
+                  <div class="dropdown-trigger" @click="toggleCascadingDropdown">
+                    <span class="selected-text">{{ getSelectedText() || "Select Test" }}</span>
+                    <span class="dropdown-arrow">▼</span>
                   </div>
-                  <!-- Main Tests Dropdown -->
-                  <div
-                    v-if="showTestsDropdown"
-                    class="tests-menu"
-                    @mouseleave="handleMainMenuLeave"
-                  >
-                    <div class="menu-item-container">
-                      <div v-if="tests.length === 0" class="menu-item no-data">
-                        No tests available
-                      </div>
-                      <div
-                        v-else
-                        v-for="(t, index) in tests"
-                        :key="t.test_id"
-                        class="menu-item"
-                        :class="{
-                          'has-submenu':
-                            testIdToStages[t.test_id] &&
-                            testIdToStages[t.test_id].length > 0,
-                          active: hoveredTestId === t.test_id,
-                        }"
-                        @mouseenter="handleTestHover(t.test_id, index)"
-                        @click.stop="selectTest(t)"
-                      >
-                        <span class="menu-text">{{ t.test_name }}</span>
-                        <span
-                          v-if="
-                            testIdToStages[t.test_id] &&
-                            testIdToStages[t.test_id].length > 0
-                          "
-                          class="menu-arrow"
-                          >❯</span
-                        >
-                      </div>
+                  
+                  <!-- Level 1: Tests -->
+                  <div v-if="showCascadingDropdown" class="cascading-menu level-1">
+                    <div v-if="loadingTestGroups" class="menu-item loading">Loading tests...</div>
+                    <div v-else-if="testGroups.length === 0" class="menu-item no-data">No tests available</div>
+                    <div
+                      v-else
+                      v-for="group in testGroups"
+                      :key="group.group_id"
+                      class="menu-item"
+                      :class="{ active: hoveredTestGroup === group.group_id }"
+                      @mouseenter="handleTestGroupHover(group)"
+                      @click="selectTestGroup(group)"
+                    >
+                      <span class="item-text">{{ group.group_name }}</span>
+                      <span class="arrow">▶</span>
                     </div>
                   </div>
-
-                  <!-- Separate Stages Submenu -->
-                  <div
-                    v-if="
-                      showTestsDropdown &&
-                      hoveredTestId &&
-                      allHoveredTypes.length > 0
-                    "
-                    class="stages-submenu"
-                    :style="{ '--submenu-offset': submenuOffset + 'px' }"
-                    @mouseenter="keepSubmenuOpen = true"
-                    @mouseleave="handleSubmenuLeave"
+                  
+                  <!-- Level 2: Sub-Tests -->
+                  <div 
+                    v-if="showSubTests && hoveredTestGroup" 
+                    class="cascading-menu level-2"
+                    @mouseenter="keepSubTestsOpen = true"
+                    @mouseleave="handleSubTestsLeave"
                   >
-                    <div class="submenu-header">
-                      <span class="submenu-title">Test Types</span>
-                      <span
-                        v-if="!allHoveredTypes.length && hoveredTestId"
-                        class="loading-indicator"
-                        >Loading types...</span
-                      >
+                    <div v-if="loadingSubTests" class="menu-item loading">Loading sub-tests...</div>
+                    <div v-else-if="subTests.length === 0" class="menu-item no-data">No sub-tests available</div>
+                    <div
+                      v-else
+                      v-for="subTest in subTests"
+                      :key="subTest.sub_test_id"
+                      class="menu-item"
+                      :class="{ active: hoveredSubTest === subTest.sub_test_id }"
+                      @mouseenter="handleSubTestHover(subTest)"
+                      @click="selectSubTest(subTest)"
+                    >
+                      <span class="item-text">{{ subTest.sub_test_name }}</span>
+                      <span class="arrow">▶</span>
                     </div>
-                    <div class="submenu-item-container">
-                      <div
-                        v-for="type in allHoveredTypes"
-                        :key="type.type_id"
-                        class="submenu-item type-item"
-                        @click.stop="selectType(type)"
-                      >
-                        <span class="submenu-text">{{ type.type_name }}</span>
-                        <span
-                          v-if="type.type_name === formData.mechanicalInsp"
-                          class="check-icon"
-                          >✓</span
-                        >
-                      </div>
+                  </div>
+                  
+                  <!-- Level 3: Bulletins -->
+                  <div 
+                    v-if="showBulletins && hoveredSubTest" 
+                    class="cascading-menu level-3"
+                    @mouseenter="keepBulletinsOpen = true"
+                    @mouseleave="handleBulletinsLeave"
+                  >
+                    <div v-if="loadingBulletins" class="menu-item loading">Loading bulletins...</div>
+                    <div v-else-if="bulletins.length === 0" class="menu-item no-data">No bulletins available</div>
+                    <div
+                      v-else
+                      v-for="bulletin in bulletins"
+                      :key="bulletin.bulletin_id"
+                      class="menu-item"
+                      :class="{ active: hoveredBulletin === bulletin.bulletin_id }"
+                      @mouseenter="handleBulletinHover(bulletin)"
+                      @click="selectBulletin(bulletin)"
+                    >
+                      <span class="item-text">{{ bulletin.bulletin_name }}</span>
+                      <span v-if="bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0" class="arrow">▶</span>
+                    </div>
+                  </div>
+                  
+                  <!-- Level 4: Sub-Bulletins -->
+                  <div 
+                    v-if="showSubBulletins && hoveredBulletin" 
+                    class="cascading-menu level-4"
+                    @mouseenter="keepSubBulletinsOpen = true"
+                    @mouseleave="handleSubBulletinsLeave"
+                  >
+                    <div v-if="subBulletins.length === 0" class="menu-item no-data">No sub-bulletins available</div>
+                    <div
+                      v-else
+                      v-for="subBulletin in subBulletins"
+                      :key="subBulletin.bulletin_id"
+                      class="menu-item"
+                      @click="selectSubBulletin(subBulletin)"
+                    >
+                      <span class="item-text">{{ subBulletin.bulletin_name }}</span>
                     </div>
                   </div>
                 </div>
@@ -1434,14 +1438,27 @@ export default {
       serialNumberLoading: false,
       serialNumberError: null,
       showSerialNumberDropdown: false,
-      // Tests data for Unit Identification dropdown
-      tests: [],
-      testIdToStages: {},
-      testIdToStageTypes: {}, // Store type_names for each test-stage combination
-      showTestsDropdown: false,
-      hoveredTestId: null,
-      keepSubmenuOpen: false,
-      submenuOffset: 0,
+
+      // Hierarchical test data for Unit Identification
+      testGroups: [],
+      subTests: [],
+      bulletins: [],
+      subBulletins: [],
+      loadingTestGroups: false,
+      loadingSubTests: false,
+      loadingBulletins: false,
+      
+      // Cascading dropdown state
+      showCascadingDropdown: false,
+      showSubTests: false,
+      showBulletins: false,
+      showSubBulletins: false,
+      hoveredTestGroup: null,
+      hoveredSubTest: null,
+      hoveredBulletin: null,
+      keepSubTestsOpen: false,
+      keepBulletinsOpen: false,
+      keepSubBulletinsOpen: false,
 
       // Time picker options
       hours: [
@@ -1506,8 +1523,11 @@ export default {
         revision3: "",
         mechanicalInsp: "",
         unitIdentification: "",
-        unitIdentificationTestId: null,
-        unitIdentificationTestName: "",
+        // Hierarchical test selection for Unit Identification
+        selectedTestGroup: "",
+        selectedSubTest: "",
+        selectedBulletin: "",
+        selectedSubBulletin: "",
         refDoc4: "",
         refNo4: "",
         version4: "",
@@ -1582,21 +1602,7 @@ export default {
       return [4, 5].includes(this.currentUserRole);
     },
     selectedTestName() {
-      return (
-        this.formData.unitIdentification ||
-        this.formData.unitIdentificationTestName
-      );
-    },
-    hoveredStages() {
-      if (!this.hoveredTestId) return [];
-      const stages = this.testIdToStages[this.hoveredTestId] || [];
-      // Debug logging
-      if (this.hoveredTestId) {
-        console.log("Hovered Test ID:", this.hoveredTestId);
-        console.log("Available stages:", stages);
-        console.log("All test-stage mappings:", this.testIdToStages);
-      }
-      return stages;
+      return this.formData.unitIdentification;
     },
     isNewMemo() {
       // Check if this is a new memo being submitted
@@ -1630,31 +1636,6 @@ export default {
     quantityOffered() {
       // Auto-calculate quantity based on selected serial numbers
       return this.formData.slNo ? this.formData.slNo.length : 0;
-    },
-    hoveredStageTypes() {
-      // Get stage types for the currently hovered test
-      if (!this.hoveredTestId) return [];
-      return this.testIdToStageTypes[this.hoveredTestId] || [];
-    },
-    allHoveredTypes() {
-      // Get all type names from all stages for the currently hovered test
-      if (!this.hoveredTestId) return [];
-      const stageTypes = this.testIdToStageTypes[this.hoveredTestId] || [];
-      const allTypes = [];
-
-      stageTypes.forEach((stage) => {
-        if (stage.types && stage.types.length > 0) {
-          stage.types.forEach((type) => {
-            // Avoid duplicates by checking if type already exists
-            if (!allTypes.find((t) => t.type_id === type.type_id)) {
-              allTypes.push(type);
-            }
-          });
-        }
-      });
-
-      // Sort by type name for better organization
-      return allTypes.sort((a, b) => a.type_name.localeCompare(b.type_name));
     },
 
     // Computed properties to combine date and time fields (convert 12-hour to 24-hour format)
@@ -1776,10 +1757,11 @@ export default {
     // Always try to fetch real data first
     console.log("Attempting to fetch data from backend...");
     await this.fetchLruOptions();
-    await this.fetchTestsConfiguration();
+    await this.fetchTestGroups();
 
     // Add click outside handler for dropdowns
     document.addEventListener("click", this.handleClickOutside);
+    document.addEventListener("click", this.handleCascadingClickOutside);
 
     console.log("Component mounted, initial data:", {
       memoId: this.memoId,
@@ -1793,6 +1775,7 @@ export default {
   beforeUnmount() {
     // Remove click outside handler
     document.removeEventListener("click", this.handleClickOutside);
+    document.removeEventListener("click", this.handleCascadingClickOutside);
   },
   methods: {
     // Convert 12-hour time format to 24-hour format
@@ -1856,163 +1839,6 @@ export default {
           "Main Control Unit for Aircraft Navigation System";
       }
     },
-    async fetchTestsConfiguration() {
-      try {
-        console.log("Fetching tests configuration...");
-        const res = await fetch(
-          "http://localhost:8000/api/tests-configuration"
-        );
-        const data = await res.json();
-        console.log("API Response:", data);
-
-        if (data && data.success) {
-          this.tests = data.tests || [];
-          console.log("Loaded tests:", this.tests);
-
-          const stageMap = {};
-          (data.stages || []).forEach((s) => {
-            stageMap[s.stage_id] = s;
-          });
-          console.log("Stage map:", stageMap);
-
-          const mapping = {};
-          (data.configurations || []).forEach((c) => {
-            if (!mapping[c.test_id]) mapping[c.test_id] = [];
-            const st = stageMap[c.stage_id];
-            if (
-              st &&
-              !mapping[c.test_id].some((x) => x.stage_id === st.stage_id)
-            ) {
-              mapping[c.test_id].push(st);
-            }
-          });
-          this.testIdToStages = mapping;
-          console.log("Final test-to-stages mapping:", this.testIdToStages);
-        } else {
-          console.error("API did not return success:", data);
-        }
-      } catch (e) {
-        console.error("Failed to fetch tests configuration", e);
-        // Fallback: Create some mock data for testing
-        this.tests = [
-          { test_id: 1, test_name: "Functional Test" },
-          { test_id: 2, test_name: "Performance Test" },
-          { test_id: 3, test_name: "Environmental Test" },
-        ];
-        this.testIdToStages = {
-          1: [
-            { stage_id: 1, stage_name: "STAGE" },
-            { stage_id: 2, stage_name: "PARTS" },
-          ],
-          2: [
-            { stage_id: 3, stage_name: "ASSY" },
-            { stage_id: 4, stage_name: "FINAL" },
-          ],
-          3: [{ stage_id: 5, stage_name: "INSTALL" }],
-        };
-        console.log("Using fallback mock data");
-      }
-    },
-    toggleTestsDropdown() {
-      this.showTestsDropdown = !this.showTestsDropdown;
-      if (!this.showTestsDropdown) {
-        this.hoveredTestId = null;
-        this.submenuOffset = 0;
-      }
-    },
-
-    async handleTestHover(testId, index) {
-      console.log("Hovering over test:", testId);
-      console.log(
-        "Available stages for this test:",
-        this.testIdToStages[testId]
-      );
-      this.hoveredTestId = testId;
-      this.keepSubmenuOpen = false;
-
-      // Calculate offset based on the menu item index
-      // Each menu item is approximately 48px tall (12px padding + 24px content + 12px padding)
-      this.submenuOffset = index * 48;
-
-      // Fetch stage types for this test if not already loaded
-      if (!this.testIdToStageTypes[testId]) {
-        console.log(`Fetching stage types for test ${testId}...`);
-        await this.fetchTestStageTypes(testId);
-      }
-    },
-
-    handleMainMenuLeave() {
-      setTimeout(() => {
-        if (!this.keepSubmenuOpen) {
-          this.hoveredTestId = null;
-        }
-      }, 150);
-    },
-
-    handleSubmenuLeave() {
-      this.keepSubmenuOpen = false;
-      setTimeout(() => {
-        this.hoveredTestId = null;
-      }, 100);
-    },
-    selectTest(test) {
-      // Only allow direct test selection if there are no sub-types available
-      const hasSubTypes =
-        this.testIdToStages[test.test_id] &&
-        this.testIdToStages[test.test_id].length > 0;
-
-      if (!hasSubTypes) {
-        // No sub-types, allow direct selection
-        this.formData.unitIdentificationTestId = test.test_id;
-        this.formData.unitIdentificationTestName = test.test_name;
-        this.formData.unitIdentification = test.test_name;
-        this.showTestsDropdown = false;
-        console.log(`Selected test without sub-types: ${test.test_name}`);
-      } else {
-        // Has sub-types, don't close dropdown - let user select from submenu
-        console.log(
-          `Test ${test.test_name} has sub-types, please select from submenu`
-        );
-      }
-    },
-    selectStage(stage) {
-      // When a stage is clicked from side dropdown, set Mechanical Inspection field
-      this.formData.mechanicalInsp = stage.stage_name;
-      this.showTestsDropdown = false;
-
-      // Log the selected stage with its types for debugging
-      if (stage.types && stage.types.length > 0) {
-        console.log(
-          `Selected stage: ${stage.stage_name} with types:`,
-          stage.types.map((t) => t.type_name)
-        );
-      }
-    },
-
-    selectType(type) {
-      // When a type is clicked from dropdown, set Unit Identification field with complete path
-      const selectedTest = this.tests.find(
-        (t) => t.test_id === this.hoveredTestId
-      );
-      if (selectedTest) {
-        // Store both the test info and create the display value
-        this.formData.unitIdentificationTestId = selectedTest.test_id;
-        this.formData.unitIdentificationTestName = selectedTest.test_name;
-        const combinedValue = `${selectedTest.test_name} - ${type.type_name}`;
-        this.formData.unitIdentification = combinedValue;
-
-        // Log the selected combination for debugging
-        console.log(
-          `Selected test: ${selectedTest.test_name}, type: ${type.type_name}, Combined: ${combinedValue}`
-        );
-      } else {
-        // Fallback if test not found
-        this.formData.unitIdentification = type.type_name;
-        console.log(`Selected type only: ${type.type_name}`);
-      }
-
-      this.showTestsDropdown = false;
-    },
 
     toggleSerialNumberDropdown() {
       this.showSerialNumberDropdown = !this.showSerialNumberDropdown;
@@ -2062,14 +1888,6 @@ export default {
         this.showSerialNumberDropdown = false;
       }
 
-      // Close tests dropdown if clicking outside
-      if (
-        this.showTestsDropdown &&
-        !event.target.closest(".dropdown-wrapper")
-      ) {
-        this.showTestsDropdown = false;
-        this.hoveredTestId = null;
-      }
     },
 
     async fetchLruOptions() {
@@ -2091,7 +1909,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2189,7 +2007,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:8000/api/lrus", {
+        const response = await fetch("http://localhost:5000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2200,34 +2018,6 @@ export default {
       }
     },
 
-    async fetchTestStageTypes(testId) {
-      try {
-        console.log(`Fetching stage types for test ID: ${testId}`);
-        const response = await fetch(
-          `http://localhost:8000/api/test/${testId}/stage-types`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Store the stage types for this test
-          this.testIdToStageTypes[testId] = data.stages;
-          console.log(`Loaded stage types for test ${testId}:`, data.stages);
-          return data.stages;
-        } else {
-          console.error("Failed to fetch stage types:", data.message);
-          return [];
-        }
-      } catch (error) {
-        console.error(`Error fetching stage types for test ${testId}:`, error);
-        return [];
-      }
-    },
-
     async fetchSerialNumbers(lruId) {
       try {
         this.serialNumberLoading = true;
@@ -2235,7 +2025,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2266,6 +2056,269 @@ export default {
         this.loadFallbackSerialNumbers(lruId);
       } finally {
         this.serialNumberLoading = false;
+      }
+    },
+    
+    // Hierarchical test data fetching methods for Unit Identification
+    async fetchTestGroups() {
+      try {
+        this.loadingTestGroups = true;
+        const response = await fetch('http://localhost:5000/api/test-groups');
+        const data = await response.json();
+        
+        if (data.success) {
+          this.testGroups = data.groups;
+          console.log('Test groups loaded:', this.testGroups);
+        } else {
+          console.error('Failed to fetch test groups:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching test groups:', error);
+      } finally {
+        this.loadingTestGroups = false;
+      }
+    },
+
+    async fetchSubTests(groupId) {
+      try {
+        this.loadingSubTests = true;
+        // Reset dependent data
+        this.subTests = [];
+        this.bulletins = [];
+        this.subBulletins = [];
+        this.formData.selectedSubTest = "";
+        this.formData.selectedBulletin = "";
+        this.formData.selectedSubBulletin = "";
+        
+        const response = await fetch(`http://localhost:5000/api/test-groups/${groupId}/sub-tests`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.subTests = data.sub_tests;
+          console.log('Sub-tests loaded:', this.subTests);
+        } else {
+          console.error('Failed to fetch sub-tests:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching sub-tests:', error);
+      } finally {
+        this.loadingSubTests = false;
+      }
+    },
+
+    async fetchBulletins(subTestId) {
+      try {
+        this.loadingBulletins = true;
+        // Reset dependent data
+        this.bulletins = [];
+        this.subBulletins = [];
+        this.formData.selectedBulletin = "";
+        this.formData.selectedSubBulletin = "";
+        
+        const response = await fetch(`http://localhost:5000/api/sub-tests/${subTestId}/bulletins`);
+        const data = await response.json();
+        
+        if (data.success) {
+          this.bulletins = data.bulletins;
+          console.log('Bulletins loaded:', this.bulletins);
+        } else {
+          console.error('Failed to fetch bulletins:', data.message);
+        }
+      } catch (error) {
+        console.error('Error fetching bulletins:', error);
+      } finally {
+        this.loadingBulletins = false;
+      }
+    },
+
+    // Event handlers for cascading dropdown
+    toggleCascadingDropdown() {
+      this.showCascadingDropdown = !this.showCascadingDropdown;
+      if (!this.showCascadingDropdown) {
+        this.closeAllMenus();
+      }
+    },
+
+    closeAllMenus() {
+      this.showCascadingDropdown = false;
+      this.showSubTests = false;
+      this.showBulletins = false;
+      this.showSubBulletins = false;
+      this.hoveredTestGroup = null;
+      this.hoveredSubTest = null;
+      this.hoveredBulletin = null;
+      this.keepSubTestsOpen = false;
+      this.keepBulletinsOpen = false;
+      this.keepSubBulletinsOpen = false;
+    },
+
+    handleTestGroupHover(group) {
+      this.hoveredTestGroup = group.group_id;
+      this.showSubTests = true;
+      this.fetchSubTests(group.group_id);
+      
+      // Reset lower levels
+      this.showBulletins = false;
+      this.showSubBulletins = false;
+      this.hoveredSubTest = null;
+      this.hoveredBulletin = null;
+    },
+
+    handleSubTestHover(subTest) {
+      this.hoveredSubTest = subTest.sub_test_id;
+      this.showBulletins = true;
+      this.fetchBulletins(subTest.sub_test_id);
+      
+      // Reset lower levels
+      this.showSubBulletins = false;
+      this.hoveredBulletin = null;
+    },
+
+    handleBulletinHover(bulletin) {
+      this.hoveredBulletin = bulletin.bulletin_id;
+      if (bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0) {
+        this.subBulletins = bulletin.sub_bulletins;
+        this.showSubBulletins = true;
+      } else {
+        this.showSubBulletins = false;
+        this.subBulletins = [];
+      }
+    },
+
+    selectTestGroup(group) {
+      // Capture the full hierarchy path based on current hover state
+      this.captureFullHierarchy(group.group_id, null, null, null);
+      this.closeAllMenus();
+    },
+
+    selectSubTest(subTest) {
+      // Capture the full hierarchy path based on current hover state
+      this.captureFullHierarchy(this.hoveredTestGroup, subTest.sub_test_id, null, null);
+      this.closeAllMenus();
+    },
+
+    selectBulletin(bulletin) {
+      // Capture the full hierarchy path based on current hover state
+      this.captureFullHierarchy(this.hoveredTestGroup, this.hoveredSubTest, bulletin.bulletin_id, null);
+      this.closeAllMenus();
+    },
+
+    selectSubBulletin(subBulletin) {
+      // Capture the full hierarchy path based on current hover state
+      this.captureFullHierarchy(this.hoveredTestGroup, this.hoveredSubTest, this.hoveredBulletin, subBulletin.bulletin_id);
+      this.closeAllMenus();
+    },
+
+    handleSubTestsLeave() {
+      if (!this.keepSubTestsOpen) {
+        this.showSubTests = false;
+        this.showBulletins = false;
+        this.showSubBulletins = false;
+        this.hoveredSubTest = null;
+        this.hoveredBulletin = null;
+      }
+    },
+
+    handleBulletinsLeave() {
+      if (!this.keepBulletinsOpen) {
+        this.showBulletins = false;
+        this.showSubBulletins = false;
+        this.hoveredBulletin = null;
+      }
+    },
+
+    handleSubBulletinsLeave() {
+      if (!this.keepSubBulletinsOpen) {
+        this.showSubBulletins = false;
+      }
+    },
+
+    getSelectedText() {
+      return this.formData.unitIdentification;
+    },
+
+    // Capture the full hierarchy path based on hover state
+    captureFullHierarchy(testGroupId, subTestId, bulletinId, subBulletinId) {
+      // Set the selected IDs
+      this.formData.selectedTestGroup = testGroupId || "";
+      this.formData.selectedSubTest = subTestId || "";
+      this.formData.selectedBulletin = bulletinId || "";
+      this.formData.selectedSubBulletin = subBulletinId || "";
+      
+      // Build the display text
+      const parts = [];
+      
+      if (testGroupId) {
+        const testGroupName = this.getTestGroupName(testGroupId);
+        if (testGroupName) parts.push(testGroupName);
+      }
+      
+      if (subTestId) {
+        const subTestName = this.getSubTestName(subTestId);
+        if (subTestName) parts.push(subTestName);
+      }
+      
+      if (bulletinId) {
+        const bulletinName = this.getBulletinName(bulletinId);
+        if (bulletinName) parts.push(bulletinName);
+      }
+      
+      if (subBulletinId) {
+        const subBulletin = this.subBulletins.find(sb => sb.bulletin_id == subBulletinId);
+        if (subBulletin) parts.push(subBulletin.bulletin_name);
+      }
+      
+      this.formData.unitIdentification = parts.join(" > ");
+    },
+
+    // Build unit identification as array for database storage
+    buildUnitIdentificationArray() {
+      const parts = [];
+      
+      // Get test group name
+      const testGroupName = this.getTestGroupName(this.formData.selectedTestGroup) || "";
+      parts.push(testGroupName);
+      
+      // Get sub-test name
+      const subTestName = this.getSubTestName(this.formData.selectedSubTest) || "";
+      parts.push(subTestName);
+      
+      // Get bulletin name
+      const bulletinName = this.getBulletinName(this.formData.selectedBulletin) || "";
+      parts.push(bulletinName);
+      
+      // Get sub-bulletin name
+      let subBulletinName = "";
+      if (this.formData.selectedSubBulletin) {
+        const subBulletin = this.subBulletins.find(sb => sb.bulletin_id == this.formData.selectedSubBulletin);
+        if (subBulletin) {
+          subBulletinName = subBulletin.bulletin_name;
+        }
+      }
+      parts.push(subBulletinName);
+      
+      return parts;
+    },
+
+    getTestGroupName(groupId) {
+      const group = this.testGroups.find(g => g.group_id === groupId);
+      return group ? group.group_name : '';
+    },
+
+    getSubTestName(subTestId) {
+      const subTest = this.subTests.find(s => s.sub_test_id === subTestId);
+      return subTest ? subTest.sub_test_name : '';
+    },
+
+    getBulletinName(bulletinId) {
+      const bulletin = this.bulletins.find(b => b.bulletin_id === bulletinId);
+      return bulletin ? bulletin.bulletin_name : '';
+    },
+
+    handleCascadingClickOutside(event) {
+      const cascadingDropdown = event.target.closest('.cascading-dropdown');
+      if (!cascadingDropdown) {
+        this.closeAllMenus();
       }
     },
     // Overlay management
@@ -2427,7 +2480,7 @@ export default {
         return;
       }
 
-      if (!this.formData.unitIdentification) {
+      if (!this.formData.selectedTestGroup) {
         alert("Please select Unit Identification type.");
         return;
       }
@@ -2466,8 +2519,8 @@ export default {
             // The backend will process the array directly
             slNo: this.formData.slNo || [],
 
-            // Unit Identification
-            unitIdentification: this.formData.unitIdentification,
+            // Unit Identification - send as array
+            unitIdentification: this.buildUnitIdentificationArray(),
             mechanicalInsp: this.formData.mechanicalInsp,
 
             // Test Information
@@ -2544,7 +2597,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:8000/api/memos", {
+        const response = await fetch("http://localhost:5000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2794,6 +2847,190 @@ export default {
   border-color: #80bdff;
   outline: none;
   box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Cascading Dropdown for Unit Identification */
+.cascading-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.dropdown-trigger:hover {
+  border-color: #007bff;
+}
+
+.selected-text {
+  flex: 1;
+  text-align: left;
+  color: #333;
+}
+
+.dropdown-arrow {
+  color: #666;
+  font-size: 12px;
+  transition: transform 0.2s;
+}
+
+.dropdown-trigger:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.cascading-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1000;
+  min-width: 200px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.level-1 {
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #e3f2fd; /* Light blue */
+  border-color: #2196f3;
+}
+
+.level-2 {
+  top: 0;
+  left: 200px; /* Fixed position to the right of level-1 */
+  background: #f3e5f5; /* Light purple */
+  border-color: #9c27b0;
+}
+
+.level-3 {
+  top: 0;
+  left: 400px; /* Fixed position to the right of level-2 */
+  background: #e8f5e8; /* Light green */
+  border-color: #4caf50;
+}
+
+.level-4 {
+  top: 0;
+  left: 600px; /* Fixed position to the right of level-3 */
+  background: #fff3e0; /* Light orange */
+  border-color: #ff9800;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background-color: #f8f9fa;
+}
+
+/* Level-specific hover colors */
+.level-1 .menu-item:hover,
+.level-1 .menu-item.active {
+  background-color: #bbdefb; /* Darker blue */
+}
+
+.level-2 .menu-item:hover,
+.level-2 .menu-item.active {
+  background-color: #e1bee7; /* Darker purple */
+}
+
+.level-3 .menu-item:hover,
+.level-3 .menu-item.active {
+  background-color: #c8e6c9; /* Darker green */
+}
+
+.level-4 .menu-item:hover,
+.level-4 .menu-item.active {
+  background-color: #ffcc80; /* Darker orange */
+}
+
+.menu-item.loading {
+  color: #666;
+  font-style: italic;
+  cursor: default;
+}
+
+.menu-item.no-data {
+  color: #999;
+  font-style: italic;
+  cursor: default;
+}
+
+.item-text {
+  flex: 1;
+  text-align: left;
+}
+
+.arrow {
+  color: #666;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+/* Level-specific arrow colors */
+.level-1 .arrow {
+  color: #2196f3; /* Blue */
+}
+
+.level-2 .arrow {
+  color: #9c27b0; /* Purple */
+}
+
+.level-3 .arrow {
+  color: #4caf50; /* Green */
+}
+
+.level-4 .arrow {
+  color: #ff9800; /* Orange */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cascading-menu {
+    min-width: 150px;
+  }
+  
+  .level-2 {
+    left: 0;
+    top: 100%;
+    margin-top: 10px;
+  }
+  
+  .level-3 {
+    left: 0;
+    top: 200%;
+    margin-top: 10px;
+  }
+  
+  .level-4 {
+    left: 0;
+    top: 300%;
+    margin-top: 10px;
+  }
 }
 
 /* Unit Identification Container */
