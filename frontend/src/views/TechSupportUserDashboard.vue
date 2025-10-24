@@ -2,7 +2,17 @@
   <div class="tech-support-user-dashboard">
     <div class="header">
       <button class="back-button" @click="$router.go(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M19 12H5"></path>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
@@ -15,7 +25,17 @@
       <div class="summary-cards">
         <div class="summary-card">
           <div class="card-icon pending">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12,6 12,12 16,14"></polyline>
             </svg>
@@ -28,8 +48,20 @@
 
         <div class="summary-card">
           <div class="card-icon in-progress">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+              ></path>
               <polyline points="3.27,6.96 12,12.01 20.73,6.96"></polyline>
               <line x1="12" y1="22.08" x2="12" y2="12"></line>
             </svg>
@@ -42,7 +74,17 @@
 
         <div class="summary-card">
           <div class="card-icon resolved">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
               <polyline points="22,4 12,14.01 9,11.01"></polyline>
             </svg>
@@ -55,7 +97,17 @@
 
         <div class="summary-card">
           <div class="card-icon closed">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -69,17 +121,43 @@
 
       <!-- Actions Bar -->
       <div class="actions-bar">
-        <button @click="refreshRequests" class="refresh-btn" :disabled="loading">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          @click="refreshRequests"
+          class="refresh-btn"
+          :disabled="loading"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="23,4 23,10 17,10"></polyline>
             <polyline points="1,20 1,14 7,14"></polyline>
-            <path d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"></path>
+            <path
+              d="M20.49,9A9,9,0,0,0,5.64,5.64L1,10m22,4L18.36,18.36A9,9,0,0,1,3.51,15"
+            ></path>
           </svg>
-          {{ loading ? 'Refreshing...' : 'Refresh' }}
+          {{ loading ? "Refreshing..." : "Refresh" }}
         </button>
-        
+
         <button @click="submitNewRequest" class="new-request-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -90,7 +168,7 @@
       <!-- Requests List -->
       <div class="requests-section">
         <h2>Your Tech Support Requests</h2>
-        
+
         <div v-if="loading" class="loading-state">
           <div class="spinner"></div>
           <p>Loading your requests...</p>
@@ -98,48 +176,99 @@
 
         <div v-else-if="requests.length === 0" class="empty-state">
           <div class="empty-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M9 12l2 2 4-4"></path>
-              <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
-              <path d="M3 12h18v6c0 .552-.448 1-1 1H4c-.552 0-1-.448-1-1v-6z"></path>
+              <path
+                d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"
+              ></path>
+              <path
+                d="M3 12h18v6c0 .552-.448 1-1 1H4c-.552 0-1-.448-1-1v-6z"
+              ></path>
             </svg>
           </div>
           <h3>No Tech Support Requests</h3>
           <p>You haven't submitted any tech support requests yet.</p>
-          <button @click="submitNewRequest" class="submit-first-btn">Submit Your First Request</button>
+          <button @click="submitNewRequest" class="submit-first-btn">
+            Submit Your First Request
+          </button>
         </div>
 
         <div v-else class="requests-list">
-          <div v-for="request in requests" :key="request.id" class="request-card" :class="`status-${request.status}`">
+          <div
+            v-for="request in requests"
+            :key="request.id"
+            class="request-card"
+            :class="`status-${request.status}`"
+          >
             <div class="request-header">
               <div class="request-id">#{{ request.id }}</div>
               <div class="request-status" :class="`status-${request.status}`">
                 {{ formatStatus(request.status) }}
               </div>
             </div>
-            
+
             <div class="request-content">
               <div class="request-description">
                 {{ request.issue_description }}
               </div>
-              
+
               <div class="request-meta">
                 <div class="meta-item">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect
+                      x="3"
+                      y="4"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    ></rect>
                     <line x1="16" y1="2" x2="16" y2="6"></line>
                     <line x1="8" y1="2" x2="8" y2="6"></line>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                   </svg>
                   <span>Submitted: {{ formatDate(request.created_at) }}</span>
                 </div>
-                
+
                 <div class="meta-item" v-if="request.status_updated_at">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12,6 12,12 16,14"></polyline>
                   </svg>
-                  <span>Last Updated: {{ formatDate(request.status_updated_at) }}</span>
+                  <span
+                    >Last Updated:
+                    {{ formatDate(request.status_updated_at) }}</span
+                  >
                 </div>
               </div>
             </div>
@@ -151,16 +280,16 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'TechSupportUserDashboard',
+  name: "TechSupportUserDashboard",
   data() {
     return {
       requests: [],
       loading: false,
-      error: null
-    }
+      error: null,
+    };
   },
   computed: {
     statusCounts() {
@@ -168,80 +297,82 @@ export default {
         pending: 0,
         in_progress: 0,
         resolved: 0,
-        closed: 0
-      }
-      
-      this.requests.forEach(request => {
+        closed: 0,
+      };
+
+      this.requests.forEach((request) => {
         if (counts.hasOwnProperty(request.status)) {
-          counts[request.status]++
+          counts[request.status]++;
         }
-      })
-      
-      return counts
-    }
+      });
+
+      return counts;
+    },
   },
   async mounted() {
-    await this.loadUserRequests()
+    await this.loadUserRequests();
   },
   methods: {
     async loadUserRequests() {
       try {
-        this.loading = true
-        this.error = null
-        
-        const currentUser = userStore.getters.currentUser()
+        this.loading = true;
+        this.error = null;
+
+        const currentUser = userStore.getters.currentUser();
         if (!currentUser || !currentUser.id) {
-          this.error = 'User information not available'
-          return
+          this.error = "User information not available";
+          return;
         }
-        
-        const response = await fetch(`http://127.0.0.1:5000/api/tech-support/user/${currentUser.id}`)
-        const data = await response.json()
-        
+
+        const response = await fetch(
+          `http://127.0.0.1:8000/api/tech-support/user/${currentUser.id}`
+        );
+        const data = await response.json();
+
         if (data.success) {
-          this.requests = data.requests || []
+          this.requests = data.requests || [];
         } else {
-          this.error = data.message || 'Failed to load requests'
+          this.error = data.message || "Failed to load requests";
         }
       } catch (error) {
-        console.error('Error loading user requests:', error)
-        this.error = 'Failed to load requests. Please try again.'
+        console.error("Error loading user requests:", error);
+        this.error = "Failed to load requests. Please try again.";
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
-    
+
     async refreshRequests() {
-      await this.loadUserRequests()
+      await this.loadUserRequests();
     },
-    
+
     submitNewRequest() {
-      this.$router.push({ name: 'TechSupport' })
+      this.$router.push({ name: "TechSupport" });
     },
-    
+
     formatStatus(status) {
       const statusMap = {
-        pending: 'Pending',
-        in_progress: 'In Progress',
-        resolved: 'Resolved',
-        closed: 'Closed'
-      }
-      return statusMap[status] || status
+        pending: "Pending",
+        in_progress: "In Progress",
+        resolved: "Resolved",
+        closed: "Closed",
+      };
+      return statusMap[status] || status;
     },
-    
+
     formatDate(dateString) {
-      if (!dateString) return 'N/A'
-      const date = new Date(dateString)
-      return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      })
-    }
-  }
-}
+      if (!dateString) return "N/A";
+      const date = new Date(dateString);
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -350,7 +481,8 @@ export default {
   gap: 16px;
 }
 
-.refresh-btn, .new-request-btn {
+.refresh-btn,
+.new-request-btn {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -392,7 +524,8 @@ export default {
   margin-bottom: 20px;
 }
 
-.loading-state, .empty-state {
+.loading-state,
+.empty-state {
   text-align: center;
   padding: 60px 20px;
   background: white;
@@ -411,8 +544,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .empty-icon {
@@ -557,22 +694,22 @@ export default {
   .tech-support-user-dashboard {
     padding: 16px;
   }
-  
+
   .summary-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .actions-bar {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .request-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .request-meta {
     flex-direction: column;
     gap: 8px;

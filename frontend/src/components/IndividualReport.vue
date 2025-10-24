@@ -4,7 +4,17 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -15,8 +25,20 @@
       </div>
       <div class="header-right">
         <button class="export-button" @click="downloadReportPDF">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -32,7 +54,7 @@
       <!-- Report Header -->
       <div class="report-header">
         <div class="report-title">
-          <h2>{{ reportName || 'Report Details' }}</h2>
+          <h2>{{ reportName || "Report Details" }}</h2>
           <div class="report-meta">
             <span class="report-id">Report ID: {{ reportId }}</span>
             <span class="project-name">Project: {{ projectName }}</span>
@@ -43,35 +65,41 @@
       <!-- Template Selection State -->
       <div v-if="!selectedTemplate" class="no-reports-state">
         <div class="empty-icon">📄</div>
-        
+
         <!-- Design Head can select template -->
         <div v-if="isDesignHead" class="template-message">
           <h3>Template not yet chosen</h3>
           <p>Please select a template to proceed with this report.</p>
-          
+
           <div class="template-action">
-            <button 
-              @click="selectTemplate"
-              class="choose-template-btn"
-            >
+            <button @click="selectTemplate" class="choose-template-btn">
               Choose Template
             </button>
           </div>
         </div>
-        
+
         <!-- Other roles wait for Design Head to select template -->
         <div v-else class="report-message">
           <h3>Waiting for template selection</h3>
-          <p>The Design Head needs to select a template before this report can be accessed.</p>
-          
+          <p>
+            The Design Head needs to select a template before this report can be
+            accessed.
+          </p>
+
           <!-- Show different messages based on role -->
           <div v-if="isQAReviewer" class="role-message qa-reviewer">
             <div class="role-icon">🔍</div>
-            <p><strong>QA Reviewer Access:</strong> Once the Design Head assigns a template, you will be able to fill out and submit this report.</p>
+            <p>
+              <strong>QA Reviewer Access:</strong> Once the Design Head assigns
+              a template, you will be able to fill out and submit this report.
+            </p>
           </div>
           <div v-else class="role-message other-role">
             <div class="role-icon">👁️</div>
-            <p><strong>View-Only Access:</strong> You can view this report once a template is assigned, but only QA Reviewers can edit it.</p>
+            <p>
+              <strong>View-Only Access:</strong> You can view this report once a
+              template is assigned, but only QA Reviewers can edit it.
+            </p>
           </div>
         </div>
       </div>
@@ -98,17 +126,23 @@
             <div v-if="isQAReviewer" class="access-info qa-reviewer">
               <div class="access-icon">🔍</div>
               <h4>QA Reviewer Access</h4>
-              <p>You can edit and submit this report. All fields are enabled for input.</p>
+              <p>
+                You can edit and submit this report. All fields are enabled for
+                input.
+              </p>
             </div>
             <div v-else class="access-info view-only">
               <div class="access-icon">👁️</div>
               <h4>View-Only Access</h4>
-              <p>You can view this report but cannot edit it. Only QA Reviewers can make changes.</p>
+              <p>
+                You can view this report but cannot edit it. Only QA Reviewers
+                can make changes.
+              </p>
             </div>
           </div>
-          
+
           <!-- Dynamic Template Component -->
-          <component 
+          <component
             v-if="currentTemplateComponent"
             :is="currentTemplateComponent"
             :projectName="projectName"
@@ -119,18 +153,31 @@
             :readonly="!canEditReport"
             :isTemplatePreview="false"
           />
-          
+
           <!-- Fallback if component not found -->
           <div v-else class="template-error">
             <div class="error-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="48"
+                height="48"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="15" y1="9" x2="9" y2="15"></line>
                 <line x1="9" y1="9" x2="15" y2="15"></line>
               </svg>
             </div>
             <h4>Template Component Not Found</h4>
-            <p>The template "{{ selectedTemplate.displayName }}" could not be loaded.</p>
+            <p>
+              The template "{{ selectedTemplate.displayName }}" could not be
+              loaded.
+            </p>
             <button @click="selectTemplate" class="change-template-btn">
               Select Different Template
             </button>
@@ -140,7 +187,11 @@
     </div>
 
     <!-- Template Selection Overlay -->
-    <div v-if="showTemplateOverlay" class="template-overlay" @click="closeOverlay">
+    <div
+      v-if="showTemplateOverlay"
+      class="template-overlay"
+      @click="closeOverlay"
+    >
       <div class="template-overlay-content" @click.stop>
         <!-- Loading Overlay -->
         <div v-if="loading" class="loading-overlay">
@@ -149,26 +200,51 @@
         <div class="template-overlay-header">
           <h2>Choose Report Template</h2>
           <button class="close-btn" @click="closeOverlay">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
         </div>
-        
+
         <div class="template-overlay-body">
-          <p class="template-description">Select a template for your report. Each template is designed for specific inspection types.</p>
-          
+          <p class="template-description">
+            Select a template for your report. Each template is designed for
+            specific inspection types.
+          </p>
+
           <div class="templates-grid">
-            <div 
-              v-for="template in availableTemplates" 
+            <div
+              v-for="template in availableTemplates"
               :key="template.name"
               class="template-card"
               @click="selectTemplateOption(template)"
             >
               <div class="template-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  ></path>
                   <polyline points="14,2 14,8 20,8"></polyline>
                   <line x1="16" y1="13" x2="8" y2="13"></line>
                   <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -191,21 +267,21 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 import jsPDF from "jspdf";
 
 // Import all template components
-import ObservationReport from '@/templates/ObservationReport.vue'
-import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
-import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
-import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
-import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
-import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
-import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
-import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+import ObservationReport from "@/templates/ObservationReport.vue";
+import BarePcbInspectionReport from "@/templates/barepcbinspectionreport.vue";
+import Conformalcoatinginspectionreport from "@/templates/Conformalcoatinginspectionreport.vue";
+import RawMaterialInspectionReport from "@/templates/RawMaterialInspectionReport.vue";
+import CotsScreeningInspectionReport from "@/templates/CotsScreeningInspectionReport.vue";
+import AssembledBoardInspectionReport from "@/templates/AssembledBoardInspectionReport.vue";
+import KitOfPartInsp from "@/templates/KitOfPartInsp.vue";
+import MechanicalInspection from "@/templates/MechanicalInspection.vue";
 
 export default {
-  name: 'IndividualReport',
+  name: "IndividualReport",
   components: {
     ObservationReport,
     BarePcbInspectionReport,
@@ -214,67 +290,74 @@ export default {
     CotsScreeningInspectionReport,
     AssembledBoardInspectionReport,
     KitOfPartInsp,
-    MechanicalInspection
+    MechanicalInspection,
   },
   data() {
     return {
-      reportId: '',
-      reportName: '',
-      projectName: '',
+      reportId: "",
+      reportName: "",
+      projectName: "",
       showTemplateOverlay: false,
       availableTemplates: [
         {
           template_id: 1,
-          name: 'Conformalcoatinginspectionreport',
-          displayName: 'Conformal Coating Inspection Report',
-          description: 'Template for creating conformal coating inspection reports with quality testing criteria',
-          component: 'Conformalcoatinginspectionreport'
+          name: "Conformalcoatinginspectionreport",
+          displayName: "Conformal Coating Inspection Report",
+          description:
+            "Template for creating conformal coating inspection reports with quality testing criteria",
+          component: "Conformalcoatinginspectionreport",
         },
         {
           template_id: 2,
-          name: 'CotsScreeningInspectionReport',
-          displayName: 'COTS Screening Inspection Report',
-          description: 'Template for creating COTS screening inspection reports with test case validation',
-          component: 'CotsScreeningInspectionReport'
+          name: "CotsScreeningInspectionReport",
+          displayName: "COTS Screening Inspection Report",
+          description:
+            "Template for creating COTS screening inspection reports with test case validation",
+          component: "CotsScreeningInspectionReport",
         },
         {
           template_id: 3,
-          name: 'BarePcbInspectionReport',
-          displayName: 'Bare PCB Inspection Report',
-          description: 'Template for creating bare PCB inspection reports with comprehensive testing criteria',
-          component: 'BarePcbInspectionReport'
+          name: "BarePcbInspectionReport",
+          displayName: "Bare PCB Inspection Report",
+          description:
+            "Template for creating bare PCB inspection reports with comprehensive testing criteria",
+          component: "BarePcbInspectionReport",
         },
         {
           template_id: 4,
-          name: 'MechanicalInspection',
-          displayName: 'Mechanical Inspection Report',
-          description: 'Template for creating mechanical inspection reports with structural testing criteria',
-          component: 'MechanicalInspection'
+          name: "MechanicalInspection",
+          displayName: "Mechanical Inspection Report",
+          description:
+            "Template for creating mechanical inspection reports with structural testing criteria",
+          component: "MechanicalInspection",
         },
         {
           template_id: 5,
-          name: 'AssembledBoardInspectionReport',
-          displayName: 'Assembled Board Inspection Report',
-          description: 'Template for creating assembled board inspection reports with comprehensive testing criteria',
-          component: 'AssembledBoardInspectionReport'
+          name: "AssembledBoardInspectionReport",
+          displayName: "Assembled Board Inspection Report",
+          description:
+            "Template for creating assembled board inspection reports with comprehensive testing criteria",
+          component: "AssembledBoardInspectionReport",
         },
         {
           template_id: 6,
-          name: 'RawMaterialInspectionReport',
-          displayName: 'Raw Material Inspection Report',
-          description: 'Template for creating raw material inspection reports with compliance checking',
-          component: 'RawMaterialInspectionReport'
+          name: "RawMaterialInspectionReport",
+          displayName: "Raw Material Inspection Report",
+          description:
+            "Template for creating raw material inspection reports with compliance checking",
+          component: "RawMaterialInspectionReport",
         },
         {
           template_id: 7,
-          name: 'KitOfPartInsp',
-          displayName: 'Kit of Part Inspection Report',
-          description: 'Template for creating kit of part inspection reports with component verification',
-          component: 'KitOfPartInsp'
-        }
+          name: "KitOfPartInsp",
+          displayName: "Kit of Part Inspection Report",
+          description:
+            "Template for creating kit of part inspection reports with component verification",
+          component: "KitOfPartInsp",
+        },
       ],
       selectedTemplate: null,
-      loading: false
+      loading: false,
     };
   },
   computed: {
@@ -283,129 +366,148 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 4;
     },
-    
+
     isDesignHead() {
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 4;
     },
-    
+
     isQAReviewer() {
       // QA Reviewer has role_id = 3
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 3;
     },
-    
+
     canEditReport() {
       // Only QA Reviewer can edit reports when template is assigned
       return this.isQAReviewer && this.selectedTemplate;
     },
-    
+
     currentTemplateComponent() {
       if (!this.selectedTemplate) return null;
-      
+
       // Map template names to component names
       const componentMap = {
-        'ObservationReport': 'ObservationReport',
-        'BarePcbInspectionReport': 'BarePcbInspectionReport',
-        'Conformalcoatinginspectionreport': 'Conformalcoatinginspectionreport',
-        'RawMaterialInspectionReport': 'RawMaterialInspectionReport',
-        'CotsScreeningInspectionReport': 'CotsScreeningInspectionReport',
-        'AssembledBoardInspectionReport': 'AssembledBoardInspectionReport',
-        'KitOfPartInsp': 'KitOfPartInsp',
-        'MechanicalInspection': 'MechanicalInspection'
+        ObservationReport: "ObservationReport",
+        BarePcbInspectionReport: "BarePcbInspectionReport",
+        Conformalcoatinginspectionreport: "Conformalcoatinginspectionreport",
+        RawMaterialInspectionReport: "RawMaterialInspectionReport",
+        CotsScreeningInspectionReport: "CotsScreeningInspectionReport",
+        AssembledBoardInspectionReport: "AssembledBoardInspectionReport",
+        KitOfPartInsp: "KitOfPartInsp",
+        MechanicalInspection: "MechanicalInspection",
       };
-      
+
       return componentMap[this.selectedTemplate.name] || null;
-    }
+    },
   },
   mounted() {
     // Get parameters from route
-    this.reportId = this.$route.params.reportId || '';
-    this.reportName = this.$route.params.reportName || '';
-    this.projectName = this.$route.params.projectName || '';
-    
+    this.reportId = this.$route.params.reportId || "";
+    this.reportName = this.$route.params.reportName || "";
+    this.projectName = this.$route.params.projectName || "";
+
     // Load report details to check if template is already selected
     this.loadReportDetails();
   },
   methods: {
     selectTemplate() {
-      console.log('Opening template selection overlay for report:', this.reportId);
+      console.log(
+        "Opening template selection overlay for report:",
+        this.reportId
+      );
       this.showTemplateOverlay = true;
     },
-    
+
     closeOverlay() {
       this.showTemplateOverlay = false;
     },
-    
+
     async selectTemplateOption(template) {
-      console.log('Selected template:', template.name, 'for report:', this.reportId);
-      
+      console.log(
+        "Selected template:",
+        template.name,
+        "for report:",
+        this.reportId
+      );
+
       try {
         this.loading = true;
-        
+
         // Update report with selected template_id
         const response = await fetch(`/api/reports/${this.reportId}/template`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            template_id: template.template_id
-          })
+            template_id: template.template_id,
+          }),
         });
-        
+
         const result = await response.json();
-        
+
         if (result.success) {
           // Set the selected template
           this.selectedTemplate = template;
-          
+
           // Close the overlay
           this.closeOverlay();
-          
+
           // Show success message
-          alert(`Template "${template.displayName}" has been selected successfully!`);
+          alert(
+            `Template "${template.displayName}" has been selected successfully!`
+          );
         } else {
           alert(`Error: ${result.message}`);
         }
       } catch (error) {
-        console.error('Error selecting template:', error);
-        alert('An error occurred while selecting the template. Please try again.');
+        console.error("Error selecting template:", error);
+        alert(
+          "An error occurred while selecting the template. Please try again."
+        );
       } finally {
         this.loading = false;
       }
     },
-    
+
     async loadReportDetails() {
       if (!this.reportId) return;
-      
+
       try {
-        const response = await fetch(`http://localhost:5000/api/reports/${this.reportId}`);
+        const response = await fetch(
+          `http://localhost:8000/api/reports/${this.reportId}`
+        );
         const result = await response.json();
-        
+
         if (result.success && result.report.template_id) {
           // Find the template that matches the template_id
-          const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
+          const template = this.availableTemplates.find(
+            (t) => t.template_id === result.report.template_id
+          );
           if (template) {
             this.selectedTemplate = template;
           }
         }
       } catch (error) {
-        console.error('Error loading report details:', error);
+        console.error("Error loading report details:", error);
       }
     },
-    
-    
+
     uploadReport() {
-      console.log('Uploading report:', this.reportId);
-      alert(`Report upload for Report ID: ${this.reportId} will be implemented soon!`);
+      console.log("Uploading report:", this.reportId);
+      alert(
+        `Report upload for Report ID: ${this.reportId} will be implemented soon!`
+      );
     },
-    
+
     createReport() {
-      console.log('Creating new report for:', this.reportId);
-      alert(`Create new report for Report ID: ${this.reportId} will be implemented soon!`);
+      console.log("Creating new report for:", this.reportId);
+      alert(
+        `Create new report for Report ID: ${this.reportId} will be implemented soon!`
+      );
     },
-    
+
     downloadReportPDF() {
       try {
         // Create new PDF document
@@ -422,9 +524,14 @@ export default {
         // Header - Report Title
         doc.setFontSize(18);
         doc.setFont("helvetica", "bold");
-        doc.text(this.reportName || 'INDIVIDUAL REPORT', pageWidth / 2, yPosition, {
-          align: "center",
-        });
+        doc.text(
+          this.reportName || "INDIVIDUAL REPORT",
+          pageWidth / 2,
+          yPosition,
+          {
+            align: "center",
+          }
+        );
         yPosition += 15;
 
         // Report Details
@@ -432,18 +539,26 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(`Report ID: ${this.reportId}`, margin, yPosition);
         yPosition += 8;
-        doc.text(`Project: ${this.projectName || 'N/A'}`, margin, yPosition);
+        doc.text(`Project: ${this.projectName || "N/A"}`, margin, yPosition);
         yPosition += 8;
 
         // Date and user info
         const currentDate = new Date().toLocaleDateString("en-GB");
         const currentTime = new Date().toLocaleTimeString("en-GB");
-        doc.text(`Generated on: ${currentDate} at ${currentTime}`, margin, yPosition);
+        doc.text(
+          `Generated on: ${currentDate} at ${currentTime}`,
+          margin,
+          yPosition
+        );
         yPosition += 8;
 
         const currentUser = userStore.getters.currentUser();
         if (currentUser) {
-          doc.text(`Generated by: ${currentUser.name} (${currentUser.role})`, margin, yPosition);
+          doc.text(
+            `Generated by: ${currentUser.name} (${currentUser.role})`,
+            margin,
+            yPosition
+          );
           yPosition += 15;
         }
 
@@ -451,48 +566,84 @@ export default {
         if (this.selectedTemplate) {
           doc.setFontSize(14);
           doc.setFont("helvetica", "bold");
-          doc.text("TEMPLATE INFORMATION", pageWidth / 2, yPosition, { align: "center" });
+          doc.text("TEMPLATE INFORMATION", pageWidth / 2, yPosition, {
+            align: "center",
+          });
           yPosition += 10;
 
           doc.setFontSize(12);
           doc.setFont("helvetica", "normal");
-          doc.text(`Template: ${this.selectedTemplate.displayName}`, margin, yPosition);
+          doc.text(
+            `Template: ${this.selectedTemplate.displayName}`,
+            margin,
+            yPosition
+          );
           yPosition += 8;
-          doc.text(`Description: ${this.selectedTemplate.description}`, margin, yPosition);
+          doc.text(
+            `Description: ${this.selectedTemplate.description}`,
+            margin,
+            yPosition
+          );
           yPosition += 15;
         }
 
         // Report Content Section
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text("REPORT CONTENT", pageWidth / 2, yPosition, { align: "center" });
+        doc.text("REPORT CONTENT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
 
         // Add a note about the report content
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("This report contains detailed inspection and testing information", margin, yPosition);
+        doc.text(
+          "This report contains detailed inspection and testing information",
+          margin,
+          yPosition
+        );
         yPosition += 8;
-        doc.text("as per the selected template format. For complete details,", margin, yPosition);
+        doc.text(
+          "as per the selected template format. For complete details,",
+          margin,
+          yPosition
+        );
         yPosition += 8;
-        doc.text("please refer to the online report in the AVIATRAX system.", margin, yPosition);
+        doc.text(
+          "please refer to the online report in the AVIATRAX system.",
+          margin,
+          yPosition
+        );
         yPosition += 15;
 
         // Access Information
         if (this.canEditReport) {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.text("ACCESS LEVEL: QA REVIEWER (EDIT ACCESS)", margin, yPosition);
+          doc.text(
+            "ACCESS LEVEL: QA REVIEWER (EDIT ACCESS)",
+            margin,
+            yPosition
+          );
           yPosition += 8;
           doc.setFont("helvetica", "normal");
-          doc.text("This report can be edited and submitted by QA Reviewers.", margin, yPosition);
+          doc.text(
+            "This report can be edited and submitted by QA Reviewers.",
+            margin,
+            yPosition
+          );
         } else {
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
           doc.text("ACCESS LEVEL: VIEW-ONLY", margin, yPosition);
           yPosition += 8;
           doc.setFont("helvetica", "normal");
-          doc.text("This report is in view-only mode. Only QA Reviewers can edit reports.", margin, yPosition);
+          doc.text(
+            "This report is in view-only mode. Only QA Reviewers can edit reports.",
+            margin,
+            yPosition
+          );
         }
 
         yPosition += 20;
@@ -500,12 +651,19 @@ export default {
         // Footer
         doc.setFontSize(8);
         doc.setFont("helvetica", "italic");
-        doc.text("This report was generated from the AVIATRAX Individual Report System", pageWidth / 2, yPosition, {
-          align: "center",
-        });
+        doc.text(
+          "This report was generated from the AVIATRAX Individual Report System",
+          pageWidth / 2,
+          yPosition,
+          {
+            align: "center",
+          }
+        );
 
         // Save the PDF
-        const fileName = `Report_${this.reportId}_${this.reportName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Individual'}_${currentDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `Report_${this.reportId}_${
+          this.reportName?.replace(/[^a-zA-Z0-9]/g, "_") || "Individual"
+        }_${currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         // Show success message
@@ -522,8 +680,8 @@ export default {
           );
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -737,42 +895,42 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .report-meta {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .no-reports-state {
     padding: 40px 20px;
   }
-  
+
   .empty-icon {
     font-size: 4em;
   }
-  
+
   .no-reports-state h3 {
     font-size: 1.8em;
   }
-  
+
   .template-message h3,
   .report-message h3 {
     font-size: 1.8em;
   }
-  
+
   .no-reports-state p {
     font-size: 1.1em;
   }
-  
+
   .choose-template-btn {
     padding: 15px 30px;
     font-size: 1.1em;
@@ -932,8 +1090,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design for Template Form */
@@ -944,30 +1106,30 @@ export default {
     gap: 20px;
     padding: 20px;
   }
-  
+
   .template-form-content {
     padding: 0;
   }
-  
+
   .template-placeholder {
     padding: 30px 15px;
   }
-  
+
   .template-placeholder h4 {
     font-size: 1.3em;
   }
-  
+
   .template-placeholder p {
     font-size: 1em;
   }
-  
+
   .template-placeholder .open-template-btn {
     padding: 12px 25px;
     font-size: 1em;
     width: 100%;
     max-width: 300px;
   }
-  
+
   .change-template-btn {
     padding: 12px 20px;
     font-size: 0.9em;
@@ -1072,13 +1234,17 @@ export default {
 }
 
 .template-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(0, 123, 255, 0.05) 0%, rgba(0, 123, 255, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 123, 255, 0.05) 0%,
+    rgba(0, 123, 255, 0.1) 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1173,35 +1339,35 @@ export default {
     width: 95%;
     margin: 20px;
   }
-  
+
   .template-overlay-header {
     padding: 20px;
   }
-  
+
   .template-overlay-header h2 {
     font-size: 1.5em;
   }
-  
+
   .template-overlay-body {
     padding: 20px;
   }
-  
+
   .templates-grid {
     grid-template-columns: 1fr;
     gap: 15px;
   }
-  
+
   .template-card {
     padding: 20px;
     flex-direction: column;
     text-align: center;
     gap: 15px;
   }
-  
+
   .template-info h3 {
     font-size: 1.2em;
   }
-  
+
   .template-info p {
     font-size: 0.9em;
   }
@@ -1302,16 +1468,16 @@ export default {
     text-align: center;
     gap: 10px;
   }
-  
+
   .role-icon,
   .access-icon {
     font-size: 1.5em;
   }
-  
+
   .access-info h4 {
     font-size: 1em;
   }
-  
+
   .role-message p,
   .access-info p {
     font-size: 0.85em;

@@ -6,7 +6,10 @@
         <h2>{{ lruName || "Document Viewer" }}</h2>
         <div class="meta-info">
           <span><strong>Project:</strong> {{ projectName || "N/A" }}</span>
-          <span><strong>Document ID:</strong> {{ getCurrentDocumentNumber() || "N/A" }}</span>
+          <span
+            ><strong>Document ID:</strong>
+            {{ getCurrentDocumentNumber() || "N/A" }}</span
+          >
           <span
             ><strong>Status:</strong>
             <span :class="'status-' + (status || 'pending')">{{
@@ -82,8 +85,8 @@
             <div class="restriction-text">
               <p><strong>Upload Restricted</strong></p>
               <p v-if="hasAcceptedDocument">
-                This document has been accepted as the final version by a reviewer. 
-                No further uploads are allowed for this LRU.
+                This document has been accepted as the final version by a
+                reviewer. No further uploads are allowed for this LRU.
               </p>
               <p v-else-if="!isLatestDocument">
                 You are viewing a previous version of the document. Upload is
@@ -267,8 +270,12 @@
                 <div class="doc-title">
                   <span class="doc-label">{{ doc.doc_ver || "A" }}</span>
                   {{ doc.document_number }}
-                  <span v-if="doc.status === 'accepted'" class="accepted-badge">✅ ACCEPTED</span>
-                  <span v-if="isCurrentDocument(doc)" class="current-badge">👁️ CURRENTLY VIEWING</span>
+                  <span v-if="doc.status === 'accepted'" class="accepted-badge"
+                    >✅ ACCEPTED</span
+                  >
+                  <span v-if="isCurrentDocument(doc)" class="current-badge"
+                    >👁️ CURRENTLY VIEWING</span
+                  >
                 </div>
                 <div class="doc-meta">
                   <span class="doc-version"
@@ -1154,7 +1161,7 @@ export default {
 
     // Check if any document in this LRU is accepted (final version)
     hasAcceptedDocument() {
-      return this.existingDocuments.some(doc => doc.status === 'accepted');
+      return this.existingDocuments.some((doc) => doc.status === "accepted");
     },
 
     // Check if user can upload a new document
@@ -1177,7 +1184,9 @@ export default {
 
       // If any document is already accepted, prevent further uploads
       if (this.hasAcceptedDocument) {
-        console.log("Document already accepted as final version - upload disabled");
+        console.log(
+          "Document already accepted as final version - upload disabled"
+        );
         return false;
       }
 
@@ -1533,7 +1542,7 @@ export default {
       if (!this.documentId || !doc) {
         return false;
       }
-      
+
       // Check if the document matches the currently viewed document
       // Prioritize document_id comparison since it's unique
       return this.documentId === doc.document_id;
@@ -1544,7 +1553,7 @@ export default {
       try {
         console.log(`Attempting to load metadata for LRU ${lruId}...`);
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/metadata`
+          `http://localhost:8000/api/lrus/${lruId}/metadata`
         );
 
         if (!response.ok) {
@@ -1577,7 +1586,7 @@ export default {
       try {
         console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
         const response = await fetch(
-          `http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`
+          `http://localhost:8000/api/plan-documents/next-doc-ver/${lruId}`
         );
 
         if (!response.ok) {
@@ -1612,7 +1621,7 @@ export default {
         console.log(`Loading existing documents for LRU ${lruId}...`);
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
 
         if (!response.ok) {
@@ -1643,7 +1652,7 @@ export default {
     async loadDocumentVersions(lruId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
         const result = await response.json();
 
@@ -1694,7 +1703,7 @@ export default {
 
         console.log("📄 Extracted filename:", filename);
 
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         console.log("🌐 File URL:", fileUrl);
 
         // Test if file is accessible
@@ -1720,8 +1729,8 @@ export default {
         }
 
         // Set document metadata
-        this.documentId = doc.document_id;  // Use actual document_id (integer) instead of document_number
-        this.documentNumber = doc.document_number;  // Set document_number for display and API calls
+        this.documentId = doc.document_id; // Use actual document_id (integer) instead of document_number
+        this.documentNumber = doc.document_number; // Set document_number for display and API calls
         this.status = doc.status;
         this.lastModifiedDate = new Date(doc.upload_date);
 
@@ -1826,7 +1835,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1862,7 +1871,7 @@ export default {
     /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         
         // Determine file type from extension
         const extension = originalFilename.split('.').pop().toLowerCase();
@@ -1945,53 +1954,55 @@ export default {
 
     async acceptDocument() {
       try {
-        console.log('Accepting document with ID:', this.documentId);
-        console.log('Document number:', this.documentNumber);
-        
+        console.log("Accepting document with ID:", this.documentId);
+        console.log("Document number:", this.documentNumber);
+
         // Show confirmation dialog
         const confirmed = confirm(
           "Are you sure you want to accept this document? This action will mark the document as approved."
         );
-        
+
         if (!confirmed) {
           return;
         }
 
         // Make API call to accept the document
-        const url = `http://localhost:5000/api/documents/${this.documentId}/accept`;
-        console.log('Making request to:', url);
-        
+        const url = `http://localhost:8000/api/documents/${this.documentId}/accept`;
+        console.log("Making request to:", url);
+
         const response = await fetch(url, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
-          }
+            "Content-Type": "application/json",
+          },
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
+        console.log("Response status:", response.status);
+        console.log("Response ok:", response.ok);
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+          throw new Error(
+            errorData.message ||
+              `HTTP ${response.status}: ${response.statusText}`
+          );
         }
 
         const result = await response.json();
-        
+
         // Show success message
         alert(`Document has been accepted successfully! ${result.message}`);
-        
+
         // Refresh the document data or emit event to parent component
-        this.$emit('document-accepted', result);
-        
+        this.$emit("document-accepted", result);
+
         // Reload existing documents to show updated status
         await this.loadExistingDocuments(this.documentDetails.lruId);
-        
+
         // Optionally reload the page or refresh data
         this.$router.go(0); // Reload the current page
-        
       } catch (error) {
-        console.error('Error accepting document:', error);
+        console.error("Error accepting document:", error);
         alert(`Failed to accept document: ${error.message}`);
       }
     },
@@ -2058,7 +2069,7 @@ export default {
         console.log("Sending comment acceptance/rejection data:", requestData);
         console.log("API endpoint:", endpoint);
 
-        const response = await fetch(`http://localhost:5000${endpoint}`, {
+        const response = await fetch(`http://localhost:8000${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2132,7 +2143,7 @@ export default {
       try {
         this.loadingReviewerStatus = true;
         const response = await fetch(
-          `http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(
+          `http://localhost:8000/api/assigned-reviewer?lru_name=${encodeURIComponent(
             this.lruName
           )}&project_name=${encodeURIComponent(this.projectName)}`
         );
@@ -2292,7 +2303,7 @@ export default {
         );
 
         const response = await fetch(
-          "http://localhost:5000/api/plan-documents",
+          "http://localhost:8000/api/plan-documents",
           {
             method: "POST",
             body: formData,
@@ -2364,7 +2375,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/plan-documents/${latestDocument.document_id}`,
+          `http://localhost:8000/api/plan-documents/${latestDocument.document_id}`,
           {
             method: "DELETE",
             headers: {
@@ -2703,7 +2714,7 @@ export default {
     async deleteCommentFromBackend(commentId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/comments/${commentId}`,
+          `http://localhost:8000/api/comments/${commentId}`,
           {
             method: "DELETE",
             headers: {
@@ -2729,16 +2740,18 @@ export default {
     startAnnotationMode() {
       this.isAnnotationMode = true;
       this.showCommentForm = false;
-      
+
       // Populate comment form with current document details
       this.commentForm.document_name = this.fileName || "";
       this.commentForm.document_id = this.documentId || "";
-      this.commentForm.version = this.existingDocuments.find(
-        (doc) => doc.document_id === this.documentId
-      )?.version || "";
-      this.commentForm.revision = this.existingDocuments.find(
-        (doc) => doc.document_id === this.documentId
-      )?.revision || "";
+      this.commentForm.version =
+        this.existingDocuments.find(
+          (doc) => doc.document_id === this.documentId
+        )?.version || "";
+      this.commentForm.revision =
+        this.existingDocuments.find(
+          (doc) => doc.document_id === this.documentId
+        )?.revision || "";
     },
 
     closeCommentForm() {
@@ -2915,16 +2928,31 @@ export default {
       try {
         // Debug: Log the comment object and component state
         console.log("Comment object:", comment);
-        console.log("Component documentId:", this.documentId, "Type:", typeof this.documentId);
-        console.log("Component documentNumber:", this.documentNumber, "Type:", typeof this.documentNumber);
-        console.log("Component fileName:", this.fileName, "Type:", typeof this.fileName);
-        
+        console.log(
+          "Component documentId:",
+          this.documentId,
+          "Type:",
+          typeof this.documentId
+        );
+        console.log(
+          "Component documentNumber:",
+          this.documentNumber,
+          "Type:",
+          typeof this.documentNumber
+        );
+        console.log(
+          "Component fileName:",
+          this.fileName,
+          "Type:",
+          typeof this.fileName
+        );
+
         // Ensure document_id is a valid integer
         const documentId = parseInt(this.documentId);
         if (isNaN(documentId)) {
           throw new Error(`Invalid document ID: ${this.documentId}`);
         }
-        
+
         // Prepare data in the format expected by the backend
         const commentData = {
           document_id: documentId,
@@ -2956,7 +2984,7 @@ export default {
           page_no: commentData.page_no,
         });
 
-        const response = await fetch("http://localhost:5000/api/comments", {
+        const response = await fetch("http://localhost:8000/api/comments", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2994,7 +3022,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/comments?document_id=${this.documentId}`
+          `http://localhost:8000/api/comments?document_id=${this.documentId}`
         );
 
         if (response.ok) {
@@ -3034,7 +3062,7 @@ export default {
 
         // Get all documents for this LRU/project
         const documentsResponse = await fetch(
-          `http://localhost:5000/api/lrus/${this.documentDetails.lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${this.documentDetails.lruId}/plan-documents`
         );
         console.log("Documents response status:", documentsResponse.status);
 
@@ -3059,7 +3087,7 @@ export default {
           console.log("Loading comments for document:", doc.document_id);
           try {
             const commentsResponse = await fetch(
-              `http://localhost:5000/api/comments?document_id=${doc.document_id}`
+              `http://localhost:8000/api/comments?document_id=${doc.document_id}`
             );
             if (commentsResponse.ok) {
               const commentsData = await commentsResponse.json();

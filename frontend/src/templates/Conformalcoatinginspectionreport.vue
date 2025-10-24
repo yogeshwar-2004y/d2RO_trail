@@ -244,7 +244,7 @@ export default {
       try {
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:5000/api/reports/conformal-coating-inspection",
+          "http://localhost:8000/api/reports/conformal-coating-inspection",
           {
             method: "POST",
             headers: {
@@ -300,7 +300,7 @@ export default {
         try {
           const reportData = this.prepareReportData();
           const response = await fetch(
-            "http://localhost:5000/api/reports/conformal-coating-inspection",
+            "http://localhost:8000/api/reports/conformal-coating-inspection",
             {
               method: "POST",
               headers: {

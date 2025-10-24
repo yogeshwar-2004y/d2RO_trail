@@ -137,7 +137,7 @@ export default {
 
       try {
         // Try to submit to backend first
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -150,9 +150,15 @@ export default {
 
         if (data.success) {
           if (data.duplicate) {
-            this.showSuccessMessage(`This request already exists (ID: ${data.existing_request_id}). Current status: ${data.existing_status.toUpperCase()}`);
+            this.showSuccessMessage(
+              `This request already exists (ID: ${
+                data.existing_request_id
+              }). Current status: ${data.existing_status.toUpperCase()}`
+            );
           } else {
-            this.showSuccessMessage("Your technical support request has been submitted successfully. We will get back to you soon.");
+            this.showSuccessMessage(
+              "Your technical support request has been submitted successfully. We will get back to you soon."
+            );
           }
           this.resetForm();
           setTimeout(() => this.goBack(), 2000);

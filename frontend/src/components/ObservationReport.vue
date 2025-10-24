@@ -4,7 +4,17 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -15,7 +25,17 @@
       </div>
       <div class="header-right">
         <button class="export-button" @click="exportReport">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
@@ -30,11 +50,11 @@
       <!-- Report Header -->
       <div class="report-header">
         <div class="document-path">
-          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ observationCount }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{
+            observationCount
+          }}/{{ currentYear }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -87,26 +107,34 @@
         <div class="version-controls">
           <div class="version-dropdown">
             <label for="version-select">Select Document Version:</label>
-            <select 
-              id="version-select" 
-              v-model="selectedDocumentId" 
+            <select
+              id="version-select"
+              v-model="selectedDocumentId"
               @change="onVersionChange"
               class="version-select"
               :disabled="loadingVersions"
             >
-              <option value="">{{ loadingVersions ? 'Loading versions...' : 'Select a version' }}</option>
-              <option 
-                v-for="document in availableDocuments" 
-                :key="document.document_id" 
+              <option value="">
+                {{
+                  loadingVersions ? "Loading versions..." : "Select a version"
+                }}
+              </option>
+              <option
+                v-for="document in availableDocuments"
+                :key="document.document_id"
                 :value="document.document_id"
               >
-                {{ document.document_number }} - {{ document.version }} ({{ document.doc_ver }}) - {{ document.uploaded_by_name }}
+                {{ document.document_number }} - {{ document.version }} ({{
+                  document.doc_ver
+                }}) - {{ document.uploaded_by_name }}
               </option>
             </select>
           </div>
           <div class="version-info" v-if="selectedDocument">
             <span class="version-label">
-              Selected: {{ selectedDocument.document_number }} - {{ selectedDocument.version }} ({{ selectedDocument.doc_ver }}) - Uploaded by {{ selectedDocument.uploaded_by_name }}
+              Selected: {{ selectedDocument.document_number }} -
+              {{ selectedDocument.version }} ({{ selectedDocument.doc_ver }}) -
+              Uploaded by {{ selectedDocument.uploaded_by_name }}
             </span>
           </div>
         </div>
@@ -115,23 +143,25 @@
       <!-- Comments Table -->
       <div class="observations-section">
         <h2 class="section-title">Document Comments & Observations</h2>
-        
+
         <!-- Loading State -->
         <div v-if="loadingComments" class="loading-container">
           <div class="loading-spinner"></div>
           <p>Loading comments for selected version...</p>
         </div>
-        
+
         <!-- No Version Selected -->
         <div v-else-if="!selectedDocumentId" class="no-selection">
-          <p>Please select a document version to view comments and observations.</p>
+          <p>
+            Please select a document version to view comments and observations.
+          </p>
         </div>
-        
+
         <!-- No Comments -->
         <div v-else-if="documentComments.length === 0" class="no-comments">
           <p>No comments found for the selected version.</p>
         </div>
-        
+
         <!-- Comments Table -->
         <div v-else class="table-container">
           <table class="observations-table">
@@ -148,22 +178,39 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(comment, index) in documentComments" :key="comment.id">
+              <tr
+                v-for="(comment, index) in documentComments"
+                :key="comment.id"
+              >
                 <td>{{ index + 1 }}</td>
                 <td>
-                  <span class="category-badge" :class="getCategoryClass(comment.section)">
-                    {{ comment.section && comment.section.trim() !== '' ? comment.section : 'General' }}
+                  <span
+                    class="category-badge"
+                    :class="getCategoryClass(comment.section)"
+                  >
+                    {{
+                      comment.section && comment.section.trim() !== ""
+                        ? comment.section
+                        : "General"
+                    }}
                   </span>
                 </td>
-                <td class="comment-text">{{ comment.description || 'No comment' }}</td>
+                <td class="comment-text">
+                  {{ comment.description || "No comment" }}
+                </td>
                 <td>
-                  <span class="status-badge" :class="getStatusClass(comment.status)">
-                    {{ comment.status || 'Pending' }}
+                  <span
+                    class="status-badge"
+                    :class="getStatusClass(comment.status)"
+                  >
+                    {{ comment.status || "Pending" }}
                   </span>
                 </td>
-                <td class="justification-text">{{ comment.justification || 'No justification provided' }}</td>
-                <td>{{ comment.reviewer_id || 'Unknown' }}</td>
-                <td>{{ comment.page_no || 'N/A' }}</td>
+                <td class="justification-text">
+                  {{ comment.justification || "No justification provided" }}
+                </td>
+                <td>{{ comment.reviewer_id || "Unknown" }}</td>
+                <td>{{ comment.page_no || "N/A" }}</td>
                 <td>{{ formatDate(comment.created_at) }}</td>
               </tr>
             </tbody>
@@ -180,19 +227,15 @@
             <div class="signature-display">
               <span class="signature-name">QA Reviewer</span>
             </div>
-            <div class="signature-date">
-              Date: {{ currentDate }}
-            </div>
+            <div class="signature-date">Date: {{ currentDate }}</div>
           </div>
-          
+
           <div class="signature-item">
             <label>Approved By:</label>
             <div class="signature-display">
               <span class="signature-name">Design Team</span>
             </div>
-            <div class="signature-date">
-              Date: {{ currentDate }}
-            </div>
+            <div class="signature-date">Date: {{ currentDate }}</div>
           </div>
         </div>
       </div>
@@ -201,47 +244,47 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'ObservationReport',
+  name: "ObservationReport",
   data() {
     return {
-      lruName: '',
-      projectName: '',
+      lruName: "",
+      projectName: "",
       lruId: null,
       // Properties for document and comment management
-      selectedDocumentId: '',
+      selectedDocumentId: "",
       availableDocuments: [],
       selectedDocument: null,
       documentComments: [],
       loadingComments: false,
       loadingVersions: false,
       // Sample data
-      serialNumber: 'SL-001',
-      observationCount: 'OBS-001',
-      currentYear: '2025',
-      currentDate: '2025-01-15',
-      lruPartNumber: 'LRU-001',
-      docReviewDate: '2025-01-15',
-      reviewVenue: 'QA Department',
-      referenceDocument: 'Technical Specification'
+      serialNumber: "SL-001",
+      observationCount: "OBS-001",
+      currentYear: "2025",
+      currentDate: "2025-01-15",
+      lruPartNumber: "LRU-001",
+      docReviewDate: "2025-01-15",
+      reviewVenue: "QA Department",
+      referenceDocument: "Technical Specification",
     };
   },
   mounted() {
     // Get parameters from route
-    this.lruName = this.$route.params.lruName || 'Unknown LRU';
-    this.projectName = this.$route.params.projectName || 'Unknown Project';
+    this.lruName = this.$route.params.lruName || "Unknown LRU";
+    this.projectName = this.$route.params.projectName || "Unknown Project";
     this.lruId = this.$route.params.lruId || null;
-    
-    console.log('ObservationReport - Route params:', this.$route.params);
-    console.log('ObservationReport - Extracted lruId:', this.lruId);
-    
+
+    console.log("ObservationReport - Route params:", this.$route.params);
+    console.log("ObservationReport - Extracted lruId:", this.lruId);
+
     // Load available documents for the LRU
     if (this.lruId) {
       this.loadAvailableDocuments();
     } else {
-      console.warn('No LRU ID provided, cannot load documents');
+      console.warn("No LRU ID provided, cannot load documents");
     }
   },
   methods: {
@@ -249,237 +292,288 @@ export default {
     async loadAvailableDocuments() {
       try {
         this.loadingVersions = true;
-        
-        console.log('Loading documents for LRU ID:', this.lruId);
-        
+
+        console.log("Loading documents for LRU ID:", this.lruId);
+
         // API call to fetch documents by LRU ID using the existing endpoint
-        const response = await fetch(`http://localhost:5000/api/lrus/${this.lruId}/plan-documents`);
+        const response = await fetch(
+          `http://localhost:8000/api/lrus/${this.lruId}/plan-documents`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.availableDocuments = data.documents || [];
-          
+
           // Update LRU and project info from the response
           if (data.lru) {
             this.lruName = data.lru.lru_name || this.lruName;
             this.projectName = data.lru.project_name || this.projectName;
           }
-          
-          console.log('Loaded documents:', this.availableDocuments);
-          console.log('LRU info:', data.lru);
+
+          console.log("Loaded documents:", this.availableDocuments);
+          console.log("LRU info:", data.lru);
         } else {
-          console.error('Error loading documents:', data.message);
+          console.error("Error loading documents:", data.message);
           this.availableDocuments = [];
         }
       } catch (error) {
-        console.error('Error fetching documents:', error);
+        console.error("Error fetching documents:", error);
         this.availableDocuments = [];
       } finally {
         this.loadingVersions = false;
       }
     },
-    
+
     // Load document comments for selected document from document_comments table
     async loadDocumentComments(documentId) {
       if (!documentId) return;
-      
+
       try {
         this.loadingComments = true;
-        
+
         // API call to fetch comments for the specific document using the existing endpoint
-        const response = await fetch(`http://localhost:5000/api/comments?document_id=${documentId}`);
+        const response = await fetch(
+          `http://localhost:8000/api/comments?document_id=${documentId}`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.documentComments = data.comments || [];
-          console.log('Loaded comments:', this.documentComments);
+          console.log("Loaded comments:", this.documentComments);
         } else {
-          console.error('Error loading comments:', data.message);
+          console.error("Error loading comments:", data.message);
           this.documentComments = [];
         }
       } catch (error) {
-        console.error('Error fetching comments:', error);
+        console.error("Error fetching comments:", error);
         this.documentComments = [];
       } finally {
         this.loadingComments = false;
       }
     },
-    
+
     // Handle document selection change
     onVersionChange() {
       if (this.selectedDocumentId) {
-        this.selectedDocument = this.availableDocuments.find(d => d.document_id.toString() === this.selectedDocumentId);
+        this.selectedDocument = this.availableDocuments.find(
+          (d) => d.document_id.toString() === this.selectedDocumentId
+        );
         this.loadDocumentComments(this.selectedDocumentId);
       } else {
         this.selectedDocument = null;
         this.documentComments = [];
       }
     },
-    
+
     // Get CSS class for category badge based on section
     getCategoryClass(section) {
-      if (!section || section.trim() === '') return 'category-default';
-      
+      if (!section || section.trim() === "") return "category-default";
+
       const sectionLower = section.toLowerCase();
-      if (sectionLower.includes('major') || sectionLower.includes('critical')) return 'category-major';
-      if (sectionLower.includes('minor')) return 'category-minor';
-      if (sectionLower.includes('general')) return 'category-general';
-      return 'category-default';
+      if (sectionLower.includes("major") || sectionLower.includes("critical"))
+        return "category-major";
+      if (sectionLower.includes("minor")) return "category-minor";
+      if (sectionLower.includes("general")) return "category-general";
+      return "category-default";
     },
-    
+
     // Get CSS class for status badge
     getStatusClass(status) {
-      if (!status) return 'status-pending';
-      
+      if (!status) return "status-pending";
+
       const statusLower = status.toLowerCase();
-      if (statusLower.includes('accept') || statusLower.includes('approved')) return 'status-accepted';
-      if (statusLower.includes('reject') || statusLower.includes('rejected')) return 'status-rejected';
-      if (statusLower.includes('pending')) return 'status-pending';
-      return 'status-default';
+      if (statusLower.includes("accept") || statusLower.includes("approved"))
+        return "status-accepted";
+      if (statusLower.includes("reject") || statusLower.includes("rejected"))
+        return "status-rejected";
+      if (statusLower.includes("pending")) return "status-pending";
+      return "status-default";
     },
-    
+
     // Format date for display
     formatDate(dateString) {
-      if (!dateString) return 'N/A';
-      
+      if (!dateString) return "N/A";
+
       try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        return date.toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         });
       } catch (error) {
-        return 'Invalid Date';
+        return "Invalid Date";
       }
     },
-    
+
     exportReport() {
       try {
-        console.log('Starting PDF export...');
+        console.log("Starting PDF export...");
 
         // Create new PDF document
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        const contentWidth = pageWidth - (2 * margin);
-        
+        const contentWidth = pageWidth - 2 * margin;
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // ===== HEADER SECTION =====
         // Main Title - IQA OBSERVATION REPORT
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('IQA OBSERVATION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("IQA OBSERVATION REPORT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Document path and date on same line
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        
+        doc.setFont("helvetica", "normal");
+
         // Left side - Document path
-        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.observationCount || '001'}/${this.currentYear || '2025'}`;
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
+          this.lruName || "LRU"
+        }/SL.${this.serialNumber || "001"}/${this.observationCount || "001"}/${
+          this.currentYear || "2025"
+        }`;
         doc.text(documentPath, margin, yPosition);
-        
+
         // Right side - Date
-        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
+        const dateText = `Date: ${
+          this.currentDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
-        
+
         // ===== SUBJECT LINE =====
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: IQA Observation Report for ${this.lruName || 'Unknown LRU'}`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: IQA Observation Report for ${
+          this.lruName || "Unknown LRU"
+        }`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // ===== DOCUMENT DETAILS SECTION =====
         doc.setFontSize(10);
-        
+
         // Left column details
         const leftColumnX = margin;
         const rightColumnX = margin + contentWidth / 2;
         const labelOffset = 40; // Space after label
-        
+
         // Left column - Project details
         yPosition = margin + 42;
-        
+
         // Project Name
-        doc.setFont('helvetica', 'bold');
-        doc.text('Project Name :', leftColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.projectName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Project Name :", leftColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.projectName || "Not specified",
+          leftColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // LRU Name
-        doc.setFont('helvetica', 'bold');
-        doc.text('LRU Name :', leftColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.lruName || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("LRU Name :", leftColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.lruName || "Not specified",
+          leftColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // LRU Part No
-        doc.setFont('helvetica', 'bold');
-        doc.text('LRU Part No. :', leftColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.lruPartNumber || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("LRU Part No. :", leftColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.lruPartNumber || "Not specified",
+          leftColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Serial Number
-        doc.setFont('helvetica', 'bold');
-        doc.text('Serial Number :', leftColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.serialNumber || 'Not specified', leftColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Serial Number :", leftColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.serialNumber || "Not specified",
+          leftColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Right column details
         yPosition = margin + 42;
-        
+
         // Inspection stage
-        doc.setFont('helvetica', 'bold');
-        doc.text('Inspection stage :', rightColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text('Document review/report', rightColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection stage :", rightColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          "Document review/report",
+          rightColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Date of doc review
-        doc.setFont('helvetica', 'bold');
-        doc.text('Date of doc review :', rightColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.docReviewDate || 'Not specified', rightColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Date of doc review :", rightColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.docReviewDate || "Not specified",
+          rightColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Review venue
-        doc.setFont('helvetica', 'bold');
-        doc.text('Review venue :', rightColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.reviewVenue || 'Not specified', rightColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Review venue :", rightColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.reviewVenue || "Not specified",
+          rightColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 8;
-        
+
         // Reference Document
-        doc.setFont('helvetica', 'bold');
-        doc.text('Reference Document :', rightColumnX, yPosition);
-        doc.setFont('helvetica', 'normal');
-        doc.text(this.referenceDocument || 'Not specified', rightColumnX + labelOffset, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Reference Document :", rightColumnX, yPosition);
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          this.referenceDocument || "Not specified",
+          rightColumnX + labelOffset,
+          yPosition
+        );
         yPosition += 15;
-        
+
         // ===== OBSERVATIONS SECTION =====
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('OBSERVATIONS', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("OBSERVATIONS", pageWidth / 2, yPosition, { align: "center" });
         yPosition += 12;
-        
+
         // ===== OBSERVATIONS TABLE =====
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        
+        doc.setFont("helvetica", "bold");
+
         // Table column widths and positions (optimized for single page)
         const tableStartX = margin;
         const snoWidth = 12;
@@ -490,157 +584,319 @@ export default {
         const reviewerWidth = 20;
         const pageWidth_col = 15;
         const dateColWidth = 25;
-        
+
         // Table headers with proper spacing
-        doc.text('SNO', tableStartX, yPosition);
-        doc.text('Category', tableStartX + snoWidth, yPosition);
-        doc.text('Observations', tableStartX + snoWidth + categoryWidth, yPosition);
-        doc.text('Accept/Reject', tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
-        doc.text('Justification', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
-        doc.text('Reviewer', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
-        doc.text('Page', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
-        doc.text('Date', tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
+        doc.text("SNO", tableStartX, yPosition);
+        doc.text("Category", tableStartX + snoWidth, yPosition);
+        doc.text(
+          "Observations",
+          tableStartX + snoWidth + categoryWidth,
+          yPosition
+        );
+        doc.text(
+          "Accept/Reject",
+          tableStartX + snoWidth + categoryWidth + observationWidth,
+          yPosition
+        );
+        doc.text(
+          "Justification",
+          tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth,
+          yPosition
+        );
+        doc.text(
+          "Reviewer",
+          tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth,
+          yPosition
+        );
+        doc.text(
+          "Page",
+          tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth +
+            reviewerWidth,
+          yPosition
+        );
+        doc.text(
+          "Date",
+          tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth +
+            reviewerWidth +
+            pageWidth_col,
+          yPosition
+        );
         yPosition += 6;
-        
+
         // Draw table header lines
         doc.line(margin, yPosition - 3, pageWidth - margin, yPosition - 3);
         doc.line(margin, yPosition, pageWidth - margin, yPosition);
         yPosition += 4;
-        
+
         // Table data
-        doc.setFont('helvetica', 'normal');
-        
+        doc.setFont("helvetica", "normal");
+
         // Safety check - ensure comments array exists and has items
         if (!this.documentComments || this.documentComments.length === 0) {
-          doc.text('No comments available', tableStartX + snoWidth + categoryWidth, yPosition);
+          doc.text(
+            "No comments available",
+            tableStartX + snoWidth + categoryWidth,
+            yPosition
+          );
           yPosition += 15;
         } else {
           // Limit comments to fit on single page
           const maxComments = Math.min(this.documentComments.length, 8);
           const commentsToShow = this.documentComments.slice(0, maxComments);
-          
+
           commentsToShow.forEach((comment, index) => {
             yPosition += 6;
-            
+
             // SNO
             doc.text((index + 1).toString(), tableStartX, yPosition);
-            
+
             // Category (shortened)
-            const categoryText = (comment.section && comment.section.trim() !== '' ? comment.section : 'General').substring(0, 15);
+            const categoryText = (
+              comment.section && comment.section.trim() !== ""
+                ? comment.section
+                : "General"
+            ).substring(0, 15);
             doc.text(categoryText, tableStartX + snoWidth, yPosition);
-            
+
             // Observations - handle long text with proper wrapping
-            const observationText = (comment.description || 'No comment').substring(0, 60);
-            const observationLines = doc.splitTextToSize(observationText, observationWidth - 2);
-            doc.text(observationLines, tableStartX + snoWidth + categoryWidth, yPosition);
-            
+            const observationText = (
+              comment.description || "No comment"
+            ).substring(0, 60);
+            const observationLines = doc.splitTextToSize(
+              observationText,
+              observationWidth - 2
+            );
+            doc.text(
+              observationLines,
+              tableStartX + snoWidth + categoryWidth,
+              yPosition
+            );
+
             // Accept/Reject
-            const acceptRejectText = (comment.status || 'Pending').substring(0, 15);
-            doc.text(acceptRejectText, tableStartX + snoWidth + categoryWidth + observationWidth, yPosition);
-            
+            const acceptRejectText = (comment.status || "Pending").substring(
+              0,
+              15
+            );
+            doc.text(
+              acceptRejectText,
+              tableStartX + snoWidth + categoryWidth + observationWidth,
+              yPosition
+            );
+
             // Justification - handle long text with proper wrapping
-            const justificationText = (comment.justification || 'No justification provided').substring(0, 40);
-            const justificationLines = doc.splitTextToSize(justificationText, justificationWidth - 2);
-            doc.text(justificationLines, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth, yPosition);
-            
+            const justificationText = (
+              comment.justification || "No justification provided"
+            ).substring(0, 40);
+            const justificationLines = doc.splitTextToSize(
+              justificationText,
+              justificationWidth - 2
+            );
+            doc.text(
+              justificationLines,
+              tableStartX +
+                snoWidth +
+                categoryWidth +
+                observationWidth +
+                acceptRejectWidth,
+              yPosition
+            );
+
             // Reviewer
-            const reviewerText = (comment.reviewer_id ? comment.reviewer_id.toString() : 'Unknown').substring(0, 15);
-            doc.text(reviewerText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth, yPosition);
-            
+            const reviewerText = (
+              comment.reviewer_id ? comment.reviewer_id.toString() : "Unknown"
+            ).substring(0, 15);
+            doc.text(
+              reviewerText,
+              tableStartX +
+                snoWidth +
+                categoryWidth +
+                observationWidth +
+                acceptRejectWidth +
+                justificationWidth,
+              yPosition
+            );
+
             // Page
-            const pageText = (comment.page_no ? comment.page_no.toString() : 'N/A').substring(0, 10);
-            doc.text(pageText, tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth, yPosition);
-            
+            const pageText = (
+              comment.page_no ? comment.page_no.toString() : "N/A"
+            ).substring(0, 10);
+            doc.text(
+              pageText,
+              tableStartX +
+                snoWidth +
+                categoryWidth +
+                observationWidth +
+                acceptRejectWidth +
+                justificationWidth +
+                reviewerWidth,
+              yPosition
+            );
+
             // Date
-            const dateText = this.formatDate(comment.created_at) || 'N/A';
-            doc.text(dateText.substring(0, 20), tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col, yPosition);
-            
+            const dateText = this.formatDate(comment.created_at) || "N/A";
+            doc.text(
+              dateText.substring(0, 20),
+              tableStartX +
+                snoWidth +
+                categoryWidth +
+                observationWidth +
+                acceptRejectWidth +
+                justificationWidth +
+                reviewerWidth +
+                pageWidth_col,
+              yPosition
+            );
+
             // Calculate row height based on the longest text
-            const maxLines = Math.max(observationLines.length, justificationLines.length, 1);
+            const maxLines = Math.max(
+              observationLines.length,
+              justificationLines.length,
+              1
+            );
             yPosition += Math.max(maxLines * 3, 8);
           });
-          
+
           // Show message if comments were truncated
           if (this.documentComments.length > maxComments) {
             yPosition += 8;
-            doc.setFont('helvetica', 'italic');
+            doc.setFont("helvetica", "italic");
             doc.setFontSize(8);
-            doc.text(`Note: Showing ${maxComments} of ${this.documentComments.length} comments. Export detailed report for complete list.`, margin, yPosition);
-            doc.setFont('helvetica', 'normal');
+            doc.text(
+              `Note: Showing ${maxComments} of ${this.documentComments.length} comments. Export detailed report for complete list.`,
+              margin,
+              yPosition
+            );
+            doc.setFont("helvetica", "normal");
             doc.setFontSize(9);
           }
         }
-        
+
         yPosition += 15;
-        
+
         // ===== SIGNATURES SECTION =====
         // Optimize for single page - ensure we have enough space
         if (yPosition > pageHeight - 60) {
           yPosition = pageHeight - 60;
         }
-        
+
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        doc.text('SIGNATURES', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("SIGNATURES", pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // ===== SIGNATURE AREA =====
         // Create a single horizontal signature box divided into two sections
         const totalSignatureWidth = contentWidth - 20; // Leave some margin
         const signatureHeight = 25;
         const leftSectionWidth = totalSignatureWidth * 0.5; // 50% for left
         const rightSectionWidth = totalSignatureWidth * 0.5; // 50% for right
-        
+
         const signatureStartX = margin + 10;
         const signatureY = yPosition;
-        
+
         // Draw the main signature box
-        doc.rect(signatureStartX, signatureY, totalSignatureWidth, signatureHeight);
-        
+        doc.rect(
+          signatureStartX,
+          signatureY,
+          totalSignatureWidth,
+          signatureHeight
+        );
+
         // Draw vertical dividing line
-        doc.line(signatureStartX + leftSectionWidth, signatureY, signatureStartX + leftSectionWidth, signatureY + signatureHeight);
-        
+        doc.line(
+          signatureStartX + leftSectionWidth,
+          signatureY,
+          signatureStartX + leftSectionWidth,
+          signatureY + signatureHeight
+        );
+
         // Add labels below the signature box
         yPosition += signatureHeight + 8;
-        
+
         // Left section label
         doc.setFontSize(9);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Reviewed by', signatureStartX + (leftSectionWidth / 2), yPosition, { align: 'center' });
-        
+        doc.setFont("helvetica", "bold");
+        doc.text(
+          "Reviewed by",
+          signatureStartX + leftSectionWidth / 2,
+          yPosition,
+          { align: "center" }
+        );
+
         // Right section label
-        doc.text('Approved by', signatureStartX + leftSectionWidth + (rightSectionWidth / 2), yPosition, { align: 'center' });
-        
+        doc.text(
+          "Approved by",
+          signatureStartX + leftSectionWidth + rightSectionWidth / 2,
+          yPosition,
+          { align: "center" }
+        );
+
         // Add names inside the signature boxes
         yPosition -= 8;
-        doc.setFont('helvetica', 'normal');
+        doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        
+
         // Reviewed by name
-        doc.text('QA Reviewer', signatureStartX + (leftSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
-        
+        doc.text(
+          "QA Reviewer",
+          signatureStartX + leftSectionWidth / 2,
+          signatureY + signatureHeight / 2 + 2,
+          { align: "center" }
+        );
+
         // Approved by name
-        doc.text('Design Team', signatureStartX + leftSectionWidth + (rightSectionWidth / 2), signatureY + (signatureHeight / 2) + 2, { align: 'center' });
-        
+        doc.text(
+          "Design Team",
+          signatureStartX + leftSectionWidth + rightSectionWidth / 2,
+          signatureY + signatureHeight / 2 + 2,
+          { align: "center" }
+        );
+
         // ===== SAVE PDF =====
-        const lruNameForFile = this.lruName || 'Unknown_LRU';
-        const currentDateForFile = this.currentDate || new Date().toLocaleDateString('en-GB');
-        const fileName = `IQA_Observation_Report_${lruNameForFile}_${currentDateForFile.replace(/\//g, '-')}.pdf`;
+        const lruNameForFile = this.lruName || "Unknown_LRU";
+        const currentDateForFile =
+          this.currentDate || new Date().toLocaleDateString("en-GB");
+        const fileName = `IQA_Observation_Report_${lruNameForFile}_${currentDateForFile.replace(
+          /\//g,
+          "-"
+        )}.pdf`;
         doc.save(fileName);
-        
+
         // Show success message
         this.$nextTick(() => {
-          alert('Report exported successfully as PDF!');
+          alert("Report exported successfully as PDF!");
         });
-        
       } catch (error) {
-        console.error('Error exporting PDF:', error);
+        console.error("Error exporting PDF:", error);
         this.$nextTick(() => {
-          alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+          alert(
+            `Error exporting PDF: ${
+              error.message || "Unknown error"
+            }. Please try again.`
+          );
         });
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -741,7 +997,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -942,11 +1198,16 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.no-selection, .no-comments {
+.no-selection,
+.no-comments {
   text-align: center;
   padding: 40px 20px;
   color: #6c757d;
@@ -957,7 +1218,8 @@ export default {
 }
 
 /* Badge Styles */
-.category-badge, .status-badge {
+.category-badge,
+.status-badge {
   padding: 4px 12px;
   border-radius: 20px;
   font-weight: 600;
@@ -1007,7 +1269,8 @@ export default {
 }
 
 /* Table Text Styles */
-.comment-text, .justification-text {
+.comment-text,
+.justification-text {
   max-width: 300px;
   word-wrap: break-word;
   line-height: 1.4;
@@ -1081,50 +1344,52 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .document-details {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .observations-table {
     font-size: 0.9em;
   }
-  
+
   .observations-table th,
   .observations-table td {
     padding: 10px 8px;
   }
-  
+
   .version-controls {
     gap: 10px;
   }
-  
+
   .version-select {
     padding: 10px 12px;
     font-size: 0.9em;
   }
-  
-  .comment-text, .justification-text {
+
+  .comment-text,
+  .justification-text {
     max-width: 200px;
     font-size: 0.9em;
   }
-  
-  .category-badge, .status-badge {
+
+  .category-badge,
+  .status-badge {
     font-size: 0.75em;
     padding: 3px 8px;
   }

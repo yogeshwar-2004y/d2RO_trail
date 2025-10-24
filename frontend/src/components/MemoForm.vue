@@ -365,15 +365,30 @@
               <div class="lru-field unit-identification-container">
                 <label>UNIT IDENTIFICATION :</label>
                 <div class="cascading-dropdown">
-                  <div class="dropdown-trigger" @click="toggleCascadingDropdown">
-                    <span class="selected-text">{{ getSelectedText() || "Select Test" }}</span>
+                  <div
+                    class="dropdown-trigger"
+                    @click="toggleCascadingDropdown"
+                  >
+                    <span class="selected-text">{{
+                      getSelectedText() || "Select Test"
+                    }}</span>
                     <span class="dropdown-arrow">▼</span>
                   </div>
-                  
+
                   <!-- Level 1: Tests -->
-                  <div v-if="showCascadingDropdown" class="cascading-menu level-1">
-                    <div v-if="loadingTestGroups" class="menu-item loading">Loading tests...</div>
-                    <div v-else-if="testGroups.length === 0" class="menu-item no-data">No tests available</div>
+                  <div
+                    v-if="showCascadingDropdown"
+                    class="cascading-menu level-1"
+                  >
+                    <div v-if="loadingTestGroups" class="menu-item loading">
+                      Loading tests...
+                    </div>
+                    <div
+                      v-else-if="testGroups.length === 0"
+                      class="menu-item no-data"
+                    >
+                      No tests available
+                    </div>
                     <div
                       v-else
                       v-for="group in testGroups"
@@ -387,22 +402,31 @@
                       <span class="arrow">▶</span>
                     </div>
                   </div>
-                  
+
                   <!-- Level 2: Sub-Tests -->
-                  <div 
-                    v-if="showSubTests && hoveredTestGroup" 
+                  <div
+                    v-if="showSubTests && hoveredTestGroup"
                     class="cascading-menu level-2"
                     @mouseenter="keepSubTestsOpen = true"
                     @mouseleave="handleSubTestsLeave"
                   >
-                    <div v-if="loadingSubTests" class="menu-item loading">Loading sub-tests...</div>
-                    <div v-else-if="subTests.length === 0" class="menu-item no-data">No sub-tests available</div>
+                    <div v-if="loadingSubTests" class="menu-item loading">
+                      Loading sub-tests...
+                    </div>
+                    <div
+                      v-else-if="subTests.length === 0"
+                      class="menu-item no-data"
+                    >
+                      No sub-tests available
+                    </div>
                     <div
                       v-else
                       v-for="subTest in subTests"
                       :key="subTest.sub_test_id"
                       class="menu-item"
-                      :class="{ active: hoveredSubTest === subTest.sub_test_id }"
+                      :class="{
+                        active: hoveredSubTest === subTest.sub_test_id,
+                      }"
                       @mouseenter="handleSubTestHover(subTest)"
                       @click="selectSubTest(subTest)"
                     >
@@ -410,38 +434,61 @@
                       <span class="arrow">▶</span>
                     </div>
                   </div>
-                  
+
                   <!-- Level 3: Bulletins -->
-                  <div 
-                    v-if="showBulletins && hoveredSubTest" 
+                  <div
+                    v-if="showBulletins && hoveredSubTest"
                     class="cascading-menu level-3"
                     @mouseenter="keepBulletinsOpen = true"
                     @mouseleave="handleBulletinsLeave"
                   >
-                    <div v-if="loadingBulletins" class="menu-item loading">Loading bulletins...</div>
-                    <div v-else-if="bulletins.length === 0" class="menu-item no-data">No bulletins available</div>
+                    <div v-if="loadingBulletins" class="menu-item loading">
+                      Loading bulletins...
+                    </div>
+                    <div
+                      v-else-if="bulletins.length === 0"
+                      class="menu-item no-data"
+                    >
+                      No bulletins available
+                    </div>
                     <div
                       v-else
                       v-for="bulletin in bulletins"
                       :key="bulletin.bulletin_id"
                       class="menu-item"
-                      :class="{ active: hoveredBulletin === bulletin.bulletin_id }"
+                      :class="{
+                        active: hoveredBulletin === bulletin.bulletin_id,
+                      }"
                       @mouseenter="handleBulletinHover(bulletin)"
                       @click="selectBulletin(bulletin)"
                     >
-                      <span class="item-text">{{ bulletin.bulletin_name }}</span>
-                      <span v-if="bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0" class="arrow">▶</span>
+                      <span class="item-text">{{
+                        bulletin.bulletin_name
+                      }}</span>
+                      <span
+                        v-if="
+                          bulletin.sub_bulletins &&
+                          bulletin.sub_bulletins.length > 0
+                        "
+                        class="arrow"
+                        >▶</span
+                      >
                     </div>
                   </div>
-                  
+
                   <!-- Level 4: Sub-Bulletins -->
-                  <div 
-                    v-if="showSubBulletins && hoveredBulletin" 
+                  <div
+                    v-if="showSubBulletins && hoveredBulletin"
                     class="cascading-menu level-4"
                     @mouseenter="keepSubBulletinsOpen = true"
                     @mouseleave="handleSubBulletinsLeave"
                   >
-                    <div v-if="subBulletins.length === 0" class="menu-item no-data">No sub-bulletins available</div>
+                    <div
+                      v-if="subBulletins.length === 0"
+                      class="menu-item no-data"
+                    >
+                      No sub-bulletins available
+                    </div>
                     <div
                       v-else
                       v-for="subBulletin in subBulletins"
@@ -449,7 +496,9 @@
                       class="menu-item"
                       @click="selectSubBulletin(subBulletin)"
                     >
-                      <span class="item-text">{{ subBulletin.bulletin_name }}</span>
+                      <span class="item-text">{{
+                        subBulletin.bulletin_name
+                      }}</span>
                     </div>
                   </div>
                 </div>
@@ -1447,7 +1496,7 @@ export default {
       loadingTestGroups: false,
       loadingSubTests: false,
       loadingBulletins: false,
-      
+
       // Cascading dropdown state
       showCascadingDropdown: false,
       showSubTests: false,
@@ -1887,7 +1936,6 @@ export default {
       ) {
         this.showSerialNumberDropdown = false;
       }
-
     },
 
     async fetchLruOptions() {
@@ -1909,7 +1957,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2007,7 +2055,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:5000/api/lrus", {
+        const response = await fetch("http://localhost:8000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2025,7 +2073,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2058,22 +2106,22 @@ export default {
         this.serialNumberLoading = false;
       }
     },
-    
+
     // Hierarchical test data fetching methods for Unit Identification
     async fetchTestGroups() {
       try {
         this.loadingTestGroups = true;
-        const response = await fetch('http://localhost:5000/api/test-groups');
+        const response = await fetch("http://localhost:8000/api/test-groups");
         const data = await response.json();
-        
+
         if (data.success) {
           this.testGroups = data.groups;
-          console.log('Test groups loaded:', this.testGroups);
+          console.log("Test groups loaded:", this.testGroups);
         } else {
-          console.error('Failed to fetch test groups:', data.message);
+          console.error("Failed to fetch test groups:", data.message);
         }
       } catch (error) {
-        console.error('Error fetching test groups:', error);
+        console.error("Error fetching test groups:", error);
       } finally {
         this.loadingTestGroups = false;
       }
@@ -2089,18 +2137,20 @@ export default {
         this.formData.selectedSubTest = "";
         this.formData.selectedBulletin = "";
         this.formData.selectedSubBulletin = "";
-        
-        const response = await fetch(`http://localhost:5000/api/test-groups/${groupId}/sub-tests`);
+
+        const response = await fetch(
+          `http://localhost:8000/api/test-groups/${groupId}/sub-tests`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.subTests = data.sub_tests;
-          console.log('Sub-tests loaded:', this.subTests);
+          console.log("Sub-tests loaded:", this.subTests);
         } else {
-          console.error('Failed to fetch sub-tests:', data.message);
+          console.error("Failed to fetch sub-tests:", data.message);
         }
       } catch (error) {
-        console.error('Error fetching sub-tests:', error);
+        console.error("Error fetching sub-tests:", error);
       } finally {
         this.loadingSubTests = false;
       }
@@ -2114,18 +2164,20 @@ export default {
         this.subBulletins = [];
         this.formData.selectedBulletin = "";
         this.formData.selectedSubBulletin = "";
-        
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${subTestId}/bulletins`);
+
+        const response = await fetch(
+          `http://localhost:8000/api/sub-tests/${subTestId}/bulletins`
+        );
         const data = await response.json();
-        
+
         if (data.success) {
           this.bulletins = data.bulletins;
-          console.log('Bulletins loaded:', this.bulletins);
+          console.log("Bulletins loaded:", this.bulletins);
         } else {
-          console.error('Failed to fetch bulletins:', data.message);
+          console.error("Failed to fetch bulletins:", data.message);
         }
       } catch (error) {
-        console.error('Error fetching bulletins:', error);
+        console.error("Error fetching bulletins:", error);
       } finally {
         this.loadingBulletins = false;
       }
@@ -2156,7 +2208,7 @@ export default {
       this.hoveredTestGroup = group.group_id;
       this.showSubTests = true;
       this.fetchSubTests(group.group_id);
-      
+
       // Reset lower levels
       this.showBulletins = false;
       this.showSubBulletins = false;
@@ -2168,7 +2220,7 @@ export default {
       this.hoveredSubTest = subTest.sub_test_id;
       this.showBulletins = true;
       this.fetchBulletins(subTest.sub_test_id);
-      
+
       // Reset lower levels
       this.showSubBulletins = false;
       this.hoveredBulletin = null;
@@ -2193,19 +2245,34 @@ export default {
 
     selectSubTest(subTest) {
       // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(this.hoveredTestGroup, subTest.sub_test_id, null, null);
+      this.captureFullHierarchy(
+        this.hoveredTestGroup,
+        subTest.sub_test_id,
+        null,
+        null
+      );
       this.closeAllMenus();
     },
 
     selectBulletin(bulletin) {
       // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(this.hoveredTestGroup, this.hoveredSubTest, bulletin.bulletin_id, null);
+      this.captureFullHierarchy(
+        this.hoveredTestGroup,
+        this.hoveredSubTest,
+        bulletin.bulletin_id,
+        null
+      );
       this.closeAllMenus();
     },
 
     selectSubBulletin(subBulletin) {
       // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(this.hoveredTestGroup, this.hoveredSubTest, this.hoveredBulletin, subBulletin.bulletin_id);
+      this.captureFullHierarchy(
+        this.hoveredTestGroup,
+        this.hoveredSubTest,
+        this.hoveredBulletin,
+        subBulletin.bulletin_id
+      );
       this.closeAllMenus();
     },
 
@@ -2244,79 +2311,86 @@ export default {
       this.formData.selectedSubTest = subTestId || "";
       this.formData.selectedBulletin = bulletinId || "";
       this.formData.selectedSubBulletin = subBulletinId || "";
-      
+
       // Build the display text
       const parts = [];
-      
+
       if (testGroupId) {
         const testGroupName = this.getTestGroupName(testGroupId);
         if (testGroupName) parts.push(testGroupName);
       }
-      
+
       if (subTestId) {
         const subTestName = this.getSubTestName(subTestId);
         if (subTestName) parts.push(subTestName);
       }
-      
+
       if (bulletinId) {
         const bulletinName = this.getBulletinName(bulletinId);
         if (bulletinName) parts.push(bulletinName);
       }
-      
+
       if (subBulletinId) {
-        const subBulletin = this.subBulletins.find(sb => sb.bulletin_id == subBulletinId);
+        const subBulletin = this.subBulletins.find(
+          (sb) => sb.bulletin_id == subBulletinId
+        );
         if (subBulletin) parts.push(subBulletin.bulletin_name);
       }
-      
+
       this.formData.unitIdentification = parts.join(" > ");
     },
 
     // Build unit identification as array for database storage
     buildUnitIdentificationArray() {
       const parts = [];
-      
+
       // Get test group name
-      const testGroupName = this.getTestGroupName(this.formData.selectedTestGroup) || "";
+      const testGroupName =
+        this.getTestGroupName(this.formData.selectedTestGroup) || "";
       parts.push(testGroupName);
-      
+
       // Get sub-test name
-      const subTestName = this.getSubTestName(this.formData.selectedSubTest) || "";
+      const subTestName =
+        this.getSubTestName(this.formData.selectedSubTest) || "";
       parts.push(subTestName);
-      
+
       // Get bulletin name
-      const bulletinName = this.getBulletinName(this.formData.selectedBulletin) || "";
+      const bulletinName =
+        this.getBulletinName(this.formData.selectedBulletin) || "";
       parts.push(bulletinName);
-      
+
       // Get sub-bulletin name
       let subBulletinName = "";
       if (this.formData.selectedSubBulletin) {
-        const subBulletin = this.subBulletins.find(sb => sb.bulletin_id == this.formData.selectedSubBulletin);
+        const subBulletin = this.subBulletins.find(
+          (sb) => sb.bulletin_id == this.formData.selectedSubBulletin
+        );
         if (subBulletin) {
           subBulletinName = subBulletin.bulletin_name;
         }
       }
       parts.push(subBulletinName);
-      
+
       return parts;
     },
 
     getTestGroupName(groupId) {
-      const group = this.testGroups.find(g => g.group_id === groupId);
-      return group ? group.group_name : '';
+      const group = this.testGroups.find((g) => g.group_id === groupId);
+      return group ? group.group_name : "";
     },
 
     getSubTestName(subTestId) {
-      const subTest = this.subTests.find(s => s.sub_test_id === subTestId);
-      return subTest ? subTest.sub_test_name : '';
+      const subTest = this.subTests.find((s) => s.sub_test_id === subTestId);
+      return subTest ? subTest.sub_test_name : "";
     },
 
     getBulletinName(bulletinId) {
-      const bulletin = this.bulletins.find(b => b.bulletin_id === bulletinId);
-      return bulletin ? bulletin.bulletin_name : '';
+      const bulletin = this.bulletins.find((b) => b.bulletin_id === bulletinId);
+      return bulletin ? bulletin.bulletin_name : "";
     },
 
     handleCascadingClickOutside(event) {
-      const cascadingDropdown = event.target.closest('.cascading-dropdown');
+      const cascadingDropdown = event.target.closest(".cascading-dropdown");
       if (!cascadingDropdown) {
         this.closeAllMenus();
       }
@@ -2597,7 +2671,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:5000/api/memos", {
+        const response = await fetch("http://localhost:8000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2892,7 +2966,7 @@ export default {
   background: white;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   min-width: 200px;
   max-height: 300px;
@@ -3013,19 +3087,19 @@ export default {
   .cascading-menu {
     min-width: 150px;
   }
-  
+
   .level-2 {
     left: 0;
     top: 100%;
     margin-top: 10px;
   }
-  
+
   .level-3 {
     left: 0;
     top: 200%;
     margin-top: 10px;
   }
-  
+
   .level-4 {
     left: 0;
     top: 300%;

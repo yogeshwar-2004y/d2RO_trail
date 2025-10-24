@@ -4,7 +4,17 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -12,11 +22,26 @@
       </div>
       <div class="header-center">
         <h1 class="page-title">{{ subTestName }}</h1>
-        <p class="page-subtitle">Manage bulletins and sub-bulletins for this sub-test</p>
+        <p class="page-subtitle">
+          Manage bulletins and sub-bulletins for this sub-test
+        </p>
       </div>
       <div class="header-right">
-        <button class="add-bulletin-btn" @click="showAddBulletinFormForTopLevel">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          class="add-bulletin-btn"
+          @click="showAddBulletinFormForTopLevel"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -32,7 +57,17 @@
         <div class="form-header">
           <h3>Add New Bulletin</h3>
           <button @click="showAddBulletinForm = false" class="close-form-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -41,30 +76,35 @@
         <form @submit.prevent="saveBulletin">
           <div class="form-group">
             <label for="bulletinName">Bulletin Name *</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               id="bulletinName"
-              v-model="bulletinForm.bulletin_name" 
+              v-model="bulletinForm.bulletin_name"
               placeholder="Enter bulletin name"
               required
-            >
+            />
           </div>
-          
+
           <div class="form-group">
             <label for="bulletinDescription">Description</label>
-            <textarea 
+            <textarea
               id="bulletinDescription"
-              v-model="bulletinForm.bulletin_description" 
+              v-model="bulletinForm.bulletin_description"
               placeholder="Enter bulletin description"
               rows="3"
             ></textarea>
           </div>
-          
-          
+
           <div class="form-actions">
-            <button type="button" @click="showAddBulletinForm = false" class="cancel-btn">Cancel</button>
+            <button
+              type="button"
+              @click="showAddBulletinForm = false"
+              class="cancel-btn"
+            >
+              Cancel
+            </button>
             <button type="submit" class="save-btn" :disabled="saving">
-              {{ saving ? 'Saving...' : 'Create Bulletin' }}
+              {{ saving ? "Saving..." : "Create Bulletin" }}
             </button>
           </div>
         </form>
@@ -88,7 +128,11 @@
       <div v-else class="bulletins-section">
         <div class="section-header">
           <h2>Bulletins</h2>
-          <span class="bulletin-count">{{ bulletins.length }} bulletin{{ bulletins.length !== 1 ? 's' : '' }}</span>
+          <span class="bulletin-count"
+            >{{ bulletins.length }} bulletin{{
+              bulletins.length !== 1 ? "s" : ""
+            }}</span
+          >
         </div>
 
         <!-- Empty State -->
@@ -96,84 +140,195 @@
           <div class="empty-icon">📋</div>
           <h3>No Bulletins Found</h3>
           <p>Create your first bulletin to get started.</p>
-          <button @click="showAddBulletinFormForTopLevel" class="add-first-bulletin-btn">
+          <button
+            @click="showAddBulletinFormForTopLevel"
+            class="add-first-bulletin-btn"
+          >
             Create First Bulletin
           </button>
         </div>
 
         <!-- Bulletins List -->
         <div v-else class="bulletins-list">
-          <div 
-            v-for="bulletin in bulletins" 
+          <div
+            v-for="bulletin in bulletins"
             :key="bulletin.bulletin_id"
             class="bulletin-item"
-            :class="{ 'parent-bulletin': !bulletin.parent_bulletin_id, 'sub-bulletin': bulletin.parent_bulletin_id }"
+            :class="{
+              'parent-bulletin': !bulletin.parent_bulletin_id,
+              'sub-bulletin': bulletin.parent_bulletin_id,
+            }"
           >
             <div class="bulletin-content">
               <div class="bulletin-header">
                 <h3 class="bulletin-name">{{ bulletin.bulletin_name }}</h3>
                 <div class="bulletin-actions">
-                  <button v-if="!bulletin.parent_bulletin_id" @click="addSubBulletin(bulletin)" class="add-sub-bulletin-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <button
+                    v-if="!bulletin.parent_bulletin_id"
+                    @click="addSubBulletin(bulletin)"
+                    class="add-sub-bulletin-btn"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <line x1="12" y1="5" x2="12" y2="19"></line>
                       <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
                     Add Sub-bulletin
                   </button>
-                  <button @click="editBulletin(bulletin)" class="action-btn edit-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  <button
+                    @click="editBulletin(bulletin)"
+                    class="action-btn edit-btn"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path
+                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                      ></path>
+                      <path
+                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                      ></path>
                     </svg>
                   </button>
-                  <button @click="deleteBulletin(bulletin)" class="action-btn delete-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <button
+                    @click="deleteBulletin(bulletin)"
+                    class="action-btn delete-btn"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
                       <polyline points="3 6 5 6 21 6"></polyline>
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                      <path
+                        d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                      ></path>
                     </svg>
                   </button>
                 </div>
               </div>
-              <p class="bulletin-description">{{ bulletin.bulletin_description || 'No description available' }}</p>
+              <p class="bulletin-description">
+                {{
+                  bulletin.bulletin_description || "No description available"
+                }}
+              </p>
               <div class="bulletin-meta">
-                <span class="created-date">Created: {{ formatDate(bulletin.created_at) }}</span>
-                <span v-if="bulletin.parent_bulletin_id" class="parent-indicator">
-                  Sub-bulletin of: {{ getParentBulletinName(bulletin.parent_bulletin_id) }}
+                <span class="created-date"
+                  >Created: {{ formatDate(bulletin.created_at) }}</span
+                >
+                <span
+                  v-if="bulletin.parent_bulletin_id"
+                  class="parent-indicator"
+                >
+                  Sub-bulletin of:
+                  {{ getParentBulletinName(bulletin.parent_bulletin_id) }}
                 </span>
-                <span v-if="!bulletin.parent_bulletin_id" class="sub-bulletin-count">
-                  {{ getSubBulletinCount(bulletin.bulletin_id) }} sub-bulletin{{ getSubBulletinCount(bulletin.bulletin_id) !== 1 ? 's' : '' }}
+                <span
+                  v-if="!bulletin.parent_bulletin_id"
+                  class="sub-bulletin-count"
+                >
+                  {{ getSubBulletinCount(bulletin.bulletin_id) }} sub-bulletin{{
+                    getSubBulletinCount(bulletin.bulletin_id) !== 1 ? "s" : ""
+                  }}
                 </span>
               </div>
             </div>
-            
+
             <!-- Sub-bulletins -->
-            <div v-if="bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0" class="sub-bulletins">
-              <div 
-                v-for="subBulletin in bulletin.sub_bulletins" 
+            <div
+              v-if="bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0"
+              class="sub-bulletins"
+            >
+              <div
+                v-for="subBulletin in bulletin.sub_bulletins"
                 :key="subBulletin.bulletin_id"
                 class="sub-bulletin-item"
               >
                 <div class="sub-bulletin-content">
                   <div class="sub-bulletin-header">
-                    <h4 class="sub-bulletin-name">{{ subBulletin.bulletin_name }}</h4>
+                    <h4 class="sub-bulletin-name">
+                      {{ subBulletin.bulletin_name }}
+                    </h4>
                     <div class="sub-bulletin-actions">
-                      <button @click="editBulletin(subBulletin)" class="action-btn edit-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      <button
+                        @click="editBulletin(subBulletin)"
+                        class="action-btn edit-btn"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <path
+                            d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                          ></path>
+                          <path
+                            d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                          ></path>
                         </svg>
                       </button>
-                      <button @click="deleteBulletin(subBulletin)" class="action-btn delete-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <button
+                        @click="deleteBulletin(subBulletin)"
+                        class="action-btn delete-btn"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
                           <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          <path
+                            d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                          ></path>
                         </svg>
                       </button>
                     </div>
                   </div>
-                  <p class="sub-bulletin-description">{{ subBulletin.bulletin_description || 'No description available' }}</p>
+                  <p class="sub-bulletin-description">
+                    {{
+                      subBulletin.bulletin_description ||
+                      "No description available"
+                    }}
+                  </p>
                   <div class="sub-bulletin-meta">
-                    <span class="created-date">Created: {{ formatDate(subBulletin.created_at) }}</span>
+                    <span class="created-date"
+                      >Created: {{ formatDate(subBulletin.created_at) }}</span
+                    >
                   </div>
                 </div>
               </div>
@@ -188,7 +343,17 @@
       <div class="form-header">
         <h3>Edit Bulletin</h3>
         <button @click="closeEditForm" class="close-form-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -197,30 +362,31 @@
       <form @submit.prevent="updateBulletin">
         <div class="form-group">
           <label for="editBulletinName">Bulletin Name *</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             id="editBulletinName"
-            v-model="editingBulletinForm.bulletin_name" 
+            v-model="editingBulletinForm.bulletin_name"
             placeholder="Enter bulletin name"
             required
-          >
+          />
         </div>
-        
+
         <div class="form-group">
           <label for="editBulletinDescription">Description</label>
-          <textarea 
+          <textarea
             id="editBulletinDescription"
-            v-model="editingBulletinForm.bulletin_description" 
+            v-model="editingBulletinForm.bulletin_description"
             placeholder="Enter bulletin description"
             rows="3"
           ></textarea>
         </div>
-        
-        
+
         <div class="form-actions">
-          <button type="button" @click="closeEditForm" class="cancel-btn">Cancel</button>
+          <button type="button" @click="closeEditForm" class="cancel-btn">
+            Cancel
+          </button>
           <button type="submit" class="save-btn" :disabled="saving">
-            {{ saving ? 'Saving...' : 'Update Bulletin' }}
+            {{ saving ? "Saving..." : "Update Bulletin" }}
           </button>
         </div>
       </form>
@@ -230,224 +396,240 @@
 
 <script>
 export default {
-  name: 'SubTestDetail',
+  name: "SubTestDetail",
   data() {
     return {
       // Data
       bulletins: [],
-      
+
       // Loading states
       loading: false,
       saving: false,
-      
+
       // Error handling
       error: null,
-      
+
       // Form states
       showAddBulletinForm: false,
       showEditBulletinForm: false,
-      
+
       // Selected items
       editingBulletin: null,
-      
+
       // Forms
       bulletinForm: {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: null
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: null,
       },
       editingBulletinForm: {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: null
-      }
-    }
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: null,
+      },
+    };
   },
   computed: {
     groupId() {
-      return this.$route.params.groupId
+      return this.$route.params.groupId;
     },
     groupName() {
-      return this.$route.params.groupName
+      return this.$route.params.groupName;
     },
     subTestId() {
-      return this.$route.params.subTestId
+      return this.$route.params.subTestId;
     },
     subTestName() {
-      return this.$route.params.subTestName
-    }
+      return this.$route.params.subTestName;
+    },
   },
   mounted() {
-    this.loadBulletins()
+    this.loadBulletins();
   },
   methods: {
     // API Methods
     async loadBulletins() {
-      this.loading = true
-      this.error = null
-      
+      this.loading = true;
+      this.error = null;
+
       try {
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`)
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`
+        );
+        const data = await response.json();
+
         if (data.success) {
-          this.bulletins = data.bulletins
+          this.bulletins = data.bulletins;
         } else {
-          this.error = data.message || 'Failed to load bulletins'
+          this.error = data.message || "Failed to load bulletins";
         }
       } catch (error) {
-        console.error('Error loading bulletins:', error)
-        this.error = 'Failed to load bulletins. Please try again.'
+        console.error("Error loading bulletins:", error);
+        this.error = "Failed to load bulletins. Please try again.";
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
-    
+
     async saveBulletin() {
-      this.saving = true
-      
+      this.saving = true;
+
       try {
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(this.bulletinForm)
-        })
-        
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.bulletinForm),
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadBulletins()
-          this.showAddBulletinForm = false
-          this.resetBulletinForm()
+          await this.loadBulletins();
+          this.showAddBulletinForm = false;
+          this.resetBulletinForm();
         } else {
-          alert(data.message || 'Failed to save bulletin')
+          alert(data.message || "Failed to save bulletin");
         }
       } catch (error) {
-        console.error('Error saving bulletin:', error)
-        alert('Failed to save bulletin. Please try again.')
+        console.error("Error saving bulletin:", error);
+        alert("Failed to save bulletin. Please try again.");
       } finally {
-        this.saving = false
+        this.saving = false;
       }
     },
-    
+
     async updateBulletin() {
-      this.saving = true
-      
+      this.saving = true;
+
       try {
-        const response = await fetch(`http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(this.editingBulletinForm)
-        })
-        
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:8000/api/bulletins/${this.editingBulletin.bulletin_id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.editingBulletinForm),
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadBulletins()
-          this.closeEditForm()
+          await this.loadBulletins();
+          this.closeEditForm();
         } else {
-          alert(data.message || 'Failed to update bulletin')
+          alert(data.message || "Failed to update bulletin");
         }
       } catch (error) {
-        console.error('Error updating bulletin:', error)
-        alert('Failed to update bulletin. Please try again.')
+        console.error("Error updating bulletin:", error);
+        alert("Failed to update bulletin. Please try again.");
       } finally {
-        this.saving = false
+        this.saving = false;
       }
     },
-    
+
     async deleteBulletin(bulletin) {
-      if (!confirm(`Are you sure you want to delete "${bulletin.bulletin_name}"?`)) {
-        return
+      if (
+        !confirm(`Are you sure you want to delete "${bulletin.bulletin_name}"?`)
+      ) {
+        return;
       }
-      
+
       try {
-        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
-          method: 'DELETE'
-        })
-        
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadBulletins()
+          await this.loadBulletins();
         } else {
-          alert(data.message || 'Failed to delete bulletin')
+          alert(data.message || "Failed to delete bulletin");
         }
       } catch (error) {
-        console.error('Error deleting bulletin:', error)
-        alert('Failed to delete bulletin. Please try again.')
+        console.error("Error deleting bulletin:", error);
+        alert("Failed to delete bulletin. Please try again.");
       }
     },
-    
+
     // UI Methods
     addSubBulletin(parentBulletin) {
       this.bulletinForm = {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: parentBulletin.bulletin_id
-      }
-      this.showAddBulletinForm = true
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: parentBulletin.bulletin_id,
+      };
+      this.showAddBulletinForm = true;
     },
-    
+
     editBulletin(bulletin) {
-      this.editingBulletin = bulletin
+      this.editingBulletin = bulletin;
       this.editingBulletinForm = {
         bulletin_name: bulletin.bulletin_name,
-        bulletin_description: bulletin.bulletin_description || '',
-        parent_bulletin_id: bulletin.parent_bulletin_id
-      }
-      this.showEditBulletinForm = true
+        bulletin_description: bulletin.bulletin_description || "",
+        parent_bulletin_id: bulletin.parent_bulletin_id,
+      };
+      this.showEditBulletinForm = true;
     },
-    
+
     closeEditForm() {
-      this.showEditBulletinForm = false
-      this.editingBulletin = null
+      this.showEditBulletinForm = false;
+      this.editingBulletin = null;
       this.editingBulletinForm = {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: null
-      }
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: null,
+      };
     },
-    
+
     // Form Management
     resetBulletinForm() {
       this.bulletinForm = {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: null
-      }
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: null,
+      };
     },
-    
+
     // Method to show add bulletin form for top-level bulletins
     showAddBulletinFormForTopLevel() {
       this.bulletinForm = {
-        bulletin_name: '',
-        bulletin_description: '',
-        parent_bulletin_id: null
-      }
-      this.showAddBulletinForm = true
+        bulletin_name: "",
+        bulletin_description: "",
+        parent_bulletin_id: null,
+      };
+      this.showAddBulletinForm = true;
     },
-    
+
     // Utility Methods
     getParentBulletinName(parentBulletinId) {
-      const parentBulletin = this.bulletins.find(b => b.bulletin_id === parentBulletinId)
-      return parentBulletin ? parentBulletin.bulletin_name : 'Unknown'
+      const parentBulletin = this.bulletins.find(
+        (b) => b.bulletin_id === parentBulletinId
+      );
+      return parentBulletin ? parentBulletin.bulletin_name : "Unknown";
     },
-    
+
     getSubBulletinCount(bulletinId) {
-      return this.bulletins.filter(b => b.parent_bulletin_id === bulletinId).length
+      return this.bulletins.filter((b) => b.parent_bulletin_id === bulletinId)
+        .length;
     },
-    
+
     formatDate(dateString) {
-      if (!dateString) return 'Unknown'
-      return new Date(dateString).toLocaleDateString()
-    }
-  }
-}
+      if (!dateString) return "Unknown";
+      return new Date(dateString).toLocaleDateString();
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -676,8 +858,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error State */
@@ -973,47 +1159,47 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .bulletins-list {
     gap: 15px;
   }
-  
+
   .bulletin-item {
     padding: 15px;
   }
-  
+
   .sub-bulletin {
     margin-left: 15px;
   }
-  
+
   .sub-bulletins {
     padding-left: 15px;
   }
-  
+
   .add-bulletin-form,
   .edit-bulletin-form {
     padding: 20px;
   }
-  
+
   .bulletins-section {
     padding: 20px;
   }
-  
+
   .bulletin-header {
     flex-direction: column;
     gap: 10px;
     align-items: flex-start;
   }
-  
+
   .bulletin-actions {
     justify-content: flex-start;
   }

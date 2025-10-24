@@ -55,7 +55,7 @@ class TechSupportSyncService {
           };
 
           const response = await fetch(
-            "http://127.0.0.1:5000/api/tech-support",
+            "http://127.0.0.1:8000/api/tech-support",
             {
               method: "POST",
               headers: {
@@ -70,7 +70,9 @@ class TechSupportSyncService {
 
           if (data.success) {
             if (data.duplicate) {
-              console.log(`Request ${request.id} was already submitted (ID: ${data.existing_request_id})`);
+              console.log(
+                `Request ${request.id} was already submitted (ID: ${data.existing_request_id})`
+              );
               // Still consider it successful and remove from offline
               successfulSubmissions.push(request.id);
             } else {

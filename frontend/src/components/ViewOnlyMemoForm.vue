@@ -22,9 +22,23 @@
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
       <div class="header-actions">
         <div class="view-only-badge">VIEW ONLY</div>
-        <button class="download-pdf-btn" @click="downloadMemoPDF" title="Download PDF">
-          <svg class="icon download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        <button
+          class="download-pdf-btn"
+          @click="downloadMemoPDF"
+          title="Download PDF"
+        >
+          <svg
+            class="icon download"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+            />
           </svg>
           <span class="download-text">Download PDF</span>
         </button>
@@ -1279,7 +1293,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/available-reviewers"
+          "http://localhost:8000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1297,7 +1311,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.id}/approval-status`
+          `http://localhost:8000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1330,7 +1344,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `http://localhost:8000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1465,7 +1479,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1516,7 +1530,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1633,20 +1647,23 @@ export default {
     async downloadMemoPDF() {
       try {
         console.log(`Downloading PDF for memo ID: ${this.id}`);
-        
+
         // Show loading state
-        const button = event.target.closest('.download-pdf-btn');
-        const originalText = button.querySelector('.download-text').textContent;
-        button.querySelector('.download-text').textContent = 'Loading...';
+        const button = event.target.closest(".download-pdf-btn");
+        const originalText = button.querySelector(".download-text").textContent;
+        button.querySelector(".download-text").textContent = "Loading...";
         button.disabled = true;
-        
+
         // Make request to backend PDF endpoint
-        const response = await fetch(`http://localhost:5000/api/memos/${this.id}/pdf`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/pdf'
+        const response = await fetch(
+          `http://localhost:8000/api/memos/${this.id}/pdf`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/pdf",
+            },
           }
-        });
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to generate PDF: ${response.statusText}`);
@@ -1654,30 +1671,32 @@ export default {
 
         // Get the PDF blob
         const blob = await response.blob();
-        
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = `memo_${this.id}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
-        
+        link.download = `memo_${this.id}_${new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, "-")}.pdf`;
+
         // Trigger download
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         // Clean up
         window.URL.revokeObjectURL(url);
-        
+
         console.log(`PDF downloaded successfully for memo ${this.id}`);
-        
       } catch (error) {
-        console.error('Error downloading memo PDF:', error);
+        console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
         if (button) {
-          button.querySelector('.download-text').textContent = originalText;
+          button.querySelector(".download-text").textContent = originalText;
           button.disabled = false;
         }
       }

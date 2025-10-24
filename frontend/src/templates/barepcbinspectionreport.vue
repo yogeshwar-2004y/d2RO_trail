@@ -5,11 +5,11 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ inspectionCount }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{
+            inspectionCount
+          }}/{{ currentYear }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -26,67 +26,157 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="formData.projectName" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="formData.projectName"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO's:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
+                  :readonly="readonly"
+                  required
+                />
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="formData.dpName" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="formData.dpName"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" :readonly="readonly" required>
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" :readonly="readonly" required>
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" :readonly="readonly" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" :readonly="readonly" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" :readonly="readonly" required>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
+                  :readonly="readonly"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" :readonly="readonly" required>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
+                  :readonly="readonly"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -111,11 +201,19 @@
                 <tr class="section-header">
                   <td colspan="5"><strong>I. VISUAL INSPECTION</strong></td>
                 </tr>
-                <tr v-for="(item, index) in formData.visualInspection" :key="'visual-' + index">
+                <tr
+                  v-for="(item, index) in formData.visualInspection"
+                  :key="'visual-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :readonly="readonly" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :readonly="readonly"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
                     <select v-model="item.remarks" :disabled="readonly">
@@ -125,19 +223,31 @@
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'visual', index)" :disabled="readonly">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'visual', index)"
+                      :disabled="readonly"
+                    />
                   </td>
                 </tr>
-                
+
                 <!-- II. CONTINUITY CHECKING -->
                 <tr class="section-header">
                   <td colspan="5"><strong>II. CONTINUITY CHECKING</strong></td>
                 </tr>
-                <tr v-for="(item, index) in formData.continuityCheck" :key="'continuity-' + index">
+                <tr
+                  v-for="(item, index) in formData.continuityCheck"
+                  :key="'continuity-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :readonly="readonly" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :readonly="readonly"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
                     <select v-model="item.remarks" :disabled="readonly">
@@ -147,31 +257,53 @@
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'continuity', index)" :disabled="readonly">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'continuity', index)"
+                      :disabled="readonly"
+                    />
                   </td>
                 </tr>
-                
+
                 <!-- III. FABRICATOR & VENDOR QC REPORTS VERIFICATION -->
                 <tr class="section-header">
-                  <td colspan="5"><strong>III. FABRICATOR & VENDOR QC REPORTS VERIFICATION</strong></td>
+                  <td colspan="5">
+                    <strong
+                      >III. FABRICATOR & VENDOR QC REPORTS VERIFICATION</strong
+                    >
+                  </td>
                 </tr>
                 <tr>
                   <td>1</td>
                   <td class="description-cell">
-                    (Fabricator Report shall be as per Mil 551101 (Mil QML 31032) Group A & B Certificates for Rigid boards and Mil 50884 for Flexi boards (or) IPC 6012 Class 3 DS)
+                    (Fabricator Report shall be as per Mil 551101 (Mil QML
+                    31032) Group A & B Certificates for Rigid boards and Mil
+                    50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
-                    <input type="text" v-model="formData.fabricatorReport.observation" :readonly="readonly" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="formData.fabricatorReport.observation"
+                      :readonly="readonly"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="formData.fabricatorReport.remarks" :disabled="readonly">
+                    <select
+                      v-model="formData.fabricatorReport.remarks"
+                      :disabled="readonly"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)" :disabled="readonly">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'fabricator', 0)"
+                      :disabled="readonly"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -206,7 +338,11 @@
           <button type="button" @click="resetForm" class="btn btn-secondary">
             Reset
           </button>
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -216,82 +352,121 @@
 </template>
 
 <script>
-import jsPDF from 'jspdf';
+import jsPDF from "jspdf";
 
 export default {
-  name: 'BarePcbInspectionReport',
+  name: "BarePcbInspectionReport",
   props: {
     readonly: {
       type: Boolean,
-      default: false
+      default: false,
     },
     isTemplatePreview: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
-      projectName: '',
-      lruName: '',
-      serialNumber: 'SL-001',
-      inspectionCount: 'INS-001',
-      currentYear: '2025',
-      currentDate: new Date().toISOString().split('T')[0],
+      projectName: "",
+      lruName: "",
+      serialNumber: "SL-001",
+      inspectionCount: "INS-001",
+      currentYear: "2025",
+      currentDate: new Date().toISOString().split("T")[0],
       formData: {
-        projectName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        dpName: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        partNo: '',
-        quantity: '',
-        slNos: '',
-        startDate: '',
-        endDate: '',
+        projectName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        dpName: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        partNo: "",
+        quantity: "",
+        slNos: "",
+        startDate: "",
+        endDate: "",
         visualInspection: [
-          { parameter: 'CHECK FOR BONDING PROBLEM (DELAMINATION)', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR SOLDER MASK OPENINGS', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR BUBBLES ON PCB', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR ANY DAMAGE TO THE PCB', observation: '', remarks: '' },
-          { parameter: 'ALL THROUGH HOLES SHOULD BE CLEAR', observation: '', remarks: '' },
-          { parameter: 'ALL VIAS TO BE MASKED', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR SILK SCREEN (LEGEND) PRINTING', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR TRACKS NEAR MOUNTING HOLES', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR PCB WARPAGE', observation: '', remarks: '' }
+          {
+            parameter: "CHECK FOR BONDING PROBLEM (DELAMINATION)",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR SOLDER MASK OPENINGS",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR BUBBLES ON PCB",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR ANY DAMAGE TO THE PCB",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "ALL THROUGH HOLES SHOULD BE CLEAR",
+            observation: "",
+            remarks: "",
+          },
+          { parameter: "ALL VIAS TO BE MASKED", observation: "", remarks: "" },
+          {
+            parameter: "CHECK FOR SILK SCREEN (LEGEND) PRINTING",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter:
+              "CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR TRACKS NEAR MOUNTING HOLES",
+            observation: "",
+            remarks: "",
+          },
+          { parameter: "CHECK FOR PCB WARPAGE", observation: "", remarks: "" },
         ],
         continuityCheck: [
-          { parameter: 'CHECK FOR VCC TO GROUND CONTINUITY', observation: '', remarks: '' }
+          {
+            parameter: "CHECK FOR VCC TO GROUND CONTINUITY",
+            observation: "",
+            remarks: "",
+          },
         ],
         fabricatorReport: {
-          observation: '',
-          remarks: ''
-        }
-      }
+          observation: "",
+          remarks: "",
+        },
+      },
     };
   },
   computed: {
     isFormValid() {
-      return this.formData.projectName &&
-             this.formData.reportRefNo &&
-             this.formData.memoRefNo &&
-             this.formData.lruName &&
-             this.formData.dpName &&
-             this.formData.sruName &&
-             this.formData.partNo;
-    }
+      return (
+        this.formData.projectName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.dpName &&
+        this.formData.sruName &&
+        this.formData.partNo
+      );
+    },
   },
   mounted() {
     // Get parameters from route
-    this.lruName = this.$route.params.lruName || '';
-    this.projectName = this.$route.params.projectName || '';
-    
+    this.lruName = this.$route.params.lruName || "";
+    this.projectName = this.$route.params.projectName || "";
+
     // Set default values
     this.formData.lruName = this.lruName;
     this.formData.projectName = this.projectName;
@@ -301,7 +476,10 @@ export default {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        console.log(`File uploaded for ${section} section, item ${index}:`, file.name);
+        console.log(
+          `File uploaded for ${section} section, item ${index}:`,
+          file.name
+        );
         // Here you would typically upload the file to your backend
         // For now, we'll just log it
       }
@@ -328,34 +506,34 @@ export default {
           end_date: this.formData.endDate,
           dated1: this.formData.dated1,
           dated2: this.formData.dated2,
-          
+
           // Visual inspection data (10 items)
           visual_inspection: this.formData.visualInspection,
-          
+
           // Continuity check data (1 item)
           continuity_check: this.formData.continuityCheck,
-          
+
           // Fabricator report data
           fabricator_report: this.formData.fabricatorReport,
-          
+
           // Draft status
-          overall_status: 'DRAFT',
+          overall_status: "DRAFT",
           quality_rating: null,
-          recommendations: '',
-          prepared_by: '',
-          verified_by: '',
-          approved_by: ''
+          recommendations: "",
+          prepared_by: "",
+          verified_by: "",
+          approved_by: "",
         };
 
-        console.log('Saving draft data:', draftData);
+        console.log("Saving draft data:", draftData);
 
         // Send data to backend API
-        const response = await fetch('/api/reports/bare-pcb-inspection', {
-          method: 'POST',
+        const response = await fetch("/api/reports/bare-pcb-inspection", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(draftData)
+          body: JSON.stringify(draftData),
         });
 
         const result = await response.json();
@@ -366,47 +544,96 @@ export default {
           alert(`Error saving draft: ${result.message}`);
         }
       } catch (error) {
-        console.error('Error saving draft:', error);
-        alert('Error saving draft. Please try again.');
+        console.error("Error saving draft:", error);
+        alert("Error saving draft. Please try again.");
       }
     },
     resetForm() {
-      if (confirm('Are you sure you want to reset the form? All data will be lost.')) {
+      if (
+        confirm(
+          "Are you sure you want to reset the form? All data will be lost."
+        )
+      ) {
         this.formData = {
           projectName: this.projectName,
           lruName: this.lruName,
-          reportRefNo: '',
-          memoRefNo: '',
-          inspectionStage: '',
-          testVenue: '',
-          dpName: '',
-          dated1: '',
-          dated2: '',
+          reportRefNo: "",
+          memoRefNo: "",
+          inspectionStage: "",
+          testVenue: "",
+          dpName: "",
+          dated1: "",
+          dated2: "",
           sruName: this.lruName,
-          partNo: '',
-          quantity: '',
-          slNos: '',
+          partNo: "",
+          quantity: "",
+          slNos: "",
           startDate: this.currentDate,
-          endDate: '',
+          endDate: "",
           visualInspection: [
-            { parameter: 'CHECK FOR BONDING PROBLEM (DELAMINATION)', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR SOLDER MASK OPENINGS', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR BUBBLES ON PCB', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR ANY DAMAGE TO THE PCB', observation: '', remarks: '' },
-            { parameter: 'ALL THROUGH HOLES SHOULD BE CLEAR', observation: '', remarks: '' },
-            { parameter: 'ALL VIAS TO BE MASKED', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR SILK SCREEN (LEGEND) PRINTING', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR TRACKS NEAR MOUNTING HOLES', observation: '', remarks: '' },
-            { parameter: 'CHECK FOR PCB WARPAGE', observation: '', remarks: '' }
+            {
+              parameter: "CHECK FOR BONDING PROBLEM (DELAMINATION)",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR SOLDER MASK OPENINGS",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR BUBBLES ON PCB",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR ANY DAMAGE TO THE PCB",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "ALL THROUGH HOLES SHOULD BE CLEAR",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "ALL VIAS TO BE MASKED",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR SILK SCREEN (LEGEND) PRINTING",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter:
+                "CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR TRACKS NEAR MOUNTING HOLES",
+              observation: "",
+              remarks: "",
+            },
+            {
+              parameter: "CHECK FOR PCB WARPAGE",
+              observation: "",
+              remarks: "",
+            },
           ],
           continuityCheck: [
-            { parameter: 'CHECK FOR VCC TO GROUND CONTINUITY', observation: '', remarks: '' }
+            {
+              parameter: "CHECK FOR VCC TO GROUND CONTINUITY",
+              observation: "",
+              remarks: "",
+            },
           ],
           fabricatorReport: {
-            observation: '',
-            remarks: ''
-          }
+            observation: "",
+            remarks: "",
+          },
         };
       }
     },
@@ -433,190 +660,248 @@ export default {
             end_date: this.formData.endDate,
             dated1: this.formData.dated1,
             dated2: this.formData.dated2,
-            
+
             // Visual inspection data (10 items)
             visual_inspection: this.formData.visualInspection,
-            
+
             // Continuity check data (1 item)
             continuity_check: this.formData.continuityCheck,
-            
+
             // Fabricator report data
             fabricator_report: this.formData.fabricatorReport,
-            
+
             // Additional fields that might be needed
-            overall_status: 'COMPLETED',
+            overall_status: "COMPLETED",
             quality_rating: null,
-            recommendations: '',
-            prepared_by: '',
-            verified_by: '',
-            approved_by: ''
+            recommendations: "",
+            prepared_by: "",
+            verified_by: "",
+            approved_by: "",
           };
 
-          console.log('Submitting form data:', submissionData);
+          console.log("Submitting form data:", submissionData);
 
           // Send data to backend API
-          const response = await fetch('http://localhost:5000/api/reports/bare-pcb-inspection', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(submissionData)
-          });
+          const response = await fetch(
+            "http://localhost:8000/api/reports/bare-pcb-inspection",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(submissionData),
+            }
+          );
 
           const result = await response.json();
 
           if (result.success) {
-            alert(`Report submitted successfully! Report ID: ${result.report_id}`);
+            alert(
+              `Report submitted successfully! Report ID: ${result.report_id}`
+            );
             // Optionally redirect or reset form
             this.resetForm();
           } else {
             alert(`Error submitting report: ${result.message}`);
           }
         } catch (error) {
-          console.error('Error submitting form:', error);
-          alert('Error submitting report. Please try again.');
+          console.error("Error submitting form:", error);
+          alert("Error submitting report. Please try again.");
         }
       } else {
-        alert('Please fill in all required fields.');
+        alert("Please fill in all required fields.");
       }
     },
     exportReport() {
       try {
-        const doc = new jsPDF('p', 'mm', 'a4');
+        const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
-        const contentWidth = pageWidth - (2 * margin);
-        
+        const contentWidth = pageWidth - 2 * margin;
+
         let yPosition = margin;
-        
+
         // Set font styles
-        doc.setFont('helvetica');
-        
+        doc.setFont("helvetica");
+
         // Header
         doc.setFontSize(18);
-        doc.setFont('helvetica', 'bold');
-        doc.text('BARE PCB INSPECTION REPORT', pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        doc.text("BARE PCB INSPECTION REPORT", pageWidth / 2, yPosition, {
+          align: "center",
+        });
         yPosition += 15;
-        
+
         // Document path and date
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const documentPath = `CASDIC/${this.projectName || 'PROJECT'}/${this.lruName || 'LRU'}/SL.${this.serialNumber || '001'}/${this.inspectionCount || '001'}/${this.currentYear || '2025'}`;
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
+          this.lruName || "LRU"
+        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
+          this.currentYear || "2025"
+        }`;
         doc.text(documentPath, margin, yPosition);
-        
-        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString('en-GB')}`;
+
+        const dateText = `Date: ${
+          this.currentDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 12;
-        
+
         // Subject line
         doc.setFontSize(12);
-        doc.setFont('helvetica', 'bold');
-        const subjectText = `SUB: Bare PCB Inspection Report for ${this.lruName || 'Unknown LRU'}`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: 'center' });
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Bare PCB Inspection Report for ${
+          this.lruName || "Unknown LRU"
+        }`;
+        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 15;
-        
+
         // Document details
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Document Details:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Document Details:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
+
+        doc.setFont("helvetica", "normal");
         const details = [
-          `Project Name: ${this.formData.projectName || 'Not specified'}`,
-          `Project Number: ${this.formData.projectNumber || 'Not specified'}`,
-          `LRU Name: ${this.formData.lruName || 'Not specified'}`,
-          `Serial Number: ${this.formData.serialNumber || 'Not specified'}`,
-          `Inspection Stage: ${this.formData.inspectionStage || 'Not specified'}`,
-          `Inspection Date: ${this.formData.inspectionDate || 'Not specified'}`
+          `Project Name: ${this.formData.projectName || "Not specified"}`,
+          `Project Number: ${this.formData.projectNumber || "Not specified"}`,
+          `LRU Name: ${this.formData.lruName || "Not specified"}`,
+          `Serial Number: ${this.formData.serialNumber || "Not specified"}`,
+          `Inspection Stage: ${
+            this.formData.inspectionStage || "Not specified"
+          }`,
+          `Inspection Date: ${this.formData.inspectionDate || "Not specified"}`,
         ];
-        
-        details.forEach(detail => {
+
+        details.forEach((detail) => {
           doc.text(detail, margin, yPosition);
           yPosition += 6;
         });
-        
+
         yPosition += 10;
-        
+
         // Inspection results
-        doc.setFont('helvetica', 'bold');
-        doc.text('Inspection Results:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection Results:", margin, yPosition);
         yPosition += 8;
-        
-        if (this.formData.inspectionItems && this.formData.inspectionItems.length > 0) {
+
+        if (
+          this.formData.inspectionItems &&
+          this.formData.inspectionItems.length > 0
+        ) {
           doc.setFontSize(9);
-          doc.setFont('helvetica', 'bold');
-          
+          doc.setFont("helvetica", "bold");
+
           // Table headers
-          doc.text('Item', margin, yPosition);
-          doc.text('Specification', margin + 40, yPosition);
-          doc.text('Actual', margin + 80, yPosition);
-          doc.text('Status', margin + 120, yPosition);
+          doc.text("Item", margin, yPosition);
+          doc.text("Specification", margin + 40, yPosition);
+          doc.text("Actual", margin + 80, yPosition);
+          doc.text("Status", margin + 120, yPosition);
           yPosition += 6;
-          
+
           // Table data
-          doc.setFont('helvetica', 'normal');
-          this.formData.inspectionItems.forEach(item => {
+          doc.setFont("helvetica", "normal");
+          this.formData.inspectionItems.forEach((item) => {
             if (item.item) {
               doc.text(item.item.substring(0, 15), margin, yPosition);
-              doc.text(item.specification.substring(0, 15), margin + 40, yPosition);
-              doc.text(item.actualValue.substring(0, 15), margin + 80, yPosition);
+              doc.text(
+                item.specification.substring(0, 15),
+                margin + 40,
+                yPosition
+              );
+              doc.text(
+                item.actualValue.substring(0, 15),
+                margin + 80,
+                yPosition
+              );
               doc.text(item.status, margin + 120, yPosition);
               yPosition += 6;
             }
           });
         }
-        
+
         yPosition += 15;
-        
+
         // Overall assessment
         doc.setFontSize(10);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Overall Assessment:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Overall Assessment:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Overall Status: ${this.formData.overallStatus || 'Not specified'}`, margin, yPosition);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `Overall Status: ${this.formData.overallStatus || "Not specified"}`,
+          margin,
+          yPosition
+        );
         yPosition += 6;
-        doc.text(`Quality Rating: ${this.formData.qualityRating || 'Not specified'}/10`, margin, yPosition);
+        doc.text(
+          `Quality Rating: ${
+            this.formData.qualityRating || "Not specified"
+          }/10`,
+          margin,
+          yPosition
+        );
         yPosition += 6;
-        
+
         if (this.formData.recommendations) {
-          doc.text('Recommendations:', margin, yPosition);
+          doc.text("Recommendations:", margin, yPosition);
           yPosition += 6;
-          const recommendations = doc.splitTextToSize(this.formData.recommendations, contentWidth - 10);
+          const recommendations = doc.splitTextToSize(
+            this.formData.recommendations,
+            contentWidth - 10
+          );
           doc.text(recommendations, margin, yPosition);
           yPosition += recommendations.length * 4;
         }
-        
+
         yPosition += 15;
-        
+
         // Signatures
-        doc.setFont('helvetica', 'bold');
-        doc.text('Signatures:', margin, yPosition);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures:", margin, yPosition);
         yPosition += 8;
-        
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Inspected By: ${this.formData.inspectedBy || 'Not specified'}`, margin, yPosition);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(
+          `Inspected By: ${this.formData.inspectedBy || "Not specified"}`,
+          margin,
+          yPosition
+        );
         yPosition += 6;
-        doc.text(`Reviewed By: ${this.formData.reviewedBy || 'Not specified'}`, margin, yPosition);
+        doc.text(
+          `Reviewed By: ${this.formData.reviewedBy || "Not specified"}`,
+          margin,
+          yPosition
+        );
         yPosition += 6;
-        doc.text(`Approved By: ${this.formData.approvedBy || 'Not specified'}`, margin, yPosition);
-        
+        doc.text(
+          `Approved By: ${this.formData.approvedBy || "Not specified"}`,
+          margin,
+          yPosition
+        );
+
         // Save PDF
-        const fileName = `Bare_PCB_Inspection_Report_${this.lruName || 'Unknown'}_${this.currentDate.replace(/\//g, '-')}.pdf`;
+        const fileName = `Bare_PCB_Inspection_Report_${
+          this.lruName || "Unknown"
+        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
-        
-        alert('Report exported successfully as PDF!');
-        
+
+        alert("Report exported successfully as PDF!");
       } catch (error) {
-        console.error('Error exporting PDF:', error);
-        alert(`Error exporting PDF: ${error.message || 'Unknown error'}. Please try again.`);
+        console.error("Error exporting PDF:", error);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -723,7 +1008,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -1048,14 +1333,17 @@ export default {
 }
 
 /* Readonly styles */
-input[readonly], select:disabled, input:disabled {
+input[readonly],
+select:disabled,
+input:disabled {
   background-color: #f8f9fa;
   color: #6c757d;
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-input[readonly]:focus, select:disabled:focus {
+input[readonly]:focus,
+select:disabled:focus {
   outline: none;
   box-shadow: none;
 }
@@ -1067,55 +1355,54 @@ input[readonly]:focus, select:disabled:focus {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .form-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .criteria-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .signatures-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .general-info-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-layout {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .signature-item {
     max-width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .inspection-table-container {
     overflow-x: auto;
   }
-  
+
   .inspection-table {
     min-width: 800px;
   }
 }
 </style>
-
