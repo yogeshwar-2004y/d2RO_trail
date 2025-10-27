@@ -250,3 +250,25 @@ def get_gallery_images():
     except Exception as e:
         print(f"Get gallery images error: {str(e)}")
         return jsonify({"success": False, "message": f"Error getting gallery images: {str(e)}"}), 500
+
+@files_bp.route('/api/reset-gallery-image/<int:image_number>', methods=['POST'])
+def reset_gallery_image(image_number):
+    """Reset a specific gallery image to default"""
+    try:
+        if image_number < 1 or image_number > 5:
+            return jsonify({"success": False, "message": "Image number must be between 1 and 5"}), 400
+        
+        # Remove existing file for this image number
+        if os.path.exists(Config.LOGIN_BACKGROUND_FOLDER):
+            for existing_file in os.listdir(Config.LOGIN_BACKGROUND_FOLDER):
+                if existing_file.startswith(f'gallery_image_{image_number}.'):
+                    os.remove(os.path.join(Config.LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        return jsonify({
+            "success": True,
+            "message": f"Gallery image {image_number} reset to default successfully"
+        })
+        
+    except Exception as e:
+        print(f"Reset gallery image error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error resetting gallery image: {str(e)}"}), 500

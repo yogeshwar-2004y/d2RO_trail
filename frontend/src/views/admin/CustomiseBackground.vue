@@ -58,6 +58,14 @@
                   {{ uploadingImage === 1 ? 'Uploading...' : 'Upload New' }}
                 </button>
                 <button 
+                  v-if="currentGalleryImages.image_1" 
+                  @click="resetGalleryImage(1)"
+                  :disabled="uploadingImage === 1"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
                   v-if="selectedFiles[1]" 
                   @click="uploadGalleryImage(1)"
                   :disabled="uploadingImage === 1"
@@ -65,7 +73,8 @@
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[1]" class="preview-box">
+                <div v-if="selectedFiles[1] && previewUrls[1]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[1]" alt="Preview" />
                 </div>
               </div>
@@ -93,6 +102,14 @@
                   {{ uploadingImage === 2 ? 'Uploading...' : 'Upload New' }}
                 </button>
                 <button 
+                  v-if="currentGalleryImages.image_2" 
+                  @click="resetGalleryImage(2)"
+                  :disabled="uploadingImage === 2"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
                   v-if="selectedFiles[2]" 
                   @click="uploadGalleryImage(2)"
                   :disabled="uploadingImage === 2"
@@ -100,7 +117,8 @@
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[2]" class="preview-box">
+                <div v-if="selectedFiles[2] && previewUrls[2]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[2]" alt="Preview" />
                 </div>
               </div>
@@ -128,6 +146,14 @@
                   {{ uploadingImage === 3 ? 'Uploading...' : 'Upload New' }}
                 </button>
                 <button 
+                  v-if="currentGalleryImages.image_3" 
+                  @click="resetGalleryImage(3)"
+                  :disabled="uploadingImage === 3"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
                   v-if="selectedFiles[3]" 
                   @click="uploadGalleryImage(3)"
                   :disabled="uploadingImage === 3"
@@ -135,7 +161,8 @@
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[3]" class="preview-box">
+                <div v-if="selectedFiles[3] && previewUrls[3]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[3]" alt="Preview" />
                 </div>
               </div>
@@ -163,6 +190,14 @@
                   {{ uploadingImage === 4 ? 'Uploading...' : 'Upload New' }}
                 </button>
                 <button 
+                  v-if="currentGalleryImages.image_4" 
+                  @click="resetGalleryImage(4)"
+                  :disabled="uploadingImage === 4"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
                   v-if="selectedFiles[4]" 
                   @click="uploadGalleryImage(4)"
                   :disabled="uploadingImage === 4"
@@ -170,7 +205,8 @@
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[4]" class="preview-box">
+                <div v-if="selectedFiles[4] && previewUrls[4]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[4]" alt="Preview" />
                 </div>
               </div>
@@ -198,6 +234,14 @@
                   {{ uploadingImage === 5 ? 'Uploading...' : 'Upload New' }}
                 </button>
                 <button 
+                  v-if="currentGalleryImages.image_5" 
+                  @click="resetGalleryImage(5)"
+                  :disabled="uploadingImage === 5"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
                   v-if="selectedFiles[5]" 
                   @click="uploadGalleryImage(5)"
                   :disabled="uploadingImage === 5"
@@ -205,7 +249,8 @@
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[5]" class="preview-box">
+                <div v-if="selectedFiles[5] && previewUrls[5]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[5]" alt="Preview" />
                 </div>
               </div>
@@ -279,6 +324,11 @@ export default {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.$set(this.previewUrls, imageNumber, e.target.result);
+        console.log(`Preview created for image ${imageNumber}`);
+      };
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        this.showMessage("Error reading file for preview", "error");
       };
       reader.readAsDataURL(file);
     },
@@ -328,6 +378,48 @@ export default {
       }
     },
 
+    async resetGalleryImage(imageNumber) {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:5000/api/reset-gallery-image/${imageNumber}`,
+          {
+            method: "POST",
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.showMessage(
+            `Gallery image ${imageNumber} reset to default successfully!`,
+            "success"
+          );
+          // Reload gallery images to refresh the display
+          await this.loadGalleryImages();
+        } else {
+          this.showMessage(
+            data.message || "Reset failed. Please try again.",
+            "error"
+          );
+        }
+      } catch (error) {
+        console.error("Reset error:", error);
+        this.showMessage("Network error. Please try again.", "error");
+      }
+    },
+
+    async loadGalleryImages() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
+        const data = await response.json();
+        if (data.success && data.gallery_images) {
+          this.currentGalleryImages = data.gallery_images;
+        }
+      } catch (error) {
+        console.error("Error loading current gallery images:", error);
+      }
+    },
+
     showMessage(text, type) {
       this.message = text;
       this.messageType = type;
@@ -337,17 +429,9 @@ export default {
     },
   },
 
-  async mounted() {
+  mounted() {
     // Load current gallery images on component mount
-    try {
-      const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
-      const data = await response.json();
-      if (data.success && data.gallery_images) {
-        this.currentGalleryImages = data.gallery_images;
-      }
-    } catch (error) {
-      console.error("Error loading current gallery images:", error);
-    }
+    this.loadGalleryImages();
   },
 };
 </script>
@@ -485,7 +569,8 @@ export default {
 }
 
 .upload-btn,
-.confirm-btn {
+.confirm-btn,
+.reset-btn {
   padding: 8px 16px;
   border: none;
   border-radius: 5px;
@@ -493,6 +578,8 @@ export default {
   font-weight: bold;
   font-size: 0.9em;
   transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 8px;
 }
 
 .upload-btn {
@@ -523,16 +610,43 @@ export default {
   cursor: not-allowed;
 }
 
+.reset-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.reset-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
 .preview-box {
   margin-top: 10px;
   text-align: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.preview-label {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: bold;
 }
 
 .preview-box img {
   max-width: 100%;
-  max-height: 80px;
+  max-height: 120px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
 }
 
 .message {
