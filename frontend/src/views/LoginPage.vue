@@ -53,31 +53,31 @@
       <!-- Row of Five Images - Full Width -->
       <div class="image-gallery">
         <img
-          src="@/assets/images/Image3.png"
+          :src="getGalleryImageSrc(1)"
           alt="Missile Launch"
           class="gallery-image"
         />
         <!-- Add radar array image path here -->
         <img
-          src="@/assets/images/Image5.jpg"
+          :src="getGalleryImageSrc(2)"
           alt="Radar Array"
           class="gallery-image"
         />
         <!-- Add Tejas fighter image path here -->
         <img
-          src="@/assets/images/Image4.jpg"
+          :src="getGalleryImageSrc(3)"
           alt="Tejas Fighter"
           class="gallery-image"
         />
         <!-- Add Mirage fighter image path here -->
         <img
-          src="@/assets/images/Image2.png"
+          :src="getGalleryImageSrc(4)"
           alt="Mirage Fighter"
           class="gallery-image"
         />
         <!-- Add industrial machinery image path here -->
         <img
-          src="@/assets/images/Image1.png"
+          :src="getGalleryImageSrc(5)"
           alt="Industrial Machinery"
           class="gallery-image"
         />
@@ -95,9 +95,37 @@ export default {
     return {
       email: "",
       password: "",
+      galleryImageUrls: {},
     };
   },
   methods: {
+    getGalleryImageSrc(imageNumber) {
+      const customUrl = this.galleryImageUrls[`image_${imageNumber}`];
+      if (customUrl && customUrl.trim() !== "") {
+        return customUrl;
+      }
+      // Default images
+      const defaults = {
+        1: "/src/assets/images/Image3.png",
+        2: "/src/assets/images/Image5.jpg",
+        3: "/src/assets/images/Image4.jpg",
+        4: "/src/assets/images/Image2.png",
+        5: "/src/assets/images/Image1.png"
+      };
+      return defaults[imageNumber];
+    },
+
+    async loadGalleryImages() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
+        const data = await response.json();
+        if (data.success && data.gallery_images) {
+          this.galleryImageUrls = data.gallery_images;
+        }
+      } catch (error) {
+        console.error("Error loading gallery images:", error);
+      }
+    },
     async login() {
       if (!this.email || !this.password) {
         alert("Please enter your email and password.");
@@ -161,6 +189,10 @@ export default {
       // Navigate to tech support page
       this.$router.push({ name: "TechSupport" });
     },
+  },
+
+  mounted() {
+    this.loadGalleryImages();
   },
 };
 </script>
