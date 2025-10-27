@@ -242,7 +242,7 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 8000);
+      }, 5000);
     },
   },
 

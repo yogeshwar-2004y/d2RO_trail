@@ -252,7 +252,7 @@ export default {
       // Auto-hide after 5 seconds
       setTimeout(() => {
         this.hideSuccessMessage();
-      }, 8000);
+      }, 5000);
     },
 
     hideSuccessMessage() {
