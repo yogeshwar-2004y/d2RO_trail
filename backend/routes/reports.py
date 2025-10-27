@@ -104,7 +104,7 @@ def get_reports():
             base_query = """
                 SELECT 
                     r.report_id,
-                    NULL as memo_id,
+                    r.memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -116,13 +116,14 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
                 ORDER BY r.date_of_review DESC
             """
             query_params = ()
@@ -148,7 +149,7 @@ def get_reports():
                 "created_at": report[10].isoformat() if report[10] else None,
                 "project": report[11],
                 "lru_name": report[12],
-                "name": report[13] or f"MEMO-{report[1]}",  # Use wing_proj_ref_no or fallback to MEMO-{id}
+                "name": report[13] or f"MEMO-{report[1]}" if report[1] else "No Memo",  # Use wing_proj_ref_no or fallback
                 "memo_description": report[14],
                 "part_number": report[15]
             })
