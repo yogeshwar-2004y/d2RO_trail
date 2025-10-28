@@ -180,9 +180,9 @@ export default {
       }
     },
     async viewNotification(notification) {
-      // Mark as read and remove when viewed
+      // Mark as read when viewed
       if (!notification.is_read) {
-        await this.markAsReadAndRemove(notification);
+        await this.markAsRead(notification.activity_id);
       }
     },
     async markAsRead(notificationId) {
@@ -208,27 +208,8 @@ export default {
       }
     },
     async markAsReadAndRemove(notification) {
-      try {
-        const response = await fetch(`http://localhost:5000/api/notifications/${notification.activity_id}/mark-read`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          // Remove notification from the list
-          const index = this.notifications.findIndex(n => n.activity_id === notification.activity_id);
-          if (index !== -1) {
-            this.notifications.splice(index, 1);
-            this.unreadCount--;
-          }
-        }
-      } catch (error) {
-        console.error('Error marking notification as read:', error);
-      }
+      // This method is no longer used but kept for compatibility
+      await this.markAsRead(notification.activity_id);
     },
     formatTime(timestamp) {
       if (!timestamp) return '';
@@ -377,7 +358,7 @@ export default {
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid #e2e8f0;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
   align-items: flex-start;
 }
 
@@ -388,6 +369,18 @@ export default {
 .notification-item.unread {
   background: #fff3cd;
   border-left: 4px solid #ffc107;
+}
+
+/* Read notifications - faded appearance */
+.notification-item:not(.unread) {
+  background: #f5f5f5;
+  opacity: 0.7;
+  border-left: 4px solid transparent;
+}
+
+.notification-item:not(.unread):hover {
+  background: #f0f0f0;
+  opacity: 0.85;
 }
 
 .notification-icon {

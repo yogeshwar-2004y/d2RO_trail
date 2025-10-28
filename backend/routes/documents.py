@@ -348,7 +348,7 @@ def upload_plan_document():
                     performed_by=int(uploaded_by),
                     notified_user_id=reviewer_id,
                     notification_type="document_upload_new_version",
-                    additional_info=f"New version '{version}' of document '{document_number}' uploaded for LRU '{lru_name}' in project '{project_name}'. Please review."
+                    additional_info=f"New revision '{doc_ver}' of document '{document_number}' uploaded for LRU '{lru_name}' in project '{project_name}'. Please review."
                 )
                 print(f"   ✓ Sent notification to reviewer: {reviewer_name}")
             else:
