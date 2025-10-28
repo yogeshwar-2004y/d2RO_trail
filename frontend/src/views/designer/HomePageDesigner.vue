@@ -1,13 +1,13 @@
 <template>
   <div class="designer-home">
     <!-- Floating Hamburger Menu Button -->
-    <button class="floating-menu-button" @click="toggleMenu">
+    <!-- <button class="floating-menu-button" @click="toggleMenu">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
-    </button>
+    </button> -->
     
     <!-- Main Content -->
     <main class="main-content">
@@ -132,7 +132,7 @@ export default {
 <style scoped>
 .designer-home {
   background-color: #f0f0f0;
-  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
+  /* height: calc(100vh - 240px); Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
   justify-content: center; /* Center content vertically */
@@ -141,6 +141,7 @@ export default {
   margin: 0;
   overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
+  margin-top: 45px;
 }
 
 /* Floating Hamburger Menu Button */

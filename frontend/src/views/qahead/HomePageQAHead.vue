@@ -118,7 +118,7 @@ export default {
 <style scoped>
 .home-page {
   background-color: #f0f0f0;
-  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
+  /* height: calc(100vh - 240px); Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
   justify-content: center; /* Center content vertically */
@@ -127,6 +127,7 @@ export default {
   margin: 0;
   overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
+  margin-top: 45px;
 }
 
 /* Floating Hamburger Menu Button */
