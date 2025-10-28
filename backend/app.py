@@ -235,6 +235,23 @@ def create_comment():
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Additionally block comments if THIS specific document is already accepted
+        cur.execute(
+            """
+            SELECT status
+            FROM plan_documents
+            WHERE document_id = %s AND is_active = TRUE
+            """,
+            (document_id,),
+        )
+        doc_status_row = cur.fetchone()
+        if doc_status_row and doc_status_row[0] == 'accepted':
+            cur.close()
+            return jsonify({
+                "success": False,
+                "message": "Cannot add comments. This document is already accepted as the final version."
+            }), 400
+
         # Prepare commented_by (string) - prefer explicit field, else use reviewer_id, else 'Anonymous'
         commented_by_val = data.get('commented_by') or (str(data.get('reviewer_id')) if data.get('reviewer_id') else 'Anonymous')
         print(f"Creating comment: document_id={data.get('document_id')} reviewer_id={data.get('reviewer_id')} commented_by={commented_by_val}")

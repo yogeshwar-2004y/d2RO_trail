@@ -448,6 +448,23 @@ def accept_document(document_id):
             return jsonify({"success": False, "message": "Document not found"}), 404
         
         lru_id = document[1]
+
+        # Prevent accepting the document if there are pending comments
+        cur.execute(
+            """
+            SELECT COUNT(*)
+            FROM document_comments
+            WHERE document_id = %s AND (status IS NULL OR status = 'pending')
+            """,
+            (document_id,),
+        )
+        pending_count = cur.fetchone()[0]
+        if pending_count and pending_count > 0:
+            cur.close()
+            return jsonify({
+                "success": False,
+                "message": f"Cannot accept document while there are {pending_count} pending comment(s). Please resolve all comments first."
+            }), 400
         
         # Check if any document in this LRU is already accepted
         cur.execute("""
