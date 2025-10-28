@@ -5,7 +5,9 @@
       <div class="overlay-header">
         <div class="header-content">
           <h2>Notifications</h2>
-          <span v-if="unreadCount > 0" class="unread-badge">{{ unreadCount }} unread</span>
+          <span v-if="filteredNotifications.filter(n => !n.is_read).length > 0" class="unread-badge">
+            {{ filteredNotifications.filter(n => !n.is_read).length }} unread
+          </span>
         </div>
         <button class="close-button" @click="close">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -26,7 +28,7 @@
           <button @click="fetchNotifications" class="retry-btn">Retry</button>
         </div>
         
-        <div v-else-if="notifications.length === 0" class="empty-state">
+        <div v-else-if="filteredNotifications.length === 0" class="empty-state">
           <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -36,18 +38,17 @@
         
         <div v-else class="notifications-list">
           <div 
-            v-for="notification in notifications" 
+            v-for="notification in filteredNotifications" 
             :key="notification.activity_id"
             class="notification-item"
             :class="{ 'unread': !notification.is_read }"
-            @click="viewNotification(notification)"
           >
             <div class="notification-icon">
               <svg v-if="!notification.is_read" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10"></circle>
               </svg>
             </div>
-            <div class="notification-content">
+            <div class="notification-content" @click="viewNotification(notification)">
               <div class="notification-header">
                 <h4>{{ notification.activity_performed }}</h4>
                 <span class="notification-time">{{ formatTime(notification.timestamp) }}</span>
@@ -57,6 +58,14 @@
                 <span class="notification-from">{{ notification.performed_by_name || 'Unknown' }}</span>
                 <span v-if="notification.project_name" class="notification-project">{{ notification.project_name }}</span>
               </div>
+            </div>
+            <div v-if="!notification.is_read" class="notification-actions">
+              <button class="mark-read-btn" @click.stop="markAsReadAndRemove(notification)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                Mark as Read
+              </button>
             </div>
           </div>
         </div>
@@ -85,6 +94,23 @@ export default {
       error: null,
       refreshInterval: null
     };
+  },
+  computed: {
+    filteredNotifications() {
+      const oneHourAgo = new Date();
+      oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+      
+      return this.notifications.filter(notification => {
+        // Always show unread notifications
+        if (!notification.is_read) {
+          return true;
+        }
+        
+        // For read notifications, show only if marked as read within the last hour
+        const timestamp = new Date(notification.timestamp);
+        return timestamp >= oneHourAgo;
+      });
+    }
   },
   watch: {
     isOpen(newVal) {
@@ -128,7 +154,20 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.notifications = data.notifications;
+          // Filter read notifications older than 1 hour
+          const oneHourAgo = new Date();
+          oneHourAgo.setHours(oneHourAgo.getHours() - 1);
+          
+          this.notifications = data.notifications.filter(notification => {
+            // Always include unread notifications
+            if (!notification.is_read) {
+              return true;
+            }
+            // Only include read notifications marked as read within last hour
+            const timestamp = new Date(notification.timestamp);
+            return timestamp >= oneHourAgo;
+          });
+          
           this.unreadCount = this.notifications.filter(n => !n.is_read).length;
         } else {
           this.error = data.message || 'Failed to fetch notifications';
@@ -161,6 +200,29 @@ export default {
           const notif = this.notifications.find(n => n.activity_id === notificationId);
           if (notif) {
             notif.is_read = true;
+            this.unreadCount--;
+          }
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
+    },
+    async markAsReadAndRemove(notification) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/notifications/${notification.activity_id}/mark-read`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Remove notification from the list
+          const index = this.notifications.findIndex(n => n.activity_id === notification.activity_id);
+          if (index !== -1) {
+            this.notifications.splice(index, 1);
             this.unreadCount--;
           }
         }
@@ -315,8 +377,8 @@ export default {
   gap: 12px;
   padding: 16px;
   border-bottom: 1px solid #e2e8f0;
-  cursor: pointer;
   transition: background 0.2s ease;
+  align-items: flex-start;
 }
 
 .notification-item:hover {
@@ -341,6 +403,38 @@ export default {
 .notification-content {
   flex: 1;
   min-width: 0;
+  cursor: pointer;
+}
+
+.notification-actions {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.mark-read-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mark-read-btn:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.mark-read-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .notification-header {
