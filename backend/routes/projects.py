@@ -177,6 +177,33 @@ def create_project():
             additional_info=f"ID:{project_id}|Name:{project_name}|Project '{project_name}' created with {len(lrus)} LRUs"
         )
         
+        # Send notifications to Design Head and QA Head
+        from utils.activity_logger import log_notification, get_users_by_role
+        
+        # Get Design Head users (role_id = 4)
+        design_heads = get_users_by_role(4)
+        for design_head in design_heads:
+            log_notification(
+                project_id=project_id,
+                activity_performed="New Project Created",
+                performed_by=created_by,
+                notified_user_id=design_head['user_id'],
+                notification_type="project_created",
+                additional_info=f"New project '{project_name}' (ID: {project_id}) has been created and requires your attention."
+            )
+        
+        # Get QA Head users (role_id = 2)
+        qa_heads = get_users_by_role(2)
+        for qa_head in qa_heads:
+            log_notification(
+                project_id=project_id,
+                activity_performed="New Project Created",
+                performed_by=created_by,
+                notified_user_id=qa_head['user_id'],
+                notification_type="project_created",
+                additional_info=f"New project '{project_name}' (ID: {project_id}) has been created and requires your attention."
+            )
+        
         return jsonify({
             "success": True,
             "message": "Project created successfully",
@@ -1244,6 +1271,110 @@ def get_activity_logs():
         
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/notifications/<int:user_id>', methods=['GET'])
+def get_user_notifications(user_id):
+    """Get notifications for a specific user"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get limit from query parameters
+        limit = request.args.get('limit', 50, type=int)
+        unread_only = request.args.get('unread_only', 'false').lower() == 'true'
+        
+        # Build query
+        if unread_only:
+            cur.execute("""
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       al.is_read, al.notification_type,
+                       u.name as performed_by_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+                WHERE al.notified_user_id = %s AND al.is_read = FALSE
+                ORDER BY al.timestamp DESC
+                LIMIT %s
+            """, (user_id, limit))
+        else:
+            cur.execute("""
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       al.is_read, al.notification_type,
+                       u.name as performed_by_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+                WHERE al.notified_user_id = %s
+                ORDER BY al.timestamp DESC
+                LIMIT %s
+            """, (user_id, limit))
+        
+        notifications = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        notification_list = []
+        for notif in notifications:
+            notification_list.append({
+                "activity_id": notif[0],
+                "project_id": notif[1],
+                "activity_performed": notif[2],
+                "performed_by": notif[3],
+                "performed_by_name": notif[8],
+                "timestamp": notif[4].isoformat() if notif[4] else None,
+                "additional_info": notif[5],
+                "is_read": notif[6],
+                "notification_type": notif[7],
+                "project_name": notif[9]
+            })
+        
+        return jsonify({
+            "success": True,
+            "notifications": notification_list,
+            "total": len(notification_list)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching notifications: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/notifications/<int:notification_id>/mark-read', methods=['PUT'])
+def mark_notification_read(notification_id):
+    """Mark a notification as read"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if notification exists
+        cur.execute("""
+            SELECT activity_id FROM activity_logs 
+            WHERE activity_id = %s
+        """, (notification_id,))
+        
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Notification not found"}), 404
+        
+        # Update notification as read
+        cur.execute("""
+            UPDATE activity_logs 
+            SET is_read = TRUE 
+            WHERE activity_id = %s
+        """, (notification_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Notification marked as read"
+        })
+        
+    except Exception as e:
+        print(f"Error marking notification as read: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 @projects_bp.route('/api/activity-logs/pdf', methods=['GET'])
