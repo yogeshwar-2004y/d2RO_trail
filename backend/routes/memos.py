@@ -1234,33 +1234,71 @@ def download_memo_pdf(memo_id):
         """, (memo_id,))
         
         references = cur.fetchall()
+        
+        # Fetch memo approval status and details
+        cur.execute("""
+            SELECT ma.status, ma.approval_date, ma.comments, ma.authentication, 
+                   ma.approved_by, u1.name as approver_name,
+                   ma.user_id, u2.name as reviewer_name, ma.test_date, ma.attachment_path
+            FROM memo_approval ma
+            LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+            LEFT JOIN users u2 ON ma.user_id = u2.user_id
+            WHERE ma.memo_id = %s
+        """, (memo_id,))
+        
+        approval_data = cur.fetchone()
         cur.close()
         
         # Generate PDF
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.4*inch, bottomMargin=0.4*inch, leftMargin=0.3*inch, rightMargin=0.3*inch)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch, leftMargin=0.5*inch, rightMargin=0.5*inch)
         
         # Define styles
         styles = getSampleStyleSheet()
         
-        # Title style
+        # Title style (matches frontend)
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=14,
-            spaceAfter=12,
+            fontSize=18,
+            spaceAfter=20,
             alignment=1,  # Center alignment
             textColor=colors.black,
             fontName='Helvetica-Bold'
         )
         
-        # Section heading style
+        # Section heading style (matches frontend)
         section_style = ParagraphStyle(
             'SectionHeading',
             parent=styles['Heading2'],
-            fontSize=10,
-            spaceAfter=6,
-            spaceBefore=8,
+            fontSize=13,
+            spaceAfter=15,
+            spaceBefore=15,
+            textColor=colors.black,
+            fontName='Helvetica-Bold'
+        )
+        
+        # Status badge style
+        status_badge_style = ParagraphStyle(
+            'StatusBadge',
+            parent=styles['Normal'],
+            fontSize=9,
+            spaceAfter=15,
+            spaceBefore=10,
+            alignment=1,  # Center alignment
+            fontName='Helvetica-Bold',
+            backColor=colors.lightgrey,
+            borderWidth=1,
+            borderPadding=8
+        )
+        
+        # Test review heading style
+        test_review_heading_style = ParagraphStyle(
+            'TestReviewHeading',
+            parent=styles['Heading3'],
+            fontSize=13,
+            spaceAfter=15,
+            spaceBefore=10,
             textColor=colors.black,
             fontName='Helvetica-Bold'
         )
@@ -1268,9 +1306,9 @@ def download_memo_pdf(memo_id):
         # Build PDF content
         story = []
         
-        # Title
+        # Title (matches frontend exactly)
         story.append(Paragraph("REQUISITION FOR DGAQA INSPECTION", title_style))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 10))
         
         # Requisition Details Section
         story.append(Paragraph("REQUISITION DETAILS", section_style))
@@ -1438,6 +1476,193 @@ def download_memo_pdf(memo_id):
         story.append(Paragraph(remarks_text, ParagraphStyle('Remarks', parent=styles['Normal'], fontSize=7, spaceAfter=6, fontName='Helvetica')))
         
         story.append(Spacer(1, 10))
+        
+        # Approval/Rejection Status Section (only if memo has been processed)
+        if approval_data:
+            status = approval_data[0]  # ma.status
+            
+            # Status badge (matches frontend exactly)
+            if status == 'accepted':
+                status_text = "✓ APPROVED AND ASSIGNED REVIEWER"
+                status_color = colors.green
+                section_bg_color = colors.Color(0.94, 0.98, 0.94)  # #f0f9f0
+                section_border_color = colors.green
+            elif status == 'rejected':
+                status_text = "✗ REJECTED"
+                status_color = colors.red
+                section_bg_color = colors.Color(0.99, 0.95, 0.95)  # #fdf2f2
+                section_border_color = colors.red
+            
+            # Add section background and border (simulated with table)
+            section_table_data = [['']]
+            section_table = Table(section_table_data, colWidths=[7*inch], rowHeights=[0.1*inch])
+            section_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), section_bg_color),
+                ('LINEBELOW', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINEABOVE', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINELEFT', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINERIGHT', (0, 0), (-1, -1), 2, section_border_color),
+            ]))
+            story.append(section_table)
+            
+            # Status badge
+            status_style = ParagraphStyle(
+                'StatusBadge',
+                parent=styles['Normal'],
+                fontSize=9,
+                spaceAfter=15,
+                spaceBefore=10,
+                alignment=1,  # Center alignment
+                textColor=status_color,
+                fontName='Helvetica-Bold',
+                backColor=colors.lightgrey,
+                borderWidth=1,
+                borderPadding=8
+            )
+            story.append(Paragraph(status_text, status_style))
+            
+            # Test or Review Details heading
+            story.append(Paragraph("Test or Review Details", test_review_heading_style))
+            
+            # Create test review details table (matches frontend layout exactly)
+            test_review_data = []
+            
+            # Row 1: Date and Comments
+            approval_date = approval_data[1]  # ma.approval_date
+            comments = approval_data[2]  # ma.comments
+            
+            date_str = approval_date.strftime('%d/%m/%Y, %H:%M') if approval_date else 'N/A'
+            comments_str = comments or 'No comments provided'
+            
+            test_review_data.append([
+                f'Date of Test or Review :\n{date_str}',
+                f'Comments :\n{comments_str}'
+            ])
+            
+            # Row 2: Tester ID and Name
+            if status == 'accepted':
+                reviewer_name = approval_data[7]  # reviewer_name
+                reviewer_id = approval_data[6]  # ma.user_id
+                test_review_data.append([
+                    f'Internal Tester ID:\n{reviewer_id or "N/A"}',
+                    f'Internal Tester Name :\n{reviewer_name or "N/A"}'
+                ])
+            else:  # rejected
+                approver_id = approval_data[4]  # ma.approved_by
+                test_review_data.append([
+                    f'Internal Tester ID:\n{approver_id or "N/A"}',
+                    f'Internal Tester Name :\nQA Head'
+                ])
+            
+            # Row 3: Authentication and Attachments
+            authentication = approval_data[3]  # ma.authentication
+            attachment_path = approval_data[9]  # ma.attachment_path
+            
+            # For now, show authentication status in table
+            auth_str = 'Signature provided' if authentication else 'Not provided'
+            attachment_str = 'File attached' if attachment_path else 'No attachments'
+            
+            test_review_data.append([
+                f'Authentication\n{auth_str}',
+                f'Attachments\n{attachment_str}'
+            ])
+            
+            # Create test review table
+            test_review_table = Table(test_review_data, colWidths=[3.5*inch, 3.5*inch])
+            test_review_table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+            ]))
+            
+            story.append(test_review_table)
+            
+            # Add signature image if available (access directly from file path)
+            if authentication:
+                try:
+                    from reportlab.lib.utils import ImageReader
+                    import os
+                    
+                    # Handle signature path - try different path formats
+                    signature_path = None
+                    
+                    # Check if it's already a full file path
+                    if os.path.exists(authentication):
+                        signature_path = authentication
+                    # Check if it's a relative path from project root
+                    elif os.path.exists(os.path.join(os.getcwd(), authentication)):
+                        signature_path = os.path.join(os.getcwd(), authentication)
+                    # Check if it's a relative path from backend directory
+                    elif os.path.exists(os.path.join(os.getcwd(), 'backend', authentication)):
+                        signature_path = os.path.join(os.getcwd(), 'backend', authentication)
+                    # Check if it's a URL that needs to be downloaded
+                    elif authentication.startswith('http') or "/api/users/signature/" in authentication:
+                        # Handle URL-based signatures
+                        if authentication.startswith('http'):
+                            signature_url = authentication
+                        else:
+                            signature_url = f"http://localhost:8000{authentication}"
+                        
+                        import requests
+                        response = requests.get(signature_url, timeout=10)
+                        if response.status_code == 200:
+                            img_data = io.BytesIO(response.content)
+                            img = ImageReader(img_data)
+                            print(f"Successfully loaded signature from URL: {signature_url}")
+                        else:
+                            print(f"Failed to load signature from URL: {signature_url}")
+                            img = None
+                    else:
+                        print(f"Signature path not found: {authentication}")
+                        img = None
+                    
+                    # If we found a local file path, load the image
+                    if signature_path and not authentication.startswith('http'):
+                        img = ImageReader(signature_path)
+                        print(f"Successfully loaded signature from file: {signature_path}")
+                    
+                    # Display the signature image
+                    if img:
+                        # Resize image to fit in PDF (good size for signature)
+                        img_width, img_height = img.getSize()
+                        max_width = 2.5 * inch  # Good size for signature visibility
+                        max_height = 1.0 * inch
+                        
+                        # Calculate scaling to maintain aspect ratio
+                        scale_x = max_width / img_width
+                        scale_y = max_height / img_height
+                        scale = min(scale_x, scale_y)
+                        
+                        scaled_width = img_width * scale
+                        scaled_height = img_height * scale
+                        
+                        # Add signature label
+                        story.append(Spacer(1, 10))
+                        story.append(Paragraph("Signature:", ParagraphStyle('SignatureLabel', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')))
+                        
+                        # Add signature image
+                        story.append(Spacer(1, 5))
+                        from reportlab.platypus import Image
+                        signature_img = Image(img, scaled_width, scaled_height)
+                        story.append(signature_img)
+                        
+                        print(f"Signature image added to PDF - Size: {scaled_width:.2f}x{scaled_height:.2f} inches")
+                    else:
+                        print(f"Could not load signature image from: {authentication}")
+                        
+                except Exception as e:
+                    # If image loading fails, just continue without the image
+                    print(f"Error loading signature image: {str(e)}")
+                    pass
+            
+            story.append(Spacer(1, 15))
         
         # References section
         if references:

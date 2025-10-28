@@ -177,6 +177,8 @@
 </template>
 
 <script>
+import html2pdf from 'html2pdf.js';
+
 export default {
   name: 'InspectionMemo',
   props: {
@@ -465,34 +467,36 @@ export default {
         button.querySelector('.download-text').textContent = 'Loading...';
         button.disabled = true;
         
-        // Make request to backend PDF endpoint
-        const response = await fetch(`http://localhost:5000/api/memos/${this.id}/pdf`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/pdf'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to generate PDF: ${response.statusText}`);
+        // Get the element you want to convert (the main memo content)
+        const element = document.querySelector('.form-content');
+        
+        if (!element) {
+          alert('Memo content not found');
+          return;
         }
-
-        // Get the PDF blob
-        const blob = await response.blob();
         
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `memo_${this.id}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
+        // Configure options to match the page appearance
+        const opt = {
+          margin: 0.5,
+          filename: `memo_${this.id}_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            allowTaint: true,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+          },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          }
+        };
         
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Clean up
-        window.URL.revokeObjectURL(url);
+        // Generate PDF from HTML
+        await html2pdf().set(opt).from(element).save();
         
         console.log(`PDF downloaded successfully for memo ${this.id}`);
         
@@ -501,6 +505,7 @@ export default {
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
+        const button = event.target.closest('.download-pdf-btn');
         if (button) {
           button.querySelector('.download-text').textContent = originalText;
           button.disabled = false;

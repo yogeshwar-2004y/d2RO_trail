@@ -594,7 +594,7 @@ export default {
       this.error = null
       
       try {
-        const response = await fetch(`http://localhost:5000/api/test-groups/${this.groupId}/sub-tests`)
+        const response = await fetch(`http://localhost:8000/api/test-groups/${this.groupId}/sub-tests`)
         const data = await response.json()
         
         if (data.success) {
@@ -622,7 +622,7 @@ export default {
       // First, load bulletins for each sub-test
       for (const subTest of this.subTests) {
         try {
-          const response = await fetch(`http://localhost:5000/api/sub-tests/${subTest.sub_test_id}/bulletins`)
+          const response = await fetch(`http://localhost:8000/api/sub-tests/${subTest.sub_test_id}/bulletins`)
           const data = await response.json()
           
           if (data.success) {
@@ -742,7 +742,7 @@ export default {
           created_by: userId
         }
         
-        const response = await fetch(`http://localhost:5000/api/test-groups/${this.groupId}/sub-tests`, {
+        const response = await fetch(`http://localhost:8000/api/test-groups/${this.groupId}/sub-tests`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -787,7 +787,7 @@ export default {
           updated_by: userId
         }
         
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${this.editingSubTest.sub_test_id}`, {
+        const response = await fetch(`http://localhost:8000/api/sub-tests/${this.editingSubTest.sub_test_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -817,7 +817,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${subTest.sub_test_id}`, {
+        const response = await fetch(`http://localhost:8000/api/sub-tests/${subTest.sub_test_id}`, {
           method: 'DELETE'
         })
         
@@ -917,7 +917,7 @@ export default {
       // Create parent bulletins first
       for (const bulletin of parentBulletins) {
         try {
-          const response = await fetch(`http://localhost:5000/api/sub-tests/${subTestId}/bulletins`, {
+          const response = await fetch(`http://localhost:8000/api/sub-tests/${subTestId}/bulletins`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -945,7 +945,7 @@ export default {
         const parentBulletin = parentBulletins.find(pb => pb.tempIndex === subBulletin.parentTempIndex)
         if (parentBulletin && parentBulletin.actualId) {
           try {
-            await fetch(`http://localhost:5000/api/sub-tests/${subTestId}/bulletins`, {
+            await fetch(`http://localhost:8000/api/sub-tests/${subTestId}/bulletins`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json'
@@ -996,7 +996,7 @@ export default {
           created_by: userId
         }
         
-        const response = await fetch(`http://localhost:5000/api/sub-tests/${subTestId}/bulletins`, {
+        const response = await fetch(`http://localhost:8000/api/sub-tests/${subTestId}/bulletins`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -1046,7 +1046,7 @@ export default {
           updated_by: userId
         }
         
-        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
+        const response = await fetch(`http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -1076,7 +1076,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
+        const response = await fetch(`http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`, {
           method: 'DELETE'
         })
         
@@ -1129,7 +1129,7 @@ export default {
           updated_by: userId
         }
         
-        const response = await fetch(`http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
+        const response = await fetch(`http://localhost:8000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'

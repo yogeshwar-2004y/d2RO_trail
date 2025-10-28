@@ -195,7 +195,7 @@ export default {
           return
         }
         
-        const response = await fetch(`http://127.0.0.1:5000/api/tech-support/user/${currentUser.id}`)
+        const response = await fetch(`http://127.0.0.1:8000/api/tech-support/user/${currentUser.id}`)
         const data = await response.json()
         
         if (data.success) {

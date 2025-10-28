@@ -586,7 +586,7 @@ export default {
         button.disabled = true;
         
         // Make request to backend PDF endpoint
-        const response = await fetch(`http://localhost:5000/api/memos/${memo.id}/pdf`, {
+        const response = await fetch(`http://localhost:8000/api/memos/${memo.id}/pdf`, {
           method: 'GET',
           headers: {
             'Accept': 'application/pdf'

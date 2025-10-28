@@ -89,7 +89,7 @@ const actions = {
     try {
       // Call backend logout endpoint to log the logout activity
       if (state.user && state.user.id) {
-        await fetch("http://localhost:5000/api/logout", {
+        await fetch("http://localhost:8000/api/logout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: state.user.id }),

@@ -14,7 +14,11 @@
         <h1 class="page-title">INDIVIDUAL REPORT</h1>
       </div>
       <div class="header-right">
-        <button class="export-button" @click="downloadReportPDF">
+        <button 
+          v-if="selectedTemplate && !showTemplateSelection && canDownloadReport" 
+          class="export-button" 
+          @click="downloadReportPDF"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
@@ -69,6 +73,10 @@
             <div class="role-icon">🔍</div>
             <p><strong>QA Reviewer Access:</strong> Once the Design Head assigns a template, you will be able to fill out and submit this report.</p>
           </div>
+          <div v-else-if="isQAHead" class="role-message qa-head">
+            <div class="role-icon">👁️</div>
+            <p><strong>QA Head - View Only Access:</strong> Once the Design Head assigns a template, you will be able to view this report but cannot edit it.</p>
+          </div>
           <div v-else class="role-message other-role">
             <div class="role-icon">👁️</div>
             <p><strong>View-Only Access:</strong> You can view this report once a template is assigned, but only QA Reviewers can edit it.</p>
@@ -99,6 +107,17 @@
               <div class="access-icon">🔍</div>
               <h4>QA Reviewer Access</h4>
               <p>You can edit and submit this report. All fields are enabled for input.</p>
+              <p v-if="!isReportSubmitted" class="download-info">
+                <strong>Note:</strong> Download PDF will be available after submitting the report.
+              </p>
+              <p v-else class="download-info success">
+                <strong>✓</strong> Report submitted! You can now download the PDF.
+              </p>
+            </div>
+            <div v-else-if="isQAHead" class="access-info qa-head">
+              <div class="access-icon">👁️</div>
+              <h4>QA Head - View Only Access</h4>
+              <p>You can view this report but cannot edit it. Only QA Reviewers can make changes to the report data.</p>
             </div>
             <div v-else class="access-info view-only">
               <div class="access-icon">👁️</div>
@@ -118,6 +137,7 @@
             :templateName="selectedTemplate.name"
             :readonly="!canEditReport"
             :isTemplatePreview="false"
+            @report-submitted="updateReportStatus"
           />
           
           <!-- Fallback if component not found -->
@@ -192,7 +212,7 @@
 
 <script>
 import { userStore } from '@/stores/userStore'
-import jsPDF from "jspdf";
+import html2pdf from 'html2pdf.js';
 
 // Import all template components
 import ObservationReport from '@/templates/ObservationReport.vue'
@@ -274,7 +294,9 @@ export default {
         }
       ],
       selectedTemplate: null,
-      loading: false
+      loading: false,
+      showTemplateSelection: false,
+      reportStatus: null
     };
   },
   computed: {
@@ -295,9 +317,31 @@ export default {
       return currentUserRole === 3;
     },
     
+    isQAHead() {
+      // QA Head has role_id = 2
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 2;
+    },
+    
     canEditReport() {
       // Only QA Reviewer can edit reports when template is assigned
+      // QA Head has view-only access
       return this.isQAReviewer && this.selectedTemplate;
+    },
+    
+    isReportSubmitted() {
+      // Check if report has been submitted (status is not 'ASSIGNED')
+      return this.reportStatus && this.reportStatus !== 'ASSIGNED';
+    },
+    
+    canDownloadReport() {
+      // QA Reviewer can download only after submitting the report
+      // Other roles with view access can download anytime (if they have access)
+      if (this.isQAReviewer) {
+        return this.isReportSubmitted;
+      }
+      // For view-only users, they can download if they have access (but they don't have access anyway)
+      return false;
     },
     
     currentTemplateComponent() {
@@ -331,10 +375,12 @@ export default {
     selectTemplate() {
       console.log('Opening template selection overlay for report:', this.reportId);
       this.showTemplateOverlay = true;
+      this.showTemplateSelection = true;
     },
     
     closeOverlay() {
       this.showTemplateOverlay = false;
+      this.showTemplateSelection = false;
     },
     
     async selectTemplateOption(template) {
@@ -376,18 +422,29 @@ export default {
       }
     },
     
+    // Method to update report status (called when report is submitted)
+    updateReportStatus(newStatus) {
+      this.reportStatus = newStatus;
+      console.log('Report status updated to:', newStatus);
+    },
+    
     async loadReportDetails() {
       if (!this.reportId) return;
       
       try {
-        const response = await fetch(`http://localhost:5000/api/reports/${this.reportId}`);
+        const response = await fetch(`http://localhost:8000/api/reports/${this.reportId}`);
         const result = await response.json();
         
-        if (result.success && result.report.template_id) {
+        if (result.success) {
+          // Set report status
+          this.reportStatus = result.report.status;
+          
           // Find the template that matches the template_id
-          const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
-          if (template) {
-            this.selectedTemplate = template;
+          if (result.report.template_id) {
+            const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
+            if (template) {
+              this.selectedTemplate = template;
+            }
           }
         }
       } catch (error) {
@@ -406,121 +463,44 @@ export default {
       alert(`Create new report for Report ID: ${this.reportId} will be implemented soon!`);
     },
     
-    downloadReportPDF() {
+    async downloadReportPDF() {
       try {
-        // Create new PDF document
-        const doc = new jsPDF("p", "mm", "a4");
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 20;
-
-        let yPosition = margin;
-
-        // Set font styles
-        doc.setFont("helvetica");
-
-        // Header - Report Title
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text(this.reportName || 'INDIVIDUAL REPORT', pageWidth / 2, yPosition, {
-          align: "center",
-        });
-        yPosition += 15;
-
-        // Report Details
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Report ID: ${this.reportId}`, margin, yPosition);
-        yPosition += 8;
-        doc.text(`Project: ${this.projectName || 'N/A'}`, margin, yPosition);
-        yPosition += 8;
-
-        // Date and user info
-        const currentDate = new Date().toLocaleDateString("en-GB");
-        const currentTime = new Date().toLocaleTimeString("en-GB");
-        doc.text(`Generated on: ${currentDate} at ${currentTime}`, margin, yPosition);
-        yPosition += 8;
-
-        const currentUser = userStore.getters.currentUser();
-        if (currentUser) {
-          doc.text(`Generated by: ${currentUser.name} (${currentUser.role})`, margin, yPosition);
-          yPosition += 15;
+        // Get the element you want to convert (the main report content)
+      const element = document.querySelector('.template-form-container');
+        
+        if (!element) {
+          alert('Report content not found');
+          return;
         }
-
-        // Template Information
-        if (this.selectedTemplate) {
-          doc.setFontSize(14);
-          doc.setFont("helvetica", "bold");
-          doc.text("TEMPLATE INFORMATION", pageWidth / 2, yPosition, { align: "center" });
-          yPosition += 10;
-
-          doc.setFontSize(12);
-          doc.setFont("helvetica", "normal");
-          doc.text(`Template: ${this.selectedTemplate.displayName}`, margin, yPosition);
-          yPosition += 8;
-          doc.text(`Description: ${this.selectedTemplate.description}`, margin, yPosition);
-          yPosition += 15;
-        }
-
-        // Report Content Section
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("REPORT CONTENT", pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
-
-        // Add a note about the report content
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.text("This report contains detailed inspection and testing information", margin, yPosition);
-        yPosition += 8;
-        doc.text("as per the selected template format. For complete details,", margin, yPosition);
-        yPosition += 8;
-        doc.text("please refer to the online report in the AVIATRAX system.", margin, yPosition);
-        yPosition += 15;
-
-        // Access Information
-        if (this.canEditReport) {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text("ACCESS LEVEL: QA REVIEWER (EDIT ACCESS)", margin, yPosition);
-          yPosition += 8;
-          doc.setFont("helvetica", "normal");
-          doc.text("This report can be edited and submitted by QA Reviewers.", margin, yPosition);
-        } else {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "bold");
-          doc.text("ACCESS LEVEL: VIEW-ONLY", margin, yPosition);
-          yPosition += 8;
-          doc.setFont("helvetica", "normal");
-          doc.text("This report is in view-only mode. Only QA Reviewers can edit reports.", margin, yPosition);
-        }
-
-        yPosition += 20;
-
-        // Footer
-        doc.setFontSize(8);
-        doc.setFont("helvetica", "italic");
-        doc.text("This report was generated from the AVIATRAX Individual Report System", pageWidth / 2, yPosition, {
-          align: "center",
-        });
-
-        // Save the PDF
-        const fileName = `Report_${this.reportId}_${this.reportName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Individual'}_${currentDate.replace(/\//g, "-")}.pdf`;
-        doc.save(fileName);
-
-        // Show success message
-        this.$nextTick(() => {
-          alert("Report PDF downloaded successfully!");
-        });
+        
+        // Configure options to match the page appearance
+        const opt = {
+          margin: 0.5,
+          filename: `Report_${this.reportId}_${this.reportName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Individual'}_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            allowTaint: true,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+          },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          }
+        };
+        
+        // Generate PDF from HTML
+        await html2pdf().set(opt).from(element).save();
+        
+        alert("Report PDF downloaded successfully!");
+        
       } catch (error) {
-        console.error("Error downloading report PDF:", error);
-        this.$nextTick(() => {
-          alert(
-            `Error downloading report PDF: ${
-              error.message || "Unknown error"
-            }. Please try again.`
-          );
-        });
+        console.error('Error downloading report PDF:', error);
+        alert(`Error downloading report PDF: ${error.message || "Unknown error"}. Please try again.`);
       }
     }
   }
@@ -1224,6 +1204,12 @@ export default {
   border-left: 6px solid #28a745;
 }
 
+.role-message.qa-head {
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  border: 2px solid #2196f3;
+  border-left: 6px solid #2196f3;
+}
+
 .role-message.other-role {
   background: linear-gradient(135deg, #fff3cd, #fef9e7);
   border: 2px solid #ffc107;
@@ -1269,6 +1255,12 @@ export default {
   border-left: 6px solid #28a745;
 }
 
+.access-info.qa-head {
+  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+  border: 2px solid #2196f3;
+  border-left: 6px solid #2196f3;
+}
+
 .access-info.view-only {
   background: linear-gradient(135deg, #f8d7da, #f5c6cb);
   border: 2px solid #dc3545;
@@ -1292,6 +1284,21 @@ export default {
   color: #2d3748;
   font-size: 0.9em;
   line-height: 1.5;
+}
+
+.download-info {
+  margin-top: 8px !important;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85em !important;
+  background: rgba(255, 193, 7, 0.1);
+  border-left: 3px solid #ffc107;
+}
+
+.download-info.success {
+  background: rgba(40, 167, 69, 0.1);
+  border-left: 3px solid #28a745;
+  color: #155724;
 }
 
 /* Responsive Design for Role Messages */

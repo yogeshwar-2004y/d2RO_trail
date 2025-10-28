@@ -12,8 +12,8 @@ from app import app
 
 if __name__ == '__main__':
     print("Starting AVIATRAX Backend Server...")
-    print("Server will be available at: http://localhost:5000")
-    print("API endpoints available at: http://localhost:5000/api")
+    print("Server will be available at: http://localhost:8000")
+    print("API endpoints available at: http://localhost:8000/api")
     print("Press Ctrl+C to stop the server")
     print("-" * 50)
     
