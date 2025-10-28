@@ -279,6 +279,70 @@ def create_comment():
             print(f"No annotation data for comment {comment_id}: is_annotation={data.get('is_annotation')}, x={data.get('x')}, y={data.get('y')}")
         
         conn.commit()
+        
+        # Send notifications to all designers in the project when a reviewer adds a comment
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get project_id from the document (plan_documents -> lrus -> projects)
+        cur.execute("""
+            SELECT p.project_id, p.project_name, l.lru_id, l.lru_name
+            FROM plan_documents pd
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.document_id = %s
+        """, (document_id,))
+        
+        project_info = cur.fetchone()
+        if project_info:
+            project_id = project_info[0]
+            project_name = project_info[1]
+            lru_id = project_info[2]
+            lru_name = project_info[3]
+            
+            # Get reviewer name
+            reviewer_name = "Unknown Reviewer"
+            reviewer_id = data.get('reviewer_id')
+            if reviewer_id:
+                cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+                reviewer_result = cur.fetchone()
+                if reviewer_result:
+                    reviewer_name = reviewer_result[0]
+            
+            # Get all designers in the project (role_id = 5)
+            cur.execute("""
+                SELECT DISTINCT u.user_id, u.name, u.email
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN project_users pu ON u.user_id = pu.user_id
+                WHERE pu.project_id = %s AND ur.role_id = 5
+            """, (project_id,))
+            
+            designers = cur.fetchall()
+            
+            # Log activity for comment creation
+            log_activity(
+                project_id=project_id,
+                activity_performed=f"Comment Added to Plan Document",
+                performed_by=reviewer_id,
+                additional_info=f"Reviewer {reviewer_name} added a comment to document '{data.get('document_name')}' in LRU '{lru_name}' for project '{project_name}'."
+            )
+            
+            # Send notification to all designers in the project
+            for designer in designers:
+                designer_id = designer[0]
+                designer_name = designer[1]
+                
+                log_notification(
+                    project_id=project_id,
+                    activity_performed="New Comment on Plan Document",
+                    performed_by=reviewer_id,
+                    notified_user_id=designer_id,
+                    notification_type="plan_document_comment",
+                    additional_info=f"Reviewer {reviewer_name} added a comment to document '{data.get('document_name')}' in LRU '{lru_name}' of project '{project_name}'. Please review and address the feedback."
+                )
+                
+                print(f"   ✓ Sent notification to designer: {designer_name} (ID: {designer_id})")
+        
         cur.close()
         
         return jsonify({
