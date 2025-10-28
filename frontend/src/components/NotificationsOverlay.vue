@@ -180,9 +180,9 @@ export default {
       }
     },
     async viewNotification(notification) {
-      // Mark as read when viewed
+      // Mark as read and remove when viewed
       if (!notification.is_read) {
-        await this.markAsRead(notification.activity_id);
+        await this.markAsReadAndRemove(notification);
       }
     },
     async markAsRead(notificationId) {
