@@ -1134,17 +1134,22 @@ def add_project_member(project_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         user_id = data.get('user_id')
+        assigned_by = data.get('assigned_by')  # Get who assigned this project
+        
         if not user_id:
             return jsonify({"success": False, "message": "User ID is required"}), 400
         
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Check if project exists
-        cur.execute("SELECT project_id FROM projects WHERE project_id = %s", (project_id,))
-        if not cur.fetchone():
+        # Check if project exists and get project name
+        cur.execute("SELECT project_id, project_name FROM projects WHERE project_id = %s", (project_id,))
+        project_result = cur.fetchone()
+        if not project_result:
             cur.close()
             return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        project_name = project_result[1]
         
         # Check if user exists
         cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
@@ -1171,6 +1176,38 @@ def add_project_member(project_id):
         
         project_user_id = cur.fetchone()[0]
         conn.commit()
+        
+        # Send notification to the designer
+        from utils.activity_logger import log_notification
+        
+        # Get the name of who assigned the project
+        assigned_by_name = 'Design Head'  # Default fallback
+        if assigned_by:
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (assigned_by,))
+            user_result = cur.fetchone()
+            if user_result:
+                assigned_by_name = user_result[0]
+        else:
+            # Try to get the first Design Head user as fallback
+            cur.execute("""
+                SELECT u.name FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                WHERE ur.role_id = 4
+                LIMIT 1
+            """)
+            design_head_result = cur.fetchone()
+            if design_head_result:
+                assigned_by_name = design_head_result[0]
+        
+        log_notification(
+            project_id=project_id,
+            activity_performed="Project Assigned",
+            performed_by=assigned_by if assigned_by else None,
+            notified_user_id=user_id,
+            notification_type="project_assigned",
+            additional_info=f"You have been assigned to project '{project_name}' (ID: {project_id}) by {assigned_by_name}."
+        )
+        
         cur.close()
         
         return jsonify({

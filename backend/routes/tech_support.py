@@ -88,9 +88,10 @@ def submit_tech_support():
         # Log the activity
         try:
             log_activity(
-                user_id=data['username'],
-                action="TECH_SUPPORT_REQUEST",
-                details=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
+                project_id=None,
+                activity_performed="TECH_SUPPORT_REQUEST",
+                performed_by=user_id,
+                additional_info=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
             )
         except Exception as log_error:
             print(f"Warning: Failed to log activity: {str(log_error)}")
@@ -248,9 +249,10 @@ def update_tech_support_status(request_id):
         # Log the activity
         try:
             log_activity(
-                user_id=str(admin_user_id),
-                action="TECH_SUPPORT_STATUS_UPDATE",
-                details=f"Updated tech support request #{request_id} status to {data['status']}"
+                project_id=None,
+                activity_performed="TECH_SUPPORT_STATUS_UPDATE",
+                performed_by=admin_user_id,
+                additional_info=f"Updated tech support request #{request_id} status to {data['status']}"
             )
         except Exception as log_error:
             print(f"Warning: Failed to log activity: {str(log_error)}")
