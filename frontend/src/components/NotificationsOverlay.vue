@@ -206,25 +206,50 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000;
+  z-index: 10005;
   padding: 20px;
+  animation: fadeIn 0.2s ease;
+  margin: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .overlay-container {
   background: white;
   border-radius: 12px;
   width: 100%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 700px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .overlay-header {
@@ -281,6 +306,8 @@ export default {
 
 .notifications-list {
   padding: 8px;
+  max-height: calc(85vh - 120px);
+  overflow-y: auto;
 }
 
 .notification-item {
@@ -396,21 +423,39 @@ export default {
 }
 
 /* Custom scrollbar */
+.overlay-content::-webkit-scrollbar,
 .notifications-list::-webkit-scrollbar {
   width: 8px;
 }
 
+.overlay-content::-webkit-scrollbar-track,
 .notifications-list::-webkit-scrollbar-track {
   background: #f1f1f1;
+  border-radius: 0 0 12px 12px;
 }
 
+.overlay-content::-webkit-scrollbar-thumb,
 .notifications-list::-webkit-scrollbar-thumb {
   background: #888;
   border-radius: 4px;
 }
 
+.overlay-content::-webkit-scrollbar-thumb:hover,
 .notifications-list::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .overlay-container {
+    max-width: 95%;
+    max-height: 90vh;
+    margin: 10px;
+  }
+  
+  .notifications-overlay {
+    padding: 10px;
+  }
 }
 </style>
 

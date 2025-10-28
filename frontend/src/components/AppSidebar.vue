@@ -133,12 +133,6 @@
       :passwordType="passwordType"
       @close="closePasswordModal"
     />
-    
-    <!-- Notifications Overlay -->
-    <NotificationsOverlay 
-      :isOpen="isNotificationsOpen"
-      @close="closeNotifications"
-    />
   </div>
 </template>
 
@@ -147,7 +141,8 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
-import NotificationsOverlay from '@/components/NotificationsOverlay.vue'
+
+const emit = defineEmits(['open-notifications'])
 
 // Import icon components
 import HomeIcon from './icons/HomeIcon.vue'
@@ -166,7 +161,6 @@ const isCollapsed = ref(true) // Collapsed by default
 const showPasswordSubmenu = ref(false)
 const isPasswordModalOpen = ref(false)
 const passwordType = ref('login')
-const isNotificationsOpen = ref(false)
 const unreadCount = ref(0)
 let notificationRefreshInterval = null
 
@@ -290,11 +284,7 @@ const handleLogout = async () => {
 }
 
 const openNotifications = () => {
-  isNotificationsOpen.value = true
-}
-
-const closeNotifications = () => {
-  isNotificationsOpen.value = false
+  emit('open-notifications')
 }
 
 const fetchUnreadCount = async () => {
