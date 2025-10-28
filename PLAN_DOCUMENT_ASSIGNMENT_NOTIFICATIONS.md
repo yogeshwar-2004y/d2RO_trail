@@ -3,6 +3,7 @@
 ## Overview
 1. When a QA Head assigns a plan document to a reviewer, the assigned reviewer receives a notification.
 2. When a reviewer adds comments to a plan document, all designers in that project receive notifications.
+3. When a designer accepts or rejects a reviewer's comment, the reviewer receives a notification.
 
 ## Implementation Details
 
@@ -40,6 +41,26 @@
   - Which reviewer added the comment
   - A request to review and address the feedback
 
+#### 4. When a Designer Accepts a Comment (POST `/api/comments/<id>/accept`)
+- A designer or design head accepts a reviewer's comment
+- The system logs the activity
+- The **reviewer** receives a notification with:
+  - Activity: "Your Comment Was Accepted"
+  - Notification type: `comment_accepted`
+  - Details about which document, LRU, and project
+  - Who accepted the comment (designer name)
+  - The justification provided
+
+#### 5. When a Designer Rejects a Comment (POST `/api/comments/<id>/reject`)
+- A designer or design head rejects a reviewer's comment
+- The system logs the activity
+- The **reviewer** receives a notification with:
+  - Activity: "Your Comment Was Rejected"
+  - Notification type: `comment_rejected`
+  - Details about which document, LRU, and project
+  - Who rejected the comment (designer name)
+  - The justification provided
+
 ### Notification Content
 The notification includes:
 - **Project**: The project name
@@ -64,6 +85,16 @@ The notification includes:
    - **Activity**: "New Comment on Plan Document"
    - **Recipients**: All designers in the project
 
+3. **Comment Accepted Notifications**:
+   - **Type**: `comment_accepted`
+   - **Activity**: "Your Comment Was Accepted"
+   - **Recipients**: Reviewer who submitted the comment
+
+4. **Comment Rejected Notifications**:
+   - **Type**: `comment_rejected`
+   - **Activity**: "Your Comment Was Rejected"
+   - **Recipients**: Reviewer who submitted the comment
+
 ### Testing
 
 #### Test Assignment Notifications
@@ -80,4 +111,15 @@ The notification includes:
 4. Log in as a Designer assigned to that project
 5. Check notifications in the sidebar
 6. You should see a notification about the new comment with details about the document and reviewer
+
+#### Test Comment Acceptance/Rejection Notifications
+1. Log in as a Designer
+2. Open a plan document for a project you're assigned to
+3. Accept or reject a reviewer's comment
+4. Log in as the Reviewer who submitted the comment
+5. Check notifications in the sidebar
+6. You should see a notification about your comment being accepted or rejected, including:
+   - The document, LRU, and project details
+   - Who accepted/rejected it
+   - The justification provided
 
