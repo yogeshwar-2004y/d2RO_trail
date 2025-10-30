@@ -177,6 +177,33 @@ def create_project():
             additional_info=f"ID:{project_id}|Name:{project_name}|Project '{project_name}' created with {len(lrus)} LRUs"
         )
         
+        # Send notifications to Design Head and QA Head
+        from utils.activity_logger import log_notification, get_users_by_role
+        
+        # Get Design Head users (role_id = 4)
+        design_heads = get_users_by_role(4)
+        for design_head in design_heads:
+            log_notification(
+                project_id=project_id,
+                activity_performed="New Project Created",
+                performed_by=created_by,
+                notified_user_id=design_head['user_id'],
+                notification_type="project_created",
+                additional_info=f"New project '{project_name}' (ID: {project_id}) has been created and requires your attention."
+            )
+        
+        # Get QA Head users (role_id = 2)
+        qa_heads = get_users_by_role(2)
+        for qa_head in qa_heads:
+            log_notification(
+                project_id=project_id,
+                activity_performed="New Project Created",
+                performed_by=created_by,
+                notified_user_id=qa_head['user_id'],
+                notification_type="project_created",
+                additional_info=f"New project '{project_name}' (ID: {project_id}) has been created and requires your attention."
+            )
+        
         return jsonify({
             "success": True,
             "message": "Project created successfully",
@@ -1107,17 +1134,22 @@ def add_project_member(project_id):
             return jsonify({"success": False, "message": "No data provided"}), 400
         
         user_id = data.get('user_id')
+        assigned_by = data.get('assigned_by')  # Get who assigned this project
+        
         if not user_id:
             return jsonify({"success": False, "message": "User ID is required"}), 400
         
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Check if project exists
-        cur.execute("SELECT project_id FROM projects WHERE project_id = %s", (project_id,))
-        if not cur.fetchone():
+        # Check if project exists and get project name
+        cur.execute("SELECT project_id, project_name FROM projects WHERE project_id = %s", (project_id,))
+        project_result = cur.fetchone()
+        if not project_result:
             cur.close()
             return jsonify({"success": False, "message": "Project not found"}), 404
+        
+        project_name = project_result[1]
         
         # Check if user exists
         cur.execute("SELECT user_id FROM users WHERE user_id = %s", (user_id,))
@@ -1144,6 +1176,38 @@ def add_project_member(project_id):
         
         project_user_id = cur.fetchone()[0]
         conn.commit()
+        
+        # Send notification to the designer
+        from utils.activity_logger import log_notification
+        
+        # Get the name of who assigned the project
+        assigned_by_name = 'Design Head'  # Default fallback
+        if assigned_by:
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (assigned_by,))
+            user_result = cur.fetchone()
+            if user_result:
+                assigned_by_name = user_result[0]
+        else:
+            # Try to get the first Design Head user as fallback
+            cur.execute("""
+                SELECT u.name FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                WHERE ur.role_id = 4
+                LIMIT 1
+            """)
+            design_head_result = cur.fetchone()
+            if design_head_result:
+                assigned_by_name = design_head_result[0]
+        
+        log_notification(
+            project_id=project_id,
+            activity_performed="Project Assigned",
+            performed_by=assigned_by if assigned_by else None,
+            notified_user_id=user_id,
+            notification_type="project_assigned",
+            additional_info=f"You have been assigned to project '{project_name}' (ID: {project_id}) by {assigned_by_name}."
+        )
+        
         cur.close()
         
         return jsonify({
@@ -1244,6 +1308,110 @@ def get_activity_logs():
         
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/notifications/<int:user_id>', methods=['GET'])
+def get_user_notifications(user_id):
+    """Get notifications for a specific user"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Get limit from query parameters
+        limit = request.args.get('limit', 50, type=int)
+        unread_only = request.args.get('unread_only', 'false').lower() == 'true'
+        
+        # Build query
+        if unread_only:
+            cur.execute("""
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       al.is_read, al.notification_type,
+                       u.name as performed_by_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+                WHERE al.notified_user_id = %s AND al.is_read = FALSE
+                ORDER BY al.timestamp DESC
+                LIMIT %s
+            """, (user_id, limit))
+        else:
+            cur.execute("""
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       al.is_read, al.notification_type,
+                       u.name as performed_by_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+                WHERE al.notified_user_id = %s
+                ORDER BY al.timestamp DESC
+                LIMIT %s
+            """, (user_id, limit))
+        
+        notifications = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        notification_list = []
+        for notif in notifications:
+            notification_list.append({
+                "activity_id": notif[0],
+                "project_id": notif[1],
+                "activity_performed": notif[2],
+                "performed_by": notif[3],
+                "performed_by_name": notif[8],
+                "timestamp": notif[4].isoformat() if notif[4] else None,
+                "additional_info": notif[5],
+                "is_read": notif[6],
+                "notification_type": notif[7],
+                "project_name": notif[9]
+            })
+        
+        return jsonify({
+            "success": True,
+            "notifications": notification_list,
+            "total": len(notification_list)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching notifications: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@projects_bp.route('/api/notifications/<int:notification_id>/mark-read', methods=['PUT'])
+def mark_notification_read(notification_id):
+    """Mark a notification as read"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if notification exists
+        cur.execute("""
+            SELECT activity_id FROM activity_logs 
+            WHERE activity_id = %s
+        """, (notification_id,))
+        
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Notification not found"}), 404
+        
+        # Update notification as read
+        cur.execute("""
+            UPDATE activity_logs 
+            SET is_read = TRUE 
+            WHERE activity_id = %s
+        """, (notification_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Notification marked as read"
+        })
+        
+    except Exception as e:
+        print(f"Error marking notification as read: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
 @projects_bp.route('/api/activity-logs/pdf', methods=['GET'])

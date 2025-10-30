@@ -18,82 +18,248 @@
     </button>
     <div class="content-container">
       <div class="upload-section">
-        <h2>Customise Login Background</h2>
-        <p>
-          Upload a new background image for the login page. Supported formats:
-          PNG, JPG, JPEG
-        </p>
-
-        <div class="current-background">
-          <h3>Current Background:</h3>
-          <div class="background-preview">
-            <img :src="currentBackgroundUrl" alt="Current Background" />
+        <h2>Customise Login Page Gallery Images</h2>
+        
+        <!-- Main Image Section - Fixed -->
+        <div class="image-section">
+          <h3>Main Banner Image (Fixed)</h3>
+          <div class="fixed-notice">
+            <p>This image is fixed and cannot be customized</p>
           </div>
         </div>
 
-        <div
-          class="upload-area"
-          @click="triggerFileInput"
-          @dragover.prevent
-          @drop.prevent="handleDrop"
-        >
-          <input
-            ref="fileInput"
-            type="file"
-            accept="image/png,image/jpg,image/jpeg"
-            @change="handleFileSelect"
-            style="display: none"
-          />
-          <div class="upload-content">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="48"
-              height="48"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-              <circle cx="9" cy="9" r="2"></circle>
-              <path d="M21 15l-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
-            </svg>
-            <p>Click to select an image or drag and drop</p>
-            <span class="file-requirements"
-              >Max size: 10MB | PNG, JPG, JPEG</span
-            >
-          </div>
-        </div>
+        <!-- Gallery Images Section -->
+        <div class="gallery-section">
+          <h3>Gallery Images (Customizable)</h3>
+          <p class="section-description">
+            You can customize the 5 gallery images displayed at the bottom of the login page
+          </p>
 
-        <div v-if="selectedFile" class="selected-file">
-          <h3>Selected File:</h3>
-          <div class="file-info">
-            <span>{{ selectedFile.name }}</span>
-            <span>{{ formatFileSize(selectedFile.size) }}</span>
-          </div>
-          <div class="preview-container" v-if="previewUrl">
-            <img :src="previewUrl" alt="Preview" class="preview-image" />
-          </div>
-        </div>
+          <div class="gallery-images-grid">
+            <!-- Gallery Image 1 -->
+            <div class="gallery-image-item">
+              <h4>Gallery Image 1</h4>
+              <div class="current-image-preview">
+                <img 
+                  :src="currentGalleryImages.image_1 || defaultImageUrls.image_1" 
+                  alt="Gallery Image 1"
+                />
+                <span class="label">Current</span>
+              </div>
+              <div class="upload-controls">
+                <input
+                  :ref="'fileInput1'"
+                  type="file"
+                  accept="image/png,image/jpg,image/jpeg"
+                  @change="handleFileSelect(1, $event)"
+                  style="display: none"
+                />
+                <button @click="triggerFileInput(1)" class="upload-btn">
+                  {{ uploadingImage === 1 ? 'Uploading...' : 'Upload New' }}
+                </button>
+                <button 
+                  v-if="currentGalleryImages.image_1" 
+                  @click="resetGalleryImage(1)"
+                  :disabled="uploadingImage === 1"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
+                  v-if="selectedFiles[1]" 
+                  @click="uploadGalleryImage(1)"
+                  :disabled="uploadingImage === 1"
+                  class="confirm-btn"
+                >
+                  Confirm
+                </button>
+                <div v-if="selectedFiles[1] && previewUrls[1]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
+                  <img :src="previewUrls[1]" alt="Preview" />
+                </div>
+              </div>
+            </div>
 
-        <div class="action-buttons">
-          <button
-            @click="uploadBackground"
-            :disabled="!selectedFile || uploading"
-            class="upload-button"
-          >
-            <span v-if="uploading">Uploading...</span>
-            <span v-else>Upload Background</span>
-          </button>
-          <button @click="resetToDefault" class="reset-button">
-            Reset to Default
-          </button>
-        </div>
+            <!-- Gallery Image 2 -->
+            <div class="gallery-image-item">
+              <h4>Gallery Image 2</h4>
+              <div class="current-image-preview">
+                <img 
+                  :src="currentGalleryImages.image_2 || defaultImageUrls.image_2" 
+                  alt="Gallery Image 2"
+                />
+                <span class="label">Current</span>
+              </div>
+              <div class="upload-controls">
+                <input
+                  :ref="'fileInput2'"
+                  type="file"
+                  accept="image/png,image/jpg,image/jpeg"
+                  @change="handleFileSelect(2, $event)"
+                  style="display: none"
+                />
+                <button @click="triggerFileInput(2)" class="upload-btn">
+                  {{ uploadingImage === 2 ? 'Uploading...' : 'Upload New' }}
+                </button>
+                <button 
+                  v-if="currentGalleryImages.image_2" 
+                  @click="resetGalleryImage(2)"
+                  :disabled="uploadingImage === 2"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
+                  v-if="selectedFiles[2]" 
+                  @click="uploadGalleryImage(2)"
+                  :disabled="uploadingImage === 2"
+                  class="confirm-btn"
+                >
+                  Confirm
+                </button>
+                <div v-if="selectedFiles[2] && previewUrls[2]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
+                  <img :src="previewUrls[2]" alt="Preview" />
+                </div>
+              </div>
+            </div>
 
-        <div v-if="message" :class="['message', messageType]">
-          {{ message }}
+            <!-- Gallery Image 3 -->
+            <div class="gallery-image-item">
+              <h4>Gallery Image 3</h4>
+              <div class="current-image-preview">
+                <img 
+                  :src="currentGalleryImages.image_3 || defaultImageUrls.image_3" 
+                  alt="Gallery Image 3"
+                />
+                <span class="label">Current</span>
+              </div>
+              <div class="upload-controls">
+                <input
+                  :ref="'fileInput3'"
+                  type="file"
+                  accept="image/png,image/jpg,image/jpeg"
+                  @change="handleFileSelect(3, $event)"
+                  style="display: none"
+                />
+                <button @click="triggerFileInput(3)" class="upload-btn">
+                  {{ uploadingImage === 3 ? 'Uploading...' : 'Upload New' }}
+                </button>
+                <button 
+                  v-if="currentGalleryImages.image_3" 
+                  @click="resetGalleryImage(3)"
+                  :disabled="uploadingImage === 3"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
+                  v-if="selectedFiles[3]" 
+                  @click="uploadGalleryImage(3)"
+                  :disabled="uploadingImage === 3"
+                  class="confirm-btn"
+                >
+                  Confirm
+                </button>
+                <div v-if="selectedFiles[3] && previewUrls[3]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
+                  <img :src="previewUrls[3]" alt="Preview" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Gallery Image 4 -->
+            <div class="gallery-image-item">
+              <h4>Gallery Image 4</h4>
+              <div class="current-image-preview">
+                <img 
+                  :src="currentGalleryImages.image_4 || defaultImageUrls.image_4" 
+                  alt="Gallery Image 4"
+                />
+                <span class="label">Current</span>
+              </div>
+              <div class="upload-controls">
+                <input
+                  :ref="'fileInput4'"
+                  type="file"
+                  accept="image/png,image/jpg,image/jpeg"
+                  @change="handleFileSelect(4, $event)"
+                  style="display: none"
+                />
+                <button @click="triggerFileInput(4)" class="upload-btn">
+                  {{ uploadingImage === 4 ? 'Uploading...' : 'Upload New' }}
+                </button>
+                <button 
+                  v-if="currentGalleryImages.image_4" 
+                  @click="resetGalleryImage(4)"
+                  :disabled="uploadingImage === 4"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
+                  v-if="selectedFiles[4]" 
+                  @click="uploadGalleryImage(4)"
+                  :disabled="uploadingImage === 4"
+                  class="confirm-btn"
+                >
+                  Confirm
+                </button>
+                <div v-if="selectedFiles[4] && previewUrls[4]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
+                  <img :src="previewUrls[4]" alt="Preview" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Gallery Image 5 -->
+            <div class="gallery-image-item">
+              <h4>Gallery Image 5</h4>
+              <div class="current-image-preview">
+                <img 
+                  :src="currentGalleryImages.image_5 || defaultImageUrls.image_5" 
+                  alt="Gallery Image 5"
+                />
+                <span class="label">Current</span>
+              </div>
+              <div class="upload-controls">
+                <input
+                  :ref="'fileInput5'"
+                  type="file"
+                  accept="image/png,image/jpg,image/jpeg"
+                  @change="handleFileSelect(5, $event)"
+                  style="display: none"
+                />
+                <button @click="triggerFileInput(5)" class="upload-btn">
+                  {{ uploadingImage === 5 ? 'Uploading...' : 'Upload New' }}
+                </button>
+                <button 
+                  v-if="currentGalleryImages.image_5" 
+                  @click="resetGalleryImage(5)"
+                  :disabled="uploadingImage === 5"
+                  class="reset-btn"
+                >
+                  Reset to Default
+                </button>
+                <button 
+                  v-if="selectedFiles[5]" 
+                  @click="uploadGalleryImage(5)"
+                  :disabled="uploadingImage === 5"
+                  class="confirm-btn"
+                >
+                  Confirm
+                </button>
+                <div v-if="selectedFiles[5] && previewUrls[5]" class="preview-box">
+                  <p class="preview-label">Preview:</p>
+                  <img :src="previewUrls[5]" alt="Preview" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="message" :class="['message', messageType]">
+            {{ message }}
+          </div>
         </div>
       </div>
     </div>
@@ -105,30 +271,32 @@ export default {
   name: "CustomiseBackground",
   data() {
     return {
-      selectedFile: null,
-      previewUrl: null,
-      uploading: false,
+      selectedFiles: {},
+      previewUrls: {},
+      uploadingImage: null,
       message: "",
       messageType: "success",
-      currentBackgroundUrl: "/src/assets/images/login-background.png",
+      currentGalleryImages: {},
+      defaultImageUrls: {
+        image_1: "/src/assets/images/Image3.png",
+        image_2: "/src/assets/images/Image5.jpg",
+        image_3: "/src/assets/images/Image4.jpg",
+        image_4: "/src/assets/images/Image2.png",
+        image_5: "/src/assets/images/Image1.png",
+      },
     };
   },
   methods: {
-    triggerFileInput() {
-      this.$refs.fileInput.click();
+    triggerFileInput(imageNumber) {
+      this.$refs[`fileInput${imageNumber}`].click();
     },
 
-    handleFileSelect(event) {
+    handleFileSelect(imageNumber, event) {
       const file = event.target.files[0];
-      this.processFile(file);
+      this.processFile(imageNumber, file);
     },
 
-    handleDrop(event) {
-      const file = event.dataTransfer.files[0];
-      this.processFile(file);
-    },
-
-    processFile(file) {
+    processFile(imageNumber, file) {
       if (!file) return;
 
       // Validate file type
@@ -148,30 +316,39 @@ export default {
         return;
       }
 
-      this.selectedFile = file;
-      this.createPreview(file);
+      this.selectedFiles[imageNumber] = file;
+      this.createPreview(imageNumber, file);
     },
 
-    createPreview(file) {
+    createPreview(imageNumber, file) {
       const reader = new FileReader();
       reader.onload = (e) => {
-        this.previewUrl = e.target.result;
+        this.$set(this.previewUrls, imageNumber, e.target.result);
+        console.log(`Preview created for image ${imageNumber}`);
+      };
+      reader.onerror = (error) => {
+        console.error("Error reading file:", error);
+        this.showMessage("Error reading file for preview", "error");
       };
       reader.readAsDataURL(file);
     },
 
-    async uploadBackground() {
-      if (!this.selectedFile) return;
+    async uploadGalleryImage(imageNumber) {
+      if (!this.selectedFiles[imageNumber]) return;
 
-      this.uploading = true;
+      this.uploadingImage = imageNumber;
       this.message = "";
 
       const formData = new FormData();
-      formData.append("background_image", this.selectedFile);
+      formData.append("image", this.selectedFiles[imageNumber]);
 
       try {
         const response = await fetch(
+<<<<<<< HEAD
           "http://127.0.0.1:8000/api/upload-login-background",
+=======
+          `http://127.0.0.1:5000/api/upload-gallery-image/${imageNumber}`,
+>>>>>>> 7353213cbac479220d0a08140de0927755692627
           {
             method: "POST",
             body: formData,
@@ -181,11 +358,16 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.showMessage("Background uploaded successfully!", "success");
-          this.currentBackgroundUrl = data.background_url;
-          this.selectedFile = null;
-          this.previewUrl = null;
-          this.$refs.fileInput.value = "";
+          this.showMessage(
+            `Gallery image ${imageNumber} uploaded successfully!`,
+            "success"
+          );
+          // Update current image display
+          this.currentGalleryImages[`image_${imageNumber}`] = data.image_url;
+          // Clear selection
+          this.selectedFiles[imageNumber] = null;
+          this.previewUrls[imageNumber] = null;
+          this.$refs[`fileInput${imageNumber}`].value = "";
         } else {
           this.showMessage(
             data.message || "Upload failed. Please try again.",
@@ -196,14 +378,18 @@ export default {
         console.error("Upload error:", error);
         this.showMessage("Network error. Please try again.", "error");
       } finally {
-        this.uploading = false;
+        this.uploadingImage = null;
       }
     },
 
-    async resetToDefault() {
+    async resetGalleryImage(imageNumber) {
       try {
         const response = await fetch(
+<<<<<<< HEAD
           "http://127.0.0.1:8000/api/reset-login-background",
+=======
+          `http://127.0.0.1:5000/api/reset-gallery-image/${imageNumber}`,
+>>>>>>> 7353213cbac479220d0a08140de0927755692627
           {
             method: "POST",
           }
@@ -213,10 +399,11 @@ export default {
 
         if (data.success) {
           this.showMessage(
-            "Background reset to default successfully!",
+            `Gallery image ${imageNumber} reset to default successfully!`,
             "success"
           );
-          this.currentBackgroundUrl = "/src/assets/images/login-background.png";
+          // Reload gallery images to refresh the display
+          await this.loadGalleryImages();
         } else {
           this.showMessage(
             data.message || "Reset failed. Please try again.",
@@ -229,12 +416,16 @@ export default {
       }
     },
 
-    formatFileSize(bytes) {
-      if (bytes === 0) return "0 Bytes";
-      const k = 1024;
-      const sizes = ["Bytes", "KB", "MB", "GB"];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    async loadGalleryImages() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
+        const data = await response.json();
+        if (data.success && data.gallery_images) {
+          this.currentGalleryImages = data.gallery_images;
+        }
+      } catch (error) {
+        console.error("Error loading current gallery images:", error);
+      }
     },
 
     showMessage(text, type) {
@@ -242,10 +433,11 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 8000);
+      }, 5000);
     },
   },
 
+<<<<<<< HEAD
   async mounted() {
     // Load current background on component mount
     try {
@@ -259,6 +451,11 @@ export default {
     } catch (error) {
       console.error("Error loading current background:", error);
     }
+=======
+  mounted() {
+    // Load current gallery images on component mount
+    this.loadGalleryImages();
+>>>>>>> 7353213cbac479220d0a08140de0927755692627
   },
 };
 </script>
@@ -266,21 +463,17 @@ export default {
 <style scoped>
 .customise-background-page {
   background-color: #f0f0f0;
-  height: calc(100vh - 240px); /* Fixed height to prevent scrolling */
+  min-height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Center content vertically */
-  align-items: center; /* Center content horizontally */
   padding: 20px;
   margin: 0;
-  overflow: hidden; /* Prevent any scrolling */
 }
 
 .content-container {
   width: 100%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto; /* Allow scrolling within content if needed */
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .upload-section {
@@ -293,21 +486,14 @@ export default {
 .upload-section h2 {
   text-align: center;
   color: #333;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
   font-size: 1.5em;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.upload-section p {
-  text-align: center;
-  color: #666;
-  margin-bottom: 30px;
-  line-height: 1.6;
-}
-
-.current-background {
+.image-section {
   margin-bottom: 30px;
   padding: 20px;
   background-color: #f8f9fa;
@@ -315,132 +501,176 @@ export default {
   border: 1px solid #e9ecef;
 }
 
-.current-background h3 {
+.image-section h3 {
   margin: 0 0 15px 0;
   color: #333;
   font-size: 1.1em;
   font-weight: bold;
 }
 
-.background-preview {
+.fixed-notice {
+  background-color: #ffe6e6;
+  border: 1px solid #ffcccc;
+  padding: 15px;
+  border-radius: 5px;
   text-align: center;
 }
 
-.background-preview img {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.fixed-notice p {
+  margin: 0;
+  color: #cc0000;
+  font-weight: bold;
 }
 
-.upload-area {
-  border: 2px dashed #007bff;
-  border-radius: 8px;
-  padding: 40px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  background-color: #f8f9fa;
+.gallery-section {
+  margin-top: 30px;
+}
+
+.gallery-section h3 {
+  color: #333;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.section-description {
+  color: #666;
   margin-bottom: 20px;
+  line-height: 1.6;
 }
 
-.upload-area:hover {
-  border-color: #0056b3;
-  background-color: #e3f2fd;
+.gallery-images-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.upload-content svg {
-  color: #007bff;
-  margin-bottom: 15px;
+.gallery-image-item {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 15px;
 }
 
-.upload-content p {
-  margin: 10px 0;
+.gallery-image-item h4 {
+  margin: 0 0 15px 0;
   color: #333;
   font-weight: bold;
-}
-
-.file-requirements {
-  color: #666;
-  font-size: 0.9em;
-}
-
-.selected-file {
-  margin-bottom: 20px;
-  padding: 20px;
-  background-color: #e8f5e8;
-  border-radius: 8px;
-  border: 1px solid #c3e6cb;
-}
-
-.selected-file h3 {
-  margin: 0 0 10px 0;
-  color: #155724;
-  font-size: 1.1em;
-  font-weight: bold;
-}
-
-.file-info {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  color: #155724;
-  font-weight: bold;
-}
-
-.preview-container {
   text-align: center;
 }
 
-.preview-image {
+.current-image-preview {
+  position: relative;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.current-image-preview img {
   max-width: 100%;
-  max-height: 200px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  height: 120px;
+  object-fit: cover;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.action-buttons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-.upload-button {
-  background-color: #007bff;
+.current-image-preview .label {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: rgba(0, 123, 255, 0.8);
   color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.75em;
+  font-weight: bold;
+}
+
+.upload-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.upload-btn,
+.confirm-btn,
+.reset-btn {
+  padding: 8px 16px;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 1em;
+  font-size: 0.9em;
   transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 8px;
 }
 
-.upload-button:hover:not(:disabled) {
+.upload-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.upload-btn:hover {
   background-color: #0056b3;
 }
 
-.upload-button:disabled {
+.upload-btn:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
 }
 
-.reset-button {
-  background-color: #6c757d;
+.confirm-btn {
+  background-color: #28a745;
   color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 1em;
-  transition: background-color 0.3s ease;
 }
 
-.reset-button:hover {
-  background-color: #545b62;
+.confirm-btn:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.confirm-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.reset-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background-color: #c82333;
+}
+
+.reset-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.preview-box {
+  margin-top: 10px;
+  text-align: center;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.preview-label {
+  font-size: 0.85em;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.preview-box img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: block;
+  margin: 0 auto;
 }
 
 .message {
@@ -448,6 +678,7 @@ export default {
   border-radius: 8px;
   text-align: center;
   font-weight: bold;
+  margin-top: 20px;
 }
 
 .message.success {
@@ -470,8 +701,15 @@ export default {
   left: 90px;
   top: 180px;
 }
-.back-button :hover {
+
+.back-button:hover {
   color: #0056b3;
   background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .gallery-images-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

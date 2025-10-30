@@ -11,46 +11,49 @@
         </button>
       </div>
       <div class="header-center">
-        <h1 class="page-title">Received Requests</h1>
+        <h1 class="page-title">Notifications</h1>
       </div>
     </div>
 
          <!-- Main Content -->
      <div class="main-content">
-       <!-- Notifications Table -->
-      <div class="notifications-section">
+       <div v-if="loading" class="loading-message">Loading notifications...</div>
+       <div v-else-if="error" class="error-message">
+         {{ error }}
+         <button @click="fetchNotifications" class="retry-button">Retry</button>
+       </div>
+       <div v-else-if="notifications.length === 0" class="no-notifications">
+         <p>You have no notifications.</p>
+       </div>
+       <div v-else class="notifications-section">
         <div class="table-container">
           <table class="notifications-table">
             <thead>
               <tr>
+                <th>Activity</th>
                 <th>Project</th>
-                <th>Serial Number</th>
-                <th>LRU</th>
-                <th>Completed Stage</th>
-                <th>Required Stage</th>
-                <th>Justification</th>
-                <th>Status</th>
+                <th>Details</th>
+                <th>From</th>
                 <th>Timestamp</th>
+                <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="notification in notifications" :key="notification.id" :class="{ 'unread': !notification.isRead }">
-                <td>{{ notification.project }}</td>
-                <td>{{ notification.serialNumber }}</td>
-                <td>{{ notification.lru }}</td>
-                <td>{{ notification.completedStage }}</td>
-                <td>{{ notification.requiredStage }}</td>
-                <td>{{ notification.justification }}</td>
-                <td>
-                  <span class="status-badge" :class="notification.status">
-                    {{ notification.status }}
-                  </span>
-                </td>
+              <tr v-for="notification in notifications" :key="notification.activity_id" :class="{ 'unread': !notification.is_read }">
+                <td>{{ notification.activity_performed }}</td>
+                <td>{{ notification.project_name || 'N/A' }}</td>
+                <td class="details-cell">{{ notification.additional_info }}</td>
+                <td>{{ notification.performed_by_name || 'Unknown' }}</td>
                 <td>{{ formatTimestamp(notification.timestamp) }}</td>
                 <td>
+                  <span class="status-badge" :class="notification.is_read ? 'read' : 'unread'">
+                    {{ notification.is_read ? 'Read' : 'Unread' }}
+                  </span>
+                </td>
+                <td>
                   <button class="view-button" @click="viewNotification(notification)">
-                    View
+                    View Details
                   </button>
                 </td>
               </tr>
@@ -61,53 +64,42 @@
     </div>
 
     <!-- Notification Detail Overlay -->
-    <div v-if="showOverlay" class="overlay" @click="closeOverlay">
+    <div v-if="showOverlay && selectedNotification" class="overlay" @click="closeOverlay">
       <div class="overlay-content" @click.stop>
         <div class="overlay-header">
-          <h2>Project Details</h2>
+          <h2>Notification Details</h2>
           <button class="close-button" @click="closeOverlay">×</button>
         </div>
         
         <div class="overlay-body">
           <div class="form-group">
-            <label>Project Name:</label>
-            <input type="text" v-model="selectedNotification.project" readonly>
+            <label>Activity Type:</label>
+            <input type="text" :value="selectedNotification.activity_performed" readonly>
           </div>
           
           <div class="form-group">
-            <label>Serial Number:</label>
-            <input type="text" v-model="selectedNotification.serialNumber" readonly>
+            <label>Project:</label>
+            <input type="text" :value="selectedNotification.project_name || 'N/A'" readonly>
           </div>
           
           <div class="form-group">
-            <label>LRU:</label>
-            <input type="text" v-model="selectedNotification.lru" readonly>
+            <label>From:</label>
+            <input type="text" :value="selectedNotification.performed_by_name || 'Unknown'" readonly>
           </div>
           
           <div class="form-group">
-            <label>Completed Stage:</label>
-            <input type="text" v-model="selectedNotification.completedStage" readonly>
+            <label>Timestamp:</label>
+            <input type="text" :value="formatTimestamp(selectedNotification.timestamp)" readonly>
           </div>
           
           <div class="form-group">
-            <label>Required Stage:</label>
-            <input type="text" v-model="selectedNotification.requiredStage" readonly>
-          </div>
-          
-          <div class="form-group">
-            <label>Justification:</label>
-            <textarea v-model="selectedNotification.justification" readonly rows="3"></textarea>
-          </div>
-          
-          <div class="form-group">
-            <label>Comments:</label>
-            <textarea v-model="comments" placeholder="Add your comments here..." rows="4"></textarea>
+            <label>Details:</label>
+            <textarea :value="selectedNotification.additional_info" readonly rows="5"></textarea>
           </div>
         </div>
         
         <div class="overlay-footer">
-          <button class="reject-button" @click="rejectRequest">Reject</button>
-          <button class="accept-button" @click="acceptRequest">Accept</button>
+          <button class="close-detail-button" @click="closeOverlay">Close</button>
         </div>
       </div>
     </div>
@@ -115,95 +107,95 @@
 </template>
 
 <script>
+import { userStore } from '@/stores/userStore';
+
 export default {
   name: 'QAHeadNotifications',
   data() {
     return {
-      notifications: [
-        { 
-          id: 1, 
-          project: 'PROJ001', 
-          serialNumber: '15,16', 
-          lru: 'LRU Name', 
-          completedStage: 'stage 1', 
-          requiredStage: 'stage3', 
-          justification: 'justification', 
-          status: 'pending',
-          isRead: false,
-          timestamp: '2025-01-15 10:30:00'
-        },
-        { 
-          id: 2, 
-          project: 'PROJ002', 
-          serialNumber: '17,18', 
-          lru: 'LRU Component', 
-          completedStage: 'stage 2', 
-          requiredStage: 'stage4', 
-          justification: 'Technical review required', 
-          status: 'pending',
-          isRead: false,
-          timestamp: '2025-01-15 09:15:00'
-        },
-        { 
-          id: 3, 
-          project: 'PROJ003', 
-          serialNumber: '19,20', 
-          lru: 'LRU Assembly', 
-          completedStage: 'stage 1', 
-          requiredStage: 'stage3', 
-          justification: 'Quality check needed', 
-          status: 'pending',
-          isRead: true,
-          timestamp: '2025-01-14 16:45:00'
-        }
-      ],
+      notifications: [],
+      loading: false,
+      error: null,
       showOverlay: false,
-      selectedNotification: null,
-      comments: ''
+      selectedNotification: null
     };
   },
+  async mounted() {
+    await this.fetchNotifications();
+  },
   methods: {
+    async fetchNotifications() {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const currentUser = userStore.getters.currentUser();
+        
+        if (!currentUser || !currentUser.id) {
+          this.error = 'User not logged in';
+          return;
+        }
+
+        const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.notifications = data.notifications;
+        } else {
+          this.error = data.message || 'Failed to fetch notifications';
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        this.error = 'Failed to load notifications. Please try again.';
+      } finally {
+        this.loading = false;
+      }
+    },
     formatTimestamp(timestamp) {
+      if (!timestamp) return 'N/A';
       const date = new Date(timestamp);
       return date.toLocaleString();
     },
-    viewNotification(notification) {
+    async viewNotification(notification) {
       this.selectedNotification = { ...notification };
-      this.comments = '';
       this.showOverlay = true;
-      // Mark as read
-      notification.isRead = true;
-      // Update notification count in parent component
-      this.$emit('notification-read', notification.id);
+      
+      // Mark as read if not already read
+      if (!notification.is_read) {
+        await this.markAsRead(notification.activity_id);
+      }
+    },
+    async markAsRead(notificationId) {
+      try {
+        const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/mark-read`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Update local state
+          const notif = this.notifications.find(n => n.activity_id === notificationId);
+          if (notif) {
+            notif.is_read = true;
+          }
+        }
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
     },
     closeOverlay() {
       this.showOverlay = false;
       this.selectedNotification = null;
-      this.comments = '';
-    },
-    acceptRequest() {
-      if (this.selectedNotification) {
-        this.selectedNotification.status = 'accepted';
-        // Update the original notification
-        const original = this.notifications.find(n => n.id === this.selectedNotification.id);
-        if (original) {
-          original.status = 'accepted';
-        }
-        alert(`Request for ${this.selectedNotification.project} has been accepted. Comments: ${this.comments}`);
-        this.closeOverlay();
-      }
-    },
-    rejectRequest() {
-      if (this.selectedNotification) {
-        this.selectedNotification.status = 'rejected';
-        // Update the original notification
-        const original = this.notifications.find(n => n.id === this.selectedNotification.id);
-        if (original) {
-          original.status = 'rejected';
-        }
-        alert(`Request for ${this.selectedNotification.project} has been rejected. Comments: ${this.comments}`);
-        this.closeOverlay();
-      }
     }
   }
 };
@@ -342,6 +334,82 @@ export default {
 .status-badge.rejected {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.status-badge.unread {
+  background-color: #dc3545;
+  color: white;
+}
+
+.status-badge.read {
+  background-color: #6c757d;
+  color: white;
+}
+
+.loading-message,
+.error-message,
+.no-notifications {
+  text-align: center;
+  padding: 40px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  margin: 30px auto;
+  max-width: 600px;
+}
+
+.loading-message {
+  color: #007bff;
+  font-size: 1.2em;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 1.1em;
+}
+
+.no-notifications {
+  color: #6c757d;
+}
+
+.retry-button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.retry-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
+}
+
+.details-cell {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.close-detail-button {
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.close-detail-button:hover {
+  background: #0056b3;
+  transform: translateY(-1px);
 }
 
 .view-button {

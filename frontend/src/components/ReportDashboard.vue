@@ -180,7 +180,10 @@
             <polyline points="14 2 14 8 20 8"></polyline>
           </svg>
         </div>
-        <span class="card-title">{{ report.name }}</span>
+        <div class="card-info">
+          <span class="card-title">{{ report.name || 'N/A' }}</span>
+          <span class="card-report-id">Report ID: #{{ report.id }}</span>
+        </div>
       </div>
 
       <div v-if="filteredReports.length === 0" class="no-reports">
@@ -630,7 +633,7 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  height: 180px;
+  height: 200px;
   text-align: center;
 }
 
@@ -663,10 +666,27 @@ export default {
   height: 48px;
 }
 
+.card-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
 .card-title {
   font-size: 1em;
   font-weight: bold;
   color: #333;
+  word-wrap: break-word;
+  text-align: center;
+  max-width: 100%;
+}
+
+.card-report-id {
+  font-size: 0.85em;
+  color: #666;
+  font-weight: 600;
 }
 
 /* Loading, Error, and No Reports States */
@@ -851,8 +871,16 @@ export default {
   }
 
   .report-card {
-    height: 150px;
+    height: 170px;
     padding: 15px;
+  }
+
+  .card-title {
+    font-size: 0.9em;
+  }
+
+  .card-report-id {
+    font-size: 0.75em;
   }
 
   .view-templates-container {

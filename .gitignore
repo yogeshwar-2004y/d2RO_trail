@@ -54,6 +54,14 @@ reports/
 TEST_FIXES_SUMMARY.md
 TEST_SETUP_SUMMARY.md
 
+# Technical documentation files
+AVIATRAX_Technical_Documentation.md
+AVIATRAX_Technical_Documentation.html
+
+# Deployment and requirements files
+DEPLOYMENT_GUIDE.md
+requirements.txt
+
 # Upload directories
 plan_doc_uploads/
 

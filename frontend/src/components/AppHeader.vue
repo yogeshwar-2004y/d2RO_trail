@@ -28,7 +28,6 @@
       <!-- Right Logo - VISTA -->
       <div class="logo-right">
         <img 
-
           src="@/assets/images/VISTA_5 Gradient_Sharp Edges.png"
           alt="VISTA Logo" 
           class="logo-image"

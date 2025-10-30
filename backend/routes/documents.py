@@ -265,6 +265,103 @@ def upload_plan_document():
         
         document_id = cur.fetchone()[0]
         conn.commit()
+        
+        # Send notifications based on version
+        from utils.activity_logger import log_notification, get_users_by_role, log_activity
+        
+        # Get LRU and project info for notification
+        cur.execute("""
+            SELECT l.lru_name, p.project_name, p.project_id
+            FROM lrus l
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE l.lru_id = %s
+        """, (lru_id,))
+        
+        lru_info = cur.fetchone()
+        lru_name = lru_info[0] if lru_info else "Unknown LRU"
+        project_name = lru_info[1] if lru_info else "Unknown Project"
+        project_id = lru_info[2] if lru_info else None
+        
+        # Check if this is version A (first version)
+        # Check both version and doc_ver fields for version A
+        is_version_a = (doc_ver and doc_ver.upper() == 'A') or (version and version.upper() == 'A')
+        
+        print(f"🔔 Document upload notification check:")
+        print(f"   Version field: {version}")
+        print(f"   Doc_ver field: {doc_ver}")
+        print(f"   Is version A: {is_version_a}")
+        
+        if is_version_a:
+            # Log activity for version A document upload
+            log_activity(
+                project_id=project_id,
+                activity_performed="Document Uploaded (Version A)",
+                performed_by=int(uploaded_by),
+                additional_info=f"New document '{document_number}' version {version} (doc_ver: {doc_ver}) uploaded for LRU '{lru_name}' in project '{project_name}' by user ID {uploaded_by}."
+            )
+            
+            # Notify QA Head (role_id = 2) when version A is uploaded
+            print(f"   Sending notification to QA Heads for version A upload")
+            qa_heads = get_users_by_role(2)
+            print(f"   Found {len(qa_heads)} QA Head(s)")
+            for qa_head in qa_heads:
+                log_notification(
+                    project_id=project_id,
+                    activity_performed="New Document Uploaded (Version A)",
+                    performed_by=int(uploaded_by),
+                    notified_user_id=qa_head['user_id'],
+                    notification_type="document_upload_version_a",
+                    additional_info=f"New document '{document_number}' version {version} uploaded for LRU '{lru_name}' in project '{project_name}'. Review required."
+                )
+                print(f"   ✓ Sent notification to QA Head: {qa_head['name']} (ID: {qa_head['user_id']})")
+        else:
+            print(f"   Checking for assigned reviewer for LRU {lru_id}")
+            # Get the assigned reviewer for this LRU
+            cur.execute("""
+                SELECT DISTINCT pda.user_id, u.name
+                FROM plan_doc_assignment pda
+                JOIN plan_documents pd ON pda.document_id = pd.document_id
+                JOIN users u ON pda.user_id = u.user_id
+                WHERE pd.lru_id = %s
+                LIMIT 1
+            """, (lru_id,))
+            
+            reviewer_result = cur.fetchone()
+            if reviewer_result:
+                reviewer_id = reviewer_result[0]
+                reviewer_name = reviewer_result[1]
+                
+                print(f"   Found assigned reviewer: {reviewer_name} (ID: {reviewer_id})")
+                
+                # Log activity for new version upload
+                log_activity(
+                    project_id=project_id,
+                    activity_performed=f"Document Version {version} Uploaded",
+                    performed_by=int(uploaded_by),
+                    additional_info=f"New version '{version}' (doc_ver: {doc_ver}) of document '{document_number}' uploaded for LRU '{lru_name}' in project '{project_name}' by user ID {uploaded_by}. Assigned reviewer: {reviewer_name}."
+                )
+                
+                # Notify the assigned reviewer about the new version
+                log_notification(
+                    project_id=project_id,
+                    activity_performed="New Document Version Uploaded",
+                    performed_by=int(uploaded_by),
+                    notified_user_id=reviewer_id,
+                    notification_type="document_upload_new_version",
+                    additional_info=f"New revision '{doc_ver}' of document '{document_number}' uploaded for LRU '{lru_name}' in project '{project_name}'. Please review."
+                )
+                print(f"   ✓ Sent notification to reviewer: {reviewer_name}")
+            else:
+                print(f"   ⚠️ No reviewer assigned for this LRU yet")
+                
+                # Log activity even when no reviewer is assigned
+                log_activity(
+                    project_id=project_id,
+                    activity_performed=f"Document Version {version} Uploaded",
+                    performed_by=int(uploaded_by),
+                    additional_info=f"New version '{version}' (doc_ver: {doc_ver}) of document '{document_number}' uploaded for LRU '{lru_name}' in project '{project_name}' by user ID {uploaded_by}. No reviewer assigned yet."
+                )
+        
         cur.close()
         
         # Auto-assign reviewer if LRU already has a reviewer assigned to other documents
@@ -351,6 +448,23 @@ def accept_document(document_id):
             return jsonify({"success": False, "message": "Document not found"}), 404
         
         lru_id = document[1]
+
+        # Prevent accepting the document if there are pending comments
+        cur.execute(
+            """
+            SELECT COUNT(*)
+            FROM document_comments
+            WHERE document_id = %s AND (status IS NULL OR status = 'pending')
+            """,
+            (document_id,),
+        )
+        pending_count = cur.fetchone()[0]
+        if pending_count and pending_count > 0:
+            cur.close()
+            return jsonify({
+                "success": False,
+                "message": f"Cannot accept document while there are {pending_count} pending comment(s). Please resolve all comments first."
+            }), 400
         
         # Check if any document in this LRU is already accepted
         cur.execute("""
@@ -612,6 +726,48 @@ def assign_reviewer():
         """, (lru_id,))
         
         conn.commit()
+        
+        # Send notification to the assigned reviewer
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get project_id, reviewer name, and assigned_by name for notification
+        cur.execute("""
+            SELECT l.project_id, u.name as reviewer_name
+            FROM lrus l
+            JOIN users u ON u.user_id = %s
+            WHERE l.lru_id = %s
+        """, (reviewer_id, lru_id))
+        
+        project_and_reviewer = cur.fetchone()
+        project_id = project_and_reviewer[0] if project_and_reviewer else None
+        reviewer_name = project_and_reviewer[1] if project_and_reviewer else "Unknown Reviewer"
+        
+        # Get who assigned it
+        assigned_by_name = "QA Head"  # Default fallback
+        if assigned_by:
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (assigned_by,))
+            assigned_by_result = cur.fetchone()
+            if assigned_by_result:
+                assigned_by_name = assigned_by_result[0]
+        
+        # Log activity for reviewer assignment
+        log_activity(
+            project_id=project_id,
+            activity_performed="Reviewer Assigned to Plan Document",
+            performed_by=assigned_by,
+            additional_info=f"QA Head assigned {reviewer_name} to review plan documents for LRU '{lru_name}' in project '{project_name}'."
+        )
+        
+        # Send notification to the reviewer
+        log_notification(
+            project_id=project_id,
+            activity_performed="Plan Document Assignment",
+            performed_by=assigned_by,
+            notified_user_id=reviewer_id,
+            notification_type="plan_document_assigned",
+            additional_info=f"You have been assigned to review plan documents for LRU '{lru_name}' in project '{project_name}' by {assigned_by_name}."
+        )
+        
         cur.close()
         
         return jsonify({
@@ -1065,6 +1221,58 @@ def update_reviewer():
         """, (lru_id,))
         
         conn.commit()
+        
+        # Send notification to the updated reviewer
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get project_id, reviewer name, and assigned_by name for notification
+        cur.execute("""
+            SELECT l.project_id, u.name as reviewer_name
+            FROM lrus l
+            JOIN users u ON u.user_id = %s
+            WHERE l.lru_id = %s
+        """, (new_reviewer_id, lru_id))
+        
+        project_and_reviewer = cur.fetchone()
+        project_id = project_and_reviewer[0] if project_and_reviewer else None
+        reviewer_name = project_and_reviewer[1] if project_and_reviewer else "Unknown Reviewer"
+        
+        # Get who assigned it
+        assigned_by_name = "QA Head"  # Default fallback
+        if assigned_by:
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (assigned_by,))
+            assigned_by_result = cur.fetchone()
+            if assigned_by_result:
+                assigned_by_name = assigned_by_result[0]
+        
+        # Get previous reviewer info if assignment was updated
+        previous_reviewer_name = None
+        if existing_assignment:
+            previous_reviewer_id = existing_assignment[1]
+            if previous_reviewer_id != new_reviewer_id:
+                cur.execute("SELECT name FROM users WHERE user_id = %s", (previous_reviewer_id,))
+                prev_result = cur.fetchone()
+                if prev_result:
+                    previous_reviewer_name = prev_result[0]
+        
+        # Log activity for reviewer update
+        log_activity(
+            project_id=project_id,
+            activity_performed="Reviewer Updated for Plan Document",
+            performed_by=assigned_by,
+            additional_info=f"QA Head updated reviewer assignment to {reviewer_name} for plan documents in LRU '{lru_name}' in project '{project_name}'."
+        )
+        
+        # Send notification to the new reviewer
+        log_notification(
+            project_id=project_id,
+            activity_performed="Plan Document Assignment Updated",
+            performed_by=assigned_by,
+            notified_user_id=new_reviewer_id,
+            notification_type="plan_document_assigned",
+            additional_info=f"You have been assigned to review plan documents for LRU '{lru_name}' in project '{project_name}' by {assigned_by_name}."
+        )
+        
         cur.close()
         
         return jsonify({

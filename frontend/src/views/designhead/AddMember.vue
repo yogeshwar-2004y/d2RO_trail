@@ -105,6 +105,8 @@
 </template>
 
 <script>
+import { userStore } from "@/stores/userStore";
+
 export default {
   name: "AddMember",
   data() {
@@ -122,6 +124,11 @@ export default {
       error: null,
       assigning: false,
     };
+  },
+  computed: {
+    currentUser() {
+      return userStore.getters.currentUser();
+    },
   },
   async mounted() {
     await this.loadInitialData();
@@ -201,6 +208,7 @@ export default {
             },
             body: JSON.stringify({
               user_id: this.selectedUserId,
+              assigned_by: this.currentUser?.id || null,
             }),
           }
         );
