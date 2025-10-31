@@ -613,14 +613,15 @@ function getHomePath() {
 .breadcrumb-nav {
   position: fixed !important;
   top: 100px !important;
-  left: 0 !important;
+  left: var(--sidebar-width, 0) !important;
   right: 0 !important;
   background-color: #f8f9fa !important;
   border-bottom: 1px solid #e9ecef !important;
   padding: 2px 0 !important;
   margin: 0 !important;
   z-index: 1001 !important;
-  width: 100% !important;
+  width: calc(100% - var(--sidebar-width, 0)) !important;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .breadcrumb-container {
