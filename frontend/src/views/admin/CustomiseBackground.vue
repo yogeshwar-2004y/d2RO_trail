@@ -344,11 +344,7 @@ export default {
 
       try {
         const response = await fetch(
-<<<<<<< HEAD
-          "http://127.0.0.1:8000/api/upload-login-background",
-=======
           `http://127.0.0.1:5000/api/upload-gallery-image/${imageNumber}`,
->>>>>>> 7353213cbac479220d0a08140de0927755692627
           {
             method: "POST",
             body: formData,
@@ -385,11 +381,7 @@ export default {
     async resetGalleryImage(imageNumber) {
       try {
         const response = await fetch(
-<<<<<<< HEAD
-          "http://127.0.0.1:8000/api/reset-login-background",
-=======
           `http://127.0.0.1:5000/api/reset-gallery-image/${imageNumber}`,
->>>>>>> 7353213cbac479220d0a08140de0927755692627
           {
             method: "POST",
           }
@@ -437,25 +429,9 @@ export default {
     },
   },
 
-<<<<<<< HEAD
-  async mounted() {
-    // Load current background on component mount
-    try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/api/get-current-background"
-      );
-      const data = await response.json();
-      if (data.success && data.background_url) {
-        this.currentBackgroundUrl = data.background_url;
-      }
-    } catch (error) {
-      console.error("Error loading current background:", error);
-    }
-=======
   mounted() {
     // Load current gallery images on component mount
     this.loadGalleryImages();
->>>>>>> 7353213cbac479220d0a08140de0927755692627
   },
 };
 </script>

@@ -515,7 +515,7 @@ export default {
 
         // Fetch templates from API
         const response = await fetch(
-          "http://localhost:8000/api/report-templates"
+          "http://localhost:5000/api/report-templates"
         );
         const data = await response.json();
 

@@ -253,7 +253,7 @@ export default {
         console.log('Loading documents for LRU ID:', this.lruId);
         
         // API call to fetch documents by LRU ID using the existing endpoint
-        const response = await fetch(`http://localhost:8000/api/lrus/${this.lruId}/plan-documents`);
+        const response = await fetch(`http://localhost:5000/api/lrus/${this.lruId}/plan-documents`);
         const data = await response.json();
         
         if (data.success) {
@@ -287,7 +287,7 @@ export default {
         this.loadingComments = true;
         
         // API call to fetch comments for the specific document using the existing endpoint
-        const response = await fetch(`http://localhost:8000/api/comments?document_id=${documentId}`);
+        const response = await fetch(`http://localhost:5000/api/comments?document_id=${documentId}`);
         const data = await response.json();
         
         if (data.success) {

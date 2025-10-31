@@ -287,7 +287,7 @@ export default {
       this.error = null
       
       try {
-        const response = await fetch(`http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`)
+        const response = await fetch(`http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`)
         const data = await response.json()
         
         if (data.success) {
@@ -307,7 +307,7 @@ export default {
       this.saving = true
       
       try {
-        const response = await fetch(`http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`, {
+        const response = await fetch(`http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -336,7 +336,7 @@ export default {
       this.saving = true
       
       try {
-        const response = await fetch(`http://localhost:8000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
+        const response = await fetch(`http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -366,7 +366,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`, {
+        const response = await fetch(`http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`, {
           method: 'DELETE'
         })
         

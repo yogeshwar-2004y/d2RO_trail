@@ -224,7 +224,7 @@ export default {
       this.error = null
       
       try {
-        const response = await fetch('http://localhost:8000/api/test-groups')
+        const response = await fetch('http://localhost:5000/api/test-groups')
         const data = await response.json()
         
         if (data.success) {
@@ -244,7 +244,7 @@ export default {
     async loadSubTestCounts() {
       for (const group of this.testGroups) {
         try {
-          const response = await fetch(`http://localhost:8000/api/test-groups/${group.group_id}/sub-tests`)
+          const response = await fetch(`http://localhost:5000/api/test-groups/${group.group_id}/sub-tests`)
           const data = await response.json()
           
           if (data.success) {
@@ -261,7 +261,7 @@ export default {
       this.saving = true
       
       try {
-        const response = await fetch('http://localhost:8000/api/test-groups', {
+        const response = await fetch('http://localhost:5000/api/test-groups', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -290,7 +290,7 @@ export default {
       this.saving = true
       
       try {
-        const response = await fetch(`http://localhost:8000/api/test-groups/${this.editingGroup.group_id}`, {
+        const response = await fetch(`http://localhost:5000/api/test-groups/${this.editingGroup.group_id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
@@ -320,7 +320,7 @@ export default {
       }
       
       try {
-        const response = await fetch(`http://localhost:8000/api/test-groups/${group.group_id}`, {
+        const response = await fetch(`http://localhost:5000/api/test-groups/${group.group_id}`, {
           method: 'DELETE'
         })
         

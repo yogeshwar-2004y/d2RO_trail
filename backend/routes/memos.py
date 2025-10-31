@@ -177,14 +177,36 @@ def submit_memo():
 
         memo_id = cur.fetchone()[0]
 
-        # Log memo submission activity
-        from utils.activity_logger import log_activity
+        # Log memo submission activity and notify QA Head(s) when submitted by Designer or Design Head
+        from utils.activity_logger import log_activity, log_notification, get_users_by_role
         log_activity(
             project_id=None,  # Memo operations don't have project_id
             activity_performed="Memo Submitted",
             performed_by=data.get('submitted_by'),
             additional_info=f"ID:{memo_id}|Name:{form_data.get('lruSruDesc', 'Memo')}|Memo '{form_data.get('lruSruDesc', 'Memo')}' (ID: {memo_id}) was submitted"
         )
+
+        # Notify QA Heads (role_id = 2) when a Designer (role_id = 5) or Design Head (role_id = 4) submits a memo
+        try:
+            submitted_by_id = data.get('submitted_by')
+            if submitted_by_id:
+                # Fetch roles for the submitting user
+                cur.execute("SELECT role_id FROM user_roles WHERE user_id = %s", (submitted_by_id,))
+                user_roles = [r[0] for r in cur.fetchall()]
+
+                if any(role in (4, 5) for role in user_roles):
+                    qa_heads = get_users_by_role(2)
+                    for qa_head in qa_heads:
+                        log_notification(
+                            project_id=None,
+                            activity_performed="New Memo Submitted",
+                            performed_by=submitted_by_id,
+                            notified_user_id=qa_head['user_id'],
+                            notification_type="memo_submitted",
+                            additional_info=f"Memo ID {memo_id} submitted by user ID {submitted_by_id}. Please review."
+                        )
+        except Exception as notify_err:
+            print(f"Error sending memo notifications: {notify_err}")
 
         # Insert reference documents into memo_references table
         references = []
@@ -599,10 +621,10 @@ def approve_memo(memo_id):
                 WHERE memo_id = %s
             """, (datetime.now(), data.get('approved_by'), memo_id))
         elif status == 'rejected':
-            print(f"Updating memo {memo_id} with rejected status...")
+            print(f"Updating memo {memo_id} with disapproved status...")
             cur.execute("""
                 UPDATE memos 
-                SET memo_status = 'rejected'
+                SET memo_status = 'disapproved'
                 WHERE memo_id = %s
             """, (memo_id,))
             
@@ -610,6 +632,76 @@ def approve_memo(memo_id):
             cur.execute("DELETE FROM reports WHERE memo_id = %s", (memo_id,))
             if cur.rowcount > 0:
                 print(f"Removed existing report for rejected memo {memo_id}")
+            
+            # Send notifications for rejected memo
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+
+                performed_by = data.get('approved_by')
+                notified_user_ids = set()
+
+                # 1) First get submitter info and role
+                cur.execute("""
+                    SELECT m.submitted_by, u.name, ur.role_id 
+                    FROM memos m 
+                    LEFT JOIN users u ON m.submitted_by = u.user_id 
+                    LEFT JOIN user_roles ur ON m.submitted_by = ur.user_id
+                    WHERE m.memo_id = %s
+                """, (memo_id,))
+                
+                rows = cur.fetchall()
+                submitted_by_id = rows[0][0] if rows else None
+                submitted_by_name = rows[0][1] if rows and rows[0][1] else None
+                submitter_roles = [r[2] for r in rows] if rows else []
+                
+                # Determine if submitter is a Design Head
+                is_submitter_design_head = 4 in submitter_roles
+
+                # 2) Always notify Design Heads about rejection
+                try:
+                    design_heads = get_users_by_role(4)
+                    for dh in design_heads:
+                        dh_id = dh.get('user_id')
+                        if not dh_id or dh_id in notified_user_ids:
+                            continue
+                        
+                        # Include submitter info in notification if they're not the design head
+                        if submitted_by_id and dh_id != submitted_by_id:
+                            submitter_label = submitted_by_name or f"User ID {submitted_by_id}"
+                            info = f"Memo ID {memo_id} submitted by {submitter_label} was rejected by QA Head ID {performed_by}."
+                        else:
+                            info = f"Memo ID {memo_id} has been rejected by QA Head ID {performed_by}."
+                        
+                        log_notification(
+                            project_id=None,
+                            activity_performed="Memo Rejected",
+                            performed_by=performed_by,
+                            notified_user_id=dh_id,
+                            notification_type="memo_rejected",
+                            additional_info=info
+                        )
+                        notified_user_ids.add(dh_id)
+                except Exception as e:
+                    print(f"Error notifying Design Heads about memo rejection: {e}")
+
+                # 3) If submitter is not a Design Head and has role_id = 5 (Designer), notify them about rejection
+                if submitted_by_id and not is_submitter_design_head and 5 in submitter_roles:
+                    try:
+                        if submitted_by_id not in notified_user_ids:
+                            log_notification(
+                                project_id=None,
+                                activity_performed="Your Memo Rejected",
+                                performed_by=performed_by,
+                                notified_user_id=submitted_by_id,
+                                notification_type="memo_rejected",
+                                additional_info=f"Your memo (ID {memo_id}) was rejected by QA Head ID {performed_by}."
+                            )
+                            notified_user_ids.add(submitted_by_id)
+                    except Exception as e:
+                        print(f"Error notifying submitting designer about memo rejection: {e}")
+
+            except Exception as notify_err:
+                print(f"Error during memo rejection notifications: {notify_err}")
         
         # Insert or update memo_approval record
         print(f"Inserting/updating memo_approval record...")
@@ -769,6 +861,58 @@ def approve_memo(memo_id):
                             'ASSIGNED'
                         ))
                         print(f"Report created successfully for memo {memo_id} with serial_id={default_serial_id}")
+                        # Notify Design Heads and the submitting Designer about report creation
+                        try:
+                            from utils.activity_logger import log_notification, get_users_by_role
+
+                            notified_user_ids = set()
+                            performed_by = data.get('approved_by')
+
+                            # Fetch submitter
+                            cur.execute("SELECT submitted_by FROM memos WHERE memo_id = %s", (memo_id,))
+                            submit_row = cur.fetchone()
+                            submitted_by_id = submit_row[0] if submit_row else None
+
+                            # 1) Notify all Design Heads (role_id = 4)
+                            try:
+                                design_heads = get_users_by_role(4)
+                                for dh in design_heads:
+                                    dh_id = dh.get('user_id')
+                                    if not dh_id or dh_id in notified_user_ids:
+                                        continue
+
+                                    info = f"A report (Serial ID {default_serial_id}) has been created for Memo ID {memo_id}."
+                                    log_notification(
+                                        project_id=None,
+                                        activity_performed="Report Created",
+                                        performed_by=performed_by,
+                                        notified_user_id=dh_id,
+                                        notification_type="report_created",
+                                        additional_info=info
+                                    )
+                                    notified_user_ids.add(dh_id)
+                            except Exception as e:
+                                print(f"Error notifying Design Heads about report creation: {e}")
+
+                            # 2) Notify submitting Designer if they are a Designer (role_id = 5)
+                            try:
+                                if submitted_by_id and submitted_by_id not in notified_user_ids:
+                                    cur.execute("SELECT 1 FROM user_roles WHERE user_id = %s AND role_id = 5", (submitted_by_id,))
+                                    if cur.fetchone():
+                                        log_notification(
+                                            project_id=None,
+                                            activity_performed="Your Report Created",
+                                            performed_by=performed_by,
+                                            notified_user_id=submitted_by_id,
+                                            notification_type="report_created_submitted_by_designer",
+                                            additional_info=f"A report has been created for your memo (ID {memo_id}). Serial ID {default_serial_id}."
+                                        )
+                                        notified_user_ids.add(submitted_by_id)
+                            except Exception as e:
+                                print(f"Error notifying submitting designer about report creation: {e}")
+
+                        except Exception as notify_err:
+                            print(f"Error during report creation notifications: {notify_err}")
                     else:
                         print(f"Report already exists for memo {memo_id}")
                 
@@ -794,6 +938,98 @@ def approve_memo(memo_id):
             performed_by=data.get('approved_by'),
             additional_info=f"ID:{memo_id}|Name:{memo_name}|Memo '{memo_name}' (ID: {memo_id}) was {status}"
         )
+
+        # Send notifications when memo is accepted
+        if status == 'accepted':
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+
+                performed_by = data.get('approved_by')
+
+                # Keep track of who we've notified to avoid duplicates
+                notified_user_ids = set()
+
+                # 1) Notify all Design Heads (role_id = 4) — always notify them regardless of who submitted
+                #    If the memo was submitted by someone else, include submitter id/name in the message.
+                try:
+                    # Fetch submitter info to include in Design Head notifications
+                    cur.execute("SELECT m.submitted_by, u.name FROM memos m LEFT JOIN users u ON m.submitted_by = u.user_id WHERE m.memo_id = %s", (memo_id,))
+                    submit_row = cur.fetchone()
+                    submitted_by_id = submit_row[0] if submit_row else None
+                    submitted_by_name = submit_row[1] if submit_row and submit_row[1] else None
+
+                    design_heads = get_users_by_role(4)
+                    for dh in design_heads:
+                        dh_id = dh.get('user_id')
+                        if not dh_id or dh_id in notified_user_ids:
+                            continue
+
+                        # If the design head is NOT the submitter, mention who submitted the memo
+                        if submitted_by_id and dh_id != submitted_by_id:
+                            submitter_label = submitted_by_name or f"User ID {submitted_by_id}"
+                            info = f"Memo ID {memo_id} submitted by {submitter_label} was accepted by QA Head ID {performed_by}."
+                        else:
+                            info = f"Memo ID {memo_id} has been accepted by QA Head ID {performed_by}."
+
+                        log_notification(
+                            project_id=None,
+                            activity_performed="Memo Accepted",
+                            performed_by=performed_by,
+                            notified_user_id=dh_id,
+                            notification_type="memo_accepted",
+                            additional_info=info
+                        )
+                        notified_user_ids.add(dh_id)
+                except Exception as e:
+                    print(f"Error notifying Design Heads about memo acceptance: {e}")
+
+                # 2) Notify the submitting Designer only if the memo was submitted by a Designer (role_id = 5)
+                try:
+                    cur.execute("SELECT submitted_by FROM memos WHERE memo_id = %s", (memo_id,))
+                    row = cur.fetchone()
+                    submitted_by_id = row[0] if row else None
+                    if submitted_by_id:
+                        # Check if submitted_by has role_id = 5 (Designer)
+                        cur.execute("SELECT 1 FROM user_roles WHERE user_id = %s AND role_id = 5", (submitted_by_id,))
+                        if cur.fetchone():
+                            # Only notify the submitting designer if they haven't already been notified (e.g., as a Design Head)
+                            if submitted_by_id not in notified_user_ids:
+                                log_notification(
+                                    project_id=None,
+                                    activity_performed="Your Memo Accepted",
+                                    performed_by=performed_by,
+                                    notified_user_id=submitted_by_id,
+                                    notification_type="memo_accepted_submitted_by_designer",
+                                    additional_info=f"Your memo (ID {memo_id}) was accepted by QA Head ID {performed_by}."
+                                )
+                                notified_user_ids.add(submitted_by_id)
+                except Exception as e:
+                    print(f"Error notifying submitting designer about memo acceptance: {e}")
+
+                # 3) Notify the assigned reviewer (if provided in the approval request)
+                try:
+                    assigned_reviewer_id = data.get('user_id') if data else None
+                    if assigned_reviewer_id:
+                        # Verify reviewer exists (optional) and notify
+                        cur.execute("SELECT user_id, name FROM users WHERE user_id = %s", (assigned_reviewer_id,))
+                        reviewer_row = cur.fetchone()
+                        if reviewer_row:
+                            if assigned_reviewer_id not in notified_user_ids:
+                                reviewer_name = reviewer_row[1] if reviewer_row[1] else f"User ID {assigned_reviewer_id}"
+                                log_notification(
+                                    project_id=None,
+                                    activity_performed="Memo Assigned to You",
+                                    performed_by=performed_by,
+                                    notified_user_id=assigned_reviewer_id,
+                                    notification_type="memo_assigned",
+                                    additional_info=f"You have been assigned to review Memo ID {memo_id} by QA Head ID {performed_by}."
+                                )
+                                notified_user_ids.add(assigned_reviewer_id)
+                except Exception as e:
+                    print(f"Error notifying assigned reviewer about memo assignment: {e}")
+
+            except Exception as notify_err:
+                print(f"Error during memo acceptance notifications: {notify_err}")
 
         cur.close()
 
@@ -1608,7 +1844,7 @@ def download_memo_pdf(memo_id):
                         if authentication.startswith('http'):
                             signature_url = authentication
                         else:
-                            signature_url = f"http://localhost:8000{authentication}"
+                            signature_url = f"http://localhost:5000{authentication}"
                         
                         import requests
                         response = requests.get(signature_url, timeout=10)
