@@ -4,7 +4,7 @@ File upload and serving routes
 import os
 from flask import Blueprint, request, jsonify, send_file
 from config import get_db_connection, Config
-from utils.helpers import allowed_image_file, validate_file_size
+from utils.helpers import allowed_image_file, validate_file_size, create_upload_directories
 
 files_bp = Blueprint('files', __name__)
 
@@ -158,3 +158,117 @@ def reset_login_background():
     except Exception as e:
         print(f"Reset background error: {str(e)}")
         return jsonify({"success": False, "message": f"Error resetting background: {str(e)}"}), 500
+
+@files_bp.route('/api/upload-gallery-image/<int:image_number>', methods=['POST'])
+def upload_gallery_image(image_number):
+    """Upload a specific gallery image (1-5)"""
+    try:
+        if image_number < 1 or image_number > 5:
+            return jsonify({"success": False, "message": "Image number must be between 1 and 5"}), 400
+        
+        if 'image' not in request.files:
+            return jsonify({"success": False, "message": "No file provided"}), 400
+        
+        file = request.files['image']
+        
+        if file.filename == '':
+            return jsonify({"success": False, "message": "No file selected"}), 400
+        
+        if not allowed_image_file(file.filename):
+            return jsonify({"success": False, "message": "Invalid file type. Only PNG, JPG, and JPEG files are allowed"}), 400
+        
+        # Check file size
+        if not validate_file_size(file, Config.MAX_IMAGE_SIZE):
+            return jsonify({"success": False, "message": "File size too large. Maximum size is 10MB"}), 400
+        
+        # Ensure directory exists
+        create_upload_directories()
+        
+        # Generate filename
+        file_extension = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"gallery_image_{image_number}.{file_extension}"
+        file_path = os.path.join(Config.LOGIN_BACKGROUND_FOLDER, filename)
+        
+        # Remove existing file for this image number
+        if os.path.exists(Config.LOGIN_BACKGROUND_FOLDER):
+            for existing_file in os.listdir(Config.LOGIN_BACKGROUND_FOLDER):
+                if existing_file.startswith(f'gallery_image_{image_number}.'):
+                    os.remove(os.path.join(Config.LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        # Save new file
+        file.save(file_path)
+        
+        # Return the URL for the uploaded image
+        image_url = f"http://127.0.0.1:5000/api/gallery-image/{filename}"
+        
+        return jsonify({
+            "success": True,
+            "message": f"Gallery image {image_number} uploaded successfully",
+            "image_url": image_url
+        })
+        
+    except Exception as e:
+        print(f"Upload gallery image error: {str(e)}")
+        return jsonify({"success": False, "message": f"Upload error: {str(e)}"}), 500
+
+@files_bp.route('/api/gallery-image/<filename>')
+def serve_gallery_image(filename):
+    """Serve gallery images"""
+    try:
+        file_path = os.path.join(Config.LOGIN_BACKGROUND_FOLDER, filename)
+        if os.path.exists(file_path):
+            return send_file(file_path)
+        else:
+            return jsonify({"success": False, "message": "Image not found"}), 404
+    except Exception as e:
+        print(f"Serve gallery image error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error serving image: {str(e)}"}), 500
+
+@files_bp.route('/api/get-gallery-images')
+def get_gallery_images():
+    """Get current gallery images URLs"""
+    try:
+        gallery_images = {}
+        
+        # Check if custom gallery images exist
+        if os.path.exists(Config.LOGIN_BACKGROUND_FOLDER):
+            for image_num in range(1, 6):
+                for ext in Config.ALLOWED_IMAGE_EXTENSIONS:
+                    custom_image = os.path.join(Config.LOGIN_BACKGROUND_FOLDER, f"gallery_image_{image_num}.{ext}")
+                    if os.path.exists(custom_image):
+                        gallery_images[f'image_{image_num}'] = f"http://127.0.0.1:5000/api/gallery-image/gallery_image_{image_num}.{ext}"
+                        break
+                # If no custom image found, store empty string to indicate default should be used
+                if f'image_{image_num}' not in gallery_images:
+                    gallery_images[f'image_{image_num}'] = ""
+        
+        return jsonify({
+            "success": True,
+            "gallery_images": gallery_images
+        })
+        
+    except Exception as e:
+        print(f"Get gallery images error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error getting gallery images: {str(e)}"}), 500
+
+@files_bp.route('/api/reset-gallery-image/<int:image_number>', methods=['POST'])
+def reset_gallery_image(image_number):
+    """Reset a specific gallery image to default"""
+    try:
+        if image_number < 1 or image_number > 5:
+            return jsonify({"success": False, "message": "Image number must be between 1 and 5"}), 400
+        
+        # Remove existing file for this image number
+        if os.path.exists(Config.LOGIN_BACKGROUND_FOLDER):
+            for existing_file in os.listdir(Config.LOGIN_BACKGROUND_FOLDER):
+                if existing_file.startswith(f'gallery_image_{image_number}.'):
+                    os.remove(os.path.join(Config.LOGIN_BACKGROUND_FOLDER, existing_file))
+        
+        return jsonify({
+            "success": True,
+            "message": f"Gallery image {image_number} reset to default successfully"
+        })
+        
+    except Exception as e:
+        print(f"Reset gallery image error: {str(e)}")
+        return jsonify({"success": False, "message": f"Error resetting gallery image: {str(e)}"}), 500

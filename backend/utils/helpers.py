@@ -21,13 +21,14 @@ def hash_password(password):
 
 def verify_password(password, hashed_password):
     """Verify password against hash"""
-    # return hash_password(password) == hashed_password
-    return password == hashed_password
+    return hash_password(password) == hashed_password
+    #return password == hashed_password
 
 def create_upload_directories():
     """Create upload directories if they don't exist"""
     os.makedirs(Config.UPLOAD_FOLDER, exist_ok=True)
     os.makedirs(Config.LOGIN_BACKGROUND_FOLDER, exist_ok=True)
+    os.makedirs(Config.SIGNATURE_UPLOAD_FOLDER, exist_ok=True)
 
 def validate_file_size(file, max_size):
     """Validate file size"""

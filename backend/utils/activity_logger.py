@@ -38,6 +38,77 @@ def log_activity(project_id: int = None, activity_performed: str = None, perform
         # Don't raise the error to avoid breaking the main operation
         return False
 
+def log_notification(project_id: int = None, activity_performed: str = None, performed_by: int = None, notified_user_id: int = None, notification_type: str = None, additional_info: str = None):
+    """
+    Log a notification to the activity_logs table
+    
+    Args:
+        project_id (int, optional): ID of the project related to the notification
+        activity_performed (str): Description of the activity/notification
+        performed_by (int): User ID who performed the activity
+        notified_user_id (int): User ID who should receive the notification
+        notification_type (str): Type of notification (e.g., 'project_created')
+        additional_info (str, optional): Additional information about the notification
+    
+    Returns:
+        bool: True if logging was successful, False otherwise
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Insert notification log
+        cur.execute("""
+            INSERT INTO activity_logs (project_id, activity_performed, performed_by, notified_user_id, notification_type, is_read, additional_info)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (project_id, activity_performed, performed_by, notified_user_id, notification_type, False, additional_info))
+        
+        conn.commit()
+        cur.close()
+        return True
+        
+    except Exception as e:
+        print(f"Error logging notification: {str(e)}")
+        return False
+
+def get_users_by_role(role_id: int):
+    """
+    Get all users with a specific role
+    
+    Args:
+        role_id (int): The role ID to filter by
+    
+    Returns:
+        list: List of user dictionaries with user_id, name, and email
+    """
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT u.user_id, u.name, u.email
+            FROM users u
+            JOIN user_roles ur ON u.user_id = ur.user_id
+            WHERE ur.role_id = %s
+        """, (role_id,))
+        
+        users = cur.fetchall()
+        cur.close()
+        
+        user_list = []
+        for user in users:
+            user_list.append({
+                "user_id": user[0],
+                "name": user[1],
+                "email": user[2]
+            })
+        
+        return user_list
+        
+    except Exception as e:
+        print(f"Error fetching users by role: {str(e)}")
+        return []
+
 def get_activity_logs(project_id: int = None, limit: int = 100):
     """
     Retrieve activity logs

@@ -55,6 +55,14 @@
       <div class="profile-section">
         <h3 v-if="!isCollapsed">Account</h3>
         <div class="profile-menu">
+          <div class="profile-item notification-item-wrapper" @click="openNotifications" :class="{ 'has-notifications': unreadCount > 0 }">
+            <div class="notification-icon-wrapper">
+              <NotificationIcon />
+              <span v-if="unreadCount > 0" class="notification-count-badge">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+            </div>
+            <span v-if="!isCollapsed">Notifications</span>
+          </div>
+          
           <div class="profile-item" @click="handleProfileAction('profile')">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -129,10 +137,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
+
+const emit = defineEmits(['open-notifications'])
 
 // Import icon components
 import HomeIcon from './icons/HomeIcon.vue'
@@ -141,6 +151,7 @@ import MemoIcon from './icons/MemoIcon.vue'
 import ReportIcon from './icons/ReportIcon.vue'
 import UserIcon from './icons/UserIcon.vue'
 import AssignIcon from './icons/AssignIcon.vue'
+import NotificationIcon from './icons/NotificationIcon.vue'
 
 const router = useRouter()
 
@@ -150,6 +161,8 @@ const isCollapsed = ref(true) // Collapsed by default
 const showPasswordSubmenu = ref(false)
 const isPasswordModalOpen = ref(false)
 const passwordType = ref('login')
+const unreadCount = ref(0)
+let notificationRefreshInterval = null
 
 // Computed properties
 const userInfo = computed(() => {
@@ -270,9 +283,41 @@ const handleLogout = async () => {
   router.push({ name: 'login' })
 }
 
+const openNotifications = () => {
+  emit('open-notifications')
+}
+
+const fetchUnreadCount = async () => {
+  try {
+    const currentUser = userStore.getters.currentUser();
+    
+    if (!currentUser || !currentUser.id) {
+      return;
+    }
+
+    const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.id}?limit=50&unread_only=true`);
+    const data = await response.json();
+
+    if (data.success) {
+      unreadCount.value = data.notifications.length;
+    }
+  } catch (error) {
+    console.error('Error fetching notification count:', error);
+  }
+}
+
 // Initialize user store on mount
 onMounted(() => {
   userStore.actions.initializeUser()
+  fetchUnreadCount()
+  // Refresh every 30 seconds
+  notificationRefreshInterval = setInterval(fetchUnreadCount, 30000)
+})
+
+onUnmounted(() => {
+  if (notificationRefreshInterval) {
+    clearInterval(notificationRefreshInterval)
+  }
 })
 </script>
 
@@ -577,6 +622,41 @@ onMounted(() => {
 
 .logout-item:hover {
   background: rgba(255, 107, 107, 0.1);
+}
+
+/* Notification Item Styling */
+.notification-item-wrapper {
+  position: relative;
+}
+
+.notification-icon-wrapper {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  border: 2px solid #2d3748;
+}
+
+.notification-item-wrapper.has-notifications {
+  font-weight: 600;
 }
 
 /* Collapse Section */
