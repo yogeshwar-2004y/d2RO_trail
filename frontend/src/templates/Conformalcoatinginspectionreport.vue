@@ -310,6 +310,7 @@ export default {
       approvedBySignatureUrl: "",
       approvedByVerifiedName: "",
       approvedByError: "",
+      reportId: null, // Store report ID after initial submission
       overallStatus: "",
       qualityRating: null,
       recommendations: "",
@@ -481,6 +482,18 @@ export default {
           this[formData.verifiedName] = data.user_name;
           this[formData.error] = "";
           this[formData.userField] = data.user_name; // Store verified name
+          
+          // Handle auto-submission and updates based on signature type
+          if (signatureType === "prepared") {
+            // Auto-submit when Prepared By signature is fetched
+            await this.autoSubmitReport();
+          } else if (signatureType === "verified") {
+            // Save to DB when Verified By signature is fetched
+            await this.updateReportSignature('verified');
+          } else if (signatureType === "approved") {
+            // Auto-submit when Approved By signature is fetched
+            await this.updateReportSignature('approved');
+          }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
           this[formData.signatureUrl] = "";
@@ -504,10 +517,11 @@ export default {
       const observation = test.observation.toLowerCase().trim();
       const expected = test.expected.toLowerCase().trim();
       
+      // Map to database constraint values: "OK" or "NOT OK"
       if (observation === expected) {
-        test.remark = "PASS";
+        test.remark = "OK";
       } else {
-        test.remark = "FAIL";
+        test.remark = "NOT OK";
       }
     },
     async saveDraft() {
@@ -572,6 +586,7 @@ export default {
         this.approvedBySignatureUrl = "";
         this.approvedByVerifiedName = "";
         this.approvedByError = "";
+        // Note: reportId is NOT reset here - it should persist until form is explicitly reset
 
         // Reset test observations and remarks
         this.tests.forEach((test) => {
@@ -580,37 +595,143 @@ export default {
         });
       }
     },
-    async submitForm() {
-      if (this.isFormValid) {
-        try {
-          const reportData = this.prepareReportData();
-          const response = await fetch(
-            "http://localhost:5000/api/reports/conformal-coating-inspection",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(reportData),
-            }
-          );
-
-          const result = await response.json();
-
-          if (result.success) {
-            alert("Report submitted successfully!");
-            console.log("Report submitted with ID:", result.report_id);
-            // Optionally redirect or reset form
-            this.resetForm();
-          } else {
-            alert(`Error submitting report: ${result.message}`);
+    async autoSubmitReport() {
+      try {
+        // Ensure all remarks are updated before submitting
+        this.tests.forEach((test) => {
+          if (test.observation) {
+            this.updateRemark(test);
           }
+        });
+        
+        const reportData = this.prepareReportData();
+        const response = await fetch(
+          "http://localhost:5000/api/reports/conformal-coating-inspection",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          this.reportId = result.report_id;
+          console.log(`Report saved to database with ID: ${result.report_id}`);
+          alert(`Report saved successfully! Report ID: ${result.report_id}`);
+        } else {
+          alert(`Error submitting report: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Error auto-submitting report:", error);
+        alert("Error submitting report. Please try again.");
+      }
+    },
+    async updateReportSignature(signatureType) {
+      if (!this.reportId) {
+        console.error("Report ID not found. Cannot update signature.");
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+
+      try {
+        const updateData = {};
+        if (signatureType === "verified") {
+          // Store signature URL in verified_by field (format: "name|signature_url")
+          updateData.verified_by = `${this.verifiedBy}|${this.verifiedBySignatureUrl}`;
+        } else if (signatureType === "approved") {
+          // Store signature URL in approved_by field (format: "name|signature_url")
+          updateData.approved_by = `${this.approvedBy}|${this.approvedBySignatureUrl}`;
+        }
+
+        // Update the existing record in the database
+        const response = await fetch(
+          `http://localhost:5000/api/reports/conformal-coating-inspection/${this.reportId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          if (signatureType === "verified") {
+            console.log(`Verified By signature updated in report ID: ${this.reportId}`);
+            alert("Verified By signature saved successfully!");
+          } else if (signatureType === "approved") {
+            console.log(`Approved By signature updated in report ID: ${this.reportId}`);
+            alert("Report finalized successfully!");
+          }
+        } else {
+          alert(`Error updating report: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Error updating report signature:", error);
+        alert("Error updating report. Please try again.");
+      }
+    },
+    async submitForm() {
+      if (this.isFormValid && this.reportId && this.approvedBySignatureUrl) {
+        try {
+          // Notify QA Heads about report submission
+          await this.notifyQAHeads();
+          alert("Report submitted successfully! QA Heads have been notified.");
+          console.log("Report submitted with ID:", this.reportId);
         } catch (error) {
-          console.error("Error submitting report:", error);
-          alert("Error submitting report. Please try again.");
+          console.error("Error notifying QA Heads:", error);
+          alert("Report submitted but notification failed. Please contact QA Heads manually.");
         }
       } else {
-        alert("Please fill in all required fields.");
+        if (!this.isFormValid) {
+          alert("Please fill in all required fields.");
+        } else if (!this.reportId) {
+          alert("Please complete the Prepared By signature first.");
+        } else if (!this.approvedBySignatureUrl) {
+          alert("Please complete the Approved By signature first.");
+        }
+      }
+    },
+    async notifyQAHeads() {
+      try {
+        // Get current user from session/localStorage
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const reviewerId = currentUser.user_id || null;
+        
+        if (!reviewerId) {
+          console.error("Reviewer ID not found");
+          return;
+        }
+
+        // Send notification to backend
+        const response = await fetch(
+          "http://localhost:5000/api/reports/conformal-coating-inspection/notify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: this.reportId,
+              memo_ref_no: this.memoRefNo,
+              reviewer_id: reviewerId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!result.success) {
+          console.error("Failed to send notification:", result.message);
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads:", error);
+        throw error;
       }
     },
     prepareReportData() {
@@ -627,8 +748,8 @@ export default {
         quantity: this.quantity || null,
         sl_nos: this.slNo,
         serial_number: this.serialNumber,
-        start_date: this.startDate,
-        end_date: this.endDate,
+        start_date: this.startDate || null,
+        end_date: this.endDate || null,
         dated1: this.dated1 || null,
         dated2: this.dated2 || null,
         tests: this.tests.map((test) => ({
@@ -640,12 +761,9 @@ export default {
         overall_status: this.overallStatus || "",
         quality_rating: this.qualityRating || null,
         recommendations: this.recommendations || "",
-        prepared_by: this.preparedBy,
-        prepared_by_signature: this.preparedBySignatureUrl || "",
-        verified_by: this.verifiedBy,
-        verified_by_signature: this.verifiedBySignatureUrl || "",
-        approved_by: this.approvedBy,
-        approved_by_signature: this.approvedBySignatureUrl || "",
+        prepared_by: this.preparedBySignatureUrl ? `${this.preparedBy}|${this.preparedBySignatureUrl}` : this.preparedBy,
+        verified_by: this.verifiedBySignatureUrl ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}` : this.verifiedBy,
+        approved_by: this.approvedBySignatureUrl ? `${this.approvedBy}|${this.approvedBySignatureUrl}` : this.approvedBy,
       };
     },
     exportReport() {

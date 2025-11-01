@@ -1804,46 +1804,46 @@ def create_conformal_coating_inspection_report():
             data.get('quantity'),
             data.get('sl_nos'),
             data.get('serial_number'),
-            data.get('start_date'),
-            data.get('end_date'),
-            data.get('dated1'),
-            data.get('dated2'),
-            # Test cases 1-9
-            data.get('tests', [{}])[0].get('observation', ''),
-            data.get('tests', [{}])[0].get('remark', ''),
-            data.get('tests', [{}])[0].get('upload', ''),
+            data.get('start_date') or None,
+            data.get('end_date') or None,
+            data.get('dated1') or None,
+            data.get('dated2') or None,
+            # Test cases 1-9 - convert empty strings to None for NULL values
+            data.get('tests', [{}])[0].get('observation', '') or None,
+            data.get('tests', [{}])[0].get('remark', '') or None,
+            data.get('tests', [{}])[0].get('upload', '') or None,
             data.get('tests', [{}])[0].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[1].get('observation', ''),
-            data.get('tests', [{}])[1].get('remark', ''),
-            data.get('tests', [{}])[1].get('upload', ''),
+            data.get('tests', [{}])[1].get('observation', '') or None,
+            data.get('tests', [{}])[1].get('remark', '') or None,
+            data.get('tests', [{}])[1].get('upload', '') or None,
             data.get('tests', [{}])[1].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[2].get('observation', ''),
-            data.get('tests', [{}])[2].get('remark', ''),
-            data.get('tests', [{}])[2].get('upload', ''),
+            data.get('tests', [{}])[2].get('observation', '') or None,
+            data.get('tests', [{}])[2].get('remark', '') or None,
+            data.get('tests', [{}])[2].get('upload', '') or None,
             data.get('tests', [{}])[2].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[3].get('observation', ''),
-            data.get('tests', [{}])[3].get('remark', ''),
-            data.get('tests', [{}])[3].get('upload', ''),
+            data.get('tests', [{}])[3].get('observation', '') or None,
+            data.get('tests', [{}])[3].get('remark', '') or None,
+            data.get('tests', [{}])[3].get('upload', '') or None,
             data.get('tests', [{}])[3].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[4].get('observation', ''),
-            data.get('tests', [{}])[4].get('remark', ''),
-            data.get('tests', [{}])[4].get('upload', ''),
+            data.get('tests', [{}])[4].get('observation', '') or None,
+            data.get('tests', [{}])[4].get('remark', '') or None,
+            data.get('tests', [{}])[4].get('upload', '') or None,
             data.get('tests', [{}])[4].get('expected', 'Not recommended'),
-            data.get('tests', [{}])[5].get('observation', ''),
-            data.get('tests', [{}])[5].get('remark', ''),
-            data.get('tests', [{}])[5].get('upload', ''),
+            data.get('tests', [{}])[5].get('observation', '') or None,
+            data.get('tests', [{}])[5].get('remark', '') or None,
+            data.get('tests', [{}])[5].get('upload', '') or None,
             data.get('tests', [{}])[5].get('expected', 'No Deformity'),
-            data.get('tests', [{}])[6].get('observation', ''),
-            data.get('tests', [{}])[6].get('remark', ''),
-            data.get('tests', [{}])[6].get('upload', ''),
+            data.get('tests', [{}])[6].get('observation', '') or None,
+            data.get('tests', [{}])[6].get('remark', '') or None,
+            data.get('tests', [{}])[6].get('upload', '') or None,
             data.get('tests', [{}])[6].get('expected', 'No Damages'),
-            data.get('tests', [{}])[7].get('observation', ''),
-            data.get('tests', [{}])[7].get('remark', ''),
-            data.get('tests', [{}])[7].get('upload', ''),
+            data.get('tests', [{}])[7].get('observation', '') or None,
+            data.get('tests', [{}])[7].get('remark', '') or None,
+            data.get('tests', [{}])[7].get('upload', '') or None,
             data.get('tests', [{}])[7].get('expected', 'Should have linear Coating'),
-            data.get('tests', [{}])[8].get('observation', ''),
-            data.get('tests', [{}])[8].get('remark', ''),
-            data.get('tests', [{}])[8].get('upload', ''),
+            data.get('tests', [{}])[8].get('observation', '') or None,
+            data.get('tests', [{}])[8].get('remark', '') or None,
+            data.get('tests', [{}])[8].get('upload', '') or None,
             data.get('tests', [{}])[8].get('expected', '30 to 130 microns'),
             # Summary fields
             data.get('overall_status'),
@@ -1914,6 +1914,139 @@ def get_conformal_coating_inspection_report(report_id):
     except Exception as e:
         print(f"Error fetching conformal coating inspection report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching conformal coating inspection report: {str(e)}")
+
+@reports_bp.route('/api/reports/conformal-coating-inspection/<int:report_id>', methods=['PUT'])
+def update_conformal_coating_inspection_report(report_id):
+    """Update conformal coating inspection report"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Build dynamic update query based on provided fields
+        update_fields = []
+        update_values = []
+        
+        # Header fields
+        header_fields = [
+            'project_name', 'report_ref_no', 'memo_ref_no', 'lru_name', 'sru_name', 'dp_name',
+            'part_no', 'inspection_stage', 'test_venue', 'quantity', 'sl_nos', 'serial_number',
+            'start_date', 'end_date', 'dated1', 'dated2'
+        ]
+        
+        for field in header_fields:
+            if field in data:
+                update_fields.append(f"{field} = %s")
+                update_values.append(data[field] or None)
+        
+        # Test cases (obs1-9, rem1-9, upload1-9, expected1-9)
+        for i in range(1, 10):
+            for prefix in ['obs', 'rem', 'upload', 'expected']:
+                field = f"{prefix}{i}"
+                if field in data:
+                    update_fields.append(f"{field} = %s")
+                    update_values.append(data[field] or None)
+        
+        # Summary fields
+        summary_fields = ['overall_status', 'quality_rating', 'recommendations']
+        for field in summary_fields:
+            if field in data:
+                update_fields.append(f"{field} = %s")
+                update_values.append(data[field] or None)
+        
+        # Signatory fields (signature URLs are stored in the user fields, not separate columns)
+        signatory_fields = ['prepared_by', 'verified_by', 'approved_by']
+        for field in signatory_fields:
+            if field in data:
+                update_fields.append(f"{field} = %s")
+                update_values.append(data[field] or None)
+        
+        if not update_fields:
+            cur.close()
+            return jsonify({"success": False, "message": "No fields to update"}), 400
+        
+        # Add updated_at timestamp
+        update_fields.append("updated_at = CURRENT_TIMESTAMP")
+        
+        # Execute update on the conformal_coating_inspection_report table
+        update_query = f"UPDATE conformal_coating_inspection_report SET {', '.join(update_fields)} WHERE report_id = %s"
+        update_values.append(report_id)
+        
+        print(f"Updating conformal_coating_inspection_report table - Report ID: {report_id}")
+        print(f"Update fields: {update_fields}")
+        
+        cur.execute(update_query, update_values)
+        
+        if cur.rowcount == 0:
+            cur.close()
+            return jsonify({"success": False, "message": f"Report not found with ID: {report_id}"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        print(f"Successfully updated report ID {report_id} in conformal_coating_inspection_report table")
+        
+        return jsonify({
+            "success": True,
+            "message": "Conformal coating inspection report updated successfully",
+            "report_id": report_id
+        })
+        
+    except Exception as e:
+        print(f"Error updating conformal coating inspection report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error updating conformal coating inspection report: {str(e)}")
+
+@reports_bp.route('/api/reports/conformal-coating-inspection/notify', methods=['POST'])
+def notify_qa_heads_conformal_coating():
+    """Notify QA Heads when a conformal coating inspection report is submitted"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        report_id = data.get('report_id')
+        memo_ref_no = data.get('memo_ref_no')
+        reviewer_id = data.get('reviewer_id')
+        
+        if not report_id or not reviewer_id:
+            return jsonify({"success": False, "message": "Report ID and Reviewer ID are required"}), 400
+        
+        from utils.activity_logger import log_notification, get_users_by_role
+        
+        # Get all QA Heads (role_id = 2)
+        qa_heads = get_users_by_role(2)
+        
+        # Get reviewer name
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+        reviewer_result = cur.fetchone()
+        reviewer_name = reviewer_result[0] if reviewer_result else "Reviewer"
+        cur.close()
+        
+        # Notify each QA Head
+        for qa_head in qa_heads:
+            memo_text = f" corresponding to memo {memo_ref_no}" if memo_ref_no else ""
+            log_notification(
+                project_id=None,
+                activity_performed=f"Conformal Coating Inspection Report{memo_text} Submitted",
+                performed_by=reviewer_id,
+                notified_user_id=qa_head['user_id'],
+                notification_type="report_submitted",
+                additional_info=f"Report ID {report_id}{memo_text} has been submitted by {reviewer_name}. Please review."
+            )
+        
+        return jsonify({
+            "success": True,
+            "message": f"Notifications sent to {len(qa_heads)} QA Head(s)"
+        })
+        
+    except Exception as e:
+        print(f"Error notifying QA Heads for conformal coating report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error notifying QA Heads: {str(e)}")
 
 @reports_bp.route('/api/reports/conformal-coating-inspection', methods=['GET'])
 def get_conformal_coating_inspection_reports():
