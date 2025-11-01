@@ -73,7 +73,13 @@
                 <td>{{ index + 1 }}</td>
                 <td>{{ test.case }}</td>
                 <td>{{ test.expected }}</td>
-                <td><input v-model="test.observation" type="text" :disabled="readonly" /></td>
+                <td>
+                  <select v-model="test.observation" :disabled="readonly">
+                    <option value="">Select</option>
+                    <option value="Pass">Pass</option>
+                    <option value="Fail">Fail</option>
+                  </select>
+                </td>
                 <td><input v-model="test.remark" type="text" :disabled="readonly" /></td>
                 <td><input type="file" :disabled="readonly" /></td>
               </tr>
@@ -164,50 +170,50 @@ export default {
       tests: [
         {
           case: "Uncoated patches",
-          expected: "Should not be there",
+          expected: "no",
           observation: "",
           remark: "",
         },
         {
           case: "Entrapped air bubbles",
-          expected: "Should not be there",
+          expected: "no",
           observation: "",
           remark: "",
         },
         {
-          case: "Enclosed foreign particles in the coat",
-          expected: "Should not be there",
+          case: "Enclosed foreign particles in the cracks",
+          expected: "no",
           observation: "",
           remark: "",
         },
         {
           case: "Residue of masking material",
-          expected: "Should not be there",
+          expected: "no",
           observation: "",
           remark: "",
         },
         {
-          case: "Discoloration",
-          expected: "No recommended",
+          case: "Dis-coloration",
+          expected: "no",
           observation: "",
           remark: "",
         },
-        { case: "Cracks", expected: "No Crimony", observation: "", remark: "" },
         {
           case: "Pin holes and Soft spots",
-          expected: "No Damages",
+          expected: "no damages",
           observation: "",
           remark: "",
         },
         {
           case: "Connectors surrounding and beneath",
-          expected: "Should have linear coating",
+          expected: "yes",
           observation: "",
           remark: "",
         },
+        { case: "Uniformity in coating across the board", expected: "no", observation: "", remark: "" },
         {
           case: "Conformal coating thickness of 30 to 130 microns for acrylic material as per IPC-CC-830B",
-          expected: "30 to 130 microns",
+          expected: "yes",
           observation: "",
           remark: "",
         },
@@ -748,6 +754,15 @@ export default {
   border: 1px solid #e0e0e0;
   padding: 5px;
   box-sizing: border-box;
+}
+
+.inspection-table select {
+  width: 95%;
+  border: 1px solid #e0e0e0;
+  padding: 5px;
+  box-sizing: border-box;
+  background-color: white;
+  font-size: inherit;
 }
 
 .inspection-table input[type="file"] {
