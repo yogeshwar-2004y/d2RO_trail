@@ -148,7 +148,7 @@
                       type="text"
                       v-model="verifiedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly"
+                      :disabled="readonly || !preparedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -157,14 +157,14 @@
                       type="password"
                       v-model="verifiedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly"
+                      :disabled="readonly || !preparedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('verified')"
-                    :disabled="readonly || !verifiedByUsername || !verifiedByPassword"
+                    :disabled="readonly || !preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -197,7 +197,7 @@
                       type="text"
                       v-model="approvedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly"
+                      :disabled="readonly || !verifiedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -206,14 +206,14 @@
                       type="password"
                       v-model="approvedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly"
+                      :disabled="readonly || !verifiedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('approved')"
-                    :disabled="readonly || !approvedByUsername || !approvedByPassword"
+                    :disabled="readonly || !verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
                   >
                     Verify & Load Signature
                   </button>
