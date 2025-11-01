@@ -13,10 +13,24 @@ const route = useRoute();
 // Notifications state
 const isNotificationsOpen = ref(false);
 
+// Sidebar state
+const isSidebarCollapsed = ref(true); // Default to collapsed
+
 // Show sidebar on all pages except login and tech support form
 const showSidebar = computed(() => {
   return route.name !== "login" && route.name !== "TechSupport";
 });
+
+// Computed sidebar width based on collapsed state
+const sidebarWidth = computed(() => {
+  if (!showSidebar.value) return 0;
+  return isSidebarCollapsed.value ? 50 : 250;
+});
+
+// Handle sidebar state changes
+const handleSidebarStateChanged = (collapsed) => {
+  isSidebarCollapsed.value = collapsed;
+};
 
 // Handle notifications
 const handleOpenNotifications = () => {
@@ -29,9 +43,16 @@ const closeNotifications = () => {
 </script>
 
 <template>
-  <div id="app">
-    <AppSidebar v-if="showSidebar" @open-notifications="handleOpenNotifications" />
-    <AppHeader />
+  <div 
+    id="app" 
+    :style="{ '--sidebar-width': `${sidebarWidth}px` }"
+  >
+    <AppSidebar 
+      v-if="showSidebar" 
+      @open-notifications="handleOpenNotifications"
+      @sidebar-state-changed="handleSidebarStateChanged"
+    />
+    <AppHeader class="app-header-responsive" />
     <BreadcrumbNavigation />
     <main
       class="main-content"
@@ -46,9 +67,9 @@ const closeNotifications = () => {
       height="50px"
       backgroundColor="#2c3e50"
       textColor="#ffffff"
-      class="app-news-ticker"
+      class="app-news-ticker app-news-ticker-responsive"
     />
-    <AppFooter class="app-footer" />
+    <AppFooter class="app-footer app-footer-responsive" />
     
     <!-- Notifications Overlay - rendered at app level -->
     <NotificationsOverlay 
@@ -65,17 +86,20 @@ const closeNotifications = () => {
   flex-direction: column;
   margin: 0;
   padding: 0;
-  margin-left: 17px;
 }
 
 /* Fixed Header */
 .app-header {
   position: fixed !important;
   top: 0 !important;
-  left: 0 !important;
+  left: var(--sidebar-width, 0) !important;
   right: 0 !important;
   z-index: 1002 !important; /* Highest z-index */
-  width: 100% !important;
+  width: calc(100% - var(--sidebar-width, 0)) !important;
+}
+
+.app-header-responsive {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .main-content {
@@ -85,6 +109,7 @@ const closeNotifications = () => {
   min-height: 0; /* Allow flex item to shrink */
   margin-top: 234px; /* Account for header (184px) + breadcrumb (50px) - default for login/dashboard */
   margin-bottom: 90px; /* Height of news ticker + footer */
+  margin-left: var(--sidebar-width, 0);
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -97,10 +122,14 @@ const closeNotifications = () => {
 .app-news-ticker {
   position: fixed !important;
   bottom: 20px !important; /* Reduced gap from 40px to 20px */
-  left: 0 !important;
+  left: var(--sidebar-width, 0) !important;
   right: 0 !important;
   z-index: 1001 !important; /* Higher than footer to ensure it's visible */
-  width: 100% !important;
+  width: calc(100% - var(--sidebar-width, 0)) !important;
+}
+
+.app-news-ticker-responsive {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Override NewsTicker internal positioning */
@@ -112,11 +141,16 @@ const closeNotifications = () => {
 .app-footer {
   position: fixed !important;
   bottom: 0 !important; /* Position at very bottom */
-  left: 0 !important;
+  left: var(--sidebar-width, 0) !important;
   right: 0 !important;
   z-index: 1000 !important;
-  width: 100% !important;
+  width: calc(100% - var(--sidebar-width, 0)) !important;
 }
+
+.app-footer-responsive {
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 
 /* Special handling for login page - no scrolling */
 .login-page {
