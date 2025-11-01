@@ -22,38 +22,38 @@
           <div class="report-info">
             <div>
               <strong>Project Name:</strong>
-              <input v-model="projectName" type="text" :disabled="readonly" />
+              <input v-model="projectName" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
               <strong>Report Ref No:</strong>
-              <input v-model="reportRefNo" type="text" :disabled="readonly" />
+              <input v-model="reportRefNo" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
-              <strong>DP Name:</strong> <input v-model="dpName" type="text" :disabled="readonly" />
+              <strong>DP Name:</strong> <input v-model="dpName" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
-              <strong>Part No:</strong> <input v-model="partNo" type="text" :disabled="readonly" />
+              <strong>Part No:</strong> <input v-model="partNo" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
-              <strong>SL No's:</strong> <input v-model="slNo" type="text" :disabled="readonly" />
+              <strong>SL No's:</strong> <input v-model="slNo" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
-              <strong>End Date:</strong> <input v-model="endDate" type="date" :disabled="readonly" />
+              <strong>End Date:</strong> <input v-model="endDate" type="date" :disabled="isFormReadonly" />
             </div>
             <div>
-              <strong>SRU Name:</strong> <input v-model="sruName" type="text" :disabled="readonly" />
+              <strong>SRU Name:</strong> <input v-model="sruName" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
               <strong>Start Date:</strong>
-              <input v-model="startDate" type="date" :disabled="readonly" />
+              <input v-model="startDate" type="date" :disabled="isFormReadonly" />
             </div>
             <div>
               <strong>Inspection Stage:</strong>
-              <input v-model="inspectionStage" type="text" :disabled="readonly" />
+              <input v-model="inspectionStage" type="text" :disabled="isFormReadonly" />
             </div>
             <div>
               <strong>Test Venue:</strong>
-              <input v-model="testVenue" type="text" :disabled="readonly" />
+              <input v-model="testVenue" type="text" :disabled="isFormReadonly" />
             </div>
           </div>
 
@@ -74,7 +74,7 @@
                 <td>{{ test.case }}</td>
                 <td>{{ test.expected }}</td>
                 <td>
-                  <select v-model="test.observation" @change="updateRemark(test)" :disabled="readonly">
+                  <select v-model="test.observation" @change="updateRemark(test)" :disabled="isFormReadonly">
                     <option value="">Select</option>
                     <option v-if="test.case === 'Connectors surrounding and beneath'" value="no damages">no damages</option>
                     <option v-if="test.case === 'Connectors surrounding and beneath'" value="damages present">damages present</option>
@@ -83,7 +83,7 @@
                   </select>
                 </td>
                 <td><input v-model="test.remark" type="text" :disabled="true" readonly /></td>
-                <td><input type="file" :disabled="readonly" /></td>
+                <td><input type="file" :disabled="isFormReadonly" /></td>
               </tr>
             </tbody>
           </table>
@@ -99,7 +99,7 @@
                       type="text"
                       v-model="preparedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly || !areAllFieldsFilled"
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
                   </div>
                   <div class="input-group">
@@ -108,14 +108,14 @@
                       type="password"
                       v-model="preparedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly || !areAllFieldsFilled"
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('prepared')"
-                    :disabled="readonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                    :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -148,7 +148,7 @@
                       type="text"
                       v-model="verifiedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl"
+                      :disabled="!preparedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -157,14 +157,14 @@
                       type="password"
                       v-model="verifiedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl"
+                      :disabled="!preparedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('verified')"
-                    :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                    :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -197,7 +197,7 @@
                       type="text"
                       v-model="approvedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl"
+                      :disabled="!verifiedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -206,14 +206,14 @@
                       type="password"
                       v-model="approvedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl"
+                      :disabled="!verifiedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('approved')"
-                    :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                    :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -240,7 +240,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly">
+        <div class="form-actions" v-if="!isFormReadonly">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -378,6 +378,25 @@ export default {
     };
   },
   computed: {
+    // Form becomes readonly once Prepared By signature is fetched and report is saved
+    // Before Prepared By signature: form is ALWAYS fully editable (regardless of readonly prop)
+    // After Prepared By signature: form becomes readonly, but Verified/Approved By remain editable
+    isFormReadonly() {
+      // Before Prepared By signature: form should ALWAYS be editable for initial data entry
+      // Check if Prepared By signature has been fetched and report has been saved
+      const hasPreparedBySignature = this.preparedBySignatureUrl && this.preparedBySignatureUrl.trim() !== '';
+      const hasReportId = this.reportId !== null && this.reportId !== undefined;
+      
+      // Form is readonly ONLY if BOTH signature exists AND report has been saved
+      // Before that point, form is always editable (even if readonly prop is true)
+      if (hasPreparedBySignature && hasReportId) {
+        return true; // Form is saved with Prepared By signature, make it readonly
+      }
+      
+      // Before Prepared By signature: form is editable regardless of readonly prop
+      // (This allows users to fill the form initially even if viewed from read-only context)
+      return false;
+    },
     isFormValid() {
       return (
         this.projectName &&
