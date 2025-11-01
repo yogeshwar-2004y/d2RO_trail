@@ -46,14 +46,15 @@ def create_mechanical_inspection():
                 dim1_dimension TEXT, dim1_tolerance TEXT, dim1_observed_value TEXT, dim1_instrument_used TEXT, dim1_remarks TEXT, dim1_upload TEXT,
                 dim2_dimension TEXT, dim2_tolerance TEXT, dim2_observed_value TEXT, dim2_instrument_used TEXT, dim2_remarks TEXT, dim2_upload TEXT,
                 dim3_dimension TEXT, dim3_tolerance TEXT, dim3_observed_value TEXT, dim3_instrument_used TEXT, dim3_remarks TEXT, dim3_upload TEXT,
-                param1_name TEXT DEFAULT 'Burrs', param1_allowed TEXT, param1_yes_no VARCHAR(10), param1_expected TEXT, param1_remarks TEXT, param1_upload TEXT,
-                param2_name TEXT DEFAULT 'Damages', param2_allowed TEXT, param2_yes_no VARCHAR(10), param2_expected TEXT, param2_remarks TEXT, param2_upload TEXT,
-                param3_name TEXT DEFAULT 'Name Plate', param3_allowed TEXT, param3_yes_no VARCHAR(10), param3_expected TEXT, param3_remarks TEXT, param3_upload TEXT,
-                param4_name TEXT DEFAULT 'Engraving', param4_allowed TEXT, param4_yes_no VARCHAR(10), param4_expected TEXT, param4_remarks TEXT, param4_upload TEXT,
-                param5_name TEXT DEFAULT 'Passivation', param5_allowed TEXT, param5_yes_no VARCHAR(10), param5_expected TEXT, param5_remarks TEXT, param5_upload TEXT,
-                param6_name TEXT DEFAULT 'Chromate', param6_allowed TEXT, param6_yes_no VARCHAR(10), param6_expected TEXT, param6_remarks TEXT, param6_upload TEXT,
-                param7_name TEXT DEFAULT 'Electro-less Nickel plating', param7_allowed TEXT, param7_yes_no VARCHAR(10), param7_expected TEXT, param7_remarks TEXT, param7_upload TEXT,
-                param8_name TEXT DEFAULT 'Fasteners', param8_allowed TEXT, param8_yes_no VARCHAR(10), param8_expected TEXT, param8_remarks TEXT, param8_upload TEXT,
+                dim4_dimension TEXT, dim4_tolerance TEXT, dim4_observed_value TEXT, dim4_instrument_used TEXT, dim4_remarks TEXT, dim4_upload TEXT,
+                param1_name TEXT DEFAULT 'Burrs', param1_compliance_observation TEXT, param1_expected TEXT DEFAULT 'Not Expected (NO)', param1_remarks TEXT, param1_upload TEXT,
+                param2_name TEXT DEFAULT 'Damages', param2_compliance_observation TEXT, param2_expected TEXT DEFAULT 'Not Expected (NO)', param2_remarks TEXT, param2_upload TEXT,
+                param3_name TEXT DEFAULT 'Name Plate', param3_compliance_observation TEXT, param3_expected TEXT DEFAULT 'As per Drawing (YES)', param3_remarks TEXT, param3_upload TEXT,
+                param4_name TEXT DEFAULT 'Engraving', param4_compliance_observation TEXT, param4_expected TEXT DEFAULT 'As per Drawing (YES)', param4_remarks TEXT, param4_upload TEXT,
+                param5_name TEXT DEFAULT 'Passivation', param5_compliance_observation TEXT, param5_expected TEXT DEFAULT 'As per Drawing (YES)', param5_remarks TEXT, param5_upload TEXT,
+                param6_name TEXT DEFAULT 'Chromate', param6_compliance_observation TEXT, param6_expected TEXT DEFAULT 'As per Drawing (YES)', param6_remarks TEXT, param6_upload TEXT,
+                param7_name TEXT DEFAULT 'Electro-less Nickel plating', param7_compliance_observation TEXT, param7_expected TEXT DEFAULT 'As per Drawing (YES)', param7_remarks TEXT, param7_upload TEXT,
+                param8_name TEXT DEFAULT 'Fasteners', param8_compliance_observation TEXT, param8_expected TEXT DEFAULT 'As per Drawing (YES)', param8_remarks TEXT, param8_upload TEXT,
                 prepared_by TEXT,
                 verified_by TEXT,
                 approved_by TEXT,
@@ -62,14 +63,40 @@ def create_mechanical_inspection():
             )
         """)
         
-        # Insert new mechanical inspection report with basic fields first
+        # Insert new mechanical inspection report with all fields
         cur.execute("""
             INSERT INTO mechanical_inspection_report (
                 project_name, report_ref_no, memo_ref_no, lru_name, inspection_stage,
                 test_venue, sl_nos, dp_name, dated1, dated2, sru_name, part_no, quantity,
-                start_date, end_date
+                start_date, end_date,
+                dim1_dimension, dim1_tolerance, dim1_observed_value, dim1_instrument_used, dim1_remarks, dim1_upload,
+                dim2_dimension, dim2_tolerance, dim2_observed_value, dim2_instrument_used, dim2_remarks, dim2_upload,
+                dim3_dimension, dim3_tolerance, dim3_observed_value, dim3_instrument_used, dim3_remarks, dim3_upload,
+                dim4_dimension, dim4_tolerance, dim4_observed_value, dim4_instrument_used, dim4_remarks, dim4_upload,
+                param1_compliance_observation, param1_expected, param1_remarks, param1_upload,
+                param2_compliance_observation, param2_expected, param2_remarks, param2_upload,
+                param3_compliance_observation, param3_expected, param3_remarks, param3_upload,
+                param4_compliance_observation, param4_expected, param4_remarks, param4_upload,
+                param5_compliance_observation, param5_expected, param5_remarks, param5_upload,
+                param6_compliance_observation, param6_expected, param6_remarks, param6_upload,
+                param7_compliance_observation, param7_expected, param7_remarks, param7_upload,
+                param8_compliance_observation, param8_expected, param8_remarks, param8_upload,
+                prepared_by, verified_by, approved_by
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s, %s,
+                %s, %s, %s
             ) RETURNING report_id
         """, (
             data['project_name'], 
@@ -86,7 +113,79 @@ def create_mechanical_inspection():
             data['part_no'], 
             data['quantity'],
             data.get('start_date'), 
-            data.get('end_date')
+            data.get('end_date'),
+            # Dimension 1
+            data.get('dim1_dimension'),
+            data.get('dim1_tolerance'),
+            data.get('dim1_observed_value'),
+            data.get('dim1_instrument_used'),
+            data.get('dim1_remarks'),
+            data.get('dim1_upload'),
+            # Dimension 2
+            data.get('dim2_dimension'),
+            data.get('dim2_tolerance'),
+            data.get('dim2_observed_value'),
+            data.get('dim2_instrument_used'),
+            data.get('dim2_remarks'),
+            data.get('dim2_upload'),
+            # Dimension 3
+            data.get('dim3_dimension'),
+            data.get('dim3_tolerance'),
+            data.get('dim3_observed_value'),
+            data.get('dim3_instrument_used'),
+            data.get('dim3_remarks'),
+            data.get('dim3_upload'),
+            # Dimension 4
+            data.get('dim4_dimension'),
+            data.get('dim4_tolerance'),
+            data.get('dim4_observed_value'),
+            data.get('dim4_instrument_used'),
+            data.get('dim4_remarks'),
+            data.get('dim4_upload'),
+            # Parameter 1
+            data.get('param1_compliance_observation'),
+            data.get('param1_expected'),
+            data.get('param1_remarks'),
+            data.get('param1_upload'),
+            # Parameter 2
+            data.get('param2_compliance_observation'),
+            data.get('param2_expected'),
+            data.get('param2_remarks'),
+            data.get('param2_upload'),
+            # Parameter 3
+            data.get('param3_compliance_observation'),
+            data.get('param3_expected'),
+            data.get('param3_remarks'),
+            data.get('param3_upload'),
+            # Parameter 4
+            data.get('param4_compliance_observation'),
+            data.get('param4_expected'),
+            data.get('param4_remarks'),
+            data.get('param4_upload'),
+            # Parameter 5
+            data.get('param5_compliance_observation'),
+            data.get('param5_expected'),
+            data.get('param5_remarks'),
+            data.get('param5_upload'),
+            # Parameter 6
+            data.get('param6_compliance_observation'),
+            data.get('param6_expected'),
+            data.get('param6_remarks'),
+            data.get('param6_upload'),
+            # Parameter 7
+            data.get('param7_compliance_observation'),
+            data.get('param7_expected'),
+            data.get('param7_remarks'),
+            data.get('param7_upload'),
+            # Parameter 8
+            data.get('param8_compliance_observation'),
+            data.get('param8_expected'),
+            data.get('param8_remarks'),
+            data.get('param8_upload'),
+            # Signatures
+            data.get('prepared_by'),
+            data.get('verified_by'),
+            data.get('approved_by')
         ))
         
         report_id = cur.fetchone()[0]

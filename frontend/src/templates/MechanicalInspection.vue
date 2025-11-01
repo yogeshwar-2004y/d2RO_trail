@@ -147,9 +147,9 @@
           <div class="inspection-table-container">
             <table class="inspection-table">
               <thead>
-                <tr>
+                <tr class="table-header">
                   <th>SL NO</th>
-                  <th>DIMENSION</th>
+                  <th>DIMENSION <br>(As Per Drawing)</th>
                   <th>TOLERANCE</th>
                   <th>OBSERVED VALUE</th>
                   <th>INSTRUMENT USED</th>
@@ -164,24 +164,32 @@
                 >
                   <td>{{ index + 1 }}</td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="item.dimension"
-                      placeholder="Enter dimension"
-                    />
+                    <div class="dimension-input-wrapper">
+                      <input
+                        type="text"
+                        v-model="item.dimension"
+                        :placeholder="`Enter ${item.label?.toLowerCase() || 'dimension'}`"
+                        class="dimension-input"
+                        @input="computeRemarks(item)"
+                      />
+                      <span class="dimension-unit">{{ item.unit }}</span>
+                    </div>
                   </td>
                   <td>
                     <input
                       type="text"
                       v-model="item.tolerance"
                       placeholder="Enter tolerance"
+                      @input="computeRemarks(item)"
                     />
+                    <span class="dimension-unit">{{ item.unit }}</span>
                   </td>
                   <td>
                     <input
                       type="text"
                       v-model="item.observedValue"
                       placeholder="Enter observed value"
+                      @input="computeRemarks(item)"
                     />
                   </td>
                   <td>
@@ -192,11 +200,15 @@
                     />
                   </td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="item.remarks"
-                      placeholder="Enter remarks"
-                    />
+                    <span 
+                      class="remarks-computed"
+                      :class="{
+                        'ok': item.remarks === 'OK',
+                        'not_ok': item.remarks === 'NOT OK'
+                      }"
+                    >
+                      {{ item.remarks || '-' }}
+                    </span>
                   </td>
                   <td>
                     <input
@@ -241,18 +253,26 @@
                     />
                   </td>
                   <td>
-                    <input
-                      type="text"
+                    <select
                       v-model="item.complianceObservation"
-                      placeholder="Enter compliance observations"
-                    />
+                      class="compliance-select"
+                      @change="computeParameterRemarks(item)"
+                    >
+                      <option value="">Select...</option>
+                      <option value="YES">YES</option>
+                      <option value="NO">NO</option>
+                    </select>
                   </td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="item.remarks"
-                      placeholder="Enter remarks (OK/NOT OK)"
-                    />
+                    <span 
+                      class="remarks-computed"
+                      :class="{
+                        'ok': item.remarks === 'OK',
+                        'not_ok': item.remarks === 'NOT OK'
+                      }"
+                    >
+                      {{ item.remarks || '-' }}
+                    </span>
                   </td>
                   <td>
                     <input
@@ -270,17 +290,190 @@
         <div class="form-section">
           <h2 class="section-title">Signatures</h2>
           <div class="signatures-layout">
+            <!-- Prepared By Signature -->
             <div class="signature-item">
               <label>Prepared By:</label>
-              <div class="signature-line"></div>
+              <div class="signature-auth-container">
+                <div v-if="!canAccessSignatures" class="signature-disabled-message">
+                  Signature authentication is only available for QA Reviewer and QA Head.
+                </div>
+                <div v-else class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="signatures.preparedBy.signatureUsername"
+                      placeholder="Enter username..."
+                      :disabled="!isPreparedByEnabled"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="signatures.preparedBy.signaturePassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!isPreparedByEnabled"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('preparedBy')"
+                    :disabled="
+                      !isPreparedByEnabled ||
+                      !signatures.preparedBy.signatureUsername ||
+                      !signatures.preparedBy.signaturePassword
+                    "
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="signatures.preparedBy.signatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
+                  <div class="signature-image-container">
+                    <img
+                      :src="signatures.preparedBy.signatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ signatures.preparedBy.verifiedUserName }}</span>
+                      <span class="signature-role">{{ signatures.preparedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="signatures.preparedBy.signatureError" class="signature-error">
+                  {{ signatures.preparedBy.signatureError }}
+                </div>
+              </div>
             </div>
+
+            <!-- Verified By Signature -->
             <div class="signature-item">
               <label>Verified By:</label>
-              <div class="signature-line"></div>
+              <div class="signature-auth-container">
+                <div v-if="!canAccessSignatures" class="signature-disabled-message">
+                  Signature authentication is only available for QA Reviewer and QA Head.
+                </div>
+                <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
+                  Please complete "Prepared By" signature first.
+                </div>
+                <div v-else class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="signatures.verifiedBy.signatureUsername"
+                      placeholder="Enter username..."
+                      :disabled="!isVerifiedByEnabled"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="signatures.verifiedBy.signaturePassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!isVerifiedByEnabled"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('verifiedBy')"
+                    :disabled="
+                      !isVerifiedByEnabled ||
+                      !signatures.verifiedBy.signatureUsername ||
+                      !signatures.verifiedBy.signaturePassword
+                    "
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="signatures.verifiedBy.signatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
+                  <div class="signature-image-container">
+                    <img
+                      :src="signatures.verifiedBy.signatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ signatures.verifiedBy.verifiedUserName }}</span>
+                      <span class="signature-role">{{ signatures.verifiedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="signatures.verifiedBy.signatureError" class="signature-error">
+                  {{ signatures.verifiedBy.signatureError }}
+                </div>
+              </div>
             </div>
+
+            <!-- Approved By Signature -->
             <div class="signature-item">
               <label>Approved By:</label>
-              <div class="signature-line"></div>
+              <div class="signature-auth-container">
+                <div v-if="!canAccessSignatures" class="signature-disabled-message">
+                  Signature authentication is only available for QA Reviewer and QA Head.
+                </div>
+                <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
+                  Please complete "Verified By" signature first.
+                </div>
+                <div v-else class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="signatures.approvedBy.signatureUsername"
+                      placeholder="Enter username..."
+                      :disabled="!isApprovedByEnabled"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="signatures.approvedBy.signaturePassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!isApprovedByEnabled"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('approvedBy')"
+                    :disabled="
+                      !isApprovedByEnabled ||
+                      !signatures.approvedBy.signatureUsername ||
+                      !signatures.approvedBy.signaturePassword
+                    "
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="signatures.approvedBy.signatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
+                  <div class="signature-image-container">
+                    <img
+                      :src="signatures.approvedBy.signatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ signatures.approvedBy.verifiedUserName }}</span>
+                      <span class="signature-role">{{ signatures.approvedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="signatures.approvedBy.signatureError" class="signature-error">
+                  {{ signatures.approvedBy.signatureError }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -302,12 +495,24 @@
           </button>
         </div>
       </form>
+
+      <!-- Submit Button at Bottom -->
+      <!-- <div class="bottom-submit-section" v-if="!readonly">
+        <button
+          type="button"
+          @click="submitForm"
+          class="btn btn-primary btn-submit-bottom"
+          :disabled="!isFormValid"
+        >
+          Submit Report
+        </button>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
-import jsPDF from "jspdf";
+import { userStore } from "@/stores/userStore";
 
 export default {
   name: "MechanicalInspection",
@@ -343,89 +548,131 @@ export default {
       },
       dimensionalChecklist: [
         {
+          label: "Length",
           dimension: "",
           tolerance: "",
           observedValue: "",
           instrumentUsed: "",
           remarks: "",
           fileName: null,
+          unit: "mm",
         },
         {
+          label: "Width",
           dimension: "",
           tolerance: "",
           observedValue: "",
           instrumentUsed: "",
           remarks: "",
           fileName: null,
+          unit: "mm",
         },
         {
+          label: "Height",
           dimension: "",
           tolerance: "",
           observedValue: "",
           instrumentUsed: "",
           remarks: "",
           fileName: null,
+          unit: "mm",
+        },
+        {
+          label: "Weight",
+          dimension: "",
+          tolerance: "",
+          observedValue: "",
+          instrumentUsed: "",
+          remarks: "",
+          fileName: null,
+          unit: "kg",
         },
       ],
       parameterChecklist: [
         {
           parameter: "Burrs",
           complianceObservation: "",
-          expected: "Not Expected",
+          expected: "Not Expected (NO)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Damages",
           complianceObservation: "",
-          expected: "Not Expected",
+          expected: "Not Expected (NO)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Name Plate",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Engraving",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Passivation",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Chromate",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Electro-less Nickel plating",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
         {
           parameter: "Fasteners",
           complianceObservation: "",
-          expected: "As per Drawing",
+          expected: "As per Drawing (YES)",
           remarks: "",
           fileName: null,
         },
       ],
       currentDate: new Date(),
+      signatures: {
+        preparedBy: {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        },
+        verifiedBy: {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        },
+        approvedBy: {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        },
+      },
     };
   },
   computed: {
@@ -442,6 +689,31 @@ export default {
         this.reportData.quantity
       );
     },
+    // Check if user is QA Reviewer (role_id = 3) or QA Head (role_id = 2)
+    canAccessSignatures() {
+      const currentUserRole = userStore.getters.currentUserRole();
+      return currentUserRole === 2 || currentUserRole === 3; // QA Head or QA Reviewer
+    },
+    // Check if Prepared By signature is verified
+    isPreparedByVerified() {
+      return !!this.signatures.preparedBy.signatureUrl;
+    },
+    // Check if Verified By signature is verified
+    isVerifiedByVerified() {
+      return !!this.signatures.verifiedBy.signatureUrl;
+    },
+    // Prepared By should be enabled if user can access signatures
+    isPreparedByEnabled() {
+      return this.canAccessSignatures;
+    },
+    // Verified By should be enabled only after Prepared By is verified
+    isVerifiedByEnabled() {
+      return this.canAccessSignatures && this.isPreparedByVerified;
+    },
+    // Approved By should be enabled only after Verified By is verified
+    isApprovedByEnabled() {
+      return this.canAccessSignatures && this.isVerifiedByVerified;
+    },
   },
   mounted() {
     // Get parameters from route
@@ -454,15 +726,148 @@ export default {
     this.reportData.startDate = this.formattedDate;
   },
   methods: {
+    // Extract numeric value from a string (handles formats like "200 mm", "± 10 mm", "Length : 200 mm")
+    extractNumericValue(value, useAbsolute = false) {
+      if (!value || typeof value !== 'string') return null;
+      
+      // Replace ± or +/- with empty string for tolerance values
+      // Handles formats like "± 10 mm", "+/- 10 mm", "200 mm", "Length : 200 mm", etc.
+      let cleaned = value.replace(/[±]/g, '').replace(/[+/-]/g, ' ').trim();
+      
+      // Remove common text prefixes like "Length :", "Width :", etc.
+      cleaned = cleaned.replace(/^[^0-9-.]*\s*:\s*/i, '').trim();
+      
+      // Extract the first number (including decimals and negative numbers)
+      const match = cleaned.match(/(-?\d+\.?\d*)/);
+      if (match) {
+        const num = parseFloat(match[1]);
+        // Return absolute value if useAbsolute is true (for tolerance), otherwise preserve sign
+        return useAbsolute ? Math.abs(num) : num;
+      }
+      return null;
+    },
+    
+    // Compute remarks based on dimension, tolerance, and observed value
+    computeRemarks(item) {
+      // Clear remarks if any required field is missing
+      if (!item.dimension || !item.tolerance || !item.observedValue) {
+        item.remarks = '';
+        return;
+      }
+      
+      // Extract values: dimension and observed preserve sign, tolerance always positive
+      const dimension = this.extractNumericValue(item.dimension, false);
+      const tolerance = this.extractNumericValue(item.tolerance, true); // Always use absolute value for tolerance
+      const observed = this.extractNumericValue(item.observedValue, false);
+      
+      // Check if all values were successfully extracted
+      if (dimension === null || tolerance === null || observed === null) {
+        item.remarks = '';
+        return;
+      }
+      
+      // Calculate the acceptable range
+      const minValue = dimension - tolerance;
+      const maxValue = dimension + tolerance;
+      
+      // Check if observed value is within range
+      if (observed >= minValue && observed <= maxValue) {
+        item.remarks = 'OK';
+      } else {
+        item.remarks = 'NOT OK';
+      }
+    },
+    
+    // Extract value in brackets from expected field (e.g., "(YES)" or "(NO)")
+    extractExpectedValue(expected) {
+      if (!expected || typeof expected !== 'string') return null;
+      
+      // Match pattern like "(YES)" or "(NO)"
+      const match = expected.match(/\(([^)]+)\)/);
+      if (match && match[1]) {
+        // Return the value in brackets, trimmed and uppercased
+        return match[1].trim().toUpperCase();
+      }
+      return null;
+    },
+    
+    // Compute remarks for parameter checklist based on compliance observation
+    computeParameterRemarks(item) {
+      // Clear remarks if compliance observation is not selected
+      if (!item.complianceObservation) {
+        item.remarks = '';
+        return;
+      }
+      
+      // Extract expected value from brackets (e.g., "YES" or "NO" from "(YES)" or "(NO)")
+      const expectedValue = this.extractExpectedValue(item.expected);
+      
+      // If we can't extract expected value, clear remarks
+      if (!expectedValue) {
+        item.remarks = '';
+        return;
+      }
+      
+      // Compare compliance observation with expected value (case-insensitive)
+      const complianceValue = item.complianceObservation.toUpperCase();
+      
+      if (complianceValue === expectedValue) {
+        item.remarks = 'OK';
+      } else {
+        item.remarks = 'NOT OK';
+      }
+    },
+    
     handleFileUpload(event, item, checklistType) {
       const file = event.target.files[0];
       if (file) {
         item.fileName = file.name;
-        console.log(`File uploaded for ${checklistType}:`, file.name);
+      }
+    },
+    
+    // Verify signature credentials for prepared/verified/approved by
+    async verifySignature(signatureType) {
+      const signature = this.signatures[signatureType];
+
+      if (!signature.signatureUsername || !signature.signaturePassword) {
+        signature.signatureError =
+          "Please enter both username and signature password";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: signature.signatureUsername,
+            signature_password: signature.signaturePassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          signature.signatureUrl = data.signature_url;
+          signature.verifiedUserName = data.user_name;
+          signature.verifiedUserRole = data.role_name;
+          signature.signatureError = "";
+        } else {
+          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureUrl = "";
+          signature.verifiedUserName = "";
+          signature.verifiedUserRole = "";
+        }
+      } catch (error) {
+        signature.signatureError = "Error verifying signature: " + error.message;
+        signature.signatureUrl = "";
+        signature.verifiedUserName = "";
+        signature.verifiedUserRole = "";
       }
     },
     saveDraft() {
-      console.log("Saving draft:", this.reportData);
       alert("Draft saved successfully!");
     },
     resetForm() {
@@ -501,11 +906,36 @@ export default {
           item.complianceObservation = "";
           item.expected =
             item.parameter === "Burrs" || item.parameter === "Damages"
-              ? "Not Expected"
-              : "As per Drawing";
+              ? "Not Expected (NO)"
+              : "As per Drawing (YES)";
           item.remarks = "";
           item.fileName = null;
         });
+        // Reset signatures
+        this.signatures.preparedBy = {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        };
+        this.signatures.verifiedBy = {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        };
+        this.signatures.approvedBy = {
+          signatureUsername: "",
+          signaturePassword: "",
+          signatureUrl: "",
+          verifiedUserName: "",
+          verifiedUserRole: "",
+          signatureError: "",
+        };
       }
     },
     async submitForm() {
@@ -555,6 +985,13 @@ export default {
           dim3_instrument_used: this.dimensionalChecklist[2].instrumentUsed,
           dim3_remarks: this.dimensionalChecklist[2].remarks,
           dim3_upload: this.dimensionalChecklist[2].fileName,
+
+          dim4_dimension: this.dimensionalChecklist[3].dimension,
+          dim4_tolerance: this.dimensionalChecklist[3].tolerance,
+          dim4_observed_value: this.dimensionalChecklist[3].observedValue,
+          dim4_instrument_used: this.dimensionalChecklist[3].instrumentUsed,
+          dim4_remarks: this.dimensionalChecklist[3].remarks,
+          dim4_upload: this.dimensionalChecklist[3].fileName,
 
           // Parameter Checklist
           param1_compliance_observation:
@@ -606,12 +1043,10 @@ export default {
           param8_upload: this.parameterChecklist[7].fileName,
 
           // Signatures
-          prepared_by: "",
-          verified_by: "",
-          approved_by: "",
+          prepared_by: this.signatures.preparedBy.signatureUrl || "",
+          verified_by: this.signatures.verifiedBy.signatureUrl || "",
+          approved_by: this.signatures.approvedBy.signatureUrl || "",
         };
-
-        console.log("Submitting mechanical inspection report:", submissionData);
 
         const response = await fetch(
           "http://localhost:5000/api/mechanical-inspection",
@@ -628,7 +1063,6 @@ export default {
 
         if (result.success) {
           alert("Mechanical inspection report submitted successfully!");
-          console.log("Report ID:", result.report_id);
           this.resetForm();
         } else {
           alert(`Error: ${result.message}`);
@@ -637,11 +1071,6 @@ export default {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
       }
-    },
-    exportReport() {
-      console.log("Exporting report...");
-      // TODO: Implement PDF export functionality
-      alert("Export functionality will be implemented soon!");
     },
   },
 };
@@ -843,6 +1272,61 @@ export default {
   color: #666;
 }
 
+.compliance-select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+  cursor: pointer;
+}
+
+.compliance-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.remarks-computed {
+  display: inline-block;
+  padding: 0.5rem;
+  font-weight: bold;
+  text-align: center;
+  min-width: 60px;
+  border-radius: 4px;
+}
+
+.remarks-computed.ok {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.remarks-computed.not_ok {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.dimension-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dimension-input-wrapper .dimension-input {
+  flex: 1;
+  margin: 0;
+}
+
+.dimension-unit {
+  font-weight: 500;
+  color: #666;
+  white-space: nowrap;
+  min-width: 30px;
+}
+
 .signatures-layout {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -853,18 +1337,163 @@ export default {
 .signature-item {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 
-.signature-item label {
+.signature-item > label {
   font-weight: bold;
   color: #333;
+  font-size: 1rem;
 }
 
-.signature-line {
-  height: 2px;
-  background: #333;
-  margin-top: 2rem;
+/* Signature Authentication Styles */
+.signature-auth-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  margin-top: 10px;
+}
+
+.signature-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.input-group input {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.25);
+}
+
+.input-group input[readonly] {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}
+
+.input-group input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signature-disabled-message {
+  padding: 15px;
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  font-style: italic;
+}
+
+.btn-verify {
+  background-color: #667eea;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  align-self: flex-start;
+}
+
+.btn-verify:hover:not(:disabled) {
+  background-color: #5a6fd8;
+}
+
+.btn-verify:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.signature-display {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border: 1px solid #28a745;
+  border-radius: 6px;
+}
+
+.signature-display label {
+  font-weight: 600;
+  color: #155724;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.signature-image-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.signature-image {
+  max-width: 150px;
+  max-height: 80px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  background-color: white;
+  padding: 5px;
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-user {
+  font-weight: 600;
+  color: #155724;
+  font-size: 14px;
+}
+
+.signature-role {
+  color: #666;
+  font-size: 12px;
+}
+
+.signature-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signature-error {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  font-size: 14px;
 }
 
 .form-actions {
@@ -906,5 +1535,23 @@ export default {
 
 .btn-secondary:hover {
   background: #5a6268;
+}
+
+.bottom-submit-section {
+  position: sticky;
+  bottom: 0;
+  background: white;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+  text-align: center;
+  border-top: 1px solid #ddd;
+}
+
+.btn-submit-bottom {
+  padding: 1rem 3rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  min-width: 200px;
 }
 </style>
