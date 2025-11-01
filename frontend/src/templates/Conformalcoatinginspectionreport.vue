@@ -616,14 +616,28 @@ export default {
           }
         );
 
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to submit report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
         const result = await response.json();
 
-        if (result.success) {
+        if (result.success && result.report_id) {
           this.reportId = result.report_id;
-          console.log(`Report saved to database with ID: ${result.report_id}`);
+          console.log(`✓ Report saved to database with ID: ${result.report_id}`);
           alert(`Report saved successfully! Report ID: ${result.report_id}`);
         } else {
-          alert(`Error submitting report: ${result.message}`);
+          const errorMsg = result.message || "Unknown error occurred";
+          console.error("Error submitting report:", errorMsg);
+          alert(`Error submitting report: ${errorMsg}`);
         }
       } catch (error) {
         console.error("Error auto-submitting report:", error);
@@ -647,6 +661,12 @@ export default {
           updateData.approved_by = `${this.approvedBy}|${this.approvedBySignatureUrl}`;
         }
 
+        if (!this.reportId) {
+          console.error("Report ID not found. Cannot update signature.");
+          alert("Error: Report not found. Please complete the Prepared By signature first.");
+          return;
+        }
+
         // Update the existing record in the database
         const response = await fetch(
           `http://localhost:5000/api/reports/conformal-coating-inspection/${this.reportId}`,
@@ -658,6 +678,18 @@ export default {
             body: JSON.stringify(updateData),
           }
         );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to update report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
 
         const result = await response.json();
 
