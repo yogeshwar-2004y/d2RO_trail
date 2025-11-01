@@ -19,6 +19,7 @@ from routes.news import news_bp
 from routes.files import files_bp
 from routes.memos import memos_bp
 from routes.reports import reports_bp
+from routes.conformal_coating_inspection import conformal_coating_bp
 from routes.mechanical_inspection import mechanical_inspection_bp
 from routes.kit_of_parts import kit_of_parts_bp
 from routes.login_logs import login_logs_bp
@@ -51,6 +52,7 @@ def create_app():
     app.register_blueprint(files_bp)
     app.register_blueprint(memos_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(conformal_coating_bp)
     app.register_blueprint(mechanical_inspection_bp)
     app.register_blueprint(kit_of_parts_bp)
     app.register_blueprint(login_logs_bp)
