@@ -99,7 +99,7 @@
                       type="text"
                       v-model="preparedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly"
+                      :disabled="readonly || !areAllFieldsFilled"
                     />
                   </div>
                   <div class="input-group">
@@ -108,14 +108,14 @@
                       type="password"
                       v-model="preparedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly"
+                      :disabled="readonly || !areAllFieldsFilled"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('prepared')"
-                    :disabled="readonly || !preparedByUsername || !preparedByPassword"
+                    :disabled="readonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -148,7 +148,7 @@
                       type="text"
                       v-model="verifiedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly || !preparedBySignatureUrl"
+                      :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -157,14 +157,14 @@
                       type="password"
                       v-model="verifiedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly || !preparedBySignatureUrl"
+                      :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('verified')"
-                    :disabled="readonly || !preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                    :disabled="readonly || !areAllFieldsFilled || !preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -197,7 +197,7 @@
                       type="text"
                       v-model="approvedByUsername"
                       placeholder="Enter username..."
-                      :disabled="readonly || !verifiedBySignatureUrl"
+                      :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl"
                     />
                   </div>
                   <div class="input-group">
@@ -206,14 +206,14 @@
                       type="password"
                       v-model="approvedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="readonly || !verifiedBySignatureUrl"
+                      :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl"
                     />
                   </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('approved')"
-                    :disabled="readonly || !verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                    :disabled="readonly || !areAllFieldsFilled || !verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
                   >
                     Verify & Load Signature
                   </button>
@@ -389,6 +389,28 @@ export default {
         this.verifiedBy &&
         this.approvedBy
       );
+    },
+    areAllFieldsFilled() {
+      // Check basic form fields
+      const basicFieldsFilled = (
+        this.projectName &&
+        this.reportRefNo &&
+        this.dpName &&
+        this.partNo &&
+        this.slNo &&
+        this.sruName &&
+        this.startDate &&
+        this.endDate &&
+        this.inspectionStage &&
+        this.testVenue
+      );
+
+      // Check if all test observations are filled
+      const allObservationsFilled = this.tests.every(
+        (test) => test.observation && test.observation.trim() !== ""
+      );
+
+      return basicFieldsFilled && allObservationsFilled;
     },
   },
   mounted() {
