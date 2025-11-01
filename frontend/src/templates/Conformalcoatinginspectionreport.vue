@@ -76,8 +76,10 @@
                 <td>
                   <select v-model="test.observation" :disabled="readonly">
                     <option value="">Select</option>
-                    <option value="Pass">Pass</option>
-                    <option value="Fail">Fail</option>
+                    <option v-if="test.case === 'Connectors surrounding and beneath'" value="no damages">no damages</option>
+                    <option v-if="test.case === 'Connectors surrounding and beneath'" value="damages present">damages present</option>
+                    <option v-if="test.case !== 'Connectors surrounding and beneath'" value="yes">yes</option>
+                    <option v-if="test.case !== 'Connectors surrounding and beneath'" value="no">no</option>
                   </select>
                 </td>
                 <td><input v-model="test.remark" type="text" :disabled="readonly" /></td>
