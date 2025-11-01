@@ -269,6 +269,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    reportId: {
+      type: [String, Number],
+      default: null,
+    },
   },
   data() {
     return {
@@ -305,6 +309,7 @@ export default {
       approvedBySignatureUrl: "",
       approvedByVerifiedName: "",
       approvedByError: "",
+      approvedByUserId: null, // Store user_id of the approver
       reportId: null, // Store report ID after initial submission
       overallStatus: "",
       qualityRating: null,
@@ -437,8 +442,137 @@ export default {
     this.sruName = this.lruName;
     this.projectName = this.projectName;
     this.startDate = this.currentDate;
+
+    // Load existing report data if reportId is provided (from prop or route)
+    const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
+    if (reportIdToLoad) {
+      // If reportId comes from route, store it in data property
+      if (this.$route?.params?.reportId && !this.reportId) {
+        this.reportId = reportIdToLoad;
+      }
+      this.loadReportData();
+    }
+  },
+  watch: {
+    reportId: {
+      handler(newVal) {
+        if (newVal) {
+          this.loadReportData();
+        }
+      },
+      immediate: false,
+    },
+    // Also watch route params for reportId changes
+    '$route.params.reportId': {
+      handler(newVal) {
+        if (newVal) {
+          // Store route reportId in data property
+          this.reportId = newVal;
+          this.loadReportData();
+        }
+      },
+      immediate: false,
+    },
   },
   methods: {
+    async loadReportData() {
+      // Load report data from database when reportId is available
+      const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
+      
+      if (!reportIdToLoad) {
+        console.log("No reportId available to load data");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch report: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report) {
+          const report = result.report;
+
+          // Set reportId
+          this.reportId = report.report_id;
+
+          // Map header fields
+          this.projectName = report.project_name || "";
+          this.reportRefNo = report.report_ref_no || "";
+          this.memoRefNo = report.memo_ref_no || "";
+          this.lruName = report.lru_name || "";
+          this.sruName = report.sru_name || "";
+          this.dpName = report.dp_name || "";
+          this.partNo = report.part_no || "";
+          this.inspectionStage = report.inspection_stage || "";
+          this.testVenue = report.test_venue || "";
+          this.quantity = report.quantity || null;
+          this.slNo = report.sl_nos || "";
+          this.serialNumber = report.serial_number || "";
+          this.startDate = report.start_date ? (typeof report.start_date === 'string' ? report.start_date.split('T')[0] : report.start_date) : "";
+          this.endDate = report.end_date ? (typeof report.end_date === 'string' ? report.end_date.split('T')[0] : report.end_date) : "";
+          this.dated1 = report.dated1 ? (typeof report.dated1 === 'string' ? report.dated1.split('T')[0] : report.dated1) : "";
+          this.dated2 = report.dated2 ? (typeof report.dated2 === 'string' ? report.dated2.split('T')[0] : report.dated2) : "";
+          this.overallStatus = report.overall_status || "";
+          this.qualityRating = report.quality_rating || null;
+          this.recommendations = report.recommendations || "";
+
+          // Map test cases (obs1-9, rem1-9, upload1-9, expected1-9)
+          for (let i = 1; i <= 9; i++) {
+            if (this.tests[i - 1]) {
+              this.tests[i - 1].observation = report[`obs${i}`] || "";
+              this.tests[i - 1].remark = report[`rem${i}`] || "";
+              this.tests[i - 1].upload = report[`upload${i}`] || "";
+              this.tests[i - 1].expected = report[`expected${i}`] || this.tests[i - 1].expected;
+              
+              // Update remark if observation is set (trigger auto-remark update)
+              if (this.tests[i - 1].observation) {
+                this.updateRemark(this.tests[i - 1]);
+              }
+            }
+          }
+
+          // Parse signature fields (format: "name|signature_url")
+          if (report.prepared_by) {
+            const preparedParts = report.prepared_by.split("|");
+            this.preparedBy = preparedParts[0] || "";
+            this.preparedBySignatureUrl = preparedParts[1] || "";
+            this.preparedByVerifiedName = preparedParts[0] || "";
+          }
+
+          if (report.verified_by) {
+            const verifiedParts = report.verified_by.split("|");
+            this.verifiedBy = verifiedParts[0] || "";
+            this.verifiedBySignatureUrl = verifiedParts[1] || "";
+            this.verifiedByVerifiedName = verifiedParts[0] || "";
+          }
+
+          if (report.approved_by) {
+            const approvedParts = report.approved_by.split("|");
+            this.approvedBy = approvedParts[0] || "";
+            this.approvedBySignatureUrl = approvedParts[1] || "";
+            this.approvedByVerifiedName = approvedParts[0] || "";
+          }
+
+          console.log("✓ Report data loaded successfully:", report.report_id);
+        } else {
+          console.error("Failed to load report data:", result.message);
+        }
+      } catch (error) {
+        console.error("Error loading report data:", error);
+      }
+    },
     async verifySignature(signatureType) {
       let username, password;
       let formData = {};
@@ -497,6 +631,11 @@ export default {
           this[formData.error] = "";
           this[formData.userField] = data.user_name; // Store verified name
           
+          // Store user_id for approved signature (needed for notification)
+          if (signatureType === "approved" && data.user_id) {
+            this.approvedByUserId = data.user_id;
+          }
+          
           // Handle auto-submission and updates based on signature type
           if (signatureType === "prepared") {
             // Auto-submit when Prepared By signature is fetched
@@ -507,6 +646,8 @@ export default {
           } else if (signatureType === "approved") {
             // Auto-submit when Approved By signature is fetched
             await this.updateReportSignature('approved');
+            // Notify QA Heads about approval
+            await this.notifyApproval();
           }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
@@ -794,6 +935,44 @@ export default {
       } catch (error) {
         console.error("Error notifying QA Heads:", error);
         throw error;
+      }
+    },
+    async notifyApproval() {
+      try {
+        if (!this.reportId) {
+          console.error("Report ID not found. Cannot send approval notification.");
+          return;
+        }
+
+        if (!this.approvedByUserId) {
+          console.error("Approved By User ID not found. Cannot send approval notification.");
+          return;
+        }
+
+        // Send approval notification to backend
+        const response = await fetch(
+          "http://localhost:5000/api/reports/conformal-coating-inspection/notify-approval",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: this.reportId,
+              approved_by_id: this.approvedByUserId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (result.success) {
+          console.log("✓ Approval notification sent successfully");
+        } else {
+          console.error("Failed to send approval notification:", result.message);
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads about approval:", error);
+        // Don't throw error - approval signature should still be saved even if notification fails
       }
     },
     prepareReportData() {

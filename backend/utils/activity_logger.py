@@ -53,6 +53,8 @@ def log_notification(project_id: int = None, activity_performed: str = None, per
     Returns:
         bool: True if logging was successful, False otherwise
     """
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -64,12 +66,21 @@ def log_notification(project_id: int = None, activity_performed: str = None, per
         """, (project_id, activity_performed, performed_by, notified_user_id, notification_type, False, additional_info))
         
         conn.commit()
-        cur.close()
+        print(f"DEBUG log_notification: Notification inserted for user_id={notified_user_id}, type={notification_type}, activity='{activity_performed}'")
         return True
         
     except Exception as e:
         print(f"Error logging notification: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        if conn:
+            conn.rollback()
         return False
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 def get_users_by_role(role_id: int):
     """
@@ -81,6 +92,8 @@ def get_users_by_role(role_id: int):
     Returns:
         list: List of user dictionaries with user_id, name, and email
     """
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -93,7 +106,6 @@ def get_users_by_role(role_id: int):
         """, (role_id,))
         
         users = cur.fetchall()
-        cur.close()
         
         user_list = []
         for user in users:
@@ -103,11 +115,19 @@ def get_users_by_role(role_id: int):
                 "email": user[2]
             })
         
+        print(f"DEBUG get_users_by_role: Found {len(user_list)} user(s) with role_id={role_id}")
         return user_list
         
     except Exception as e:
         print(f"Error fetching users by role: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return []
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
 
 def get_activity_logs(project_id: int = None, limit: int = 100):
     """
