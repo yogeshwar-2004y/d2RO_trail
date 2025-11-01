@@ -27,6 +27,7 @@
         <div class="user-details" v-if="!isCollapsed">
           <h4>{{ userInfo.name }}</h4>
           <p>{{ userInfo.role }}</p>
+          <p class="user-id">ID: {{ userInfo.id }}</p>
         </div>
       </div>
 
@@ -438,6 +439,13 @@ onUnmounted(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.user-details .user-id {
+  margin-top: 2px;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  font-weight: 400;
 }
 
 /* Navigation Section */
