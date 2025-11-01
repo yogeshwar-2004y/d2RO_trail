@@ -74,7 +74,7 @@
                 <td>{{ test.case }}</td>
                 <td>{{ test.expected }}</td>
                 <td>
-                  <select v-model="test.observation" :disabled="readonly">
+                  <select v-model="test.observation" @change="updateRemark(test)" :disabled="readonly">
                     <option value="">Select</option>
                     <option v-if="test.case === 'Connectors surrounding and beneath'" value="no damages">no damages</option>
                     <option v-if="test.case === 'Connectors surrounding and beneath'" value="damages present">damages present</option>
@@ -82,7 +82,7 @@
                     <option v-if="test.case !== 'Connectors surrounding and beneath'" value="no">no</option>
                   </select>
                 </td>
-                <td><input v-model="test.remark" type="text" :disabled="readonly" /></td>
+                <td><input v-model="test.remark" type="text" :disabled="true" readonly /></td>
                 <td><input type="file" :disabled="readonly" /></td>
               </tr>
             </tbody>
@@ -252,6 +252,22 @@ export default {
     this.startDate = this.currentDate;
   },
   methods: {
+    updateRemark(test) {
+      if (!test.observation) {
+        test.remark = "";
+        return;
+      }
+      
+      // Compare observation with expected value (case-insensitive)
+      const observation = test.observation.toLowerCase().trim();
+      const expected = test.expected.toLowerCase().trim();
+      
+      if (observation === expected) {
+        test.remark = "PASS";
+      } else {
+        test.remark = "FAIL";
+      }
+    },
     async saveDraft() {
       try {
         const reportData = this.prepareReportData();
