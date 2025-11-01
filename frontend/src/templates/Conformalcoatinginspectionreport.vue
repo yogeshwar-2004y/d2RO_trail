@@ -22,38 +22,38 @@
           <div class="report-info">
             <div>
               <strong>Project Name:</strong>
-              <input v-model="projectName" type="text" />
+              <input v-model="projectName" type="text" :disabled="readonly" />
             </div>
             <div>
               <strong>Report Ref No:</strong>
-              <input v-model="reportRefNo" type="text" />
+              <input v-model="reportRefNo" type="text" :disabled="readonly" />
             </div>
             <div>
-              <strong>DP Name:</strong> <input v-model="dpName" type="text" />
+              <strong>DP Name:</strong> <input v-model="dpName" type="text" :disabled="readonly" />
             </div>
             <div>
-              <strong>Part No:</strong> <input v-model="partNo" type="text" />
+              <strong>Part No:</strong> <input v-model="partNo" type="text" :disabled="readonly" />
             </div>
             <div>
-              <strong>SL No’s:</strong> <input v-model="slNo" type="text" />
+              <strong>SL No's:</strong> <input v-model="slNo" type="text" :disabled="readonly" />
             </div>
             <div>
-              <strong>End Date:</strong> <input v-model="endDate" type="date" />
+              <strong>End Date:</strong> <input v-model="endDate" type="date" :disabled="readonly" />
             </div>
             <div>
-              <strong>SRU Name:</strong> <input v-model="sruName" type="text" />
+              <strong>SRU Name:</strong> <input v-model="sruName" type="text" :disabled="readonly" />
             </div>
             <div>
               <strong>Start Date:</strong>
-              <input v-model="startDate" type="date" />
+              <input v-model="startDate" type="date" :disabled="readonly" />
             </div>
             <div>
               <strong>Inspection Stage:</strong>
-              <input v-model="inspectionStage" type="text" />
+              <input v-model="inspectionStage" type="text" :disabled="readonly" />
             </div>
             <div>
               <strong>Test Venue:</strong>
-              <input v-model="testVenue" type="text" />
+              <input v-model="testVenue" type="text" :disabled="readonly" />
             </div>
           </div>
 
@@ -73,9 +73,9 @@
                 <td>{{ index + 1 }}</td>
                 <td>{{ test.case }}</td>
                 <td>{{ test.expected }}</td>
-                <td><input v-model="test.observation" type="text" /></td>
-                <td><input v-model="test.remark" type="text" /></td>
-                <td><input type="file" /></td>
+                <td><input v-model="test.observation" type="text" :disabled="readonly" /></td>
+                <td><input v-model="test.remark" type="text" :disabled="readonly" /></td>
+                <td><input type="file" :disabled="readonly" /></td>
               </tr>
             </tbody>
           </table>
@@ -83,15 +83,15 @@
           <div class="report-footer">
             <div>
               <strong>Prepared By:</strong>
-              <input v-model="preparedBy" type="text" />
+              <input v-model="preparedBy" type="text" :disabled="readonly" />
             </div>
             <div>
               <strong>Verified By:</strong>
-              <input v-model="verifiedBy" type="text" />
+              <input v-model="verifiedBy" type="text" :disabled="readonly" />
             </div>
             <div>
               <strong>Approved By:</strong>
-              <input v-model="approvedBy" type="text" />
+              <input v-model="approvedBy" type="text" :disabled="readonly" />
             </div>
           </div>
         </div>

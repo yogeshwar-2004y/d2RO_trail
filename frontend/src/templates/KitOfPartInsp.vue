@@ -32,6 +32,7 @@
                   type="text"
                   id="projectName"
                   v-model="reportData.projectName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -41,6 +42,7 @@
                   type="text"
                   id="reportRefNo"
                   v-model="reportData.reportRefNo"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -50,6 +52,7 @@
                   type="text"
                   id="memoRefNo"
                   v-model="reportData.memoRefNo"
+                  :disabled="readonly"
                 />
               </div>
               <div class="form-group">
@@ -58,6 +61,7 @@
                   type="text"
                   id="lruName"
                   v-model="reportData.lruName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -67,6 +71,7 @@
                   type="text"
                   id="inspectionStage"
                   v-model="reportData.inspectionStage"
+                  :disabled="readonly"
                 />
               </div>
               <div class="form-group">
@@ -75,11 +80,12 @@
                   type="text"
                   id="testVenue"
                   v-model="reportData.testVenue"
+                  :disabled="readonly"
                 />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="reportData.slNos" />
+                <input type="text" id="slNos" v-model="reportData.slNos" :disabled="readonly" />
               </div>
             </div>
 
@@ -91,20 +97,21 @@
                   type="text"
                   id="dpName"
                   v-model="reportData.dpName"
+                  :disabled="readonly"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="reportData.dated1" />
+                <input type="date" id="dated1" v-model="reportData.dated1" :disabled="readonly" />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="reportData.dated2" />
+                <input type="date" id="dated2" v-model="reportData.dated2" :disabled="readonly" />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="reportData.sruName" />
+                <input type="text" id="sruName" v-model="reportData.sruName" :disabled="readonly" />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
@@ -112,6 +119,7 @@
                   type="text"
                   id="partNo"
                   v-model="reportData.partNo"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -131,11 +139,12 @@
                   type="date"
                   id="startDate"
                   v-model="reportData.startDate"
+                  :disabled="readonly"
                 />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="reportData.endDate" />
+                <input type="date" id="endDate" v-model="reportData.endDate" :disabled="readonly" />
               </div>
             </div>
           </div>
@@ -163,13 +172,14 @@
                   <td>{{ item.expected }}</td>
                   <td>
                     <textarea
+                      :disabled="readonly"
                       v-model="item.observations"
                       rows="2"
                       placeholder="Enter observations here..."
                     ></textarea>
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>

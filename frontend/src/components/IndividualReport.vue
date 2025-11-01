@@ -112,17 +112,29 @@
         <!-- Template Form Content -->
         <div class="template-form-content">
           <!-- Role-based access message -->
-          <div v-if="!canEditReport && selectedTemplate" class="access-message">
-            <div v-if="isQAReviewer" class="access-info qa-reviewer">
+          <div v-if="selectedTemplate" class="access-message">
+            <!-- Assigned Reviewer (can edit) -->
+            <div v-if="canEditReport && isQAReviewer" class="access-info qa-reviewer">
               <div class="access-icon">🔍</div>
-              <h4>QA Reviewer Access</h4>
-              <p>You can edit and submit this report. All fields are enabled for input.</p>
+              <h4>Assigned Reviewer Access</h4>
+              <p>You are the assigned reviewer for this report. You can edit and submit this report. All fields are enabled for input.</p>
               <p v-if="!isReportSubmitted" class="download-info">
                 <strong>Note:</strong> Download PDF will be available after submitting the report.
               </p>
               <p v-else class="download-info success">
                 <strong>✓</strong> Report submitted! You can now download the PDF.
               </p>
+            </div>
+            <!-- QA Reviewer but not assigned (read-only) -->
+            <div v-else-if="isQAReviewer && !canEditReport" class="access-info view-only">
+              <div class="access-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <h4>QA Reviewer - Read-Only Access</h4>
+              <p>You are a QA Reviewer, but this report is assigned to another reviewer. You can view the report but cannot edit it. Only the assigned reviewer can modify report data.</p>
             </div>
             <div v-else-if="isQAHead" class="access-info qa-head">
               <div class="access-icon">
@@ -317,7 +329,8 @@ export default {
       selectedTemplate: null,
       loading: false,
       showTemplateSelection: false,
-      reportStatus: null
+      reportStatus: null,
+      assignedReviewerId: null
     };
   },
   computed: {
@@ -345,9 +358,23 @@ export default {
     },
     
     canEditReport() {
-      // Only QA Reviewer can edit reports when template is assigned
-      // QA Head has view-only access
-      return this.isQAReviewer && this.selectedTemplate;
+      // Only the assigned reviewer can edit reports
+      // Check if current user is the assigned reviewer
+      const currentUser = userStore.getters.currentUser();
+      const currentUserId = currentUser?.id || currentUser?.user_id;
+      
+      // If no template is selected, cannot edit
+      if (!this.selectedTemplate) {
+        return false;
+      }
+      
+      // If no assigned reviewer, cannot edit
+      if (!this.assignedReviewerId) {
+        return false;
+      }
+      
+      // Only the assigned reviewer can edit
+      return currentUserId === this.assignedReviewerId;
     },
     
     isReportSubmitted() {
@@ -459,6 +486,9 @@ export default {
         if (result.success) {
           // Set report status
           this.reportStatus = result.report.status;
+          
+          // Store assigned reviewer ID
+          this.assignedReviewerId = result.report.assigned_reviewer_id || null;
           
           // Find the template that matches the template_id
           if (result.report.template_id) {

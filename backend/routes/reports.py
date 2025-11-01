@@ -237,11 +237,11 @@ def get_report_details(report_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch report details with template information
+        # Fetch report details with template information and assigned reviewer
         cur.execute("""
             SELECT 
                 r.report_id,
-                NULL as memo_id,
+                r.memo_id,
                 r.project_id,
                 r.lru_id,
                 r.serial_id,
@@ -249,7 +249,7 @@ def get_report_details(report_id):
                 r.date_of_review,
                 r.review_venue,
                 r.reference_document,
-                'Active' as status,
+                COALESCE(r.status, 'ASSIGNED') as status,
                 r.date_of_review as created_at,
                 r.template_id,
                 p.project_name,
@@ -278,11 +278,13 @@ def get_report_details(report_id):
                 NULL as func_check_end,
                 NULL as certified,
                 NULL as remarks,
-                rt.template_name
+                rt.template_name,
+                ma.user_id as assigned_reviewer_id
             FROM reports r
             LEFT JOIN projects p ON r.project_id = p.project_id
             LEFT JOIN lrus l ON r.lru_id = l.lru_id
             LEFT JOIN report_templates rt ON r.template_id = rt.template_id
+            LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id AND ma.status = 'accepted'
             WHERE r.report_id = %s
         """, (report_id,))
         
@@ -332,7 +334,8 @@ def get_report_details(report_id):
             "func_check_end": report[35].isoformat() if report[35] else None,
             "certified": report[36],
             "remarks": report[37],
-            "template_name": report[38]
+            "template_name": report[38],
+            "assigned_reviewer_id": report[39]
         }
         
         return jsonify({
