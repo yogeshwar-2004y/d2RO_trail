@@ -212,7 +212,8 @@
 
 <script>
 import { userStore } from '@/stores/userStore'
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 
 // Import all template components
 import ObservationReport from '@/templates/ObservationReport.vue'
@@ -465,6 +466,12 @@ export default {
     
     async downloadReportPDF() {
       try {
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
+        
         // Get the element you want to convert (the main report content)
       const element = document.querySelector('.template-form-container');
         

@@ -239,7 +239,8 @@
 </template>
 
 <script>
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 import { userStore } from "@/stores/userStore";
 
 export default {
@@ -395,6 +396,12 @@ export default {
 
     async downloadDashboardPDF() {
       try {
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
+        
         // Get the element you want to convert (the main dashboard content)
         const element = document.querySelector('.report-dashboard');
         
