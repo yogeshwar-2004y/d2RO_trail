@@ -89,17 +89,152 @@
           </table>
 
           <div class="report-footer">
-            <div>
+            <div class="signature-section">
               <strong>Prepared By:</strong>
-              <input v-model="preparedBy" type="text" :disabled="readonly" />
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="preparedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="preparedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('prepared')"
+                    :disabled="readonly || !preparedByUsername || !preparedByPassword"
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="preparedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="preparedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="preparedByError" class="signature-error">
+                  {{ preparedByError }}
+                </div>
+              </div>
             </div>
-            <div>
+            <div class="signature-section">
               <strong>Verified By:</strong>
-              <input v-model="verifiedBy" type="text" :disabled="readonly" />
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="verifiedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="verifiedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('verified')"
+                    :disabled="readonly || !verifiedByUsername || !verifiedByPassword"
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="verifiedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="verifiedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="verifiedByError" class="signature-error">
+                  {{ verifiedByError }}
+                </div>
+              </div>
             </div>
-            <div>
+            <div class="signature-section">
               <strong>Approved By:</strong>
-              <input v-model="approvedBy" type="text" :disabled="readonly" />
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="approvedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="approvedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="readonly"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('approved')"
+                    :disabled="readonly || !approvedByUsername || !approvedByPassword"
+                  >
+                    Verify & Load Signature
+                  </button>
+                </div>
+                <div v-if="approvedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="approvedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="approvedByError" class="signature-error">
+                  {{ approvedByError }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -158,8 +293,23 @@ export default {
       inspectionStage: "",
       testVenue: "",
       preparedBy: "",
+      preparedByUsername: "",
+      preparedByPassword: "",
+      preparedBySignatureUrl: "",
+      preparedByVerifiedName: "",
+      preparedByError: "",
       verifiedBy: "",
+      verifiedByUsername: "",
+      verifiedByPassword: "",
+      verifiedBySignatureUrl: "",
+      verifiedByVerifiedName: "",
+      verifiedByError: "",
       approvedBy: "",
+      approvedByUsername: "",
+      approvedByPassword: "",
+      approvedBySignatureUrl: "",
+      approvedByVerifiedName: "",
+      approvedByError: "",
       overallStatus: "",
       qualityRating: null,
       recommendations: "",
@@ -252,6 +402,76 @@ export default {
     this.startDate = this.currentDate;
   },
   methods: {
+    async verifySignature(signatureType) {
+      let username, password;
+      let formData = {};
+
+      if (signatureType === "prepared") {
+        username = this.preparedByUsername;
+        password = this.preparedByPassword;
+        formData = {
+          signatureUrl: "preparedBySignatureUrl",
+          verifiedName: "preparedByVerifiedName",
+          error: "preparedByError",
+          userField: "preparedBy"
+        };
+      } else if (signatureType === "verified") {
+        username = this.verifiedByUsername;
+        password = this.verifiedByPassword;
+        formData = {
+          signatureUrl: "verifiedBySignatureUrl",
+          verifiedName: "verifiedByVerifiedName",
+          error: "verifiedByError",
+          userField: "verifiedBy"
+        };
+      } else if (signatureType === "approved") {
+        username = this.approvedByUsername;
+        password = this.approvedByPassword;
+        formData = {
+          signatureUrl: "approvedBySignatureUrl",
+          verifiedName: "approvedByVerifiedName",
+          error: "approvedByError",
+          userField: "approvedBy"
+        };
+      }
+
+      if (!username || !password) {
+        this[formData.error] = "Please enter both username and signature password";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            signature_password: password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this[formData.signatureUrl] = data.signature_url;
+          this[formData.verifiedName] = data.user_name;
+          this[formData.error] = "";
+          this[formData.userField] = data.user_name; // Store verified name
+        } else {
+          this[formData.error] = data.message || "Failed to verify signature";
+          this[formData.signatureUrl] = "";
+          this[formData.verifiedName] = "";
+          this[formData.userField] = "";
+        }
+      } catch (error) {
+        this[formData.error] = "Error verifying signature: " + error.message;
+        this[formData.signatureUrl] = "";
+        this[formData.verifiedName] = "";
+        this[formData.userField] = "";
+      }
+    },
     updateRemark(test) {
       if (!test.observation) {
         test.remark = "";
@@ -313,8 +533,23 @@ export default {
         this.inspectionStage = "";
         this.testVenue = "";
         this.preparedBy = "";
+        this.preparedByUsername = "";
+        this.preparedByPassword = "";
+        this.preparedBySignatureUrl = "";
+        this.preparedByVerifiedName = "";
+        this.preparedByError = "";
         this.verifiedBy = "";
+        this.verifiedByUsername = "";
+        this.verifiedByPassword = "";
+        this.verifiedBySignatureUrl = "";
+        this.verifiedByVerifiedName = "";
+        this.verifiedByError = "";
         this.approvedBy = "";
+        this.approvedByUsername = "";
+        this.approvedByPassword = "";
+        this.approvedBySignatureUrl = "";
+        this.approvedByVerifiedName = "";
+        this.approvedByError = "";
 
         // Reset test observations and remarks
         this.tests.forEach((test) => {
@@ -384,8 +619,11 @@ export default {
         quality_rating: this.qualityRating || null,
         recommendations: this.recommendations || "",
         prepared_by: this.preparedBy,
+        prepared_by_signature: this.preparedBySignatureUrl || "",
         verified_by: this.verifiedBy,
+        verified_by_signature: this.verifiedBySignatureUrl || "",
         approved_by: this.approvedBy,
+        approved_by_signature: this.approvedBySignatureUrl || "",
       };
     },
     exportReport() {
@@ -793,25 +1031,134 @@ export default {
 
 .report-footer {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 20px;
   margin-top: 30px;
   padding-top: 15px;
   border-top: 1px dashed #ccc;
 }
 
-.report-footer div {
-  flex-basis: 30%;
-  text-align: center;
+.signature-section {
+  flex-basis: 100%;
+  margin-bottom: 20px;
+}
+
+.signature-section strong {
+  display: block;
+  margin-bottom: 10px;
   font-size: 14px;
 }
 
-.report-footer input[type="text"] {
-  border: none;
-  border-bottom: 1px solid #000;
-  width: 90%;
+.signature-auth-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
   margin-top: 10px;
-  padding: 5px;
-  background-color: transparent;
+}
+
+.signature-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signature-inputs .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-inputs label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.signature-inputs input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.signature-inputs input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.btn-verify {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.btn-verify:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.btn-verify:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signature-display {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border: 1px solid #28a745;
+  border-radius: 6px;
+}
+
+.signature-image-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.signature-image {
+  max-width: 150px;
+  max-height: 80px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  background-color: white;
+  object-fit: contain;
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-user {
+  font-weight: 600;
+  color: #155724;
+  font-size: 14px;
+}
+
+.signature-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signature-error {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  font-size: 12px;
 }
 
 /* Form Actions */
