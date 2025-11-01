@@ -1031,7 +1031,8 @@ export default {
 
 .report-footer {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   gap: 20px;
   margin-top: 30px;
   padding-top: 15px;
@@ -1039,8 +1040,8 @@ export default {
 }
 
 .signature-section {
-  flex-basis: 100%;
-  margin-bottom: 20px;
+  flex: 1;
+  min-width: 0;
 }
 
 .signature-section strong {
