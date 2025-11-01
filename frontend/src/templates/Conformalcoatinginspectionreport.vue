@@ -200,17 +200,21 @@ export default {
         },
         {
           case: "Pin holes and Soft spots",
-          expected: "no damages",
+          expected: "no",
           observation: "",
           remark: "",
         },
         {
           case: "Connectors surrounding and beneath",
-          expected: "yes",
+          expected: "no damages",
           observation: "",
           remark: "",
         },
-        { case: "Uniformity in coating across the board", expected: "no", observation: "", remark: "" },
+        { case: "Uniformity in coating across the board", 
+        expected: "yes", 
+        observation: "", 
+        remark: "" 
+        },
         {
           case: "Conformal coating thickness of 30 to 130 microns for acrylic material as per IPC-CC-830B",
           expected: "yes",
