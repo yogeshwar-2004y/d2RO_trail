@@ -239,18 +239,13 @@
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="form-actions" v-if="!isFormReadonly">
-          <button type="button" @click="saveDraft" class="btn btn-secondary">
-            Save Draft
-          </button>
-          <button type="button" @click="resetForm" class="btn btn-secondary">
-            Reset
-          </button>
+        <!-- Submit Button - Enabled only after Approved By signature -->
+        <div class="form-actions final-submit" v-if="isFormReadonly && approvedBySignatureUrl">
           <button
-            type="submit"
-            class="btn btn-primary"
-            :disabled="!isFormValid"
+            type="button"
+            @click="finalSubmitReport"
+            class="btn btn-primary btn-submit-final"
+            :disabled="!approvedBySignatureUrl || !reportId"
           >
             Submit Report
           </button>
@@ -729,16 +724,10 @@ export default {
       }
     },
     async submitForm() {
+      // This is the old submit handler - kept for form submission prevention
+      // Actual submission happens via finalSubmitReport after Approved By signature
       if (this.isFormValid && this.reportId && this.approvedBySignatureUrl) {
-        try {
-          // Notify QA Heads about report submission
-          await this.notifyQAHeads();
-          alert("Report submitted successfully! QA Heads have been notified.");
-          console.log("Report submitted with ID:", this.reportId);
-        } catch (error) {
-          console.error("Error notifying QA Heads:", error);
-          alert("Report submitted but notification failed. Please contact QA Heads manually.");
-        }
+        await this.finalSubmitReport();
       } else {
         if (!this.isFormValid) {
           alert("Please fill in all required fields.");
@@ -747,6 +736,28 @@ export default {
         } else if (!this.approvedBySignatureUrl) {
           alert("Please complete the Approved By signature first.");
         }
+      }
+    },
+    async finalSubmitReport() {
+      // Final submit button handler - called after Approved By signature is fetched
+      if (!this.reportId) {
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+      
+      if (!this.approvedBySignatureUrl) {
+        alert("Please complete the Approved By signature first.");
+        return;
+      }
+      
+      try {
+        // Notify QA Heads and log to activity logs
+        await this.notifyQAHeads();
+        alert("Report submitted successfully! Activity logged and QA Heads have been notified.");
+        console.log("Report submitted with ID:", this.reportId);
+      } catch (error) {
+        console.error("Error submitting report:", error);
+        alert("Error submitting report. Please try again.");
       }
     },
     async notifyQAHeads() {
@@ -1401,6 +1412,38 @@ export default {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+/* Final Submit Button Styling */
+.form-actions.final-submit {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #4a5568;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-submit-final {
+  min-width: 200px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-submit-final:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit-final:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */

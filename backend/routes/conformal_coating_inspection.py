@@ -441,13 +441,38 @@ def notify_qa_heads_conformal_coating():
         # Get all QA Heads (role_id = 2)
         qa_heads = get_users_by_role(2)
         
-        # Get reviewer name
+        # Get reviewer name and report details
         conn = get_db_connection()
         cur = conn.cursor()
         cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
         reviewer_result = cur.fetchone()
         reviewer_name = reviewer_result[0] if reviewer_result else "Reviewer"
+        
+        # Get report details for activity log
+        cur.execute("""
+            SELECT report_ref_no, project_name, lru_name 
+            FROM conformal_coating_inspection_report 
+            WHERE report_id = %s
+        """, (report_id,))
+        report_result = cur.fetchone()
+        report_ref_no = report_result[0] if report_result else f"Report {report_id}"
+        project_name = report_result[1] if report_result else "Unknown"
+        lru_name = report_result[2] if report_result else "Unknown"
         cur.close()
+        
+        # Log activity to activity logs
+        from utils.activity_logger import log_activity
+        memo_text = f" corresponding to memo {memo_ref_no}" if memo_ref_no else ""
+        activity_message = f"Conformal Coating Inspection Report (ID: {report_id}, Ref: {report_ref_no}){memo_text} has been submitted by {reviewer_name} for project '{project_name}', LRU '{lru_name}'."
+        
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Conformal Coating Inspection Report Submitted",
+            performed_by=reviewer_id,
+            additional_info=f"Report ID: {report_id}|Report Ref: {report_ref_no}|Project: {project_name}|LRU: {lru_name}|Submitted by: {reviewer_name}{memo_text}"
+        )
+        
+        print(f"✓ Activity logged: Conformal Coating Inspection Report {report_id} submitted by {reviewer_name}")
         
         # Notify each QA Head
         for qa_head in qa_heads:
@@ -458,12 +483,14 @@ def notify_qa_heads_conformal_coating():
                 performed_by=reviewer_id,
                 notified_user_id=qa_head['user_id'],
                 notification_type="report_submitted",
-                additional_info=f"Report ID {report_id}{memo_text} has been submitted by {reviewer_name}. Please review."
+                additional_info=f"Report ID {report_id} (Ref: {report_ref_no}){memo_text} has been submitted by {reviewer_name} for project '{project_name}', LRU '{lru_name}'. Please review."
             )
+        
+        print(f"✓ Notifications sent to {len(qa_heads)} QA Head(s)")
         
         return jsonify({
             "success": True,
-            "message": f"Notifications sent to {len(qa_heads)} QA Head(s)"
+            "message": f"Activity logged and notifications sent to {len(qa_heads)} QA Head(s)"
         })
         
     except Exception as e:
