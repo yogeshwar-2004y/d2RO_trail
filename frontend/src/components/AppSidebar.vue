@@ -63,13 +63,13 @@
             <span v-if="!isCollapsed">Notifications</span>
           </div>
           
-          <div class="profile-item" @click="handleProfileAction('profile')">
+          <!-- <div class="profile-item" @click="handleProfileAction('profile')">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             <span v-if="!isCollapsed">Profile</span>
-          </div>
+          </div> -->
           
           <div class="profile-item" @click="handleProfileAction('tech-support')">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -142,7 +142,7 @@ import { useRouter } from 'vue-router'
 import { userStore } from '@/stores/userStore'
 import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
 
-const emit = defineEmits(['open-notifications'])
+const emit = defineEmits(['open-notifications', 'sidebar-state-changed'])
 
 // Import icon components
 import HomeIcon from './icons/HomeIcon.vue'
@@ -224,6 +224,8 @@ const toggleSidebar = () => {
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
+  // Emit the collapsed state to parent component
+  emit('sidebar-state-changed', isCollapsed.value)
 }
 
 const navigateToPage = (routeName) => {
@@ -312,6 +314,8 @@ onMounted(() => {
   fetchUnreadCount()
   // Refresh every 30 seconds
   notificationRefreshInterval = setInterval(fetchUnreadCount, 30000)
+  // Emit initial collapsed state
+  emit('sidebar-state-changed', isCollapsed.value)
 })
 
 onUnmounted(() => {
@@ -530,7 +534,10 @@ onUnmounted(() => {
 }
 
 .profile-item:hover {
+  /* background: rgba(255, 255, 255, 0.1); */
   background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateX(4px);
 }
 
 .profile-item svg {

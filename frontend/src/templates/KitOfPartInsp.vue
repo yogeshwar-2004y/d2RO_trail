@@ -171,19 +171,24 @@
                   <td>{{ item.testCase }}</td>
                   <td>{{ item.expected }}</td>
                   <td>
-                    <textarea
+                    <select
                       :disabled="readonly"
                       v-model="item.observations"
-                      rows="2"
-                      placeholder="Enter observations here..."
-                    ></textarea>
+                      @change="onObservationChange(item)"
+                    >
+                      <option value="">Select</option>
+                      <option
+                        v-for="opt in getObservationOptions(item.slNo)"
+                        :key="opt"
+                        :value="opt"
+                      >
+                        {{ opt }}
+                      </option>
+                    </select>
                   </td>
                   <td>
-                    <select v-model="item.remarks" :disabled="readonly">
-                      <option value="">Select</option>
-                      <option value="OK">OK</option>
-                      <option value="NOT OK">NOT OK</option>
-                    </select>
+                    <!-- Remarks are auto-filled and not editable -->
+                    <input type="text" :value="item.remarks" disabled />
                   </td>
                   <td>
                     <input
@@ -311,7 +316,7 @@ export default {
           {
             slNo: 5,
             testCase: "Components storage in ESD cover",
-            expected: "Stored in ESD",
+            expected: "Yes",
             observations: "",
             remarks: "",
             fileName: null,
@@ -319,7 +324,7 @@ export default {
           {
             slNo: 6,
             testCase: "All connectors to be fitted with screws before assembly",
-            expected: "Fitted properly",
+            expected: "Yes",
             observations: "",
             remarks: "",
             fileName: null,
@@ -362,6 +367,12 @@ export default {
     this.reportData.projectName = projectName;
     this.reportData.lruName = lruName;
     this.reportData.startDate = this.currentDate;
+    // Compute initial remarks if observations already present
+    this.reportData.inspectionItems.forEach((item) => {
+      if (item.observations) {
+        this.computeRemarkForItem(item);
+      }
+    });
   },
   methods: {
     handleFileUpload(event, item) {
@@ -550,6 +561,68 @@ export default {
       } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
+      }
+    },
+    getObservationOptions(slNo) {
+      // Return options based on slNo
+      switch (slNo) {
+        case 1:
+          return ["Nil", "Present"];
+        case 2:
+          return ["Verified", "Not Verified"];
+        case 3:
+          return ["Matching", "Not Matching"];
+        case 4:
+          return ["Matching", "Not Matching"];
+        case 5:
+          return ["Yes", "No"];
+        case 6:
+          return ["Yes", "No"];
+        case 7:
+          return ["Nil", "Yes"];
+        default:
+          return ["Nil", "Present"];
+      }
+    },
+    onObservationChange(item) {
+      // When observation changes, compute remark automatically
+      this.computeRemarkForItem(item);
+    },
+    computeRemarkForItem(item) {
+      const expectedNormalized = this.normalizeExpectedForItem(item).toLowerCase();
+      const obs = (item.observations || "").toString().trim().toLowerCase();
+      if (!obs) {
+        item.remarks = "";
+        return;
+      }
+      if (expectedNormalized === obs) {
+        item.remarks = "Passed";
+      } else {
+        item.remarks = "Failed";
+      }
+    },
+    normalizeExpectedForItem(item) {
+      // Map expected values to comparable observation values
+      const e = (item.expected || "").toString().toLowerCase();
+      switch (item.slNo) {
+        case 1:
+          return e.includes("nil") ? "Nil" : e;
+        case 2:
+          return e.includes("verif") ? "Verified" : e;
+        case 3:
+          return e.includes("match") ? "Matching" : e;
+        case 4:
+          return e.includes("match") ? "Matching" : e;
+        case 5:
+          // Expected 'Stored in ESD' -> treat as Yes
+          return e.includes("stored") || e.includes("yes") ? "Yes" : e;
+        case 6:
+          // Expected 'Fitted properly' -> treat as Yes
+          return e.includes("fitt") || e.includes("yes") ? "Yes" : e;
+        case 7:
+          return e.includes("nil") ? "Nil" : e;
+        default:
+          return item.expected || "";
       }
     },
     exportReport() {
