@@ -84,15 +84,22 @@
             <p><strong>QA Reviewer Access:</strong> Once the Design Head assigns a template, you will be able to fill out and submit this report.</p>
           </div>
           <div v-else-if="isQAHead" class="role-message qa-head">
-            <div class="role-icon">👁️</div>
-            <p><strong>QA Head - View Only Access:</strong> Once the Design Head assigns a template, you will be able to view this report but cannot edit it.</p>
+            <div class="role-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <p><strong>Quality Assurance Head - Read-Only Access Privilege:</strong> Upon template assignment by the Design Head, this report will be accessible for review and inspection purposes. Modification capabilities are not available at this access level.</p>
           </div>
           <div v-else class="role-message other-role">
-            <div class="role-icon">👁️</div>
-            <p>
-              <strong>View-Only Access:</strong> You can view this report once a
-              template is assigned, but only QA Reviewers can edit it.
-            </p>
+            <div class="role-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </div>
+            <p><strong>Read-Only Access Privilege:</strong> Upon template assignment, this report will be accessible for review purposes. Modification capabilities are restricted to authorized QA Reviewer personnel exclusively.</p>
           </div>
         </div>
       </div>
@@ -115,11 +122,12 @@
         <!-- Template Form Content -->
         <div class="template-form-content">
           <!-- Role-based access message -->
-          <div v-if="!canEditReport && selectedTemplate" class="access-message">
-            <div v-if="isQAReviewer" class="access-info qa-reviewer">
+          <div v-if="selectedTemplate" class="access-message">
+            <!-- Assigned Reviewer (can edit) -->
+            <div v-if="canEditReport && isQAReviewer" class="access-info qa-reviewer">
               <div class="access-icon">🔍</div>
-              <h4>QA Reviewer Access</h4>
-              <p>You can edit and submit this report. All fields are enabled for input.</p>
+              <h4>Assigned Reviewer Access</h4>
+              <p>You are the assigned reviewer for this report. You can edit and submit this report. All fields are enabled for input.</p>
               <p v-if="!isReportSubmitted" class="download-info">
                 <strong>Note:</strong> Download PDF will be available after submitting the report.
               </p>
@@ -127,18 +135,36 @@
                 <strong>✓</strong> Report submitted! You can now download the PDF.
               </p>
             </div>
+            <!-- QA Reviewer but not assigned (read-only) -->
+            <div v-else-if="isQAReviewer && !canEditReport" class="access-info view-only">
+              <div class="access-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <h4>QA Reviewer - Read-Only Access</h4>
+              <p>You are a QA Reviewer, but this report is assigned to another reviewer. You can view the report but cannot edit it. Only the assigned reviewer can modify report data.</p>
+            </div>
             <div v-else-if="isQAHead" class="access-info qa-head">
-              <div class="access-icon">👁️</div>
-              <h4>QA Head - View Only Access</h4>
-              <p>You can view this report but cannot edit it. Only QA Reviewers can make changes to the report data.</p>
+              <div class="access-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <h4>Quality Assurance Head - Read-Only Access Privilege</h4>
+              <p>This report is available for review and inspection purposes only. Modification privileges are restricted to authorized QA Reviewer personnel exclusively. Report data modifications are not permitted at your current access level.</p>
             </div>
             <div v-else class="access-info view-only">
-              <div class="access-icon">👁️</div>
-              <h4>View-Only Access</h4>
-              <p>
-                You can view this report but cannot edit it. Only QA Reviewers
-                can make changes.
-              </p>
+              <div class="access-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </div>
+              <h4>Read-Only Access Privilege</h4>
+              <p>This report is available for review and inspection purposes only. Modification privileges are restricted to authorized QA Reviewer personnel exclusively.</p>
             </div>
           </div>
 
@@ -270,7 +296,8 @@
 
 <script>
 import { userStore } from '@/stores/userStore'
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 
 // Import all template components
 import ObservationReport from "@/templates/ObservationReport.vue";
@@ -361,7 +388,8 @@ export default {
       selectedTemplate: null,
       loading: false,
       showTemplateSelection: false,
-      reportStatus: null
+      reportStatus: null,
+      assignedReviewerId: null
     };
   },
   computed: {
@@ -389,9 +417,23 @@ export default {
     },
     
     canEditReport() {
-      // Only QA Reviewer can edit reports when template is assigned
-      // QA Head has view-only access
-      return this.isQAReviewer && this.selectedTemplate;
+      // Only the assigned reviewer can edit reports
+      // Check if current user is the assigned reviewer
+      const currentUser = userStore.getters.currentUser();
+      const currentUserId = currentUser?.id || currentUser?.user_id;
+      
+      // If no template is selected, cannot edit
+      if (!this.selectedTemplate) {
+        return false;
+      }
+      
+      // If no assigned reviewer, cannot edit
+      if (!this.assignedReviewerId) {
+        return false;
+      }
+      
+      // Only the assigned reviewer can edit
+      return currentUserId === this.assignedReviewerId;
     },
     
     isReportSubmitted() {
@@ -518,6 +560,9 @@ export default {
           // Set report status
           this.reportStatus = result.report.status;
           
+          // Store assigned reviewer ID
+          this.assignedReviewerId = result.report.assigned_reviewer_id || null;
+          
           // Find the template that matches the template_id
           if (result.report.template_id) {
             const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
@@ -547,6 +592,12 @@ export default {
     
     async downloadReportPDF() {
       try {
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
+        
         // Get the element you want to convert (the main report content)
       const element = document.querySelector('.template-form-container');
         
@@ -1295,9 +1346,23 @@ export default {
 }
 
 .role-message.qa-head {
-  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-  border: 2px solid #2196f3;
-  border-left: 6px solid #2196f3;
+  background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #faf5ff 100%);
+  border: 1.5px solid #4a90e2;
+  border-left: 5px solid #2c5282;
+  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12), 0 1px 3px rgba(44, 82, 130, 0.08);
+  padding: 20px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-message.qa-head::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2c5282 0%, #4a90e2 50%, #2c5282 100%);
 }
 
 .role-message.other-role {
@@ -1307,20 +1372,54 @@ export default {
 }
 
 .role-icon {
-  font-size: 2em;
   flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(44, 82, 130, 0.15);
+}
+
+.role-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #2c5282;
+}
+
+.role-message.qa-head .role-icon {
+  background: linear-gradient(135deg, rgba(44, 82, 130, 0.1), rgba(74, 144, 226, 0.1));
+  border-color: rgba(44, 82, 130, 0.2);
+}
+
+.role-message.qa-head .role-icon svg {
+  color: #2c5282;
 }
 
 .role-message p {
   margin: 0;
+  color: #4a5568;
+  font-size: 0.94em;
+  line-height: 1.65;
+  letter-spacing: 0.1px;
+}
+
+.role-message.qa-head p {
   color: #2d3748;
-  font-size: 0.95em;
-  line-height: 1.6;
 }
 
 .role-message strong {
-  color: #1a202c;
-  font-weight: 600;
+  color: #2c5282;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.role-message.qa-head strong {
+  color: #2c5282;
+  font-size: 1.02em;
 }
 
 /* Access Message in Template Form */
@@ -1334,9 +1433,9 @@ export default {
 .access-info {
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 15px;
-  border-radius: 8px;
+  gap: 18px;
+  padding: 20px 24px;
+  border-radius: 6px;
 }
 
 .access-info.qa-reviewer {
@@ -1346,34 +1445,121 @@ export default {
 }
 
 .access-info.qa-head {
-  background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
-  border: 2px solid #2196f3;
-  border-left: 6px solid #2196f3;
+  background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #faf5ff 100%);
+  border: 1.5px solid #4a90e2;
+  border-left: 5px solid #2c5282;
+  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12), 0 1px 3px rgba(44, 82, 130, 0.08);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.access-info.qa-head::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2c5282 0%, #4a90e2 50%, #2c5282 100%);
 }
 
 .access-info.view-only {
-  background: linear-gradient(135deg, #f8d7da, #f5c6cb);
-  border: 2px solid #dc3545;
-  border-left: 6px solid #dc3545;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 50%, #fef5e7 100%);
+  border: 1.5px solid #e53e3e;
+  border-left: 5px solid #c53030;
+  box-shadow: 0 2px 8px rgba(197, 48, 48, 0.12), 0 1px 3px rgba(197, 48, 48, 0.08);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.access-info.view-only::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #c53030 0%, #e53e3e 50%, #c53030 100%);
 }
 
 .access-icon {
-  font-size: 1.8em;
   flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(44, 82, 130, 0.15);
+}
+
+.access-icon svg {
+  width: 24px;
+  height: 24px;
+  color: #2c5282;
+}
+
+.access-info.qa-head .access-icon {
+  background: linear-gradient(135deg, rgba(44, 82, 130, 0.1), rgba(74, 144, 226, 0.1));
+  border-color: rgba(44, 82, 130, 0.2);
+}
+
+.access-info.qa-head .access-icon svg {
+  color: #2c5282;
+}
+
+.access-info.view-only .access-icon {
+  background: linear-gradient(135deg, rgba(197, 48, 48, 0.1), rgba(229, 62, 62, 0.1));
+  border-color: rgba(197, 48, 48, 0.2);
+}
+
+.access-info.view-only .access-icon svg {
+  color: #c53030;
 }
 
 .access-info h4 {
-  margin: 0 0 5px 0;
+  margin: 0 0 10px 0;
   color: #1a202c;
-  font-size: 1.1em;
+  font-size: 1.05em;
   font-weight: 600;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  text-transform: none;
+}
+
+.access-info.qa-head h4 {
+  color: #2c5282;
+  font-size: 1.08em;
+  font-weight: 700;
+}
+
+.access-info.view-only h4 {
+  color: #c53030;
+  font-size: 1.08em;
+  font-weight: 700;
 }
 
 .access-info p {
   margin: 0;
+  color: #4a5568;
+  font-size: 0.92em;
+  line-height: 1.6;
+  letter-spacing: 0.1px;
+  text-align: left;
+}
+
+.access-info.qa-head p {
   color: #2d3748;
-  font-size: 0.9em;
-  line-height: 1.5;
+  font-size: 0.94em;
+}
+
+.access-info.view-only p {
+  color: #4a5568;
+  font-size: 0.94em;
 }
 
 .download-info {

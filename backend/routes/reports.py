@@ -34,6 +34,14 @@ def get_reports():
         user_id = request.args.get('user_id', type=int)
         user_role = request.args.get('user_role', type=int)
         
+        # Handle case where user_id or user_role is None
+        if user_id is None or user_role is None:
+            # If no user context provided, return empty list or all reports based on your requirement
+            user_id = user_id or 0
+            user_role = user_role or 0
+        
+        print(f"Fetching reports for user_id={user_id}, user_role={user_role}")
+        
         conn = get_db_connection()
         cur = conn.cursor()
         
@@ -130,6 +138,20 @@ def get_reports():
         
         cur.execute(base_query, query_params)
         reports = cur.fetchall()
+        
+        # Also fetch conformal coating inspection reports
+        try:
+            cur.execute("""
+                SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
+                       created_at, updated_at
+                FROM conformal_coating_inspection_report 
+                ORDER BY created_at DESC
+            """)
+            conformal_reports = cur.fetchall()
+        except Exception as e:
+            print(f"Warning: Could not fetch conformal coating reports: {str(e)}")
+            conformal_reports = []
+        
         cur.close()
         
         # Convert to list of dictionaries
@@ -151,8 +173,35 @@ def get_reports():
                 "lru_name": report[12],
                 "name": report[13] or f"MEMO-{report[1]}" if report[1] else "No Memo",  # Use wing_proj_ref_no or fallback
                 "memo_description": report[14],
-                "part_number": report[15]
+                "part_number": report[15],
+                "report_type": "memo_report"
             })
+        
+        # Add conformal coating reports
+        for report in conformal_reports:
+            report_list.append({
+                "id": report[0],
+                "memo_id": report[4],  # memo_ref_no
+                "project_id": None,
+                "lru_id": None,
+                "serial_id": None,
+                "inspection_stage": None,
+                "date_of_review": report[5].isoformat() if report[5] else None,
+                "review_venue": None,
+                "reference_document": None,
+                "status": "Active",
+                "created_at": report[5].isoformat() if report[5] else None,
+                "project": report[1],  # project_name
+                "lru_name": report[2],
+                "name": report[3] or f"Conformal Coating Report {report[0]}",  # report_ref_no
+                "memo_description": None,
+                "part_number": None,
+                "report_type": "conformal_coating",
+                "report_ref_no": report[3],
+                "memo_ref_no": report[4]
+            })
+        
+        print(f"Returning {len(report_list)} reports ({len(reports)} memo reports, {len(conformal_reports)} conformal coating reports)")
         
         return jsonify({
             "success": True,
@@ -237,11 +286,11 @@ def get_report_details(report_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Fetch report details with template information
+        # Fetch report details with template information and assigned reviewer
         cur.execute("""
             SELECT 
                 r.report_id,
-                NULL as memo_id,
+                r.memo_id,
                 r.project_id,
                 r.lru_id,
                 r.serial_id,
@@ -249,7 +298,7 @@ def get_report_details(report_id):
                 r.date_of_review,
                 r.review_venue,
                 r.reference_document,
-                'Active' as status,
+                COALESCE(r.status, 'ASSIGNED') as status,
                 r.date_of_review as created_at,
                 r.template_id,
                 p.project_name,
@@ -278,11 +327,13 @@ def get_report_details(report_id):
                 NULL as func_check_end,
                 NULL as certified,
                 NULL as remarks,
-                rt.template_name
+                rt.template_name,
+                ma.user_id as assigned_reviewer_id
             FROM reports r
             LEFT JOIN projects p ON r.project_id = p.project_id
             LEFT JOIN lrus l ON r.lru_id = l.lru_id
             LEFT JOIN report_templates rt ON r.template_id = rt.template_id
+            LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id AND ma.status = 'accepted'
             WHERE r.report_id = %s
         """, (report_id,))
         
@@ -332,7 +383,8 @@ def get_report_details(report_id):
             "func_check_end": report[35].isoformat() if report[35] else None,
             "certified": report[36],
             "remarks": report[37],
-            "template_name": report[38]
+            "template_name": report[38],
+            "assigned_reviewer_id": report[39]
         }
         
         return jsonify({
@@ -1747,208 +1799,8 @@ def get_bare_pcb_inspection_reports():
         return handle_database_error(get_db_connection(), f"Error fetching bare PCB inspection reports: {str(e)}")
 
 # Conformal Coating Inspection Report API Endpoints
-
-@reports_bp.route('/api/reports/conformal-coating-inspection', methods=['POST'])
-def create_conformal_coating_inspection_report():
-    """Create a new conformal coating inspection report"""
-    try:
-        data = request.json
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
-        
-        # Validate required fields
-        required_fields = ['project_name', 'report_ref_no', 'dp_name', 'sru_name', 'part_no']
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
-        
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Insert conformal coating inspection report
-        cur.execute("""
-            INSERT INTO conformal_coating_inspection_report (
-                project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name, 
-                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number, 
-                start_date, end_date, dated1, dated2,
-                obs1, rem1, upload1, expected1,
-                obs2, rem2, upload2, expected2,
-                obs3, rem3, upload3, expected3,
-                obs4, rem4, upload4, expected4,
-                obs5, rem5, upload5, expected5,
-                obs6, rem6, upload6, expected6,
-                obs7, rem7, upload7, expected7,
-                obs8, rem8, upload8, expected8,
-                obs9, rem9, upload9, expected9,
-                overall_status, quality_rating, recommendations,
-                prepared_by, verified_by, approved_by
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            ) RETURNING report_id
-        """, (
-            data['project_name'],
-            data['report_ref_no'],
-            data.get('memo_ref_no'),
-            data.get('lru_name'),
-            data['sru_name'],
-            data['dp_name'],
-            data['part_no'],
-            data.get('inspection_stage'),
-            data.get('test_venue'),
-            data.get('quantity'),
-            data.get('sl_nos'),
-            data.get('serial_number'),
-            data.get('start_date'),
-            data.get('end_date'),
-            data.get('dated1'),
-            data.get('dated2'),
-            # Test cases 1-9
-            data.get('tests', [{}])[0].get('observation', ''),
-            data.get('tests', [{}])[0].get('remark', ''),
-            data.get('tests', [{}])[0].get('upload', ''),
-            data.get('tests', [{}])[0].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[1].get('observation', ''),
-            data.get('tests', [{}])[1].get('remark', ''),
-            data.get('tests', [{}])[1].get('upload', ''),
-            data.get('tests', [{}])[1].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[2].get('observation', ''),
-            data.get('tests', [{}])[2].get('remark', ''),
-            data.get('tests', [{}])[2].get('upload', ''),
-            data.get('tests', [{}])[2].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[3].get('observation', ''),
-            data.get('tests', [{}])[3].get('remark', ''),
-            data.get('tests', [{}])[3].get('upload', ''),
-            data.get('tests', [{}])[3].get('expected', 'Should not be there'),
-            data.get('tests', [{}])[4].get('observation', ''),
-            data.get('tests', [{}])[4].get('remark', ''),
-            data.get('tests', [{}])[4].get('upload', ''),
-            data.get('tests', [{}])[4].get('expected', 'Not recommended'),
-            data.get('tests', [{}])[5].get('observation', ''),
-            data.get('tests', [{}])[5].get('remark', ''),
-            data.get('tests', [{}])[5].get('upload', ''),
-            data.get('tests', [{}])[5].get('expected', 'No Deformity'),
-            data.get('tests', [{}])[6].get('observation', ''),
-            data.get('tests', [{}])[6].get('remark', ''),
-            data.get('tests', [{}])[6].get('upload', ''),
-            data.get('tests', [{}])[6].get('expected', 'No Damages'),
-            data.get('tests', [{}])[7].get('observation', ''),
-            data.get('tests', [{}])[7].get('remark', ''),
-            data.get('tests', [{}])[7].get('upload', ''),
-            data.get('tests', [{}])[7].get('expected', 'Should have linear Coating'),
-            data.get('tests', [{}])[8].get('observation', ''),
-            data.get('tests', [{}])[8].get('remark', ''),
-            data.get('tests', [{}])[8].get('upload', ''),
-            data.get('tests', [{}])[8].get('expected', '30 to 130 microns'),
-            # Summary fields
-            data.get('overall_status'),
-            data.get('quality_rating'),
-            data.get('recommendations'),
-            # Signatures
-            data.get('prepared_by'),
-            data.get('verified_by'),
-            data.get('approved_by')
-        ))
-        
-        report_id = cur.fetchone()[0]
-        
-        # Log conformal coating report submission activity
-        from utils.activity_logger import log_activity
-        report_name = data.get('report_ref_no') or f"Conformal Coating Report {report_id}"
-        log_activity(
-            project_id=None,  # Report operations don't have project_id in this context
-            activity_performed="Report Submitted",
-            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
-            additional_info=f"ID:{report_id}|Name:{report_name}|Conformal Coating Report '{report_name}' (ID: {report_id}) was submitted"
-        )
-        
-        conn.commit()
-        cur.close()
-        
-        return jsonify({
-            "success": True,
-            "message": "Conformal coating inspection report created successfully",
-            "report_id": report_id
-        })
-        
-    except Exception as e:
-        print(f"Error creating conformal coating inspection report: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error creating conformal coating inspection report: {str(e)}")
-
-@reports_bp.route('/api/reports/conformal-coating-inspection/<int:report_id>', methods=['GET'])
-def get_conformal_coating_inspection_report(report_id):
-    """Get conformal coating inspection report details"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT * FROM conformal_coating_inspection_report WHERE report_id = %s
-        """, (report_id,))
-        
-        report = cur.fetchone()
-        cur.close()
-        
-        if not report:
-            return jsonify({"success": False, "message": "Report not found"}), 404
-        
-        # Convert to dictionary
-        columns = [desc[0] for desc in cur.description] if cur.description else []
-        report_data = dict(zip(columns, report))
-        
-        # Convert datetime objects to strings
-        for key, value in report_data.items():
-            if hasattr(value, 'isoformat'):
-                report_data[key] = value.isoformat()
-        
-        return jsonify({
-            "success": True,
-            "report": report_data
-        })
-        
-    except Exception as e:
-        print(f"Error fetching conformal coating inspection report: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error fetching conformal coating inspection report: {str(e)}")
-
-@reports_bp.route('/api/reports/conformal-coating-inspection', methods=['GET'])
-def get_conformal_coating_inspection_reports():
-    """Get all conformal coating inspection reports"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
-                   created_at, updated_at
-            FROM conformal_coating_inspection_report 
-            ORDER BY created_at DESC
-        """)
-        
-        reports = cur.fetchall()
-        cur.close()
-        
-        report_list = []
-        for report in reports:
-            report_list.append({
-                "report_id": report[0],
-                "project_name": report[1],
-                "lru_name": report[2],
-                "report_ref_no": report[3],
-                "memo_ref_no": report[4],
-                "created_at": report[5].isoformat() if report[5] else None,
-                "updated_at": report[6].isoformat() if report[6] else None
-            })
-        
-        return jsonify({
-            "success": True,
-            "reports": report_list
-        })
-        
-    except Exception as e:
-        print(f"Error fetching conformal coating inspection reports: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error fetching conformal coating inspection reports: {str(e)}")
+# NOTE: All conformal coating endpoints have been moved to routes/conformal_coating_inspection.py
+# This file only keeps the reference in the general get_reports endpoint (see get_reports function above)
 
 # Raw Material Inspection Report API Endpoints
 

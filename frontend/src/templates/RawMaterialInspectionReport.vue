@@ -30,6 +30,7 @@
                   type="text"
                   id="projectName"
                   v-model="formData.projectName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -39,6 +40,7 @@
                   type="text"
                   id="reportRefNo"
                   v-model="formData.reportRefNo"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -48,6 +50,7 @@
                   type="text"
                   id="memoRefNo"
                   v-model="formData.memoRefNo"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -57,6 +60,7 @@
                   type="text"
                   id="lruName"
                   v-model="formData.lruName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -66,6 +70,7 @@
                   type="text"
                   id="inspectionStage"
                   v-model="formData.inspectionStage"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -75,6 +80,7 @@
                   type="text"
                   id="testVenue"
                   v-model="formData.testVenue"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -84,6 +90,7 @@
                   type="text"
                   id="slNos"
                   v-model="formData.slNos"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -97,6 +104,7 @@
                   type="text"
                   id="dpName"
                   v-model="formData.dpName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -106,6 +114,7 @@
                   type="date"
                   id="dated1"
                   v-model="formData.dated1"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -115,6 +124,7 @@
                   type="date"
                   id="dated2"
                   v-model="formData.dated2"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -124,6 +134,7 @@
                   type="text"
                   id="sruName"
                   v-model="formData.sruName"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -133,6 +144,7 @@
                   type="text"
                   id="partNo"
                   v-model="formData.partNo"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -142,6 +154,7 @@
                   type="number"
                   id="quantity"
                   v-model="formData.quantity"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -151,6 +164,7 @@
                   type="date"
                   id="startDate"
                   v-model="formData.startDate"
+                  :disabled="readonly"
                   required
                 />
               </div>
@@ -193,21 +207,21 @@
                     {{ checkpoint.description }}
                   </td>
                   <td>
-                    <select v-model="checkpoint.applicability">
+                    <select v-model="checkpoint.applicability" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="A">A</option>
                       <option value="NA">NA</option>
                     </select>
                   </td>
                   <td>
-                    <select v-model="checkpoint.compliance">
+                    <select v-model="checkpoint.compliance" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="YES">YES</option>
                       <option value="NO">NO</option>
                     </select>
                   </td>
                   <td>
-                    <select v-model="checkpoint.remarks">
+                    <select v-model="checkpoint.remarks" :disabled="readonly">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -231,15 +245,15 @@
           <div class="signatures-layout">
             <div class="signature-item">
               <label>Prepared By:</label>
-              <input type="text" v-model="preparedBy" class="signature-input" />
+              <input type="text" v-model="preparedBy" class="signature-input" :disabled="readonly" />
             </div>
             <div class="signature-item">
               <label>Verified By:</label>
-              <input type="text" v-model="verifiedBy" class="signature-input" />
+              <input type="text" v-model="verifiedBy" class="signature-input" :disabled="readonly" />
             </div>
             <div class="signature-item">
               <label>Approved By:</label>
-              <input type="text" v-model="approvedBy" class="signature-input" />
+              <input type="text" v-model="approvedBy" class="signature-input" :disabled="readonly" />
             </div>
           </div>
         </div>

@@ -26,73 +26,31 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input
-                  type="text"
-                  id="projectName"
-                  v-model="formData.projectName"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="projectName" v-model="formData.projectName" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input
-                  type="text"
-                  id="reportRefNo"
-                  v-model="formData.reportRefNo"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input
-                  type="text"
-                  id="memoRefNo"
-                  v-model="formData.memoRefNo"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input
-                  type="text"
-                  id="lruName"
-                  v-model="formData.lruName"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="lruName" v-model="formData.lruName" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input
-                  type="text"
-                  id="inspectionStage"
-                  v-model="formData.inspectionStage"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input
-                  type="text"
-                  id="testVenue"
-                  v-model="formData.testVenue"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="testVenue" v-model="formData.testVenue" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO's:</label>
-                <input
-                  type="text"
-                  id="slNos"
-                  v-model="formData.slNos"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="slNos" v-model="formData.slNos" :disabled="readonly" required>
               </div>
             </div>
 
@@ -100,83 +58,35 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input
-                  type="text"
-                  id="dpName"
-                  v-model="formData.dpName"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="dpName" v-model="formData.dpName" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input
-                  type="date"
-                  id="dated1"
-                  v-model="formData.dated1"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="date" id="dated1" v-model="formData.dated1" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input
-                  type="date"
-                  id="dated2"
-                  v-model="formData.dated2"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="date" id="dated2" v-model="formData.dated2" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input
-                  type="text"
-                  id="sruName"
-                  v-model="formData.sruName"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="sruName" v-model="formData.sruName" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input
-                  type="text"
-                  id="partNo"
-                  v-model="formData.partNo"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="text" id="partNo" v-model="formData.partNo" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input
-                  type="number"
-                  id="quantity"
-                  v-model="formData.quantity"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="number" id="quantity" v-model="formData.quantity" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input
-                  type="date"
-                  id="startDate"
-                  v-model="formData.startDate"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="date" id="startDate" v-model="formData.startDate" :disabled="readonly" required>
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  v-model="formData.endDate"
-                  :readonly="readonly"
-                  required
-                />
+                <input type="date" id="endDate" v-model="formData.endDate" :disabled="readonly" required>
               </div>
             </div>
           </div>
@@ -208,12 +118,7 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="item.observation"
-                      :readonly="readonly"
-                      placeholder="Enter observation"
-                    />
+                    <input type="text" v-model="item.observation" :disabled="readonly" placeholder="Enter observation">
                   </td>
                   <td>
                     <select v-model="item.remarks" :disabled="readonly">
@@ -242,12 +147,7 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="item.observation"
-                      :readonly="readonly"
-                      placeholder="Enter observation"
-                    />
+                    <input type="text" v-model="item.observation" :disabled="readonly" placeholder="Enter observation">
                   </td>
                   <td>
                     <select v-model="item.remarks" :disabled="readonly">
@@ -281,12 +181,7 @@
                     50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
-                    <input
-                      type="text"
-                      v-model="formData.fabricatorReport.observation"
-                      :readonly="readonly"
-                      placeholder="Enter observation"
-                    />
+                    <input type="text" v-model="formData.fabricatorReport.observation" :disabled="readonly" placeholder="Enter observation">
                   </td>
                   <td>
                     <select

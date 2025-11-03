@@ -916,7 +916,8 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 
 export default {
   name: "ViewOnlyMemoForm",
@@ -1647,6 +1648,12 @@ export default {
     // Download memo PDF
     async downloadMemoPDF() {
       try {
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
+        
         console.log(`Downloading PDF for memo ID: ${this.id}`);
 
         // Show loading state

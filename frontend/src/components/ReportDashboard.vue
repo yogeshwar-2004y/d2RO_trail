@@ -241,7 +241,8 @@
 </template>
 
 <script>
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 import { userStore } from "@/stores/userStore";
 
 export default {
@@ -320,10 +321,26 @@ export default {
 
         console.log("API URL:", apiUrl);
 
-        const response = await fetch(apiUrl);
+        const response = await fetch(apiUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }).catch((networkError) => {
+          // Handle network errors (backend not running, CORS, etc.)
+          throw new Error(`Network error: Unable to connect to backend server. Please ensure the backend is running at ${apiUrl}`);
+        });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch reports: ${response.statusText}`);
+          const errorText = await response.text();
+          let errorMessage = `Failed to fetch reports: ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
@@ -338,7 +355,8 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching reports:", error);
-        this.error = error.message;
+        this.error = error.message || "Failed to fetch reports. Please check if the backend server is running.";
+        console.error("Full error details:", error);
       } finally {
         this.loading = false;
       }
@@ -397,6 +415,12 @@ export default {
 
     async downloadDashboardPDF() {
       try {
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
+        
         // Get the element you want to convert (the main dashboard content)
         const element = document.querySelector('.report-dashboard');
         
