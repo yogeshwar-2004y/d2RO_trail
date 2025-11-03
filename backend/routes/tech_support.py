@@ -4,7 +4,7 @@ Tech support management routes
 from flask import Blueprint, request, jsonify
 from config import get_db_connection
 from utils.helpers import handle_database_error
-from utils.activity_logger import log_activity
+from utils.activity_logger import log_activity, log_notification, get_users_by_role
 from datetime import datetime
 
 tech_support_bp = Blueprint('tech_support', __name__)
@@ -72,6 +72,7 @@ def submit_tech_support():
         cur.execute("""
             INSERT INTO tech_support_requests (username, user_id, issue_date, issue_description)
             VALUES (%s, %s, %s, %s)
+            RETURNING id
         """, (
             data['username'],
             str(user_id),  # Convert to string to match database type
@@ -79,19 +80,38 @@ def submit_tech_support():
             data['issue']
         ))
         
+        request_id = cur.fetchone()[0]
+        
         conn.commit()
         cur.close()
         
         # Log the activity
         try:
             log_activity(
-                user_id=data['username'],
-                action="TECH_SUPPORT_REQUEST",
-                details=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
+                project_id=None,
+                activity_performed="TECH_SUPPORT_REQUEST",
+                performed_by=user_id,
+                additional_info=f"Tech support request submitted by {data['username']} (User ID: {data['userId']})"
             )
         except Exception as log_error:
             print(f"Warning: Failed to log activity: {str(log_error)}")
             # Continue execution even if logging fails
+        
+        # Send notifications to all admins
+        try:
+            admins = get_users_by_role(1)  # role_id = 1 for Admin
+            for admin in admins:
+                log_notification(
+                    project_id=None,
+                    activity_performed="New Tech Support Request",
+                    performed_by=user_id,
+                    notified_user_id=admin['user_id'],
+                    notification_type="tech_support_request",
+                    additional_info=f"New tech support request #{request_id} from {data['username']} (User ID: {data['userId']}). Issue: {data['issue'][:100]}{'...' if len(data['issue']) > 100 else ''}"
+                )
+        except Exception as notification_error:
+            print(f"Warning: Failed to send notifications: {str(notification_error)}")
+            # Continue execution even if notifications fail
         
         return jsonify({
             "success": True,
@@ -229,9 +249,10 @@ def update_tech_support_status(request_id):
         # Log the activity
         try:
             log_activity(
-                user_id=str(admin_user_id),
-                action="TECH_SUPPORT_STATUS_UPDATE",
-                details=f"Updated tech support request #{request_id} status to {data['status']}"
+                project_id=None,
+                activity_performed="TECH_SUPPORT_STATUS_UPDATE",
+                performed_by=admin_user_id,
+                additional_info=f"Updated tech support request #{request_id} status to {data['status']}"
             )
         except Exception as log_error:
             print(f"Warning: Failed to log activity: {str(log_error)}")

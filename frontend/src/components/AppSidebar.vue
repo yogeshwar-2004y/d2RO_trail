@@ -1,16 +1,39 @@
 <template>
-  <div class="sidebar-container" :class="{ 'open': isOpen, 'collapsed': isCollapsed }">
-
+  <div
+    class="sidebar-container"
+    :class="{ open: isOpen, collapsed: isCollapsed }"
+  >
     <!-- Sidebar Content -->
-    <div class="sidebar-content" :class="{ 'collapsed': isCollapsed }">
-
+    <div class="sidebar-content" :class="{ collapsed: isCollapsed }">
       <!-- Collapse/Expand Button -->
       <div class="collapse-section">
         <button class="collapse-btn" @click="toggleCollapse">
-          <svg v-if="isCollapsed" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            v-if="isCollapsed"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            v-else
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
@@ -19,7 +42,17 @@
       <!-- User Info Section -->
       <div class="user-info-section">
         <div class="user-avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
@@ -34,11 +67,11 @@
       <div class="navigation-section">
         <h3 v-if="!isCollapsed">Navigation</h3>
         <div class="nav-cards">
-          <div 
-            v-for="card in roleBasedCards" 
+          <div
+            v-for="card in roleBasedCards"
             :key="card.id"
             class="nav-card"
-            :class="{ 'collapsed': isCollapsed }"
+            :class="{ collapsed: isCollapsed }"
             @click="navigateToPage(card.route)"
           >
             <div class="card-icon">
@@ -55,58 +88,166 @@
       <div class="profile-section">
         <h3 v-if="!isCollapsed">Account</h3>
         <div class="profile-menu">
+          <div
+            class="profile-item notification-item-wrapper"
+            @click="openNotifications"
+            :class="{ 'has-notifications': unreadCount > 0 }"
+          >
+            <div class="notification-icon-wrapper">
+              <NotificationIcon />
+              <span v-if="unreadCount > 0" class="notification-count-badge">{{
+                unreadCount > 9 ? "9+" : unreadCount
+              }}</span>
+            </div>
+            <span v-if="!isCollapsed">Notifications</span>
+          </div>
+
           <div class="profile-item" @click="handleProfileAction('profile')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
               <circle cx="12" cy="7" r="4"></circle>
             </svg>
             <span v-if="!isCollapsed">Profile</span>
           </div>
-          
-          <div class="profile-item" @click="handleProfileAction('tech-support')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+          <div
+            class="profile-item"
+            @click="handleProfileAction('tech-support')"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M9 12l2 2 4-4"></path>
-              <path d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"></path>
-              <path d="M3 12h18v6c0 .552-.448 1-1 1H4c-.552 0-1-.448-1-1v-6z"></path>
+              <path
+                d="M21 12c.552 0 1-.448 1-1V5c0-.552-.448-1-1-1H3c-.552 0-1 .448-1 1v6c0 .552.448 1 1 1h18z"
+              ></path>
+              <path
+                d="M3 12h18v6c0 .552-.448 1-1 1H4c-.552 0-1-.448-1-1v-6z"
+              ></path>
             </svg>
             <span v-if="!isCollapsed">Tech Support</span>
           </div>
-          
-          <div class="profile-item password-item" @click="togglePasswordSubmenu" :class="{ 'active': showPasswordSubmenu }">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+          <div
+            class="profile-item password-item"
+            @click="togglePasswordSubmenu"
+            :class="{ active: showPasswordSubmenu }"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <circle cx="12" cy="16" r="1"></circle>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
             <span v-if="!isCollapsed">Passwords</span>
-            <svg v-if="!isCollapsed" class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              v-if="!isCollapsed"
+              class="dropdown-arrow"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </div>
-          
+
           <!-- Password Submenu -->
-          <div class="password-submenu" v-if="showPasswordSubmenu && !isCollapsed">
-            <div class="submenu-item" @click="handleProfileAction('change-login-password')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div
+            class="password-submenu"
+            v-if="showPasswordSubmenu && !isCollapsed"
+          >
+            <div
+              class="submenu-item"
+              @click="handleProfileAction('change-login-password')"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <circle cx="12" cy="16" r="1"></circle>
                 <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
               </svg>
               <span>Login Password</span>
             </div>
-            <div class="submenu-item" @click="handleProfileAction('change-signature-password')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div
+              class="submenu-item"
+              @click="handleProfileAction('change-signature-password')"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M12 20h9"></path>
-                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                <path
+                  d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                ></path>
               </svg>
               <span>Signature Password</span>
             </div>
           </div>
-          
+
           <div class="profile-divider"></div>
-          
+
           <div class="profile-item logout-item" @click="handleLogout">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="16 17 21 12 16 7"></polyline>
               <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -115,12 +256,10 @@
           </div>
         </div>
       </div>
-
-      
     </div>
 
     <!-- Password Change Modal -->
-    <PasswordChangeModal 
+    <PasswordChangeModal
       :isOpen="isPasswordModalOpen"
       :passwordType="passwordType"
       @close="closePasswordModal"
@@ -129,151 +268,255 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { userStore } from '@/stores/userStore'
-import PasswordChangeModal from '@/components/PasswordChangeModal.vue'
+import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import { userStore } from "@/stores/userStore";
+import PasswordChangeModal from "@/components/PasswordChangeModal.vue";
+
+const emit = defineEmits(["open-notifications"]);
 
 // Import icon components
-import HomeIcon from './icons/HomeIcon.vue'
-import DocumentIcon from './icons/DocumentIcon.vue'
-import MemoIcon from './icons/MemoIcon.vue'
-import ReportIcon from './icons/ReportIcon.vue'
-import UserIcon from './icons/UserIcon.vue'
-import AssignIcon from './icons/AssignIcon.vue'
+import HomeIcon from "./icons/HomeIcon.vue";
+import DocumentIcon from "./icons/DocumentIcon.vue";
+import MemoIcon from "./icons/MemoIcon.vue";
+import ReportIcon from "./icons/ReportIcon.vue";
+import UserIcon from "./icons/UserIcon.vue";
+import AssignIcon from "./icons/AssignIcon.vue";
+import NotificationIcon from "./icons/NotificationIcon.vue";
 
-const router = useRouter()
+const router = useRouter();
 
 // Reactive data
-const isOpen = ref(true) // Collapsed by default
-const isCollapsed = ref(true) // Collapsed by default
-const showPasswordSubmenu = ref(false)
-const isPasswordModalOpen = ref(false)
-const passwordType = ref('login')
+const isOpen = ref(true); // Collapsed by default
+const isCollapsed = ref(true); // Collapsed by default
+const showPasswordSubmenu = ref(false);
+const isPasswordModalOpen = ref(false);
+const passwordType = ref("login");
+const unreadCount = ref(0);
+let notificationRefreshInterval = null;
 
 // Computed properties
 const userInfo = computed(() => {
-  return userStore.getters.currentUser() || { name: 'User', role: 'Unknown' }
-})
+  return userStore.getters.currentUser() || { name: "User", role: "Unknown" };
+});
 
 // Role-based cards configuration
 const roleBasedCards = computed(() => {
   // const userRole = userInfo.value.role?.toLowerCase()
-  const userRole = userInfo.value.role?.toLowerCase().replace(/\s+/g, '');
+  const userRole = userInfo.value.role?.toLowerCase().replace(/\s+/g, "");
 
-  console.log('User Role:', userRole) // Debugging line
-  
+  console.log("User Role:", userRole); // Debugging line
+
   const cardDefinitions = {
     admin: [
-      { id: 'home', title: 'Home', route: 'HomePageAdmin', icon: HomeIcon },
-      { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
-      { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
-      { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'user activities', title: 'User Activities', route: 'UserActivities', icon: UserIcon },
+      { id: "home", title: "Home", route: "HomePageAdmin", icon: HomeIcon },
+      {
+        id: "documents",
+        title: "Documents",
+        route: "ProjectsDashboard",
+        icon: DocumentIcon,
+      },
+      { id: "memos", title: "Memos", route: "MemoDashboard", icon: MemoIcon },
+      {
+        id: "reports",
+        title: "Reports",
+        route: "ReportDashboard",
+        icon: ReportIcon,
+      },
+      {
+        id: "user activities",
+        title: "User Activities",
+        route: "UserActivities",
+        icon: UserIcon,
+      },
     ],
     qareviewer: [
-      { id: 'home', title: 'Home', route: 'HomePageReviewer', icon: HomeIcon },
-      { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
-      { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
-      { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon }
+      { id: "home", title: "Home", route: "HomePageReviewer", icon: HomeIcon },
+      {
+        id: "documents",
+        title: "Documents",
+        route: "ProjectsDashboard",
+        icon: DocumentIcon,
+      },
+      { id: "memos", title: "Memos", route: "MemoDashboard", icon: MemoIcon },
+      {
+        id: "reports",
+        title: "Reports",
+        route: "ReportDashboard",
+        icon: ReportIcon,
+      },
     ],
     qahead: [
-      { id: 'home', title: 'Home', route: 'HomePageQAHead', icon: HomeIcon },
-      { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
-      { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
-      { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
+      { id: "home", title: "Home", route: "HomePageQAHead", icon: HomeIcon },
+      {
+        id: "documents",
+        title: "Documents",
+        route: "ProjectsDashboard",
+        icon: DocumentIcon,
+      },
+      { id: "memos", title: "Memos", route: "MemoDashboard", icon: MemoIcon },
+      {
+        id: "reports",
+        title: "Reports",
+        route: "ReportDashboard",
+        icon: ReportIcon,
+      },
     ],
     designhead: [
-      { id: 'home', title: 'Home', route: 'HomePageDesignHead', icon: HomeIcon },
-      { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
-      { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
-      { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon },
-      { id: 'assign', title: 'Assign Projects', route: 'ProjectsForAssigning', icon: AssignIcon }
+      {
+        id: "home",
+        title: "Home",
+        route: "HomePageDesignHead",
+        icon: HomeIcon,
+      },
+      {
+        id: "documents",
+        title: "Documents",
+        route: "ProjectsDashboard",
+        icon: DocumentIcon,
+      },
+      { id: "memos", title: "Memos", route: "MemoDashboard", icon: MemoIcon },
+      {
+        id: "reports",
+        title: "Reports",
+        route: "ReportDashboard",
+        icon: ReportIcon,
+      },
+      {
+        id: "assign",
+        title: "Assign Projects",
+        route: "ProjectsForAssigning",
+        icon: AssignIcon,
+      },
     ],
     designer: [
-      { id: 'home', title: 'Home', route: 'HomePageDesigner', icon: HomeIcon },
-      { id: 'documents', title: 'Documents', route: 'ProjectsDashboard', icon: DocumentIcon },
-      { id: 'memos', title: 'Memos', route: 'MemoDashboard', icon: MemoIcon },
-      { id: 'reports', title: 'Reports', route: 'ReportDashboard', icon: ReportIcon }
-    ]
-  }
-  
-  return cardDefinitions[userRole] || []
-})
+      { id: "home", title: "Home", route: "HomePageDesigner", icon: HomeIcon },
+      {
+        id: "documents",
+        title: "Documents",
+        route: "ProjectsDashboard",
+        icon: DocumentIcon,
+      },
+      { id: "memos", title: "Memos", route: "MemoDashboard", icon: MemoIcon },
+      {
+        id: "reports",
+        title: "Reports",
+        route: "ReportDashboard",
+        icon: ReportIcon,
+      },
+    ],
+  };
+
+  return cardDefinitions[userRole] || [];
+});
 
 // Methods
 const toggleSidebar = () => {
-  isOpen.value = !isOpen.value
+  isOpen.value = !isOpen.value;
   if (!isOpen.value) {
-    showPasswordSubmenu.value = false // Close submenu when closing sidebar
+    showPasswordSubmenu.value = false; // Close submenu when closing sidebar
   }
-}
+};
 
 const toggleCollapse = () => {
-  isCollapsed.value = !isCollapsed.value
-}
+  isCollapsed.value = !isCollapsed.value;
+};
 
 const navigateToPage = (routeName) => {
-  router.push({ name: routeName })
+  router.push({ name: routeName });
   // Close sidebar after navigation on mobile
   if (window.innerWidth <= 768) {
-    isOpen.value = false
+    isOpen.value = false;
   }
-}
+};
 
 const handleProfileAction = (action) => {
   switch (action) {
-    case 'profile':
+    case "profile":
       // Handle profile action
-      console.log('Profile clicked')
-      break
-    case 'tech-support':
+      console.log("Profile clicked");
+      break;
+    case "tech-support":
       // Check if user is admin - if so, go to tech support management, otherwise go to tech support form
-      const userRole = userStore.getters.currentUserRole()
-      const roleName = userStore.getters.roleName()
-      
-      if (userRole === 1 || roleName?.toLowerCase() === 'admin') {
+      const userRole = userStore.getters.currentUserRole();
+      const roleName = userStore.getters.roleName();
+
+      if (userRole === 1 || roleName?.toLowerCase() === "admin") {
         // Admin users go to tech support management page
-        router.push({ name: 'TechSupportManagement' })
+        router.push({ name: "TechSupportManagement" });
       } else {
         // Regular users go to their tech support dashboard
-        router.push({ name: 'TechSupportUserDashboard' })
+        router.push({ name: "TechSupportUserDashboard" });
       }
-      
+
       // Close sidebar after navigation on mobile
       if (window.innerWidth <= 768) {
-        isOpen.value = false
+        isOpen.value = false;
       }
-      break
-    case 'change-login-password':
-      passwordType.value = 'login'
-      isPasswordModalOpen.value = true
-      break
-    case 'change-signature-password':
-      passwordType.value = 'signature'
-      isPasswordModalOpen.value = true
-      break
+      break;
+    case "change-login-password":
+      passwordType.value = "login";
+      isPasswordModalOpen.value = true;
+      break;
+    case "change-signature-password":
+      passwordType.value = "signature";
+      isPasswordModalOpen.value = true;
+      break;
   }
-}
+};
 
 const togglePasswordSubmenu = () => {
-  showPasswordSubmenu.value = !showPasswordSubmenu.value
-}
+  showPasswordSubmenu.value = !showPasswordSubmenu.value;
+};
 
 const closePasswordModal = () => {
-  isPasswordModalOpen.value = false
-}
+  isPasswordModalOpen.value = false;
+};
 
 const handleLogout = async () => {
   // Handle logout
-  await userStore.actions.logout()
-  router.push({ name: 'login' })
-}
+  await userStore.actions.logout();
+  router.push({ name: "login" });
+};
+
+const openNotifications = () => {
+  emit("open-notifications");
+};
+
+const fetchUnreadCount = async () => {
+  try {
+    const currentUser = userStore.getters.currentUser();
+
+    if (!currentUser || !currentUser.id) {
+      return;
+    }
+
+    const response = await fetch(
+      `http://localhost:8000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
+    );
+    const data = await response.json();
+
+    if (data.success) {
+      unreadCount.value = data.notifications.length;
+    }
+  } catch (error) {
+    console.error("Error fetching notification count:", error);
+  }
+};
 
 // Initialize user store on mount
 onMounted(() => {
-  userStore.actions.initializeUser()
-})
+  userStore.actions.initializeUser();
+  fetchUnreadCount();
+  // Refresh every 30 seconds
+  notificationRefreshInterval = setInterval(fetchUnreadCount, 30000);
+});
+
+onUnmounted(() => {
+  if (notificationRefreshInterval) {
+    clearInterval(notificationRefreshInterval);
+  }
+});
 </script>
 
 <style scoped>
@@ -579,6 +822,41 @@ onMounted(() => {
   background: rgba(255, 107, 107, 0.1);
 }
 
+/* Notification Item Styling */
+.notification-item-wrapper {
+  position: relative;
+}
+
+.notification-icon-wrapper {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: #dc3545;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: bold;
+  border: 2px solid #2d3748;
+}
+
+.notification-item-wrapper.has-notifications {
+  font-weight: 600;
+}
+
 /* Collapse Section */
 .collapse-section {
   padding: 10px;
@@ -629,7 +907,7 @@ onMounted(() => {
   .sidebar-content {
     width: 100%;
   }
-  
+
   .sidebar-toggle {
     left: 15px;
     top: 15px;

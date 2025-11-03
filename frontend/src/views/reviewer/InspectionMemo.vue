@@ -1,41 +1,27 @@
-<template>
+ <template>
   <div class="inspection-memo-container">
     <header class="app-header">
       <div class="logo-section">
-        <svg
-          class="icon arrow-left"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
+        <svg 
+          class="icon arrow-left" 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          stroke-width="2" 
+          stroke-linecap="round" 
           stroke-linejoin="round"
           @click="goBack"
         >
-          <path d="M19 12H5M12 19l-7-7 7-7" />
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
         </svg>
         <span class="logo-text">AVIATRAX</span>
         <span class="memo-id">Memo ID: {{ id }}</span>
       </div>
-
+      
       <div class="header-actions">
-        <button
-          class="download-pdf-btn"
-          @click="downloadMemoPDF"
-          title="Download PDF"
-        >
-          <svg
-            class="icon download"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
-            />
+        <button class="download-pdf-btn" @click="downloadMemoPDF" title="Download PDF">
+          <svg class="icon download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
           </svg>
           <span class="download-text">Download PDF</span>
         </button>
@@ -48,37 +34,13 @@
           <h2 class="card-title">REQUISITION FOR DGAQA INSPECTION</h2>
         </div>
         <div class="grid-layout">
-          <div class="grid-item">
-            <span>FROM:</span
-            ><input type="text" v-model="memoData.from" readonly />
-          </div>
-          <div class="grid-item">
-            <span>CASCIC Ref No.:</span
-            ><input type="text" v-model="memoData.cascicRefNo" readonly />
-          </div>
-          <div class="grid-item">
-            <span>CASCIC/</span
-            ><input type="text" v-model="memoData.cascic" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Dated:</span
-            ><input type="text" v-model="memoData.dated" readonly />
-          </div>
-          <div class="grid-item">
-            <span>TO:</span><input type="text" v-model="memoData.to" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Wing/Proj Ref No.:</span
-            ><input type="text" v-model="memoData.wingProjRefNo" readonly />
-          </div>
-          <div class="grid-item-full">
-            <span>Name & contact No of CASCIC (Designs) coordinator:</span
-            ><input
-              type="text"
-              v-model="memoData.coordinatorContact"
-              readonly
-            />
-          </div>
+          <div class="grid-item"><span>FROM:</span><input type="text" v-model="memoData.from" readonly /></div>
+          <div class="grid-item"><span>CASCIC Ref No.:</span><input type="text" v-model="memoData.cascicRefNo" readonly /></div>
+          <div class="grid-item"><span>CASCIC/</span><input type="text" v-model="memoData.cascic" readonly /></div>
+          <div class="grid-item"><span>Dated:</span><input type="text" v-model="memoData.dated" readonly /></div>
+          <div class="grid-item"><span>TO:</span><input type="text" v-model="memoData.to" readonly /></div>
+          <div class="grid-item"><span>Wing/Proj Ref No.:</span><input type="text" v-model="memoData.wingProjRefNo" readonly /></div>
+          <div class="grid-item-full"><span>Name & contact No of CASCIC (Designs) coordinator:</span><input type="text" v-model="memoData.coordinatorContact" readonly /></div>
         </div>
       </div>
       <div class="form-card read-only-section">
@@ -86,90 +48,30 @@
           <h3 class="section-title">LRU/SRU DETAILS</h3>
         </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half">
-            <span>LRU/SRU DETAILS</span
-            ><input type="text" v-model="memoData.lruSruDetails" readonly />
-          </div>
-          <div class="grid-item-half">
-            <span>LRU/SRU Desc:</span
-            ><input type="text" v-model="memoData.lruSruDesc" readonly />
-          </div>
+          <div class="grid-item-half"><span>LRU/SRU DETAILS</span><input type="text" v-model="memoData.lruSruDetails" readonly /></div>
+          <div class="grid-item-half"><span>LRU/SRU Desc:</span><input type="text" v-model="memoData.lruSruDesc" readonly /></div>
         </div>
         <div class="grid-layout two-col-doc">
-          <div class="grid-item">
-            <span>Ref Doc</span
-            ><input type="text" v-model="memoData.refDoc" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Ref No of Document</span
-            ><input type="text" v-model="memoData.refNoDocument" readonly />
-          </div>
-          <div class="grid-item">
-            <span>ver</span
-            ><input type="text" v-model="memoData.version" readonly />
-          </div>
-          <div class="grid-item">
-            <span>rev</span
-            ><input type="text" v-model="memoData.revision" readonly />
-          </div>
+          <div class="grid-item"><span>Ref Doc</span><input type="text" v-model="memoData.refDoc" readonly /></div>
+          <div class="grid-item"><span>Ref No of Document</span><input type="text" v-model="memoData.refNoDocument" readonly /></div>
+          <div class="grid-item"><span>ver</span><input type="text" v-model="memoData.version" readonly /></div>
+          <div class="grid-item"><span>rev</span><input type="text" v-model="memoData.revision" readonly /></div>
         </div>
         <div class="grid-layout">
-          <div class="grid-item">
-            <span>Part No:</span
-            ><input type="text" v-model="memoData.partNo" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Manufacturer:</span
-            ><input type="text" v-model="memoData.manufacturer" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Sl.No of units:</span
-            ><input type="text" v-model="memoData.serialNo" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Drawing no/Rev:</span
-            ><input type="text" v-model="memoData.drawingNoRev" readonly />
-          </div>
-          <div class="grid-item">
-            <span>Qty Offered:</span
-            ><input type="text" v-model="memoData.qtyOffered" readonly />
-          </div>
-          <div class="grid-item">
-            <span>source:</span
-            ><input type="text" v-model="memoData.source" readonly />
-          </div>
+          <div class="grid-item"><span>Part No:</span><input type="text" v-model="memoData.partNo" readonly /></div>
+          <div class="grid-item"><span>Manufacturer:</span><input type="text" v-model="memoData.manufacturer" readonly /></div>
+          <div class="grid-item"><span>Sl.No of units:</span><input type="text" v-model="memoData.serialNo" readonly /></div>
+          <div class="grid-item"><span>Drawing no/Rev:</span><input type="text" v-model="memoData.drawingNoRev" readonly /></div>
+          <div class="grid-item"><span>Qty Offered:</span><input type="text" v-model="memoData.qtyOffered" readonly /></div>
+          <div class="grid-item"><span>source:</span><input type="text" v-model="memoData.source" readonly /></div>
         </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half">
-            <span>UNIT IDENTIFICATION:</span
-            ><input
-              type="text"
-              v-model="memoData.unitIdentification"
-              readonly
-            />
-          </div>
-          <div class="grid-item-half">
-            <span>MECHANICAL INSPN:</span
-            ><input
-              type="text"
-              v-model="memoData.mechanicalInspection"
-              readonly
-            />
-          </div>
+          <div class="grid-item-half"><span>UNIT IDENTIFICATION:</span><input type="text" v-model="memoData.unitIdentification" readonly /></div>
+          <div class="grid-item-half"><span>MECHANICAL INSPN:</span><input type="text" v-model="memoData.mechanicalInspection" readonly /></div>
         </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half">
-            <span>INSPECTION /TEST STAGE OFFERED NOW:</span
-            ><input
-              type="text"
-              v-model="memoData.inspectionTestStage"
-              readonly
-            />
-          </div>
-          <div class="grid-item-half">
-            <span>STTE Status:</span
-            ><input type="text" v-model="memoData.stteStatus" readonly />
-          </div>
+          <div class="grid-item-half"><span>INSPECTION /TEST STAGE OFFERED NOW:</span><input type="text" v-model="memoData.inspectionTestStage" readonly /></div>
+          <div class="grid-item-half"><span>STTE Status:</span><input type="text" v-model="memoData.stteStatus" readonly /></div>
         </div>
       </div>
       <div class="form-card read-only-section">
@@ -177,70 +79,16 @@
           <h3 class="section-title">TESTING DETAILS</h3>
         </div>
         <div class="grid-layout">
-          <div class="grid-item-half">
-            <span>Above Unit is ready for Testing at venue, dated onwards.</span
-            ><input type="text" v-model="memoData.testingVenueDate" readonly />
-          </div>
-          <div class="grid-item-half">
-            <span>Test facility to be used:</span
-            ><input type="text" v-model="memoData.testFacility" readonly />
-          </div>
-          <div class="grid-item-half">
-            <span>Calibration status OK/Due on:</span
-            ><input type="text" v-model="memoData.calibrationStatus" readonly />
-          </div>
-          <div class="grid-item-half">
-            <span>SIGNATURE: NAME / DESIGNATION</span
-            ><input
-              type="text"
-              v-model="memoData.signatureNameDesignation"
-              readonly
-            />
-          </div>
-          <div class="grid-item-quarter">
-            <span>Test cycle / Duration:</span
-            ><input
-              type="text"
-              v-model="memoData.testCycleDuration"
-              readonly
-            /><span>hrs</span>
-          </div>
-          <div class="grid-item-quarter">
-            <span>Func. Check(Initial):</span
-            ><input
-              type="text"
-              v-model="memoData.funcCheckInitial"
-              readonly
-            /><span>date/time</span>
-          </div>
-          <div class="grid-item-quarter">
-            <span>Test Start on:</span
-            ><input type="text" v-model="memoData.testStartOn" readonly /><span
-              >date/time</span
-            >
-          </div>
-          <div class="grid-item-quarter">
-            <span>Perf. check (during):</span
-            ><input
-              type="text"
-              v-model="memoData.perfCheckDuring"
-              readonly
-            /><span>date/time</span>
-          </div>
-          <div class="grid-item-half">
-            <span>Test complete on:</span
-            ><input
-              type="text"
-              v-model="memoData.testCompleteOn"
-              readonly
-            /><span>date/time</span>
-          </div>
-          <div class="grid-item-half">
-            <span>Func Check (End):</span
-            ><input type="text" v-model="memoData.funcCheckEnd" readonly /><span
-              >date/time</span
-            >
-          </div>
+          <div class="grid-item-half"><span>Above Unit is ready for Testing at venue, dated onwards.</span><input type="text" v-model="memoData.testingVenueDate" readonly /></div>
+          <div class="grid-item-half"><span>Test facility to be used:</span><input type="text" v-model="memoData.testFacility" readonly /></div>
+          <div class="grid-item-half"><span>Calibration status OK/Due on:</span><input type="text" v-model="memoData.calibrationStatus" readonly /></div>
+          <div class="grid-item-half"><span>SIGNATURE: NAME / DESIGNATION</span><input type="text" v-model="memoData.signatureNameDesignation" readonly /></div>
+          <div class="grid-item-quarter"><span>Test cycle / Duration:</span><input type="text" v-model="memoData.testCycleDuration" readonly /><span>hrs</span></div>
+          <div class="grid-item-quarter"><span>Func. Check(Initial):</span><input type="text" v-model="memoData.funcCheckInitial" readonly /><span>date/time</span></div>
+          <div class="grid-item-quarter"><span>Test Start on:</span><input type="text" v-model="memoData.testStartOn" readonly /><span>date/time</span></div>
+          <div class="grid-item-quarter"><span>Perf. check (during):</span><input type="text" v-model="memoData.perfCheckDuring" readonly /><span>date/time</span></div>
+          <div class="grid-item-half"><span>Test complete on:</span><input type="text" v-model="memoData.testCompleteOn" readonly /><span>date/time</span></div>
+          <div class="grid-item-half"><span>Func Check (End):</span><input type="text" v-model="memoData.funcCheckEnd" readonly /><span>date/time</span></div>
         </div>
       </div>
       <div class="form-card read-only-section">
@@ -249,49 +97,12 @@
         </div>
         <div class="grid-layout one-col-checkbox">
           <p class="checkbox-title">It is certified that :</p>
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.mechanicalQualityRecords"
-            />Mechanical Quality Records of all the parts (Raw material TC
-            (chemical & mechanical), Dimensional reports, NDT reports, Process
-            certificates etc.) & Electrical Quality Records (Components
-            Screening report, PCB manufacturing report, process compliance
-            reports/ test reports, etc.) were verified thoroughly.</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.cocVerified"
-            />CoC for SRU, fasteners & standard parts are verified and
-            satisfactory</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.sruSerialNoted"
-            />Sl no of the SRUs are noted down in the respective log book opened
-            on _________</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.noDefectInvestigation"
-            />No Defect investigation is pending against this LRU</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.previousTestStagesCleared"
-            />All the previous test stages of this LRU/SRU are cleared</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              v-model="memoData.certifications.cascicQAInspected"
-            />CASCIC QA has physically inspected and accepted the LRU on
-            _________</label
-          >
+          <label><input type="checkbox" v-model="memoData.certifications.mechanicalQualityRecords"  />Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
+          <label><input type="checkbox" v-model="memoData.certifications.cocVerified"  />CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
+          <label><input type="checkbox" v-model="memoData.certifications.sruSerialNoted"  />Sl no of the SRUs are noted down in the respective log book opened on _________</label>
+          <label><input type="checkbox" v-model="memoData.certifications.noDefectInvestigation"  />No Defect investigation is pending against this LRU</label>
+          <label><input type="checkbox" v-model="memoData.certifications.previousTestStagesCleared"  />All the previous test stages of this LRU/SRU are cleared</label>
+          <label><input type="checkbox" v-model="memoData.certifications.cascicQAInspected"  />CASCIC QA has physically inspected and accepted the LRU on _________</label>
           <span class="signature-line">SIGNATURE of Rep, IQA CASCIC</span>
         </div>
       </div>
@@ -308,48 +119,32 @@
         <div class="section-header">
           <h3 class="section-title">TEST STATUS</h3>
         </div>
-        <div class="grid-layout one-col-radio">
-          <label>
-            <input
-              type="radio"
-              value="Successfully completed"
-              v-model="memoData.testStatus"
-            />
-            Successfully completed
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="Completed with observations"
-              v-model="memoData.testStatus"
-            />
-            Completed with observations
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="Test not conducted"
-              v-model="memoData.testStatus"
-            />
-            Test not conducted
-          </label>
-          <label>
-            <input
-              type="radio"
-              value="Test failed"
-              v-model="memoData.testStatus"
-            />
-            Test failed
-          </label>
-        </div>
+       <div class="grid-layout one-col-radio">
+  <label>
+    <input type="radio" value="Successfully completed" v-model="memoData.testStatus" />
+    Successfully completed
+  </label>
+  <label>
+    <input type="radio" value="Completed with observations" v-model="memoData.testStatus" />
+    Completed with observations
+  </label>
+  <label>
+    <input type="radio" value="Test not conducted" v-model="memoData.testStatus" />
+    Test not conducted
+  </label>
+  <label>
+    <input type="radio" value="Test failed" v-model="memoData.testStatus" />
+    Test failed
+  </label>
+</div>
       </div>
       <div class="form-card editable-section">
         <div class="section-header">
           <h3 class="section-title">Remarks by QA Reviewer</h3>
         </div>
         <div class="grid-layout">
-          <textarea
-            v-model="memoData.reviewerComments"
+          <textarea 
+            v-model="memoData.reviewerComments" 
             class="reviewer-comments"
             placeholder="Enter reviewer comments..."
             rows="4"
@@ -358,7 +153,7 @@
         </div>
       </div>
     </div>
-    <!-- 
+<!-- 
 <div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
       <div class="share-modal-content">
         <h2>Share via Email</h2>
@@ -370,73 +165,79 @@
       </div>
     </div>    
 -->
+    
 
     <!-- Submit Button -->
     <div class="submit-section">
-      <button class="submit-button" @click="submitMemo">Submit</button>
+      <button class="submit-button" @click="submitMemo">
+        Submit
+      </button>
     </div>
   </div>
 </template>
 
 <script>
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
+
 export default {
-  name: "InspectionMemo",
+  name: 'InspectionMemo',
   props: {
     id: {
       type: [String, Number],
-      required: true,
-    },
+      required: true
+    }
   },
   data() {
     return {
       showShareModal: false,
-      emailAddresses: "",
+      emailAddresses: '',
       memoData: {
-        dgaqaRemarks: "All records verified. Proceed as per plan.",
-        from: "CASCIC Design Team",
-        cascicRefNo: "CASCIC/2025/001",
-        cascic: "CASCIC/DES/2025",
-        dated: "15-01-2025",
-        to: "DGAQA Inspection Team",
-        wingProjRefNo: "WING/PROJ/2025/001",
-        coordinatorContact: "Sumith",
-        lruSruDetails: "LRU-001",
-        lruSruDesc: "Flight Control Unit",
-        refDoc: "FCU-SPEC-001",
-        refNoDocument: "DOC/FCU/2025/001",
-        version: "1.0",
-        revision: "A",
-        partNo: "FCU-001-REV-A",
-        manufacturer: "Aviation Systems Ltd.",
-        serialNo: "SN001234567",
-        drawingNoRev: "DRW/FCU/001-REV-A",
-        qtyOffered: "2",
-        source: "Manufacturer",
-        unitIdentification: "FCU-001-REV-A-SN001234567",
-        mechanicalInspection: "PASSED",
-        inspectionTestStage: "Final Assembly Test",
-        stteStatus: "READY",
-        testingVenueDate: "20-01-2025",
-        testFacility: "Test Lab A",
-        calibrationStatus: "OK",
-        signatureNameDesignation: "Design Engineer",
-        testCycleDuration: "24",
-        funcCheckInitial: "20-01-2025 09:00",
-        testStartOn: "20-01-2025 10:00",
-        perfCheckDuring: "20-01-2025 14:00",
-        testCompleteOn: "21-01-2025 10:00",
-        funcCheckEnd: "21-01-2025 11:00",
+        dgaqaRemarks: 'All records verified. Proceed as per plan.',
+        from: 'CASCIC Design Team',
+        cascicRefNo: 'CASCIC/2025/001',
+        cascic: 'CASCIC/DES/2025',
+        dated: '15-01-2025',
+        to: 'DGAQA Inspection Team',
+        wingProjRefNo: 'WING/PROJ/2025/001',
+        coordinatorContact: 'Sumith',
+        lruSruDetails: 'LRU-001',
+        lruSruDesc: 'Flight Control Unit',
+        refDoc: 'FCU-SPEC-001',
+        refNoDocument: 'DOC/FCU/2025/001',
+        version: '1.0',
+        revision: 'A',
+        partNo: 'FCU-001-REV-A',
+        manufacturer: 'Aviation Systems Ltd.',
+        serialNo: 'SN001234567',
+        drawingNoRev: 'DRW/FCU/001-REV-A',
+        qtyOffered: '2',
+        source: 'Manufacturer',
+        unitIdentification: 'FCU-001-REV-A-SN001234567',
+        mechanicalInspection: 'PASSED',
+        inspectionTestStage: 'Final Assembly Test',
+        stteStatus: 'READY',
+        testingVenueDate: '20-01-2025',
+        testFacility: 'Test Lab A',
+        calibrationStatus: 'OK',
+        signatureNameDesignation: 'Design Engineer',
+        testCycleDuration: '24',
+        funcCheckInitial: '20-01-2025 09:00',
+        testStartOn: '20-01-2025 10:00',
+        perfCheckDuring: '20-01-2025 14:00',
+        testCompleteOn: '21-01-2025 10:00',
+        funcCheckEnd: '21-01-2025 11:00',
         certifications: {
           mechanicalQualityRecords: true,
           cocVerified: true,
           sruSerialNoted: true,
           noDefectInvestigation: true,
           previousTestStagesCleared: true,
-          cascicQAInspected: true,
+          cascicQAInspected: true
         },
-        reviewerComments: "",
-        testStatus: "",
-      },
+        reviewerComments: '',
+        testStatus: ''
+      }
     };
   },
   mounted() {
@@ -449,17 +250,15 @@ export default {
     async fetchMemoData() {
       try {
         // Check if data was passed via sessionStorage (from dashboard navigation)
-        if (this.$route.query.hasData === "true") {
+        if (this.$route.query.hasData === 'true') {
           const storedMemoData = sessionStorage.getItem(`memoData_${this.id}`);
-          const storedReferences = sessionStorage.getItem(
-            `references_${this.id}`
-          );
-
+          const storedReferences = sessionStorage.getItem(`references_${this.id}`);
+          
           if (storedMemoData && storedReferences) {
             const memoData = JSON.parse(storedMemoData);
             const references = JSON.parse(storedReferences);
             this.transformAndSetMemoData(memoData, references);
-
+            
             // Clean up sessionStorage after use
             sessionStorage.removeItem(`memoData_${this.id}`);
             sessionStorage.removeItem(`references_${this.id}`);
@@ -470,21 +269,19 @@ export default {
         // Otherwise, fetch from API
         const response = await fetch(`/api/memos/${this.id}`);
         if (!response.ok) {
-          throw new Error(
-            `Failed to fetch memo details: ${response.statusText}`
-          );
+          throw new Error(`Failed to fetch memo details: ${response.statusText}`);
         }
 
         const data = await response.json();
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
         } else {
-          throw new Error(data.message || "Failed to fetch memo details");
+          throw new Error(data.message || 'Failed to fetch memo details');
         }
       } catch (error) {
-        console.error("Error fetching memo data:", error);
+        console.error('Error fetching memo data:', error);
         // Fallback to default data if fetch fails
-        console.log("Using default memo data due to fetch error");
+        console.log('Using default memo data due to fetch error');
       }
     },
 
@@ -492,112 +289,104 @@ export default {
       // Transform backend memo data to frontend format
       this.memoData = {
         // Basic memo information
-        dgaqaRemarks: backendMemo.remarks || "No remarks provided",
-        from: backendMemo.from_person || "CASCIC Design Team",
-        cascicRefNo: backendMemo.casdic_ref_no || "",
-        cascic: backendMemo.casdic_ref_no || "",
+        dgaqaRemarks: backendMemo.remarks || 'No remarks provided',
+        from: backendMemo.from_person || 'CASCIC Design Team',
+        cascicRefNo: backendMemo.casdic_ref_no || '',
+        cascic: backendMemo.casdic_ref_no || '',
         dated: this.formatDate(backendMemo.dated),
-        to: backendMemo.to_person || "DGAQA Inspection Team",
-        wingProjRefNo: backendMemo.wing_proj_ref_no || "",
-        coordinatorContact: backendMemo.name_designation || "",
-
+        to: backendMemo.to_person || 'DGAQA Inspection Team',
+        wingProjRefNo: backendMemo.wing_proj_ref_no || '',
+        coordinatorContact: backendMemo.name_designation || '',
+        
         // LRU/SRU Details
-        lruSruDetails: backendMemo.part_number || "",
-        lruSruDesc: backendMemo.lru_sru_desc || "",
-        refDoc: references[0]?.ref_doc || "",
-        refNoDocument: references[0]?.ref_no || "",
-        version: references[0]?.ver?.toString() || "",
-        revision: references[0]?.rev?.toString() || "",
-        partNo: backendMemo.part_number || "",
-        manufacturer: backendMemo.manufacturer || "",
+        lruSruDetails: backendMemo.part_number || '',
+        lruSruDesc: backendMemo.lru_sru_desc || '',
+        refDoc: references[0]?.ref_doc || '',
+        refNoDocument: references[0]?.ref_no || '',
+        version: references[0]?.ver?.toString() || '',
+        revision: references[0]?.rev?.toString() || '',
+        partNo: backendMemo.part_number || '',
+        manufacturer: backendMemo.manufacturer || '',
         serialNo: this.formatSerialNumbers(backendMemo.slno_units),
-        drawingNoRev: backendMemo.drawing_no_rev || "",
-        qtyOffered: backendMemo.qty_offered?.toString() || "0",
-        source: backendMemo.source || "",
-        unitIdentification: this.formatUnitIdentification(
-          backendMemo.unit_identification
-        ),
-        mechanicalInspection: backendMemo.mechanical_inspn || "",
-        inspectionTestStage: backendMemo.inspn_test_stage_offered || "",
-        stteStatus: backendMemo.stte_status || "",
-
+        drawingNoRev: backendMemo.drawing_no_rev || '',
+        qtyOffered: backendMemo.qty_offered?.toString() || '0',
+        source: backendMemo.source || '',
+        unitIdentification: this.formatUnitIdentification(backendMemo.unit_identification),
+        mechanicalInspection: backendMemo.mechanical_inspn || '',
+        inspectionTestStage: backendMemo.inspn_test_stage_offered || '',
+        stteStatus: backendMemo.stte_status || '',
+        
         // Testing Details
         testingVenueDate: this.formatDate(backendMemo.memo_date),
-        testFacility: backendMemo.test_facility || "",
-        calibrationStatus: backendMemo.calibration_status || "",
-        signatureNameDesignation: backendMemo.name_designation || "",
-        testCycleDuration: backendMemo.test_cycle_duration || "",
+        testFacility: backendMemo.test_facility || '',
+        calibrationStatus: backendMemo.calibration_status || '',
+        signatureNameDesignation: backendMemo.name_designation || '',
+        testCycleDuration: backendMemo.test_cycle_duration || '',
         funcCheckInitial: this.formatDateTime(backendMemo.func_check_initial),
         testStartOn: this.formatDateTime(backendMemo.test_start_on),
         perfCheckDuring: this.formatDateTime(backendMemo.perf_check_during),
         testCompleteOn: this.formatDateTime(backendMemo.test_complete_on),
         funcCheckEnd: this.formatDateTime(backendMemo.func_check_end),
-
+        
         // Certifications object with all required properties
         certifications: {
-          mechanicalQualityRecords:
-            backendMemo.certified?.includes("a") || false,
-          cocVerified: backendMemo.certified?.includes("b") || false,
-          sruSerialNoted: backendMemo.certified?.includes("c") || false,
-          noDefectInvestigation: backendMemo.certified?.includes("d") || false,
-          previousTestStagesCleared:
-            backendMemo.certified?.includes("e") || false,
-          cascicQAInspected: backendMemo.certified?.includes("f") || false,
+          mechanicalQualityRecords: backendMemo.certified?.includes('a') || false,
+          cocVerified: backendMemo.certified?.includes('b') || false,
+          sruSerialNoted: backendMemo.certified?.includes('c') || false,
+          noDefectInvestigation: backendMemo.certified?.includes('d') || false,
+          previousTestStagesCleared: backendMemo.certified?.includes('e') || false,
+          cascicQAInspected: backendMemo.certified?.includes('f') || false,
         },
-
+        
         // Test Status - single string value for radio button selection
-        testStatus: "",
-
+        testStatus: '',
+        
         // Reviewer comments (empty for view-only)
-        reviewerComments: "",
+        reviewerComments: ''
       };
     },
 
     formatDate(dateString) {
-      if (!dateString) return "";
+      if (!dateString) return '';
       try {
         const date = new Date(dateString);
-        return date
-          .toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-          })
-          .replace(/\//g, "-");
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        }).replace(/\//g, '-');
       } catch {
         return dateString;
       }
     },
 
     formatDateTime(datetimeString) {
-      if (!datetimeString) return "";
+      if (!datetimeString) return '';
       try {
         const date = new Date(datetimeString);
-        return date
-          .toLocaleString("en-GB", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-          .replace(",", "");
+        return date.toLocaleString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(',', '');
       } catch {
         return datetimeString;
       }
     },
 
     formatSerialNumbers(serialArray) {
-      if (!serialArray || !Array.isArray(serialArray)) return "";
-      return serialArray.join(", ");
+      if (!serialArray || !Array.isArray(serialArray)) return '';
+      return serialArray.join(', ');
     },
 
     formatUnitIdentification(unitIdArray) {
-      if (!unitIdArray || !Array.isArray(unitIdArray)) return "";
-      return unitIdArray.join(", ");
+      if (!unitIdArray || !Array.isArray(unitIdArray)) return '';
+      return unitIdArray.join(', ');
     },
 
-    /** toggleShareModal() {
+   /** toggleShareModal() {
       this.showShareModal = !this.showShareModal;
       if (!this.showShareModal) {
         this.emailAddresses = ''; // Clear input on close
@@ -615,60 +404,55 @@ export default {
       
       alert(`Memo sent successfully to: ${emails.join(', ')}`);
       this.toggleShareModal(); // Close the modal after "sending"
-    },*/
+    },*/ 
     async submitMemo() {
       // Validate that a test status is selected
       if (!this.memoData.testStatus) {
-        alert("Please select a test status.");
+        alert('Please select a test status.');
         return;
       }
-
+      
       if (!this.memoData.reviewerComments.trim()) {
-        alert("Please provide reviewer comments.");
+        alert('Please provide reviewer comments.');
         return;
       }
-
+      
       try {
         // Prepare certification data for backend
         const certified = [];
-        if (this.memoData.certifications.mechanicalQualityRecords)
-          certified.push("a");
-        if (this.memoData.certifications.cocVerified) certified.push("b");
-        if (this.memoData.certifications.sruSerialNoted) certified.push("c");
-        if (this.memoData.certifications.noDefectInvestigation)
-          certified.push("d");
-        if (this.memoData.certifications.previousTestStagesCleared)
-          certified.push("e");
-        if (this.memoData.certifications.cascicQAInspected) certified.push("f");
-
+        if (this.memoData.certifications.mechanicalQualityRecords) certified.push('a');
+        if (this.memoData.certifications.cocVerified) certified.push('b');
+        if (this.memoData.certifications.sruSerialNoted) certified.push('c');
+        if (this.memoData.certifications.noDefectInvestigation) certified.push('d');
+        if (this.memoData.certifications.previousTestStagesCleared) certified.push('e');
+        if (this.memoData.certifications.cascicQAInspected) certified.push('f');
+        
         // Update memo status via API
         const response = await fetch(`/api/memos/${this.id}/status`, {
-          method: "PUT",
+          method: 'PUT',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             test_status: this.memoData.testStatus,
             reviewer_comments: this.memoData.reviewerComments,
-            certified: certified,
-          }),
+            certified: certified
+          })
         });
-
+        
         if (!response.ok) {
-          throw new Error(
-            `Failed to update memo status: ${response.statusText}`
-          );
+          throw new Error(`Failed to update memo status: ${response.statusText}`);
         }
-
+        
         const result = await response.json();
         if (result.success) {
-          alert("Memo status updated successfully!");
+          alert('Memo status updated successfully!');
           this.goBack(); // Navigate back after successful submission
         } else {
-          throw new Error(result.message || "Failed to update memo status");
+          throw new Error(result.message || 'Failed to update memo status');
         }
       } catch (error) {
-        console.error("Error updating memo status:", error);
+        console.error('Error updating memo status:', error);
         alert(`Error updating memo status: ${error.message}`);
       }
     },
@@ -676,62 +460,66 @@ export default {
     // Download memo PDF
     async downloadMemoPDF() {
       try {
-        console.log(`Downloading PDF for memo ID: ${this.id}`);
-
-        // Show loading state
-        const button = event.target.closest(".download-pdf-btn");
-        const originalText = button.querySelector(".download-text").textContent;
-        button.querySelector(".download-text").textContent = "Loading...";
-        button.disabled = true;
-
-        // Make request to backend PDF endpoint
-        const response = await fetch(
-          `http://localhost:8000/api/memos/${this.id}/pdf`,
-          {
-            method: "GET",
-            headers: {
-              Accept: "application/pdf",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to generate PDF: ${response.statusText}`);
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
         }
-
-        // Get the PDF blob
-        const blob = await response.blob();
-
-        // Create download link
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `memo_${this.id}_${new Date()
-          .toISOString()
-          .slice(0, 19)
-          .replace(/:/g, "-")}.pdf`;
-
-        // Trigger download
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Clean up
-        window.URL.revokeObjectURL(url);
-
+        
+        console.log(`Downloading PDF for memo ID: ${this.id}`);
+        
+        // Show loading state
+        const button = event.target.closest('.download-pdf-btn');
+        const originalText = button.querySelector('.download-text').textContent;
+        button.querySelector('.download-text').textContent = 'Loading...';
+        button.disabled = true;
+        
+        // Get the element you want to convert (the main memo content)
+        const element = document.querySelector('.form-content');
+        
+        if (!element) {
+          alert('Memo content not found');
+          return;
+        }
+        
+        // Configure options to match the page appearance
+        const opt = {
+          margin: 0.5,
+          filename: `memo_${this.id}_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { 
+            scale: 2,
+            useCORS: true,
+            letterRendering: true,
+            allowTaint: true,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
+          },
+          jsPDF: { 
+            unit: 'in', 
+            format: 'a4', 
+            orientation: 'portrait' 
+          }
+        };
+        
+        // Generate PDF from HTML
+        await html2pdf().set(opt).from(element).save();
+        
         console.log(`PDF downloaded successfully for memo ${this.id}`);
+        
       } catch (error) {
-        console.error("Error downloading memo PDF:", error);
+        console.error('Error downloading memo PDF:', error);
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
+        const button = event.target.closest('.download-pdf-btn');
         if (button) {
-          button.querySelector(".download-text").textContent = originalText;
+          button.querySelector('.download-text').textContent = originalText;
           button.disabled = false;
         }
       }
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -905,8 +693,7 @@ export default {
   flex-direction: column;
 }
 
-.grid-item-half,
-.grid-item-quarter {
+.grid-item-half, .grid-item-quarter {
   display: flex;
   flex-direction: column;
 }
@@ -917,10 +704,7 @@ export default {
   flex-direction: column;
 }
 
-.grid-item input,
-.grid-item-full input,
-.grid-item-half input,
-.grid-item-quarter input {
+.grid-item input, .grid-item-full input, .grid-item-half input, .grid-item-quarter input {
   width: 100%;
   padding: 8px 12px;
   border: 2px solid var(--border-color);
@@ -932,10 +716,7 @@ export default {
   transition: border-color 0.3s ease;
 }
 
-.grid-item input:focus,
-.grid-item-full input:focus,
-.grid-item-half input:focus,
-.grid-item-quarter input:focus {
+.grid-item input:focus, .grid-item-full input:focus, .grid-item-half input:focus, .grid-item-quarter input:focus {
   outline: none;
   border-color: #555;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
@@ -953,10 +734,7 @@ export default {
   cursor: text;
 }
 
-.grid-item span,
-.grid-item-full span,
-.grid-item-half span,
-.grid-item-quarter span {
+.grid-item span, .grid-item-full span, .grid-item-half span, .grid-item-quarter span {
   font-size: 0.9em;
 }
 
@@ -1136,7 +914,7 @@ export default {
 .editable-section {
   border-left: none;
   background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   border: 1px solid var(--border-color);
 }
 
@@ -1161,7 +939,7 @@ export default {
 .read-only-section {
   border-left: none;
   background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   border: 1px solid var(--border-color);
 }
 
@@ -1173,4 +951,5 @@ export default {
   font-size: 1.2em;
   font-weight: bold;
 }
+
 </style>

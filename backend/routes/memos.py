@@ -177,14 +177,36 @@ def submit_memo():
 
         memo_id = cur.fetchone()[0]
 
-        # Log memo submission activity
-        from utils.activity_logger import log_activity
+        # Log memo submission activity and notify QA Head(s) when submitted by Designer or Design Head
+        from utils.activity_logger import log_activity, log_notification, get_users_by_role
         log_activity(
             project_id=None,  # Memo operations don't have project_id
             activity_performed="Memo Submitted",
             performed_by=data.get('submitted_by'),
             additional_info=f"ID:{memo_id}|Name:{form_data.get('lruSruDesc', 'Memo')}|Memo '{form_data.get('lruSruDesc', 'Memo')}' (ID: {memo_id}) was submitted"
         )
+
+        # Notify QA Heads (role_id = 2) when a Designer (role_id = 5) or Design Head (role_id = 4) submits a memo
+        try:
+            submitted_by_id = data.get('submitted_by')
+            if submitted_by_id:
+                # Fetch roles for the submitting user
+                cur.execute("SELECT role_id FROM user_roles WHERE user_id = %s", (submitted_by_id,))
+                user_roles = [r[0] for r in cur.fetchall()]
+
+                if any(role in (4, 5) for role in user_roles):
+                    qa_heads = get_users_by_role(2)
+                    for qa_head in qa_heads:
+                        log_notification(
+                            project_id=None,
+                            activity_performed="New Memo Submitted",
+                            performed_by=submitted_by_id,
+                            notified_user_id=qa_head['user_id'],
+                            notification_type="memo_submitted",
+                            additional_info=f"Memo ID {memo_id} submitted by user ID {submitted_by_id}. Please review."
+                        )
+        except Exception as notify_err:
+            print(f"Error sending memo notifications: {notify_err}")
 
         # Insert reference documents into memo_references table
         references = []
@@ -599,10 +621,10 @@ def approve_memo(memo_id):
                 WHERE memo_id = %s
             """, (datetime.now(), data.get('approved_by'), memo_id))
         elif status == 'rejected':
-            print(f"Updating memo {memo_id} with rejected status...")
+            print(f"Updating memo {memo_id} with disapproved status...")
             cur.execute("""
                 UPDATE memos 
-                SET memo_status = 'rejected'
+                SET memo_status = 'disapproved'
                 WHERE memo_id = %s
             """, (memo_id,))
             
@@ -610,6 +632,76 @@ def approve_memo(memo_id):
             cur.execute("DELETE FROM reports WHERE memo_id = %s", (memo_id,))
             if cur.rowcount > 0:
                 print(f"Removed existing report for rejected memo {memo_id}")
+            
+            # Send notifications for rejected memo
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+
+                performed_by = data.get('approved_by')
+                notified_user_ids = set()
+
+                # 1) First get submitter info and role
+                cur.execute("""
+                    SELECT m.submitted_by, u.name, ur.role_id 
+                    FROM memos m 
+                    LEFT JOIN users u ON m.submitted_by = u.user_id 
+                    LEFT JOIN user_roles ur ON m.submitted_by = ur.user_id
+                    WHERE m.memo_id = %s
+                """, (memo_id,))
+                
+                rows = cur.fetchall()
+                submitted_by_id = rows[0][0] if rows else None
+                submitted_by_name = rows[0][1] if rows and rows[0][1] else None
+                submitter_roles = [r[2] for r in rows] if rows else []
+                
+                # Determine if submitter is a Design Head
+                is_submitter_design_head = 4 in submitter_roles
+
+                # 2) Always notify Design Heads about rejection
+                try:
+                    design_heads = get_users_by_role(4)
+                    for dh in design_heads:
+                        dh_id = dh.get('user_id')
+                        if not dh_id or dh_id in notified_user_ids:
+                            continue
+                        
+                        # Include submitter info in notification if they're not the design head
+                        if submitted_by_id and dh_id != submitted_by_id:
+                            submitter_label = submitted_by_name or f"User ID {submitted_by_id}"
+                            info = f"Memo ID {memo_id} submitted by {submitter_label} was rejected by QA Head ID {performed_by}."
+                        else:
+                            info = f"Memo ID {memo_id} has been rejected by QA Head ID {performed_by}."
+                        
+                        log_notification(
+                            project_id=None,
+                            activity_performed="Memo Rejected",
+                            performed_by=performed_by,
+                            notified_user_id=dh_id,
+                            notification_type="memo_rejected",
+                            additional_info=info
+                        )
+                        notified_user_ids.add(dh_id)
+                except Exception as e:
+                    print(f"Error notifying Design Heads about memo rejection: {e}")
+
+                # 3) If submitter is not a Design Head and has role_id = 5 (Designer), notify them about rejection
+                if submitted_by_id and not is_submitter_design_head and 5 in submitter_roles:
+                    try:
+                        if submitted_by_id not in notified_user_ids:
+                            log_notification(
+                                project_id=None,
+                                activity_performed="Your Memo Rejected",
+                                performed_by=performed_by,
+                                notified_user_id=submitted_by_id,
+                                notification_type="memo_rejected",
+                                additional_info=f"Your memo (ID {memo_id}) was rejected by QA Head ID {performed_by}."
+                            )
+                            notified_user_ids.add(submitted_by_id)
+                    except Exception as e:
+                        print(f"Error notifying submitting designer about memo rejection: {e}")
+
+            except Exception as notify_err:
+                print(f"Error during memo rejection notifications: {notify_err}")
         
         # Insert or update memo_approval record
         print(f"Inserting/updating memo_approval record...")
@@ -769,6 +861,58 @@ def approve_memo(memo_id):
                             'ASSIGNED'
                         ))
                         print(f"Report created successfully for memo {memo_id} with serial_id={default_serial_id}")
+                        # Notify Design Heads and the submitting Designer about report creation
+                        try:
+                            from utils.activity_logger import log_notification, get_users_by_role
+
+                            notified_user_ids = set()
+                            performed_by = data.get('approved_by')
+
+                            # Fetch submitter
+                            cur.execute("SELECT submitted_by FROM memos WHERE memo_id = %s", (memo_id,))
+                            submit_row = cur.fetchone()
+                            submitted_by_id = submit_row[0] if submit_row else None
+
+                            # 1) Notify all Design Heads (role_id = 4)
+                            try:
+                                design_heads = get_users_by_role(4)
+                                for dh in design_heads:
+                                    dh_id = dh.get('user_id')
+                                    if not dh_id or dh_id in notified_user_ids:
+                                        continue
+
+                                    info = f"A report (Serial ID {default_serial_id}) has been created for Memo ID {memo_id}."
+                                    log_notification(
+                                        project_id=None,
+                                        activity_performed="Report Created",
+                                        performed_by=performed_by,
+                                        notified_user_id=dh_id,
+                                        notification_type="report_created",
+                                        additional_info=info
+                                    )
+                                    notified_user_ids.add(dh_id)
+                            except Exception as e:
+                                print(f"Error notifying Design Heads about report creation: {e}")
+
+                            # 2) Notify submitting Designer if they are a Designer (role_id = 5)
+                            try:
+                                if submitted_by_id and submitted_by_id not in notified_user_ids:
+                                    cur.execute("SELECT 1 FROM user_roles WHERE user_id = %s AND role_id = 5", (submitted_by_id,))
+                                    if cur.fetchone():
+                                        log_notification(
+                                            project_id=None,
+                                            activity_performed="Your Report Created",
+                                            performed_by=performed_by,
+                                            notified_user_id=submitted_by_id,
+                                            notification_type="report_created_submitted_by_designer",
+                                            additional_info=f"A report has been created for your memo (ID {memo_id}). Serial ID {default_serial_id}."
+                                        )
+                                        notified_user_ids.add(submitted_by_id)
+                            except Exception as e:
+                                print(f"Error notifying submitting designer about report creation: {e}")
+
+                        except Exception as notify_err:
+                            print(f"Error during report creation notifications: {notify_err}")
                     else:
                         print(f"Report already exists for memo {memo_id}")
                 
@@ -794,6 +938,98 @@ def approve_memo(memo_id):
             performed_by=data.get('approved_by'),
             additional_info=f"ID:{memo_id}|Name:{memo_name}|Memo '{memo_name}' (ID: {memo_id}) was {status}"
         )
+
+        # Send notifications when memo is accepted
+        if status == 'accepted':
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+
+                performed_by = data.get('approved_by')
+
+                # Keep track of who we've notified to avoid duplicates
+                notified_user_ids = set()
+
+                # 1) Notify all Design Heads (role_id = 4) — always notify them regardless of who submitted
+                #    If the memo was submitted by someone else, include submitter id/name in the message.
+                try:
+                    # Fetch submitter info to include in Design Head notifications
+                    cur.execute("SELECT m.submitted_by, u.name FROM memos m LEFT JOIN users u ON m.submitted_by = u.user_id WHERE m.memo_id = %s", (memo_id,))
+                    submit_row = cur.fetchone()
+                    submitted_by_id = submit_row[0] if submit_row else None
+                    submitted_by_name = submit_row[1] if submit_row and submit_row[1] else None
+
+                    design_heads = get_users_by_role(4)
+                    for dh in design_heads:
+                        dh_id = dh.get('user_id')
+                        if not dh_id or dh_id in notified_user_ids:
+                            continue
+
+                        # If the design head is NOT the submitter, mention who submitted the memo
+                        if submitted_by_id and dh_id != submitted_by_id:
+                            submitter_label = submitted_by_name or f"User ID {submitted_by_id}"
+                            info = f"Memo ID {memo_id} submitted by {submitter_label} was accepted by QA Head ID {performed_by}."
+                        else:
+                            info = f"Memo ID {memo_id} has been accepted by QA Head ID {performed_by}."
+
+                        log_notification(
+                            project_id=None,
+                            activity_performed="Memo Accepted",
+                            performed_by=performed_by,
+                            notified_user_id=dh_id,
+                            notification_type="memo_accepted",
+                            additional_info=info
+                        )
+                        notified_user_ids.add(dh_id)
+                except Exception as e:
+                    print(f"Error notifying Design Heads about memo acceptance: {e}")
+
+                # 2) Notify the submitting Designer only if the memo was submitted by a Designer (role_id = 5)
+                try:
+                    cur.execute("SELECT submitted_by FROM memos WHERE memo_id = %s", (memo_id,))
+                    row = cur.fetchone()
+                    submitted_by_id = row[0] if row else None
+                    if submitted_by_id:
+                        # Check if submitted_by has role_id = 5 (Designer)
+                        cur.execute("SELECT 1 FROM user_roles WHERE user_id = %s AND role_id = 5", (submitted_by_id,))
+                        if cur.fetchone():
+                            # Only notify the submitting designer if they haven't already been notified (e.g., as a Design Head)
+                            if submitted_by_id not in notified_user_ids:
+                                log_notification(
+                                    project_id=None,
+                                    activity_performed="Your Memo Accepted",
+                                    performed_by=performed_by,
+                                    notified_user_id=submitted_by_id,
+                                    notification_type="memo_accepted_submitted_by_designer",
+                                    additional_info=f"Your memo (ID {memo_id}) was accepted by QA Head ID {performed_by}."
+                                )
+                                notified_user_ids.add(submitted_by_id)
+                except Exception as e:
+                    print(f"Error notifying submitting designer about memo acceptance: {e}")
+
+                # 3) Notify the assigned reviewer (if provided in the approval request)
+                try:
+                    assigned_reviewer_id = data.get('user_id') if data else None
+                    if assigned_reviewer_id:
+                        # Verify reviewer exists (optional) and notify
+                        cur.execute("SELECT user_id, name FROM users WHERE user_id = %s", (assigned_reviewer_id,))
+                        reviewer_row = cur.fetchone()
+                        if reviewer_row:
+                            if assigned_reviewer_id not in notified_user_ids:
+                                reviewer_name = reviewer_row[1] if reviewer_row[1] else f"User ID {assigned_reviewer_id}"
+                                log_notification(
+                                    project_id=None,
+                                    activity_performed="Memo Assigned to You",
+                                    performed_by=performed_by,
+                                    notified_user_id=assigned_reviewer_id,
+                                    notification_type="memo_assigned",
+                                    additional_info=f"You have been assigned to review Memo ID {memo_id} by QA Head ID {performed_by}."
+                                )
+                                notified_user_ids.add(assigned_reviewer_id)
+                except Exception as e:
+                    print(f"Error notifying assigned reviewer about memo assignment: {e}")
+
+            except Exception as notify_err:
+                print(f"Error during memo acceptance notifications: {notify_err}")
 
         cur.close()
 
@@ -1234,33 +1470,71 @@ def download_memo_pdf(memo_id):
         """, (memo_id,))
         
         references = cur.fetchall()
+        
+        # Fetch memo approval status and details
+        cur.execute("""
+            SELECT ma.status, ma.approval_date, ma.comments, ma.authentication, 
+                   ma.approved_by, u1.name as approver_name,
+                   ma.user_id, u2.name as reviewer_name, ma.test_date, ma.attachment_path
+            FROM memo_approval ma
+            LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+            LEFT JOIN users u2 ON ma.user_id = u2.user_id
+            WHERE ma.memo_id = %s
+        """, (memo_id,))
+        
+        approval_data = cur.fetchone()
         cur.close()
         
         # Generate PDF
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.4*inch, bottomMargin=0.4*inch, leftMargin=0.3*inch, rightMargin=0.3*inch)
+        doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch, leftMargin=0.5*inch, rightMargin=0.5*inch)
         
         # Define styles
         styles = getSampleStyleSheet()
         
-        # Title style
+        # Title style (matches frontend)
         title_style = ParagraphStyle(
             'CustomTitle',
             parent=styles['Heading1'],
-            fontSize=14,
-            spaceAfter=12,
+            fontSize=18,
+            spaceAfter=20,
             alignment=1,  # Center alignment
             textColor=colors.black,
             fontName='Helvetica-Bold'
         )
         
-        # Section heading style
+        # Section heading style (matches frontend)
         section_style = ParagraphStyle(
             'SectionHeading',
             parent=styles['Heading2'],
-            fontSize=10,
-            spaceAfter=6,
-            spaceBefore=8,
+            fontSize=13,
+            spaceAfter=15,
+            spaceBefore=15,
+            textColor=colors.black,
+            fontName='Helvetica-Bold'
+        )
+        
+        # Status badge style
+        status_badge_style = ParagraphStyle(
+            'StatusBadge',
+            parent=styles['Normal'],
+            fontSize=9,
+            spaceAfter=15,
+            spaceBefore=10,
+            alignment=1,  # Center alignment
+            fontName='Helvetica-Bold',
+            backColor=colors.lightgrey,
+            borderWidth=1,
+            borderPadding=8
+        )
+        
+        # Test review heading style
+        test_review_heading_style = ParagraphStyle(
+            'TestReviewHeading',
+            parent=styles['Heading3'],
+            fontSize=13,
+            spaceAfter=15,
+            spaceBefore=10,
             textColor=colors.black,
             fontName='Helvetica-Bold'
         )
@@ -1268,9 +1542,9 @@ def download_memo_pdf(memo_id):
         # Build PDF content
         story = []
         
-        # Title
+        # Title (matches frontend exactly)
         story.append(Paragraph("REQUISITION FOR DGAQA INSPECTION", title_style))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 10))
         
         # Requisition Details Section
         story.append(Paragraph("REQUISITION DETAILS", section_style))
@@ -1438,6 +1712,193 @@ def download_memo_pdf(memo_id):
         story.append(Paragraph(remarks_text, ParagraphStyle('Remarks', parent=styles['Normal'], fontSize=7, spaceAfter=6, fontName='Helvetica')))
         
         story.append(Spacer(1, 10))
+        
+        # Approval/Rejection Status Section (only if memo has been processed)
+        if approval_data:
+            status = approval_data[0]  # ma.status
+            
+            # Status badge (matches frontend exactly)
+            if status == 'accepted':
+                status_text = "✓ APPROVED AND ASSIGNED REVIEWER"
+                status_color = colors.green
+                section_bg_color = colors.Color(0.94, 0.98, 0.94)  # #f0f9f0
+                section_border_color = colors.green
+            elif status == 'rejected':
+                status_text = "✗ REJECTED"
+                status_color = colors.red
+                section_bg_color = colors.Color(0.99, 0.95, 0.95)  # #fdf2f2
+                section_border_color = colors.red
+            
+            # Add section background and border (simulated with table)
+            section_table_data = [['']]
+            section_table = Table(section_table_data, colWidths=[7*inch], rowHeights=[0.1*inch])
+            section_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, -1), section_bg_color),
+                ('LINEBELOW', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINEABOVE', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINELEFT', (0, 0), (-1, -1), 2, section_border_color),
+                ('LINERIGHT', (0, 0), (-1, -1), 2, section_border_color),
+            ]))
+            story.append(section_table)
+            
+            # Status badge
+            status_style = ParagraphStyle(
+                'StatusBadge',
+                parent=styles['Normal'],
+                fontSize=9,
+                spaceAfter=15,
+                spaceBefore=10,
+                alignment=1,  # Center alignment
+                textColor=status_color,
+                fontName='Helvetica-Bold',
+                backColor=colors.lightgrey,
+                borderWidth=1,
+                borderPadding=8
+            )
+            story.append(Paragraph(status_text, status_style))
+            
+            # Test or Review Details heading
+            story.append(Paragraph("Test or Review Details", test_review_heading_style))
+            
+            # Create test review details table (matches frontend layout exactly)
+            test_review_data = []
+            
+            # Row 1: Date and Comments
+            approval_date = approval_data[1]  # ma.approval_date
+            comments = approval_data[2]  # ma.comments
+            
+            date_str = approval_date.strftime('%d/%m/%Y, %H:%M') if approval_date else 'N/A'
+            comments_str = comments or 'No comments provided'
+            
+            test_review_data.append([
+                f'Date of Test or Review :\n{date_str}',
+                f'Comments :\n{comments_str}'
+            ])
+            
+            # Row 2: Tester ID and Name
+            if status == 'accepted':
+                reviewer_name = approval_data[7]  # reviewer_name
+                reviewer_id = approval_data[6]  # ma.user_id
+                test_review_data.append([
+                    f'Internal Tester ID:\n{reviewer_id or "N/A"}',
+                    f'Internal Tester Name :\n{reviewer_name or "N/A"}'
+                ])
+            else:  # rejected
+                approver_id = approval_data[4]  # ma.approved_by
+                test_review_data.append([
+                    f'Internal Tester ID:\n{approver_id or "N/A"}',
+                    f'Internal Tester Name :\nQA Head'
+                ])
+            
+            # Row 3: Authentication and Attachments
+            authentication = approval_data[3]  # ma.authentication
+            attachment_path = approval_data[9]  # ma.attachment_path
+            
+            # For now, show authentication status in table
+            auth_str = 'Signature provided' if authentication else 'Not provided'
+            attachment_str = 'File attached' if attachment_path else 'No attachments'
+            
+            test_review_data.append([
+                f'Authentication\n{auth_str}',
+                f'Attachments\n{attachment_str}'
+            ])
+            
+            # Create test review table
+            test_review_table = Table(test_review_data, colWidths=[3.5*inch, 3.5*inch])
+            test_review_table.setStyle(TableStyle([
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (-1, -1), 12),
+                ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+                ('TOPPADDING', (0, 0), (-1, -1), 12),
+                ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+            ]))
+            
+            story.append(test_review_table)
+            
+            # Add signature image if available (access directly from file path)
+            if authentication:
+                try:
+                    from reportlab.lib.utils import ImageReader
+                    import os
+                    
+                    # Handle signature path - try different path formats
+                    signature_path = None
+                    
+                    # Check if it's already a full file path
+                    if os.path.exists(authentication):
+                        signature_path = authentication
+                    # Check if it's a relative path from project root
+                    elif os.path.exists(os.path.join(os.getcwd(), authentication)):
+                        signature_path = os.path.join(os.getcwd(), authentication)
+                    # Check if it's a relative path from backend directory
+                    elif os.path.exists(os.path.join(os.getcwd(), 'backend', authentication)):
+                        signature_path = os.path.join(os.getcwd(), 'backend', authentication)
+                    # Check if it's a URL that needs to be downloaded
+                    elif authentication.startswith('http') or "/api/users/signature/" in authentication:
+                        # Handle URL-based signatures
+                        if authentication.startswith('http'):
+                            signature_url = authentication
+                        else:
+                            signature_url = f"http://localhost:8000{authentication}"
+                        
+                        import requests
+                        response = requests.get(signature_url, timeout=10)
+                        if response.status_code == 200:
+                            img_data = io.BytesIO(response.content)
+                            img = ImageReader(img_data)
+                            print(f"Successfully loaded signature from URL: {signature_url}")
+                        else:
+                            print(f"Failed to load signature from URL: {signature_url}")
+                            img = None
+                    else:
+                        print(f"Signature path not found: {authentication}")
+                        img = None
+                    
+                    # If we found a local file path, load the image
+                    if signature_path and not authentication.startswith('http'):
+                        img = ImageReader(signature_path)
+                        print(f"Successfully loaded signature from file: {signature_path}")
+                    
+                    # Display the signature image
+                    if img:
+                        # Resize image to fit in PDF (good size for signature)
+                        img_width, img_height = img.getSize()
+                        max_width = 2.5 * inch  # Good size for signature visibility
+                        max_height = 1.0 * inch
+                        
+                        # Calculate scaling to maintain aspect ratio
+                        scale_x = max_width / img_width
+                        scale_y = max_height / img_height
+                        scale = min(scale_x, scale_y)
+                        
+                        scaled_width = img_width * scale
+                        scaled_height = img_height * scale
+                        
+                        # Add signature label
+                        story.append(Spacer(1, 10))
+                        story.append(Paragraph("Signature:", ParagraphStyle('SignatureLabel', parent=styles['Normal'], fontSize=9, fontName='Helvetica-Bold')))
+                        
+                        # Add signature image
+                        story.append(Spacer(1, 5))
+                        from reportlab.platypus import Image
+                        signature_img = Image(img, scaled_width, scaled_height)
+                        story.append(signature_img)
+                        
+                        print(f"Signature image added to PDF - Size: {scaled_width:.2f}x{scaled_height:.2f} inches")
+                    else:
+                        print(f"Could not load signature image from: {authentication}")
+                        
+                except Exception as e:
+                    # If image loading fails, just continue without the image
+                    print(f"Error loading signature image: {str(e)}")
+                    pass
+            
+            story.append(Spacer(1, 15))
         
         # References section
         if references:

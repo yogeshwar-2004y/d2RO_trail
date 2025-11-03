@@ -1,23 +1,36 @@
 <script setup>
 import { RouterLink, RouterView, useRoute } from "vue-router";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import NewsTicker from "@/components/NewsTicker.vue";
 import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
 import AppSidebar from "@/components/AppSidebar.vue";
+import NotificationsOverlay from "@/components/NotificationsOverlay.vue";
 
 const route = useRoute();
+
+// Notifications state
+const isNotificationsOpen = ref(false);
 
 // Show sidebar on all pages except login and tech support form
 const showSidebar = computed(() => {
   return route.name !== "login" && route.name !== "TechSupport";
 });
+
+// Handle notifications
+const handleOpenNotifications = () => {
+  isNotificationsOpen.value = true;
+};
+
+const closeNotifications = () => {
+  isNotificationsOpen.value = false;
+};
 </script>
 
 <template>
   <div id="app">
-    <AppSidebar v-if="showSidebar" />
+    <AppSidebar v-if="showSidebar" @open-notifications="handleOpenNotifications" />
     <AppHeader />
     <BreadcrumbNavigation />
     <main
@@ -36,6 +49,12 @@ const showSidebar = computed(() => {
       class="app-news-ticker"
     />
     <AppFooter class="app-footer" />
+    
+    <!-- Notifications Overlay - rendered at app level -->
+    <NotificationsOverlay 
+      :isOpen="isNotificationsOpen"
+      @close="closeNotifications"
+    />
   </div>
 </template>
 

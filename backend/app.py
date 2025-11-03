@@ -235,6 +235,23 @@ def create_comment():
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Additionally block comments if THIS specific document is already accepted
+        cur.execute(
+            """
+            SELECT status
+            FROM plan_documents
+            WHERE document_id = %s AND is_active = TRUE
+            """,
+            (document_id,),
+        )
+        doc_status_row = cur.fetchone()
+        if doc_status_row and doc_status_row[0] == 'accepted':
+            cur.close()
+            return jsonify({
+                "success": False,
+                "message": "Cannot add comments. This document is already accepted as the final version."
+            }), 400
+
         # Prepare commented_by (string) - prefer explicit field, else use reviewer_id, else 'Anonymous'
         commented_by_val = data.get('commented_by') or (str(data.get('reviewer_id')) if data.get('reviewer_id') else 'Anonymous')
         print(f"Creating comment: document_id={data.get('document_id')} reviewer_id={data.get('reviewer_id')} commented_by={commented_by_val}")
@@ -279,6 +296,70 @@ def create_comment():
             print(f"No annotation data for comment {comment_id}: is_annotation={data.get('is_annotation')}, x={data.get('x')}, y={data.get('y')}")
         
         conn.commit()
+        
+        # Send notifications to all designers in the project when a reviewer adds a comment
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get project_id from the document (plan_documents -> lrus -> projects)
+        cur.execute("""
+            SELECT p.project_id, p.project_name, l.lru_id, l.lru_name
+            FROM plan_documents pd
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.document_id = %s
+        """, (document_id,))
+        
+        project_info = cur.fetchone()
+        if project_info:
+            project_id = project_info[0]
+            project_name = project_info[1]
+            lru_id = project_info[2]
+            lru_name = project_info[3]
+            
+            # Get reviewer name
+            reviewer_name = "Unknown Reviewer"
+            reviewer_id = data.get('reviewer_id')
+            if reviewer_id:
+                cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+                reviewer_result = cur.fetchone()
+                if reviewer_result:
+                    reviewer_name = reviewer_result[0]
+            
+            # Get all designers in the project (role_id = 5)
+            cur.execute("""
+                SELECT DISTINCT u.user_id, u.name, u.email
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN project_users pu ON u.user_id = pu.user_id
+                WHERE pu.project_id = %s AND ur.role_id = 5
+            """, (project_id,))
+            
+            designers = cur.fetchall()
+            
+            # Log activity for comment creation
+            log_activity(
+                project_id=project_id,
+                activity_performed=f"Comment Added to Plan Document",
+                performed_by=reviewer_id,
+                additional_info=f"Reviewer {reviewer_name} added a comment to document '{data.get('document_name')}' in LRU '{lru_name}' for project '{project_name}'."
+            )
+            
+            # Send notification to all designers in the project
+            for designer in designers:
+                designer_id = designer[0]
+                designer_name = designer[1]
+                
+                log_notification(
+                    project_id=project_id,
+                    activity_performed="New Comment on Plan Document",
+                    performed_by=reviewer_id,
+                    notified_user_id=designer_id,
+                    notification_type="plan_document_comment",
+                    additional_info=f"Reviewer {reviewer_name} added a comment to document '{data.get('document_name')}' in LRU '{lru_name}' of project '{project_name}'. Please review and address the feedback."
+                )
+                
+                print(f"   ✓ Sent notification to designer: {designer_name} (ID: {designer_id})")
+        
         cur.close()
         
         return jsonify({
@@ -414,6 +495,68 @@ def accept_comment(comment_id):
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
+        
+        # Send notification to the reviewer when their comment is accepted
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get comment details including reviewer_id, document info, and project info
+        cur.execute("""
+            SELECT dc.reviewer_id, dc.document_name, dc.description,
+                   pd.document_id, pd.document_number,
+                   l.lru_id, l.lru_name, p.project_id, p.project_name
+            FROM document_comments dc
+            JOIN plan_documents pd ON dc.document_id = pd.document_id
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE dc.comment_id = %s
+        """, (comment_id,))
+        
+        comment_info = cur.fetchone()
+        if comment_info:
+            reviewer_id = comment_info[0]
+            document_name = comment_info[1]
+            comment_description = comment_info[2]
+            document_number = comment_info[5]
+            lru_name = comment_info[6]
+            project_id = comment_info[7]
+            project_name = comment_info[8]
+            
+            # Get designer/design head name who accepted the comment
+            designer_name = "Unknown Designer"
+            accepted_by_id = int(data['accepted_by'])
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (accepted_by_id,))
+            designer_result = cur.fetchone()
+            if designer_result:
+                designer_name = designer_result[0]
+            
+            # Get reviewer name
+            reviewer_name = "Unknown Reviewer"
+            if reviewer_id:
+                cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+                reviewer_result = cur.fetchone()
+                if reviewer_result:
+                    reviewer_name = reviewer_result[0]
+            
+            # Log activity for comment acceptance
+            log_activity(
+                project_id=project_id,
+                activity_performed="Comment Accepted",
+                performed_by=accepted_by_id,
+                additional_info=f"{designer_name} accepted a comment on document '{document_name}' ({document_number}) in LRU '{lru_name}' for project '{project_name}'."
+            )
+            
+            # Send notification to the reviewer
+            log_notification(
+                project_id=project_id,
+                activity_performed="Your Comment Was Accepted",
+                performed_by=accepted_by_id,
+                notified_user_id=reviewer_id,
+                notification_type="comment_accepted",
+                additional_info=f"Designer {designer_name} accepted your comment on document '{document_name}' ({document_number}) in LRU '{lru_name}' of project '{project_name}'. Justification: {data.get('justification', 'N/A')}"
+            )
+            
+            print(f"   ✓ Sent notification to reviewer: {reviewer_name} (ID: {reviewer_id})")
+        
         cur.close()
         
         return jsonify({
@@ -473,6 +616,68 @@ def reject_comment(comment_id):
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
+        
+        # Send notification to the reviewer when their comment is rejected
+        from utils.activity_logger import log_notification, log_activity
+        
+        # Get comment details including reviewer_id, document info, and project info
+        cur.execute("""
+            SELECT dc.reviewer_id, dc.document_name, dc.description,
+                   pd.document_id, pd.document_number,
+                   l.lru_id, l.lru_name, p.project_id, p.project_name
+            FROM document_comments dc
+            JOIN plan_documents pd ON dc.document_id = pd.document_id
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE dc.comment_id = %s
+        """, (comment_id,))
+        
+        comment_info = cur.fetchone()
+        if comment_info:
+            reviewer_id = comment_info[0]
+            document_name = comment_info[1]
+            comment_description = comment_info[2]
+            document_number = comment_info[5]
+            lru_name = comment_info[6]
+            project_id = comment_info[7]
+            project_name = comment_info[8]
+            
+            # Get designer/design head name who rejected the comment
+            designer_name = "Unknown Designer"
+            accepted_by_id = int(data['accepted_by'])
+            cur.execute("SELECT name FROM users WHERE user_id = %s", (accepted_by_id,))
+            designer_result = cur.fetchone()
+            if designer_result:
+                designer_name = designer_result[0]
+            
+            # Get reviewer name
+            reviewer_name = "Unknown Reviewer"
+            if reviewer_id:
+                cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+                reviewer_result = cur.fetchone()
+                if reviewer_result:
+                    reviewer_name = reviewer_result[0]
+            
+            # Log activity for comment rejection
+            log_activity(
+                project_id=project_id,
+                activity_performed="Comment Rejected",
+                performed_by=accepted_by_id,
+                additional_info=f"{designer_name} rejected a comment on document '{document_name}' ({document_number}) in LRU '{lru_name}' for project '{project_name}'."
+            )
+            
+            # Send notification to the reviewer
+            log_notification(
+                project_id=project_id,
+                activity_performed="Your Comment Was Rejected",
+                performed_by=accepted_by_id,
+                notified_user_id=reviewer_id,
+                notification_type="comment_rejected",
+                additional_info=f"Designer {designer_name} rejected your comment on document '{document_name}' ({document_number}) in LRU '{lru_name}' of project '{project_name}'. Justification: {data.get('justification', 'N/A')}"
+            )
+            
+            print(f"   ✓ Sent notification to reviewer: {reviewer_name} (ID: {reviewer_id})")
+        
         cur.close()
         
         return jsonify({
