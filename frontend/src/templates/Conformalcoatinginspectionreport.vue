@@ -1007,7 +1007,8 @@ export default {
         prepared_by: this.preparedBySignatureUrl ? `${this.preparedBy}|${this.preparedBySignatureUrl}` : this.preparedBy,
         verified_by: this.verifiedBySignatureUrl ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}` : this.verifiedBy,
         approved_by: this.approvedBySignatureUrl ? `${this.approvedBy}|${this.approvedBySignatureUrl}` : this.approvedBy,
-        original_report_id: originalReportId, // Link to the original report card ID from reports table
+        report_card_id: originalReportId, // Link to the original report card ID from reports table (preferred field)
+        original_report_id: originalReportId, // Backward compatibility
       };
     },
     exportReport() {

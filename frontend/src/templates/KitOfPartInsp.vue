@@ -206,23 +206,158 @@
         <div class="form-section">
           <h2 class="section-title">Signatures</h2>
           <div class="signatures-layout">
-            <div class="signature-item">
-              <label>Prepared By (QA G1 -Team):</label>
-              <div class="signature-line"></div>
+            <div class="signature-section">
+              <strong>Prepared By (QA G1 -Team):</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="preparedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="readonly || !areAllFieldsFilled"
+                    />
             </div>
-            <div class="signature-item">
-              <label>Verified By (G1H - QA G):</label>
-              <div class="signature-line"></div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="preparedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="readonly || !areAllFieldsFilled"
+                    />
             </div>
-            <div class="signature-item">
-              <label>Approved By:</label>
-              <div class="signature-line"></div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('prepared')"
+                    :disabled="readonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                  >
+                    Verify & Load Signature
+                  </button>
+                 </div>
+                 <div v-if="preparedBySignatureUrl && (preparedByVerifiedInSession || readonly)" class="signature-display">
+                   <div class="signature-image-container">
+                     <img
+                       :src="preparedBySignatureUrl"
+                       alt="Verified Signature"
+                       class="signature-image"
+                     />
+                     <div class="signature-info">
+                       <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                       <span class="signature-status">✓ Verified</span>
+                     </div>
+                   </div>
+                 </div>
+                 <div v-if="preparedByError" class="signature-error">
+                   {{ preparedByError }}
+                 </div>
+              </div>
+            </div>
+            <div class="signature-section">
+              <strong>Verified By (G1H - QA G):</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="verifiedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="!preparedBySignatureUrl || readonly"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="verifiedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!preparedBySignatureUrl || readonly"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('verified')"
+                    :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword || readonly"
+                  >
+                    Verify & Load Signature
+                  </button>
+                 </div>
+                 <div v-if="verifiedBySignatureUrl && (verifiedByVerifiedInSession || readonly)" class="signature-display">
+                   <div class="signature-image-container">
+                     <img
+                       :src="verifiedBySignatureUrl"
+                       alt="Verified Signature"
+                       class="signature-image"
+                     />
+                     <div class="signature-info">
+                       <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                       <span class="signature-status">✓ Verified</span>
+                     </div>
+                   </div>
+                 </div>
+                 <div v-if="verifiedByError" class="signature-error">
+                   {{ verifiedByError }}
+                 </div>
+              </div>
+            </div>
+            <div class="signature-section">
+              <strong>Approved By:</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="approvedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="!verifiedBySignatureUrl || readonly"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="approvedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!verifiedBySignatureUrl || readonly"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('approved')"
+                    :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword || readonly"
+                  >
+                    Verify & Load Signature
+                  </button>
+                 </div>
+                 <div v-if="approvedBySignatureUrl && (approvedByVerifiedInSession || readonly)" class="signature-display">
+                   <div class="signature-image-container">
+                     <img
+                       :src="approvedBySignatureUrl"
+                       alt="Verified Signature"
+                       class="signature-image"
+                     />
+                     <div class="signature-info">
+                       <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                       <span class="signature-status">✓ Verified</span>
+                     </div>
+                   </div>
+                 </div>
+                 <div v-if="approvedByError" class="signature-error">
+                   {{ approvedByError }}
+                 </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly">
+        <!-- Action Buttons - Only show before Prepared By signature is verified -->
+        <div class="form-actions" v-if="!readonly && !preparedBySignatureUrl">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -230,11 +365,12 @@
             Reset
           </button>
           <button
-            type="submit"
+            type="button"
             class="btn btn-primary"
             :disabled="!isFormValid"
+            @click="handleSubmit"
           >
-            Submit Report
+            Fill Report (Signatures Required)
           </button>
         </div>
       </form>
@@ -255,6 +391,10 @@ export default {
     isTemplatePreview: {
       type: Boolean,
       default: false,
+    },
+    reportId: {
+      type: [String, Number],
+      default: null,
     },
   },
   data() {
@@ -344,6 +484,28 @@ export default {
         verifiedBy: "",
         approvedBy: "",
       },
+      // Signature verification fields
+      preparedByUsername: "",
+      preparedByPassword: "",
+      preparedBySignatureUrl: "",
+      preparedByVerifiedName: "",
+      preparedByError: "",
+      verifiedByUsername: "",
+      verifiedByPassword: "",
+      verifiedBySignatureUrl: "",
+      verifiedByVerifiedName: "",
+      verifiedByError: "",
+      approvedByUsername: "",
+      approvedByPassword: "",
+      approvedBySignatureUrl: "",
+      approvedByVerifiedName: "",
+      approvedByError: "",
+      approvedByUserId: null, // Store user_id of the approver
+      savedReportId: null, // Store report ID after submission
+      // Track if signatures were verified in current session (not just loaded from DB)
+      preparedByVerifiedInSession: false,
+      verifiedByVerifiedInSession: false,
+      approvedByVerifiedInSession: false,
     };
   },
   computed: {
@@ -357,6 +519,21 @@ export default {
         this.reportData.quantity
       );
     },
+    areAllFieldsFilled() {
+      // Check if all required fields are filled
+      return (
+        this.reportData.projectName &&
+        this.reportData.reportRefNo &&
+        this.reportData.lruName &&
+        this.reportData.dpName &&
+        this.reportData.partNo &&
+        this.reportData.quantity
+      );
+    },
+    effectiveReportId() {
+      // Return the effective report ID (either prop or saved)
+      return this.reportId || this.savedReportId;
+    },
   },
   mounted() {
     // Get parameters from route
@@ -367,12 +544,43 @@ export default {
     this.reportData.projectName = projectName;
     this.reportData.lruName = lruName;
     this.reportData.startDate = this.currentDate;
+
+    // Load existing report data if reportId is provided (from prop or route)
+    const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
+    if (reportIdToLoad) {
+      // If reportId comes from route, store it in prop/component
+      if (this.$route?.params?.reportId && !this.reportId) {
+        // Note: reportId is a prop, so we'll use it directly
+      }
+      this.loadReportData();
+    }
+    
     // Compute initial remarks if observations already present
     this.reportData.inspectionItems.forEach((item) => {
       if (item.observations) {
         this.computeRemarkForItem(item);
       }
     });
+  },
+  watch: {
+    reportId: {
+      handler(newVal) {
+        if (newVal) {
+          this.loadReportData();
+        }
+      },
+      immediate: false,
+    },
+    // Also watch route params for reportId changes
+    '$route.params.reportId': {
+      handler(newVal) {
+        if (newVal) {
+          // Load data when route reportId changes
+          this.loadReportData();
+        }
+      },
+      immediate: false,
+    },
   },
   methods: {
     handleFileUpload(event, item) {
@@ -476,14 +684,345 @@ export default {
       }
     },
     async handleSubmit() {
+      // This method is now only for validation
+      // Actual submission happens when Prepared By signature is verified
       if (!this.isFormValid) {
         alert("Please fill in all required fields.");
         return;
       }
+      
+      // Just validate and show message that signatures are needed
+      alert("Please complete the Prepared By signature to submit the report. The report will be saved to the database when the Prepared By signature is verified.");
+    },
+    async verifySignature(signatureType) {
+      let username, password;
+      let formData = {};
+
+      if (signatureType === "prepared") {
+        username = this.preparedByUsername;
+        password = this.preparedByPassword;
+        formData = {
+          signatureUrl: "preparedBySignatureUrl",
+          verifiedName: "preparedByVerifiedName",
+          error: "preparedByError",
+          userField: "preparedBy"
+        };
+      } else if (signatureType === "verified") {
+        username = this.verifiedByUsername;
+        password = this.verifiedByPassword;
+        formData = {
+          signatureUrl: "verifiedBySignatureUrl",
+          verifiedName: "verifiedByVerifiedName",
+          error: "verifiedByError",
+          userField: "verifiedBy"
+        };
+      } else if (signatureType === "approved") {
+        username = this.approvedByUsername;
+        password = this.approvedByPassword;
+        formData = {
+          signatureUrl: "approvedBySignatureUrl",
+          verifiedName: "approvedByVerifiedName",
+          error: "approvedByError",
+          userField: "approvedBy"
+        };
+      }
+
+      if (!username || !password) {
+        this[formData.error] = "Please enter both username and signature password";
+        return;
+      }
 
       try {
-        // Prepare data for submission
-        const submissionData = {
+        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            signature_password: password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this[formData.signatureUrl] = data.signature_url;
+          this[formData.verifiedName] = data.user_name;
+          this[formData.error] = "";
+          this.reportData[formData.userField] = data.user_name; // Store verified name
+          
+          // Mark signature as verified in current session
+          if (signatureType === "prepared") {
+            this.preparedByVerifiedInSession = true;
+          } else if (signatureType === "verified") {
+            this.verifiedByVerifiedInSession = true;
+          } else if (signatureType === "approved") {
+            this.approvedByVerifiedInSession = true;
+          }
+          
+          // Store user_id for approved signature (needed for notification)
+          if (signatureType === "approved" && data.user_id) {
+            this.approvedByUserId = data.user_id;
+          }
+          
+          // Handle auto-submission and updates based on signature type
+          if (signatureType === "prepared") {
+            // CREATE new row when Prepared By signature is verified
+            await this.autoSubmitReport();
+          } else if (signatureType === "verified") {
+            // UPDATE the same row when Verified By signature is fetched
+            await this.updateReportSignature('verified');
+          } else if (signatureType === "approved") {
+            // UPDATE the same row when Approved By signature is fetched
+            await this.updateReportSignature('approved');
+          }
+        } else {
+          this[formData.error] = data.message || "Failed to verify signature";
+          this[formData.signatureUrl] = "";
+          this[formData.verifiedName] = "";
+          this.reportData[formData.userField] = "";
+        }
+      } catch (error) {
+        this[formData.error] = "Error verifying signature: " + error.message;
+        this[formData.signatureUrl] = "";
+        this[formData.verifiedName] = "";
+        this.reportData[formData.userField] = "";
+      }
+    },
+    async autoSubmitReport() {
+      try {
+        // Ensure all remarks are updated before submitting
+        this.reportData.inspectionItems.forEach((item) => {
+          if (item.observations) {
+            this.computeRemarkForItem(item);
+          }
+        });
+        
+        const submissionData = this.prepareSubmissionData();
+        
+        const response = await fetch("http://localhost:5000/api/kit-of-parts", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(submissionData),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to submit report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report_id) {
+          this.savedReportId = result.report_id;
+          // Also set reportId if it wasn't set (for consistency)
+          if (!this.reportId) {
+            // Note: reportId is a prop, so we can't directly set it, but savedReportId will work
+          }
+          console.log(`✓ Report saved to database with ID: ${result.report_id}`);
+          alert(`Report saved successfully! Report ID: ${result.report_id}`);
+        } else {
+          const errorMsg = result.message || "Unknown error occurred";
+          console.error("Error submitting report:", errorMsg);
+          alert(`Error submitting report: ${errorMsg}`);
+        }
+      } catch (error) {
+        console.error("Error auto-submitting report:", error);
+        alert(`Error submitting report: ${error.message}`);
+      }
+    },
+    async updateReportSignature(signatureType) {
+      const reportIdToUse = this.savedReportId || this.reportId;
+      
+      if (!reportIdToUse) {
+        console.error("Report ID not found. Cannot update signature.");
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+
+      try {
+        const updateData = {};
+        if (signatureType === "verified") {
+          // Store signature URL in verified_by_g1h_qa_g field (format: "name|signature_url")
+          updateData.verified_by_g1h_qa_g = `${this.reportData.verifiedBy}|${this.verifiedBySignatureUrl}`;
+        } else if (signatureType === "approved") {
+          // Store signature URL in approved_by field (format: "name|signature_url")
+          updateData.approved_by = `${this.reportData.approvedBy}|${this.approvedBySignatureUrl}`;
+        }
+
+        // Update the existing record in the database
+        const response = await fetch(
+          `http://localhost:5000/api/kit-of-parts/${reportIdToUse}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to update report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          if (signatureType === "verified") {
+            console.log(`Verified By signature updated in report ID: ${reportIdToUse}`);
+            alert("Verified By signature saved successfully!");
+          } else if (signatureType === "approved") {
+            console.log(`Approved By signature updated in report ID: ${reportIdToUse}`);
+            alert("Report finalized successfully!");
+          }
+        } else {
+          alert(`Error updating report: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Error updating report signature:", error);
+        alert("Error updating report. Please try again.");
+      }
+    },
+    async loadReportData() {
+      // Load report data from database when reportId is available
+      const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
+      
+      if (!reportIdToLoad) {
+        console.log("No reportId available to load data");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/kit-of-parts/${reportIdToLoad}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch report: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report) {
+          const report = result.report;
+
+          // Set savedReportId if this is a loaded report
+          if (report.report_id) {
+            this.savedReportId = report.report_id;
+          } else {
+            // Fallback to using the reportIdToLoad
+            this.savedReportId = reportIdToLoad;
+          }
+
+          // Map header fields
+          this.reportData.projectName = report.projectName || "";
+          this.reportData.reportRefNo = report.reportRefNo || "";
+          this.reportData.memoRefNo = report.memoRefNo || "";
+          this.reportData.lruName = report.lruName || "";
+          this.reportData.sruName = report.sruName || "";
+          this.reportData.dpName = report.dpName || "";
+          this.reportData.partNo = report.partNo || "";
+          this.reportData.inspectionStage = report.inspectionStage || "";
+          this.reportData.testVenue = report.testVenue || "";
+          this.reportData.quantity = report.quantity || null;
+          this.reportData.slNos = report.slNos || "";
+          this.reportData.startDate = report.startDate ? (typeof report.startDate === 'string' ? report.startDate.split('T')[0] : report.startDate) : "";
+          this.reportData.endDate = report.endDate ? (typeof report.endDate === 'string' ? report.endDate.split('T')[0] : report.endDate) : "";
+          this.reportData.dated1 = report.dated1 ? (typeof report.dated1 === 'string' ? report.dated1.split('T')[0] : report.dated1) : "";
+          this.reportData.dated2 = report.dated2 ? (typeof report.dated2 === 'string' ? report.dated2.split('T')[0] : report.dated2) : "";
+
+          // Map inspection items (test1-7)
+          if (report.inspectionItems && Array.isArray(report.inspectionItems)) {
+            for (let i = 0; i < Math.min(report.inspectionItems.length, 7); i++) {
+              if (this.reportData.inspectionItems[i]) {
+                const item = report.inspectionItems[i];
+                this.reportData.inspectionItems[i].observations = item.observations || "";
+                this.reportData.inspectionItems[i].remarks = item.remarks || "";
+                this.reportData.inspectionItems[i].fileName = item.upload || "";
+                
+                // Compute remark if observation is set
+                if (this.reportData.inspectionItems[i].observations) {
+                  this.computeRemarkForItem(this.reportData.inspectionItems[i]);
+                }
+              }
+            }
+          }
+
+          // Parse signature fields (format: "name|signature_url")
+          // Only load signature URLs if form is readonly (viewing completed report)
+          // If form is editable, user must verify signatures again in current session
+          if (report.preparedBy) {
+            const preparedParts = report.preparedBy.split("|");
+            this.reportData.preparedBy = preparedParts[0] || "";
+            // Only set signature URL if form is readonly (viewing completed report)
+            if (this.readonly) {
+              this.preparedBySignatureUrl = preparedParts[1] || "";
+              this.preparedByVerifiedName = preparedParts[0] || "";
+              // Mark as verified since we're viewing a completed report
+              this.preparedByVerifiedInSession = true;
+            }
+          }
+
+          if (report.verifiedBy) {
+            const verifiedParts = report.verifiedBy.split("|");
+            this.reportData.verifiedBy = verifiedParts[0] || "";
+            // Only set signature URL if form is readonly (viewing completed report)
+            if (this.readonly) {
+              this.verifiedBySignatureUrl = verifiedParts[1] || "";
+              this.verifiedByVerifiedName = verifiedParts[0] || "";
+              // Mark as verified since we're viewing a completed report
+              this.verifiedByVerifiedInSession = true;
+            }
+          }
+
+          if (report.approvedBy) {
+            const approvedParts = report.approvedBy.split("|");
+            this.reportData.approvedBy = approvedParts[0] || "";
+            // Only set signature URL if form is readonly (viewing completed report)
+            if (this.readonly) {
+              this.approvedBySignatureUrl = approvedParts[1] || "";
+              this.approvedByVerifiedName = approvedParts[0] || "";
+              // Mark as verified since we're viewing a completed report
+              this.approvedByVerifiedInSession = true;
+            }
+          }
+
+          console.log("✓ Report data loaded successfully:", reportIdToLoad);
+        } else {
+          console.error("Failed to load report data:", result.message);
+        }
+      } catch (error) {
+        console.error("Error loading report data:", error);
+      }
+    },
+    prepareSubmissionData() {
+      // Prepare data for submission (reusable method)
+      return {
           // Report Details
           projectName: this.reportData.projectName,
           reportRefNo: this.reportData.reportRefNo,
@@ -530,38 +1069,16 @@ export default {
           test7Remarks: this.reportData.inspectionItems[6].remarks,
           test7Upload: this.reportData.inspectionItems[6].fileName,
 
-          // Signatures
-          preparedBy: this.reportData.preparedBy,
-          verifiedBy: this.reportData.verifiedBy,
-          approvedBy: this.reportData.approvedBy,
-        };
-
-        console.log(
-          "Submitting kit of parts inspection report:",
-          submissionData
-        );
-
-        const response = await fetch("http://localhost:5000/api/kit-of-parts", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(submissionData),
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          alert("Kit of parts inspection report submitted successfully!");
-          console.log("Report ID:", result.report_id);
-          this.resetForm();
-        } else {
-          alert(`Error: ${result.message}`);
-        }
-      } catch (error) {
-        console.error("Error submitting report:", error);
-        alert("Error submitting report. Please try again.");
-      }
+        // Signatures (with signature URLs if available)
+        preparedBy: this.preparedBySignatureUrl ? `${this.reportData.preparedBy}|${this.preparedBySignatureUrl}` : this.reportData.preparedBy,
+        verifiedBy: this.verifiedBySignatureUrl ? `${this.reportData.verifiedBy}|${this.verifiedBySignatureUrl}` : this.reportData.verifiedBy,
+        approvedBy: this.approvedBySignatureUrl ? `${this.reportData.approvedBy}|${this.approvedBySignatureUrl}` : this.reportData.approvedBy,
+        
+        // Link to original report card (if provided as prop)
+        // Use report_card_id (preferred) but also support original_report_id for backward compatibility
+        report_card_id: this.reportId,
+        original_report_id: this.reportId, // Backward compatibility
+      };
     },
     getObservationOptions(slNo) {
       // Return options based on slNo
@@ -940,32 +1457,133 @@ export default {
 .signatures-layout {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-top: 30px;
-  padding: 20px 0;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.signature-item {
+.signature-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.signature-section strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.signature-auth-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  margin-top: 10px;
+}
+
+.signature-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signature-inputs .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-inputs label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+}
+
+.signature-inputs input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.signature-inputs input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.btn-verify {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.btn-verify:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.btn-verify:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signature-display {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 4px;
+  border: 1px solid #28a745;
+}
+
+.signature-image-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  flex: 1;
+  gap: 8px;
+}
+
+.signature-image {
   max-width: 200px;
+  max-height: 80px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+  background-color: white;
 }
 
-.signature-item label {
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.signature-user {
   font-weight: 600;
-  color: #4a5568;
-  font-size: 1em;
-  margin-bottom: 5px;
+  color: #333;
+  font-size: 14px;
 }
 
-.signature-line {
-  width: 100%;
-  height: 40px;
-  border-bottom: 1px solid #333;
-  margin-top: 10px;
+.signature-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signature-error {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
 }
 
 /* Form Actions */
