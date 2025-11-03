@@ -339,6 +339,9 @@
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
                 </div>
+                <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
+                  Please fill in all form fields (Report Details, Dimensional Checklist, and Parameter Checklist) before verifying signature.
+                </div>
                 <div v-else class="signature-inputs">
                   <div class="input-group">
                     <label>Username:</label>
@@ -521,13 +524,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly">
-          <button type="button" @click="saveDraft" class="btn btn-secondary">
-            Save Draft
-          </button>
-          <button type="button" @click="resetForm" class="btn btn-secondary">
-            Reset
-          </button>
+        <div class="form-actions" v-if="!readonly && isApprovedByVerified">
           <button
             type="submit"
             class="btn btn-primary"
@@ -538,17 +535,6 @@
         </div>
       </form>
 
-      <!-- Submit Button at Bottom -->
-      <!-- <div class="bottom-submit-section" v-if="!readonly">
-        <button
-          type="button"
-          @click="submitForm"
-          class="btn btn-primary btn-submit-bottom"
-          :disabled="!isFormValid"
-        >
-          Submit Report
-        </button>
-      </div> -->
     </div>
   </div>
 </template>
@@ -735,6 +721,31 @@ export default {
         this.reportData.quantity
       );
     },
+    // Check if all form fields are filled (required for enabling Prepared By)
+    areAllFieldsFilled() {
+      // Check required report details
+      if (!this.isFormValid) {
+        return false;
+      }
+      
+      // Check dimensional checklist - all 4 dimensions must have dimension, tolerance, observedValue, and instrumentUsed
+      for (let i = 0; i < this.dimensionalChecklist.length; i++) {
+        const item = this.dimensionalChecklist[i];
+        if (!item.dimension || !item.tolerance || !item.observedValue || !item.instrumentUsed) {
+          return false;
+        }
+      }
+      
+      // Check parameter checklist - all 8 parameters must have complianceObservation
+      for (let i = 0; i < this.parameterChecklist.length; i++) {
+        const item = this.parameterChecklist[i];
+        if (!item.complianceObservation || item.complianceObservation === "") {
+          return false;
+        }
+      }
+      
+      return true;
+    },
     // Check if user is QA Reviewer (role_id = 3) or QA Head (role_id = 2)
     canAccessSignatures() {
       const currentUserRole = userStore.getters.currentUserRole();
@@ -748,9 +759,13 @@ export default {
     isVerifiedByVerified() {
       return !!this.signatures.verifiedBy.signatureUrl;
     },
-    // Prepared By should be enabled if user can access signatures
+    // Check if Approved By signature is verified
+    isApprovedByVerified() {
+      return !!this.signatures.approvedBy.signatureUrl;
+    },
+    // Prepared By should be enabled only if all fields are filled AND user can access signatures
     isPreparedByEnabled() {
-      return this.canAccessSignatures;
+      return this.canAccessSignatures && this.areAllFieldsFilled;
     },
     // Verified By should be enabled only after Prepared By is verified
     isVerifiedByEnabled() {
@@ -1039,6 +1054,9 @@ export default {
           signature.verifiedUserName = data.user_name;
           signature.verifiedUserRole = data.role_name;
           signature.signatureError = "";
+          
+          // Auto-save after signature verification
+          await this.autoSaveReport(signatureType);
         } else {
           signature.signatureError = data.message || "Failed to verify signature";
           signature.signatureUrl = "";
@@ -1052,77 +1070,126 @@ export default {
         signature.verifiedUserRole = "";
       }
     },
-    saveDraft() {
-      alert("Draft saved successfully!");
-    },
-    resetForm() {
-      if (
-        confirm(
-          "Are you sure you want to reset the form? All data will be lost."
-        )
-      ) {
-        this.reportData = {
-          projectName: this.$route.params.projectName || "",
-          reportRefNo: "",
-          memoRefNo: "",
-          lruName: this.$route.params.lruName || "",
-          inspectionStage: "",
-          testVenue: "",
-          slNos: "",
-          dpName: "",
-          dated1: "",
-          dated2: "",
-          sruName: "",
-          partNo: "",
-          quantity: null,
-          startDate: this.formattedDate,
-          endDate: "",
+    
+    // Auto-save report data after each signature verification
+    async autoSaveReport(signatureType) {
+      try {
+        const reportCardId = this.reportId || this.$route.params.reportId;
+        
+        if (!reportCardId) {
+          console.log("No report card ID available for auto-save");
+          return;
+        }
+        
+        // Prepare data for auto-save (same structure as submitForm)
+        const submissionData = {
+          report_card_id: reportCardId,
+          project_name: this.reportData.projectName,
+          report_ref_no: this.reportData.reportRefNo,
+          memo_ref_no: this.reportData.memoRefNo,
+          lru_name: this.reportData.lruName,
+          inspection_stage: this.reportData.inspectionStage,
+          test_venue: this.reportData.testVenue,
+          sl_nos: this.reportData.slNos,
+          dp_name: this.reportData.dpName,
+          dated1: this.reportData.dated1,
+          dated2: this.reportData.dated2,
+          sru_name: this.reportData.sruName,
+          part_no: this.reportData.partNo,
+          quantity: this.reportData.quantity || 0,
+          start_date: this.reportData.startDate,
+          end_date: this.reportData.endDate,
+
+          // Dimensional Checklist
+          dim1_dimension: this.dimensionalChecklist[0].dimension,
+          dim1_tolerance: this.dimensionalChecklist[0].tolerance,
+          dim1_observed_value: this.dimensionalChecklist[0].observedValue,
+          dim1_instrument_used: this.dimensionalChecklist[0].instrumentUsed,
+          dim1_remarks: this.dimensionalChecklist[0].remarks,
+          dim1_upload: this.dimensionalChecklist[0].fileName,
+          dim2_dimension: this.dimensionalChecklist[1].dimension,
+          dim2_tolerance: this.dimensionalChecklist[1].tolerance,
+          dim2_observed_value: this.dimensionalChecklist[1].observedValue,
+          dim2_instrument_used: this.dimensionalChecklist[1].instrumentUsed,
+          dim2_remarks: this.dimensionalChecklist[1].remarks,
+          dim2_upload: this.dimensionalChecklist[1].fileName,
+          dim3_dimension: this.dimensionalChecklist[2].dimension,
+          dim3_tolerance: this.dimensionalChecklist[2].tolerance,
+          dim3_observed_value: this.dimensionalChecklist[2].observedValue,
+          dim3_instrument_used: this.dimensionalChecklist[2].instrumentUsed,
+          dim3_remarks: this.dimensionalChecklist[2].remarks,
+          dim3_upload: this.dimensionalChecklist[2].fileName,
+          dim4_dimension: this.dimensionalChecklist[3].dimension,
+          dim4_tolerance: this.dimensionalChecklist[3].tolerance,
+          dim4_observed_value: this.dimensionalChecklist[3].observedValue,
+          dim4_instrument_used: this.dimensionalChecklist[3].instrumentUsed,
+          dim4_remarks: this.dimensionalChecklist[3].remarks,
+          dim4_upload: this.dimensionalChecklist[3].fileName,
+
+          // Parameter Checklist
+          param1_compliance_observation: this.parameterChecklist[0].complianceObservation,
+          param1_expected: this.parameterChecklist[0].expected,
+          param1_remarks: this.parameterChecklist[0].remarks,
+          param1_upload: this.parameterChecklist[0].fileName,
+          param2_compliance_observation: this.parameterChecklist[1].complianceObservation,
+          param2_expected: this.parameterChecklist[1].expected,
+          param2_remarks: this.parameterChecklist[1].remarks,
+          param2_upload: this.parameterChecklist[1].fileName,
+          param3_compliance_observation: this.parameterChecklist[2].complianceObservation,
+          param3_expected: this.parameterChecklist[2].expected,
+          param3_remarks: this.parameterChecklist[2].remarks,
+          param3_upload: this.parameterChecklist[2].fileName,
+          param4_compliance_observation: this.parameterChecklist[3].complianceObservation,
+          param4_expected: this.parameterChecklist[3].expected,
+          param4_remarks: this.parameterChecklist[3].remarks,
+          param4_upload: this.parameterChecklist[3].fileName,
+          param5_compliance_observation: this.parameterChecklist[4].complianceObservation,
+          param5_expected: this.parameterChecklist[4].expected,
+          param5_remarks: this.parameterChecklist[4].remarks,
+          param5_upload: this.parameterChecklist[4].fileName,
+          param6_compliance_observation: this.parameterChecklist[5].complianceObservation,
+          param6_expected: this.parameterChecklist[5].expected,
+          param6_remarks: this.parameterChecklist[5].remarks,
+          param6_upload: this.parameterChecklist[5].fileName,
+          param7_compliance_observation: this.parameterChecklist[6].complianceObservation,
+          param7_expected: this.parameterChecklist[6].expected,
+          param7_remarks: this.parameterChecklist[6].remarks,
+          param7_upload: this.parameterChecklist[6].fileName,
+          param8_compliance_observation: this.parameterChecklist[7].complianceObservation,
+          param8_expected: this.parameterChecklist[7].expected,
+          param8_remarks: this.parameterChecklist[7].remarks,
+          param8_upload: this.parameterChecklist[7].fileName,
+
+          // Signatures (include current and previous ones)
+          prepared_by: this.signatures.preparedBy.signatureUrl || "",
+          verified_by: this.signatures.verifiedBy.signatureUrl || "",
+          approved_by: this.signatures.approvedBy.signatureUrl || "",
         };
-        // Reset checklists
-        this.dimensionalChecklist.forEach((item) => {
-          item.dimension = "";
-          item.tolerance = "";
-          item.observedValue = "";
-          item.instrumentUsed = "";
-          item.remarks = "";
-          item.fileName = null;
-        });
-        this.parameterChecklist.forEach((item) => {
-          item.complianceObservation = "";
-          item.expected =
-            item.parameter === "Burrs" || item.parameter === "Damages"
-              ? "Not Expected (NO)"
-              : "As per Drawing (YES)";
-          item.remarks = "";
-          item.fileName = null;
-        });
-        // Reset signatures
-        this.signatures.preparedBy = {
-          signatureUsername: "",
-          signaturePassword: "",
-          signatureUrl: "",
-          verifiedUserName: "",
-          verifiedUserRole: "",
-          signatureError: "",
-        };
-        this.signatures.verifiedBy = {
-          signatureUsername: "",
-          signaturePassword: "",
-          signatureUrl: "",
-          verifiedUserName: "",
-          verifiedUserRole: "",
-          signatureError: "",
-        };
-        this.signatures.approvedBy = {
-          signatureUsername: "",
-          signaturePassword: "",
-          signatureUrl: "",
-          verifiedUserName: "",
-          verifiedUserRole: "",
-          signatureError: "",
-        };
+
+        const response = await fetch(
+          "http://localhost:5000/api/mechanical-inspection",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(submissionData),
+          }
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          console.log(`Auto-saved report after ${signatureType} signature verification`);
+        } else {
+          console.error(`Auto-save failed: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Error auto-saving report:", error);
+        // Don't show alert for auto-save failures, just log
       }
     },
+    
     async submitForm() {
       if (!this.isFormValid) {
         alert("Please fill in all required fields.");
@@ -1252,8 +1319,9 @@ export default {
         const result = await response.json();
 
         if (result.success) {
-          alert("Mechanical inspection report submitted successfully!");
-          this.resetForm();
+          alert("Mechanical inspection report submitted successfully! Notifications have been sent.");
+          // Optionally redirect or reset - but since data is already saved, we might want to keep it visible
+          // this.$router.push('/reports');
         } else {
           alert(`Error: ${result.message}`);
         }
@@ -1688,7 +1756,7 @@ export default {
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 1rem;
   margin-top: 2rem;
   padding-top: 2rem;
@@ -1718,30 +1786,4 @@ export default {
   cursor: not-allowed;
 }
 
-.btn-secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #5a6268;
-}
-
-.bottom-submit-section {
-  position: sticky;
-  bottom: 0;
-  background: white;
-  padding: 1.5rem 2rem;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 2rem;
-  text-align: center;
-  border-top: 1px solid #ddd;
-}
-
-.btn-submit-bottom {
-  padding: 1rem 3rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  min-width: 200px;
-}
 </style>

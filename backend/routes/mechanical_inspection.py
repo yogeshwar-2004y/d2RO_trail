@@ -291,6 +291,69 @@ def create_mechanical_inspection():
         conn.commit()
         cur.close()
         
+        # Send notifications after successful submission
+        try:
+            from utils.activity_logger import log_notification, get_users_by_role
+            
+            # Get report card info to find memo_id and project_id for notifications
+            if report_card_id:
+                conn = get_db_connection()
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT r.memo_id, r.project_id, m.submitted_by
+                    FROM reports r
+                    LEFT JOIN memos m ON r.memo_id = m.memo_id
+                    WHERE r.report_id = %s
+                """, (report_card_id,))
+                report_info = cur.fetchone()
+                cur.close()
+                
+                if report_info and len(report_info) >= 3:
+                    memo_id = report_info[0] if report_info[0] else None
+                    project_id = report_info[1] if report_info[1] else None
+                    submitted_by = report_info[2] if report_info[2] else None
+                    
+                    # Get current user from session/token (you may need to adjust this)
+                    # For now, we'll use submitted_by if available
+                    performed_by = submitted_by if submitted_by else None
+                    
+                    # Notify Design Heads (role_id = 4) about report completion
+                    try:
+                        design_heads = get_users_by_role(4)
+                        for dh in design_heads:
+                            dh_id = dh.get('user_id') if isinstance(dh, dict) else dh[0] if hasattr(dh, '__getitem__') else None
+                            if dh_id:
+                                log_notification(
+                                    project_id=project_id,
+                                    activity_performed="Mechanical Inspection Report Completed",
+                                    performed_by=performed_by,
+                                    notified_user_id=dh_id,
+                                    notification_type="report_completed",
+                                    additional_info=f"Mechanical Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
+                                )
+                    except Exception as e:
+                        print(f"Error notifying Design Heads: {e}")
+                    
+                    # Notify QA Heads (role_id = 2) about report completion
+                    try:
+                        qa_heads = get_users_by_role(2)
+                        for qa in qa_heads:
+                            qa_id = qa.get('user_id') if isinstance(qa, dict) else qa[0] if hasattr(qa, '__getitem__') else None
+                            if qa_id:
+                                log_notification(
+                                    project_id=project_id,
+                                    activity_performed="Mechanical Inspection Report Completed",
+                                    performed_by=performed_by,
+                                    notified_user_id=qa_id,
+                                    notification_type="report_completed",
+                                    additional_info=f"Mechanical Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
+                                )
+                    except Exception as e:
+                        print(f"Error notifying QA Heads: {e}")
+        except Exception as notify_error:
+            print(f"Warning: Failed to send notifications: {str(notify_error)}")
+            # Continue execution even if notifications fail
+        
         return jsonify({
             "success": True,
             "message": "Mechanical inspection report created successfully",
