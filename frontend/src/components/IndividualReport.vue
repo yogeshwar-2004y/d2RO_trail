@@ -495,6 +495,10 @@ export default {
             const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
             if (template) {
               this.selectedTemplate = template;
+              
+              // If template is selected and it's Conformal Coating, fetch the inspection data
+              // The template component will receive reportId prop and should load data automatically
+              // But we can also trigger a manual load here if needed
             }
           }
         }

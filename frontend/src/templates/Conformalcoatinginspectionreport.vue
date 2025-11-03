@@ -976,6 +976,8 @@ export default {
       }
     },
     prepareReportData() {
+      // Include original_report_id from the reportId prop (which is the reports.report_id)
+      const originalReportId = this.reportId || this.savedReportId;
       return {
         project_name: this.projectName,
         report_ref_no: this.reportRefNo,
@@ -1005,6 +1007,7 @@ export default {
         prepared_by: this.preparedBySignatureUrl ? `${this.preparedBy}|${this.preparedBySignatureUrl}` : this.preparedBy,
         verified_by: this.verifiedBySignatureUrl ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}` : this.verifiedBy,
         approved_by: this.approvedBySignatureUrl ? `${this.approvedBy}|${this.approvedBySignatureUrl}` : this.approvedBy,
+        original_report_id: originalReportId, // Link to the original report card ID from reports table
       };
     },
     exportReport() {
