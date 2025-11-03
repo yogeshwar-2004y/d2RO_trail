@@ -230,7 +230,6 @@
                   </button>
                 </div>
                 <div v-if="preparedBySignatureUrl" class="signature-display">
-                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="preparedBySignatureUrl"
@@ -289,7 +288,6 @@
                   </button>
                 </div>
                 <div v-if="verifiedBySignatureUrl" class="signature-display">
-                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="verifiedBySignatureUrl"
@@ -348,7 +346,6 @@
                   </button>
                 </div>
                 <div v-if="approvedBySignatureUrl" class="signature-display">
-                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="approvedBySignatureUrl"
@@ -762,8 +759,10 @@ export default {
       }
 
       try {
-        const response = await fetch("/api/users/verify-signature", {
-          method: "POST",
+        const response = await fetch(
+          "http://localhost:8000/api/users/verify-signature",
+          {
+            method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -802,6 +801,8 @@ export default {
           } else if (signatureType === "approved") {
             // For Approved By: update database with signature
             await this.updateReportSignature("approved");
+            // Notify QA Heads about approval
+            await this.notifyApproval();
           }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
@@ -964,6 +965,7 @@ export default {
       }
     },
     async finalSubmitReport() {
+      // Final submit button handler - called after Approved By signature is fetched
       if (!this.reportId) {
         alert(
           "Error: Report not found. Please complete the Prepared By signature first."
@@ -977,11 +979,96 @@ export default {
       }
 
       try {
-        alert("Report submitted successfully!");
+        // Notify QA Heads and log to activity logs
+        await this.notifyQAHeads();
+        alert(
+          "Report submitted successfully! Activity logged and QA Heads have been notified."
+        );
         console.log("Report submitted with ID:", this.reportId);
       } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
+      }
+    },
+    async notifyQAHeads() {
+      try {
+        // Get current user from session/localStorage
+        const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+        const reviewerId = currentUser.user_id || null;
+
+        if (!reviewerId) {
+          console.error("Reviewer ID not found");
+          return;
+        }
+
+        // Send notification to backend
+        const response = await fetch(
+          "http://localhost:8000/api/reports/raw-material-inspection/notify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: this.reportId,
+              memo_ref_no: this.formData.memoRefNo,
+              reviewer_id: reviewerId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!result.success) {
+          console.error("Failed to send notification:", result.message);
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads:", error);
+        throw error;
+      }
+    },
+    async notifyApproval() {
+      try {
+        if (!this.reportId) {
+          console.error(
+            "Report ID not found. Cannot send approval notification."
+          );
+          return;
+        }
+
+        if (!this.approvedByUserId) {
+          console.error(
+            "Approved By User ID not found. Cannot send approval notification."
+          );
+          return;
+        }
+
+        // Send approval notification to backend
+        const response = await fetch(
+          "http://localhost:8000/api/reports/raw-material-inspection/notify-approval",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: this.reportId,
+              approved_by_id: this.approvedByUserId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (result.success) {
+          console.log("✓ Approval notification sent successfully");
+        } else {
+          console.error(
+            "Failed to send approval notification:",
+            result.message
+          );
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads about approval:", error);
+        // Don't throw error - approval signature should still be saved even if notification fails
       }
     },
     prepareReportData() {
@@ -1515,13 +1602,6 @@ export default {
   background-color: #e8f5e8;
   border: 1px solid #28a745;
   border-radius: 6px;
-}
-
-.signature-display label {
-  font-weight: 600;
-  color: #155724;
-  margin-bottom: 10px;
-  display: block;
 }
 
 .signature-image-container {
