@@ -256,61 +256,24 @@ def get_kit_of_parts_inspection(report_id):
             report = cur.fetchone()
         
         if not report:
+            cur.close()
             return jsonify({"success": False, "message": "Report not found"}), 404
         
-        # Convert to dictionary
-        columns = [desc[0] for desc in cur.description]
-        report_data = dict(zip(columns, report))
-
-        # Map OK/NOT OK back to Passed/Failed for frontend
-        for i in range(1, 8):
-            remarks_key = f'test{i}_remarks'
-            if report_data.get(remarks_key) == 'OK':
-                report_data[remarks_key] = 'Passed'
-            elif report_data.get(remarks_key) == 'NOT OK':
-                report_data[remarks_key] = 'Failed'
-
-        # Restructure the data for frontend format
-        inspection_items = []
-        for i in range(1, 8):
-            inspection_items.append({
-                'slNo': report_data.get(f'test{i}_sl_no', i),
-                'testCase': report_data.get(f'test{i}_case', ''),
-                'expected': report_data.get(f'test{i}_expected', ''),
-                'observations': report_data.get(f'test{i}_observations', ''),
-                'remarks': report_data.get(f'test{i}_remarks', ''),
-                'upload': report_data.get(f'test{i}_upload', '')
-            })
-
-        # Format the response in frontend format
-        frontend_data = {
-            'report_id': report_data.get('report_id'),  # Include report_id for frontend
-            'projectName': report_data.get('project_name'),
-            'dpName': report_data.get('dp_name'),
-            'reportRefNo': report_data.get('report_ref_no'),
-            'memoRefNo': report_data.get('memo_ref_no'),
-            'lruName': report_data.get('lru_name'),
-            'sruName': report_data.get('sru_name'),
-            'partNo': report_data.get('part_no'),
-            'quantity': report_data.get('quantity'),
-            'slNos': report_data.get('sl_nos'),
-            'testVenue': report_data.get('test_venue'),
-            'inspectionStage': report_data.get('inspection_stage'),
-            'startDate': report_data.get('start_date').strftime('%Y-%m-%d') if report_data.get('start_date') else None,
-            'endDate': report_data.get('end_date').strftime('%Y-%m-%d') if report_data.get('end_date') else None,
-            'dated1': report_data.get('dated1').strftime('%Y-%m-%d') if report_data.get('dated1') else None,
-            'dated2': report_data.get('dated2').strftime('%Y-%m-%d') if report_data.get('dated2') else None,
-            'preparedBy': report_data.get('prepared_by_qa_g1'),
-            'verifiedBy': report_data.get('verified_by_g1h_qa_g'),
-            'approvedBy': report_data.get('approved_by'),
-            'inspectionItems': inspection_items
-        }
+        columns = [desc[0] for desc in cur.description] if cur.description else []
         
         cur.close()
         
+        # Convert to dictionary
+        report_data = dict(zip(columns, report))
+        
+        # Convert datetime objects to strings
+        for key, value in report_data.items():
+            if hasattr(value, 'isoformat'):
+                report_data[key] = value.isoformat()
+        
         return jsonify({
             "success": True,
-            "report": frontend_data
+            "report": report_data
         })
         
     except Exception as e:
@@ -399,6 +362,205 @@ def update_kit_of_parts_inspection(report_id):
     except Exception as e:
         print(f"Error updating kit of parts inspection report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error updating kit of parts inspection report: {str(e)}")
+
+@kit_of_parts_bp.route('/api/kit-of-parts/notify', methods=['POST'])
+def notify_qa_heads_kit_of_parts():
+    """Notify QA Heads when a kit of parts inspection report is submitted"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        report_id = data.get('report_id')
+        memo_ref_no = data.get('memo_ref_no')
+        reviewer_id = data.get('reviewer_id')
+        
+        if not report_id or not reviewer_id:
+            return jsonify({"success": False, "message": "Report ID and Reviewer ID are required"}), 400
+        
+        from utils.activity_logger import log_notification, get_users_by_role
+        
+        # Get all QA Heads (role_id = 2)
+        qa_heads = get_users_by_role(2)
+        
+        # Get reviewer name and report details
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM users WHERE user_id = %s", (reviewer_id,))
+        reviewer_result = cur.fetchone()
+        reviewer_name = reviewer_result[0] if reviewer_result else "Reviewer"
+        
+        # Get report details for activity log
+        cur.execute("""
+            SELECT report_ref_no, project_name, lru_name 
+            FROM kit_of_parts_inspection_report 
+            WHERE report_id = %s
+        """, (report_id,))
+        report_result = cur.fetchone()
+        report_ref_no = report_result[0] if report_result else f"Report {report_id}"
+        project_name = report_result[1] if report_result else "Unknown"
+        lru_name = report_result[2] if report_result else "Unknown"
+        cur.close()
+        
+        # Log activity to activity logs
+        from utils.activity_logger import log_activity
+        memo_text = f" corresponding to memo {memo_ref_no}" if memo_ref_no else ""
+        activity_message = f"Kit of Parts Inspection Report (ID: {report_id}, Ref: {report_ref_no}){memo_text} has been submitted by {reviewer_name} for project '{project_name}', LRU '{lru_name}'."
+        
+        log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Kit of Parts Inspection Report Submitted",
+            performed_by=reviewer_id,
+            additional_info=f"Report ID: {report_id}|Report Ref: {report_ref_no}|Project: {project_name}|LRU: {lru_name}|Submitted by: {reviewer_name}{memo_text}"
+        )
+        
+        print(f"✓ Activity logged: Kit of Parts Inspection Report {report_id} submitted by {reviewer_name}")
+        
+        # Notify each QA Head
+        for qa_head in qa_heads:
+            memo_text = f" corresponding to memo {memo_ref_no}" if memo_ref_no else ""
+            log_notification(
+                project_id=None,
+                activity_performed=f"Kit of Parts Inspection Report{memo_text} Submitted",
+                performed_by=reviewer_id,
+                notified_user_id=qa_head['user_id'],
+                notification_type="report_submitted",
+                additional_info=f"Report ID {report_id} (Ref: {report_ref_no}){memo_text} has been submitted by {reviewer_name} for project '{project_name}', LRU '{lru_name}'. Please review."
+            )
+        
+        print(f"✓ Notifications sent to {len(qa_heads)} QA Head(s)")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Activity logged and notifications sent to {len(qa_heads)} QA Head(s)"
+        })
+        
+    except Exception as e:
+        print(f"Error notifying QA Heads for kit of parts report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error notifying QA Heads: {str(e)}")
+
+
+@kit_of_parts_bp.route('/api/kit-of-parts/notify-approval', methods=['POST'])
+def notify_qa_heads_approval_kit_of_parts():
+    """Notify QA Heads when a kit of parts inspection report is approved"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        report_id = data.get('report_id')
+        approved_by_id = data.get('approved_by_id')
+        
+        if not report_id or not approved_by_id:
+            return jsonify({"success": False, "message": "Report ID and Approved By ID are required"}), 400
+        
+        from utils.activity_logger import log_notification, get_users_by_role
+        
+        # Get all QA Heads (role_id = 2)
+        qa_heads = get_users_by_role(2)
+        print(f"DEBUG: Found {len(qa_heads)} QA Head(s)")
+        
+        if not qa_heads or len(qa_heads) == 0:
+            print(f"WARNING: No QA Heads found with role_id = 2")
+            # Still log the activity even if no QA Heads found
+        else:
+            for qa_head in qa_heads:
+                print(f"DEBUG: QA Head found - ID: {qa_head['user_id']}, Name: {qa_head['name']}, Email: {qa_head['email']}")
+        
+        # Get approver name and report details
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM users WHERE user_id = %s", (approved_by_id,))
+        approver_result = cur.fetchone()
+        approver_name = approver_result[0] if approver_result else "Approver"
+        
+        # Get report details for activity log
+        cur.execute("""
+            SELECT report_ref_no, project_name, lru_name, memo_ref_no 
+            FROM kit_of_parts_inspection_report 
+            WHERE report_id = %s
+        """, (report_id,))
+        report_result = cur.fetchone()
+        report_ref_no = report_result[0] if report_result else f"Report {report_id}"
+        project_name = report_result[1] if report_result else "Unknown"
+        lru_name = report_result[2] if report_result else "Unknown"
+        memo_ref_no = report_result[3] if report_result else None
+        cur.close()
+        
+        print(f"DEBUG: Report details - Ref: {report_ref_no}, Project: {project_name}, LRU: {lru_name}")
+        
+        # Log activity to activity logs
+        from utils.activity_logger import log_activity
+        activity_message = f"Kit of Parts Inspection Report (ID: {report_id}, Ref: {report_ref_no}) has been approved by {approver_name} for project '{project_name}', LRU '{lru_name}'."
+        
+        activity_logged = log_activity(
+            project_id=None,  # Report operations don't have project_id in this context
+            activity_performed="Kit of Parts Inspection Report Approved",
+            performed_by=approved_by_id,
+            additional_info=f"Report ID: {report_id}|Report Ref: {report_ref_no}|Project: {project_name}|LRU: {lru_name}|Approved by: {approver_name}"
+        )
+        
+        if activity_logged:
+            print(f"✓ Activity logged: Kit of Parts Inspection Report {report_id} approved by {approver_name}")
+        else:
+            print(f"✗ Failed to log activity for report {report_id}")
+        
+        # Notify each QA Head
+        notification_count = 0
+        notification_errors = []
+        
+        if qa_heads and len(qa_heads) > 0:
+            for qa_head in qa_heads:
+                notification_message = f"Report num : {report_ref_no} has been approved"
+                print(f"DEBUG: Attempting to notify QA Head {qa_head['user_id']} ({qa_head['name']})")
+                
+                notification_sent = log_notification(
+                    project_id=None,
+                    activity_performed=notification_message,
+                    performed_by=approved_by_id,
+                    notified_user_id=qa_head['user_id'],
+                    notification_type="report_approved",
+                    additional_info=f"Report ID {report_id} (Ref: {report_ref_no}) has been approved by {approver_name} for project '{project_name}', LRU '{lru_name}'. Please review."
+                )
+                
+                if notification_sent:
+                    notification_count += 1
+                    print(f"✓ Notification sent to QA Head {qa_head['user_id']} ({qa_head['name']})")
+                else:
+                    error_msg = f"Failed to send notification to QA Head {qa_head['user_id']} ({qa_head['name']})"
+                    notification_errors.append(error_msg)
+                    print(f"✗ {error_msg}")
+        else:
+            print(f"WARNING: No QA Heads to notify. Cannot send approval notifications.")
+        
+        print(f"✓ Approval notifications sent to {notification_count} QA Head(s)")
+        
+        if notification_errors:
+            print(f"ERROR: {len(notification_errors)} notification(s) failed:")
+            for error in notification_errors:
+                print(f"  - {error}")
+        
+        if notification_count > 0:
+            return jsonify({
+                "success": True,
+                "message": f"Activity logged and approval notifications sent to {notification_count} QA Head(s)"
+            })
+        else:
+            if not qa_heads or len(qa_heads) == 0:
+                return jsonify({
+                    "success": False,
+                    "message": "Activity logged but no QA Heads found to notify. Please ensure QA Heads are assigned role_id = 2."
+                })
+            else:
+                return jsonify({
+                    "success": False,
+                    "message": f"Activity logged but failed to send notifications to {len(qa_heads)} QA Head(s). Check server logs for details."
+                })
+        
+    except Exception as e:
+        print(f"Error notifying QA Heads for kit of parts report approval: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error notifying QA Heads for approval: {str(e)}")
+
 
 @kit_of_parts_bp.route('/api/kit-of-parts', methods=['GET'])
 def get_all_kit_of_parts_inspections():

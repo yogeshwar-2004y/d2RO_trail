@@ -373,6 +373,27 @@
             Fill Report (Signatures Required)
           </button>
         </div>
+
+        <!-- Submit Button - Enabled only after Approved By signature -->
+        <div class="form-actions final-submit" v-if="effectiveReportId && approvedBySignatureUrl && !readonly && !isReportSubmitted">
+          <button
+            type="button"
+            @click="finalSubmitReport"
+            class="btn btn-primary btn-submit-final"
+            :disabled="!approvedBySignatureUrl || !effectiveReportId"
+          >
+            Submit Report
+          </button>
+        </div>
+
+        <!-- Show message if report is already submitted -->
+        <div v-if="isReportSubmitted" class="submission-status-message">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span>Report has been submitted successfully</span>
+        </div>
       </form>
     </div>
   </div>
@@ -502,6 +523,7 @@ export default {
       approvedByError: "",
       approvedByUserId: null, // Store user_id of the approver
       savedReportId: null, // Store report ID after submission
+      isReportSubmitted: false, // Track if report has been submitted
       // Track if signatures were verified in current session (not just loaded from DB)
       preparedByVerifiedInSession: false,
       verifiedByVerifiedInSession: false,
@@ -776,6 +798,8 @@ export default {
           } else if (signatureType === "approved") {
             // UPDATE the same row when Approved By signature is fetched
             await this.updateReportSignature('approved');
+            // Notify QA Heads about approval
+            await this.notifyApproval();
           }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
@@ -939,85 +963,184 @@ export default {
             this.savedReportId = reportIdToLoad;
           }
 
-          // Map header fields
-          this.reportData.projectName = report.projectName || "";
-          this.reportData.reportRefNo = report.reportRefNo || "";
-          this.reportData.memoRefNo = report.memoRefNo || "";
-          this.reportData.lruName = report.lruName || "";
-          this.reportData.sruName = report.sruName || "";
-          this.reportData.dpName = report.dpName || "";
-          this.reportData.partNo = report.partNo || "";
-          this.reportData.inspectionStage = report.inspectionStage || "";
-          this.reportData.testVenue = report.testVenue || "";
+          // Map header fields (using snake_case from backend, same as conformal coating)
+          this.reportData.projectName = report.project_name || "";
+          this.reportData.reportRefNo = report.report_ref_no || "";
+          this.reportData.memoRefNo = report.memo_ref_no || "";
+          this.reportData.lruName = report.lru_name || "";
+          this.reportData.sruName = report.sru_name || "";
+          this.reportData.dpName = report.dp_name || "";
+          this.reportData.partNo = report.part_no || "";
+          this.reportData.inspectionStage = report.inspection_stage || "";
+          this.reportData.testVenue = report.test_venue || "";
           this.reportData.quantity = report.quantity || null;
-          this.reportData.slNos = report.slNos || "";
-          this.reportData.startDate = report.startDate ? (typeof report.startDate === 'string' ? report.startDate.split('T')[0] : report.startDate) : "";
-          this.reportData.endDate = report.endDate ? (typeof report.endDate === 'string' ? report.endDate.split('T')[0] : report.endDate) : "";
+          this.reportData.slNos = report.sl_nos || "";
+          this.reportData.startDate = report.start_date ? (typeof report.start_date === 'string' ? report.start_date.split('T')[0] : report.start_date) : "";
+          this.reportData.endDate = report.end_date ? (typeof report.end_date === 'string' ? report.end_date.split('T')[0] : report.end_date) : "";
           this.reportData.dated1 = report.dated1 ? (typeof report.dated1 === 'string' ? report.dated1.split('T')[0] : report.dated1) : "";
           this.reportData.dated2 = report.dated2 ? (typeof report.dated2 === 'string' ? report.dated2.split('T')[0] : report.dated2) : "";
 
-          // Map inspection items (test1-7)
-          if (report.inspectionItems && Array.isArray(report.inspectionItems)) {
-            for (let i = 0; i < Math.min(report.inspectionItems.length, 7); i++) {
-              if (this.reportData.inspectionItems[i]) {
-                const item = report.inspectionItems[i];
-                this.reportData.inspectionItems[i].observations = item.observations || "";
-                this.reportData.inspectionItems[i].remarks = item.remarks || "";
-                this.reportData.inspectionItems[i].fileName = item.upload || "";
-                
-                // Compute remark if observation is set
-                if (this.reportData.inspectionItems[i].observations) {
-                  this.computeRemarkForItem(this.reportData.inspectionItems[i]);
-                }
+          // Map inspection items (test1-7) from snake_case backend fields
+          for (let i = 1; i <= 7; i++) {
+            if (this.reportData.inspectionItems[i - 1]) {
+              this.reportData.inspectionItems[i - 1].observations = report[`test${i}_observations`] || "";
+              // Map remarks: OK -> Passed, NOT OK -> Failed
+              const remark = report[`test${i}_remarks`] || "";
+              if (remark === 'OK') {
+                this.reportData.inspectionItems[i - 1].remarks = 'Passed';
+              } else if (remark === 'NOT OK') {
+                this.reportData.inspectionItems[i - 1].remarks = 'Failed';
+              } else {
+                this.reportData.inspectionItems[i - 1].remarks = remark;
+              }
+              this.reportData.inspectionItems[i - 1].fileName = report[`test${i}_upload`] || "";
+              this.reportData.inspectionItems[i - 1].expected = report[`test${i}_expected`] || this.reportData.inspectionItems[i - 1].expected;
+              
+              // Compute remark if observation is set (trigger auto-remark update)
+              if (this.reportData.inspectionItems[i - 1].observations) {
+                this.computeRemarkForItem(this.reportData.inspectionItems[i - 1]);
               }
             }
           }
 
           // Parse signature fields (format: "name|signature_url")
-          // Only load signature URLs if form is readonly (viewing completed report)
-          // If form is editable, user must verify signatures again in current session
-          if (report.preparedBy) {
-            const preparedParts = report.preparedBy.split("|");
+          // Same logic as conformal coating - load signatures directly from DB
+          if (report.prepared_by_qa_g1) {
+            const preparedParts = report.prepared_by_qa_g1.split("|");
             this.reportData.preparedBy = preparedParts[0] || "";
-            // Only set signature URL if form is readonly (viewing completed report)
-            if (this.readonly) {
-              this.preparedBySignatureUrl = preparedParts[1] || "";
-              this.preparedByVerifiedName = preparedParts[0] || "";
-              // Mark as verified since we're viewing a completed report
-              this.preparedByVerifiedInSession = true;
-            }
+            this.preparedBySignatureUrl = preparedParts[1] || "";
+            this.preparedByVerifiedName = preparedParts[0] || "";
           }
 
-          if (report.verifiedBy) {
-            const verifiedParts = report.verifiedBy.split("|");
+          if (report.verified_by_g1h_qa_g) {
+            const verifiedParts = report.verified_by_g1h_qa_g.split("|");
             this.reportData.verifiedBy = verifiedParts[0] || "";
-            // Only set signature URL if form is readonly (viewing completed report)
-            if (this.readonly) {
-              this.verifiedBySignatureUrl = verifiedParts[1] || "";
-              this.verifiedByVerifiedName = verifiedParts[0] || "";
-              // Mark as verified since we're viewing a completed report
-              this.verifiedByVerifiedInSession = true;
-            }
+            this.verifiedBySignatureUrl = verifiedParts[1] || "";
+            this.verifiedByVerifiedName = verifiedParts[0] || "";
           }
 
-          if (report.approvedBy) {
-            const approvedParts = report.approvedBy.split("|");
+          if (report.approved_by) {
+            const approvedParts = report.approved_by.split("|");
             this.reportData.approvedBy = approvedParts[0] || "";
-            // Only set signature URL if form is readonly (viewing completed report)
-            if (this.readonly) {
-              this.approvedBySignatureUrl = approvedParts[1] || "";
-              this.approvedByVerifiedName = approvedParts[0] || "";
-              // Mark as verified since we're viewing a completed report
-              this.approvedByVerifiedInSession = true;
-            }
+            this.approvedBySignatureUrl = approvedParts[1] || "";
+            this.approvedByVerifiedName = approvedParts[0] || "";
           }
 
-          console.log("✓ Report data loaded successfully:", reportIdToLoad);
+          // Mark as submitted if all signatures exist
+          if (this.preparedBySignatureUrl && this.verifiedBySignatureUrl && this.approvedBySignatureUrl) {
+            this.isReportSubmitted = true;
+          }
+
+          console.log("✓ Report data loaded successfully:", report.report_id);
         } else {
           console.error("Failed to load report data:", result.message);
         }
       } catch (error) {
         console.error("Error loading report data:", error);
+      }
+    },
+    async finalSubmitReport() {
+      // Final submit button handler - called after Approved By signature is verified
+      const reportIdToUse = this.savedReportId || this.reportId;
+      
+      if (!reportIdToUse) {
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+      
+      if (!this.approvedBySignatureUrl) {
+        alert("Please complete the Approved By signature first.");
+        return;
+      }
+      
+      try {
+        // Notify QA Heads and log to activity logs
+        await this.notifyQAHeads();
+        this.isReportSubmitted = true;
+        alert("Report submitted successfully! Activity logged and QA Heads have been notified.");
+        console.log("Report submitted with ID:", reportIdToUse);
+      } catch (error) {
+        console.error("Error submitting report:", error);
+        alert("Error submitting report. Please try again.");
+      }
+    },
+    async notifyQAHeads() {
+      try {
+        // Get current user from session/localStorage
+        const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const reviewerId = currentUser.user_id || null;
+        
+        if (!reviewerId) {
+          console.error("Reviewer ID not found");
+          return;
+        }
+
+        const reportIdToUse = this.savedReportId || this.reportId;
+
+        // Send notification to backend
+        const response = await fetch(
+          "http://localhost:5000/api/kit-of-parts/notify",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: reportIdToUse,
+              memo_ref_no: this.reportData.memoRefNo,
+              reviewer_id: reviewerId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (!result.success) {
+          console.error("Failed to send notification:", result.message);
+          throw new Error(result.message || "Failed to notify QA Heads");
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads:", error);
+        throw error;
+      }
+    },
+    async notifyApproval() {
+      try {
+        const reportIdToUse = this.savedReportId || this.reportId;
+        
+        if (!reportIdToUse) {
+          console.error("Report ID not found. Cannot send approval notification.");
+          return;
+        }
+
+        if (!this.approvedByUserId) {
+          console.error("Approved By User ID not found. Cannot send approval notification.");
+          return;
+        }
+
+        // Send approval notification to backend
+        const response = await fetch(
+          "http://localhost:5000/api/kit-of-parts/notify-approval",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              report_id: reportIdToUse,
+              approved_by_id: this.approvedByUserId,
+            }),
+          }
+        );
+
+        const result = await response.json();
+        if (result.success) {
+          console.log("✓ Approval notification sent successfully");
+        } else {
+          console.error("Failed to send approval notification:", result.message);
+        }
+      } catch (error) {
+        console.error("Error notifying QA Heads about approval:", error);
+        // Don't throw error - approval signature should still be saved even if notification fails
       }
     },
     prepareSubmissionData() {
@@ -1680,5 +1803,64 @@ export default {
   .inspection-table {
     min-width: 800px;
   }
+}
+
+/* Submission Status Message */
+.submission-status-message {
+  margin-top: 20px;
+  padding: 15px 20px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 5px;
+  color: #155724;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.submission-status-message svg {
+  width: 24px;
+  height: 24px;
+  stroke: #155724;
+  flex-shrink: 0;
+}
+
+/* Final Submit Button Styling */
+.form-actions.final-submit {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #4a5568;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-submit-final {
+  min-width: 200px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-submit-final:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit-final:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-submit-final:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 </style>
