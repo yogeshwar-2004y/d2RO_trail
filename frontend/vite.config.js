@@ -16,6 +16,9 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
+  optimizeDeps: {
+    include: ["html2pdf.js"],
+  },
   server: {
     proxy: {
       "/api": {
