@@ -7,6 +7,16 @@ from utils.helpers import handle_database_error
 
 mechanical_inspection_bp = Blueprint('mechanical_inspection', __name__)
 
+
+def _serialize_dates(report_data):
+    """Convert date objects to ISO format strings for JSON serialization"""
+    date_fields = ['dated1', 'dated2', 'start_date', 'end_date', 'created_at', 'updated_at']
+    for field in date_fields:
+        if field in report_data and report_data[field]:
+            if hasattr(report_data[field], 'isoformat'):
+                report_data[field] = report_data[field].isoformat()
+    return report_data
+
 @mechanical_inspection_bp.route('/api/mechanical-inspection', methods=['POST'])
 def create_mechanical_inspection():
     """Create a new mechanical inspection report"""
@@ -24,7 +34,7 @@ def create_mechanical_inspection():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # First, check if table exists, if not create it
+        # Ensure table exists
         cur.execute("""
             CREATE TABLE IF NOT EXISTS mechanical_inspection_report (
                 report_id SERIAL PRIMARY KEY,
@@ -64,7 +74,7 @@ def create_mechanical_inspection():
             )
         """)
         
-        # Add report_card_id column if it doesn't exist (for existing tables)
+        # Add report_card_id column if missing (for existing tables)
         try:
             cur.execute("""
                 SELECT EXISTS (
@@ -75,7 +85,6 @@ def create_mechanical_inspection():
             column_exists = cur.fetchone()[0]
             
             if not column_exists:
-                print("Adding report_card_id column to existing table...")
                 cur.execute("""
                     ALTER TABLE mechanical_inspection_report 
                     ADD COLUMN report_card_id INT REFERENCES reports(report_id) ON DELETE CASCADE;
@@ -84,25 +93,18 @@ def create_mechanical_inspection():
                     CREATE INDEX IF NOT EXISTS idx_mechanical_inspection_report_card_id 
                     ON mechanical_inspection_report(report_card_id);
                 """)
-                conn.commit()  # Commit the column addition
-                print("report_card_id column added successfully")
-            else:
-                print("report_card_id column already exists")
+                conn.commit()
         except Exception as e:
-            print(f"Error adding report_card_id column: {str(e)}")
             conn.rollback()
         
-        # Check if report already exists for this report_card_id (update instead of insert)
         report_card_id = data.get('report_card_id')
         existing_report = None
         if report_card_id:
             try:
                 cur.execute("SELECT report_id FROM mechanical_inspection_report WHERE report_card_id = %s", (report_card_id,))
                 existing_report = cur.fetchone()
-            except Exception as e:
-                # If column doesn't exist yet, existing_report will be None and we'll do INSERT
-                print(f"Note: Could not check for existing report (column may not exist yet): {str(e)}")
-                existing_report = None
+            except Exception:
+                pass
         
         if existing_report:
             # Update existing report
@@ -291,16 +293,15 @@ def create_mechanical_inspection():
         conn.commit()
         cur.close()
         
-        # Send notifications after successful submission
-        try:
-            from utils.activity_logger import log_notification, get_users_by_role
-            
-            # Get report card info to find memo_id and project_id for notifications
-            if report_card_id:
+        # Send notifications after successful submission (only when all signatures are present)
+        if report_card_id and data.get('prepared_by') and data.get('verified_by') and data.get('approved_by'):
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+                
                 conn = get_db_connection()
                 cur = conn.cursor()
                 cur.execute("""
-                    SELECT r.memo_id, r.project_id, m.submitted_by
+                    SELECT r.project_id, m.submitted_by
                     FROM reports r
                     LEFT JOIN memos m ON r.memo_id = m.memo_id
                     WHERE r.report_id = %s
@@ -308,51 +309,28 @@ def create_mechanical_inspection():
                 report_info = cur.fetchone()
                 cur.close()
                 
-                if report_info and len(report_info) >= 3:
-                    memo_id = report_info[0] if report_info[0] else None
-                    project_id = report_info[1] if report_info[1] else None
-                    submitted_by = report_info[2] if report_info[2] else None
+                if report_info and len(report_info) >= 2:
+                    project_id = report_info[0]
+                    performed_by = report_info[1]
                     
-                    # Get current user from session/token (you may need to adjust this)
-                    # For now, we'll use submitted_by if available
-                    performed_by = submitted_by if submitted_by else None
-                    
-                    # Notify Design Heads (role_id = 4) about report completion
-                    try:
-                        design_heads = get_users_by_role(4)
-                        for dh in design_heads:
-                            dh_id = dh.get('user_id') if isinstance(dh, dict) else dh[0] if hasattr(dh, '__getitem__') else None
-                            if dh_id:
-                                log_notification(
-                                    project_id=project_id,
-                                    activity_performed="Mechanical Inspection Report Completed",
-                                    performed_by=performed_by,
-                                    notified_user_id=dh_id,
-                                    notification_type="report_completed",
-                                    additional_info=f"Mechanical Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
-                                )
-                    except Exception as e:
-                        print(f"Error notifying Design Heads: {e}")
-                    
-                    # Notify QA Heads (role_id = 2) about report completion
-                    try:
-                        qa_heads = get_users_by_role(2)
-                        for qa in qa_heads:
-                            qa_id = qa.get('user_id') if isinstance(qa, dict) else qa[0] if hasattr(qa, '__getitem__') else None
-                            if qa_id:
-                                log_notification(
-                                    project_id=project_id,
-                                    activity_performed="Mechanical Inspection Report Completed",
-                                    performed_by=performed_by,
-                                    notified_user_id=qa_id,
-                                    notification_type="report_completed",
-                                    additional_info=f"Mechanical Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
-                                )
-                    except Exception as e:
-                        print(f"Error notifying QA Heads: {e}")
-        except Exception as notify_error:
-            print(f"Warning: Failed to send notifications: {str(notify_error)}")
-            # Continue execution even if notifications fail
+                    for role_id in [4, 2]:  # Design Heads = 4, QA Heads = 2
+                        try:
+                            users = get_users_by_role(role_id)
+                            for user in users:
+                                user_id = user.get('user_id') if isinstance(user, dict) else (user[0] if hasattr(user, '__getitem__') else None)
+                                if user_id:
+                                    log_notification(
+                                        project_id=project_id,
+                                        activity_performed="Mechanical Inspection Report Completed",
+                                        performed_by=performed_by,
+                                        notified_user_id=user_id,
+                                        notification_type="report_completed",
+                                        additional_info=f"Mechanical Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
+                                    )
+                        except Exception:
+                            pass
+            except Exception:
+                pass
         
         return jsonify({
             "success": True,
@@ -361,7 +339,6 @@ def create_mechanical_inspection():
         })
         
     except Exception as e:
-        print(f"Error creating mechanical inspection report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error creating mechanical inspection report: {str(e)}")
 
 @mechanical_inspection_bp.route('/api/mechanical-inspection/by-report-card/<int:report_card_id>', methods=['GET'])
@@ -378,19 +355,10 @@ def get_mechanical_inspection_by_report_card(report_card_id):
             cur.close()
             return jsonify({"success": False, "message": "Report not found"}), 404
         
-        # Get column names before closing cursor
         columns = [desc[0] for desc in cur.description] if cur.description else []
         cur.close()
         
-        # Convert to dictionary
-        report_data = dict(zip(columns, report))
-        
-        # Convert date objects to ISO format strings for JSON serialization
-        date_fields = ['dated1', 'dated2', 'start_date', 'end_date', 'created_at', 'updated_at']
-        for field in date_fields:
-            if field in report_data and report_data[field]:
-                if hasattr(report_data[field], 'isoformat'):
-                    report_data[field] = report_data[field].isoformat()
+        report_data = _serialize_dates(dict(zip(columns, report)))
         
         return jsonify({
             "success": True,
@@ -398,125 +366,5 @@ def get_mechanical_inspection_by_report_card(report_card_id):
         })
         
     except Exception as e:
-        print(f"Error fetching mechanical inspection report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching mechanical inspection report: {str(e)}")
 
-@mechanical_inspection_bp.route('/api/mechanical-inspection/<int:report_id>', methods=['GET'])
-def get_mechanical_inspection(report_id):
-    """Get a specific mechanical inspection report by its own ID"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("SELECT * FROM mechanical_inspection_report WHERE report_id = %s", (report_id,))
-        report = cur.fetchone()
-        
-        if not report:
-            cur.close()
-            return jsonify({"success": False, "message": "Report not found"}), 404
-        
-        # Get column names before closing cursor
-        columns = [desc[0] for desc in cur.description] if cur.description else []
-        cur.close()
-        
-        # Convert to dictionary
-        report_data = dict(zip(columns, report))
-        
-        # Convert date objects to ISO format strings for JSON serialization
-        date_fields = ['dated1', 'dated2', 'start_date', 'end_date', 'created_at', 'updated_at']
-        for field in date_fields:
-            if field in report_data and report_data[field]:
-                if hasattr(report_data[field], 'isoformat'):
-                    report_data[field] = report_data[field].isoformat()
-        
-        return jsonify({
-            "success": True,
-            "report": report_data
-        })
-        
-    except Exception as e:
-        print(f"Error fetching mechanical inspection report: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error fetching mechanical inspection report: {str(e)}")
-
-@mechanical_inspection_bp.route('/api/mechanical-inspection/<int:report_id>', methods=['PUT'])
-def update_mechanical_inspection(report_id):
-    """Update a mechanical inspection report"""
-    try:
-        data = request.json
-        if not data:
-            return jsonify({"success": False, "message": "No data provided"}), 400
-        
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Build dynamic update query
-        update_fields = []
-        update_values = []
-        
-        for key, value in data.items():
-            if key != 'report_id':  # Don't update the ID
-                update_fields.append(f"{key} = %s")
-                update_values.append(value)
-        
-        if not update_fields:
-            return jsonify({"success": False, "message": "No fields to update"}), 400
-        
-        update_values.append(report_id)
-        
-        cur.execute(f"""
-            UPDATE mechanical_inspection_report 
-            SET {', '.join(update_fields)}
-            WHERE report_id = %s
-        """, update_values)
-        
-        if cur.rowcount == 0:
-            cur.close()
-            return jsonify({"success": False, "message": "Report not found"}), 404
-        
-        conn.commit()
-        cur.close()
-        
-        return jsonify({
-            "success": True,
-            "message": "Mechanical inspection report updated successfully"
-        })
-        
-    except Exception as e:
-        print(f"Error updating mechanical inspection report: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error updating mechanical inspection report: {str(e)}")
-
-@mechanical_inspection_bp.route('/api/mechanical-inspection', methods=['GET'])
-def get_all_mechanical_inspections():
-    """Get all mechanical inspection reports"""
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT report_id, project_name, product_name, part_no, created_at, updated_at
-            FROM mechanical_inspection_report
-            ORDER BY created_at DESC
-        """)
-        
-        reports = cur.fetchall()
-        cur.close()
-        
-        report_list = []
-        for report in reports:
-            report_list.append({
-                "report_id": report[0],
-                "project_name": report[1],
-                "product_name": report[2],
-                "part_no": report[3],
-                "created_at": report[4].isoformat() if report[4] else None,
-                "updated_at": report[5].isoformat() if report[5] else None
-            })
-        
-        return jsonify({
-            "success": True,
-            "reports": report_list
-        })
-        
-    except Exception as e:
-        print(f"Error fetching mechanical inspection reports: {str(e)}")
-        return handle_database_error(get_db_connection(), f"Error fetching mechanical inspection reports: {str(e)}")

@@ -134,7 +134,7 @@ export default {
   margin: 0;
   overflow: hidden; /* Prevent any scrolling */
   position: relative; /* For floating menu button */
-  margin-top: 40px;
+  margin-top: 45px;
 }
 
 /* Floating Hamburger Menu Button */
