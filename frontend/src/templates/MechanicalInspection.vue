@@ -253,7 +253,7 @@
                     <input
                       type="file"
                       :disabled="isPreparedByVerified"
-                      @change="handleFileUpload($event, item, 'dim')"
+                      @change="handleFileUpload($event, item)"
                     />
                   </td>
                 </tr>
@@ -319,7 +319,7 @@
                     <input
                       type="file"
                       :disabled="isPreparedByVerified"
-                      @change="handleFileUpload($event, item, 'param')"
+                      @change="handleFileUpload($event, item)"
                     />
                   </td>
                 </tr>
@@ -549,10 +549,6 @@ export default {
       type: Boolean,
       default: false,
     },
-    isTemplatePreview: {
-      type: Boolean,
-      default: false,
-    },
     reportId: {
       type: [String, Number],
       default: null,
@@ -721,199 +717,129 @@ export default {
         this.reportData.quantity
       );
     },
-    // Check if all form fields are filled (required for enabling Prepared By)
     areAllFieldsFilled() {
-      // Check required report details
-      if (!this.isFormValid) {
-        return false;
-      }
+      if (!this.isFormValid) return false;
       
-      // Check dimensional checklist - all 4 dimensions must have dimension, tolerance, observedValue, and instrumentUsed
-      for (let i = 0; i < this.dimensionalChecklist.length; i++) {
-        const item = this.dimensionalChecklist[i];
+      for (const item of this.dimensionalChecklist) {
         if (!item.dimension || !item.tolerance || !item.observedValue || !item.instrumentUsed) {
           return false;
         }
       }
       
-      // Check parameter checklist - all 8 parameters must have complianceObservation
-      for (let i = 0; i < this.parameterChecklist.length; i++) {
-        const item = this.parameterChecklist[i];
-        if (!item.complianceObservation || item.complianceObservation === "") {
+      for (const item of this.parameterChecklist) {
+        if (!item.complianceObservation) {
           return false;
         }
       }
       
       return true;
     },
-    // Check if user is QA Reviewer (role_id = 3) or QA Head (role_id = 2)
     canAccessSignatures() {
       const currentUserRole = userStore.getters.currentUserRole();
-      return currentUserRole === 2 || currentUserRole === 3; // QA Head or QA Reviewer
+      return currentUserRole === 2 || currentUserRole === 3;
     },
-    // Check if Prepared By signature is verified
     isPreparedByVerified() {
       return !!this.signatures.preparedBy.signatureUrl;
     },
-    // Check if Verified By signature is verified
     isVerifiedByVerified() {
       return !!this.signatures.verifiedBy.signatureUrl;
     },
-    // Check if Approved By signature is verified
     isApprovedByVerified() {
       return !!this.signatures.approvedBy.signatureUrl;
     },
-    // Prepared By should be enabled only if all fields are filled AND user can access signatures
     isPreparedByEnabled() {
       return this.canAccessSignatures && this.areAllFieldsFilled;
     },
-    // Verified By should be enabled only after Prepared By is verified
     isVerifiedByEnabled() {
       return this.canAccessSignatures && this.isPreparedByVerified;
     },
-    // Approved By should be enabled only after Verified By is verified
     isApprovedByEnabled() {
       return this.canAccessSignatures && this.isVerifiedByVerified;
     },
   },
   mounted() {
-    // Get parameters from props (when used in IndividualReport) or route params
-    const projectName = this.$route.params.projectName || "";
-    const lruName = this.$route.params.lruName || "";
     const reportCardId = this.reportId || this.$route.params.reportId;
 
-    console.log("MechanicalInspection mounted - reportCardId:", reportCardId);
-
-    // If reportCardId is provided, load the report data
     if (reportCardId) {
       this.loadReportData(reportCardId);
     } else {
-      // Set default values for new report
-      this.reportData.projectName = projectName;
-      this.reportData.lruName = lruName;
+      this.reportData.projectName = this.$route.params.projectName || "";
+      this.reportData.lruName = this.$route.params.lruName || "";
       this.reportData.startDate = this.formattedDate;
     }
   },
   methods: {
-    // Extract numeric value from a string (handles formats like "200 mm", "± 10 mm", "Length : 200 mm")
     extractNumericValue(value, useAbsolute = false) {
       if (!value || typeof value !== 'string') return null;
       
-      // Replace ± or +/- with empty string for tolerance values
-      // Handles formats like "± 10 mm", "+/- 10 mm", "200 mm", "Length : 200 mm", etc.
       let cleaned = value.replace(/[±]/g, '').replace(/[+/-]/g, ' ').trim();
-      
-      // Remove common text prefixes like "Length :", "Width :", etc.
       cleaned = cleaned.replace(/^[^0-9-.]*\s*:\s*/i, '').trim();
       
-      // Extract the first number (including decimals and negative numbers)
       const match = cleaned.match(/(-?\d+\.?\d*)/);
       if (match) {
         const num = parseFloat(match[1]);
-        // Return absolute value if useAbsolute is true (for tolerance), otherwise preserve sign
         return useAbsolute ? Math.abs(num) : num;
       }
       return null;
     },
-    
-    // Compute remarks based on dimension, tolerance, and observed value
     computeRemarks(item) {
-      // Clear remarks if any required field is missing
       if (!item.dimension || !item.tolerance || !item.observedValue) {
         item.remarks = '';
         return;
       }
       
-      // Extract values: dimension and observed preserve sign, tolerance always positive
       const dimension = this.extractNumericValue(item.dimension, false);
-      const tolerance = this.extractNumericValue(item.tolerance, true); // Always use absolute value for tolerance
+      const tolerance = this.extractNumericValue(item.tolerance, true);
       const observed = this.extractNumericValue(item.observedValue, false);
       
-      // Check if all values were successfully extracted
       if (dimension === null || tolerance === null || observed === null) {
         item.remarks = '';
         return;
       }
       
-      // Calculate the acceptable range
       const minValue = dimension - tolerance;
       const maxValue = dimension + tolerance;
-      
-      // Check if observed value is within range
-      if (observed >= minValue && observed <= maxValue) {
-        item.remarks = 'OK';
-      } else {
-        item.remarks = 'NOT OK';
-      }
+      item.remarks = (observed >= minValue && observed <= maxValue) ? 'OK' : 'NOT OK';
     },
-    
-    // Extract value in brackets from expected field (e.g., "(YES)" or "(NO)")
     extractExpectedValue(expected) {
       if (!expected || typeof expected !== 'string') return null;
       
-      // Match pattern like "(YES)" or "(NO)"
       const match = expected.match(/\(([^)]+)\)/);
-      if (match && match[1]) {
-        // Return the value in brackets, trimmed and uppercased
-        return match[1].trim().toUpperCase();
-      }
-      return null;
+      return match && match[1] ? match[1].trim().toUpperCase() : null;
     },
     
-    // Compute remarks for parameter checklist based on compliance observation
     computeParameterRemarks(item) {
-      // Clear remarks if compliance observation is not selected
       if (!item.complianceObservation) {
         item.remarks = '';
         return;
       }
       
-      // Extract expected value from brackets (e.g., "YES" or "NO" from "(YES)" or "(NO)")
       const expectedValue = this.extractExpectedValue(item.expected);
-      
-      // If we can't extract expected value, clear remarks
       if (!expectedValue) {
         item.remarks = '';
         return;
       }
       
-      // Compare compliance observation with expected value (case-insensitive)
-      const complianceValue = item.complianceObservation.toUpperCase();
-      
-      if (complianceValue === expectedValue) {
-        item.remarks = 'OK';
-      } else {
-        item.remarks = 'NOT OK';
-      }
+      item.remarks = item.complianceObservation.toUpperCase() === expectedValue ? 'OK' : 'NOT OK';
     },
     
-    handleFileUpload(event, item, checklistType) {
+    handleFileUpload(event, item) {
       const file = event.target.files[0];
       if (file) {
         item.fileName = file.name;
       }
     },
     
-    // Load report data from API using report card ID
     async loadReportData(reportCardId) {
       try {
-        const url = `http://localhost:5000/api/mechanical-inspection/by-report-card/${reportCardId}`;
-        console.log("Loading report data from:", url);
-        
-        const response = await fetch(url);
+        const response = await fetch(
+          `http://localhost:5000/api/mechanical-inspection/by-report-card/${reportCardId}`
+        );
 
         if (!response.ok) {
-          const errorText = await response.text();
-          console.error("Failed to fetch report. Status:", response.status, "Response:", errorText);
-          
-          // If report not found (404), it means the form hasn't been submitted yet
-          // Show empty form instead of error alert
           if (response.status === 404) {
-            console.log("Report not found - showing empty form (report may not have been submitted yet)");
-            // Keep default empty form values
             return;
           }
-          
           throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
         }
 
@@ -922,7 +848,6 @@ export default {
         if (result.success && result.report) {
           const report = result.report;
 
-          // Map report data
           this.reportData = {
             projectName: report.project_name || "",
             reportRefNo: report.report_ref_no || "",
@@ -941,47 +866,22 @@ export default {
             endDate: report.end_date || "",
           };
 
-          // Map dimensional checklist
           if (this.dimensionalChecklist.length >= 4) {
-            // Dimension 1 (Length)
-            this.dimensionalChecklist[0].dimension = report.dim1_dimension || "";
-            this.dimensionalChecklist[0].tolerance = report.dim1_tolerance || "";
-            this.dimensionalChecklist[0].observedValue = report.dim1_observed_value || "";
-            this.dimensionalChecklist[0].instrumentUsed = report.dim1_instrument_used || "";
-            this.dimensionalChecklist[0].remarks = report.dim1_remarks || "";
-            this.dimensionalChecklist[0].fileName = report.dim1_upload || null;
-
-            // Dimension 2 (Width)
-            this.dimensionalChecklist[1].dimension = report.dim2_dimension || "";
-            this.dimensionalChecklist[1].tolerance = report.dim2_tolerance || "";
-            this.dimensionalChecklist[1].observedValue = report.dim2_observed_value || "";
-            this.dimensionalChecklist[1].instrumentUsed = report.dim2_instrument_used || "";
-            this.dimensionalChecklist[1].remarks = report.dim2_remarks || "";
-            this.dimensionalChecklist[1].fileName = report.dim2_upload || null;
-
-            // Dimension 3 (Height)
-            this.dimensionalChecklist[2].dimension = report.dim3_dimension || "";
-            this.dimensionalChecklist[2].tolerance = report.dim3_tolerance || "";
-            this.dimensionalChecklist[2].observedValue = report.dim3_observed_value || "";
-            this.dimensionalChecklist[2].instrumentUsed = report.dim3_instrument_used || "";
-            this.dimensionalChecklist[2].remarks = report.dim3_remarks || "";
-            this.dimensionalChecklist[2].fileName = report.dim3_upload || null;
-
-            // Dimension 4 (Weight)
-            this.dimensionalChecklist[3].dimension = report.dim4_dimension || "";
-            this.dimensionalChecklist[3].tolerance = report.dim4_tolerance || "";
-            this.dimensionalChecklist[3].observedValue = report.dim4_observed_value || "";
-            this.dimensionalChecklist[3].instrumentUsed = report.dim4_instrument_used || "";
-            this.dimensionalChecklist[3].remarks = report.dim4_remarks || "";
-            this.dimensionalChecklist[3].fileName = report.dim4_upload || null;
+            const dimMappings = [
+              ['dim1', 0], ['dim2', 1], ['dim3', 2], ['dim4', 3]
+            ];
+            
+            dimMappings.forEach(([prefix, index]) => {
+              this.dimensionalChecklist[index].dimension = report[`${prefix}_dimension`] || "";
+              this.dimensionalChecklist[index].tolerance = report[`${prefix}_tolerance`] || "";
+              this.dimensionalChecklist[index].observedValue = report[`${prefix}_observed_value`] || "";
+              this.dimensionalChecklist[index].instrumentUsed = report[`${prefix}_instrument_used`] || "";
+              this.dimensionalChecklist[index].remarks = report[`${prefix}_remarks`] || "";
+              this.dimensionalChecklist[index].fileName = report[`${prefix}_upload`] || null;
+            });
           }
 
-          // Map parameter checklist
-          const paramFields = [
-            'param1', 'param2', 'param3', 'param4',
-            'param5', 'param6', 'param7', 'param8'
-          ];
-
+          const paramFields = ['param1', 'param2', 'param3', 'param4', 'param5', 'param6', 'param7', 'param8'];
           paramFields.forEach((paramPrefix, index) => {
             if (index < this.parameterChecklist.length) {
               this.parameterChecklist[index].complianceObservation = 
@@ -995,52 +895,31 @@ export default {
             }
           });
 
-          // Map signatures
-          if (report.prepared_by) {
-            this.signatures.preparedBy.signatureUrl = report.prepared_by;
-          }
-          if (report.verified_by) {
-            this.signatures.verifiedBy.signatureUrl = report.verified_by;
-          }
-          if (report.approved_by) {
-            this.signatures.approvedBy.signatureUrl = report.approved_by;
-          }
-
-          console.log("Report data loaded successfully");
+          if (report.prepared_by) this.signatures.preparedBy.signatureUrl = report.prepared_by;
+          if (report.verified_by) this.signatures.verifiedBy.signatureUrl = report.verified_by;
+          if (report.approved_by) this.signatures.approvedBy.signatureUrl = report.approved_by;
         } else {
           throw new Error(result.message || "Failed to load report data");
         }
       } catch (error) {
-        console.error("Error loading report data:", error);
-        
-        // If report not found (404), it means the form hasn't been submitted yet
-        // Show empty form instead of error alert
         if (error.message.includes('404') || error.message.includes('not found')) {
-          console.log("Report not found - showing empty form (report may not have been submitted yet)");
-          // Keep default empty form values
           return;
         }
-        
         alert(`Error loading report data: ${error.message}. Please try again.`);
       }
     },
-    
-    // Verify signature credentials for prepared/verified/approved by
     async verifySignature(signatureType) {
       const signature = this.signatures[signatureType];
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError =
-          "Please enter both username and signature password";
+        signature.signatureError = "Please enter both username and signature password";
         return;
       }
 
       try {
         const response = await fetch("http://localhost:5000/api/users/verify-signature", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username: signature.signatureUsername,
             signature_password: signature.signaturePassword,
@@ -1054,9 +933,7 @@ export default {
           signature.verifiedUserName = data.user_name;
           signature.verifiedUserRole = data.role_name;
           signature.signatureError = "";
-          
-          // Auto-save after signature verification
-          await this.autoSaveReport(signatureType);
+          await this.autoSaveReport();
         } else {
           signature.signatureError = data.message || "Failed to verify signature";
           signature.signatureUrl = "";
@@ -1070,19 +947,10 @@ export default {
         signature.verifiedUserRole = "";
       }
     },
-    
-    // Auto-save report data after each signature verification
-    async autoSaveReport(signatureType) {
-      try {
-        const reportCardId = this.reportId || this.$route.params.reportId;
-        
-        if (!reportCardId) {
-          console.log("No report card ID available for auto-save");
-          return;
-        }
-        
-        // Prepare data for auto-save (same structure as submitForm)
-        const submissionData = {
+    prepareSubmissionData() {
+      const reportCardId = this.reportId || this.$route.params.reportId;
+      
+      return {
           report_card_id: reportCardId,
           project_name: this.reportData.projectName,
           report_ref_no: this.reportData.reportRefNo,
@@ -1160,36 +1028,32 @@ export default {
           param8_remarks: this.parameterChecklist[7].remarks,
           param8_upload: this.parameterChecklist[7].fileName,
 
-          // Signatures (include current and previous ones)
-          prepared_by: this.signatures.preparedBy.signatureUrl || "",
-          verified_by: this.signatures.verifiedBy.signatureUrl || "",
-          approved_by: this.signatures.approvedBy.signatureUrl || "",
-        };
-
-        const response = await fetch(
-          "http://localhost:5000/api/mechanical-inspection",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        prepared_by: this.signatures.preparedBy.signatureUrl || "",
+        verified_by: this.signatures.verifiedBy.signatureUrl || "",
+        approved_by: this.signatures.approvedBy.signatureUrl || "",
+      };
+    },
+    
+    async autoSaveReport() {
+      try {
+        const reportCardId = this.reportId || this.$route.params.reportId;
+        if (!reportCardId) return;
+        
+        const submissionData = this.prepareSubmissionData();
+        const response = await fetch("http://localhost:5000/api/mechanical-inspection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
-
-        if (result.success) {
-          console.log(`Auto-saved report after ${signatureType} signature verification`);
-        } else {
+        if (!result.success) {
           console.error(`Auto-save failed: ${result.message}`);
         }
       } catch (error) {
         console.error("Error auto-saving report:", error);
-        // Don't show alert for auto-save failures, just log
       }
     },
-    
     async submitForm() {
       if (!this.isFormValid) {
         alert("Please fill in all required fields.");
@@ -1197,131 +1061,17 @@ export default {
       }
 
       try {
-        // Get report card ID from props or route
-        const reportCardId = this.reportId || this.$route.params.reportId;
-        
-        // Prepare data for submission
-        const submissionData = {
-          // Link to report card
-          report_card_id: reportCardId,
-          // Report Details
-          project_name: this.reportData.projectName,
-          report_ref_no: this.reportData.reportRefNo,
-          memo_ref_no: this.reportData.memoRefNo,
-          lru_name: this.reportData.lruName,
-          inspection_stage: this.reportData.inspectionStage,
-          test_venue: this.reportData.testVenue,
-          sl_nos: this.reportData.slNos,
-          dp_name: this.reportData.dpName,
-          dated1: this.reportData.dated1,
-          dated2: this.reportData.dated2,
-          sru_name: this.reportData.sruName,
-          part_no: this.reportData.partNo,
-          quantity: this.reportData.quantity || 0,
-          start_date: this.reportData.startDate,
-          end_date: this.reportData.endDate,
-
-          // Dimensional Checklist
-          dim1_dimension: this.dimensionalChecklist[0].dimension,
-          dim1_tolerance: this.dimensionalChecklist[0].tolerance,
-          dim1_observed_value: this.dimensionalChecklist[0].observedValue,
-          dim1_instrument_used: this.dimensionalChecklist[0].instrumentUsed,
-          dim1_remarks: this.dimensionalChecklist[0].remarks,
-          dim1_upload: this.dimensionalChecklist[0].fileName,
-
-          dim2_dimension: this.dimensionalChecklist[1].dimension,
-          dim2_tolerance: this.dimensionalChecklist[1].tolerance,
-          dim2_observed_value: this.dimensionalChecklist[1].observedValue,
-          dim2_instrument_used: this.dimensionalChecklist[1].instrumentUsed,
-          dim2_remarks: this.dimensionalChecklist[1].remarks,
-          dim2_upload: this.dimensionalChecklist[1].fileName,
-
-          dim3_dimension: this.dimensionalChecklist[2].dimension,
-          dim3_tolerance: this.dimensionalChecklist[2].tolerance,
-          dim3_observed_value: this.dimensionalChecklist[2].observedValue,
-          dim3_instrument_used: this.dimensionalChecklist[2].instrumentUsed,
-          dim3_remarks: this.dimensionalChecklist[2].remarks,
-          dim3_upload: this.dimensionalChecklist[2].fileName,
-
-          dim4_dimension: this.dimensionalChecklist[3].dimension,
-          dim4_tolerance: this.dimensionalChecklist[3].tolerance,
-          dim4_observed_value: this.dimensionalChecklist[3].observedValue,
-          dim4_instrument_used: this.dimensionalChecklist[3].instrumentUsed,
-          dim4_remarks: this.dimensionalChecklist[3].remarks,
-          dim4_upload: this.dimensionalChecklist[3].fileName,
-
-          // Parameter Checklist
-          param1_compliance_observation:
-            this.parameterChecklist[0].complianceObservation,
-          param1_expected: this.parameterChecklist[0].expected,
-          param1_remarks: this.parameterChecklist[0].remarks,
-          param1_upload: this.parameterChecklist[0].fileName,
-
-          param2_compliance_observation:
-            this.parameterChecklist[1].complianceObservation,
-          param2_expected: this.parameterChecklist[1].expected,
-          param2_remarks: this.parameterChecklist[1].remarks,
-          param2_upload: this.parameterChecklist[1].fileName,
-
-          param3_compliance_observation:
-            this.parameterChecklist[2].complianceObservation,
-          param3_expected: this.parameterChecklist[2].expected,
-          param3_remarks: this.parameterChecklist[2].remarks,
-          param3_upload: this.parameterChecklist[2].fileName,
-
-          param4_compliance_observation:
-            this.parameterChecklist[3].complianceObservation,
-          param4_expected: this.parameterChecklist[3].expected,
-          param4_remarks: this.parameterChecklist[3].remarks,
-          param4_upload: this.parameterChecklist[3].fileName,
-
-          param5_compliance_observation:
-            this.parameterChecklist[4].complianceObservation,
-          param5_expected: this.parameterChecklist[4].expected,
-          param5_remarks: this.parameterChecklist[4].remarks,
-          param5_upload: this.parameterChecklist[4].fileName,
-
-          param6_compliance_observation:
-            this.parameterChecklist[5].complianceObservation,
-          param6_expected: this.parameterChecklist[5].expected,
-          param6_remarks: this.parameterChecklist[5].remarks,
-          param6_upload: this.parameterChecklist[5].fileName,
-
-          param7_compliance_observation:
-            this.parameterChecklist[6].complianceObservation,
-          param7_expected: this.parameterChecklist[6].expected,
-          param7_remarks: this.parameterChecklist[6].remarks,
-          param7_upload: this.parameterChecklist[6].fileName,
-
-          param8_compliance_observation:
-            this.parameterChecklist[7].complianceObservation,
-          param8_expected: this.parameterChecklist[7].expected,
-          param8_remarks: this.parameterChecklist[7].remarks,
-          param8_upload: this.parameterChecklist[7].fileName,
-
-          // Signatures
-          prepared_by: this.signatures.preparedBy.signatureUrl || "",
-          verified_by: this.signatures.verifiedBy.signatureUrl || "",
-          approved_by: this.signatures.approvedBy.signatureUrl || "",
-        };
-
-        const response = await fetch(
-          "http://localhost:5000/api/mechanical-inspection",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        const submissionData = this.prepareSubmissionData();
+        const response = await fetch("http://localhost:5000/api/mechanical-inspection", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
 
         if (result.success) {
           alert("Mechanical inspection report submitted successfully! Notifications have been sent.");
-          // Optionally redirect or reset - but since data is already saved, we might want to keep it visible
-          // this.$router.push('/reports');
         } else {
           alert(`Error: ${result.message}`);
         }
@@ -1339,69 +1089,6 @@ export default {
   min-height: 100vh;
   background-color: #f5f5f5;
   font-family: "Arial", sans-serif;
-}
-
-.page-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.back-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  padding: 0.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.header-center {
-  flex: 1;
-  text-align: center;
-}
-
-.page-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin: 0;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.export-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: none;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.export-button:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .main-content {

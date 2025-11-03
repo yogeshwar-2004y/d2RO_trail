@@ -462,6 +462,8 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
   z-index: 10;
+  left: -55px;
+  width: calc(100% - 5px);
 }
 
 .header-left {
