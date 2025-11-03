@@ -432,6 +432,11 @@ export default {
         return false;
       }
       
+      // If report is already submitted, make it readonly
+      if (this.isReportSubmitted) {
+        return false;
+      }
+      
       // Only the assigned reviewer can edit
       return currentUserId === this.assignedReviewerId;
     },
@@ -568,6 +573,10 @@ export default {
             const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
             if (template) {
               this.selectedTemplate = template;
+              
+              // If template is selected and it's Conformal Coating, fetch the inspection data
+              // The template component will receive reportId prop and should load data automatically
+              // But we can also trigger a manual load here if needed
             }
           }
         }

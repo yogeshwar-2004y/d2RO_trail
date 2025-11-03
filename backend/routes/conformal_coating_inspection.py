@@ -130,22 +130,54 @@ def create_conformal_coating_inspection_report():
                 data.get('approved_by') or None
             )
             
+            # Get report_card_id from data (the report_id from reports table)
+            # This should be the report_id from the reports table that created this report card
+            report_card_id = data.get('report_card_id') or data.get('original_report_id') or data.get('report_id')
+            
             # Verify value count matches placeholder count
-            placeholder_count = 58  # 16 headers + 36 tests + 3 summary + 3 signatures
+            # insert_values has 58 values (16 headers + 36 tests + 3 summary + 3 signatures)
+            # We add report_card_id separately, so total will be 59
+            placeholder_count_for_insert = 58
             value_count = len(insert_values)
             
             print(f"  INSERT VALUES COUNT CHECK:")
-            print(f"    Expected: {placeholder_count} values")
-            print(f"    Actual: {value_count} values")
+            print(f"    Expected in insert_values: {placeholder_count_for_insert} values")
+            print(f"    Actual in insert_values: {value_count} values")
             print(f"    Test values count: {len(test_values)} (should be 36)")
+            print(f"    report_card_id will be added separately: {report_card_id}")
             
-            if value_count != placeholder_count:
-                raise ValueError(f"Value count mismatch! Expected {placeholder_count}, got {value_count}. Test values: {len(test_values)}")
+            if value_count != placeholder_count_for_insert:
+                raise ValueError(f"Value count mismatch! Expected {placeholder_count_for_insert} in insert_values, got {value_count}. Test values: {len(test_values)}")
             
             # Insert conformal coating inspection report into the database
             # This INSERT statement stores ALL data in the conformal_coating_inspection_report table
             print(f"  Executing INSERT INTO conformal_coating_inspection_report...")
             try:
+                # Check if report_card_id column exists, if not add it (preferred field name)
+                cur.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name='conformal_coating_inspection_report' 
+                    AND column_name='report_card_id'
+                """)
+                if not cur.fetchone():
+                    print("  Adding report_card_id column to conformal_coating_inspection_report table...")
+                    cur.execute("""
+                        ALTER TABLE conformal_coating_inspection_report 
+                        ADD COLUMN report_card_id INT REFERENCES reports(report_id) ON DELETE CASCADE
+                    """)
+                    conn.commit()
+                    print("  ✓ Added report_card_id column")
+                
+                # Also check for original_report_id (for backward compatibility)
+                cur.execute("""
+                    SELECT column_name 
+                    FROM information_schema.columns 
+                    WHERE table_name='conformal_coating_inspection_report' 
+                    AND column_name='original_report_id'
+                """)
+                has_original_report_id = cur.fetchone()
+                
                 cur.execute("""
                     INSERT INTO conformal_coating_inspection_report (
                         project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name, 
@@ -161,14 +193,15 @@ def create_conformal_coating_inspection_report():
                         obs8, rem8, upload8, expected8,
                         obs9, rem9, upload9, expected9,
                         overall_status, quality_rating, recommendations,
-                        prepared_by, verified_by, approved_by
+                        prepared_by, verified_by, approved_by,
+                        report_card_id
                     ) VALUES (
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                         %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                     ) RETURNING report_id
-                """, insert_values)
+                """, insert_values + (report_card_id,))
                 
                 report_id = cur.fetchone()[0]
                 print(f"  ✓ INSERT executed successfully, got report_id: {report_id}")
@@ -249,16 +282,37 @@ def create_conformal_coating_inspection_report():
 
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection/<int:report_id>', methods=['GET'])
 def get_conformal_coating_inspection_report(report_id):
-    """Get conformal coating inspection report details"""
+    """Get conformal coating inspection report details
+    report_id can be either the original_report_id (from reports table) or the inspection report's own report_id
+    """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # First try to find by report_card_id (from reports table) - preferred method
         cur.execute("""
-            SELECT * FROM conformal_coating_inspection_report WHERE report_id = %s
+            SELECT * FROM conformal_coating_inspection_report 
+            WHERE report_card_id = %s
         """, (report_id,))
         
         report = cur.fetchone()
+        
+        # If not found, try by original_report_id (backward compatibility)
+        if not report:
+            cur.execute("""
+                SELECT * FROM conformal_coating_inspection_report 
+                WHERE original_report_id = %s
+            """, (report_id,))
+            report = cur.fetchone()
+        
+        # If still not found, try by the inspection report's own report_id
+        if not report:
+            cur.execute("""
+                SELECT * FROM conformal_coating_inspection_report 
+                WHERE report_id = %s
+            """, (report_id,))
+            report = cur.fetchone()
+        
         columns = [desc[0] for desc in cur.description] if cur.description else []
         
         cur.close()

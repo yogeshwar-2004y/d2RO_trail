@@ -22,96 +22,175 @@
           <div class="report-info">
             <div>
               <strong>Project Name:</strong>
-              <input v-model="formData.projectName" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.projectName"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Report Ref No:</strong>
-              <input v-model="formData.reportRefNo" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.reportRefNo"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Memo Ref No:</strong>
-              <input v-model="formData.memoRefNo" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.memoRefNo"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>LRU Name:</strong>
-              <input v-model="formData.lruName" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.lruName"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>DP Name:</strong>
-              <input v-model="formData.dpName" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.dpName"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Part No:</strong>
-              <input v-model="formData.partNo" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.partNo"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>SL No's:</strong>
-              <input v-model="formData.slNos" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.slNos"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>End Date:</strong>
-              <input v-model="formData.endDate" type="date" :disabled="isFormReadonly" />
+              <input
+                v-model="formData.endDate"
+                type="date"
+                :disabled="isFormReadonly"
+              />
             </div>
             <div>
               <strong>SRU Name:</strong>
-              <input v-model="formData.sruName" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.sruName"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Start Date:</strong>
-              <input v-model="formData.startDate" type="date" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.startDate"
+                type="date"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Inspection Stage:</strong>
-              <input v-model="formData.inspectionStage" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.inspectionStage"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Test Venue:</strong>
-              <input v-model="formData.testVenue" type="text" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.testVenue"
+                type="text"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Quantity:</strong>
-              <input v-model="formData.quantity" type="number" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.quantity"
+                type="number"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Dated:</strong>
-              <input v-model="formData.dated1" type="date" :disabled="isFormReadonly" />
-              </div>
+              <input
+                v-model="formData.dated1"
+                type="date"
+                :disabled="isFormReadonly"
+              />
+            </div>
             <div>
               <strong>Dated:</strong>
-              <input v-model="formData.dated2" type="date" :disabled="isFormReadonly" />
+              <input
+                v-model="formData.dated2"
+                type="date"
+                :disabled="isFormReadonly"
+              />
+            </div>
           </div>
-        </div>
 
           <table class="inspection-table">
-              <thead>
-                <tr>
+            <thead>
+              <tr>
                 <th>SL.NO</th>
-                  <th>CHECK POINTS</th>
-                  <th>APPLICABILITY (A / NA)</th>
-                  <th>COMPLIANCE (YES / NO)</th>
-                  <th>REMARKS (OK / NOT OK)</th>
-                  <th>UPLOAD</th>
-                </tr>
-              </thead>
-              <tbody>
-              <tr v-for="(checkpoint, index) in formData.checkPoints" :key="index">
-                  <td>{{ index + 1 }}</td>
+                <th>CHECK POINTS</th>
+                <th>APPLICABILITY (A / NA)</th>
+                <th>COMPLIANCE (YES / NO)</th>
+                <th>REMARKS (OK / NOT OK)</th>
+                <th>UPLOAD</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(checkpoint, index) in formData.checkPoints"
+                :key="index"
+              >
+                <td>{{ index + 1 }}</td>
                 <td>{{ checkpoint.description }}</td>
                 <td>{{ checkpoint.applicability }}</td>
                 <td>
-                  <select v-model="checkpoint.compliance" @change="updateRemarks(index)" :disabled="isFormReadonly">
-                      <option value="">Select</option>
-                      <option value="YES">YES</option>
-                      <option value="NO">NO</option>
-                    </select>
-                  </td>
-                  <td>
-                  <input v-model="checkpoint.remarks" type="text" readonly :disabled="true" class="remarks-readonly" />
-                  </td>
-                <td><input type="file" :disabled="isFormReadonly" @change="handleFileUpload($event, 'checkpoint', index)" /></td>
-                </tr>
-              </tbody>
-            </table>
+                  <select
+                    v-model="checkpoint.compliance"
+                    @change="updateRemarks(index)"
+                    :disabled="isFormReadonly"
+                  >
+                    <option value="">Select</option>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                  </select>
+                </td>
+                <td>
+                  <input
+                    v-model="checkpoint.remarks"
+                    type="text"
+                    readonly
+                    :disabled="true"
+                    class="remarks-readonly"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="file"
+                    :disabled="isFormReadonly"
+                    @change="handleFileUpload($event, 'checkpoint', index)"
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
 
           <div class="report-footer">
             <div class="signature-section">
@@ -126,7 +205,7 @@
                       placeholder="Enter username..."
                       :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
-          </div>
+                  </div>
                   <div class="input-group">
                     <label>Signature Password:</label>
                     <input
@@ -135,16 +214,21 @@
                       placeholder="Enter signature password..."
                       :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
-        </div>
+                  </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('prepared')"
-                    :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                    :disabled="
+                      isFormReadonly ||
+                      !areAllFieldsFilled ||
+                      !preparedByUsername ||
+                      !preparedByPassword
+                    "
                   >
                     Verify & Load Signature
                   </button>
-            </div>
+                </div>
                 <div v-if="preparedBySignatureUrl" class="signature-display">
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
@@ -154,15 +238,19 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ preparedByVerifiedName }}</span>
-                      <span class="signature-role" v-if="preparedByVerifiedRole">{{ preparedByVerifiedRole }} Signature</span>
+                      <span class="signature-user">{{
+                        preparedByVerifiedName
+                      }}</span>
+                      <span class="signature-role" v-if="preparedByVerifiedRole"
+                        >{{ preparedByVerifiedRole }} Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
-            </div>
-            </div>
-          </div>
+                    </div>
+                  </div>
+                </div>
                 <div v-if="preparedByError" class="signature-error">
                   {{ preparedByError }}
-        </div>
+                </div>
               </div>
             </div>
             <div class="signature-section">
@@ -191,10 +279,14 @@
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('verified')"
-                    :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                    :disabled="
+                      !preparedBySignatureUrl ||
+                      !verifiedByUsername ||
+                      !verifiedByPassword
+                    "
                   >
                     Verify & Load Signature
-          </button>
+                  </button>
                 </div>
                 <div v-if="verifiedBySignatureUrl" class="signature-display">
                   <label>Verified Signature:</label>
@@ -205,8 +297,12 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ verifiedByVerifiedName }}</span>
-                      <span class="signature-role" v-if="verifiedByVerifiedRole">{{ verifiedByVerifiedRole }} Signature</span>
+                      <span class="signature-user">{{
+                        verifiedByVerifiedName
+                      }}</span>
+                      <span class="signature-role" v-if="verifiedByVerifiedRole"
+                        >{{ verifiedByVerifiedRole }} Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
@@ -242,10 +338,14 @@
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('approved')"
-                    :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                    :disabled="
+                      !verifiedBySignatureUrl ||
+                      !approvedByUsername ||
+                      !approvedByPassword
+                    "
                   >
                     Verify & Load Signature
-          </button>
+                  </button>
                 </div>
                 <div v-if="approvedBySignatureUrl" class="signature-display">
                   <label>Verified Signature:</label>
@@ -256,8 +356,12 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ approvedByVerifiedName }}</span>
-                      <span class="signature-role" v-if="approvedByVerifiedRole">{{ approvedByVerifiedRole }} Signature</span>
+                      <span class="signature-user">{{
+                        approvedByVerifiedName
+                      }}</span>
+                      <span class="signature-role" v-if="approvedByVerifiedRole"
+                        >{{ approvedByVerifiedRole }} Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
@@ -271,7 +375,10 @@
         </div>
 
         <!-- Submit Button - Enabled only after Approved By signature -->
-        <div class="form-actions final-submit" v-if="isFormReadonly && approvedBySignatureUrl">
+        <div
+          class="form-actions final-submit"
+          v-if="isFormReadonly && approvedBySignatureUrl"
+        >
           <button
             type="button"
             @click="finalSubmitReport"
@@ -407,23 +514,25 @@ export default {
     isFormReadonly() {
       // Form becomes readonly once Prepared By signature is verified
       // This ensures form cannot be changed after Prepared By signature is added
-      const hasPreparedBySignature = this.preparedBySignatureUrl && this.preparedBySignatureUrl.trim() !== '';
-      
+      const hasPreparedBySignature =
+        this.preparedBySignatureUrl &&
+        this.preparedBySignatureUrl.trim() !== "";
+
       // Once Prepared By signature exists, form is readonly (reportId will be set by autoSubmitReport)
       // We check for reportId as well to ensure the save was successful
       const hasReportId = this.reportId !== null && this.reportId !== undefined;
-      
+
       // Form is readonly if Prepared By signature exists and report is saved
       if (hasPreparedBySignature && hasReportId) {
         return true;
       }
-      
+
       // If Prepared By signature exists but reportId doesn't yet (still saving),
       // still make form readonly to prevent changes during save
       if (hasPreparedBySignature) {
         return true;
       }
-      
+
       return false;
     },
     isFormValid() {
@@ -438,7 +547,7 @@ export default {
       );
     },
     areAllFieldsFilled() {
-      const basicFieldsFilled = (
+      const basicFieldsFilled =
         this.formData.projectName &&
         this.formData.reportRefNo &&
         this.formData.memoRefNo &&
@@ -450,8 +559,7 @@ export default {
         this.formData.endDate &&
         this.formData.inspectionStage &&
         this.formData.testVenue &&
-        this.formData.slNos
-      );
+        this.formData.slNos;
 
       const allCheckpointsFilled = this.formData.checkPoints.every(
         (checkpoint) => checkpoint.compliance && checkpoint.remarks
@@ -625,7 +733,7 @@ export default {
           signatureUrl: "preparedBySignatureUrl",
           verifiedName: "preparedByVerifiedName",
           error: "preparedByError",
-          userField: "preparedBy"
+          userField: "preparedBy",
         };
       } else if (signatureType === "verified") {
         username = this.verifiedByUsername;
@@ -634,7 +742,7 @@ export default {
           signatureUrl: "verifiedBySignatureUrl",
           verifiedName: "verifiedByVerifiedName",
           error: "verifiedByError",
-          userField: "verifiedBy"
+          userField: "verifiedBy",
         };
       } else if (signatureType === "approved") {
         username = this.approvedByUsername;
@@ -643,12 +751,13 @@ export default {
           signatureUrl: "approvedBySignatureUrl",
           verifiedName: "approvedByVerifiedName",
           error: "approvedByError",
-          userField: "approvedBy"
+          userField: "approvedBy",
         };
       }
 
       if (!username || !password) {
-        this[formData.error] = "Please enter both username and signature password";
+        this[formData.error] =
+          "Please enter both username and signature password";
         return;
       }
 
@@ -679,20 +788,20 @@ export default {
           }
           this[formData.error] = "";
           this[formData.userField] = data.user_name;
-          
+
           if (signatureType === "approved" && data.user_id) {
             this.approvedByUserId = data.user_id;
           }
-          
+
           if (signatureType === "prepared") {
             // For Prepared By: save to database and make form readonly
             await this.autoSubmitReport();
           } else if (signatureType === "verified") {
             // For Verified By: update database with signature
-            await this.updateReportSignature('verified');
+            await this.updateReportSignature("verified");
           } else if (signatureType === "approved") {
             // For Approved By: update database with signature
-            await this.updateReportSignature('approved');
+            await this.updateReportSignature("approved");
           }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
@@ -722,25 +831,25 @@ export default {
       }
     },
     async autoSubmitReport() {
-        try {
-          // Update all remarks before submitting
-          this.formData.checkPoints.forEach((checkpoint, index) => {
-            if (checkpoint.compliance) {
-              this.updateRemarks(index);
-            }
-          });
+      try {
+        // Update all remarks before submitting
+        this.formData.checkPoints.forEach((checkpoint, index) => {
+          if (checkpoint.compliance) {
+            this.updateRemarks(index);
+          }
+        });
 
-          const reportData = this.prepareReportData();
-          const response = await fetch(
-          "http://localhost:5000/api/reports/raw-material-inspection",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(reportData),
-            }
-          );
+        const reportData = this.prepareReportData();
+        const response = await fetch(
+          "http://localhost:8000/api/reports/raw-material-inspection",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -754,31 +863,37 @@ export default {
           throw new Error(errorMessage);
         }
 
-          const result = await response.json();
+        const result = await response.json();
 
         if (result.success && result.report_id) {
           this.reportId = result.report_id;
-          console.log(`✓ Report saved to database with ID: ${result.report_id}`);
+          console.log(
+            `✓ Report saved to database with ID: ${result.report_id}`
+          );
           console.log(`✓ Form is now readonly - inputs cannot be changed`);
-          alert(`Report saved successfully! Report ID: ${result.report_id}\n\nThe form is now locked. You can proceed with Verified By and Approved By signatures.`);
-          } else {
+          alert(
+            `Report saved successfully! Report ID: ${result.report_id}\n\nThe form is now locked. You can proceed with Verified By and Approved By signatures.`
+          );
+        } else {
           const errorMsg = result.message || "Unknown error occurred";
           console.error("Error submitting report:", errorMsg);
           alert(`Error submitting report: ${errorMsg}`);
-          }
-        } catch (error) {
+        }
+      } catch (error) {
         console.error("Error auto-submitting report:", error);
-          alert("Error submitting report. Please try again.");
-          // Clear signature on error so user can retry
-          this.preparedBySignatureUrl = "";
-          this.preparedByVerifiedName = "";
-          this.preparedBy = "";
+        alert("Error submitting report. Please try again.");
+        // Clear signature on error so user can retry
+        this.preparedBySignatureUrl = "";
+        this.preparedByVerifiedName = "";
+        this.preparedBy = "";
       }
     },
     async updateReportSignature(signatureType) {
       if (!this.reportId) {
         console.error("Report ID not found. Cannot update signature.");
-        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        alert(
+          "Error: Report not found. Please complete the Prepared By signature first."
+        );
         return;
       }
 
@@ -791,7 +906,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/reports/raw-material-inspection/${this.reportId}`,
+          `http://localhost:8000/api/reports/raw-material-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -817,13 +932,17 @@ export default {
 
         if (result.success) {
           if (signatureType === "verified") {
-            console.log(`Verified By signature updated in report ID: ${this.reportId}`);
+            console.log(
+              `Verified By signature updated in report ID: ${this.reportId}`
+            );
             alert("Verified By signature saved successfully!");
           } else if (signatureType === "approved") {
-            console.log(`Approved By signature updated in report ID: ${this.reportId}`);
+            console.log(
+              `Approved By signature updated in report ID: ${this.reportId}`
+            );
             alert("Report finalized successfully!");
-        }
-      } else {
+          }
+        } else {
           alert(`Error updating report: ${result.message}`);
         }
       } catch (error) {
@@ -836,7 +955,7 @@ export default {
         await this.finalSubmitReport();
       } else {
         if (!this.isFormValid) {
-        alert("Please fill in all required fields.");
+          alert("Please fill in all required fields.");
         } else if (!this.reportId) {
           alert("Please complete the Prepared By signature first.");
         } else if (!this.approvedBySignatureUrl) {
@@ -846,15 +965,17 @@ export default {
     },
     async finalSubmitReport() {
       if (!this.reportId) {
-        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        alert(
+          "Error: Report not found. Please complete the Prepared By signature first."
+        );
         return;
       }
-      
+
       if (!this.approvedBySignatureUrl) {
         alert("Please complete the Approved By signature first.");
         return;
       }
-      
+
       try {
         alert("Report submitted successfully!");
         console.log("Report submitted with ID:", this.reportId);
@@ -865,8 +986,11 @@ export default {
     },
     prepareReportData() {
       // Get report_card_id from route params or props
-      const reportCardId = this.$route?.params?.reportCardId || this.$route?.params?.report_id || null;
-      
+      const reportCardId =
+        this.$route?.params?.reportCardId ||
+        this.$route?.params?.report_id ||
+        null;
+
       return {
         report_card_id: reportCardId ? parseInt(reportCardId) : null,
         project_name: this.formData.projectName,
@@ -895,9 +1019,15 @@ export default {
         overall_status: this.overallStatus || "",
         quality_rating: this.qualityRating || null,
         recommendations: this.recommendations || "",
-        prepared_by: this.preparedBySignatureUrl ? `${this.preparedBy}|${this.preparedBySignatureUrl}` : this.preparedBy,
-        verified_by: this.verifiedBySignatureUrl ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}` : this.verifiedBy,
-        approved_by: this.approvedBySignatureUrl ? `${this.approvedBy}|${this.approvedBySignatureUrl}` : this.approvedBy,
+        prepared_by: this.preparedBySignatureUrl
+          ? `${this.preparedBy}|${this.preparedBySignatureUrl}`
+          : this.preparedBy,
+        verified_by: this.verifiedBySignatureUrl
+          ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}`
+          : this.verifiedBy,
+        approved_by: this.approvedBySignatureUrl
+          ? `${this.approvedBy}|${this.approvedBySignatureUrl}`
+          : this.approvedBy,
       };
     },
     exportReport() {
