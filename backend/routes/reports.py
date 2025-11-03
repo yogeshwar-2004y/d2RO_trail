@@ -1885,7 +1885,7 @@ def create_raw_material_inspection_report():
             data.get('checkPoints', [{}])[5].get('compliance', ''),
             data.get('checkPoints', [{}])[5].get('remarks', ''),
             data.get('checkPoints', [{}])[5].get('upload', ''),
-            data.get('checkPoints', [{}])[6].get('applicability', 'NIL'),
+            data.get('checkPoints', [{}])[6].get('applicability', 'NA'),  # Changed from 'NIL' to 'NA' to match database constraint
             data.get('checkPoints', [{}])[6].get('compliance', ''),
             data.get('checkPoints', [{}])[6].get('remarks', ''),
             data.get('checkPoints', [{}])[6].get('upload', ''),

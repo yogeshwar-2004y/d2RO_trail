@@ -833,6 +833,8 @@ export default {
     },
     async autoSubmitReport() {
       try {
+        console.log("Starting autoSubmitReport - saving form data to database...");
+        
         // Update all remarks before submitting
         this.formData.checkPoints.forEach((checkpoint, index) => {
           if (checkpoint.compliance) {
@@ -841,6 +843,8 @@ export default {
         });
 
         const reportData = this.prepareReportData();
+        console.log("Prepared report data:", reportData);
+        
         const response = await fetch(
           "http://localhost:8000/api/reports/raw-material-inspection",
           {
@@ -852,19 +856,25 @@ export default {
           }
         );
 
+        console.log("API Response status:", response.status, response.statusText);
+
         if (!response.ok) {
           const errorText = await response.text();
+          console.error("API Error Response:", errorText);
           let errorMessage = `Failed to submit report: ${response.status} ${response.statusText}`;
           try {
             const errorData = JSON.parse(errorText);
             errorMessage = errorData.message || errorMessage;
+            console.error("Parsed error message:", errorMessage);
           } catch (e) {
+            console.error("Could not parse error response:", e);
             errorMessage = errorText || errorMessage;
           }
           throw new Error(errorMessage);
         }
 
         const result = await response.json();
+        console.log("API Response result:", result);
 
         if (result.success && result.report_id) {
           this.reportId = result.report_id;
@@ -877,12 +887,14 @@ export default {
           );
         } else {
           const errorMsg = result.message || "Unknown error occurred";
-          console.error("Error submitting report:", errorMsg);
+          console.error("Error submitting report - no success:", errorMsg);
           alert(`Error submitting report: ${errorMsg}`);
+          // Don't clear signature if there's an error - allow retry
         }
       } catch (error) {
         console.error("Error auto-submitting report:", error);
-        alert("Error submitting report. Please try again.");
+        console.error("Error details:", error.message, error.stack);
+        alert(`Error submitting report: ${error.message || "Please try again."}`);
         // Clear signature on error so user can retry
         this.preparedBySignatureUrl = "";
         this.preparedByVerifiedName = "";
@@ -1078,6 +1090,14 @@ export default {
         this.$route?.params?.report_id ||
         null;
 
+      // Helper function to convert applicability to database format
+      const convertApplicability = (applicability) => {
+        if (applicability === "Applicable") return "A";
+        if (applicability === "Not Applicable") return "NA";
+        if (applicability === "NIL") return "NA"; // Convert NIL to NA for database constraint
+        return applicability; // Return as-is if already in correct format
+      };
+
       return {
         report_card_id: reportCardId ? parseInt(reportCardId) : null,
         project_name: this.formData.projectName,
@@ -1098,7 +1118,7 @@ export default {
         dated2: this.formData.dated2,
         checkPoints: this.formData.checkPoints.map((checkpoint) => ({
           description: checkpoint.description,
-          applicability: checkpoint.applicability,
+          applicability: convertApplicability(checkpoint.applicability),
           compliance: checkpoint.compliance,
           remarks: checkpoint.remarks,
           upload: checkpoint.upload || "",
