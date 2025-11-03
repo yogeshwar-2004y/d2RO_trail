@@ -32,7 +32,7 @@
                   type="text"
                   id="projectName"
                   v-model="reportData.projectName"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                   required
                 />
               </div>
@@ -42,7 +42,7 @@
                   type="text"
                   id="reportRefNo"
                   v-model="reportData.reportRefNo"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                   required
                 />
               </div>
@@ -52,7 +52,7 @@
                   type="text"
                   id="memoRefNo"
                   v-model="reportData.memoRefNo"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                 />
               </div>
               <div class="form-group">
@@ -61,7 +61,7 @@
                   type="text"
                   id="lruName"
                   v-model="reportData.lruName"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                   required
                 />
               </div>
@@ -71,7 +71,7 @@
                   type="text"
                   id="inspectionStage"
                   v-model="reportData.inspectionStage"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                 />
               </div>
               <div class="form-group">
@@ -80,12 +80,12 @@
                   type="text"
                   id="testVenue"
                   v-model="reportData.testVenue"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                 />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="reportData.slNos" :disabled="effectiveReadonly" />
+                <input type="text" id="slNos" v-model="reportData.slNos" :disabled="isFormReadonly" />
               </div>
             </div>
 
@@ -97,21 +97,21 @@
                   type="text"
                   id="dpName"
                   v-model="reportData.dpName"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="reportData.dated1" :disabled="effectiveReadonly" />
+                <input type="date" id="dated1" v-model="reportData.dated1" :disabled="isFormReadonly" />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="reportData.dated2" :disabled="effectiveReadonly" />
+                <input type="date" id="dated2" v-model="reportData.dated2" :disabled="isFormReadonly" />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="reportData.sruName" :disabled="effectiveReadonly" />
+                <input type="text" id="sruName" v-model="reportData.sruName" :disabled="isFormReadonly" />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
@@ -119,7 +119,7 @@
                   type="text"
                   id="partNo"
                   v-model="reportData.partNo"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                   required
                 />
               </div>
@@ -139,12 +139,12 @@
                   type="date"
                   id="startDate"
                   v-model="reportData.startDate"
-                  :disabled="effectiveReadonly"
+                  :disabled="isFormReadonly"
                 />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="reportData.endDate" :disabled="effectiveReadonly" />
+                <input type="date" id="endDate" v-model="reportData.endDate" :disabled="isFormReadonly" />
               </div>
             </div>
           </div>
@@ -172,7 +172,7 @@
                   <td>{{ item.expected }}</td>
                   <td>
                     <select
-                      :disabled="effectiveReadonly"
+                      :disabled="isFormReadonly"
                       v-model="item.observations"
                       @change="onObservationChange(item)"
                     >
@@ -216,7 +216,7 @@
                       type="text"
                       v-model="preparedByUsername"
                       placeholder="Enter username..."
-                      :disabled="effectiveReadonly || !areAllFieldsFilled"
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
             </div>
                   <div class="input-group">
@@ -225,19 +225,19 @@
                       type="password"
                       v-model="preparedByPassword"
                       placeholder="Enter signature password..."
-                      :disabled="effectiveReadonly || !areAllFieldsFilled"
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
                     />
             </div>
                   <button
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('prepared')"
-                    :disabled="effectiveReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                    :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
                   >
                     Verify & Load Signature
                   </button>
                  </div>
-                 <div v-if="preparedBySignatureUrl && (preparedByVerifiedInSession || effectiveReadonly)" class="signature-display">
+                 <div v-if="preparedBySignatureUrl" class="signature-display">
                    <div class="signature-image-container">
                      <img
                        :src="preparedBySignatureUrl"
@@ -281,12 +281,12 @@
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('verified')"
-                    :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword || effectiveReadonly"
+                    :disabled="isFormReadonly || !preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
                   >
                     Verify & Load Signature
                   </button>
                  </div>
-                 <div v-if="verifiedBySignatureUrl && (verifiedByVerifiedInSession || effectiveReadonly)" class="signature-display">
+                 <div v-if="verifiedBySignatureUrl" class="signature-display">
                    <div class="signature-image-container">
                      <img
                        :src="verifiedBySignatureUrl"
@@ -330,12 +330,12 @@
                     type="button"
                     class="btn btn-verify"
                     @click="verifySignature('approved')"
-                    :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword || effectiveReadonly"
+                    :disabled="isFormReadonly || !verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
                   >
                     Verify & Load Signature
                   </button>
                  </div>
-                 <div v-if="approvedBySignatureUrl && (approvedByVerifiedInSession || effectiveReadonly)" class="signature-display">
+                 <div v-if="approvedBySignatureUrl" class="signature-display">
                    <div class="signature-image-container">
                      <img
                        :src="approvedBySignatureUrl"
@@ -357,7 +357,7 @@
         </div>
 
         <!-- Action Buttons - Only show before Prepared By signature is verified -->
-        <div class="form-actions" v-if="!effectiveReadonly && !preparedBySignatureUrl">
+        <div class="form-actions" v-if="!isFormReadonly && !preparedBySignatureUrl">
           <button type="button" @click="saveDraft" class="btn btn-secondary">
             Save Draft
           </button>
@@ -375,7 +375,7 @@
         </div>
 
         <!-- Submit Button - Enabled only after Approved By signature -->
-        <div class="form-actions final-submit" v-if="effectiveReportId && approvedBySignatureUrl && !effectiveReadonly && !isReportSubmitted">
+        <div class="form-actions final-submit" v-if="effectiveReportId && approvedBySignatureUrl && isFormReadonly && !isReportSubmitted">
           <button
             type="button"
             @click="finalSubmitReport"
@@ -524,7 +524,6 @@ export default {
       approvedByUserId: null, // Store user_id of the approver
       savedReportId: null, // Store report ID after submission
       isReportSubmitted: false, // Track if report has been submitted
-      hasReportData: false, // Track if report data exists in DB (makes form readonly)
       // Track if signatures were verified in current session (not just loaded from DB)
       preparedByVerifiedInSession: false,
       verifiedByVerifiedInSession: false,
@@ -532,9 +531,24 @@ export default {
     };
   },
   computed: {
-    // Effective readonly state: form is readonly if prop says so OR if report data exists in DB
-    effectiveReadonly() {
-      return this.readonly || this.hasReportData;
+    // Form becomes readonly once Prepared By signature is fetched and report is saved
+    // Before Prepared By signature: form is ALWAYS fully editable (regardless of readonly prop)
+    // After Prepared By signature: form becomes readonly, but Verified/Approved By remain editable
+    isFormReadonly() {
+      // Before Prepared By signature: form should ALWAYS be editable for initial data entry
+      // Check if Prepared By signature has been fetched and report has been saved
+      const hasPreparedBySignature = this.preparedBySignatureUrl && this.preparedBySignatureUrl.trim() !== '';
+      const hasReportId = this.effectiveReportId !== null && this.effectiveReportId !== undefined;
+      
+      // Form is readonly ONLY if BOTH signature exists AND report has been saved
+      // Before that point, form is always editable (even if readonly prop is true)
+      if (hasPreparedBySignature && hasReportId) {
+        return true; // Form is saved with Prepared By signature, make it readonly
+      }
+      
+      // Before Prepared By signature: form is editable regardless of readonly prop
+      // (This allows users to fill the form initially even if viewed from read-only context)
+      return false;
     },
     isFormValid() {
       return (
@@ -969,12 +983,16 @@ export default {
           const report = result.report;
 
           // Set savedReportId if this is a loaded report
+          // This ensures isFormReadonly becomes true when data is loaded
           if (report.report_id) {
             this.savedReportId = report.report_id;
           } else {
             // Fallback to using the reportIdToLoad
             this.savedReportId = reportIdToLoad;
           }
+
+          // Also set reportId if not already set (for compatibility)
+          // Note: reportId is a prop, but we can use savedReportId for effectiveReportId
 
           // Map header fields (using snake_case from backend, same as conformal coating)
           this.reportData.projectName = report.project_name || "";
@@ -1050,9 +1068,6 @@ export default {
               this.approvedByVerifiedInSession = true;
             }
           }
-
-          // Mark that report data exists (makes form readonly)
-          this.hasReportData = true;
 
           // Mark as submitted if all signatures exist
           if (this.preparedBySignatureUrl && this.verifiedBySignatureUrl && this.approvedBySignatureUrl) {
