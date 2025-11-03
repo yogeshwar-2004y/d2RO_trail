@@ -587,16 +587,12 @@ export default {
       this.$route?.params?.reportId ||
       null;
 
-    // Load existing report data if reportId is provided (from prop or route)
-    // Note: this.reportId will be set to the raw material inspection report ID after saving
-    const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
-    if (reportIdToLoad) {
-      if (this.$route?.params?.reportId && !this.reportId) {
-        // Only set this.reportId if it's not already a raw material report ID
-        // If it's the parent report card ID, it's already stored in parentReportCardId
-        this.reportId = reportIdToLoad;
-      }
-      // Note: You may want to add loadReportData() method similar to conformal coating report
+    // Load existing report data using report_card_id (parent report card ID)
+    // The backend will query raw_material_inspection_report table by report_card_id foreign key
+    if (this.parentReportCardId) {
+      this.$nextTick(() => {
+        this.loadReportData();
+      });
     }
     
     console.log("Mounted - parentReportCardId:", this.parentReportCardId, "reportId prop:", this.reportId);
@@ -1054,6 +1050,152 @@ export default {
       } catch (error) {
         console.error("Error notifying QA Heads:", error);
         throw error;
+      }
+    },
+    async loadReportData() {
+      // Load report data from database using report_card_id (foreign key in raw_material_inspection_report table)
+      // The backend will query by report_card_id first, then fallback to report_id
+      const reportCardIdToLoad = this.parentReportCardId;
+
+      if (!reportCardIdToLoad) {
+        console.log("No report card ID available to load data");
+        return;
+      }
+
+      try {
+        console.log(`Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`);
+        const response = await fetch(
+          `http://localhost:8000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.log(`Report with report_card_id ${reportCardIdToLoad} not found`);
+            return;
+          }
+          throw new Error(`Failed to fetch report: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report) {
+          const report = result.report;
+
+          // Set reportId to the raw material inspection report ID from the response
+          this.reportId = report.report_id;
+
+          // Map header fields to formData
+          this.formData.projectName = report.project_name || "";
+          this.formData.reportRefNo = report.report_ref_no || "";
+          this.formData.memoRefNo = report.memo_ref_no || "";
+          this.formData.lruName = report.lru_name || "";
+          this.formData.sruName = report.sru_name || "";
+          this.formData.dpName = report.dp_name || "";
+          this.formData.partNo = report.part_no || "";
+          this.formData.inspectionStage = report.inspection_stage || "";
+          this.formData.testVenue = report.test_venue || "";
+          this.formData.quantity = report.quantity || null;
+          this.formData.slNos = report.sl_nos || "";
+          this.serialNumber = report.serial_number || this.serialNumber;
+          
+          // Update projectName and lruName from loaded data
+          if (report.project_name) {
+            this.projectName = report.project_name;
+          }
+          if (report.lru_name) {
+            this.lruName = report.lru_name;
+          }
+
+          // Format dates
+          this.formData.startDate = report.start_date
+            ? typeof report.start_date === "string"
+              ? report.start_date.split("T")[0]
+              : report.start_date
+            : "";
+          this.formData.endDate = report.end_date
+            ? typeof report.end_date === "string"
+              ? report.end_date.split("T")[0]
+              : report.end_date
+            : "";
+          this.formData.dated1 = report.dated1
+            ? typeof report.dated1 === "string"
+              ? report.dated1.split("T")[0]
+              : report.dated1
+            : "";
+          this.formData.dated2 = report.dated2
+            ? typeof report.dated2 === "string"
+              ? report.dated2.split("T")[0]
+              : report.dated2
+            : "";
+
+          // Map summary fields
+          this.overallStatus = report.overall_status || "";
+          this.qualityRating = report.quality_rating || null;
+          this.recommendations = report.recommendations || "";
+
+          // Convert applicability from DB format ('A', 'NA') to display format
+          const convertApplicability = (applicability) => {
+            if (applicability === "A") return "Applicable";
+            if (applicability === "NA") return "Not Applicable";
+            return applicability || "Applicable";
+          };
+
+          // Map checkpoints from database format (applicability1-7, compliance1-7, rem1-7, upload1-7)
+          for (let i = 0; i < 7; i++) {
+            const index = i + 1;
+            if (this.formData.checkPoints[i]) {
+              const dbApplicability = report[`applicability${index}`];
+              this.formData.checkPoints[i].applicability = convertApplicability(dbApplicability);
+              this.formData.checkPoints[i].compliance = report[`compliance${index}`] || "";
+              this.formData.checkPoints[i].remarks = report[`rem${index}`] || "";
+              this.formData.checkPoints[i].upload = report[`upload${index}`] || "";
+              
+              // Update remarks based on compliance if needed
+              if (this.formData.checkPoints[i].compliance) {
+                this.updateRemarks(i);
+              }
+            }
+          }
+
+          // Parse signature fields (format: "name|signature_url")
+          if (report.prepared_by) {
+            const parts = report.prepared_by.split("|");
+            this.preparedBy = parts[0] || "";
+            this.preparedBySignatureUrl = parts[1] || "";
+            this.preparedByVerifiedName = parts[0] || "";
+          }
+
+          if (report.verified_by) {
+            const parts = report.verified_by.split("|");
+            this.verifiedBy = parts[0] || "";
+            this.verifiedBySignatureUrl = parts[1] || "";
+            this.verifiedByVerifiedName = parts[0] || "";
+          }
+
+          if (report.approved_by) {
+            const parts = report.approved_by.split("|");
+            this.approvedBy = parts[0] || "";
+            this.approvedBySignatureUrl = parts[1] || "";
+            this.approvedByVerifiedName = parts[0] || "";
+          }
+
+          // Update parent report card ID if available (should already be set)
+          if (report.report_card_id) {
+            this.parentReportCardId = report.report_card_id;
+          }
+
+          console.log("✓ Report data loaded successfully:", report.report_id);
+        } else {
+          console.error("Failed to load report data:", result.message);
+        }
+      } catch (error) {
+        console.error("Error loading report data:", error);
       }
     },
     async notifyApproval() {

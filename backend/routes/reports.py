@@ -1976,23 +1976,37 @@ def create_raw_material_inspection_report():
 
 @reports_bp.route('/api/reports/raw-material-inspection/<int:report_id>', methods=['GET'])
 def get_raw_material_inspection_report(report_id):
-    """Get raw material inspection report details"""
+    """Get raw material inspection report details
+    report_id can be either the report_card_id (from reports table) or the inspection report's own report_id
+    """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # First try to find by report_card_id (from reports table) - preferred method
         cur.execute("""
-            SELECT * FROM raw_material_inspection_report WHERE report_id = %s
+            SELECT * FROM raw_material_inspection_report 
+            WHERE report_card_id = %s
         """, (report_id,))
         
         report = cur.fetchone()
+        
+        # If not found, try by the inspection report's own report_id
+        if not report:
+            cur.execute("""
+                SELECT * FROM raw_material_inspection_report 
+                WHERE report_id = %s
+            """, (report_id,))
+            report = cur.fetchone()
+        
+        columns = [desc[0] for desc in cur.description] if cur.description else []
+        
         cur.close()
         
         if not report:
             return jsonify({"success": False, "message": "Report not found"}), 404
         
         # Convert to dictionary
-        columns = [desc[0] for desc in cur.description] if cur.description else []
         report_data = dict(zip(columns, report))
         
         # Convert datetime objects to strings
@@ -2185,7 +2199,7 @@ def get_raw_material_inspection_reports():
         
         cur.execute("""
             SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
-                   created_at, updated_at
+                   created_at, updated_at, report_card_id
             FROM raw_material_inspection_report 
             ORDER BY created_at DESC
         """)
@@ -2202,7 +2216,8 @@ def get_raw_material_inspection_reports():
                 "report_ref_no": report[3],
                 "memo_ref_no": report[4],
                 "created_at": report[5].isoformat() if report[5] else None,
-                "updated_at": report[6].isoformat() if report[6] else None
+                "updated_at": report[6].isoformat() if report[6] else None,
+                "report_card_id": report[7] if report[7] else None
             })
         
         return jsonify({
