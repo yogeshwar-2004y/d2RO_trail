@@ -373,6 +373,11 @@ export default {
         return false;
       }
       
+      // If report is already submitted, make it readonly
+      if (this.isReportSubmitted) {
+        return false;
+      }
+      
       // Only the assigned reviewer can edit
       return currentUserId === this.assignedReviewerId;
     },
