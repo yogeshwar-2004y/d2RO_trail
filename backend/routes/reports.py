@@ -1824,7 +1824,7 @@ def create_raw_material_inspection_report():
         # Insert raw material inspection report
         cur.execute("""
             INSERT INTO raw_material_inspection_report (
-                project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name, 
+                report_card_id, project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name, 
                 part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number, 
                 start_date, end_date, dated1, dated2,
                 applicability1, compliance1, rem1, upload1,
@@ -1837,12 +1837,13 @@ def create_raw_material_inspection_report():
                 overall_status, quality_rating, recommendations,
                 prepared_by, verified_by, approved_by
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                 %s, %s
             ) RETURNING report_id
         """, (
+            data.get('report_card_id'),  # Foreign key to reports table
             data['project_name'],
             data['report_ref_no'],
             data['memo_ref_no'],
@@ -2047,6 +2048,7 @@ def create_inspection_tables():
         cur.execute("""
             CREATE TABLE IF NOT EXISTS raw_material_inspection_report (
                 report_id SERIAL PRIMARY KEY,
+                report_card_id INT REFERENCES reports(report_id) ON DELETE SET NULL,
                 project_name TEXT,
                 report_ref_no VARCHAR(100),
                 memo_ref_no VARCHAR(100),
@@ -2100,6 +2102,12 @@ def create_inspection_tables():
                 created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+        
+        # Create index on report_card_id for fast lookup
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_raw_material_inspection_report_card_id 
+            ON raw_material_inspection_report(report_card_id);
         """)
         
         # Create triggers

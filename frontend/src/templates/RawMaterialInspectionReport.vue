@@ -146,6 +146,7 @@
                   </button>
             </div>
                 <div v-if="preparedBySignatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="preparedBySignatureUrl"
@@ -154,6 +155,7 @@
                     />
                     <div class="signature-info">
                       <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                      <span class="signature-role" v-if="preparedByVerifiedRole">{{ preparedByVerifiedRole }} Signature</span>
                       <span class="signature-status">✓ Verified</span>
             </div>
             </div>
@@ -195,6 +197,7 @@
           </button>
                 </div>
                 <div v-if="verifiedBySignatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="verifiedBySignatureUrl"
@@ -203,6 +206,7 @@
                     />
                     <div class="signature-info">
                       <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                      <span class="signature-role" v-if="verifiedByVerifiedRole">{{ verifiedByVerifiedRole }} Signature</span>
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
@@ -244,6 +248,7 @@
           </button>
                 </div>
                 <div v-if="approvedBySignatureUrl" class="signature-display">
+                  <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
                       :src="approvedBySignatureUrl"
@@ -252,6 +257,7 @@
                     />
                     <div class="signature-info">
                       <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                      <span class="signature-role" v-if="approvedByVerifiedRole">{{ approvedByVerifiedRole }} Signature</span>
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
@@ -377,18 +383,21 @@ export default {
       preparedByPassword: "",
       preparedBySignatureUrl: "",
       preparedByVerifiedName: "",
+      preparedByVerifiedRole: "",
       preparedByError: "",
       verifiedBy: "",
       verifiedByUsername: "",
       verifiedByPassword: "",
       verifiedBySignatureUrl: "",
       verifiedByVerifiedName: "",
+      verifiedByVerifiedRole: "",
       verifiedByError: "",
       approvedBy: "",
       approvedByUsername: "",
       approvedByPassword: "",
       approvedBySignatureUrl: "",
       approvedByVerifiedName: "",
+      approvedByVerifiedRole: "",
       approvedByError: "",
       approvedByUserId: null,
       reportId: null,
@@ -396,10 +405,22 @@ export default {
   },
   computed: {
     isFormReadonly() {
+      // Form becomes readonly once Prepared By signature is verified
+      // This ensures form cannot be changed after Prepared By signature is added
       const hasPreparedBySignature = this.preparedBySignatureUrl && this.preparedBySignatureUrl.trim() !== '';
+      
+      // Once Prepared By signature exists, form is readonly (reportId will be set by autoSubmitReport)
+      // We check for reportId as well to ensure the save was successful
       const hasReportId = this.reportId !== null && this.reportId !== undefined;
       
+      // Form is readonly if Prepared By signature exists and report is saved
       if (hasPreparedBySignature && hasReportId) {
+        return true;
+      }
+      
+      // If Prepared By signature exists but reportId doesn't yet (still saving),
+      // still make form readonly to prevent changes during save
+      if (hasPreparedBySignature) {
         return true;
       }
       
@@ -632,7 +653,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+        const response = await fetch("/api/users/verify-signature", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -648,6 +669,14 @@ export default {
         if (data.success) {
           this[formData.signatureUrl] = data.signature_url;
           this[formData.verifiedName] = data.user_name;
+          // Store verified role for display
+          if (signatureType === "prepared") {
+            this.preparedByVerifiedRole = data.role_name || "";
+          } else if (signatureType === "verified") {
+            this.verifiedByVerifiedRole = data.role_name || "";
+          } else if (signatureType === "approved") {
+            this.approvedByVerifiedRole = data.role_name || "";
+          }
           this[formData.error] = "";
           this[formData.userField] = data.user_name;
           
@@ -656,22 +685,39 @@ export default {
           }
           
           if (signatureType === "prepared") {
+            // For Prepared By: save to database and make form readonly
             await this.autoSubmitReport();
           } else if (signatureType === "verified") {
+            // For Verified By: update database with signature
             await this.updateReportSignature('verified');
           } else if (signatureType === "approved") {
+            // For Approved By: update database with signature
             await this.updateReportSignature('approved');
           }
         } else {
           this[formData.error] = data.message || "Failed to verify signature";
           this[formData.signatureUrl] = "";
           this[formData.verifiedName] = "";
+          if (signatureType === "prepared") {
+            this.preparedByVerifiedRole = "";
+          } else if (signatureType === "verified") {
+            this.verifiedByVerifiedRole = "";
+          } else if (signatureType === "approved") {
+            this.approvedByVerifiedRole = "";
+          }
           this[formData.userField] = "";
         }
       } catch (error) {
         this[formData.error] = "Error verifying signature: " + error.message;
         this[formData.signatureUrl] = "";
         this[formData.verifiedName] = "";
+        if (signatureType === "prepared") {
+          this.preparedByVerifiedRole = "";
+        } else if (signatureType === "verified") {
+          this.verifiedByVerifiedRole = "";
+        } else if (signatureType === "approved") {
+          this.approvedByVerifiedRole = "";
+        }
         this[formData.userField] = "";
       }
     },
@@ -713,7 +759,8 @@ export default {
         if (result.success && result.report_id) {
           this.reportId = result.report_id;
           console.log(`✓ Report saved to database with ID: ${result.report_id}`);
-          alert(`Report saved successfully! Report ID: ${result.report_id}`);
+          console.log(`✓ Form is now readonly - inputs cannot be changed`);
+          alert(`Report saved successfully! Report ID: ${result.report_id}\n\nThe form is now locked. You can proceed with Verified By and Approved By signatures.`);
           } else {
           const errorMsg = result.message || "Unknown error occurred";
           console.error("Error submitting report:", errorMsg);
@@ -722,6 +769,10 @@ export default {
         } catch (error) {
         console.error("Error auto-submitting report:", error);
           alert("Error submitting report. Please try again.");
+          // Clear signature on error so user can retry
+          this.preparedBySignatureUrl = "";
+          this.preparedByVerifiedName = "";
+          this.preparedBy = "";
       }
     },
     async updateReportSignature(signatureType) {
@@ -813,7 +864,11 @@ export default {
       }
     },
     prepareReportData() {
+      // Get report_card_id from route params or props
+      const reportCardId = this.$route?.params?.reportCardId || this.$route?.params?.report_id || null;
+      
       return {
+        report_card_id: reportCardId ? parseInt(reportCardId) : null,
         project_name: this.formData.projectName,
         report_ref_no: this.formData.reportRefNo,
         memo_ref_no: this.formData.memoRefNo,
@@ -1332,6 +1387,13 @@ export default {
   border-radius: 6px;
 }
 
+.signature-display label {
+  font-weight: 600;
+  color: #155724;
+  margin-bottom: 10px;
+  display: block;
+}
+
 .signature-image-container {
   display: flex;
   align-items: center;
@@ -1358,6 +1420,13 @@ export default {
   font-weight: 600;
   color: #155724;
   font-size: 14px;
+}
+
+.signature-role {
+  font-weight: 500;
+  color: #155724;
+  font-size: 12px;
+  font-style: italic;
 }
 
 .signature-status {
