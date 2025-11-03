@@ -32,6 +32,7 @@
                   type="text"
                   id="projectName"
                   v-model="reportData.projectName"
+                  :disabled="isPreparedByVerified"
                   required
                 />
               </div>
@@ -41,6 +42,7 @@
                   type="text"
                   id="reportRefNo"
                   v-model="reportData.reportRefNo"
+                  :disabled="isPreparedByVerified"
                   required
                 />
               </div>
@@ -50,6 +52,7 @@
                   type="text"
                   id="memoRefNo"
                   v-model="reportData.memoRefNo"
+                  :disabled="isPreparedByVerified"
                 />
               </div>
               <div class="form-group">
@@ -58,6 +61,7 @@
                   type="text"
                   id="lruName"
                   v-model="reportData.lruName"
+                  :disabled="isPreparedByVerified"
                   required
                 />
               </div>
@@ -67,6 +71,7 @@
                   type="text"
                   id="inspectionStage"
                   v-model="reportData.inspectionStage"
+                  :disabled="isPreparedByVerified"
                 />
               </div>
               <div class="form-group">
@@ -75,11 +80,17 @@
                   type="text"
                   id="testVenue"
                   v-model="reportData.testVenue"
+                  :disabled="isPreparedByVerified"
                 />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                <input type="text" id="slNos" v-model="reportData.slNos" />
+                <input 
+                  type="text" 
+                  id="slNos" 
+                  v-model="reportData.slNos"
+                  :disabled="isPreparedByVerified"
+                />
               </div>
             </div>
 
@@ -91,20 +102,36 @@
                   type="text"
                   id="dpName"
                   v-model="reportData.dpName"
+                  :disabled="isPreparedByVerified"
                   required
                 />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="reportData.dated1" />
+                <input 
+                  type="date" 
+                  id="dated1" 
+                  v-model="reportData.dated1"
+                  :disabled="isPreparedByVerified"
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="reportData.dated2" />
+                <input 
+                  type="date" 
+                  id="dated2" 
+                  v-model="reportData.dated2"
+                  :disabled="isPreparedByVerified"
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="reportData.sruName" />
+                <input 
+                  type="text" 
+                  id="sruName" 
+                  v-model="reportData.sruName"
+                  :disabled="isPreparedByVerified"
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
@@ -112,6 +139,7 @@
                   type="text"
                   id="partNo"
                   v-model="reportData.partNo"
+                  :disabled="isPreparedByVerified"
                   required
                 />
               </div>
@@ -121,6 +149,7 @@
                   type="number"
                   id="quantity"
                   v-model.number="reportData.quantity"
+                  :disabled="isPreparedByVerified"
                   min="1"
                   required
                 />
@@ -131,11 +160,17 @@
                   type="date"
                   id="startDate"
                   v-model="reportData.startDate"
+                  :disabled="isPreparedByVerified"
                 />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="reportData.endDate" />
+                <input 
+                  type="date" 
+                  id="endDate" 
+                  v-model="reportData.endDate"
+                  :disabled="isPreparedByVerified"
+                />
               </div>
             </div>
           </div>
@@ -170,6 +205,7 @@
                         v-model="item.dimension"
                         :placeholder="`Enter ${item.label?.toLowerCase() || 'dimension'}`"
                         class="dimension-input"
+                        :disabled="isPreparedByVerified"
                         @input="computeRemarks(item)"
                       />
                       <span class="dimension-unit">{{ item.unit }}</span>
@@ -180,6 +216,7 @@
                       type="text"
                       v-model="item.tolerance"
                       placeholder="Enter tolerance"
+                      :disabled="isPreparedByVerified"
                       @input="computeRemarks(item)"
                     />
                     <span class="dimension-unit">{{ item.unit }}</span>
@@ -189,6 +226,7 @@
                       type="text"
                       v-model="item.observedValue"
                       placeholder="Enter observed value"
+                      :disabled="isPreparedByVerified"
                       @input="computeRemarks(item)"
                     />
                   </td>
@@ -197,6 +235,7 @@
                       type="text"
                       v-model="item.instrumentUsed"
                       placeholder="Enter instrument"
+                      :disabled="isPreparedByVerified"
                     />
                   </td>
                   <td>
@@ -213,6 +252,7 @@
                   <td>
                     <input
                       type="file"
+                      :disabled="isPreparedByVerified"
                       @change="handleFileUpload($event, item, 'dim')"
                     />
                   </td>
@@ -256,6 +296,7 @@
                     <select
                       v-model="item.complianceObservation"
                       class="compliance-select"
+                      :disabled="isPreparedByVerified"
                       @change="computeParameterRemarks(item)"
                     >
                       <option value="">Select...</option>
@@ -277,6 +318,7 @@
                   <td>
                     <input
                       type="file"
+                      :disabled="isPreparedByVerified"
                       @change="handleFileUpload($event, item, 'param')"
                     />
                   </td>
