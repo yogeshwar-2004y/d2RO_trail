@@ -504,7 +504,9 @@ export default {
       approvedByVerifiedRole: "",
       approvedByError: "",
       approvedByUserId: null,
-      reportId: null,
+      preparedByUserId: null,
+      reportId: null,  // This will be set to the raw material inspection report ID after saving
+      parentReportCardId: null,  // Store the parent report card ID (from props/route) separately
     };
   },
   computed: {
@@ -576,14 +578,28 @@ export default {
     this.formData.startDate = this.currentDate;
     this.formData.sruName = this.lruName;
 
+    // Capture the parent report card ID from props or route params
+    // This should be stored in report_card_id column in the database
+    this.parentReportCardId = 
+      this.reportId ||  // From props (parent report card ID)
+      this.$route?.params?.reportCardId ||
+      this.$route?.params?.report_id ||
+      this.$route?.params?.reportId ||
+      null;
+
     // Load existing report data if reportId is provided (from prop or route)
+    // Note: this.reportId will be set to the raw material inspection report ID after saving
     const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
     if (reportIdToLoad) {
       if (this.$route?.params?.reportId && !this.reportId) {
+        // Only set this.reportId if it's not already a raw material report ID
+        // If it's the parent report card ID, it's already stored in parentReportCardId
         this.reportId = reportIdToLoad;
       }
       // Note: You may want to add loadReportData() method similar to conformal coating report
     }
+    
+    console.log("Mounted - parentReportCardId:", this.parentReportCardId, "reportId prop:", this.reportId);
   },
   methods: {
     handleFileUpload(event, section, index) {
@@ -788,7 +804,10 @@ export default {
           this[formData.error] = "";
           this[formData.userField] = data.user_name;
 
-          if (signatureType === "approved" && data.user_id) {
+          // Store user_id for activity logging
+          if (signatureType === "prepared" && data.user_id) {
+            this.preparedByUserId = data.user_id;
+          } else if (signatureType === "approved" && data.user_id) {
             this.approvedByUserId = data.user_id;
           }
 
@@ -909,7 +928,6 @@ export default {
         );
         return;
       }
-
       try {
         const updateData = {};
         if (signatureType === "verified") {
@@ -1084,11 +1102,11 @@ export default {
       }
     },
     prepareReportData() {
-      // Get report_card_id from route params or props
-      const reportCardId =
-        this.$route?.params?.reportCardId ||
-        this.$route?.params?.report_id ||
-        null;
+      // Use parentReportCardId which was captured in mounted()
+      // This is the parent report card ID (from reports table) that should be stored in report_card_id column
+      const reportCardId = this.parentReportCardId;
+      
+      console.log("Preparing report data - report_card_id:", reportCardId, "parentReportCardId:", this.parentReportCardId);
 
       // Helper function to convert applicability to database format
       const convertApplicability = (applicability) => {
@@ -1099,7 +1117,7 @@ export default {
       };
 
       return {
-        report_card_id: reportCardId ? parseInt(reportCardId) : null,
+        report_card_id: reportCardId ? (typeof reportCardId === 'number' ? reportCardId : parseInt(reportCardId)) : null,
         project_name: this.formData.projectName,
         report_ref_no: this.formData.reportRefNo,
         memo_ref_no: this.formData.memoRefNo,
@@ -1129,6 +1147,7 @@ export default {
         prepared_by: this.preparedBySignatureUrl
           ? `${this.preparedBy}|${this.preparedBySignatureUrl}`
           : this.preparedBy,
+        prepared_by_user_id: this.preparedByUserId || null,  // For activity logging
         verified_by: this.verifiedBySignatureUrl
           ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}`
           : this.verifiedBy,
