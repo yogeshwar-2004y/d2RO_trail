@@ -525,6 +525,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    reportId: {
+      type: [String, Number],
+      default: null,
+    },
   },
   data() {
     return {
@@ -716,14 +720,22 @@ export default {
     },
   },
   mounted() {
-    // Get parameters from route
+    // Get parameters from props (when used in IndividualReport) or route params
     const projectName = this.$route.params.projectName || "";
     const lruName = this.$route.params.lruName || "";
+    const reportCardId = this.reportId || this.$route.params.reportId;
 
-    // Set default values
-    this.reportData.projectName = projectName;
-    this.reportData.lruName = lruName;
-    this.reportData.startDate = this.formattedDate;
+    console.log("MechanicalInspection mounted - reportCardId:", reportCardId);
+
+    // If reportCardId is provided, load the report data
+    if (reportCardId) {
+      this.loadReportData(reportCardId);
+    } else {
+      // Set default values for new report
+      this.reportData.projectName = projectName;
+      this.reportData.lruName = lruName;
+      this.reportData.startDate = this.formattedDate;
+    }
   },
   methods: {
     // Extract numeric value from a string (handles formats like "200 mm", "± 10 mm", "Length : 200 mm")
@@ -822,6 +834,137 @@ export default {
       const file = event.target.files[0];
       if (file) {
         item.fileName = file.name;
+      }
+    },
+    
+    // Load report data from API using report card ID
+    async loadReportData(reportCardId) {
+      try {
+        const url = `http://localhost:5000/api/mechanical-inspection/by-report-card/${reportCardId}`;
+        console.log("Loading report data from:", url);
+        
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Failed to fetch report. Status:", response.status, "Response:", errorText);
+          
+          // If report not found (404), it means the form hasn't been submitted yet
+          // Show empty form instead of error alert
+          if (response.status === 404) {
+            console.log("Report not found - showing empty form (report may not have been submitted yet)");
+            // Keep default empty form values
+            return;
+          }
+          
+          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report) {
+          const report = result.report;
+
+          // Map report data
+          this.reportData = {
+            projectName: report.project_name || "",
+            reportRefNo: report.report_ref_no || "",
+            memoRefNo: report.memo_ref_no || "",
+            lruName: report.lru_name || "",
+            inspectionStage: report.inspection_stage || "",
+            testVenue: report.test_venue || "",
+            slNos: report.sl_nos || "",
+            dpName: report.dp_name || "",
+            dated1: report.dated1 || "",
+            dated2: report.dated2 || "",
+            sruName: report.sru_name || "",
+            partNo: report.part_no || "",
+            quantity: report.quantity || null,
+            startDate: report.start_date || this.formattedDate,
+            endDate: report.end_date || "",
+          };
+
+          // Map dimensional checklist
+          if (this.dimensionalChecklist.length >= 4) {
+            // Dimension 1 (Length)
+            this.dimensionalChecklist[0].dimension = report.dim1_dimension || "";
+            this.dimensionalChecklist[0].tolerance = report.dim1_tolerance || "";
+            this.dimensionalChecklist[0].observedValue = report.dim1_observed_value || "";
+            this.dimensionalChecklist[0].instrumentUsed = report.dim1_instrument_used || "";
+            this.dimensionalChecklist[0].remarks = report.dim1_remarks || "";
+            this.dimensionalChecklist[0].fileName = report.dim1_upload || null;
+
+            // Dimension 2 (Width)
+            this.dimensionalChecklist[1].dimension = report.dim2_dimension || "";
+            this.dimensionalChecklist[1].tolerance = report.dim2_tolerance || "";
+            this.dimensionalChecklist[1].observedValue = report.dim2_observed_value || "";
+            this.dimensionalChecklist[1].instrumentUsed = report.dim2_instrument_used || "";
+            this.dimensionalChecklist[1].remarks = report.dim2_remarks || "";
+            this.dimensionalChecklist[1].fileName = report.dim2_upload || null;
+
+            // Dimension 3 (Height)
+            this.dimensionalChecklist[2].dimension = report.dim3_dimension || "";
+            this.dimensionalChecklist[2].tolerance = report.dim3_tolerance || "";
+            this.dimensionalChecklist[2].observedValue = report.dim3_observed_value || "";
+            this.dimensionalChecklist[2].instrumentUsed = report.dim3_instrument_used || "";
+            this.dimensionalChecklist[2].remarks = report.dim3_remarks || "";
+            this.dimensionalChecklist[2].fileName = report.dim3_upload || null;
+
+            // Dimension 4 (Weight)
+            this.dimensionalChecklist[3].dimension = report.dim4_dimension || "";
+            this.dimensionalChecklist[3].tolerance = report.dim4_tolerance || "";
+            this.dimensionalChecklist[3].observedValue = report.dim4_observed_value || "";
+            this.dimensionalChecklist[3].instrumentUsed = report.dim4_instrument_used || "";
+            this.dimensionalChecklist[3].remarks = report.dim4_remarks || "";
+            this.dimensionalChecklist[3].fileName = report.dim4_upload || null;
+          }
+
+          // Map parameter checklist
+          const paramFields = [
+            'param1', 'param2', 'param3', 'param4',
+            'param5', 'param6', 'param7', 'param8'
+          ];
+
+          paramFields.forEach((paramPrefix, index) => {
+            if (index < this.parameterChecklist.length) {
+              this.parameterChecklist[index].complianceObservation = 
+                report[`${paramPrefix}_compliance_observation`] || "";
+              this.parameterChecklist[index].expected = 
+                report[`${paramPrefix}_expected`] || this.parameterChecklist[index].expected;
+              this.parameterChecklist[index].remarks = 
+                report[`${paramPrefix}_remarks`] || "";
+              this.parameterChecklist[index].fileName = 
+                report[`${paramPrefix}_upload`] || null;
+            }
+          });
+
+          // Map signatures
+          if (report.prepared_by) {
+            this.signatures.preparedBy.signatureUrl = report.prepared_by;
+          }
+          if (report.verified_by) {
+            this.signatures.verifiedBy.signatureUrl = report.verified_by;
+          }
+          if (report.approved_by) {
+            this.signatures.approvedBy.signatureUrl = report.approved_by;
+          }
+
+          console.log("Report data loaded successfully");
+        } else {
+          throw new Error(result.message || "Failed to load report data");
+        }
+      } catch (error) {
+        console.error("Error loading report data:", error);
+        
+        // If report not found (404), it means the form hasn't been submitted yet
+        // Show empty form instead of error alert
+        if (error.message.includes('404') || error.message.includes('not found')) {
+          console.log("Report not found - showing empty form (report may not have been submitted yet)");
+          // Keep default empty form values
+          return;
+        }
+        
+        alert(`Error loading report data: ${error.message}. Please try again.`);
       }
     },
     
@@ -945,8 +1088,13 @@ export default {
       }
 
       try {
+        // Get report card ID from props or route
+        const reportCardId = this.reportId || this.$route.params.reportId;
+        
         // Prepare data for submission
         const submissionData = {
+          // Link to report card
+          report_card_id: reportCardId,
           // Report Details
           project_name: this.reportData.projectName,
           report_ref_no: this.reportData.reportRefNo,
