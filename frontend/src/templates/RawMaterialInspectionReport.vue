@@ -18,178 +18,74 @@
 
       <!-- Inspection Form -->
       <form @submit.prevent="submitForm" class="inspection-form">
-        <!-- General Information Section -->
-        <div class="form-section">
-          <h2 class="section-title">General Information</h2>
-          <div class="general-info-grid">
-            <!-- Left Column -->
-            <div class="info-column">
-              <div class="form-group">
-                <label for="projectName">Project Name:</label>
-                <input
-                  type="text"
-                  id="projectName"
-                  v-model="formData.projectName"
-                  :disabled="readonly"
-                  required
-                />
+        <div class="report-container">
+          <div class="report-info">
+            <div>
+              <strong>Project Name:</strong>
+              <input v-model="formData.projectName" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="reportRefNo">Report Ref No:</label>
-                <input
-                  type="text"
-                  id="reportRefNo"
-                  v-model="formData.reportRefNo"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Report Ref No:</strong>
+              <input v-model="formData.reportRefNo" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="memoRefNo">Memo Ref No:</label>
-                <input
-                  type="text"
-                  id="memoRefNo"
-                  v-model="formData.memoRefNo"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Memo Ref No:</strong>
+              <input v-model="formData.memoRefNo" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="lruName">LRU Name:</label>
-                <input
-                  type="text"
-                  id="lruName"
-                  v-model="formData.lruName"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>LRU Name:</strong>
+              <input v-model="formData.lruName" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="inspectionStage">Inspection Stage:</label>
-                <input
-                  type="text"
-                  id="inspectionStage"
-                  v-model="formData.inspectionStage"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>DP Name:</strong>
+              <input v-model="formData.dpName" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="testVenue">Test Venue:</label>
-                <input
-                  type="text"
-                  id="testVenue"
-                  v-model="formData.testVenue"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Part No:</strong>
+              <input v-model="formData.partNo" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="slNos">SL.NO'S:</label>
-                <input
-                  type="text"
-                  id="slNos"
-                  v-model="formData.slNos"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>SL No's:</strong>
+              <input v-model="formData.slNos" type="text" :disabled="isFormReadonly" />
               </div>
+            <div>
+              <strong>End Date:</strong>
+              <input v-model="formData.endDate" type="date" :disabled="isFormReadonly" />
             </div>
-
-            <!-- Right Column -->
-            <div class="info-column">
-              <div class="form-group">
-                <label for="dpName">DP Name:</label>
-                <input
-                  type="text"
-                  id="dpName"
-                  v-model="formData.dpName"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>SRU Name:</strong>
+              <input v-model="formData.sruName" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="dated1">Dated:</label>
-                <input
-                  type="date"
-                  id="dated1"
-                  v-model="formData.dated1"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Start Date:</strong>
+              <input v-model="formData.startDate" type="date" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="dated2">Dated:</label>
-                <input
-                  type="date"
-                  id="dated2"
-                  v-model="formData.dated2"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Inspection Stage:</strong>
+              <input v-model="formData.inspectionStage" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="sruName">SRU Name:</label>
-                <input
-                  type="text"
-                  id="sruName"
-                  v-model="formData.sruName"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Test Venue:</strong>
+              <input v-model="formData.testVenue" type="text" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="partNo">Part No:</label>
-                <input
-                  type="text"
-                  id="partNo"
-                  v-model="formData.partNo"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Quantity:</strong>
+              <input v-model="formData.quantity" type="number" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="quantity">Quantity:</label>
-                <input
-                  type="number"
-                  id="quantity"
-                  v-model="formData.quantity"
-                  :disabled="readonly"
-                  required
-                />
+            <div>
+              <strong>Dated:</strong>
+              <input v-model="formData.dated1" type="date" :disabled="isFormReadonly" />
               </div>
-              <div class="form-group">
-                <label for="startDate">Start Date:</label>
-                <input
-                  type="date"
-                  id="startDate"
-                  v-model="formData.startDate"
-                  :disabled="readonly"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="endDate">End Date:</label>
-                <input
-                  type="date"
-                  id="endDate"
-                  v-model="formData.endDate"
-                  required
-                />
-              </div>
-            </div>
+            <div>
+              <strong>Dated:</strong>
+              <input v-model="formData.dated2" type="date" :disabled="isFormReadonly" />
           </div>
         </div>
 
-        <!-- Check Points Section -->
-        <div class="form-section">
-          <h2 class="section-title">Check Points</h2>
-          <div class="checkpoints-table-container">
-            <table class="checkpoints-table">
+          <table class="inspection-table">
               <thead>
                 <tr>
-                  <th>SL.NO:</th>
+                <th>SL.NO</th>
                   <th>CHECK POINTS</th>
                   <th>APPLICABILITY (A / NA)</th>
                   <th>COMPLIANCE (YES / NO)</th>
@@ -198,78 +94,183 @@
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="(checkpoint, index) in formData.checkPoints"
-                  :key="index"
-                >
+              <tr v-for="(checkpoint, index) in formData.checkPoints" :key="index">
                   <td>{{ index + 1 }}</td>
-                  <td class="checkpoint-description">
-                    {{ checkpoint.description }}
-                  </td>
-                  <td>
-                    <select v-model="checkpoint.applicability" :disabled="readonly">
-                      <option value="">Select</option>
-                      <option value="A">A</option>
-                      <option value="NA">NA</option>
-                    </select>
-                  </td>
-                  <td>
-                    <select v-model="checkpoint.compliance" :disabled="readonly">
+                <td>{{ checkpoint.description }}</td>
+                <td>{{ checkpoint.applicability }}</td>
+                <td>
+                  <select v-model="checkpoint.compliance" @change="updateRemarks(index)" :disabled="isFormReadonly">
                       <option value="">Select</option>
                       <option value="YES">YES</option>
                       <option value="NO">NO</option>
                     </select>
                   </td>
                   <td>
-                    <select v-model="checkpoint.remarks" :disabled="readonly">
-                      <option value="">Select</option>
-                      <option value="OK">OK</option>
-                      <option value="NOT OK">NOT OK</option>
-                    </select>
+                  <input v-model="checkpoint.remarks" type="text" readonly :disabled="true" class="remarks-readonly" />
                   </td>
-                  <td>
-                    <input
-                      type="file"
-                      @change="handleFileUpload($event, 'checkpoint', index)"
-                    />
-                  </td>
+                <td><input type="file" :disabled="isFormReadonly" @change="handleFileUpload($event, 'checkpoint', index)" /></td>
                 </tr>
               </tbody>
             </table>
+
+          <div class="report-footer">
+            <div class="signature-section">
+              <strong>Prepared By:</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="preparedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
+                    />
+          </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="preparedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="isFormReadonly || !areAllFieldsFilled"
+                    />
+        </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('prepared')"
+                    :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                  >
+                    Verify & Load Signature
+                  </button>
+            </div>
+                <div v-if="preparedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="preparedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+            </div>
+            </div>
+          </div>
+                <div v-if="preparedByError" class="signature-error">
+                  {{ preparedByError }}
+        </div>
+              </div>
+            </div>
+            <div class="signature-section">
+              <strong>Verified By:</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="verifiedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="!preparedBySignatureUrl"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="verifiedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!preparedBySignatureUrl"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('verified')"
+                    :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                  >
+                    Verify & Load Signature
+          </button>
+                </div>
+                <div v-if="verifiedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="verifiedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="verifiedByError" class="signature-error">
+                  {{ verifiedByError }}
+                </div>
+              </div>
+            </div>
+            <div class="signature-section">
+              <strong>Approved By:</strong>
+              <div class="signature-auth-container">
+                <div class="signature-inputs">
+                  <div class="input-group">
+                    <label>Username:</label>
+                    <input
+                      type="text"
+                      v-model="approvedByUsername"
+                      placeholder="Enter username..."
+                      :disabled="!verifiedBySignatureUrl"
+                    />
+                  </div>
+                  <div class="input-group">
+                    <label>Signature Password:</label>
+                    <input
+                      type="password"
+                      v-model="approvedByPassword"
+                      placeholder="Enter signature password..."
+                      :disabled="!verifiedBySignatureUrl"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-verify"
+                    @click="verifySignature('approved')"
+                    :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                  >
+                    Verify & Load Signature
+          </button>
+                </div>
+                <div v-if="approvedBySignatureUrl" class="signature-display">
+                  <div class="signature-image-container">
+                    <img
+                      :src="approvedBySignatureUrl"
+                      alt="Verified Signature"
+                      class="signature-image"
+                    />
+                    <div class="signature-info">
+                      <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                      <span class="signature-status">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+                <div v-if="approvedByError" class="signature-error">
+                  {{ approvedByError }}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Signatures Section -->
-        <div class="form-section">
-          <h2 class="section-title">Signatures</h2>
-          <div class="signatures-layout">
-            <div class="signature-item">
-              <label>Prepared By:</label>
-              <input type="text" v-model="preparedBy" class="signature-input" :disabled="readonly" />
-            </div>
-            <div class="signature-item">
-              <label>Verified By:</label>
-              <input type="text" v-model="verifiedBy" class="signature-input" :disabled="readonly" />
-            </div>
-            <div class="signature-item">
-              <label>Approved By:</label>
-              <input type="text" v-model="approvedBy" class="signature-input" :disabled="readonly" />
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly">
-          <button type="button" @click="saveDraft" class="btn btn-secondary">
-            Save Draft
-          </button>
-          <button type="button" @click="resetForm" class="btn btn-secondary">
-            Reset
-          </button>
+        <!-- Submit Button - Enabled only after Approved By signature -->
+        <div class="form-actions final-submit" v-if="isFormReadonly && approvedBySignatureUrl">
           <button
-            type="submit"
-            class="btn btn-primary"
-            :disabled="!isFormValid"
+            type="button"
+            @click="finalSubmitReport"
+            class="btn btn-primary btn-submit-final"
+            :disabled="!approvedBySignatureUrl || !reportId"
           >
             Submit Report
           </button>
@@ -292,6 +293,10 @@ export default {
     isTemplatePreview: {
       type: Boolean,
       default: false,
+    },
+    reportId: {
+      type: [String, Number],
+      default: null,
     },
   },
   data() {
@@ -322,37 +327,37 @@ export default {
           {
             description:
               "Dimensions of the Raw Materials Received as per Certificate",
-            applicability: "A",
+            applicability: "Applicable",
             compliance: "",
             remarks: "",
           },
           {
             description: "CoC of Raw Materials",
-            applicability: "A",
+            applicability: "Applicable",
             compliance: "",
             remarks: "",
           },
           {
             description: "Chemical Reports as specified in QAP",
-            applicability: "NA",
+            applicability: "Not Applicable",
             compliance: "",
             remarks: "",
           },
           {
             description: "Tensile Strength",
-            applicability: "A",
+            applicability: "Applicable",
             compliance: "",
             remarks: "",
           },
           {
             description: "Hardness Test Results as specified in QAP",
-            applicability: "NA",
+            applicability: "Not Applicable",
             compliance: "",
             remarks: "",
           },
           {
             description: "UT Test",
-            applicability: "A",
+            applicability: "Applicable",
             compliance: "",
             remarks: "",
           },
@@ -368,11 +373,38 @@ export default {
       qualityRating: null,
       recommendations: "",
       preparedBy: "",
+      preparedByUsername: "",
+      preparedByPassword: "",
+      preparedBySignatureUrl: "",
+      preparedByVerifiedName: "",
+      preparedByError: "",
       verifiedBy: "",
+      verifiedByUsername: "",
+      verifiedByPassword: "",
+      verifiedBySignatureUrl: "",
+      verifiedByVerifiedName: "",
+      verifiedByError: "",
       approvedBy: "",
+      approvedByUsername: "",
+      approvedByPassword: "",
+      approvedBySignatureUrl: "",
+      approvedByVerifiedName: "",
+      approvedByError: "",
+      approvedByUserId: null,
+      reportId: null,
     };
   },
   computed: {
+    isFormReadonly() {
+      const hasPreparedBySignature = this.preparedBySignatureUrl && this.preparedBySignatureUrl.trim() !== '';
+      const hasReportId = this.reportId !== null && this.reportId !== undefined;
+      
+      if (hasPreparedBySignature && hasReportId) {
+        return true;
+      }
+      
+      return false;
+    },
     isFormValid() {
       return (
         this.formData.projectName &&
@@ -384,6 +416,28 @@ export default {
         this.formData.partNo
       );
     },
+    areAllFieldsFilled() {
+      const basicFieldsFilled = (
+        this.formData.projectName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.dpName &&
+        this.formData.sruName &&
+        this.formData.partNo &&
+        this.formData.startDate &&
+        this.formData.endDate &&
+        this.formData.inspectionStage &&
+        this.formData.testVenue &&
+        this.formData.slNos
+      );
+
+      const allCheckpointsFilled = this.formData.checkPoints.every(
+        (checkpoint) => checkpoint.compliance && checkpoint.remarks
+      );
+
+      return basicFieldsFilled && allCheckpointsFilled;
+    },
   },
   mounted() {
     // Get parameters from route
@@ -394,6 +448,16 @@ export default {
     this.formData.lruName = this.lruName;
     this.formData.projectName = this.projectName;
     this.formData.startDate = this.currentDate;
+    this.formData.sruName = this.lruName;
+
+    // Load existing report data if reportId is provided (from prop or route)
+    const reportIdToLoad = this.reportId || this.$route?.params?.reportId;
+    if (reportIdToLoad) {
+      if (this.$route?.params?.reportId && !this.reportId) {
+        this.reportId = reportIdToLoad;
+      }
+      // Note: You may want to add loadReportData() method similar to conformal coating report
+    }
   },
   methods: {
     handleFileUpload(event, section, index) {
@@ -405,6 +469,31 @@ export default {
         );
         // Here you would typically upload the file to your backend
         // For now, we'll just log it
+      }
+    },
+    updateRemarks(index) {
+      const checkpoint = this.formData.checkPoints[index];
+      if (!checkpoint.compliance) {
+        checkpoint.remarks = "";
+        return;
+      }
+
+      const applicability = checkpoint.applicability;
+      const compliance = checkpoint.compliance;
+
+      // Logic based on applicability and compliance
+      if (applicability === "Applicable") {
+        // If Applicable and YES -> OK, if NO -> NOT OK
+        checkpoint.remarks = compliance === "YES" ? "OK" : "NOT OK";
+      } else if (applicability === "Not Applicable") {
+        // If Not Applicable and NO -> OK, if YES -> NOT OK
+        checkpoint.remarks = compliance === "NO" ? "OK" : "NOT OK";
+      } else if (applicability === "NIL") {
+        // If NIL and NO -> OK, else NOT OK
+        checkpoint.remarks = compliance === "NO" ? "OK" : "NOT OK";
+      } else {
+        // Default fallback
+        checkpoint.remarks = "";
       }
     },
     async saveDraft() {
@@ -460,37 +549,37 @@ export default {
             {
               description:
                 "Dimensions of the Raw Materials Received as per Certificate",
-              applicability: "A",
+              applicability: "Applicable",
               compliance: "",
               remarks: "",
             },
             {
               description: "CoC of Raw Materials",
-              applicability: "A",
+              applicability: "Applicable",
               compliance: "",
               remarks: "",
             },
             {
               description: "Chemical Reports as specified in QAP",
-              applicability: "NA",
+              applicability: "Not Applicable",
               compliance: "",
               remarks: "",
             },
             {
               description: "Tensile Strength",
-              applicability: "A",
+              applicability: "Applicable",
               compliance: "",
               remarks: "",
             },
             {
               description: "Hardness Test Results as specified in QAP",
-              applicability: "NA",
+              applicability: "Not Applicable",
               compliance: "",
               remarks: "",
             },
             {
               description: "UT Test",
-              applicability: "A",
+              applicability: "Applicable",
               compliance: "",
               remarks: "",
             },
@@ -504,12 +593,100 @@ export default {
         };
       }
     },
-    async submitForm() {
-      if (this.isFormValid) {
+    async verifySignature(signatureType) {
+      let username, password;
+      let formData = {};
+
+      if (signatureType === "prepared") {
+        username = this.preparedByUsername;
+        password = this.preparedByPassword;
+        formData = {
+          signatureUrl: "preparedBySignatureUrl",
+          verifiedName: "preparedByVerifiedName",
+          error: "preparedByError",
+          userField: "preparedBy"
+        };
+      } else if (signatureType === "verified") {
+        username = this.verifiedByUsername;
+        password = this.verifiedByPassword;
+        formData = {
+          signatureUrl: "verifiedBySignatureUrl",
+          verifiedName: "verifiedByVerifiedName",
+          error: "verifiedByError",
+          userField: "verifiedBy"
+        };
+      } else if (signatureType === "approved") {
+        username = this.approvedByUsername;
+        password = this.approvedByPassword;
+        formData = {
+          signatureUrl: "approvedBySignatureUrl",
+          verifiedName: "approvedByVerifiedName",
+          error: "approvedByError",
+          userField: "approvedBy"
+        };
+      }
+
+      if (!username || !password) {
+        this[formData.error] = "Please enter both username and signature password";
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username,
+            signature_password: password,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this[formData.signatureUrl] = data.signature_url;
+          this[formData.verifiedName] = data.user_name;
+          this[formData.error] = "";
+          this[formData.userField] = data.user_name;
+          
+          if (signatureType === "approved" && data.user_id) {
+            this.approvedByUserId = data.user_id;
+          }
+          
+          if (signatureType === "prepared") {
+            await this.autoSubmitReport();
+          } else if (signatureType === "verified") {
+            await this.updateReportSignature('verified');
+          } else if (signatureType === "approved") {
+            await this.updateReportSignature('approved');
+          }
+        } else {
+          this[formData.error] = data.message || "Failed to verify signature";
+          this[formData.signatureUrl] = "";
+          this[formData.verifiedName] = "";
+          this[formData.userField] = "";
+        }
+      } catch (error) {
+        this[formData.error] = "Error verifying signature: " + error.message;
+        this[formData.signatureUrl] = "";
+        this[formData.verifiedName] = "";
+        this[formData.userField] = "";
+      }
+    },
+    async autoSubmitReport() {
         try {
+          // Update all remarks before submitting
+          this.formData.checkPoints.forEach((checkpoint, index) => {
+            if (checkpoint.compliance) {
+              this.updateRemarks(index);
+            }
+          });
+
           const reportData = this.prepareReportData();
           const response = await fetch(
-            "http://localhost:8000/api/reports/raw-material-inspection",
+          "http://localhost:5000/api/reports/raw-material-inspection",
             {
               method: "POST",
               headers: {
@@ -519,22 +696,120 @@ export default {
             }
           );
 
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to submit report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
           const result = await response.json();
 
-          if (result.success) {
-            alert("Report submitted successfully!");
-            console.log("Report submitted with ID:", result.report_id);
-            // Optionally redirect or reset form
-            this.resetForm();
+        if (result.success && result.report_id) {
+          this.reportId = result.report_id;
+          console.log(`✓ Report saved to database with ID: ${result.report_id}`);
+          alert(`Report saved successfully! Report ID: ${result.report_id}`);
           } else {
-            alert(`Error submitting report: ${result.message}`);
+          const errorMsg = result.message || "Unknown error occurred";
+          console.error("Error submitting report:", errorMsg);
+          alert(`Error submitting report: ${errorMsg}`);
           }
         } catch (error) {
-          console.error("Error submitting report:", error);
+        console.error("Error auto-submitting report:", error);
           alert("Error submitting report. Please try again.");
+      }
+    },
+    async updateReportSignature(signatureType) {
+      if (!this.reportId) {
+        console.error("Report ID not found. Cannot update signature.");
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+
+      try {
+        const updateData = {};
+        if (signatureType === "verified") {
+          updateData.verified_by = `${this.verifiedBy}|${this.verifiedBySignatureUrl}`;
+        } else if (signatureType === "approved") {
+          updateData.approved_by = `${this.approvedBy}|${this.approvedBySignatureUrl}`;
+        }
+
+        const response = await fetch(
+          `http://localhost:5000/api/reports/raw-material-inspection/${this.reportId}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(updateData),
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          let errorMessage = `Failed to update report: ${response.status} ${response.statusText}`;
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            errorMessage = errorText || errorMessage;
+          }
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+          if (signatureType === "verified") {
+            console.log(`Verified By signature updated in report ID: ${this.reportId}`);
+            alert("Verified By signature saved successfully!");
+          } else if (signatureType === "approved") {
+            console.log(`Approved By signature updated in report ID: ${this.reportId}`);
+            alert("Report finalized successfully!");
         }
       } else {
+          alert(`Error updating report: ${result.message}`);
+        }
+      } catch (error) {
+        console.error("Error updating report signature:", error);
+        alert("Error updating report. Please try again.");
+      }
+    },
+    async submitForm() {
+      if (this.isFormValid && this.reportId && this.approvedBySignatureUrl) {
+        await this.finalSubmitReport();
+      } else {
+        if (!this.isFormValid) {
         alert("Please fill in all required fields.");
+        } else if (!this.reportId) {
+          alert("Please complete the Prepared By signature first.");
+        } else if (!this.approvedBySignatureUrl) {
+          alert("Please complete the Approved By signature first.");
+        }
+      }
+    },
+    async finalSubmitReport() {
+      if (!this.reportId) {
+        alert("Error: Report not found. Please complete the Prepared By signature first.");
+        return;
+      }
+      
+      if (!this.approvedBySignatureUrl) {
+        alert("Please complete the Approved By signature first.");
+        return;
+      }
+      
+      try {
+        alert("Report submitted successfully!");
+        console.log("Report submitted with ID:", this.reportId);
+      } catch (error) {
+        console.error("Error submitting report:", error);
+        alert("Error submitting report. Please try again.");
       }
     },
     prepareReportData() {
@@ -565,9 +840,9 @@ export default {
         overall_status: this.overallStatus || "",
         quality_rating: this.qualityRating || null,
         recommendations: this.recommendations || "",
-        prepared_by: this.preparedBy || "",
-        verified_by: this.verifiedBy || "",
-        approved_by: this.approvedBy || "",
+        prepared_by: this.preparedBySignatureUrl ? `${this.preparedBy}|${this.preparedBySignatureUrl}` : this.preparedBy,
+        verified_by: this.verifiedBySignatureUrl ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}` : this.verifiedBy,
+        approved_by: this.approvedBySignatureUrl ? `${this.approvedBy}|${this.approvedBySignatureUrl}` : this.approvedBy,
       };
     },
     exportReport() {
@@ -845,169 +1120,260 @@ export default {
   overflow: hidden;
 }
 
-/* Form Sections */
-.form-section {
-  padding: 30px;
-  border-bottom: 1px solid #e2e8f0;
+.report-container {
+  max-width: 1200px;
+  margin: auto;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #fff;
 }
 
-.form-section:last-child {
-  border-bottom: none;
-}
-
-.section-title {
-  color: #2d3748;
-  border-bottom: 3px solid #4a5568;
-  padding-bottom: 15px;
-  margin-bottom: 25px;
-  font-size: 1.5em;
-  font-weight: 600;
-}
-
-/* General Info Grid */
-.general-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-}
-
-.info-column {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #4a5568;
-  font-size: 0.9em;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 12px 15px;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 0.9em;
-  transition: all 0.3s ease;
-  background: white;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: #4a5568;
-  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
-}
-
-/* Check Points Table */
-.checkpoints-table-container {
-  margin-top: 20px;
-  overflow-x: auto;
-}
-
-.checkpoints-table {
+.report-header-table {
   width: 100%;
   border-collapse: collapse;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  font-size: 0.9em;
+  margin-bottom: 20px;
+  background: #f0f2f5;
+  border-radius: 10px;
+  border: 1px solid #ddd;
 }
 
-.checkpoints-table th {
-  background: #2d3748;
-  color: white;
-  padding: 12px 8px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.85em;
+.report-header-table td {
+  padding: 10px;
+  vertical-align: middle;
+  text-align: center;
 }
 
-.checkpoints-table td {
-  padding: 8px;
-  border-bottom: 1px solid #e2e8f0;
-  vertical-align: top;
+.header-logo-cell {
+  width: 15%;
+  background: #e5e7eb;
 }
 
-.checkpoints-table tr:nth-child(even) {
-  background-color: #f8fafc;
+.header-title-cell {
+  width: 70%;
+  background: #f0f2f5;
+  color: #333;
 }
 
-.checkpoint-description {
-  font-size: 0.8em;
-  line-height: 1.4;
-  max-width: 200px;
+.report-header-table h1 {
+  font-size: 22px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
 }
 
-.checkpoints-table input[type="text"],
-.checkpoints-table select {
+.logo {
+  height: 40px;
+  width: 80px;
+  object-fit: contain;
+  background: transparent;
+  border-radius: 5px;
+}
+
+.report-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.report-info strong {
+  display: inline-block;
+  min-width: 100px;
+}
+
+.report-info input[type="text"],
+.report-info input[type="date"],
+.report-info input[type="number"] {
+  border: none;
+  border-bottom: 1px solid #ccc;
+  padding: 3px 5px;
+  width: 70%;
+  background-color: transparent;
+}
+
+.inspection-table {
   width: 100%;
-  padding: 6px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  font-size: 0.85em;
+  border-collapse: collapse;
+  margin-bottom: 20px;
 }
 
-.checkpoints-table input[type="file"] {
-  font-size: 0.8em;
-  padding: 4px;
+.inspection-table th,
+.inspection-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
 }
 
-/* Signatures */
-.signatures-layout {
+.inspection-table th {
+  background: #f3f4f6;
+  font-size: 14px;
+  color: #333;
+}
+
+.inspection-table input[type="text"] {
+  width: 95%;
+  border: 1px solid #e0e0e0;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.inspection-table select {
+  width: 95%;
+  border: 1px solid #e0e0e0;
+  padding: 5px;
+  box-sizing: border-box;
+  background-color: white;
+  font-size: inherit;
+}
+
+.inspection-table input[type="file"] {
+  font-size: 12px;
+}
+
+.remarks-readonly {
+  width: 95%;
+  border: 1px solid #e0e0e0;
+  padding: 5px;
+  box-sizing: border-box;
+  background-color: #f5f5f5;
+  color: #333;
+  cursor: not-allowed;
+  font-weight: 500;
+}
+
+.report-footer {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
-  align-items: flex-end;
+  gap: 20px;
   margin-top: 30px;
-  padding: 20px 0;
+  padding-top: 15px;
+  border-top: 1px dashed #ccc;
 }
 
-.signature-item {
+.signature-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.signature-section strong {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.signature-auth-container {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  margin-top: 10px;
+}
+
+.signature-inputs {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
-  flex: 1;
-  max-width: 200px;
 }
 
-.signature-item label {
+.signature-inputs .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-inputs label {
+  font-size: 12px;
   font-weight: 600;
-  color: #4a5568;
-  font-size: 1em;
-  margin-bottom: 5px;
+  color: #333;
 }
 
-.signature-line {
-  width: 100%;
-  height: 40px;
-  border-bottom: 1px solid #333;
-  margin-top: 10px;
-}
-
-.signature-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #e2e8f0;
+.signature-inputs input {
+  padding: 8px;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 0.9em;
-  margin-top: 10px;
-  background: white;
+  font-size: 14px;
 }
 
-.signature-input:focus {
-  outline: none;
-  border-color: #4a5568;
-  box-shadow: 0 0 0 2px rgba(74, 85, 104, 0.1);
+.signature-inputs input:disabled {
+  background-color: #f0f0f0;
+  cursor: not-allowed;
+}
+
+.btn-verify {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.btn-verify:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.btn-verify:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signature-display {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #e8f5e8;
+  border: 1px solid #28a745;
+  border-radius: 6px;
+}
+
+.signature-image-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.signature-image {
+  max-width: 150px;
+  max-height: 80px;
+  border: 2px solid #28a745;
+  border-radius: 4px;
+  background-color: white;
+  object-fit: contain;
+}
+
+.signature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-user {
+  font-weight: 600;
+  color: #155724;
+  font-size: 14px;
+}
+
+.signature-status {
+  color: #28a745;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.signature-error {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+  color: #721c24;
+  font-size: 12px;
 }
 
 /* Form Actions */
@@ -1060,6 +1426,38 @@ export default {
   transform: none;
 }
 
+/* Final Submit Button Styling */
+.form-actions.final-submit {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #4a5568;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.btn-submit-final {
+  min-width: 200px;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 30px;
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.btn-submit-final:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit-final:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .page-header {
@@ -1077,32 +1475,22 @@ export default {
     margin: 20px auto;
   }
 
-  .general-info-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .signatures-layout {
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .signature-item {
-    max-width: 100%;
-  }
-
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
 
-  .checkpoints-table-container {
+  .inspection-table {
     overflow-x: auto;
   }
 
-  .checkpoints-table {
-    min-width: 800px;
+  .inspection-table table {
+    min-width: 600px;
+  }
+
+  .report-footer {
+    flex-direction: column;
+    gap: 20px;
   }
 }
 </style>
