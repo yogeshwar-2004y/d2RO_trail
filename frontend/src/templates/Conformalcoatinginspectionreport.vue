@@ -139,7 +139,7 @@
               </div>
             </div>
             <div class="signature-section">
-              <strong>Verified By:</strong>
+              i<strong>Verified By:</strong>
               <div class="signature-auth-container">
                 <div class="signature-inputs">
                   <div class="input-group">
