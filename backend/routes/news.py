@@ -74,7 +74,7 @@ def get_news():
         cur.execute("""
             SELECT id, news_text, created_at, updated_at, hidden
             FROM news_updates
-            WHERE hidden = FALSE
+            WHERE hidden IS NULL OR hidden = FALSE
             ORDER BY updated_at DESC
         """)
         
@@ -82,6 +82,7 @@ def get_news():
         cur.close()
         
         news_list = []
+        # print("Fetched news items:", news)
         for item in news:
             news_list.append({
                 "id": item[0],
@@ -90,7 +91,7 @@ def get_news():
                 "updated_at": item[3].isoformat() if item[3] else None,
                 "hidden": item[4]
             })
-        
+        # print(news_list)
         return jsonify({
             "success": True,
             "news": news_list

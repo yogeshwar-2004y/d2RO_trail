@@ -361,7 +361,7 @@ export default {
 .table-container {
   width: 100%;
   max-width: 1200px;
-  background: #e9e5e5;
+  background: #201e1e;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   padding: 20px;

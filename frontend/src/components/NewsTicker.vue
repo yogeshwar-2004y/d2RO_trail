@@ -98,6 +98,7 @@ export default {
       try {
         const response = await fetch("http://localhost:5000/api/news");
         const data = await response.json();
+        // console.log("Debugging News API responseeeeee:", data);
 
         if (data.success && data.news.length > 0) {
           this.news = data.news;
@@ -192,7 +193,7 @@ export default {
 .news-ticker-container::before {
   content: "📰 NEWS";
   position: absolute;
-  left: 33px;
+  /* left: 20px; */
   top: 0;
   height: 100%;
   background: linear-gradient(45deg, #e74c3c, #c0392b);
