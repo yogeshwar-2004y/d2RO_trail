@@ -200,14 +200,14 @@
                   <td>{{ index + 1 }}</td>
                   <td>
                     <div class="dimension-input-wrapper">
-                      <input
-                        type="text"
-                        v-model="item.dimension"
+                    <input
+                      type="text"
+                      v-model="item.dimension"
                         :placeholder="`Enter ${item.label?.toLowerCase() || 'dimension'}`"
                         class="dimension-input"
                         :disabled="isPreparedByVerified"
                         @input="computeRemarks(item)"
-                      />
+                    />
                       <span class="dimension-unit">{{ item.unit }}</span>
                     </div>
                   </td>
@@ -338,7 +338,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
                   Please fill in all form fields (Report Details, Dimensional Checklist, and Parameter Checklist) before verifying signature.
                 </div>
@@ -401,7 +401,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
                   Please complete "Prepared By" signature first.
                 </div>
@@ -464,7 +464,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
                   Please complete "Verified By" signature first.
                 </div>
@@ -765,7 +765,7 @@ export default {
     } else {
       this.reportData.projectName = this.$route.params.projectName || "";
       this.reportData.lruName = this.$route.params.lruName || "";
-      this.reportData.startDate = this.formattedDate;
+    this.reportData.startDate = this.formattedDate;
     }
   },
   methods: {
@@ -848,7 +848,7 @@ export default {
         if (result.success && result.report) {
           const report = result.report;
 
-          this.reportData = {
+        this.reportData = {
             projectName: report.project_name || "",
             reportRefNo: report.report_ref_no || "",
             memoRefNo: report.memo_ref_no || "",
@@ -1041,9 +1041,9 @@ export default {
         
         const submissionData = this.prepareSubmissionData();
         const response = await fetch("http://localhost:5000/api/mechanical-inspection", {
-          method: "POST",
+            method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
+            body: JSON.stringify(submissionData),
         });
 
         const result = await response.json();

@@ -52,63 +52,63 @@
             <div class="details-column">
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                  <input
-                    type="text"
-                    id="reportRefNo"
-                    v-model="formData.reportRefNo"
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                  <input
-                    type="text"
-                    id="memoRefNo"
-                    v-model="formData.memoRefNo"
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                  <input
-                    type="text"
-                    id="lruName"
-                    v-model="formData.lruName"
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                  <input
-                    type="text"
-                    id="inspectionStage"
-                    v-model="formData.inspectionStage"
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                  <input
-                    type="text"
-                    id="testVenue"
-                    v-model="formData.testVenue"
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO'S:</label>
-                  <input
-                    type="text"
-                    id="slNos"
-                    v-model="formData.slNos"
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
             </div>
 
@@ -116,73 +116,73 @@
             <div class="details-column">
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                  <input
-                    type="date"
-                    id="dated1"
-                    v-model="formData.dated1"
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                  <input
-                    type="date"
-                    id="dated2"
-                    v-model="formData.dated2"
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                  <input
-                    type="text"
-                    id="sruName"
-                    v-model="formData.sruName"
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                  <input
-                    type="text"
-                    id="partNo"
-                    v-model="formData.partNo"
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                  <input
-                    type="number"
-                    id="quantity"
-                    v-model="formData.quantity"
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    v-model="formData.startDate"
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    v-model="formData.endDate"
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
                     :disabled="isPreparedByVerified"
-                    required
-                  />
+                  required
+                />
               </div>
             </div>
           </div>
@@ -254,10 +254,11 @@
                       type="text"
                       v-model="item.observation"
                       placeholder="Enter observation"
+                      :disabled="isPreparedByVerified"
                     />
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -266,6 +267,7 @@
                   <td>
                     <input
                       type="file"
+                      :disabled="isPreparedByVerified"
                       @change="handleFileUpload($event, 'component', index)"
                     />
                   </td>
@@ -288,10 +290,11 @@
                       type="text"
                       v-model="item.observation"
                       placeholder="Enter observation"
+                      :disabled="isPreparedByVerified"
                     />
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -300,6 +303,7 @@
                   <td>
                     <input
                       type="file"
+                      :disabled="isPreparedByVerified"
                       @change="handleFileUpload($event, 'assembly', index)"
                     />
                   </td>
@@ -320,10 +324,11 @@
                       type="text"
                       v-model="item.observation"
                       placeholder="Enter observation"
+                      :disabled="isPreparedByVerified"
                     />
                   </td>
                   <td>
-                    <select v-model="item.remarks">
+                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -332,6 +337,7 @@
                   <td>
                     <input
                       type="file"
+                      :disabled="isPreparedByVerified"
                       @change="handleFileUpload($event, 'continuity', index)"
                     />
                   </td>
@@ -388,7 +394,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
                   Please fill in all form fields before verifying signature.
                 </div>
@@ -451,7 +457,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
                   Please complete "Prepared By" signature first.
                 </div>
@@ -514,7 +520,7 @@
               <div class="signature-auth-container">
                 <div v-if="!canAccessSignatures" class="signature-disabled-message">
                   Signature authentication is only available for QA Reviewer and QA Head.
-                </div>
+            </div>
                 <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
                   Please complete "Verified By" signature first.
                 </div>
@@ -790,16 +796,202 @@ export default {
     },
   },
   mounted() {
-    // Get parameters from route
-    this.lruName = this.$route.params.lruName || "";
-    this.projectName = this.$route.params.projectName || "";
+    const reportCardId = this.reportId || this.$route.params.reportId;
 
-    // Set default values
-    this.formData.lruName = this.lruName;
-    this.formData.projectName = this.projectName;
-    this.formData.startDate = this.currentDate;
+    if (reportCardId) {
+      this.loadReportData(reportCardId);
+    } else {
+      // Get parameters from route
+      this.lruName = this.$route.params.lruName || "";
+      this.projectName = this.$route.params.projectName || "";
+
+      // Set default values
+      this.formData.lruName = this.lruName;
+      this.formData.projectName = this.projectName;
+      this.formData.startDate = this.currentDate;
+    }
   },
   methods: {
+    async loadReportData(reportCardId) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/reports/assembled-board/by-report-card/${reportCardId}`
+        );
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            // Report doesn't exist yet, show empty form
+            this.lruName = this.$route.params.lruName || "";
+            this.projectName = this.$route.params.projectName || "";
+            this.formData.lruName = this.lruName;
+            this.formData.projectName = this.projectName;
+            this.formData.startDate = this.currentDate;
+            return;
+          }
+          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+        }
+
+        const result = await response.json();
+
+        if (result.success && result.report) {
+          const report = result.report;
+
+          // Map report details
+          this.formData.projectName = report.project_name || "";
+          this.formData.dpName = report.dp_name || "";
+          this.formData.reportRefNo = report.report_ref_no || "";
+          this.formData.memoRefNo = report.memo_ref_no || "";
+          this.formData.lruName = report.lru_name || "";
+          this.formData.inspectionStage = report.inspection_stage || "";
+          this.formData.testVenue = report.test_venue || "";
+          this.formData.slNos = report.sl_nos || "";
+          this.formData.dated1 = report.dated1 ? report.dated1.split('T')[0] : "";
+          this.formData.dated2 = report.dated2 ? report.dated2.split('T')[0] : "";
+          this.formData.sruName = report.sru_name || "";
+          this.formData.partNo = report.part_no || "";
+          this.formData.quantity = report.quantity || "";
+          this.formData.startDate = report.start_date ? report.start_date.split('T')[0] : this.currentDate;
+          this.formData.endDate = report.end_date ? report.end_date.split('T')[0] : "";
+          
+          this.projectName = report.project_name || "";
+          this.lruName = report.lru_name || "";
+          this.serialNumber = report.serial_number || this.serialNumber;
+
+          // Map visual inspection data (obs1-obs5)
+          if (this.formData.visualInspection.length >= 5) {
+            this.formData.visualInspection[0].observation = report.obs1 || "";
+            this.formData.visualInspection[0].remarks = report.rem1 || "";
+            this.formData.visualInspection[0].fileName = report.upload1 || null;
+            
+            this.formData.visualInspection[1].observation = report.obs2 || "";
+            this.formData.visualInspection[1].remarks = report.rem2 || "";
+            this.formData.visualInspection[1].fileName = report.upload2 || null;
+            
+            this.formData.visualInspection[2].observation = report.obs3 || "";
+            this.formData.visualInspection[2].remarks = report.rem3 || "";
+            this.formData.visualInspection[2].fileName = report.upload3 || null;
+            
+            this.formData.visualInspection[3].observation = report.obs4 || "";
+            this.formData.visualInspection[3].remarks = report.rem4 || "";
+            this.formData.visualInspection[3].fileName = report.upload4 || null;
+            
+            this.formData.visualInspection[4].observation = report.obs5 || "";
+            this.formData.visualInspection[4].remarks = report.rem5 || "";
+            this.formData.visualInspection[4].fileName = report.upload5 || null;
+          }
+
+          // Map component inspection data (obs6-obs11)
+          if (this.formData.componentInspection.length >= 6) {
+            this.formData.componentInspection[0].observation = report.obs6 || "";
+            this.formData.componentInspection[0].remarks = report.rem6 || "";
+            this.formData.componentInspection[0].fileName = report.upload6 || null;
+            
+            this.formData.componentInspection[1].observation = report.obs7 || "";
+            this.formData.componentInspection[1].remarks = report.rem7 || "";
+            this.formData.componentInspection[1].fileName = report.upload7 || null;
+            
+            this.formData.componentInspection[2].observation = report.obs8 || "";
+            this.formData.componentInspection[2].remarks = report.rem8 || "";
+            this.formData.componentInspection[2].fileName = report.upload8 || null;
+            
+            this.formData.componentInspection[3].observation = report.obs9 || "";
+            this.formData.componentInspection[3].remarks = report.rem9 || "";
+            this.formData.componentInspection[3].fileName = report.upload9 || null;
+            
+            this.formData.componentInspection[4].observation = report.obs10 || "";
+            this.formData.componentInspection[4].remarks = report.rem10 || "";
+            this.formData.componentInspection[4].fileName = report.upload10 || null;
+            
+            this.formData.componentInspection[5].observation = report.obs11 || "";
+            this.formData.componentInspection[5].remarks = report.rem11 || "";
+            this.formData.componentInspection[5].fileName = report.upload11 || null;
+          }
+
+          // Map assembly issues data (obs12-obs18)
+          if (this.formData.assemblyIssues.length >= 7) {
+            this.formData.assemblyIssues[0].observation = report.obs12 || "";
+            this.formData.assemblyIssues[0].remarks = report.rem12 || "";
+            this.formData.assemblyIssues[0].fileName = report.upload12 || null;
+            
+            this.formData.assemblyIssues[1].observation = report.obs13 || "";
+            this.formData.assemblyIssues[1].remarks = report.rem13 || "";
+            this.formData.assemblyIssues[1].fileName = report.upload13 || null;
+            
+            this.formData.assemblyIssues[2].observation = report.obs14 || "";
+            this.formData.assemblyIssues[2].remarks = report.rem14 || "";
+            this.formData.assemblyIssues[2].fileName = report.upload14 || null;
+            
+            this.formData.assemblyIssues[3].observation = report.obs15 || "";
+            this.formData.assemblyIssues[3].remarks = report.rem15 || "";
+            this.formData.assemblyIssues[3].fileName = report.upload15 || null;
+            
+            this.formData.assemblyIssues[4].observation = report.obs16 || "";
+            this.formData.assemblyIssues[4].remarks = report.rem16 || "";
+            this.formData.assemblyIssues[4].fileName = report.upload16 || null;
+            
+            this.formData.assemblyIssues[5].observation = report.obs17 || "";
+            this.formData.assemblyIssues[5].remarks = report.rem17 || "";
+            this.formData.assemblyIssues[5].fileName = report.upload17 || null;
+            
+            this.formData.assemblyIssues[6].observation = report.obs18 || "";
+            this.formData.assemblyIssues[6].remarks = report.rem18 || "";
+            this.formData.assemblyIssues[6].fileName = report.upload18 || null;
+          }
+
+          // Map continuity check data (obs19)
+          if (this.formData.continuityCheck.length >= 1) {
+            this.formData.continuityCheck[0].observation = report.obs19 || "";
+            this.formData.continuityCheck[0].remarks = report.rem19 || "";
+            this.formData.continuityCheck[0].fileName = report.upload19 || null;
+          }
+
+          // Map QC report data (obs20)
+          this.formData.qcReport.observation = report.obs20 || "";
+          this.formData.qcReport.remarks = report.rem20 || "";
+          this.formData.qcReport.fileName = report.upload20 || null;
+
+          // Load signatures
+          if (report.prepared_by) {
+            this.signatures.preparedBy.signatureUrl = report.prepared_by;
+            // Try to fetch user info if signature URL exists
+            if (report.prepared_by.includes('/api/users/signature/')) {
+              const signatureFileName = report.prepared_by.split('/').pop();
+              // Extract user info from signature URL if possible
+              this.signatures.preparedBy.verifiedUserName = "Verified User";
+              this.signatures.preparedBy.verifiedUserRole = "QA";
+            }
+          }
+          if (report.verified_by) {
+            this.signatures.verifiedBy.signatureUrl = report.verified_by;
+            if (report.verified_by.includes('/api/users/signature/')) {
+              this.signatures.verifiedBy.verifiedUserName = "Verified User";
+              this.signatures.verifiedBy.verifiedUserRole = "QA";
+            }
+          }
+          if (report.approved_by) {
+            this.signatures.approvedBy.signatureUrl = report.approved_by;
+            if (report.approved_by.includes('/api/users/signature/')) {
+              this.signatures.approvedBy.verifiedUserName = "Verified User";
+              this.signatures.approvedBy.verifiedUserRole = "QA Head";
+            }
+          }
+        } else {
+          throw new Error(result.message || "Failed to load report data");
+        }
+      } catch (error) {
+        if (error.message.includes('404') || error.message.includes('not found')) {
+          // Report doesn't exist, show empty form
+          this.lruName = this.$route.params.lruName || "";
+          this.projectName = this.$route.params.projectName || "";
+          this.formData.lruName = this.lruName;
+          this.formData.projectName = this.projectName;
+          this.formData.startDate = this.currentDate;
+          return;
+        }
+        console.error("Error loading report data:", error);
+        alert(`Error loading report data: ${error.message}. Please try again.`);
+      }
+    },
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
@@ -1080,19 +1272,19 @@ export default {
       try {
         const submissionData = this.prepareSubmissionData();
         const response = await fetch("http://localhost:5000/api/reports/assembled-board?user_role=4", {
-          method: "POST",
+              method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submissionData),
         });
 
-        const result = await response.json();
+          const result = await response.json();
 
-        if (result.success) {
+          if (result.success) {
           alert("Assembled board inspection report submitted successfully! Notifications have been sent.");
-        } else {
-          alert(`Error: ${result.message}`);
-        }
-      } catch (error) {
+          } else {
+            alert(`Error: ${result.message}`);
+          }
+        } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
       }

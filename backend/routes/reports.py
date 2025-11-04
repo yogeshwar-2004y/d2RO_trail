@@ -574,45 +574,45 @@ def create_assembled_board_report():
                     prepared_by = %s, verified_by = %s, approved_by = %s,
                     updated_at = CURRENT_TIMESTAMP
                 WHERE report_id = %s
-            """, (
-                data.get('project_name') or None,
-                data.get('report_ref_no') or None,
-                data.get('memo_ref_no') or None,
-                data.get('lru_name') or None,
-                data.get('sru_name') or None,
-                data.get('dp_name') or None,
-                data.get('part_no') or None,
-                data.get('inspection_stage') or None,
-                data.get('test_venue') or None,
-                data.get('quantity') or None,
-                data.get('sl_nos') or None,
-                data.get('serial_number') or None,
-                data.get('start_date') or None,
-                data.get('end_date') or None,
-                data.get('dated1') or None,
-                data.get('dated2') or None,
-                data.get('obs1') or None, data.get('rem1') or None, data.get('upload1') or None,
-                data.get('obs2') or None, data.get('rem2') or None, data.get('upload2') or None,
-                data.get('obs3') or None, data.get('rem3') or None, data.get('upload3') or None,
-                data.get('obs4') or None, data.get('rem4') or None, data.get('upload4') or None,
-                data.get('obs5') or None, data.get('rem5') or None, data.get('upload5') or None,
-                data.get('obs6') or None, data.get('rem6') or None, data.get('upload6') or None,
-                data.get('obs7') or None, data.get('rem7') or None, data.get('upload7') or None,
-                data.get('obs8') or None, data.get('rem8') or None, data.get('upload8') or None,
-                data.get('obs9') or None, data.get('rem9') or None, data.get('upload9') or None,
-                data.get('obs10') or None, data.get('rem10') or None, data.get('upload10') or None,
-                data.get('obs11') or None, data.get('rem11') or None, data.get('upload11') or None,
-                data.get('obs12') or None, data.get('rem12') or None, data.get('upload12') or None,
-                data.get('obs13') or None, data.get('rem13') or None, data.get('upload13') or None,
-                data.get('obs14') or None, data.get('rem14') or None, data.get('upload14') or None,
-                data.get('obs15') or None, data.get('rem15') or None, data.get('upload15') or None,
-                data.get('obs16') or None, data.get('rem16') or None, data.get('upload16') or None,
-                data.get('obs17') or None, data.get('rem17') or None, data.get('upload17') or None,
-                data.get('obs18') or None, data.get('rem18') or None, data.get('upload18') or None,
-                data.get('obs19') or None, data.get('rem19') or None, data.get('upload19') or None,
-                data.get('obs20') or None, data.get('rem20') or None, data.get('upload20') or None,
-                data.get('prepared_by') or None,
-                data.get('verified_by') or None,
+        """, (
+            data.get('project_name') or None,
+            data.get('report_ref_no') or None,
+            data.get('memo_ref_no') or None,
+            data.get('lru_name') or None,
+            data.get('sru_name') or None,
+            data.get('dp_name') or None,
+            data.get('part_no') or None,
+            data.get('inspection_stage') or None,
+            data.get('test_venue') or None,
+            data.get('quantity') or None,
+            data.get('sl_nos') or None,
+            data.get('serial_number') or None,
+            data.get('start_date') or None,
+            data.get('end_date') or None,
+            data.get('dated1') or None,
+            data.get('dated2') or None,
+            data.get('obs1') or None, data.get('rem1') or None, data.get('upload1') or None,
+            data.get('obs2') or None, data.get('rem2') or None, data.get('upload2') or None,
+            data.get('obs3') or None, data.get('rem3') or None, data.get('upload3') or None,
+            data.get('obs4') or None, data.get('rem4') or None, data.get('upload4') or None,
+            data.get('obs5') or None, data.get('rem5') or None, data.get('upload5') or None,
+            data.get('obs6') or None, data.get('rem6') or None, data.get('upload6') or None,
+            data.get('obs7') or None, data.get('rem7') or None, data.get('upload7') or None,
+            data.get('obs8') or None, data.get('rem8') or None, data.get('upload8') or None,
+            data.get('obs9') or None, data.get('rem9') or None, data.get('upload9') or None,
+            data.get('obs10') or None, data.get('rem10') or None, data.get('upload10') or None,
+            data.get('obs11') or None, data.get('rem11') or None, data.get('upload11') or None,
+            data.get('obs12') or None, data.get('rem12') or None, data.get('upload12') or None,
+            data.get('obs13') or None, data.get('rem13') or None, data.get('upload13') or None,
+            data.get('obs14') or None, data.get('rem14') or None, data.get('upload14') or None,
+            data.get('obs15') or None, data.get('rem15') or None, data.get('upload15') or None,
+            data.get('obs16') or None, data.get('rem16') or None, data.get('upload16') or None,
+            data.get('obs17') or None, data.get('rem17') or None, data.get('upload17') or None,
+            data.get('obs18') or None, data.get('rem18') or None, data.get('upload18') or None,
+            data.get('obs19') or None, data.get('rem19') or None, data.get('upload19') or None,
+            data.get('obs20') or None, data.get('rem20') or None, data.get('upload20') or None,
+            data.get('prepared_by') or None,
+            data.get('verified_by') or None,
                 data.get('approved_by') or None,
                 existing_report_id
             ))
@@ -688,7 +688,7 @@ def create_assembled_board_report():
                 RETURNING report_id
             """, values)
             
-            report_id = cur.fetchone()[0]
+        report_id = cur.fetchone()[0]
         
         print("Insert/Update query executed successfully")  # Debug log
         
@@ -799,6 +799,106 @@ def get_assembled_board_report(report_id):
             FROM assembled_board_inspection_report 
             WHERE report_id = %s
         """, (report_id,))
+        
+        report = cur.fetchone()
+        cur.close()
+        
+        if not report:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        # Convert to dictionary
+        report_data = {
+            "report_id": report[0],
+            "project_name": report[1],
+            "report_ref_no": report[2],
+            "memo_ref_no": report[3],
+            "lru_name": report[4],
+            "sru_name": report[5],
+            "dp_name": report[6],
+            "part_no": report[7],
+            "inspection_stage": report[8],
+            "test_venue": report[9],
+            "quantity": report[10],
+            "sl_nos": report[11],
+            "serial_number": report[12],
+            "start_date": report[13].isoformat() if report[13] else None,
+            "end_date": report[14].isoformat() if report[14] else None,
+            "dated1": report[15].isoformat() if report[15] else None,
+            "dated2": report[16].isoformat() if report[16] else None,
+            # Parameters 1-20
+            "obs1": report[17], "rem1": report[18], "upload1": report[19],
+            "obs2": report[20], "rem2": report[21], "upload2": report[22],
+            "obs3": report[23], "rem3": report[24], "upload3": report[25],
+            "obs4": report[26], "rem4": report[27], "upload4": report[28],
+            "obs5": report[29], "rem5": report[30], "upload5": report[31],
+            "obs6": report[32], "rem6": report[33], "upload6": report[34],
+            "obs7": report[35], "rem7": report[36], "upload7": report[37],
+            "obs8": report[38], "rem8": report[39], "upload8": report[40],
+            "obs9": report[41], "rem9": report[42], "upload9": report[43],
+            "obs10": report[44], "rem10": report[45], "upload10": report[46],
+            "obs11": report[47], "rem11": report[48], "upload11": report[49],
+            "obs12": report[50], "rem12": report[51], "upload12": report[52],
+            "obs13": report[53], "rem13": report[54], "upload13": report[55],
+            "obs14": report[56], "rem14": report[57], "upload14": report[58],
+            "obs15": report[59], "rem15": report[60], "upload15": report[61],
+            "obs16": report[62], "rem16": report[63], "upload16": report[64],
+            "obs17": report[65], "rem17": report[66], "upload17": report[67],
+            "obs18": report[68], "rem18": report[69], "upload18": report[70],
+            "obs19": report[71], "rem19": report[72], "upload19": report[73],
+            "obs20": report[74], "rem20": report[75], "upload20": report[76],
+            # Signatories
+            "prepared_by": report[77],
+            "verified_by": report[78],
+            "approved_by": report[79],
+            "created_at": report[80].isoformat() if report[80] else None,
+            "updated_at": report[81].isoformat() if report[81] else None
+        }
+        
+        return jsonify({
+            "success": True,
+            "report": report_data
+        })
+        
+    except Exception as e:
+        print(f"Error fetching assembled board inspection report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching assembled board inspection report: {str(e)}")
+
+@reports_bp.route('/api/reports/assembled-board/by-report-card/<int:report_card_id>', methods=['GET'])
+def get_assembled_board_report_by_report_card(report_card_id):
+    """Get assembled board inspection report by report card ID"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if report_card_id column exists
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'assembled_board_inspection_report' 
+            AND column_name = 'report_card_id'
+        """)
+        has_report_card_id = cur.fetchone() is not None
+        
+        if not has_report_card_id:
+            cur.close()
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        cur.execute("""
+            SELECT 
+                report_id, project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
+                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
+                start_date, end_date, dated1, dated2,
+                obs1, rem1, upload1, obs2, rem2, upload2, obs3, rem3, upload3,
+                obs4, rem4, upload4, obs5, rem5, upload5, obs6, rem6, upload6,
+                obs7, rem7, upload7, obs8, rem8, upload8, obs9, rem9, upload9,
+                obs10, rem10, upload10, obs11, rem11, upload11, obs12, rem12, upload12,
+                obs13, rem13, upload13, obs14, rem14, upload14, obs15, rem15, upload15,
+                obs16, rem16, upload16, obs17, rem17, upload17, obs18, rem18, upload18,
+                obs19, rem19, upload19, obs20, rem20, upload20,
+                prepared_by, verified_by, approved_by, created_at, updated_at
+            FROM assembled_board_inspection_report 
+            WHERE report_card_id = %s
+        """, (report_card_id,))
         
         report = cur.fetchone()
         cur.close()
