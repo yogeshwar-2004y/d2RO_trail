@@ -517,89 +517,252 @@ def create_assembled_board_report():
         
         print("Table exists, proceeding with insert...")  # Debug log
         
-        # Insert new assembled board inspection report
+        # Check if report_card_id exists in table, add if missing
+        report_card_id = data.get('report_card_id')
         cur.execute("""
-            INSERT INTO assembled_board_inspection_report (
-                project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
-                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
-                start_date, end_date, dated1, dated2,
-                obs1, rem1, upload1, obs2, rem2, upload2, obs3, rem3, upload3,
-                obs4, rem4, upload4, obs5, rem5, upload5, obs6, rem6, upload6,
-                obs7, rem7, upload7, obs8, rem8, upload8, obs9, rem9, upload9,
-                obs10, rem10, upload10, obs11, rem11, upload11, obs12, rem12, upload12,
-                obs13, rem13, upload13, obs14, rem14, upload14, obs15, rem15, upload15,
-                obs16, rem16, upload16, obs17, rem17, upload17, obs18, rem18, upload18,
-                obs19, rem19, upload19, obs20, rem20, upload20,
-                prepared_by, verified_by, approved_by
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-            ) RETURNING report_id
-        """, (
-            data.get('project_name') or None,
-            data.get('report_ref_no') or None,
-            data.get('memo_ref_no') or None,
-            data.get('lru_name') or None,
-            data.get('sru_name') or None,
-            data.get('dp_name') or None,
-            data.get('part_no') or None,
-            data.get('inspection_stage') or None,
-            data.get('test_venue') or None,
-            data.get('quantity') or None,
-            data.get('sl_nos') or None,
-            data.get('serial_number') or None,
-            data.get('start_date') or None,
-            data.get('end_date') or None,
-            data.get('dated1') or None,
-            data.get('dated2') or None,
-            # Parameters 1-20
-            data.get('obs1') or None, data.get('rem1') or None, data.get('upload1') or None,
-            data.get('obs2') or None, data.get('rem2') or None, data.get('upload2') or None,
-            data.get('obs3') or None, data.get('rem3') or None, data.get('upload3') or None,
-            data.get('obs4') or None, data.get('rem4') or None, data.get('upload4') or None,
-            data.get('obs5') or None, data.get('rem5') or None, data.get('upload5') or None,
-            data.get('obs6') or None, data.get('rem6') or None, data.get('upload6') or None,
-            data.get('obs7') or None, data.get('rem7') or None, data.get('upload7') or None,
-            data.get('obs8') or None, data.get('rem8') or None, data.get('upload8') or None,
-            data.get('obs9') or None, data.get('rem9') or None, data.get('upload9') or None,
-            data.get('obs10') or None, data.get('rem10') or None, data.get('upload10') or None,
-            data.get('obs11') or None, data.get('rem11') or None, data.get('upload11') or None,
-            data.get('obs12') or None, data.get('rem12') or None, data.get('upload12') or None,
-            data.get('obs13') or None, data.get('rem13') or None, data.get('upload13') or None,
-            data.get('obs14') or None, data.get('rem14') or None, data.get('upload14') or None,
-            data.get('obs15') or None, data.get('rem15') or None, data.get('upload15') or None,
-            data.get('obs16') or None, data.get('rem16') or None, data.get('upload16') or None,
-            data.get('obs17') or None, data.get('rem17') or None, data.get('upload17') or None,
-            data.get('obs18') or None, data.get('rem18') or None, data.get('upload18') or None,
-            data.get('obs19') or None, data.get('rem19') or None, data.get('upload19') or None,
-            data.get('obs20') or None, data.get('rem20') or None, data.get('upload20') or None,
-            # Signatories
-            data.get('prepared_by') or None,
-            data.get('verified_by') or None,
-            data.get('approved_by') or None
-        ))
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'assembled_board_inspection_report' 
+            AND column_name = 'report_card_id'
+        """)
+        has_report_card_id = cur.fetchone() is not None
         
-        print("Insert query executed successfully")  # Debug log
+        if not has_report_card_id and report_card_id:
+            try:
+                cur.execute("ALTER TABLE assembled_board_inspection_report ADD COLUMN report_card_id INTEGER")
+                conn.commit()
+                has_report_card_id = True
+                print("Added report_card_id column to assembled_board_inspection_report table")
+            except Exception as e:
+                print(f"Note: Could not add report_card_id column (may already exist): {str(e)}")
+                conn.rollback()
         
-        # Get the inserted report ID from RETURNING clause
-        report_id = cur.fetchone()[0]
+        # Check if report already exists for this report_card_id
+        existing_report_id = None
+        if report_card_id:
+            if has_report_card_id:
+                cur.execute("""
+                    SELECT report_id FROM assembled_board_inspection_report 
+                    WHERE report_card_id = %s
+                """, (report_card_id,))
+                existing = cur.fetchone()
+                if existing:
+                    existing_report_id = existing[0]
         
-        # Log assembled board report submission activity
-        from utils.activity_logger import log_activity
-        report_name = data.get('report_ref_no') or f"Assembled Board Report {report_id}"
-        log_activity(
-            project_id=None,  # Report operations don't have project_id in this context
-            activity_performed="Report Submitted",
-            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
-            additional_info=f"ID:{report_id}|Name:{report_name}|Assembled Board Report '{report_name}' (ID: {report_id}) was submitted"
-        )
+        # Get user ID from request or data
+        user_id = request.args.get('user_id', type=int) or data.get('user_id') or 1002
         
+        if existing_report_id:
+            # Update existing report
+            print(f"Updating existing report with ID: {existing_report_id}")
+            cur.execute("""
+                UPDATE assembled_board_inspection_report SET
+                    project_name = %s, report_ref_no = %s, memo_ref_no = %s, lru_name = %s, 
+                    sru_name = %s, dp_name = %s, part_no = %s, inspection_stage = %s, 
+                    test_venue = %s, quantity = %s, sl_nos = %s, serial_number = %s,
+                    start_date = %s, end_date = %s, dated1 = %s, dated2 = %s,
+                    obs1 = %s, rem1 = %s, upload1 = %s, obs2 = %s, rem2 = %s, upload2 = %s,
+                    obs3 = %s, rem3 = %s, upload3 = %s, obs4 = %s, rem4 = %s, upload4 = %s,
+                    obs5 = %s, rem5 = %s, upload5 = %s, obs6 = %s, rem6 = %s, upload6 = %s,
+                    obs7 = %s, rem7 = %s, upload7 = %s, obs8 = %s, rem8 = %s, upload8 = %s,
+                    obs9 = %s, rem9 = %s, upload9 = %s, obs10 = %s, rem10 = %s, upload10 = %s,
+                    obs11 = %s, rem11 = %s, upload11 = %s, obs12 = %s, rem12 = %s, upload12 = %s,
+                    obs13 = %s, rem13 = %s, upload13 = %s, obs14 = %s, rem14 = %s, upload14 = %s,
+                    obs15 = %s, rem15 = %s, upload15 = %s, obs16 = %s, rem16 = %s, upload16 = %s,
+                    obs17 = %s, rem17 = %s, upload17 = %s, obs18 = %s, rem18 = %s, upload18 = %s,
+                    obs19 = %s, rem19 = %s, upload19 = %s, obs20 = %s, rem20 = %s, upload20 = %s,
+                    prepared_by = %s, verified_by = %s, approved_by = %s,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE report_id = %s
+            """, (
+                data.get('project_name') or None,
+                data.get('report_ref_no') or None,
+                data.get('memo_ref_no') or None,
+                data.get('lru_name') or None,
+                data.get('sru_name') or None,
+                data.get('dp_name') or None,
+                data.get('part_no') or None,
+                data.get('inspection_stage') or None,
+                data.get('test_venue') or None,
+                data.get('quantity') or None,
+                data.get('sl_nos') or None,
+                data.get('serial_number') or None,
+                data.get('start_date') or None,
+                data.get('end_date') or None,
+                data.get('dated1') or None,
+                data.get('dated2') or None,
+                data.get('obs1') or None, data.get('rem1') or None, data.get('upload1') or None,
+                data.get('obs2') or None, data.get('rem2') or None, data.get('upload2') or None,
+                data.get('obs3') or None, data.get('rem3') or None, data.get('upload3') or None,
+                data.get('obs4') or None, data.get('rem4') or None, data.get('upload4') or None,
+                data.get('obs5') or None, data.get('rem5') or None, data.get('upload5') or None,
+                data.get('obs6') or None, data.get('rem6') or None, data.get('upload6') or None,
+                data.get('obs7') or None, data.get('rem7') or None, data.get('upload7') or None,
+                data.get('obs8') or None, data.get('rem8') or None, data.get('upload8') or None,
+                data.get('obs9') or None, data.get('rem9') or None, data.get('upload9') or None,
+                data.get('obs10') or None, data.get('rem10') or None, data.get('upload10') or None,
+                data.get('obs11') or None, data.get('rem11') or None, data.get('upload11') or None,
+                data.get('obs12') or None, data.get('rem12') or None, data.get('upload12') or None,
+                data.get('obs13') or None, data.get('rem13') or None, data.get('upload13') or None,
+                data.get('obs14') or None, data.get('rem14') or None, data.get('upload14') or None,
+                data.get('obs15') or None, data.get('rem15') or None, data.get('upload15') or None,
+                data.get('obs16') or None, data.get('rem16') or None, data.get('upload16') or None,
+                data.get('obs17') or None, data.get('rem17') or None, data.get('upload17') or None,
+                data.get('obs18') or None, data.get('rem18') or None, data.get('upload18') or None,
+                data.get('obs19') or None, data.get('rem19') or None, data.get('upload19') or None,
+                data.get('obs20') or None, data.get('rem20') or None, data.get('upload20') or None,
+                data.get('prepared_by') or None,
+                data.get('verified_by') or None,
+                data.get('approved_by') or None,
+                existing_report_id
+            ))
+            report_id = existing_report_id
+        else:
+            # Insert new report
+            columns = [
+                'project_name', 'report_ref_no', 'memo_ref_no', 'lru_name', 'sru_name', 'dp_name',
+                'part_no', 'inspection_stage', 'test_venue', 'quantity', 'sl_nos', 'serial_number',
+                'start_date', 'end_date', 'dated1', 'dated2',
+                'obs1', 'rem1', 'upload1', 'obs2', 'rem2', 'upload2', 'obs3', 'rem3', 'upload3',
+                'obs4', 'rem4', 'upload4', 'obs5', 'rem5', 'upload5', 'obs6', 'rem6', 'upload6',
+                'obs7', 'rem7', 'upload7', 'obs8', 'rem8', 'upload8', 'obs9', 'rem9', 'upload9',
+                'obs10', 'rem10', 'upload10', 'obs11', 'rem11', 'upload11', 'obs12', 'rem12', 'upload12',
+                'obs13', 'rem13', 'upload13', 'obs14', 'rem14', 'upload14', 'obs15', 'rem15', 'upload15',
+                'obs16', 'rem16', 'upload16', 'obs17', 'rem17', 'upload17', 'obs18', 'rem18', 'upload18',
+                'obs19', 'rem19', 'upload19', 'obs20', 'rem20', 'upload20',
+                'prepared_by', 'verified_by', 'approved_by'
+            ]
+            
+            values = [
+                data.get('project_name') or None,
+                data.get('report_ref_no') or None,
+                data.get('memo_ref_no') or None,
+                data.get('lru_name') or None,
+                data.get('sru_name') or None,
+                data.get('dp_name') or None,
+                data.get('part_no') or None,
+                data.get('inspection_stage') or None,
+                data.get('test_venue') or None,
+                data.get('quantity') or None,
+                data.get('sl_nos') or None,
+                data.get('serial_number') or None,
+                data.get('start_date') or None,
+                data.get('end_date') or None,
+                data.get('dated1') or None,
+                data.get('dated2') or None,
+                data.get('obs1') or None, data.get('rem1') or None, data.get('upload1') or None,
+                data.get('obs2') or None, data.get('rem2') or None, data.get('upload2') or None,
+                data.get('obs3') or None, data.get('rem3') or None, data.get('upload3') or None,
+                data.get('obs4') or None, data.get('rem4') or None, data.get('upload4') or None,
+                data.get('obs5') or None, data.get('rem5') or None, data.get('upload5') or None,
+                data.get('obs6') or None, data.get('rem6') or None, data.get('upload6') or None,
+                data.get('obs7') or None, data.get('rem7') or None, data.get('upload7') or None,
+                data.get('obs8') or None, data.get('rem8') or None, data.get('upload8') or None,
+                data.get('obs9') or None, data.get('rem9') or None, data.get('upload9') or None,
+                data.get('obs10') or None, data.get('rem10') or None, data.get('upload10') or None,
+                data.get('obs11') or None, data.get('rem11') or None, data.get('upload11') or None,
+                data.get('obs12') or None, data.get('rem12') or None, data.get('upload12') or None,
+                data.get('obs13') or None, data.get('rem13') or None, data.get('upload13') or None,
+                data.get('obs14') or None, data.get('rem14') or None, data.get('upload14') or None,
+                data.get('obs15') or None, data.get('rem15') or None, data.get('upload15') or None,
+                data.get('obs16') or None, data.get('rem16') or None, data.get('upload16') or None,
+                data.get('obs17') or None, data.get('rem17') or None, data.get('upload17') or None,
+                data.get('obs18') or None, data.get('rem18') or None, data.get('upload18') or None,
+                data.get('obs19') or None, data.get('rem19') or None, data.get('upload19') or None,
+                data.get('obs20') or None, data.get('rem20') or None, data.get('upload20') or None,
+                data.get('prepared_by') or None,
+                data.get('verified_by') or None,
+                data.get('approved_by') or None
+            ]
+            
+            if report_card_id and has_report_card_id:
+                columns.append('report_card_id')
+                values.append(report_card_id)
+            
+            placeholders = ', '.join(['%s'] * len(values))
+            column_names = ', '.join(columns)
+            
+            cur.execute(f"""
+                INSERT INTO assembled_board_inspection_report ({column_names})
+                VALUES ({placeholders})
+                RETURNING report_id
+            """, values)
+            
+            report_id = cur.fetchone()[0]
+        
+        print("Insert/Update query executed successfully")  # Debug log
+        
+        # Commit the transaction FIRST before logging activity
         conn.commit()
         cur.close()
         
-        print(f"Report created with ID: {report_id}")  # Debug log
+        print(f"Report created/updated with ID: {report_id}")  # Debug log
+        
+        # Log assembled board report submission activity (after commit to avoid rollback)
+        try:
+            from utils.activity_logger import log_activity
+            report_name = data.get('report_ref_no') or f"Assembled Board Report {report_id}"
+            
+            # Ensure performed_by is an integer, not a signature URL
+            performed_by = user_id
+            if not performed_by or performed_by == '':
+                performed_by = 1002  # Default to admin if not provided or empty
+            elif isinstance(performed_by, str):
+                try:
+                    performed_by = int(performed_by)
+                except (ValueError, TypeError):
+                    performed_by = 1002
+            
+            log_activity(
+                project_id=None,
+                activity_performed="Report Submitted",
+                performed_by=performed_by,
+                additional_info=f"ID:{report_id}|Name:{report_name}|Assembled Board Report '{report_name}' (ID: {report_id}) was submitted"
+            )
+        except Exception as e:
+            print(f"Error logging activity: {str(e)}")
+            # Continue even if activity logging fails
+        
+        # Send notifications after successful submission (only when all signatures are present)
+        if report_card_id and data.get('prepared_by') and data.get('verified_by') and data.get('approved_by'):
+            try:
+                from utils.activity_logger import log_notification, get_users_by_role
+                
+                conn = get_db_connection()
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT r.project_id, m.submitted_by
+                    FROM reports r
+                    LEFT JOIN memos m ON r.memo_id = m.memo_id
+                    WHERE r.report_id = %s
+                """, (report_card_id,))
+                report_info = cur.fetchone()
+                cur.close()
+                
+                if report_info and len(report_info) >= 2:
+                    project_id = report_info[0]
+                    performed_by = report_info[1] or user_id
+                    
+                    for role_id in [4, 2]:  # Design Heads = 4, QA Heads = 2
+                        try:
+                            users = get_users_by_role(role_id)
+                            for user in users:
+                                user_id_notify = user.get('user_id') if isinstance(user, dict) else (user[0] if hasattr(user, '__getitem__') else None)
+                                if user_id_notify:
+                                    log_notification(
+                                        project_id=project_id,
+                                        activity_performed="Assembled Board Inspection Report Completed",
+                                        performed_by=performed_by,
+                                        notified_user_id=user_id_notify,
+                                        notification_type="report_completed",
+                                        additional_info=f"Assembled Board Inspection Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
+                                    )
+                        except Exception as e:
+                            print(f"Error sending notification to role {role_id}: {str(e)}")
+                            pass
+            except Exception as e:
+                print(f"Error sending notifications: {str(e)}")
+                pass
         
         return jsonify({
             "success": True,

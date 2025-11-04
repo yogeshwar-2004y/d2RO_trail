@@ -364,7 +364,7 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('preparedBy')"
+                    @click="verifySignature('preparedBy'); $event.target.blur()"
                     :disabled="
                       !isPreparedByEnabled ||
                       !signatures.preparedBy.signatureUsername ||
@@ -427,7 +427,7 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('verifiedBy')"
+                    @click="verifySignature('verifiedBy'); $event.target.blur()"
                     :disabled="
                       !isVerifiedByEnabled ||
                       !signatures.verifiedBy.signatureUsername ||
@@ -490,7 +490,7 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('approvedBy')"
+                    @click="verifySignature('approvedBy'); $event.target.blur()"
                     :disabled="
                       !isApprovedByEnabled ||
                       !signatures.approvedBy.signatureUsername ||
@@ -1355,10 +1355,10 @@ export default {
   font-style: italic;
 }
 
-.btn-verify {
+.btn.btn-verify {
   background-color: #667eea;
   color: white;
-  border: none;
+  border: none !important;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
@@ -1366,15 +1366,38 @@ export default {
   font-weight: 600;
   transition: background-color 0.3s ease;
   align-self: flex-start;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.btn-verify:hover:not(:disabled) {
+.btn.btn-verify:hover:not(:disabled) {
   background-color: #5a6fd8;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
-.btn-verify:disabled {
+.btn.btn-verify:focus,
+.btn.btn-verify:focus-visible,
+.btn.btn-verify:focus-within {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #667eea;
+  border: none !important;
+}
+
+.btn.btn-verify:active:not(:disabled) {
+  background-color: #5a6fd8;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+}
+
+.btn.btn-verify:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
 .signature-display {
