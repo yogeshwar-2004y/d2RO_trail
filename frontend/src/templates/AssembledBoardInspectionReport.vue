@@ -595,17 +595,12 @@
 </template>
 
 <script>
-import jsPDF from "jspdf";
 import { userStore } from "@/stores/userStore";
 
 export default {
   name: "AssembledBoardInspectionReport",
   props: {
     readonly: {
-      type: Boolean,
-      default: false,
-    },
-    isTemplatePreview: {
       type: Boolean,
       default: false,
     },
@@ -953,10 +948,7 @@ export default {
           // Load signatures
           if (report.prepared_by) {
             this.signatures.preparedBy.signatureUrl = report.prepared_by;
-            // Try to fetch user info if signature URL exists
             if (report.prepared_by.includes('/api/users/signature/')) {
-              const signatureFileName = report.prepared_by.split('/').pop();
-              // Extract user info from signature URL if possible
               this.signatures.preparedBy.verifiedUserName = "Verified User";
               this.signatures.preparedBy.verifiedUserRole = "QA";
             }
@@ -1171,98 +1163,6 @@ export default {
         console.error("Error auto-saving report:", error);
       }
     },
-    saveDraft() {
-      console.log("Saving draft:", this.formData);
-      alert("Draft saved successfully!");
-    },
-    resetForm() {
-      if (
-        confirm(
-          "Are you sure you want to reset the form? All data will be lost."
-        )
-      ) {
-        this.formData = {
-          projectName: this.projectName,
-          dpName: "",
-          reportRefNo: "",
-          memoRefNo: "",
-          lruName: this.lruName,
-          inspectionStage: "",
-          testVenue: "",
-          dated1: "",
-          dated2: "",
-          sruName: this.lruName,
-          partNo: "",
-          quantity: "",
-          slNos: "",
-          startDate: this.currentDate,
-          endDate: "",
-          visualInspection: [
-            {
-              parameter: "CHECK FOR BUBBLES ON PCB",
-              observation: "",
-              remarks: "",
-            },
-            {
-              parameter: "CHECK FOR BONDING PROBLEM",
-              observation: "",
-              remarks: "",
-            },
-            {
-              parameter: "CHECK FOR ANY DAMAGE TO PCB",
-              observation: "",
-              remarks: "",
-            },
-            {
-              parameter: "CHECK FOR SOLDER MASK OPENINGS",
-              observation: "",
-              remarks: "",
-            },
-            { parameter: "PCB CLEANING", observation: "", remarks: "" },
-          ],
-          componentInspection: [
-            {
-              parameter: "CHECK AS PER BILL OF MATERIAL",
-              observation: "",
-              remarks: "",
-            },
-            {
-              parameter: "COMPONENT ORIENTATION",
-              observation: "",
-              remarks: "",
-            },
-            { parameter: "COMPONENT DAMAGE", observation: "", remarks: "" },
-            { parameter: "ANY PIN BENDS", observation: "", remarks: "" },
-            { parameter: "MISALIGNMENT", observation: "", remarks: "" },
-            { parameter: "COMPONENT MISSING", observation: "", remarks: "" },
-          ],
-          assemblyIssues: [
-            { parameter: "BLOW HOLES", observation: "", remarks: "" },
-            { parameter: "EXCESS SOLDER", observation: "", remarks: "" },
-            { parameter: "LESS SOLDER", observation: "", remarks: "" },
-            { parameter: "PINS NOT SOLDERED", observation: "", remarks: "" },
-            { parameter: "SOLDER SHORT", observation: "", remarks: "" },
-            { parameter: "DRY SOLDER", observation: "", remarks: "" },
-            {
-              parameter: "SOLDER SPIKES/SOLDER BOLES",
-              observation: "",
-              remarks: "",
-            },
-          ],
-          continuityCheck: [
-            {
-              parameter: "CHECK FOR VCC TO GROUND CONTINUITY",
-              observation: "",
-              remarks: "",
-            },
-          ],
-          qcReport: {
-            observation: "",
-            remarks: "",
-          },
-        };
-      }
-    },
     async submitForm() {
       if (!this.isFormValid) {
         alert("Please fill in all required fields.");
@@ -1279,243 +1179,14 @@ export default {
 
           const result = await response.json();
 
-          if (result.success) {
+        if (result.success) {
           alert("Assembled board inspection report submitted successfully! Notifications have been sent.");
-          } else {
-            alert(`Error: ${result.message}`);
-          }
-        } catch (error) {
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
-      }
-    },
-    exportReport() {
-      try {
-        const doc = new jsPDF("p", "mm", "a4");
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 20;
-        const contentWidth = pageWidth - 2 * margin;
-
-        let yPosition = margin;
-
-        // Set font styles
-        doc.setFont("helvetica");
-
-        // Header
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text(
-          "ASSEMBLED BOARD INSPECTION REPORT",
-          pageWidth / 2,
-          yPosition,
-          { align: "center" }
-        );
-        yPosition += 15;
-
-        // Document path and date
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
-          this.lruName || "LRU"
-        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
-          this.currentYear || "2025"
-        }`;
-        doc.text(documentPath, margin, yPosition);
-
-        const dateText = `Date: ${
-          this.currentDate || new Date().toLocaleDateString("en-GB")
-        }`;
-        const dateWidth = doc.getTextWidth(dateText);
-        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
-        yPosition += 12;
-
-        // Subject line
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: Assembled Board Inspection Report for ${
-          this.lruName || "Unknown LRU"
-        }`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
-
-        // Report details
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("Report Details:", margin, yPosition);
-        yPosition += 8;
-
-        doc.setFont("helvetica", "normal");
-        const details = [
-          `Project Name: ${this.formData.projectName || "Not specified"}`,
-          `DP Name: ${this.formData.dpName || "Not specified"}`,
-          `Report Ref No: ${this.formData.reportRefNo || "Not specified"}`,
-          `Memo Ref No: ${this.formData.memoRefNo || "Not specified"}`,
-          `LRU Name: ${this.formData.lruName || "Not specified"}`,
-          `SRU Name: ${this.formData.sruName || "Not specified"}`,
-          `Part No: ${this.formData.partNo || "Not specified"}`,
-          `Quantity: ${this.formData.quantity || "Not specified"}`,
-          `Start Date: ${this.formData.startDate || "Not specified"}`,
-          `End Date: ${this.formData.endDate || "Not specified"}`,
-        ];
-
-        details.forEach((detail) => {
-          doc.text(detail, margin, yPosition);
-          yPosition += 6;
-        });
-
-        yPosition += 10;
-
-        // Inspection results
-        doc.setFont("helvetica", "bold");
-        doc.text("Inspection Results:", margin, yPosition);
-        yPosition += 8;
-
-        // Visual Inspection
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("1. VISUAL INSPECTION OF BOARD:", margin, yPosition);
-        yPosition += 6;
-
-        if (
-          this.formData.visualInspection &&
-          this.formData.visualInspection.length > 0
-        ) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          this.formData.visualInspection.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.parameter}`, margin + 5, yPosition);
-            doc.text(
-              `Remarks: ${item.remarks || "Not specified"}`,
-              margin + 80,
-              yPosition
-            );
-            yPosition += 5;
-          });
-        }
-
-        yPosition += 5;
-
-        // Component Inspection
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("2. COMPONENT INSPECTION:", margin, yPosition);
-        yPosition += 6;
-
-        if (
-          this.formData.componentInspection &&
-          this.formData.componentInspection.length > 0
-        ) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          this.formData.componentInspection.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.parameter}`, margin + 5, yPosition);
-            doc.text(
-              `Remarks: ${item.remarks || "Not specified"}`,
-              margin + 80,
-              yPosition
-            );
-            yPosition += 5;
-          });
-        }
-
-        yPosition += 5;
-
-        // Assembly Issues
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("3. CHECK FOR ASSEMBLY ISSUES:", margin, yPosition);
-        yPosition += 6;
-
-        if (
-          this.formData.assemblyIssues &&
-          this.formData.assemblyIssues.length > 0
-        ) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          this.formData.assemblyIssues.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.parameter}`, margin + 5, yPosition);
-            doc.text(
-              `Remarks: ${item.remarks || "Not specified"}`,
-              margin + 80,
-              yPosition
-            );
-            yPosition += 5;
-          });
-        }
-
-        yPosition += 5;
-
-        // Continuity Check
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("4. CONTINUITY CHECKING:", margin, yPosition);
-        yPosition += 6;
-
-        if (
-          this.formData.continuityCheck &&
-          this.formData.continuityCheck.length > 0
-        ) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
-          this.formData.continuityCheck.forEach((item, index) => {
-            doc.text(`${index + 1}. ${item.parameter}`, margin + 5, yPosition);
-            doc.text(
-              `Remarks: ${item.remarks || "Not specified"}`,
-              margin + 80,
-              yPosition
-            );
-            yPosition += 5;
-          });
-        }
-
-        yPosition += 5;
-
-        // QC Report Verification
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text(
-          "5. ASSEMBLER & VENDOR QC REPORTS VERIFICATION:",
-          margin,
-          yPosition
-        );
-        yPosition += 6;
-
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.text("1. (Report shall be as per IPC 610G)", margin + 5, yPosition);
-        doc.text(
-          `Remarks: ${this.formData.qcReport.remarks || "Not specified"}`,
-          margin + 80,
-          yPosition
-        );
-
-        yPosition += 15;
-
-        // Signatures
-        doc.setFont("helvetica", "bold");
-        doc.text("Signatures:", margin, yPosition);
-        yPosition += 8;
-
-        doc.setFont("helvetica", "normal");
-        doc.text("Prepared By: _________________", margin, yPosition);
-        doc.text("Verified By: _________________", margin + 70, yPosition);
-        doc.text("Approved By: _________________", margin + 140, yPosition);
-
-        // Save PDF
-        const fileName = `Assembled_Board_Inspection_Report_${
-          this.lruName || "Unknown"
-        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
-        doc.save(fileName);
-
-        alert("Report exported successfully as PDF!");
-      } catch (error) {
-        console.error("Error exporting PDF:", error);
-        alert(
-          `Error exporting PDF: ${
-            error.message || "Unknown error"
-          }. Please try again.`
-        );
       }
     },
   },
@@ -1526,83 +1197,6 @@ export default {
 .assembled-board-inspection-page {
   min-height: 100vh;
   background: #f5f5f5;
-}
-
-/* Header */
-.page-header {
-  background: #2d3748;
-  padding: 20px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.back-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  color: white;
-}
-
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.app-logo {
-  width: 120px;
-  height: auto;
-  filter: brightness(0) invert(1);
-}
-
-.header-center {
-  flex: 1;
-  text-align: center;
-}
-
-.page-title {
-  color: white;
-  font-size: 2.2em;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.export-button {
-  background: rgba(255, 255, 255, 0.95);
-  border: none;
-  border-radius: 25px;
-  padding: 12px 20px;
-  font-weight: 600;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.export-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  background: white;
 }
 
 /* Main Content */
@@ -2004,16 +1598,6 @@ export default {
   transform: translateY(-1px);
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: translateY(-1px);
-}
-
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -2022,16 +1606,6 @@ export default {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .page-header {
-    padding: 15px 20px;
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .page-title {
-    font-size: 1.8em;
-  }
-
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
