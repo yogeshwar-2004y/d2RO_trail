@@ -1068,7 +1068,8 @@ export default {
     },
     // Check if memo is approved and has assigned reviewer
     isMemoApprovedWithReviewer() {
-      return (
+      console.log("approval status:", this.memoApprovalStatus, "assigned reviewer:", this.assignedReviewer, "memo status", this.memoApprovalStatus);
+      return (                     
         this.memoApprovalStatus &&
         this.memoApprovalStatus.status === "accepted" &&
         this.assignedReviewer

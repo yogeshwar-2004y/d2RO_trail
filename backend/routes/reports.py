@@ -31,118 +31,126 @@ def get_reports():
     """Get reports with role-based filtering"""
     try:
         # Get user context from query parameters
-        # user_id = request.args.get('user_id', type=int)
-        # user_role = request.args.get('user_role', type=int)
-        user_id = 0
-        user_role = 0
-        # Handle case where user_id or user_role is None
-        # if user_id is None or user_role is None:
-        #     # If no user context provided, return empty list or all reports based on your requirement
-        #     user_id = user_id or 0
-        #     user_role = user_role or 0
+        user_id = request.args.get('user_id', type=int)
+        user_role = request.args.get('user_role', type=int)
+        print("USER ROLE from REQ ARGS", user_role)
+        print("USER ID from REQ ARGS", user_id)
 
-        # print("USER ROLEEEEEEEEEE", user_role)
-        # print("USER IDDDDDDDD", user_id)
-        
-        # print(f"Fetching reports for user_id={user_id}, user_role={user_role}")
+        # Handle case where user_id or user_role is None
+        if user_id is None or user_role is None:
+            # If no user context provided, return empty list or all reports based on your requirement
+            user_id = user_id or 0
+            user_role = user_role or 0
+            print("No user context provided, defaulting to user_id=0, user_role=0")
+
+        print(f"Fetching reports for user_id={user_id}, user_role={user_role}")
         
         conn = get_db_connection()
         cur = conn.cursor()
         
         # Build query based on user role
-        # if user_role == 5:  # Designer role
-        #     # For designers, show only reports for memos they submitted
-        #     base_query = """
-        #         SELECT 
-        #             r.report_id,
-        #             NULL as memo_id,
-        #             r.project_id,
-        #             r.lru_id,
-        #             r.serial_id,
-        #             r.inspection_stage,
-        #             r.date_of_review,
-        #             r.review_venue,
-        #             r.reference_document,
-        #             'Active' as status,
-        #             r.date_of_review as created_at,
-        #             p.project_name,
-        #             l.lru_name,
-        #             NULL as wing_proj_ref_no,
-        #             NULL as lru_sru_desc,
-        #             NULL as part_number,
-        #             NULL as memo_id
-        #         FROM reports r
-        #         LEFT JOIN projects p ON r.project_id = p.project_id
-        #         LEFT JOIN lrus l ON r.lru_id = l.lru_id
-        #         WHERE r.project_id IN (
-        #             SELECT project_id FROM projects WHERE created_by = %s
-        #         )
-        #         ORDER BY r.date_of_review DESC
-        #     """
-        #     query_params = (user_id,)
+        if user_role == 5:  # Designer role
+            # For designers, show only reports for memos they submitted
             
-        # elif user_role == 3:  # QA Reviewer role
-        #     # For QA reviewers, show only reports for memos assigned to them
-        #     base_query = """
-        #         SELECT 
-        #             r.report_id,
-        #             r.memo_id,
-        #             r.project_id,
-        #             r.lru_id,
-        #             r.serial_id,
-        #             r.inspection_stage,
-        #             r.date_of_review,
-        #             r.review_venue,
-        #             r.reference_document,
-        #             'Active' as status,
-        #             r.date_of_review as created_at,
-        #             p.project_name,
-        #             l.lru_name,
-        #             m.wing_proj_ref_no,
-        #             m.lru_sru_desc,
-        #             m.part_number,
-        #             r.memo_id
-        #         FROM reports r
-        #         LEFT JOIN projects p ON r.project_id = p.project_id
-        #         LEFT JOIN lrus l ON r.lru_id = l.lru_id
-        #         LEFT JOIN memos m ON r.memo_id = m.memo_id
-        #         LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id
-        #         WHERE ma.user_id = %s AND ma.status = 'accepted'
-        #         ORDER BY r.date_of_review DESC
-        #     """
-        #     query_params = (user_id,)
+            base_query = """
+                SELECT 
+                    r.report_id,
+                    NULL as memo_id,
+                    r.project_id,
+                    r.lru_id,
+                    r.serial_id,
+                    r.inspection_stage,
+                    r.date_of_review,
+                    r.review_venue,
+                    r.reference_document,
+                    'Active' as status,
+                    r.date_of_review as created_at,
+                    p.project_name,
+                    l.lru_name,
+                    NULL as wing_proj_ref_no,
+                    NULL as lru_sru_desc,
+                    NULL as part_number,
+                    NULL as memo_id,
+                    r.template_id
+                FROM reports r
+                LEFT JOIN projects p ON r.project_id = p.project_id
+                LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                WHERE r.project_id IN (
+                    SELECT project_id FROM projects WHERE created_by = %s
+                )
+                ORDER BY r.date_of_review DESC
+            """
+            query_params = (user_id,)
             
-        # else:# Admin, QA Head, Design Head - show all reports
-        base_query = """
-            SELECT 
-                r.report_id,
-                r.memo_id,
-                r.project_id,
-                r.lru_id,
-                r.serial_id,
-                r.inspection_stage,
-                r.date_of_review,
-                r.review_venue,
-                r.reference_document,
-                'Active' as status,
-                r.date_of_review as created_at,
-                p.project_name,
-                l.lru_name,
-                m.wing_proj_ref_no,
-                m.lru_sru_desc,
-                m.part_number,
-                r.memo_id,
-                r.template_id
-            FROM reports r
-            LEFT JOIN projects p ON r.project_id = p.project_id
-            LEFT JOIN lrus l ON r.lru_id = l.lru_id
-            LEFT JOIN memos m ON r.memo_id = m.memo_id
-            ORDER BY r.date_of_review DESC
-        """
-        query_params = ()
+        elif user_role == 3:  # QA Reviewer role
+            
+            # For QA reviewers, show only reports for memos assigned to them
+            base_query = """
+                SELECT 
+                    r.report_id,
+                    r.memo_id,
+                    r.project_id,
+                    r.lru_id,
+                    r.serial_id,
+                    r.inspection_stage,
+                    r.date_of_review,
+                    r.review_venue,
+                    r.reference_document,
+                    'Active' as status,
+                    r.date_of_review as created_at,
+                    p.project_name,
+                    l.lru_name,
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id,
+                    r.template_id
+                FROM reports r
+                LEFT JOIN projects p ON r.project_id = p.project_id
+                LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
+                LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id
+                WHERE ma.user_id = %s AND ma.status = 'accepted'
+                ORDER BY r.date_of_review DESC
+            """
+            query_params = (user_id,)
+            
+               
+        else:# Admin, QA Head, Design Head - show all reports
+            base_query = """
+                SELECT 
+                    r.report_id,
+                    r.memo_id,
+                    r.project_id,
+                    r.lru_id,
+                    r.serial_id,
+                    r.inspection_stage,
+                    r.date_of_review,
+                    r.review_venue,
+                    r.reference_document,
+                    'Active' as status,
+                    r.date_of_review as created_at,
+                    p.project_name,
+                    l.lru_name,
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id,
+                    r.template_id
+                FROM reports r
+                LEFT JOIN projects p ON r.project_id = p.project_id
+                LEFT JOIN lrus l ON r.lru_id = l.lru_id
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
+                ORDER BY r.date_of_review DESC
+            """
+            query_params = ()
+        
+        
         
         cur.execute(base_query, query_params)
+        
         reports = cur.fetchall()
+        
         
         # Also fetch conformal coating inspection reports
         # try:
@@ -162,6 +170,7 @@ def get_reports():
         # print("REPORTTTTTT", reports[0])
 
         # Convert to list of dictionaries
+        
         report_list = []
         for report in reports:
             report_list.append({
@@ -184,6 +193,8 @@ def get_reports():
                 "report_type": "memo_report",
                 "template_id": report[17],
             })
+        
+        print("PRINTTTTTTTTTTTTTTTTTTTTTT!!!!")
         
         # Add conformal coating reports
         # for report in conformal_reports:
@@ -2151,6 +2162,8 @@ def serve_cot_screening_file(filename):
     except Exception as e:
         print(f"Error serving file: {str(e)}")
         return jsonify({"success": False, "message": f"Error serving file: {str(e)}"}), 500
+
+# ------------------ Bare PCB Inspection Report Routes ------------------ #
 
 @reports_bp.route('/api/reports/bare-pcb-inspection', methods=['POST'])
 def create_bare_pcb_inspection_report():
