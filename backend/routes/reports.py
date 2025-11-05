@@ -1324,7 +1324,6 @@ def validate_cot_screening_data(data):
 # COT Screening Inspection Report Routes
 
 @reports_bp.route('/api/reports/cot-screening', methods=['POST'])
-@require_design_head_role
 def create_cot_screening_report():
     """Create a new COT screening inspection report"""
     try:
@@ -1381,73 +1380,270 @@ def create_cot_screening_report():
             conn.close()
             return jsonify({"success": False, "message": "COT screening table does not exist"}), 500
         
-        print("Table exists, proceeding with insert...")
+        print("Table exists, proceeding with insert/update...")
         
-        # Insert the report data
+        # Check if report_card_id column exists, add if missing
+        report_card_id = data.get('report_card_id')
         cur.execute("""
-            INSERT INTO cot_screening_inspection_report (
-                project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
-                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
-                start_date, end_date, dated1, dated2,
-                test_nature1, test_nature2, test_nature3,
-                rem1, upload1, rem2, upload2, rem3, upload3,
-                prepared_by, verified_by, approved_by
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                %s, %s, %s,
-                %s, %s, %s, %s, %s, %s,
-                %s, %s, %s
-            ) RETURNING report_id
-        """, (
-            data.get('project_name') or None,
-            data.get('report_ref_no') or None,
-            data.get('memo_ref_no') or None,
-            data.get('lru_name') or None,
-            data.get('sru_name') or None,
-            data.get('dp_name') or None,
-            data.get('part_no') or None,
-            data.get('inspection_stage') or None,
-            data.get('test_venue') or None,
-            data.get('quantity') or None,
-            data.get('sl_nos') or None,
-            data.get('serial_number') or None,
-            data.get('start_date') or None,
-            data.get('end_date') or None,
-            data.get('dated1') or None,
-            data.get('dated2') or None,
-            # Test nature fields
-            data.get('test_nature1') or None,
-            data.get('test_nature2') or None,
-            data.get('test_nature3') or None,
-            # Checklist parameters
-            data.get('rem1') or None,
-            data.get('upload1') or None,
-            data.get('rem2') or None,
-            data.get('upload2') or None,
-            data.get('rem3') or None,
-            data.get('upload3') or None,
-            # Signatories
-            data.get('prepared_by') or None,
-            data.get('verified_by') or None,
-            data.get('approved_by') or None
-        ))
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'cot_screening_inspection_report' 
+            AND column_name = 'report_card_id'
+        """)
+        has_report_card_id = cur.fetchone() is not None
         
-        report_id = cur.fetchone()[0]
+        if not has_report_card_id and report_card_id:
+            try:
+                cur.execute("ALTER TABLE cot_screening_inspection_report ADD COLUMN report_card_id INTEGER")
+                conn.commit()
+                has_report_card_id = True
+                print("Added report_card_id column to cot_screening_inspection_report table")
+            except Exception as e:
+                print(f"Note: Could not add report_card_id column (may already exist): {str(e)}")
+                conn.rollback()
         
-        # Log COT screening report submission activity
-        from utils.activity_logger import log_activity
-        report_name = data.get('report_ref_no') or f"COT Screening Report {report_id}"
-        log_activity(
-            project_id=None,  # Report operations don't have project_id in this context
-            activity_performed="Report Submitted",
-            performed_by=data.get('prepared_by', 1002),  # Default to admin if not provided
-            additional_info=f"ID:{report_id}|Name:{report_name}|COT Screening Report '{report_name}' (ID: {report_id}) was submitted"
-        )
+        # Check if report already exists for this report_card_id
+        existing_report_id = None
+        if report_card_id and has_report_card_id:
+            cur.execute("""
+                SELECT report_id FROM cot_screening_inspection_report 
+                WHERE report_card_id = %s
+            """, (report_card_id,))
+            existing = cur.fetchone()
+            if existing:
+                existing_report_id = existing[0]
+        
+        if existing_report_id:
+            # Update existing report
+            print(f"Updating existing report with ID: {existing_report_id}")
+            if has_report_card_id:
+                cur.execute("""
+                    UPDATE cot_screening_inspection_report SET
+                        project_name = %s, report_ref_no = %s, memo_ref_no = %s, lru_name = %s, 
+                        sru_name = %s, dp_name = %s, part_no = %s, inspection_stage = %s, 
+                        test_venue = %s, quantity = %s, sl_nos = %s, serial_number = %s,
+                        start_date = %s, end_date = %s, dated1 = %s, dated2 = %s,
+                        test_nature1 = %s, test_nature2 = %s, test_nature3 = %s,
+                        rem1 = %s, upload1 = %s, rem2 = %s, upload2 = %s, rem3 = %s, upload3 = %s,
+                        prepared_by = %s, verified_by = %s, approved_by = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE report_id = %s
+                """, (
+                    data.get('project_name') or None,
+                    data.get('report_ref_no') or None,
+                    data.get('memo_ref_no') or None,
+                    data.get('lru_name') or None,
+                    data.get('sru_name') or None,
+                    data.get('dp_name') or None,
+                    data.get('part_no') or None,
+                    data.get('inspection_stage') or None,
+                    data.get('test_venue') or None,
+                    data.get('quantity') or None,
+                    data.get('sl_nos') or None,
+                    data.get('serial_number') or None,
+                    data.get('start_date') or None,
+                    data.get('end_date') or None,
+                    data.get('dated1') or None,
+                    data.get('dated2') or None,
+                    data.get('test_nature1') or None,
+                    data.get('test_nature2') or None,
+                    data.get('test_nature3') or None,
+                    data.get('rem1') or None,
+                    data.get('upload1') or None,
+                    data.get('rem2') or None,
+                    data.get('upload2') or None,
+                    data.get('rem3') or None,
+                    data.get('upload3') or None,
+                    data.get('prepared_by') or None,
+                    data.get('verified_by') or None,
+                    data.get('approved_by') or None,
+                    existing_report_id
+                ))
+            else:
+                cur.execute("""
+                    UPDATE cot_screening_inspection_report SET
+                        project_name = %s, report_ref_no = %s, memo_ref_no = %s, lru_name = %s, 
+                        sru_name = %s, dp_name = %s, part_no = %s, inspection_stage = %s, 
+                        test_venue = %s, quantity = %s, sl_nos = %s, serial_number = %s,
+                        start_date = %s, end_date = %s, dated1 = %s, dated2 = %s,
+                        test_nature1 = %s, test_nature2 = %s, test_nature3 = %s,
+                        rem1 = %s, upload1 = %s, rem2 = %s, upload2 = %s, rem3 = %s, upload3 = %s,
+                        prepared_by = %s, verified_by = %s, approved_by = %s,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE report_id = %s
+                """, (
+                    data.get('project_name') or None,
+                    data.get('report_ref_no') or None,
+                    data.get('memo_ref_no') or None,
+                    data.get('lru_name') or None,
+                    data.get('sru_name') or None,
+                    data.get('dp_name') or None,
+                    data.get('part_no') or None,
+                    data.get('inspection_stage') or None,
+                    data.get('test_venue') or None,
+                    data.get('quantity') or None,
+                    data.get('sl_nos') or None,
+                    data.get('serial_number') or None,
+                    data.get('start_date') or None,
+                    data.get('end_date') or None,
+                    data.get('dated1') or None,
+                    data.get('dated2') or None,
+                    data.get('test_nature1') or None,
+                    data.get('test_nature2') or None,
+                    data.get('test_nature3') or None,
+                    data.get('rem1') or None,
+                    data.get('upload1') or None,
+                    data.get('rem2') or None,
+                    data.get('upload2') or None,
+                    data.get('rem3') or None,
+                    data.get('upload3') or None,
+                    data.get('prepared_by') or None,
+                    data.get('verified_by') or None,
+                    data.get('approved_by') or None,
+                    existing_report_id
+                ))
+            report_id = existing_report_id
+            print(f"Update query executed successfully for report ID: {report_id}")
+        else:
+            # Insert new report
+            if has_report_card_id:
+                cur.execute("""
+                    INSERT INTO cot_screening_inspection_report (
+                        report_card_id,
+                        project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
+                        part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
+                        start_date, end_date, dated1, dated2,
+                        test_nature1, test_nature2, test_nature3,
+                        rem1, upload1, rem2, upload2, rem3, upload3,
+                        prepared_by, verified_by, approved_by
+                    ) VALUES (
+                        %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s
+                    ) RETURNING report_id
+                """, (
+                    report_card_id,
+                    data.get('project_name') or None,
+                    data.get('report_ref_no') or None,
+                    data.get('memo_ref_no') or None,
+                    data.get('lru_name') or None,
+                    data.get('sru_name') or None,
+                    data.get('dp_name') or None,
+                    data.get('part_no') or None,
+                    data.get('inspection_stage') or None,
+                    data.get('test_venue') or None,
+                    data.get('quantity') or None,
+                    data.get('sl_nos') or None,
+                    data.get('serial_number') or None,
+                    data.get('start_date') or None,
+                    data.get('end_date') or None,
+                    data.get('dated1') or None,
+                    data.get('dated2') or None,
+                    data.get('test_nature1') or None,
+                    data.get('test_nature2') or None,
+                    data.get('test_nature3') or None,
+                    data.get('rem1') or None,
+                    data.get('upload1') or None,
+                    data.get('rem2') or None,
+                    data.get('upload2') or None,
+                    data.get('rem3') or None,
+                    data.get('upload3') or None,
+                    data.get('prepared_by') or None,
+                    data.get('verified_by') or None,
+                    data.get('approved_by') or None
+                ))
+            else:
+                cur.execute("""
+                    INSERT INTO cot_screening_inspection_report (
+                        project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
+                        part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
+                        start_date, end_date, dated1, dated2,
+                        test_nature1, test_nature2, test_nature3,
+                        rem1, upload1, rem2, upload2, rem3, upload3,
+                        prepared_by, verified_by, approved_by
+                    ) VALUES (
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s
+                    ) RETURNING report_id
+                """, (
+                    data.get('project_name') or None,
+                    data.get('report_ref_no') or None,
+                    data.get('memo_ref_no') or None,
+                    data.get('lru_name') or None,
+                    data.get('sru_name') or None,
+                    data.get('dp_name') or None,
+                    data.get('part_no') or None,
+                    data.get('inspection_stage') or None,
+                    data.get('test_venue') or None,
+                    data.get('quantity') or None,
+                    data.get('sl_nos') or None,
+                    data.get('serial_number') or None,
+                    data.get('start_date') or None,
+                    data.get('end_date') or None,
+                    data.get('dated1') or None,
+                    data.get('dated2') or None,
+                    data.get('test_nature1') or None,
+                    data.get('test_nature2') or None,
+                    data.get('test_nature3') or None,
+                    data.get('rem1') or None,
+                    data.get('upload1') or None,
+                    data.get('rem2') or None,
+                    data.get('upload2') or None,
+                    data.get('rem3') or None,
+                    data.get('upload3') or None,
+                    data.get('prepared_by') or None,
+                    data.get('verified_by') or None,
+                    data.get('approved_by') or None
+                ))
+            report_id = cur.fetchone()[0]
+            print(f"Insert query executed successfully")
+            print(f"Report created with ID: {report_id}")
         
         conn.commit()
         
-        print(f"Insert query executed successfully")
-        print(f"Report created with ID: {report_id}")
+        # Send notifications if all signatures are complete
+        if data.get('prepared_by') and data.get('verified_by') and data.get('approved_by'):
+            try:
+                from utils.activity_logger import log_notification
+                from utils.helpers import get_users_by_role
+                
+                if report_card_id:
+                    cur.execute("""
+                        SELECT project_id, submitted_by 
+                        FROM reports 
+                        WHERE report_id = %s
+                    """, (report_card_id,))
+                    report_info = cur.fetchone()
+                    
+                    if report_info and len(report_info) >= 2:
+                        project_id = report_info[0]
+                        performed_by = report_info[1] or 1002
+                        
+                        # Send notifications to Design Heads (role_id=4) and QA Heads (role_id=2)
+                        for role_id in [4, 2]:
+                            try:
+                                users = get_users_by_role(role_id)
+                                for user in users:
+                                    user_id = user.get('user_id') if isinstance(user, dict) else (user[0] if hasattr(user, '__getitem__') else None)
+                                    if user_id:
+                                        log_notification(
+                                            project_id=project_id,
+                                            activity_performed="COTS Screening Report Completed",
+                                            performed_by=performed_by,
+                                            notified_user_id=user_id,
+                                            notification_type="report_completed",
+                                            additional_info=f"COTS Screening Report (ID: {report_id}) for Report Card {report_card_id} has been completed with all signatures."
+                                        )
+                            except Exception as e:
+                                print(f"Error sending notification to role {role_id}: {str(e)}")
+                                pass
+            except Exception as e:
+                print(f"Error in notification logic: {str(e)}")
+                pass
         
         cur.close()
         conn.close()
@@ -1526,6 +1722,91 @@ def get_cot_screening_report(report_id):
         
         cur.close()
         conn.close()
+        
+        return jsonify({
+            "success": True,
+            "report": report_data
+        })
+        
+    except Exception as e:
+        print(f"Error fetching COT screening report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching COT screening report: {str(e)}")
+
+@reports_bp.route('/api/reports/cot-screening/by-report-card/<int:report_card_id>', methods=['GET'])
+def get_cot_screening_report_by_report_card(report_card_id):
+    """Get COT screening inspection report by report card ID"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if report_card_id column exists
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'cot_screening_inspection_report' 
+            AND column_name = 'report_card_id'
+        """)
+        has_report_card_id = cur.fetchone() is not None
+        
+        if not has_report_card_id:
+            cur.close()
+            conn.close()
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        cur.execute("""
+            SELECT 
+                report_id, project_name, report_ref_no, memo_ref_no, lru_name, sru_name, dp_name,
+                part_no, inspection_stage, test_venue, quantity, sl_nos, serial_number,
+                start_date, end_date, dated1, dated2,
+                test_nature1, test_nature2, test_nature3,
+                rem1, upload1, rem2, upload2, rem3, upload3,
+                prepared_by, verified_by, approved_by,
+                created_at, updated_at
+            FROM cot_screening_inspection_report 
+            WHERE report_card_id = %s
+        """, (report_card_id,))
+        
+        report = cur.fetchone()
+        cur.close()
+        conn.close()
+        
+        if not report:
+            return jsonify({"success": False, "message": "Report not found"}), 404
+        
+        # Convert to dictionary
+        report_data = {
+            "report_id": report[0],
+            "project_name": report[1],
+            "report_ref_no": report[2],
+            "memo_ref_no": report[3],
+            "lru_name": report[4],
+            "sru_name": report[5],
+            "dp_name": report[6],
+            "part_no": report[7],
+            "inspection_stage": report[8],
+            "test_venue": report[9],
+            "quantity": report[10],
+            "sl_nos": report[11],
+            "serial_number": report[12],
+            "start_date": report[13].isoformat() if report[13] else None,
+            "end_date": report[14].isoformat() if report[14] else None,
+            "dated1": report[15].isoformat() if report[15] else None,
+            "dated2": report[16].isoformat() if report[16] else None,
+            "test_nature1": report[17],
+            "test_nature2": report[18],
+            "test_nature3": report[19],
+            "rem1": report[20],
+            "upload1": report[21],
+            "rem2": report[22],
+            "upload2": report[23],
+            "rem3": report[24],
+            "upload3": report[25],
+            "prepared_by": report[26],
+            "verified_by": report[27],
+            "approved_by": report[28],
+            "created_at": report[29].isoformat() if report[29] else None,
+            "updated_at": report[30].isoformat() if report[30] else None
+        }
         
         return jsonify({
             "success": True,
