@@ -304,7 +304,7 @@ def update_kit_of_parts_inspection(report_id):
         if not result:
             cur.execute("""
                 SELECT report_id FROM kit_of_parts_inspection_report 
-                WHERE original_report_id = %s
+                WHERE report_id = %s
             """, (report_id,))
             result = cur.fetchone()
             actual_report_id = result[0] if result else report_id
@@ -439,7 +439,6 @@ def notify_qa_heads_kit_of_parts():
         print(f"Error notifying QA Heads for kit of parts report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error notifying QA Heads: {str(e)}")
 
-
 @kit_of_parts_bp.route('/api/kit-of-parts/notify-approval', methods=['POST'])
 def notify_qa_heads_approval_kit_of_parts():
     """Notify QA Heads when a kit of parts inspection report is approved"""
@@ -560,7 +559,6 @@ def notify_qa_heads_approval_kit_of_parts():
     except Exception as e:
         print(f"Error notifying QA Heads for kit of parts report approval: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error notifying QA Heads for approval: {str(e)}")
-
 
 @kit_of_parts_bp.route('/api/kit-of-parts', methods=['GET'])
 def get_all_kit_of_parts_inspections():

@@ -228,175 +228,151 @@
         </div>
 
         <!-- Signatures Section -->
-        <div class="form-section">
-          <h2 class="section-title">Signatures</h2>
-          <div class="signatures-layout">
-            <div class="signature-section">
-              <strong>Prepared By (QA G1 -Team):</strong>
-              <div class="signature-auth-container">
-                <div class="signature-inputs">
-                  <div class="input-group">
-                    <label>Username:</label>
-                    <input
-                      type="text"
-                      v-model="preparedByUsername"
-                      placeholder="Enter username..."
-                      :disabled="isFormReadonly || !areAllFieldsFilled"
-                    />
-                  </div>
-                  <div class="input-group">
-                    <label>Signature Password:</label>
-                    <input
-                      type="password"
-                      v-model="preparedByPassword"
-                      placeholder="Enter signature password..."
-                      :disabled="isFormReadonly || !areAllFieldsFilled"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-verify"
-                    @click="verifySignature('prepared')"
-                    :disabled="
-                      isFormReadonly ||
-                      !areAllFieldsFilled ||
-                      !preparedByUsername ||
-                      !preparedByPassword
-                    "
-                  >
-                    Verify & Load Signature
-                  </button>
+        <div class="report-footer">
+          <div class="signature-section">
+            <strong>Prepared By:</strong>
+            <div class="signature-auth-container">
+              <div class="signature-inputs">
+                <div class="input-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    v-model="preparedByUsername"
+                    placeholder="Enter username..."
+                    :disabled="isFormReadonly || !areAllFieldsFilled"
+                  />
                 </div>
-                <div v-if="preparedBySignatureUrl" class="signature-display">
-                  <div class="signature-image-container">
-                    <img
-                      :src="preparedBySignatureUrl"
-                      alt="Verified Signature"
-                      class="signature-image"
-                    />
-                    <div class="signature-info">
-                      <span class="signature-user">{{
-                        preparedByVerifiedName
-                      }}</span>
-                      <span class="signature-status">✓ Verified</span>
-                    </div>
-                  </div>
+                <div class="input-group">
+                  <label>Signature Password:</label>
+                  <input
+                    type="password"
+                    v-model="preparedByPassword"
+                    placeholder="Enter signature password..."
+                    :disabled="isFormReadonly || !areAllFieldsFilled"
+                  />
                 </div>
-                <div v-if="preparedByError" class="signature-error">
-                  {{ preparedByError }}
+                <button
+                  type="button"
+                  class="btn btn-verify"
+                  @click="verifySignature('prepared')"
+                  :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                >
+                  Verify & Load Signature
+                </button>
+              </div>
+              <div v-if="preparedBySignatureUrl" class="signature-display">
+                <div class="signature-image-container">
+                  <img
+                    :src="preparedBySignatureUrl"
+                    alt="Verified Signature"
+                    class="signature-image"
+                  />
+                  <div class="signature-info">
+                    <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                    <span class="signature-status">✓ Verified</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="signature-section">
-              <strong>Verified By (G1H - QA G):</strong>
-              <div class="signature-auth-container">
-                <div class="signature-inputs">
-                  <div class="input-group">
-                    <label>Username:</label>
-                    <input
-                      type="text"
-                      v-model="verifiedByUsername"
-                      placeholder="Enter username..."
-                      :disabled="!preparedBySignatureUrl || effectiveReadonly"
-                    />
-                  </div>
-                  <div class="input-group">
-                    <label>Signature Password:</label>
-                    <input
-                      type="password"
-                      v-model="verifiedByPassword"
-                      placeholder="Enter signature password..."
-                      :disabled="!preparedBySignatureUrl || effectiveReadonly"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-verify"
-                    @click="verifySignature('verified')"
-                    :disabled="
-                      isFormReadonly ||
-                      !preparedBySignatureUrl ||
-                      !verifiedByUsername ||
-                      !verifiedByPassword
-                    "
-                  >
-                    Verify & Load Signature
-                  </button>
-                </div>
-                <div v-if="verifiedBySignatureUrl" class="signature-display">
-                  <div class="signature-image-container">
-                    <img
-                      :src="verifiedBySignatureUrl"
-                      alt="Verified Signature"
-                      class="signature-image"
-                    />
-                    <div class="signature-info">
-                      <span class="signature-user">{{
-                        verifiedByVerifiedName
-                      }}</span>
-                      <span class="signature-status">✓ Verified</span>
-                    </div>
-                  </div>
-                </div>
-                <div v-if="verifiedByError" class="signature-error">
-                  {{ verifiedByError }}
-                </div>
+              <div v-if="preparedByError" class="signature-error">
+                {{ preparedByError }}
               </div>
             </div>
-            <div class="signature-section">
-              <strong>Approved By:</strong>
-              <div class="signature-auth-container">
-                <div class="signature-inputs">
-                  <div class="input-group">
-                    <label>Username:</label>
-                    <input
-                      type="text"
-                      v-model="approvedByUsername"
-                      placeholder="Enter username..."
-                      :disabled="!verifiedBySignatureUrl || effectiveReadonly"
-                    />
-                  </div>
-                  <div class="input-group">
-                    <label>Signature Password:</label>
-                    <input
-                      type="password"
-                      v-model="approvedByPassword"
-                      placeholder="Enter signature password..."
-                      :disabled="!verifiedBySignatureUrl || effectiveReadonly"
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-verify"
-                    @click="verifySignature('approved')"
-                    :disabled="
-                      isFormReadonly ||
-                      !verifiedBySignatureUrl ||
-                      !approvedByUsername ||
-                      !approvedByPassword
-                    "
-                  >
-                    Verify & Load Signature
-                  </button>
+          </div>
+          <div class="signature-section">
+            <strong>Verified By:</strong>
+            <div class="signature-auth-container">
+              <div class="signature-inputs">
+                <div class="input-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    v-model="verifiedByUsername"
+                    placeholder="Enter username..."
+                    :disabled="!preparedBySignatureUrl"
+                  />
                 </div>
-                <div v-if="approvedBySignatureUrl" class="signature-display">
-                  <div class="signature-image-container">
-                    <img
-                      :src="approvedBySignatureUrl"
-                      alt="Verified Signature"
-                      class="signature-image"
-                    />
-                    <div class="signature-info">
-                      <span class="signature-user">{{
-                        approvedByVerifiedName
-                      }}</span>
-                      <span class="signature-status">✓ Verified</span>
-                    </div>
+                <div class="input-group">
+                  <label>Signature Password:</label>
+                  <input
+                    type="password"
+                    v-model="verifiedByPassword"
+                    placeholder="Enter signature password..."
+                    :disabled="!preparedBySignatureUrl"
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-verify"
+                  @click="verifySignature('verified')"
+                  :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                >
+                  Verify & Load Signature
+                </button>
+              </div>
+              <div v-if="verifiedBySignatureUrl" class="signature-display">
+                <div class="signature-image-container">
+                  <img
+                    :src="verifiedBySignatureUrl"
+                    alt="Verified Signature"
+                    class="signature-image"
+                  />
+                  <div class="signature-info">
+                    <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                    <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
-                <div v-if="approvedByError" class="signature-error">
-                  {{ approvedByError }}
+              </div>
+              <div v-if="verifiedByError" class="signature-error">
+                {{ verifiedByError }}
+              </div>
+            </div>
+          </div>
+          <div class="signature-section">
+            <strong>Approved By:</strong>
+            <div class="signature-auth-container">
+              <div class="signature-inputs">
+                <div class="input-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    v-model="approvedByUsername"
+                    placeholder="Enter username..."
+                    :disabled="!verifiedBySignatureUrl"
+                  />
                 </div>
+                <div class="input-group">
+                  <label>Signature Password:</label>
+                  <input
+                    type="password"
+                    v-model="approvedByPassword"
+                    placeholder="Enter signature password..."
+                    :disabled="!verifiedBySignatureUrl"
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-verify"
+                  @click="verifySignature('approved')"
+                  :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                >
+                  Verify & Load Signature
+                </button>
+              </div>
+              <div v-if="approvedBySignatureUrl" class="signature-display">
+                <div class="signature-image-container">
+                  <img
+                    :src="approvedBySignatureUrl"
+                    alt="Verified Signature"
+                    class="signature-image"
+                  />
+                  <div class="signature-info">
+                    <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                    <span class="signature-status">✓ Verified</span>
+                  </div>
+                </div>
+              </div>
+              <div v-if="approvedByError" class="signature-error">
+                {{ approvedByError }}
               </div>
             </div>
           </div>
@@ -1141,38 +1117,53 @@ export default {
           }
 
           // Parse signature fields (format: "name|signature_url")
-          // Load signatures directly from DB - always display them when loading from DB
+          // Fetch all 3 signatures - same logic as conformal coating
+          console.log("Fetching signatures from backend:", {
+            prepared_by_qa_g1: report.prepared_by_qa_g1,
+            verified_by_g1h_qa_g: report.verified_by_g1h_qa_g,
+            approved_by: report.approved_by
+          });
+
+          // Prepared By signature - same logic as conformal coating
           if (report.prepared_by_qa_g1) {
             const preparedParts = report.prepared_by_qa_g1.split("|");
             this.reportData.preparedBy = preparedParts[0] || "";
             this.preparedBySignatureUrl = preparedParts[1] || "";
             this.preparedByVerifiedName = preparedParts[0] || "";
-            // Mark as verified since we're loading from DB (signatures were already verified)
-            if (this.preparedBySignatureUrl) {
-              this.preparedByVerifiedInSession = true;
-            }
+            console.log("✓ Prepared By signature fetched:", {
+              name: this.reportData.preparedBy,
+              url: this.preparedBySignatureUrl
+            });
+          } else {
+            console.log("✗ Prepared By signature not found or empty");
           }
 
+          // Verified By signature - same logic as conformal coating
           if (report.verified_by_g1h_qa_g) {
             const verifiedParts = report.verified_by_g1h_qa_g.split("|");
             this.reportData.verifiedBy = verifiedParts[0] || "";
             this.verifiedBySignatureUrl = verifiedParts[1] || "";
             this.verifiedByVerifiedName = verifiedParts[0] || "";
-            // Mark as verified since we're loading from DB (signatures were already verified)
-            if (this.verifiedBySignatureUrl) {
-              this.verifiedByVerifiedInSession = true;
-            }
+            console.log("✓ Verified By signature fetched:", {
+              name: this.reportData.verifiedBy,
+              url: this.verifiedBySignatureUrl
+            });
+          } else {
+            console.log("✗ Verified By signature not found or empty:", report.verified_by_g1h_qa_g);
           }
 
+          // Approved By signature - same logic as conformal coating
           if (report.approved_by) {
             const approvedParts = report.approved_by.split("|");
             this.reportData.approvedBy = approvedParts[0] || "";
             this.approvedBySignatureUrl = approvedParts[1] || "";
             this.approvedByVerifiedName = approvedParts[0] || "";
-            // Mark as verified since we're loading from DB (signatures were already verified)
-            if (this.approvedBySignatureUrl) {
-              this.approvedByVerifiedInSession = true;
-            }
+            console.log("✓ Approved By signature fetched:", {
+              name: this.reportData.approvedBy,
+              url: this.approvedBySignatureUrl
+            });
+          } else {
+            console.log("✗ Approved By signature not found or empty:", report.approved_by);
           }
 
           // Mark as submitted if all signatures exist
@@ -1748,11 +1739,14 @@ export default {
 }
 
 /* Signatures */
-.signatures-layout {
+.report-footer {
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   gap: 20px;
-  margin-top: 20px;
+  margin-top: 30px;
+  padding-top: 15px;
+  border-top: 1px dashed #ccc;
 }
 
 .signature-section {
@@ -1829,38 +1823,37 @@ export default {
 
 .signature-display {
   margin-top: 15px;
-  padding: 10px;
-  background-color: white;
-  border-radius: 4px;
+  padding: 15px;
+  background-color: #e8f5e8;
   border: 1px solid #28a745;
+  border-radius: 6px;
 }
 
 .signature-image-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .signature-image {
-  max-width: 200px;
+  max-width: 150px;
   max-height: 80px;
-  border: 1px solid #ddd;
+  border: 2px solid #28a745;
   border-radius: 4px;
-  padding: 5px;
   background-color: white;
+  object-fit: contain;
 }
 
 .signature-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .signature-user {
   font-weight: 600;
-  color: #333;
+  color: #155724;
   font-size: 14px;
 }
 
@@ -1871,13 +1864,13 @@ export default {
 }
 
 .signature-error {
-  color: #dc3545;
-  font-size: 12px;
-  margin-top: 8px;
-  padding: 8px;
+  margin-top: 10px;
+  padding: 10px;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
   border-radius: 4px;
+  color: #721c24;
+  font-size: 12px;
 }
 
 /* Form Actions */
@@ -1952,7 +1945,7 @@ export default {
     gap: 20px;
   }
 
-  .signatures-layout {
+  .report-footer {
     flex-direction: column;
     align-items: center;
     gap: 20px;
