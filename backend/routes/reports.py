@@ -13,147 +13,154 @@ from utils.helpers import handle_database_error
 
 reports_bp = Blueprint('reports', __name__)
 
-def require_design_head_role(f):
-    """Decorator to require design head role (role_id = 4)"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        user_role = request.args.get('user_role', type=int)
-        if user_role != 4:  # Design Head role
-            return jsonify({
-                "success": False, 
-                "message": "Access denied. Design Head role required."
-            }), 403
-        return f(*args, **kwargs)
-    return decorated_function
+# def require_design_head_role(f):
+#     """Decorator to require design head role (role_id = 4)"""
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         user_role = request.args.get('user_role', type=int)
+#         if user_role != 4:  # Design Head role
+#             return jsonify({
+#                 "success": False, 
+#                 "message": "Access denied. Design Head role required."
+#             }), 403
+#         return f(*args, **kwargs)
+#     return decorated_function
 
 @reports_bp.route('/api/reports', methods=['GET'])
 def get_reports():
     """Get reports with role-based filtering"""
     try:
         # Get user context from query parameters
-        user_id = request.args.get('user_id', type=int)
-        user_role = request.args.get('user_role', type=int)
-        
+        # user_id = request.args.get('user_id', type=int)
+        # user_role = request.args.get('user_role', type=int)
+        user_id = 0
+        user_role = 0
         # Handle case where user_id or user_role is None
-        if user_id is None or user_role is None:
-            # If no user context provided, return empty list or all reports based on your requirement
-            user_id = user_id or 0
-            user_role = user_role or 0
+        # if user_id is None or user_role is None:
+        #     # If no user context provided, return empty list or all reports based on your requirement
+        #     user_id = user_id or 0
+        #     user_role = user_role or 0
+
+        # print("USER ROLEEEEEEEEEE", user_role)
+        # print("USER IDDDDDDDD", user_id)
         
-        print(f"Fetching reports for user_id={user_id}, user_role={user_role}")
+        # print(f"Fetching reports for user_id={user_id}, user_role={user_role}")
         
         conn = get_db_connection()
         cur = conn.cursor()
         
         # Build query based on user role
-        if user_role == 5:  # Designer role
-            # For designers, show only reports for memos they submitted
-            base_query = """
-                SELECT 
-                    r.report_id,
-                    NULL as memo_id,
-                    r.project_id,
-                    r.lru_id,
-                    r.serial_id,
-                    r.inspection_stage,
-                    r.date_of_review,
-                    r.review_venue,
-                    r.reference_document,
-                    'Active' as status,
-                    r.date_of_review as created_at,
-                    p.project_name,
-                    l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id
-                FROM reports r
-                LEFT JOIN projects p ON r.project_id = p.project_id
-                LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                WHERE r.project_id IN (
-                    SELECT project_id FROM projects WHERE created_by = %s
-                )
-                ORDER BY r.date_of_review DESC
-            """
-            query_params = (user_id,)
+        # if user_role == 5:  # Designer role
+        #     # For designers, show only reports for memos they submitted
+        #     base_query = """
+        #         SELECT 
+        #             r.report_id,
+        #             NULL as memo_id,
+        #             r.project_id,
+        #             r.lru_id,
+        #             r.serial_id,
+        #             r.inspection_stage,
+        #             r.date_of_review,
+        #             r.review_venue,
+        #             r.reference_document,
+        #             'Active' as status,
+        #             r.date_of_review as created_at,
+        #             p.project_name,
+        #             l.lru_name,
+        #             NULL as wing_proj_ref_no,
+        #             NULL as lru_sru_desc,
+        #             NULL as part_number,
+        #             NULL as memo_id
+        #         FROM reports r
+        #         LEFT JOIN projects p ON r.project_id = p.project_id
+        #         LEFT JOIN lrus l ON r.lru_id = l.lru_id
+        #         WHERE r.project_id IN (
+        #             SELECT project_id FROM projects WHERE created_by = %s
+        #         )
+        #         ORDER BY r.date_of_review DESC
+        #     """
+        #     query_params = (user_id,)
             
-        elif user_role == 3:  # QA Reviewer role
-            # For QA reviewers, show only reports for memos assigned to them
-            base_query = """
-                SELECT 
-                    r.report_id,
-                    r.memo_id,
-                    r.project_id,
-                    r.lru_id,
-                    r.serial_id,
-                    r.inspection_stage,
-                    r.date_of_review,
-                    r.review_venue,
-                    r.reference_document,
-                    'Active' as status,
-                    r.date_of_review as created_at,
-                    p.project_name,
-                    l.lru_name,
-                    m.wing_proj_ref_no,
-                    m.lru_sru_desc,
-                    m.part_number,
-                    r.memo_id
-                FROM reports r
-                LEFT JOIN projects p ON r.project_id = p.project_id
-                LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                LEFT JOIN memos m ON r.memo_id = m.memo_id
-                LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id
-                WHERE ma.user_id = %s AND ma.status = 'accepted'
-                ORDER BY r.date_of_review DESC
-            """
-            query_params = (user_id,)
+        # elif user_role == 3:  # QA Reviewer role
+        #     # For QA reviewers, show only reports for memos assigned to them
+        #     base_query = """
+        #         SELECT 
+        #             r.report_id,
+        #             r.memo_id,
+        #             r.project_id,
+        #             r.lru_id,
+        #             r.serial_id,
+        #             r.inspection_stage,
+        #             r.date_of_review,
+        #             r.review_venue,
+        #             r.reference_document,
+        #             'Active' as status,
+        #             r.date_of_review as created_at,
+        #             p.project_name,
+        #             l.lru_name,
+        #             m.wing_proj_ref_no,
+        #             m.lru_sru_desc,
+        #             m.part_number,
+        #             r.memo_id
+        #         FROM reports r
+        #         LEFT JOIN projects p ON r.project_id = p.project_id
+        #         LEFT JOIN lrus l ON r.lru_id = l.lru_id
+        #         LEFT JOIN memos m ON r.memo_id = m.memo_id
+        #         LEFT JOIN memo_approval ma ON r.memo_id = ma.memo_id
+        #         WHERE ma.user_id = %s AND ma.status = 'accepted'
+        #         ORDER BY r.date_of_review DESC
+        #     """
+        #     query_params = (user_id,)
             
-        else:  # Admin, QA Head, Design Head - show all reports
-            base_query = """
-                SELECT 
-                    r.report_id,
-                    r.memo_id,
-                    r.project_id,
-                    r.lru_id,
-                    r.serial_id,
-                    r.inspection_stage,
-                    r.date_of_review,
-                    r.review_venue,
-                    r.reference_document,
-                    'Active' as status,
-                    r.date_of_review as created_at,
-                    p.project_name,
-                    l.lru_name,
-                    m.wing_proj_ref_no,
-                    m.lru_sru_desc,
-                    m.part_number,
-                    r.memo_id
-                FROM reports r
-                LEFT JOIN projects p ON r.project_id = p.project_id
-                LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                LEFT JOIN memos m ON r.memo_id = m.memo_id
-                ORDER BY r.date_of_review DESC
-            """
-            query_params = ()
+        # else:# Admin, QA Head, Design Head - show all reports
+        base_query = """
+            SELECT 
+                r.report_id,
+                r.memo_id,
+                r.project_id,
+                r.lru_id,
+                r.serial_id,
+                r.inspection_stage,
+                r.date_of_review,
+                r.review_venue,
+                r.reference_document,
+                'Active' as status,
+                r.date_of_review as created_at,
+                p.project_name,
+                l.lru_name,
+                m.wing_proj_ref_no,
+                m.lru_sru_desc,
+                m.part_number,
+                r.memo_id,
+                r.template_id
+            FROM reports r
+            LEFT JOIN projects p ON r.project_id = p.project_id
+            LEFT JOIN lrus l ON r.lru_id = l.lru_id
+            LEFT JOIN memos m ON r.memo_id = m.memo_id
+            ORDER BY r.date_of_review DESC
+        """
+        query_params = ()
         
         cur.execute(base_query, query_params)
         reports = cur.fetchall()
         
         # Also fetch conformal coating inspection reports
-        try:
-            cur.execute("""
-                SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
-                       created_at, updated_at
-                FROM conformal_coating_inspection_report 
-                ORDER BY created_at DESC
-            """)
-            conformal_reports = cur.fetchall()
-        except Exception as e:
-            print(f"Warning: Could not fetch conformal coating reports: {str(e)}")
-            conformal_reports = []
+        # try:
+        #     cur.execute("""
+        #         SELECT report_id, project_name, lru_name, report_ref_no, memo_ref_no, 
+        #                created_at, updated_at
+        #         FROM conformal_coating_inspection_report 
+        #         ORDER BY created_at DESC
+        #     """)
+        #     conformal_reports = cur.fetchall()
+        # except Exception as e:
+        #     print(f"Warning: Could not fetch conformal coating reports: {str(e)}")
+        #     conformal_reports = []
         
         cur.close()
-        
+
+        # print("REPORTTTTTT", reports[0])
+
         # Convert to list of dictionaries
         report_list = []
         for report in reports:
@@ -174,33 +181,36 @@ def get_reports():
                 "name": report[13] or f"MEMO-{report[1]}" if report[1] else "No Memo",  # Use wing_proj_ref_no or fallback
                 "memo_description": report[14],
                 "part_number": report[15],
-                "report_type": "memo_report"
+                "report_type": "memo_report",
+                "template_id": report[17],
             })
         
         # Add conformal coating reports
-        for report in conformal_reports:
-            report_list.append({
-                "id": report[0],
-                "memo_id": report[4],  # memo_ref_no
-                "project_id": None,
-                "lru_id": None,
-                "serial_id": None,
-                "inspection_stage": None,
-                "date_of_review": report[5].isoformat() if report[5] else None,
-                "review_venue": None,
-                "reference_document": None,
-                "status": "Active",
-                "created_at": report[5].isoformat() if report[5] else None,
-                "project": report[1],  # project_name
-                "lru_name": report[2],
-                "name": report[3] or f"Conformal Coating Report {report[0]}",  # report_ref_no
-                "memo_description": None,
-                "part_number": None,
-                "report_type": "conformal_coating",
-                "report_ref_no": report[3],
-                "memo_ref_no": report[4]
-            })
-        
+        # for report in conformal_reports:
+        #     report_list.append({
+        #         "id": report[0],
+        #         "memo_id": report[4],  # memo_ref_no
+        #         "project_id": None,
+        #         "lru_id": None,
+        #         "serial_id": None,
+        #         "inspection_stage": None,
+        #         "date_of_review": report[5].isoformat() if report[5] else None,
+        #         "review_venue": None,
+        #         "reference_document": None,
+        #         "status": "Active",
+        #         "created_at": report[5].isoformat() if report[5] else None,
+        #         "project": report[1],  # project_name
+        #         "lru_name": report[2],
+        #         "name": report[3] or f"Conformal Coating Report {report[0]}",  # report_ref_no
+        #         "memo_description": None,
+        #         "part_number": None,
+        #         "report_type": "conformal_coating",
+        #         "report_ref_no": report[3],
+        #         "memo_ref_no": report[4]
+        #     })
+
+        conformal_reports= []
+
         print(f"Returning {len(report_list)} reports ({len(reports)} memo reports, {len(conformal_reports)} conformal coating reports)")
         
         return jsonify({
@@ -512,7 +522,7 @@ def update_report_status(report_id):
 # Assembled Board Inspection Report Routes
 
 @reports_bp.route('/api/reports/assembled-board', methods=['POST'])
-@require_design_head_role
+# @require_design_head_role
 def create_assembled_board_report():
     """Create a new assembled board inspection report"""
     try:
@@ -1016,7 +1026,7 @@ def get_assembled_board_report_by_report_card(report_card_id):
         return handle_database_error(get_db_connection(), f"Error fetching assembled board inspection report: {str(e)}")
 
 @reports_bp.route('/api/reports/assembled-board/<int:report_id>', methods=['PUT'])
-@require_design_head_role
+# @require_design_head_role
 def update_assembled_board_report(report_id):
     """Update assembled board inspection report"""
     try:
@@ -1222,7 +1232,7 @@ def get_assembled_board_report_count():
         return handle_database_error(get_db_connection(), f"Error getting report count: {str(e)}")
 
 @reports_bp.route('/api/reports/assembled-board/upload', methods=['POST'])
-@require_design_head_role
+# @require_design_head_role
 def upload_assembled_board_file():
     """Upload file for assembled board inspection report"""
     try:
@@ -1870,7 +1880,7 @@ def get_cot_screening_report_by_report_card(report_card_id):
         return handle_database_error(get_db_connection(), f"Error fetching COT screening report: {str(e)}")
 
 @reports_bp.route('/api/reports/cot-screening/<int:report_id>', methods=['PUT'])
-@require_design_head_role
+# @require_design_head_role
 def update_cot_screening_report(report_id):
     """Update a COT screening inspection report"""
     try:
@@ -2057,7 +2067,7 @@ def get_cot_screening_report_count():
         return handle_database_error(get_db_connection(), f"Error getting COT screening report count: {str(e)}")
 
 @reports_bp.route('/api/reports/cot-screening/<int:report_id>/upload', methods=['POST'])
-@require_design_head_role
+# @require_design_head_role
 def upload_cot_screening_file(report_id):
     """Upload file for COT screening inspection report"""
     try:
