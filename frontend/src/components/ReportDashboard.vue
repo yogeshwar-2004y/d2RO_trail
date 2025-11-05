@@ -185,6 +185,7 @@
         <div class="card-info">
           <span class="card-title">{{ report.name || 'N/A' }}</span>
           <span class="card-report-id">Report ID: #{{ report.id }}</span>
+          <span>{{ templates[report.template_id] || 'N/A' }}</span>
         </div>
       </div>
 
@@ -264,6 +265,16 @@ export default {
       reports: [],
       loading: true,
       error: null,
+      templateId: null,
+      templates: {
+        1: "conformal coating inspection report",
+        2: "cots screening inspection report",
+        3: "bare pcb inspection report",
+        4: "mechanical inspection report",
+        5: "assembled board inspection report",
+        6: "raw material inspection report",
+        7: "kit of part inspection report"
+      },
     };
   },
   computed: {
@@ -347,6 +358,8 @@ export default {
 
         if (data.success) {
           this.reports = data.reports;
+          console.log('REPORTSSSS: ',this.reports);
+          
           console.log(
             `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
           );
