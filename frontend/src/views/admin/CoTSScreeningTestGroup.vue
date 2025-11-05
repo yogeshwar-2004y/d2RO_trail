@@ -100,15 +100,6 @@ export default {
         { id: 5, number: 5, name: "Power Burn-In Test" }
       ],
       bulletins: [
-        // Visual Inspection - No bulletins
-        
-        // Functional Check - No bulletins
-        
-        // High Temperature Storage - No bulletins
-        
-        // Thermal Shock - No bulletins
-        
-        // Power Burn-In Test
         { id: 6, subTestId: 5, name: 'INSITU Functional Check' },
         { id: 7, subTestId: 5, name: 'Post Power Burn-in Functional Check' }
       ],
@@ -278,8 +269,6 @@ export default {
   cursor: pointer;
   margin-right: 20px;
 }
-
-
 
 .page-title {
   font-size: 1.5em;
