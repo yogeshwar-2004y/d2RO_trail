@@ -1103,7 +1103,7 @@ export default {
   methods: {
     // Check if the authentication field contains a signature URL
     isSignatureUrl(authentication) {
-      return authentication && authentication.includes("/api/users/signature/");
+      return authentication && authentication.includes("http://localhost:5000/api/users/signature/");
     },
 
     async fetchMemoData() {
@@ -1118,7 +1118,7 @@ export default {
         }
 
         // Otherwise, fetch from API
-        const response = await fetch(`/api/memos/${this.id}`);
+        const response = await fetch(`http://localhost:5000/api/memos/${this.id}`);
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
