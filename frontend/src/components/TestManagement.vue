@@ -4,7 +4,17 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -12,11 +22,26 @@
       </div>
       <div class="header-center">
         <h1 class="page-title">TEST MANAGEMENT</h1>
-        <p class="page-subtitle">Select a test group to manage sub-tests and bulletins</p>
+        <p class="page-subtitle">
+          Select a test group to manage sub-tests and bulletins
+        </p>
       </div>
       <div class="header-right">
-        <button class="add-group-btn" @click="showAddGroupForm = !showAddGroupForm">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button
+          class="add-group-btn"
+          @click="showAddGroupForm = !showAddGroupForm"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
@@ -32,7 +57,17 @@
         <div class="form-header">
           <h3>Add New Test Group</h3>
           <button @click="showAddGroupForm = false" class="close-form-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -41,29 +76,35 @@
         <form @submit.prevent="saveGroup">
           <div class="form-group">
             <label for="groupName">Group Name *</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               id="groupName"
-              v-model="groupForm.group_name" 
+              v-model="groupForm.group_name"
               placeholder="Enter group name"
               required
-            >
+            />
           </div>
-          
+
           <div class="form-group">
             <label for="groupDescription">Description</label>
-            <textarea 
+            <textarea
               id="groupDescription"
-              v-model="groupForm.group_description" 
+              v-model="groupForm.group_description"
               placeholder="Enter group description"
               rows="3"
             ></textarea>
           </div>
-          
+
           <div class="form-actions">
-            <button type="button" @click="showAddGroupForm = false" class="cancel-btn">Cancel</button>
+            <button
+              type="button"
+              @click="showAddGroupForm = false"
+              class="cancel-btn"
+            >
+              Cancel
+            </button>
             <button type="submit" class="save-btn" :disabled="saving">
-              {{ saving ? 'Saving...' : 'Create Group' }}
+              {{ saving ? "Saving..." : "Create Group" }}
             </button>
           </div>
         </form>
@@ -85,37 +126,83 @@
 
       <!-- Test Groups Grid -->
       <div v-else class="test-groups-grid">
-        <div 
-          v-for="group in testGroups" 
+        <div
+          v-for="group in testGroups"
           :key="group.group_id"
           class="group-card"
           @click="goToGroup(group)"
         >
           <div class="group-header">
             <div class="group-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="32"
+                height="32"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <polyline points="9 11 12 14 22 4"></polyline>
-                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                <path
+                  d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+                ></path>
               </svg>
             </div>
             <div class="group-actions">
-              <button @click.stop="editGroup(group)" class="action-btn edit-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              <button
+                @click.stop="editGroup(group)"
+                class="action-btn edit-btn"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  ></path>
+                  <path
+                    d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  ></path>
                 </svg>
               </button>
-              <button @click.stop="deleteGroup(group)" class="action-btn delete-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                @click.stop="deleteGroup(group)"
+                class="action-btn delete-btn"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path
+                    d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                  ></path>
                 </svg>
               </button>
             </div>
           </div>
           <div class="group-content">
             <h3 class="group-name">{{ group.group_name }}</h3>
-            <p class="group-description">{{ group.group_description || 'No description available' }}</p>
+            <p class="group-description">
+              {{ group.group_description || "No description available" }}
+            </p>
             <div class="group-stats">
               <span class="stat">
                 <strong>{{ getSubTestCount(group.group_id) }}</strong> Sub-tests
@@ -126,7 +213,10 @@
       </div>
 
       <!-- Empty State -->
-      <div v-if="!loading && !error && testGroups.length === 0" class="empty-state">
+      <div
+        v-if="!loading && !error && testGroups.length === 0"
+        class="empty-state"
+      >
         <div class="empty-icon">📋</div>
         <h3>No Test Groups Found</h3>
         <p>Create your first test group to get started with test management.</p>
@@ -141,7 +231,17 @@
       <div class="form-header">
         <h3>Edit Test Group</h3>
         <button @click="closeEditForm" class="close-form-btn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -150,29 +250,31 @@
       <form @submit.prevent="updateGroup">
         <div class="form-group">
           <label for="editGroupName">Group Name *</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             id="editGroupName"
-            v-model="editingGroupForm.group_name" 
+            v-model="editingGroupForm.group_name"
             placeholder="Enter group name"
             required
-          >
+          />
         </div>
-        
+
         <div class="form-group">
           <label for="editGroupDescription">Description</label>
-          <textarea 
+          <textarea
             id="editGroupDescription"
-            v-model="editingGroupForm.group_description" 
+            v-model="editingGroupForm.group_description"
             placeholder="Enter group description"
             rows="3"
           ></textarea>
         </div>
-        
+
         <div class="form-actions">
-          <button type="button" @click="closeEditForm" class="cancel-btn">Cancel</button>
+          <button type="button" @click="closeEditForm" class="cancel-btn">
+            Cancel
+          </button>
           <button type="submit" class="save-btn" :disabled="saving">
-            {{ saving ? 'Saving...' : 'Update Group' }}
+            {{ saving ? "Saving..." : "Update Group" }}
           </button>
         </div>
       </form>
@@ -182,206 +284,221 @@
 
 <script>
 export default {
-  name: 'TestManagement',
+  name: "TestManagement",
   data() {
     return {
       // Data
       testGroups: [],
       subTestCounts: {},
-      
+
       // Loading states
       loading: false,
       saving: false,
-      
+
       // Error handling
       error: null,
-      
+
       // Form states
       showAddGroupForm: false,
       showEditGroupForm: false,
-      
+
       // Selected items
       editingGroup: null,
-      
+
       // Forms
       groupForm: {
-        group_name: '',
-        group_description: ''
+        group_name: "",
+        group_description: "",
       },
       editingGroupForm: {
-        group_name: '',
-        group_description: ''
-      }
-    }
+        group_name: "",
+        group_description: "",
+      },
+    };
   },
   mounted() {
-    this.loadTestGroups()
+    this.loadTestGroups();
   },
   methods: {
     // API Methods
     async loadTestGroups() {
-      this.loading = true
-      this.error = null
-      
+      this.loading = true;
+      this.error = null;
+
       try {
-        const response = await fetch('http://localhost:5000/api/test-groups')
-        const data = await response.json()
-        
+        const response = await fetch("http://localhost:5000/api/test-groups");
+        const data = await response.json();
+
         if (data.success) {
-          this.testGroups = data.groups
-          await this.loadSubTestCounts()
+          this.testGroups = data.groups;
+          await this.loadSubTestCounts();
         } else {
-          this.error = data.message || 'Failed to load test groups'
+          this.error = data.message || "Failed to load test groups";
         }
       } catch (error) {
-        console.error('Error loading test groups:', error)
-        this.error = 'Failed to load test groups. Please try again.'
+        console.error("Error loading test groups:", error);
+        this.error = "Failed to load test groups. Please try again.";
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
-    
+
     async loadSubTestCounts() {
       for (const group of this.testGroups) {
         try {
-          const response = await fetch(`http://localhost:5000/api/test-groups/${group.group_id}/sub-tests`)
-          const data = await response.json()
-          
+          const response = await fetch(
+            `http://localhost:5000/api/test-groups/${group.group_id}/sub-tests`
+          );
+          const data = await response.json();
+
           if (data.success) {
-            this.subTestCounts[group.group_id] = data.sub_tests.length
+            this.subTestCounts[group.group_id] = data.sub_tests.length;
           }
         } catch (error) {
-          console.error(`Error loading sub-tests for group ${group.group_id}:`, error)
-          this.subTestCounts[group.group_id] = 0
+          console.error(
+            `Error loading sub-tests for group ${group.group_id}:`,
+            error
+          );
+          this.subTestCounts[group.group_id] = 0;
         }
       }
     },
-    
+
     async saveGroup() {
-      this.saving = true
-      
+      this.saving = true;
+
       try {
-        const response = await fetch('http://localhost:5000/api/test-groups', {
-          method: 'POST',
+        const response = await fetch("http://localhost:5000/api/test-groups", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(this.groupForm)
-        })
-        
-        const data = await response.json()
-        
+          body: JSON.stringify(this.groupForm),
+        });
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadTestGroups()
-          this.showAddGroupForm = false
-          this.resetGroupForm()
+          await this.loadTestGroups();
+          this.showAddGroupForm = false;
+          this.resetGroupForm();
         } else {
-          alert(data.message || 'Failed to save group')
+          alert(data.message || "Failed to save group");
         }
       } catch (error) {
-        console.error('Error saving group:', error)
-        alert('Failed to save group. Please try again.')
+        console.error("Error saving group:", error);
+        alert("Failed to save group. Please try again.");
       } finally {
-        this.saving = false
+        this.saving = false;
       }
     },
-    
+
     async updateGroup() {
-      this.saving = true
-      
+      this.saving = true;
+
       try {
-        const response = await fetch(`http://localhost:5000/api/test-groups/${this.editingGroup.group_id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(this.editingGroupForm)
-        })
-        
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:5000/api/test-groups/${this.editingGroup.group_id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(this.editingGroupForm),
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadTestGroups()
-          this.closeEditForm()
+          await this.loadTestGroups();
+          this.closeEditForm();
         } else {
-          alert(data.message || 'Failed to update group')
+          alert(data.message || "Failed to update group");
         }
       } catch (error) {
-        console.error('Error updating group:', error)
-        alert('Failed to update group. Please try again.')
+        console.error("Error updating group:", error);
+        alert("Failed to update group. Please try again.");
       } finally {
-        this.saving = false
+        this.saving = false;
       }
     },
-    
+
     async deleteGroup(group) {
-      if (!confirm(`Are you sure you want to delete "${group.group_name}"? This will also delete all sub-tests and bulletins.`)) {
-        return
+      if (
+        !confirm(
+          `Are you sure you want to delete "${group.group_name}"? This will also delete all sub-tests and bulletins.`
+        )
+      ) {
+        return;
       }
-      
+
       try {
-        const response = await fetch(`http://localhost:5000/api/test-groups/${group.group_id}`, {
-          method: 'DELETE'
-        })
-        
-        const data = await response.json()
-        
+        const response = await fetch(
+          `http://localhost:5000/api/test-groups/${group.group_id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        const data = await response.json();
+
         if (data.success) {
-          await this.loadTestGroups()
+          await this.loadTestGroups();
         } else {
-          alert(data.message || 'Failed to delete group')
+          alert(data.message || "Failed to delete group");
         }
       } catch (error) {
-        console.error('Error deleting group:', error)
-        alert('Failed to delete group. Please try again.')
+        console.error("Error deleting group:", error);
+        alert("Failed to delete group. Please try again.");
       }
     },
-    
+
     // Navigation Methods
     goToGroup(group) {
       // Navigate to group detail page
       this.$router.push({
-        name: 'GroupDetail',
+        name: "GroupDetail",
         params: {
           groupId: group.group_id,
-          groupName: group.group_name
-        }
-      })
+          groupName: group.group_name,
+        },
+      });
     },
-    
+
     // UI Methods
     editGroup(group) {
-      this.editingGroup = group
+      this.editingGroup = group;
       this.editingGroupForm = {
         group_name: group.group_name,
-        group_description: group.group_description || ''
-      }
-      this.showEditGroupForm = true
+        group_description: group.group_description || "",
+      };
+      this.showEditGroupForm = true;
     },
-    
+
     closeEditForm() {
-      this.showEditGroupForm = false
-      this.editingGroup = null
+      this.showEditGroupForm = false;
+      this.editingGroup = null;
       this.editingGroupForm = {
-        group_name: '',
-        group_description: ''
-      }
+        group_name: "",
+        group_description: "",
+      };
     },
-    
+
     // Form Management
     resetGroupForm() {
       this.groupForm = {
-        group_name: '',
-        group_description: ''
-      }
+        group_name: "",
+        group_description: "",
+      };
     },
-    
+
     // Utility Methods
     getSubTestCount(groupId) {
-      return this.subTestCounts[groupId] || 0
-    }
-  }
-}
+      return this.subTestCounts[groupId] || 0;
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -608,8 +725,12 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error State */
@@ -795,25 +916,25 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .test-groups-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .group-card {
     padding: 20px;
   }
-  
+
   .add-group-form,
   .edit-group-form {
     padding: 20px;

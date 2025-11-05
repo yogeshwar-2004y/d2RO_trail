@@ -4,7 +4,17 @@
     <div class="page-header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -15,17 +25,17 @@
       </div>
     </div>
 
-         <!-- Main Content -->
-     <div class="main-content">
-       <div v-if="loading" class="loading-message">Loading notifications...</div>
-       <div v-else-if="error" class="error-message">
-         {{ error }}
-         <button @click="fetchNotifications" class="retry-button">Retry</button>
-       </div>
-       <div v-else-if="notifications.length === 0" class="no-notifications">
-         <p>You have no notifications.</p>
-       </div>
-       <div v-else class="notifications-section">
+    <!-- Main Content -->
+    <div class="main-content">
+      <div v-if="loading" class="loading-message">Loading notifications...</div>
+      <div v-else-if="error" class="error-message">
+        {{ error }}
+        <button @click="fetchNotifications" class="retry-button">Retry</button>
+      </div>
+      <div v-else-if="notifications.length === 0" class="no-notifications">
+        <p>You have no notifications.</p>
+      </div>
+      <div v-else class="notifications-section">
         <div class="table-container">
           <table class="notifications-table">
             <thead>
@@ -40,19 +50,29 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="notification in notifications" :key="notification.activity_id" :class="{ 'unread': !notification.is_read }">
+              <tr
+                v-for="notification in notifications"
+                :key="notification.activity_id"
+                :class="{ unread: !notification.is_read }"
+              >
                 <td>{{ notification.activity_performed }}</td>
-                <td>{{ notification.project_name || 'N/A' }}</td>
+                <td>{{ notification.project_name || "N/A" }}</td>
                 <td class="details-cell">{{ notification.additional_info }}</td>
-                <td>{{ notification.performed_by_name || 'Unknown' }}</td>
+                <td>{{ notification.performed_by_name || "Unknown" }}</td>
                 <td>{{ formatTimestamp(notification.timestamp) }}</td>
                 <td>
-                  <span class="status-badge" :class="notification.is_read ? 'read' : 'unread'">
-                    {{ notification.is_read ? 'Read' : 'Unread' }}
+                  <span
+                    class="status-badge"
+                    :class="notification.is_read ? 'read' : 'unread'"
+                  >
+                    {{ notification.is_read ? "Read" : "Unread" }}
                   </span>
                 </td>
                 <td>
-                  <button class="view-button" @click="viewNotification(notification)">
+                  <button
+                    class="view-button"
+                    @click="viewNotification(notification)"
+                  >
                     View Details
                   </button>
                 </td>
@@ -64,42 +84,68 @@
     </div>
 
     <!-- Notification Detail Overlay -->
-    <div v-if="showOverlay && selectedNotification" class="overlay" @click="closeOverlay">
+    <div
+      v-if="showOverlay && selectedNotification"
+      class="overlay"
+      @click="closeOverlay"
+    >
       <div class="overlay-content" @click.stop>
         <div class="overlay-header">
           <h2>Notification Details</h2>
           <button class="close-button" @click="closeOverlay">×</button>
         </div>
-        
+
         <div class="overlay-body">
           <div class="form-group">
             <label>Activity Type:</label>
-            <input type="text" :value="selectedNotification.activity_performed" readonly>
+            <input
+              type="text"
+              :value="selectedNotification.activity_performed"
+              readonly
+            />
           </div>
-          
+
           <div class="form-group">
             <label>Project:</label>
-            <input type="text" :value="selectedNotification.project_name || 'N/A'" readonly>
+            <input
+              type="text"
+              :value="selectedNotification.project_name || 'N/A'"
+              readonly
+            />
           </div>
-          
+
           <div class="form-group">
             <label>From:</label>
-            <input type="text" :value="selectedNotification.performed_by_name || 'Unknown'" readonly>
+            <input
+              type="text"
+              :value="selectedNotification.performed_by_name || 'Unknown'"
+              readonly
+            />
           </div>
-          
+
           <div class="form-group">
             <label>Timestamp:</label>
-            <input type="text" :value="formatTimestamp(selectedNotification.timestamp)" readonly>
+            <input
+              type="text"
+              :value="formatTimestamp(selectedNotification.timestamp)"
+              readonly
+            />
           </div>
-          
+
           <div class="form-group">
             <label>Details:</label>
-            <textarea :value="selectedNotification.additional_info" readonly rows="5"></textarea>
+            <textarea
+              :value="selectedNotification.additional_info"
+              readonly
+              rows="5"
+            ></textarea>
           </div>
         </div>
-        
+
         <div class="overlay-footer">
-          <button class="close-detail-button" @click="closeOverlay">Close</button>
+          <button class="close-detail-button" @click="closeOverlay">
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -107,17 +153,17 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore';
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'QAHeadNotifications',
+  name: "QAHeadNotifications",
   data() {
     return {
       notifications: [],
       loading: false,
       error: null,
       showOverlay: false,
-      selectedNotification: null
+      selectedNotification: null,
     };
   },
   async mounted() {
@@ -127,45 +173,48 @@ export default {
     async fetchNotifications() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         const currentUser = userStore.getters.currentUser();
-        
+
         if (!currentUser || !currentUser.id) {
-          this.error = 'User not logged in';
+          this.error = "User not logged in";
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.id}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${currentUser.id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
         if (data.success) {
           this.notifications = data.notifications;
         } else {
-          this.error = data.message || 'Failed to fetch notifications';
+          this.error = data.message || "Failed to fetch notifications";
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
-        this.error = 'Failed to load notifications. Please try again.';
+        console.error("Error fetching notifications:", error);
+        this.error = "Failed to load notifications. Please try again.";
       } finally {
         this.loading = false;
       }
     },
     formatTimestamp(timestamp) {
-      if (!timestamp) return 'N/A';
+      if (!timestamp) return "N/A";
       const date = new Date(timestamp);
       return date.toLocaleString();
     },
     async viewNotification(notification) {
       this.selectedNotification = { ...notification };
       this.showOverlay = true;
-      
+
       // Mark as read if not already read
       if (!notification.is_read) {
         await this.markAsRead(notification.activity_id);
@@ -173,31 +222,36 @@ export default {
     },
     async markAsRead(notificationId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/mark-read`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${notificationId}/mark-read`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
         if (data.success) {
           // Update local state
-          const notif = this.notifications.find(n => n.activity_id === notificationId);
+          const notif = this.notifications.find(
+            (n) => n.activity_id === notificationId
+          );
           if (notif) {
             notif.is_read = true;
           }
         }
       } catch (error) {
-        console.error('Error marking notification as read:', error);
+        console.error("Error marking notification as read:", error);
       }
     },
     closeOverlay() {
       this.showOverlay = false;
       this.selectedNotification = null;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -569,25 +623,25 @@ export default {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .page-title {
     font-size: 1.8em;
   }
-  
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .overlay-content {
     width: 95%;
     margin: 20px;
   }
-  
+
   .notifications-table {
     font-size: 0.9em;
   }
-  
+
   .notifications-table th,
   .notifications-table td {
     padding: 10px 8px;

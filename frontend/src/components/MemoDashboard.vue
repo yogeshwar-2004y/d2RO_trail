@@ -3,13 +3,23 @@
     <div class="header">
       <div class="header-left">
         <button class="back-button" @click="$router.go(-1)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M19 12H5"></path>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
       </div>
-       <div class="header-center">
+      <div class="header-center">
         <div class="page-title">
           <svg
             class="title-icon"
@@ -35,33 +45,48 @@
         </div>
       </div>
       <div class="header-right">
-
         <!-- Shared with Me Button (only for QA Reviewer - role 3) -->
-        <button 
-          v-if="currentUserRole === 3" 
+        <button
+          v-if="currentUserRole === 3"
           class="shared-with-me-button"
           @click="openSharedMemos"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M20 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M4 21v-2a4 4 0 0 1 3-3.87"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
           Shared with Me
         </button>
-        
+
         <!-- Notification Bell (only for QA Head - role 2) -->
-        <div 
-          v-if="currentUserRole === 2" 
-          class="notification-container" 
+        <div
+          v-if="currentUserRole === 2"
+          class="notification-container"
           @click="openNotifications"
         >
           <div class="notification-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-                 viewBox="0 0 24 24" fill="none" stroke="currentColor" 
-                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
@@ -73,10 +98,24 @@
 
         <!-- Search Box -->
         <div class="search-box">
-          <input type="text" v-model="searchQuery" placeholder="Search Projects" class="search-input">
-          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
-               viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-               stroke-linecap="round" stroke-linejoin="round">
+          <input
+            type="text"
+            v-model="searchQuery"
+            placeholder="Search Projects"
+            class="search-input"
+          />
+          <svg
+            class="search-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -92,7 +131,7 @@
               v-for="project in projects"
               :key="project"
               class="filter-option"
-              :class="{ 'selected': activeProjectFilter === project }"
+              :class="{ selected: activeProjectFilter === project }"
               @click="selectProject(project)"
             >
               {{ project }}
@@ -110,7 +149,10 @@
               v-for="status in memoStatuses"
               :key="status.name"
               class="filter-option"
-              :class="[status.color, { 'selected': activeMemoFilter === status.name }]"
+              :class="[
+                status.color,
+                { selected: activeMemoFilter === status.name },
+              ]"
               @click="selectMemoStatus(status.name)"
             >
               {{ status.name }}
@@ -119,17 +161,16 @@
         </div>
 
         <!-- Submit Memo Button (only for Design Head - role 4, Designer - role 5) -->
-        <button 
-          v-if="[4, 5].includes(currentUserRole)" 
-          class="submit-new-memo-button" 
+        <button
+          v-if="[4, 5].includes(currentUserRole)"
+          class="submit-new-memo-button"
           @click="submitNewMemo"
         >
           + Submit New Memo
         </button>
-
       </div>
     </div>
-    
+
     <!-- Memo List -->
     <div class="memo-list">
       <!-- Loading State -->
@@ -149,15 +190,21 @@
       <div v-else-if="filteredMemos.length === 0" class="empty-state">
         <div class="empty-icon">📝</div>
         <p>No memos found</p>
-        <p class="empty-subtitle">{{ searchQuery || activeProjectFilter || activeMemoFilter ? 'Try adjusting your filters' : 'No memos have been submitted yet' }}</p>
+        <p class="empty-subtitle">
+          {{
+            searchQuery || activeProjectFilter || activeMemoFilter
+              ? "Try adjusting your filters"
+              : "No memos have been submitted yet"
+          }}
+        </p>
       </div>
 
       <!-- Memo Cards -->
-      <div 
+      <div
         v-else
-        v-for="memo in filteredMemos" 
-        :key="memo.id" 
-        class="memo-card" 
+        v-for="memo in filteredMemos"
+        :key="memo.id"
+        class="memo-card"
         :class="memo.status.toLowerCase().replace(/ /g, '-')"
         @click="viewMemo(memo)"
       >
@@ -167,13 +214,29 @@
         </div>
         <div class="memo-schedule" v-if="memo.assignedDate">
           <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
-          <div class="memo-scheduled">TEST SCHEDULED ON : {{ memo.scheduledDate }}</div>
+          <div class="memo-scheduled">
+            TEST SCHEDULED ON : {{ memo.scheduledDate }}
+          </div>
         </div>
         <!-- Share button for QA Reviewers -->
         <div v-if="currentUserRole === 3" class="memo-actions">
-          <button class="share-btn" @click.stop="shareMemo(memo)" title="Share memo">
-            <svg class="icon share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>
+          <button
+            class="share-btn"
+            @click.stop="shareMemo(memo)"
+            title="Share memo"
+          >
+            <svg
+              class="icon share"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"
+              />
             </svg>
             <span class="share-text">Share</span>
           </button>
@@ -182,20 +245,33 @@
     </div>
 
     <!-- Share Modal -->
-    <div v-if="showShareModal" class="share-modal-overlay" @click.self="toggleShareModal">
+    <div
+      v-if="showShareModal"
+      class="share-modal-overlay"
+      @click.self="toggleShareModal"
+    >
       <div class="share-modal-content">
         <h2>Share Memo</h2>
         <p>Select a QA reviewer to share this memo with.</p>
         <div class="memo-info">
-          <strong>Project:</strong> {{ selectedMemo?.project }}<br>
-          <strong>Author:</strong> {{ selectedMemo?.author }}<br>
+          <strong>Project:</strong> {{ selectedMemo?.project }}<br />
+          <strong>Author:</strong> {{ selectedMemo?.author }}<br />
           <strong>Memo ID:</strong> {{ selectedMemo?.id }}
         </div>
         <div class="form-group">
           <label for="reviewer-select">Select QA Reviewer:</label>
-          <select id="reviewer-select" v-model="selectedReviewerId" class="reviewer-select" @change="onReviewerChange">
+          <select
+            id="reviewer-select"
+            v-model="selectedReviewerId"
+            class="reviewer-select"
+            @change="onReviewerChange"
+          >
             <option value="">Choose a reviewer...</option>
-            <option v-for="reviewer in reviewers" :key="reviewer.user_id" :value="reviewer.user_id">
+            <option
+              v-for="reviewer in reviewers"
+              :key="reviewer.user_id"
+              :value="reviewer.user_id"
+            >
               {{ reviewer.name }} ({{ reviewer.email }})
             </option>
           </select>
@@ -203,13 +279,19 @@
         <div class="form-group" v-if="selectedReviewerId">
           <label>Selected Reviewer Details:</label>
           <div class="reviewer-details">
-            <strong>Username:</strong> {{ getSelectedReviewerName() }}<br>
-            <strong>User ID:</strong> {{ selectedReviewerId }}<br>
+            <strong>Username:</strong> {{ getSelectedReviewerName() }}<br />
+            <strong>User ID:</strong> {{ selectedReviewerId }}<br />
             <strong>Email:</strong> {{ getSelectedReviewerEmail() }}
           </div>
         </div>
         <div class="modal-actions">
-          <button @click="shareMemoWithReviewer" class="send-btn" :disabled="!selectedReviewerId">Share</button>
+          <button
+            @click="shareMemoWithReviewer"
+            class="send-btn"
+            :disabled="!selectedReviewerId"
+          >
+            Share
+          </button>
           <button @click="toggleShareModal" class="cancel-btn">Cancel</button>
         </div>
       </div>
@@ -218,65 +300,117 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'MemoDashboard',
+  name: "MemoDashboard",
   data() {
     return {
-      searchQuery: '',
+      searchQuery: "",
       showProjectFilter: false,
       showMemoFilter: false,
       activeProjectFilter: null,
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        { name: 'SUCCESSFULLY COMPLETED', color: 'success', dbValue: 'successfully_completed' },
-        { name: 'REJECTED', color: 'rejected', dbValue: 'disapproved' },
-        { name: 'DISAPPROVED', color: 'disapproved', dbValue: 'disapproved' },
-        { name: 'ASSIGNED', color: 'assigned', dbValue: 'assigned' },
-        { name: 'COMPLETED WITH OBSERVATIONS', color: 'observation', dbValue: 'completed_with_observations' },
-        { name: 'TEST NOT CONDUCTED', color: 'not-conducted', dbValue: 'test_not_conducted' },
-        { name: 'NOT ASSIGNED', color: 'not-assigned', dbValue: 'not_assigned' },
-        { name: 'TEST FAILED', color: 'test-failed', dbValue: 'test_failed' },
+        {
+          name: "SUCCESSFULLY COMPLETED",
+          color: "success",
+          dbValue: "successfully_completed",
+        },
+        { name: "REJECTED", color: "rejected", dbValue: "disapproved" },
+        { name: "DISAPPROVED", color: "disapproved", dbValue: "disapproved" },
+        { name: "ASSIGNED", color: "assigned", dbValue: "assigned" },
+        {
+          name: "COMPLETED WITH OBSERVATIONS",
+          color: "observation",
+          dbValue: "completed_with_observations",
+        },
+        {
+          name: "TEST NOT CONDUCTED",
+          color: "not-conducted",
+          dbValue: "test_not_conducted",
+        },
+        {
+          name: "NOT ASSIGNED",
+          color: "not-assigned",
+          dbValue: "not_assigned",
+        },
+        { name: "TEST FAILED", color: "test-failed", dbValue: "test_failed" },
       ],
       memos: [],
       loading: true,
       error: null,
       showShareModal: false,
       selectedMemo: null,
-      selectedReviewerId: '',
+      selectedReviewerId: "",
       reviewers: [],
       notifications: [
-        { id: 1, project: 'PROJ001', serialNumber: '15,16', lru: 'LRU Name', completedStage: 'stage 1', requiredStage: 'stage3', justification: 'justification', status: 'pending', isRead: false },
-        { id: 2, project: 'PROJ002', serialNumber: '17,18', lru: 'LRU Component', completedStage: 'stage 2', requiredStage: 'stage4', justification: 'Technical review required', status: 'pending', isRead: false },
-        { id: 3, project: 'PROJ003', serialNumber: '19,20', lru: 'LRU Assembly', completedStage: 'stage 1', requiredStage: 'stage3', justification: 'Quality check needed', status: 'pending', isRead: true },
+        {
+          id: 1,
+          project: "PROJ001",
+          serialNumber: "15,16",
+          lru: "LRU Name",
+          completedStage: "stage 1",
+          requiredStage: "stage3",
+          justification: "justification",
+          status: "pending",
+          isRead: false,
+        },
+        {
+          id: 2,
+          project: "PROJ002",
+          serialNumber: "17,18",
+          lru: "LRU Component",
+          completedStage: "stage 2",
+          requiredStage: "stage4",
+          justification: "Technical review required",
+          status: "pending",
+          isRead: false,
+        },
+        {
+          id: 3,
+          project: "PROJ003",
+          serialNumber: "19,20",
+          lru: "LRU Assembly",
+          completedStage: "stage 1",
+          requiredStage: "stage3",
+          justification: "Quality check needed",
+          status: "pending",
+          isRead: true,
+        },
       ],
     };
   },
   computed: {
     // Get current user role from global store
     currentUserRole() {
-      return userStore.getters.currentUserRole()
+      return userStore.getters.currentUserRole();
     },
     filteredMemos() {
       let filtered = this.memos;
 
       if (this.activeProjectFilter) {
-        filtered = filtered.filter(memo => memo.project === this.activeProjectFilter);
+        filtered = filtered.filter(
+          (memo) => memo.project === this.activeProjectFilter
+        );
       }
       if (this.activeMemoFilter) {
-        filtered = filtered.filter(memo => memo.status === this.activeMemoFilter);
+        filtered = filtered.filter(
+          (memo) => memo.status === this.activeMemoFilter
+        );
       }
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter(memo => memo.project.toLowerCase().includes(query));
+        filtered = filtered.filter((memo) =>
+          memo.project.toLowerCase().includes(query)
+        );
       }
       return filtered;
     },
     unreadNotifications() {
-      return this.notifications.filter(n => !n.isRead).length;
-    }
+      return this.notifications.filter((n) => !n.isRead).length;
+    },
   },
   async mounted() {
     await this.fetchMemos();
@@ -288,32 +422,32 @@ export default {
       try {
         this.loading = true;
         this.error = null;
-        
+
         // Get current user information
         const currentUser = userStore.getters.currentUser();
         const currentUserRole = userStore.getters.currentUserRole();
-        
+
         // Build query parameters
         const params = new URLSearchParams();
         if (currentUser && currentUserRole) {
-          params.append('user_id', currentUser.id);
-          params.append('user_role', currentUserRole);
+          params.append("user_id", currentUser.id);
+          params.append("user_role", currentUserRole);
         }
-        
+
         const response = await fetch(`/api/memos?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         if (data.success) {
           // Transform backend memo data to frontend format
-          this.memos = data.memos.map(memo => this.transformMemoData(memo));
+          this.memos = data.memos.map((memo) => this.transformMemoData(memo));
         } else {
-          throw new Error(data.message || 'Failed to fetch memos');
+          throw new Error(data.message || "Failed to fetch memos");
         }
       } catch (error) {
-        console.error('Error fetching memos:', error);
+        console.error("Error fetching memos:", error);
         this.error = error.message;
         this.memos = [];
       } finally {
@@ -323,17 +457,17 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch('/api/projects');
+        const response = await fetch("/api/projects");
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         if (data.success) {
-          this.projects = data.projects.map(project => project.name);
+          this.projects = data.projects.map((project) => project.name);
         }
       } catch (error) {
-        console.error('Error fetching projects:', error);
+        console.error("Error fetching projects:", error);
         this.projects = [];
       }
     },
@@ -342,13 +476,13 @@ export default {
       // Map backend memo format to frontend expected format
       return {
         id: backendMemo.memo_id,
-        project: backendMemo.wing_proj_ref_no || 'N/A',
-        author: backendMemo.from_person || 'Design Team',
+        project: backendMemo.wing_proj_ref_no || "N/A",
+        author: backendMemo.from_person || "Design Team",
         assignedDate: this.formatDate(backendMemo.dated),
         scheduledDate: this.formatDate(backendMemo.memo_date),
         status: this.determineStatus(backendMemo),
         // Store the original backend data for detailed view
-        originalData: backendMemo
+        originalData: backendMemo,
       };
     },
 
@@ -356,33 +490,33 @@ export default {
       // Use memo_status field if available, otherwise fall back to legacy logic
       if (memo.memo_status) {
         switch (memo.memo_status) {
-          case 'not_assigned':
-            return 'NOT ASSIGNED';
-          case 'assigned':
-            return 'ASSIGNED';
-          case 'disapproved':
+          case "not_assigned":
+            return "NOT ASSIGNED";
+          case "assigned":
+            return "ASSIGNED";
+          case "disapproved":
             // Check if this memo was rejected (has rejection in memo_approval)
-            return 'REJECTED';
-          case 'successfully_completed':
-            return 'SUCCESSFULLY COMPLETED';
-          case 'test_not_conducted':
-            return 'TEST NOT CONDUCTED';
-          case 'completed_with_observations':
-            return 'COMPLETED WITH OBSERVATIONS';
-          case 'test_failed':
-            return 'TEST FAILED';
+            return "REJECTED";
+          case "successfully_completed":
+            return "SUCCESSFULLY COMPLETED";
+          case "test_not_conducted":
+            return "TEST NOT CONDUCTED";
+          case "completed_with_observations":
+            return "COMPLETED WITH OBSERVATIONS";
+          case "test_failed":
+            return "TEST FAILED";
           default:
-            return memo.memo_status.toUpperCase().replace(/_/g, ' ');
+            return memo.memo_status.toUpperCase().replace(/_/g, " ");
         }
       }
-      
+
       // Fallback to legacy logic for backward compatibility
       if (memo.accepted_at) {
-        return 'SUCCESSFULLY COMPLETED';
+        return "SUCCESSFULLY COMPLETED";
       } else if (memo.submitted_at) {
-        return 'ASSIGNED';
+        return "ASSIGNED";
       } else {
-        return 'NOT ASSIGNED';
+        return "NOT ASSIGNED";
       }
     },
 
@@ -390,11 +524,13 @@ export default {
       if (!dateString) return null;
       try {
         const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric'
-        }).replace(/\//g, '-');
+        return date
+          .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+          .replace(/\//g, "-");
       } catch {
         return dateString;
       }
@@ -405,49 +541,63 @@ export default {
         // Fetch detailed memo data from backend
         const response = await fetch(`/api/memos/${memo.id}`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch memo details: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch memo details: ${response.statusText}`
+          );
         }
-        
+
         const data = await response.json();
         if (data.success) {
           // Navigate based on user role
           const userRole = userStore.getters.roleName()?.toLowerCase();
-          
-          if (userRole === 'qa reviewer') {
+
+          if (userRole === "qa reviewer") {
             // Reviewers use the InspectionMemo component
-            this.$router.push({ 
-              name: 'InspectionMemo', 
-              params: { 
-                id: memo.id
+            this.$router.push({
+              name: "InspectionMemo",
+              params: {
+                id: memo.id,
               },
               query: {
-                hasData: 'true'
-              }
+                hasData: "true",
+              },
             });
             // Store the data in sessionStorage for the component to access
-            sessionStorage.setItem(`memoData_${memo.id}`, JSON.stringify(data.memo));
-            sessionStorage.setItem(`references_${memo.id}`, JSON.stringify(data.references || []));
+            sessionStorage.setItem(
+              `memoData_${memo.id}`,
+              JSON.stringify(data.memo)
+            );
+            sessionStorage.setItem(
+              `references_${memo.id}`,
+              JSON.stringify(data.references || [])
+            );
           } else {
             // All other roles use the ViewOnlyMemoForm component
-            this.$router.push({ 
-              name: 'ViewOnlyMemoForm', 
-              params: { 
-                id: memo.id
+            this.$router.push({
+              name: "ViewOnlyMemoForm",
+              params: {
+                id: memo.id,
               },
               query: {
-                hasData: 'true'
-              }
+                hasData: "true",
+              },
             });
             // Store the data in sessionStorage for the component to access
-            sessionStorage.setItem(`memoData_${memo.id}`, JSON.stringify(data.memo));
-            sessionStorage.setItem(`references_${memo.id}`, JSON.stringify(data.references || []));
+            sessionStorage.setItem(
+              `memoData_${memo.id}`,
+              JSON.stringify(data.memo)
+            );
+            sessionStorage.setItem(
+              `references_${memo.id}`,
+              JSON.stringify(data.references || [])
+            );
           }
         } else {
-          throw new Error(data.message || 'Failed to fetch memo details');
+          throw new Error(data.message || "Failed to fetch memo details");
         }
       } catch (error) {
-        console.error('Error fetching memo details:', error);
-        alert('Failed to load memo details. Please try again.');
+        console.error("Error fetching memo details:", error);
+        alert("Failed to load memo details. Please try again.");
       }
     },
 
@@ -460,7 +610,8 @@ export default {
       this.showProjectFilter = false;
     },
     selectProject(project) {
-      this.activeProjectFilter = this.activeProjectFilter === project ? null : project;
+      this.activeProjectFilter =
+        this.activeProjectFilter === project ? null : project;
       this.showProjectFilter = false;
     },
     selectMemoStatus(status) {
@@ -468,13 +619,13 @@ export default {
       this.showMemoFilter = false;
     },
     submitNewMemo() {
-      this.$router.push({ name: 'NewMemoForm' });
+      this.$router.push({ name: "NewMemoForm" });
     },
     openNotifications() {
-      this.$router.push({ name: 'QAHeadNotifications' });
+      this.$router.push({ name: "QAHeadNotifications" });
     },
     openSharedMemos() {
-      this.$router.push({ name: 'SharedMemoDashboard' }); 
+      this.$router.push({ name: "SharedMemoDashboard" });
     },
     shareMemo(memo) {
       this.selectedMemo = memo;
@@ -483,7 +634,7 @@ export default {
     toggleShareModal() {
       this.showShareModal = !this.showShareModal;
       if (!this.showShareModal) {
-        this.selectedReviewerId = '';
+        this.selectedReviewerId = "";
         this.selectedMemo = null;
       }
     },
@@ -492,55 +643,61 @@ export default {
         // Get current user information
         const currentUser = userStore.getters.currentUser();
         if (!currentUser) {
-          console.error('No current user found');
+          console.error("No current user found");
           this.reviewers = [];
           return;
         }
 
         // Build query parameters to exclude current user
         const params = new URLSearchParams();
-        params.append('current_user_id', currentUser.id);
+        params.append("current_user_id", currentUser.id);
 
         const response = await fetch(`/api/reviewers?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
         }
-        
+
         const data = await response.json();
         if (data.success) {
           this.reviewers = data.reviewers;
-          console.log(`Fetched ${this.reviewers.length} reviewers (excluding current user)`);
+          console.log(
+            `Fetched ${this.reviewers.length} reviewers (excluding current user)`
+          );
         } else {
-          throw new Error(data.message || 'Failed to fetch reviewers');
+          throw new Error(data.message || "Failed to fetch reviewers");
         }
       } catch (error) {
-        console.error('Error fetching reviewers:', error);
+        console.error("Error fetching reviewers:", error);
         this.reviewers = [];
       }
     },
     onReviewerChange() {
       // This method is called when reviewer selection changes
       // The selectedReviewerId is automatically updated by v-model
-      console.log('Selected reviewer ID:', this.selectedReviewerId);
+      console.log("Selected reviewer ID:", this.selectedReviewerId);
     },
     getSelectedReviewerName() {
-      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
-      return reviewer ? reviewer.name : '';
+      const reviewer = this.reviewers.find(
+        (r) => r.user_id == this.selectedReviewerId
+      );
+      return reviewer ? reviewer.name : "";
     },
     getSelectedReviewerEmail() {
-      const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
-      return reviewer ? reviewer.email : '';
+      const reviewer = this.reviewers.find(
+        (r) => r.user_id == this.selectedReviewerId
+      );
+      return reviewer ? reviewer.email : "";
     },
     async shareMemoWithReviewer() {
       if (!this.selectedReviewerId) {
-        alert('Please select a reviewer to share with.');
+        alert("Please select a reviewer to share with.");
         return;
       }
 
       try {
         const currentUser = userStore.getters.currentUser();
         if (!currentUser) {
-          alert('User not logged in.');
+          alert("User not logged in.");
           return;
         }
 
@@ -548,50 +705,57 @@ export default {
         const shareData = {
           memo_id: this.selectedMemo.id,
           shared_by: currentUser.id,
-          shared_with: parseInt(this.selectedReviewerId)
+          shared_with: parseInt(this.selectedReviewerId),
         };
 
-        console.log('Sharing memo with data:', shareData);
+        console.log("Sharing memo with data:", shareData);
 
-        const response = await fetch('/api/memos/share', {
-          method: 'POST',
+        const response = await fetch("/api/memos/share", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(shareData)
+          body: JSON.stringify(shareData),
         });
 
         const data = await response.json();
         if (data.success) {
-          const reviewer = this.reviewers.find(r => r.user_id == this.selectedReviewerId);
-          alert(`Memo ID ${this.selectedMemo.id} shared successfully with ${reviewer.name} (${reviewer.email})!`);
+          const reviewer = this.reviewers.find(
+            (r) => r.user_id == this.selectedReviewerId
+          );
+          alert(
+            `Memo ID ${this.selectedMemo.id} shared successfully with ${reviewer.name} (${reviewer.email})!`
+          );
           this.toggleShareModal();
         } else {
           alert(`Error sharing memo: ${data.message}`);
         }
       } catch (error) {
-        console.error('Error sharing memo:', error);
-        alert('Error sharing memo. Please try again.');
+        console.error("Error sharing memo:", error);
+        alert("Error sharing memo. Please try again.");
       }
     },
 
     async downloadMemoPDF(memo) {
       try {
         console.log(`Downloading PDF for memo ID: ${memo.id}`);
-        
+
         // Show loading state
-        const button = event.target.closest('.download-pdf-btn');
-        const originalText = button.querySelector('.download-text').textContent;
-        button.querySelector('.download-text').textContent = 'Loading...';
+        const button = event.target.closest(".download-pdf-btn");
+        const originalText = button.querySelector(".download-text").textContent;
+        button.querySelector(".download-text").textContent = "Loading...";
         button.disabled = true;
-        
+
         // Make request to backend PDF endpoint
-        const response = await fetch(`http://localhost:5000/api/memos/${memo.id}/pdf`, {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/pdf'
+        const response = await fetch(
+          `http://localhost:5000/api/memos/${memo.id}/pdf`,
+          {
+            method: "GET",
+            headers: {
+              Accept: "application/pdf",
+            },
           }
-        });
+        );
 
         if (!response.ok) {
           throw new Error(`Failed to generate PDF: ${response.statusText}`);
@@ -599,35 +763,37 @@ export default {
 
         // Get the PDF blob
         const blob = await response.blob();
-        
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
-        link.download = `memo_${memo.id}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.pdf`;
-        
+        link.download = `memo_${memo.id}_${new Date()
+          .toISOString()
+          .slice(0, 19)
+          .replace(/:/g, "-")}.pdf`;
+
         // Trigger download
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         // Clean up
         window.URL.revokeObjectURL(url);
-        
+
         console.log(`PDF downloaded successfully for memo ${memo.id}`);
-        
       } catch (error) {
-        console.error('Error downloading memo PDF:', error);
+        console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
         if (button) {
-          button.querySelector('.download-text').textContent = originalText;
+          button.querySelector(".download-text").textContent = originalText;
           button.disabled = false;
         }
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -782,20 +948,50 @@ export default {
 }
 
 /* Status-based colors */
-.success, .successfully-completed { background-color: #e2fbdc; }
-.rejected { background-color: #ff4757; color: white; }
-.disapproved { background-color: #ffd8d6; }
-.assigned { background-color: #d1d8ff; }
-.observation, .completed-with-observations { background-color: #fdddfa; }
-.not-conducted, .test-not-conducted { background-color: #fdd8d6; }
-.not-assigned { background-color: #fff1d6; }
-.test-failed { background-color: #ff6b6b; color: white; }
+.success,
+.successfully-completed {
+  background-color: #e2fbdc;
+}
+.rejected {
+  background-color: #ff4757;
+  color: white;
+}
+.disapproved {
+  background-color: #ffd8d6;
+}
+.assigned {
+  background-color: #d1d8ff;
+}
+.observation,
+.completed-with-observations {
+  background-color: #fdddfa;
+}
+.not-conducted,
+.test-not-conducted {
+  background-color: #fdd8d6;
+}
+.not-assigned {
+  background-color: #fff1d6;
+}
+.test-failed {
+  background-color: #ff6b6b;
+  color: white;
+}
 
 /* Specific status classes for dynamic status values */
-.successfully-completed { background-color: #e2fbdc; }
-.test-not-conducted { background-color: #fdd8d6; }
-.completed-with-observations { background-color: #fdddfa; }
-.test-failed { background-color: #ff6b6b; color: white; }
+.successfully-completed {
+  background-color: #e2fbdc;
+}
+.test-not-conducted {
+  background-color: #fdd8d6;
+}
+.completed-with-observations {
+  background-color: #fdddfa;
+}
+.test-failed {
+  background-color: #ff6b6b;
+  color: white;
+}
 
 .memo-list {
   padding: 20px;
@@ -819,10 +1015,22 @@ export default {
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
-.memo-details { flex-grow: 1; }
-.memo-project { font-weight: bold; font-size: 1.1em; }
-.memo-author { font-size: 0.9em; color: #555; }
-.memo-schedule { text-align: right; font-size: 0.9em; color: #555; }
+.memo-details {
+  flex-grow: 1;
+}
+.memo-project {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+.memo-author {
+  font-size: 0.9em;
+  color: #555;
+}
+.memo-schedule {
+  text-align: right;
+  font-size: 0.9em;
+  color: #555;
+}
 
 /* New button */
 .submit-new-memo-button {
@@ -864,7 +1072,9 @@ export default {
 }
 
 /* Loading, Error, and Empty States */
-.loading-state, .error-state, .empty-state {
+.loading-state,
+.error-state,
+.empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -885,11 +1095,16 @@ export default {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-.error-icon, .empty-icon {
+.error-icon,
+.empty-icon {
   font-size: 48px;
   margin-bottom: 20px;
 }
@@ -1132,5 +1347,4 @@ export default {
   background-color: #5a6268;
   transform: translateY(-1px);
 }
-
 </style>

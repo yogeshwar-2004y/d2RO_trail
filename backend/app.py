@@ -19,6 +19,7 @@ from routes.news import news_bp
 from routes.files import files_bp
 from routes.memos import memos_bp
 from routes.reports import reports_bp
+from routes.conformal_coating_inspection import conformal_coating_bp
 from routes.mechanical_inspection import mechanical_inspection_bp
 from routes.kit_of_parts import kit_of_parts_bp
 from routes.login_logs import login_logs_bp
@@ -51,6 +52,7 @@ def create_app():
     app.register_blueprint(files_bp)
     app.register_blueprint(memos_bp)
     app.register_blueprint(reports_bp)
+    app.register_blueprint(conformal_coating_bp)
     app.register_blueprint(mechanical_inspection_bp)
     app.register_blueprint(kit_of_parts_bp)
     app.register_blueprint(login_logs_bp)
@@ -67,6 +69,8 @@ app = create_app()
 @app.route('/api/users/reviewers', methods=['GET'])
 def get_reviewers():
     """Get all users with reviewer role"""
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -81,7 +85,6 @@ def get_reviewers():
         """)
         
         rows = cur.fetchall()
-        cur.close()
         
         reviewers = []
         for row in rows:
@@ -99,6 +102,13 @@ def get_reviewers():
     except Exception as e:
         print(f"Error fetching reviewers: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        # Don't close conn - it's a shared global connection
 
 # Comments and Annotations API Endpoints
 
@@ -151,8 +161,6 @@ def get_comments():
         """, (document_id,))
         
         rows = cur.fetchall()
-        cur.close()
-        conn.close()
         
         # Group comments and annotations
         comments = []
@@ -198,14 +206,14 @@ def get_comments():
         
     except Exception as e:
         print(f"Error fetching comments: {str(e)}")
-        try:
-            if 'cur' in locals():
-                cur.close()
-            if 'conn' in locals():
-                conn.close()
-        except:
-            pass
         return jsonify({"success": False, "message": "Internal server error"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
+        # Don't close conn - it's a shared global connection
 
 # Create a new comment
 @app.route('/api/comments', methods=['POST'])
@@ -246,7 +254,6 @@ def create_comment():
         )
         doc_status_row = cur.fetchone()
         if doc_status_row and doc_status_row[0] == 'accepted':
-            cur.close()
             return jsonify({
                 "success": False,
                 "message": "Cannot add comments. This document is already accepted as the final version."
@@ -360,8 +367,6 @@ def create_comment():
                 
                 print(f"   ✓ Sent notification to designer: {designer_name} (ID: {designer_id})")
         
-        cur.close()
-        
         return jsonify({
             "success": True,
             "message": "Comment created successfully",
@@ -369,9 +374,19 @@ def create_comment():
         })
         
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals():
+            try:
+                conn.rollback()
+            except:
+                pass
         print(f"Error creating comment: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
 
 # Update a comment
 @app.route('/api/comments/<int:comment_id>', methods=['PUT'])
@@ -398,11 +413,9 @@ def update_comment(comment_id):
         ))
         
         if cur.rowcount == 0:
-            cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
-        cur.close()
         
         return jsonify({
             "success": True,
@@ -410,9 +423,19 @@ def update_comment(comment_id):
         })
         
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals():
+            try:
+                conn.rollback()
+            except:
+                pass
         print(f"Error updating comment: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
 
 # Delete a comment
 @app.route('/api/comments/<int:comment_id>', methods=['DELETE'])
@@ -433,11 +456,9 @@ def delete_comment(comment_id):
         cur.execute("DELETE FROM document_comments WHERE comment_id = %s", (comment_id,))
         
         if cur.rowcount == 0:
-            cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
-        cur.close()
         
         return jsonify({
             "success": True,
@@ -445,9 +466,19 @@ def delete_comment(comment_id):
         })
         
     except Exception as e:
-        conn.rollback()
+        if 'conn' in locals():
+            try:
+                conn.rollback()
+            except:
+                pass
         print(f"Error deleting comment: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
 
 # Accept a comment
 @app.route('/api/comments/<int:comment_id>/accept', methods=['POST'])
@@ -491,7 +522,6 @@ def accept_comment(comment_id):
         print(f"Updated {cur.rowcount} rows for comment {comment_id}")
         
         if cur.rowcount == 0:
-            cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
@@ -557,8 +587,6 @@ def accept_comment(comment_id):
             
             print(f"   ✓ Sent notification to reviewer: {reviewer_name} (ID: {reviewer_id})")
         
-        cur.close()
-        
         return jsonify({
             "success": True,
             "message": "Comment accepted successfully"
@@ -566,9 +594,18 @@ def accept_comment(comment_id):
         
     except Exception as e:
         if 'conn' in locals():
-            conn.rollback()
+            try:
+                conn.rollback()
+            except:
+                pass
         print(f"Error accepting comment: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
 
 # Reject a comment
 @app.route('/api/comments/<int:comment_id>/reject', methods=['POST'])
@@ -612,7 +649,6 @@ def reject_comment(comment_id):
         print(f"Updated {cur.rowcount} rows for comment {comment_id}")
         
         if cur.rowcount == 0:
-            cur.close()
             return jsonify({"success": False, "message": "Comment not found"}), 404
         
         conn.commit()
@@ -678,8 +714,6 @@ def reject_comment(comment_id):
             
             print(f"   ✓ Sent notification to reviewer: {reviewer_name} (ID: {reviewer_id})")
         
-        cur.close()
-        
         return jsonify({
             "success": True,
             "message": "Comment rejected successfully"
@@ -687,14 +721,25 @@ def reject_comment(comment_id):
         
     except Exception as e:
         if 'conn' in locals():
-            conn.rollback()
+            try:
+                conn.rollback()
+            except:
+                pass
         print(f"Error rejecting comment: {str(e)}")
         return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
+    finally:
+        if 'cur' in locals() and cur:
+            try:
+                cur.close()
+            except:
+                pass
 
 # Test endpoint to check database tables
 @app.route('/api/test-db', methods=['GET'])
 def test_database():
     """Test endpoint to check if database tables exist and are accessible"""
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -734,8 +779,6 @@ def test_database():
         """)
         annotations_schema = cur.fetchall()
         
-        cur.close()
-        
         return jsonify({
             "success": True,
             "tables": {
@@ -752,6 +795,13 @@ def test_database():
         
     except Exception as e:
         return jsonify({"success": False, "message": f"Database test failed: {str(e)}"}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        # Don't close conn - it's a shared global connection
 
 if __name__ == '__main__':
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=True, host='127.0.0.1', port=8000)

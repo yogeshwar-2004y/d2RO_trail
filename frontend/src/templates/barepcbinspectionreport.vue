@@ -5,11 +5,11 @@
       <!-- Form Header -->
       <div class="form-header">
         <div class="document-path">
-          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{ inspectionCount }}/{{ currentYear }}
+          CASDIC/{{ projectName }}/{{ lruName }}/SL.{{ serialNumber }}/{{
+            inspectionCount
+          }}/{{ currentYear }}
         </div>
-        <div class="report-date">
-          Date: {{ currentDate }}
-        </div>
+        <div class="report-date">Date: {{ currentDate }}</div>
       </div>
 
       <div class="subject-line">
@@ -53,7 +53,7 @@
                 <input type="text" id="slNos" v-model="formData.slNos" :disabled="isPreparedByVerified" required>
               </div>
             </div>
-            
+
             <!-- Right Column -->
             <div class="info-column">
               <div class="form-group">
@@ -111,7 +111,10 @@
                 <tr class="section-header">
                   <td colspan="5"><strong>I. VISUAL INSPECTION</strong></td>
                 </tr>
-                <tr v-for="(item, index) in formData.visualInspection" :key="'visual-' + index">
+                <tr
+                  v-for="(item, index) in formData.visualInspection"
+                  :key="'visual-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
@@ -128,12 +131,15 @@
                     <input type="file" @change="handleFileUpload($event, 'visual', index)" :disabled="isPreparedByVerified">
                   </td>
                 </tr>
-                
+
                 <!-- II. CONTINUITY CHECKING -->
                 <tr class="section-header">
                   <td colspan="5"><strong>II. CONTINUITY CHECKING</strong></td>
                 </tr>
-                <tr v-for="(item, index) in formData.continuityCheck" :key="'continuity-' + index">
+                <tr
+                  v-for="(item, index) in formData.continuityCheck"
+                  :key="'continuity-' + index"
+                >
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
@@ -150,15 +156,21 @@
                     <input type="file" @change="handleFileUpload($event, 'continuity', index)" :disabled="isPreparedByVerified">
                   </td>
                 </tr>
-                
+
                 <!-- III. FABRICATOR & VENDOR QC REPORTS VERIFICATION -->
                 <tr class="section-header">
-                  <td colspan="5"><strong>III. FABRICATOR & VENDOR QC REPORTS VERIFICATION</strong></td>
+                  <td colspan="5">
+                    <strong
+                      >III. FABRICATOR & VENDOR QC REPORTS VERIFICATION</strong
+                    >
+                  </td>
                 </tr>
                 <tr>
                   <td>1</td>
                   <td class="description-cell">
-                    (Fabricator Report shall be as per Mil 551101 (Mil QML 31032) Group A & B Certificates for Rigid boards and Mil 50884 for Flexi boards (or) IPC 6012 Class 3 DS)
+                    (Fabricator Report shall be as per Mil 551101 (Mil QML
+                    31032) Group A & B Certificates for Rigid boards and Mil
+                    50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
                     <input type="text" v-model="formData.fabricatorReport.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
@@ -389,11 +401,11 @@
 import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'BarePcbInspectionReport',
+  name: "BarePcbInspectionReport",
   props: {
     readonly: {
       type: Boolean,
-      default: false
+      default: false,
     },
     reportId: {
       type: [String, Number],
@@ -402,42 +414,79 @@ export default {
   },
   data() {
     return {
-      projectName: '',
-      lruName: '',
-      serialNumber: 'SL-001',
-      inspectionCount: 'INS-001',
-      currentYear: '2025',
-      currentDate: new Date().toISOString().split('T')[0],
+      projectName: "",
+      lruName: "",
+      serialNumber: "SL-001",
+      inspectionCount: "INS-001",
+      currentYear: "2025",
+      currentDate: new Date().toISOString().split("T")[0],
       formData: {
-        projectName: '',
-        reportRefNo: '',
-        memoRefNo: '',
-        lruName: '',
-        inspectionStage: '',
-        testVenue: '',
-        dpName: '',
-        dated1: '',
-        dated2: '',
-        sruName: '',
-        partNo: '',
-        quantity: '',
-        slNos: '',
-        startDate: '',
-        endDate: '',
+        projectName: "",
+        reportRefNo: "",
+        memoRefNo: "",
+        lruName: "",
+        inspectionStage: "",
+        testVenue: "",
+        dpName: "",
+        dated1: "",
+        dated2: "",
+        sruName: "",
+        partNo: "",
+        quantity: "",
+        slNos: "",
+        startDate: "",
+        endDate: "",
         visualInspection: [
-          { parameter: 'CHECK FOR BONDING PROBLEM (DELAMINATION)', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR SOLDER MASK OPENINGS', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR BUBBLES ON PCB', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR ANY DAMAGE TO THE PCB', observation: '', remarks: '' },
-          { parameter: 'ALL THROUGH HOLES SHOULD BE CLEAR', observation: '', remarks: '' },
-          { parameter: 'ALL VIAS TO BE MASKED', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR SILK SCREEN (LEGEND) PRINTING', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR TRACKS NEAR MOUNTING HOLES', observation: '', remarks: '' },
-          { parameter: 'CHECK FOR PCB WARPAGE', observation: '', remarks: '' }
+          {
+            parameter: "CHECK FOR BONDING PROBLEM (DELAMINATION)",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR SOLDER MASK OPENINGS",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR BUBBLES ON PCB",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR ANY DAMAGE TO THE PCB",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "ALL THROUGH HOLES SHOULD BE CLEAR",
+            observation: "",
+            remarks: "",
+          },
+          { parameter: "ALL VIAS TO BE MASKED", observation: "", remarks: "" },
+          {
+            parameter: "CHECK FOR SILK SCREEN (LEGEND) PRINTING",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter:
+              "CHECK FOR PIN NO MARKING ON ICS, CONNECTORS & POLARITY OF DIODES, CAPACITORS etc.",
+            observation: "",
+            remarks: "",
+          },
+          {
+            parameter: "CHECK FOR TRACKS NEAR MOUNTING HOLES",
+            observation: "",
+            remarks: "",
+          },
+          { parameter: "CHECK FOR PCB WARPAGE", observation: "", remarks: "" },
         ],
         continuityCheck: [
-          { parameter: 'CHECK FOR VCC TO GROUND CONTINUITY', observation: '', remarks: '' }
+          {
+            parameter: "CHECK FOR VCC TO GROUND CONTINUITY",
+            observation: "",
+            remarks: "",
+          },
         ],
         fabricatorReport: {
           observation: '',
@@ -797,7 +846,7 @@ export default {
 }
 
 .document-path {
-  font-family: 'Courier New', monospace;
+  font-family: "Courier New", monospace;
   color: #4a5568;
   font-size: 0.9em;
   background: #f7fafc;
@@ -1186,20 +1235,33 @@ export default {
 }
 
 /* Readonly styles */
-input[readonly], select:disabled, input:disabled {
+input[readonly],
+select:disabled,
+input:disabled {
   background-color: #f8f9fa;
   color: #6c757d;
   cursor: not-allowed;
   opacity: 0.8;
 }
 
-input[readonly]:focus, select:disabled:focus {
+input[readonly]:focus,
+select:disabled:focus {
   outline: none;
   box-shadow: none;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .page-header {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .page-title {
+    font-size: 1.8em;
+  }
+
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
@@ -1209,29 +1271,28 @@ input[readonly]:focus, select:disabled:focus {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .signatures-layout {
     flex-direction: column;
     align-items: center;
     gap: 20px;
   }
-  
+
   .signature-item {
     max-width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .inspection-table-container {
     overflow-x: auto;
   }
-  
+
   .inspection-table {
     min-width: 800px;
   }
 }
 </style>
-

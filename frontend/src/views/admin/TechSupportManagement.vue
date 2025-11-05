@@ -337,25 +337,49 @@ export default {
         if (data.success) {
           if (data.duplicate) {
             // Request was already submitted, remove from offline anyway
-            this.offlineRequests = this.offlineRequests.filter(r => r.id !== requestId);
-            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(r => r.id !== requestId);
-            
+            this.offlineRequests = this.offlineRequests.filter(
+              (r) => r.id !== requestId
+            );
+            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(
+              (r) => r.id !== requestId
+            );
+
             // Update localStorage
-            const updatedOffline = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
-            const filteredOffline = updatedOffline.filter(r => r.id !== requestId);
-            localStorage.setItem('tech_support_offline', JSON.stringify(filteredOffline));
-            
-            this.showSuccessNotification(`Request was already submitted (ID: ${data.existing_request_id}). Removed from offline list.`);
+            const updatedOffline = JSON.parse(
+              localStorage.getItem("tech_support_offline") || "[]"
+            );
+            const filteredOffline = updatedOffline.filter(
+              (r) => r.id !== requestId
+            );
+            localStorage.setItem(
+              "tech_support_offline",
+              JSON.stringify(filteredOffline)
+            );
+
+            this.showSuccessNotification(
+              `Request was already submitted (ID: ${data.existing_request_id}). Removed from offline list.`
+            );
           } else {
             // Remove from offline requests
-            this.offlineRequests = this.offlineRequests.filter(r => r.id !== requestId);
-            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(r => r.id !== requestId);
-            
+            this.offlineRequests = this.offlineRequests.filter(
+              (r) => r.id !== requestId
+            );
+            this.filteredOfflineRequests = this.filteredOfflineRequests.filter(
+              (r) => r.id !== requestId
+            );
+
             // Update localStorage
-            const updatedOffline = JSON.parse(localStorage.getItem('tech_support_offline') || '[]');
-            const filteredOffline = updatedOffline.filter(r => r.id !== requestId);
-            localStorage.setItem('tech_support_offline', JSON.stringify(filteredOffline));
-            
+            const updatedOffline = JSON.parse(
+              localStorage.getItem("tech_support_offline") || "[]"
+            );
+            const filteredOffline = updatedOffline.filter(
+              (r) => r.id !== requestId
+            );
+            localStorage.setItem(
+              "tech_support_offline",
+              JSON.stringify(filteredOffline)
+            );
+
             this.showSuccessNotification(`Offline request synced successfully`);
           }
           await this.loadRequests(); // Reload online requests

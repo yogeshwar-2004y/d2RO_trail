@@ -110,14 +110,16 @@ export default {
         2: "/src/assets/images/Image5.jpg",
         3: "/src/assets/images/Image4.jpg",
         4: "/src/assets/images/Image2.png",
-        5: "/src/assets/images/Image1.png"
+        5: "/src/assets/images/Image1.png",
       };
       return defaults[imageNumber];
     },
 
     async loadGalleryImages() {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
+        const response = await fetch(
+          "http://127.0.0.1:5000/api/get-gallery-images"
+        );
         const data = await response.json();
         if (data.success && data.gallery_images) {
           this.galleryImageUrls = data.gallery_images;

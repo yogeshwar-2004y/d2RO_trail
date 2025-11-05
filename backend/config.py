@@ -45,6 +45,12 @@ class DatabaseConnection:
     def connect(self):
         """Establish database connection"""
         try:
+            # Close existing connection if it exists
+            if self.conn and not self.conn.closed:
+                try:
+                    self.conn.close()
+                except:
+                    pass
             self.conn = psycopg2.connect(**Config.DATABASE_CONFIG)
             print("Database connection established successfully")
         except Exception as e:
@@ -52,9 +58,29 @@ class DatabaseConnection:
             raise e
     
     def get_connection(self):
-        """Get database connection"""
-        if self.conn is None or self.conn.closed:
-            self.connect()
+        """Get database connection - reconnect if closed or stale"""
+        try:
+            # Check if connection exists and is valid
+            if self.conn is None or self.conn.closed:
+                self.connect()
+            else:
+                # Test connection with a simple query
+                try:
+                    cur = self.conn.cursor()
+                    cur.execute("SELECT 1")
+                    cur.fetchone()
+                    cur.close()
+                except (psycopg2.OperationalError, psycopg2.InterfaceError):
+                    # Connection is stale, reconnect
+                    print("Database connection is stale, reconnecting...")
+                    self.connect()
+        except Exception as e:
+            print(f"Error checking database connection: {str(e)}")
+            # Try to reconnect
+            try:
+                self.connect()
+            except:
+                raise e
         return self.conn
     
     def close(self):

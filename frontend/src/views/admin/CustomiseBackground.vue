@@ -19,7 +19,7 @@
     <div class="content-container">
       <div class="upload-section">
         <h2>Customise Login Page Gallery Images</h2>
-        
+
         <!-- Main Image Section - Fixed -->
         <div class="image-section">
           <h3>Main Banner Image (Fixed)</h3>
@@ -32,7 +32,8 @@
         <div class="gallery-section">
           <h3>Gallery Images (Customizable)</h3>
           <p class="section-description">
-            You can customize the 5 gallery images displayed at the bottom of the login page
+            You can customize the 5 gallery images displayed at the bottom of
+            the login page
           </p>
 
           <div class="gallery-images-grid">
@@ -40,8 +41,10 @@
             <div class="gallery-image-item">
               <h4>Gallery Image 1</h4>
               <div class="current-image-preview">
-                <img 
-                  :src="currentGalleryImages.image_1 || defaultImageUrls.image_1" 
+                <img
+                  :src="
+                    currentGalleryImages.image_1 || defaultImageUrls.image_1
+                  "
                   alt="Gallery Image 1"
                 />
                 <span class="label">Current</span>
@@ -55,25 +58,28 @@
                   style="display: none"
                 />
                 <button @click="triggerFileInput(1)" class="upload-btn">
-                  {{ uploadingImage === 1 ? 'Uploading...' : 'Upload New' }}
+                  {{ uploadingImage === 1 ? "Uploading..." : "Upload New" }}
                 </button>
-                <button 
-                  v-if="currentGalleryImages.image_1" 
+                <button
+                  v-if="currentGalleryImages.image_1"
                   @click="resetGalleryImage(1)"
                   :disabled="uploadingImage === 1"
                   class="reset-btn"
                 >
                   Reset to Default
                 </button>
-                <button 
-                  v-if="selectedFiles[1]" 
+                <button
+                  v-if="selectedFiles[1]"
                   @click="uploadGalleryImage(1)"
                   :disabled="uploadingImage === 1"
                   class="confirm-btn"
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[1] && previewUrls[1]" class="preview-box">
+                <div
+                  v-if="selectedFiles[1] && previewUrls[1]"
+                  class="preview-box"
+                >
                   <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[1]" alt="Preview" />
                 </div>
@@ -84,8 +90,10 @@
             <div class="gallery-image-item">
               <h4>Gallery Image 2</h4>
               <div class="current-image-preview">
-                <img 
-                  :src="currentGalleryImages.image_2 || defaultImageUrls.image_2" 
+                <img
+                  :src="
+                    currentGalleryImages.image_2 || defaultImageUrls.image_2
+                  "
                   alt="Gallery Image 2"
                 />
                 <span class="label">Current</span>
@@ -99,25 +107,28 @@
                   style="display: none"
                 />
                 <button @click="triggerFileInput(2)" class="upload-btn">
-                  {{ uploadingImage === 2 ? 'Uploading...' : 'Upload New' }}
+                  {{ uploadingImage === 2 ? "Uploading..." : "Upload New" }}
                 </button>
-                <button 
-                  v-if="currentGalleryImages.image_2" 
+                <button
+                  v-if="currentGalleryImages.image_2"
                   @click="resetGalleryImage(2)"
                   :disabled="uploadingImage === 2"
                   class="reset-btn"
                 >
                   Reset to Default
                 </button>
-                <button 
-                  v-if="selectedFiles[2]" 
+                <button
+                  v-if="selectedFiles[2]"
                   @click="uploadGalleryImage(2)"
                   :disabled="uploadingImage === 2"
                   class="confirm-btn"
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[2] && previewUrls[2]" class="preview-box">
+                <div
+                  v-if="selectedFiles[2] && previewUrls[2]"
+                  class="preview-box"
+                >
                   <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[2]" alt="Preview" />
                 </div>
@@ -128,8 +139,10 @@
             <div class="gallery-image-item">
               <h4>Gallery Image 3</h4>
               <div class="current-image-preview">
-                <img 
-                  :src="currentGalleryImages.image_3 || defaultImageUrls.image_3" 
+                <img
+                  :src="
+                    currentGalleryImages.image_3 || defaultImageUrls.image_3
+                  "
                   alt="Gallery Image 3"
                 />
                 <span class="label">Current</span>
@@ -143,25 +156,28 @@
                   style="display: none"
                 />
                 <button @click="triggerFileInput(3)" class="upload-btn">
-                  {{ uploadingImage === 3 ? 'Uploading...' : 'Upload New' }}
+                  {{ uploadingImage === 3 ? "Uploading..." : "Upload New" }}
                 </button>
-                <button 
-                  v-if="currentGalleryImages.image_3" 
+                <button
+                  v-if="currentGalleryImages.image_3"
                   @click="resetGalleryImage(3)"
                   :disabled="uploadingImage === 3"
                   class="reset-btn"
                 >
                   Reset to Default
                 </button>
-                <button 
-                  v-if="selectedFiles[3]" 
+                <button
+                  v-if="selectedFiles[3]"
                   @click="uploadGalleryImage(3)"
                   :disabled="uploadingImage === 3"
                   class="confirm-btn"
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[3] && previewUrls[3]" class="preview-box">
+                <div
+                  v-if="selectedFiles[3] && previewUrls[3]"
+                  class="preview-box"
+                >
                   <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[3]" alt="Preview" />
                 </div>
@@ -172,8 +188,10 @@
             <div class="gallery-image-item">
               <h4>Gallery Image 4</h4>
               <div class="current-image-preview">
-                <img 
-                  :src="currentGalleryImages.image_4 || defaultImageUrls.image_4" 
+                <img
+                  :src="
+                    currentGalleryImages.image_4 || defaultImageUrls.image_4
+                  "
                   alt="Gallery Image 4"
                 />
                 <span class="label">Current</span>
@@ -187,25 +205,28 @@
                   style="display: none"
                 />
                 <button @click="triggerFileInput(4)" class="upload-btn">
-                  {{ uploadingImage === 4 ? 'Uploading...' : 'Upload New' }}
+                  {{ uploadingImage === 4 ? "Uploading..." : "Upload New" }}
                 </button>
-                <button 
-                  v-if="currentGalleryImages.image_4" 
+                <button
+                  v-if="currentGalleryImages.image_4"
                   @click="resetGalleryImage(4)"
                   :disabled="uploadingImage === 4"
                   class="reset-btn"
                 >
                   Reset to Default
                 </button>
-                <button 
-                  v-if="selectedFiles[4]" 
+                <button
+                  v-if="selectedFiles[4]"
                   @click="uploadGalleryImage(4)"
                   :disabled="uploadingImage === 4"
                   class="confirm-btn"
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[4] && previewUrls[4]" class="preview-box">
+                <div
+                  v-if="selectedFiles[4] && previewUrls[4]"
+                  class="preview-box"
+                >
                   <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[4]" alt="Preview" />
                 </div>
@@ -216,8 +237,10 @@
             <div class="gallery-image-item">
               <h4>Gallery Image 5</h4>
               <div class="current-image-preview">
-                <img 
-                  :src="currentGalleryImages.image_5 || defaultImageUrls.image_5" 
+                <img
+                  :src="
+                    currentGalleryImages.image_5 || defaultImageUrls.image_5
+                  "
                   alt="Gallery Image 5"
                 />
                 <span class="label">Current</span>
@@ -231,25 +254,28 @@
                   style="display: none"
                 />
                 <button @click="triggerFileInput(5)" class="upload-btn">
-                  {{ uploadingImage === 5 ? 'Uploading...' : 'Upload New' }}
+                  {{ uploadingImage === 5 ? "Uploading..." : "Upload New" }}
                 </button>
-                <button 
-                  v-if="currentGalleryImages.image_5" 
+                <button
+                  v-if="currentGalleryImages.image_5"
                   @click="resetGalleryImage(5)"
                   :disabled="uploadingImage === 5"
                   class="reset-btn"
                 >
                   Reset to Default
                 </button>
-                <button 
-                  v-if="selectedFiles[5]" 
+                <button
+                  v-if="selectedFiles[5]"
                   @click="uploadGalleryImage(5)"
                   :disabled="uploadingImage === 5"
                   class="confirm-btn"
                 >
                   Confirm
                 </button>
-                <div v-if="selectedFiles[5] && previewUrls[5]" class="preview-box">
+                <div
+                  v-if="selectedFiles[5] && previewUrls[5]"
+                  class="preview-box"
+                >
                   <p class="preview-label">Preview:</p>
                   <img :src="previewUrls[5]" alt="Preview" />
                 </div>
@@ -410,7 +436,9 @@ export default {
 
     async loadGalleryImages() {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/get-gallery-images");
+        const response = await fetch(
+          "http://127.0.0.1:5000/api/get-gallery-images"
+        );
         const data = await response.json();
         if (data.success && data.gallery_images) {
           this.currentGalleryImages = data.gallery_images;
@@ -425,7 +453,7 @@ export default {
       this.messageType = type;
       setTimeout(() => {
         this.message = "";
-      }, 5000);
+      }, 8000);
     },
   },
 

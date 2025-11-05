@@ -1,17 +1,29 @@
 <template>
   <div class="notification-badge-container">
     <button class="notification-bell" @click="toggleNotifications">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
       </svg>
       <span v-if="unreadCount > 0" class="badge">{{ unreadCount }}</span>
     </button>
-    
+
     <div v-if="showDropdown" class="notification-dropdown">
       <div class="dropdown-header">
         <h3>Notifications</h3>
-        <span v-if="unreadCount > 0" class="unread-count">{{ unreadCount }} unread</span>
+        <span v-if="unreadCount > 0" class="unread-count"
+          >{{ unreadCount }} unread</span
+        >
       </div>
       <div class="dropdown-content">
         <div v-if="loading" class="loading">Loading...</div>
@@ -20,21 +32,25 @@
           No notifications
         </div>
         <div v-else>
-          <div 
-            v-for="notification in notifications.slice(0, 5)" 
+          <div
+            v-for="notification in notifications.slice(0, 5)"
             :key="notification.activity_id"
             class="notification-item"
-            :class="{ 'unread': !notification.is_read }"
+            :class="{ unread: !notification.is_read }"
             @click="viewNotification(notification)"
           >
             <div class="notification-content">
               <strong>{{ notification.activity_performed }}</strong>
               <p>{{ notification.additional_info }}</p>
-              <span class="notification-time">{{ formatTime(notification.timestamp) }}</span>
+              <span class="notification-time">{{
+                formatTime(notification.timestamp)
+              }}</span>
             </div>
           </div>
           <div v-if="notifications.length > 5" class="view-all">
-            <router-link to="/notifications" @click="toggleNotifications">View all notifications</router-link>
+            <router-link to="/notifications" @click="toggleNotifications"
+              >View all notifications</router-link
+            >
           </div>
         </div>
       </div>
@@ -43,10 +59,10 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore';
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'NotificationBadge',
+  name: "NotificationBadge",
   data() {
     return {
       notifications: [],
@@ -54,53 +70,58 @@ export default {
       loading: false,
       error: null,
       showDropdown: false,
-      refreshInterval: null
+      refreshInterval: null,
     };
   },
   async mounted() {
     await this.fetchNotifications();
     // Poll for new notifications every 30 seconds
     this.refreshInterval = setInterval(this.fetchNotifications, 30000);
-    
+
     // Close dropdown when clicking outside
-    document.addEventListener('click', this.handleClickOutside);
+    document.addEventListener("click", this.handleClickOutside);
   },
   beforeUnmount() {
     if (this.refreshInterval) {
       clearInterval(this.refreshInterval);
     }
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
     async fetchNotifications() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         const currentUser = userStore.getters.currentUser();
-        
+
         if (!currentUser || !currentUser.id) {
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.id}?limit=10&unread_only=false`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${currentUser.id}?limit=10&unread_only=false`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
         if (data.success) {
           this.notifications = data.notifications;
-          this.unreadCount = this.notifications.filter(n => !n.is_read).length;
+          this.unreadCount = this.notifications.filter(
+            (n) => !n.is_read
+          ).length;
         } else {
-          this.error = data.message || 'Failed to fetch notifications';
+          this.error = data.message || "Failed to fetch notifications";
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
-        this.error = 'Failed to load notifications';
+        console.error("Error fetching notifications:", error);
+        this.error = "Failed to load notifications";
       } finally {
         this.loading = false;
       }
@@ -112,7 +133,7 @@ export default {
       }
     },
     handleClickOutside(event) {
-      if (!event.target.closest('.notification-badge-container')) {
+      if (!event.target.closest(".notification-badge-container")) {
         this.showDropdown = false;
       }
     },
@@ -120,44 +141,49 @@ export default {
       if (!notification.is_read) {
         await this.markAsRead(notification.activity_id);
       }
-      this.$router.push('/notifications');
+      this.$router.push("/notifications");
       this.showDropdown = false;
     },
     async markAsRead(notificationId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/mark-read`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${notificationId}/mark-read`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
         if (data.success) {
-          const notif = this.notifications.find(n => n.activity_id === notificationId);
+          const notif = this.notifications.find(
+            (n) => n.activity_id === notificationId
+          );
           if (notif) {
             notif.is_read = true;
             this.unreadCount--;
           }
         }
       } catch (error) {
-        console.error('Error marking notification as read:', error);
+        console.error("Error marking notification as read:", error);
       }
     },
     formatTime(timestamp) {
-      if (!timestamp) return '';
+      if (!timestamp) return "";
       const date = new Date(timestamp);
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
-      
-      if (diffMins < 1) return 'Just now';
+
+      if (diffMins < 1) return "Just now";
       if (diffMins < 60) return `${diffMins}m ago`;
       if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
       return date.toLocaleDateString();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -309,4 +335,3 @@ export default {
   text-decoration: underline;
 }
 </style>
-

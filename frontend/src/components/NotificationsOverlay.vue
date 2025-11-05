@@ -5,12 +5,25 @@
       <div class="overlay-header">
         <div class="header-content">
           <h2>Notifications</h2>
-          <span v-if="filteredNotifications.filter(n => !n.is_read).length > 0" class="unread-badge">
-            {{ filteredNotifications.filter(n => !n.is_read).length }} unread
+          <span
+            v-if="filteredNotifications.filter((n) => !n.is_read).length > 0"
+            class="unread-badge"
+          >
+            {{ filteredNotifications.filter((n) => !n.is_read).length }} unread
           </span>
         </div>
         <button class="close-button" @click="close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -22,46 +35,91 @@
         <div v-if="loading" class="loading-state">
           <p>Loading notifications...</p>
         </div>
-        
+
         <div v-else-if="error" class="error-state">
           <p>{{ error }}</p>
           <button @click="fetchNotifications" class="retry-btn">Retry</button>
         </div>
-        
+
         <div v-else-if="filteredNotifications.length === 0" class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
           <p>No notifications</p>
         </div>
-        
+
         <div v-else class="notifications-list">
-          <div 
-            v-for="notification in filteredNotifications" 
+          <div
+            v-for="notification in filteredNotifications"
             :key="notification.activity_id"
             class="notification-item"
-            :class="{ 'unread': !notification.is_read }"
+            :class="{ unread: !notification.is_read }"
           >
             <div class="notification-icon">
-              <svg v-if="!notification.is_read" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                v-if="!notification.is_read"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
               </svg>
             </div>
-            <div class="notification-content" @click="viewNotification(notification)">
+            <div
+              class="notification-content"
+              @click="viewNotification(notification)"
+            >
               <div class="notification-header">
                 <h4>{{ notification.activity_performed }}</h4>
-                <span class="notification-time">{{ formatTime(notification.timestamp) }}</span>
+                <span class="notification-time">{{
+                  formatTime(notification.timestamp)
+                }}</span>
               </div>
-              <p class="notification-details">{{ notification.additional_info }}</p>
+              <p class="notification-details">
+                {{ notification.additional_info }}
+              </p>
               <div class="notification-meta">
-                <span class="notification-from">{{ notification.performed_by_name || 'Unknown' }}</span>
-                <span v-if="notification.project_name" class="notification-project">{{ notification.project_name }}</span>
+                <span class="notification-from">{{
+                  notification.performed_by_name || "Unknown"
+                }}</span>
+                <span
+                  v-if="notification.project_name"
+                  class="notification-project"
+                  >{{ notification.project_name }}</span
+                >
               </div>
             </div>
             <div v-if="!notification.is_read" class="notification-actions">
-              <button class="mark-read-btn" @click.stop="markAsReadAndRemove(notification)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <button
+                class="mark-read-btn"
+                @click.stop="markAsReadAndRemove(notification)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
                 Mark as Read
@@ -75,42 +133,42 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore';
+import { userStore } from "@/stores/userStore";
 
 export default {
-  name: 'NotificationsOverlay',
+  name: "NotificationsOverlay",
   props: {
     isOpen: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
-  emits: ['close'],
+  emits: ["close"],
   data() {
     return {
       notifications: [],
       unreadCount: 0,
       loading: false,
       error: null,
-      refreshInterval: null
+      refreshInterval: null,
     };
   },
   computed: {
     filteredNotifications() {
       const oneHourAgo = new Date();
       oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-      
-      return this.notifications.filter(notification => {
+
+      return this.notifications.filter((notification) => {
         // Always show unread notifications
         if (!notification.is_read) {
           return true;
         }
-        
+
         // For read notifications, show only if marked as read within the last hour
         const timestamp = new Date(notification.timestamp);
         return timestamp >= oneHourAgo;
       });
-    }
+    },
   },
   watch: {
     isOpen(newVal) {
@@ -120,7 +178,7 @@ export default {
       } else {
         this.stopAutoRefresh();
       }
-    }
+    },
   },
   async mounted() {
     if (this.isOpen) {
@@ -135,21 +193,24 @@ export default {
     async fetchNotifications() {
       this.loading = true;
       this.error = null;
-      
+
       try {
         const currentUser = userStore.getters.currentUser();
-        
+
         if (!currentUser || !currentUser.id) {
-          this.error = 'User not logged in';
+          this.error = "User not logged in";
           return;
         }
 
-        const response = await fetch(`http://localhost:5000/api/notifications/${currentUser.id}?limit=50`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${currentUser.id}?limit=50`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
@@ -157,8 +218,8 @@ export default {
           // Filter read notifications older than 1 hour
           const oneHourAgo = new Date();
           oneHourAgo.setHours(oneHourAgo.getHours() - 1);
-          
-          this.notifications = data.notifications.filter(notification => {
+
+          this.notifications = data.notifications.filter((notification) => {
             // Always include unread notifications
             if (!notification.is_read) {
               return true;
@@ -167,14 +228,16 @@ export default {
             const timestamp = new Date(notification.timestamp);
             return timestamp >= oneHourAgo;
           });
-          
-          this.unreadCount = this.notifications.filter(n => !n.is_read).length;
+
+          this.unreadCount = this.notifications.filter(
+            (n) => !n.is_read
+          ).length;
         } else {
-          this.error = data.message || 'Failed to fetch notifications';
+          this.error = data.message || "Failed to fetch notifications";
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
-        this.error = 'Failed to load notifications';
+        console.error("Error fetching notifications:", error);
+        this.error = "Failed to load notifications";
       } finally {
         this.loading = false;
       }
@@ -187,24 +250,29 @@ export default {
     },
     async markAsRead(notificationId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/notifications/${notificationId}/mark-read`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
+        const response = await fetch(
+          `http://localhost:5000/api/notifications/${notificationId}/mark-read`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
           }
-        });
+        );
 
         const data = await response.json();
 
         if (data.success) {
-          const notif = this.notifications.find(n => n.activity_id === notificationId);
+          const notif = this.notifications.find(
+            (n) => n.activity_id === notificationId
+          );
           if (notif) {
             notif.is_read = true;
             this.unreadCount--;
           }
         }
       } catch (error) {
-        console.error('Error marking notification as read:', error);
+        console.error("Error marking notification as read:", error);
       }
     },
     async markAsReadAndRemove(notification) {
@@ -212,13 +280,13 @@ export default {
       await this.markAsRead(notification.activity_id);
     },
     formatTime(timestamp) {
-      if (!timestamp) return '';
+      if (!timestamp) return "";
       const date = new Date(timestamp);
       const now = new Date();
       const diffMs = now - date;
       const diffMins = Math.floor(diffMs / 60000);
-      
-      if (diffMins < 1) return 'Just now';
+
+      if (diffMins < 1) return "Just now";
       if (diffMins < 60) return `${diffMins}m ago`;
       if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
       return date.toLocaleDateString();
@@ -233,14 +301,14 @@ export default {
       }
     },
     close() {
-      this.$emit('close');
+      this.$emit("close");
     },
     closeOnOverlay(event) {
       if (event.target === event.currentTarget) {
         this.close();
       }
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -539,10 +607,9 @@ export default {
     max-height: 90vh;
     margin: 10px;
   }
-  
+
   .notifications-overlay {
     padding: 10px;
   }
 }
 </style>
-

@@ -150,9 +150,15 @@ export default {
 
         if (data.success) {
           if (data.duplicate) {
-            this.showSuccessMessage(`This request already exists (ID: ${data.existing_request_id}). Current status: ${data.existing_status.toUpperCase()}`);
+            this.showSuccessMessage(
+              `This request already exists (ID: ${
+                data.existing_request_id
+              }). Current status: ${data.existing_status.toUpperCase()}`
+            );
           } else {
-            this.showSuccessMessage("Your technical support request has been submitted successfully. We will get back to you soon.");
+            this.showSuccessMessage(
+              "Your technical support request has been submitted successfully. We will get back to you soon."
+            );
           }
           this.resetForm();
           setTimeout(() => this.goBack(), 2000);
@@ -252,7 +258,7 @@ export default {
       // Auto-hide after 5 seconds
       setTimeout(() => {
         this.hideSuccessMessage();
-      }, 5000);
+      }, 8000);
     },
 
     hideSuccessMessage() {

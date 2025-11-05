@@ -22,9 +22,23 @@
       <h1 class="form-title">REQUISITION FOR DGAQA INSPECTION</h1>
       <div class="header-actions">
         <div class="view-only-badge">VIEW ONLY</div>
-        <button class="download-pdf-btn" @click="downloadMemoPDF" title="Download PDF">
-          <svg class="icon download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+        <button
+          class="download-pdf-btn"
+          @click="downloadMemoPDF"
+          title="Download PDF"
+        >
+          <svg
+            class="icon download"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"
+            />
           </svg>
           <span class="download-text">Download PDF</span>
         </button>
@@ -902,7 +916,8 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
-import html2pdf from 'html2pdf.js';
+// Dynamic import for html2pdf to avoid blocking app initialization
+let html2pdf;
 
 export default {
   name: "ViewOnlyMemoForm",
@@ -1633,12 +1648,18 @@ export default {
     // Download memo PDF
     async downloadMemoPDF() {
       try {
-        console.log(`Downloading PDF for memo ID: ${this.id}`);
+        // Dynamically import html2pdf to avoid blocking app initialization
+        if (!html2pdf) {
+          const html2pdfModule = await import('html2pdf.js');
+          html2pdf = html2pdfModule.default || html2pdfModule;
+        }
         
+        console.log(`Downloading PDF for memo ID: ${this.id}`);
+
         // Show loading state
-        const button = event.target.closest('.download-pdf-btn');
-        const originalText = button.querySelector('.download-text').textContent;
-        button.querySelector('.download-text').textContent = 'Loading...';
+        const button = event.target.closest(".download-pdf-btn");
+        const originalText = button.querySelector(".download-text").textContent;
+        button.querySelector(".download-text").textContent = "Loading...";
         button.disabled = true;
         
         // Get the element you want to convert (the main memo content)
@@ -1673,15 +1694,14 @@ export default {
         await html2pdf().set(opt).from(element).save();
         
         console.log(`PDF downloaded successfully for memo ${this.id}`);
-        
       } catch (error) {
-        console.error('Error downloading memo PDF:', error);
+        console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
         const button = event.target.closest('.download-pdf-btn');
         if (button) {
-          button.querySelector('.download-text').textContent = originalText;
+          button.querySelector(".download-text").textContent = originalText;
           button.disabled = false;
         }
       }
