@@ -777,83 +777,6 @@ export default {
   background: #f5f5f5;
 }
 
-/* Header */
-.page-header {
-  background: #2d3748;
-  padding: 20px 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.back-button {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  color: white;
-}
-
-.back-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.05);
-}
-
-.app-logo {
-  width: 120px;
-  height: auto;
-  filter: brightness(0) invert(1);
-}
-
-.header-center {
-  flex: 1;
-  text-align: center;
-}
-
-.page-title {
-  color: white;
-  font-size: 2.2em;
-  font-weight: 700;
-  margin: 0;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.export-button {
-  background: rgba(255, 255, 255, 0.95);
-  border: none;
-  border-radius: 25px;
-  padding: 12px 20px;
-  font-weight: 600;
-  color: #4a5568;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.export-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  background: white;
-}
-
 /* Main Content */
 .main-content {
   max-width: 1200px;
@@ -925,13 +848,6 @@ export default {
   font-weight: 600;
 }
 
-/* Form Grid */
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-}
-
 /* General Info Grid */
 .general-info-grid {
   display: grid;
@@ -974,57 +890,6 @@ export default {
   outline: none;
   border-color: #4a5568;
   box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.dimensions-input {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.dimensions-input input {
-  flex: 1;
-}
-
-.dimensions-input span {
-  font-weight: bold;
-  color: #4a5568;
-}
-
-/* Criteria Grid */
-.criteria-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.criteria-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 15px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-}
-
-.criteria-item label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #4a5568;
-}
-
-.criteria-item input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #4a5568;
 }
 
 /* Inspection Table */
@@ -1090,30 +955,6 @@ export default {
 .inspection-table input[type="file"] {
   font-size: 0.8em;
   padding: 4px;
-}
-
-.add-item-btn {
-  background: #4a5568;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-  margin-top: 15px;
-  transition: all 0.3s ease;
-}
-
-.add-item-btn:hover {
-  background: #2d3748;
-  transform: translateY(-1px);
-}
-
-/* Assessment Grid */
-.assessment-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
 }
 
 /* Signatures */
@@ -1338,16 +1179,6 @@ export default {
   transform: translateY(-1px);
 }
 
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: translateY(-1px);
-}
-
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -1369,31 +1200,9 @@ input[readonly]:focus, select:disabled:focus {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .page-header {
-    padding: 15px 20px;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .page-title {
-    font-size: 1.8em;
-  }
-  
   .main-content {
     padding: 0 20px;
     margin: 20px auto;
-  }
-  
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .criteria-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .signatures-grid {
-    grid-template-columns: 1fr;
   }
   
   .general-info-grid {

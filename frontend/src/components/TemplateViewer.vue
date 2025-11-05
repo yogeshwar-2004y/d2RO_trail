@@ -85,7 +85,7 @@
 
 <script>
 import ObservationReport from '@/templates/ObservationReport.vue'
-import BarePcbInspectionReport from '@/templates/barepcbinspectionreport.vue'
+import BarePcbInspectionReport from '@/templates/BarePcbInspectionReport.vue'
 import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
 import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
 import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
