@@ -21,6 +21,17 @@ const showSidebar = computed(() => {
   return route.name !== "login" && route.name !== "TechSupport";
 });
 
+// Check if current route is login or dashboard
+// const isLoginOrDashboard = computed(() => {
+//   const routeName = route.name;
+//   return routeName === "login" || 
+//          routeName === "HomePageAdmin" || 
+//          routeName === "HomePageReviewer" || 
+//          routeName === "HomePageQAHead" || 
+//          routeName === "HomePageDesignHead" || 
+//          routeName === "HomePageDesigner";
+// });
+
 // Computed sidebar width based on collapsed state
 const sidebarWidth = computed(() => {
   if (!showSidebar.value) return 0;
