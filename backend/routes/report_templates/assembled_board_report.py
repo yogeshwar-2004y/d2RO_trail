@@ -1,10 +1,10 @@
 # Assembled Board Inspection Report Routes
 
+import os
+import uuid
 from flask import Blueprint, request, jsonify
 from config import get_db_connection, Config
 from utils.helpers import handle_database_error
-import os
-import uuid
 from utils.helpers import handle_database_error, allowed_file, validate_file_size
 
 # Create blueprint for conformal coating inspection reports
@@ -432,6 +432,7 @@ def get_assembled_board_report_by_report_card(report_card_id):
         
         if not has_report_card_id:
             cur.close()
+            conn.close()
             return jsonify({"success": False, "message": "Report not found"}), 404
         
         cur.execute("""
@@ -453,6 +454,7 @@ def get_assembled_board_report_by_report_card(report_card_id):
         
         report = cur.fetchone()
         cur.close()
+        conn.close()
         
         if not report:
             return jsonify({"success": False, "message": "Report not found"}), 404

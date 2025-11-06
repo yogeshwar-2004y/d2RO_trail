@@ -301,7 +301,7 @@ def get_conformal_coating_inspection_report(report_id):
         if not report:
             cur.execute("""
                 SELECT * FROM conformal_coating_inspection_report 
-                WHERE original_report_id = %s
+                WHERE report_card_id = %s
             """, (report_id,))
             report = cur.fetchone()
         
