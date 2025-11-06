@@ -21,7 +21,7 @@
 
       <div class="header-actions">
         <button class="action-btn" @click="goToManageProjects">
-          Manage Projects
+          View Projects
         </button>
         <button class="action-btn" @click="goToUpdateProject">
           Update existing project
