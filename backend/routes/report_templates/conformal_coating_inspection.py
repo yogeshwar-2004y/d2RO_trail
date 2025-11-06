@@ -9,7 +9,6 @@ from utils.helpers import handle_database_error
 # Create blueprint for conformal coating inspection reports
 conformal_coating_bp = Blueprint('conformal_coating', __name__)
 
-
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection', methods=['POST'])
 def create_conformal_coating_inspection_report():
     """Create a new conformal coating inspection report"""
@@ -279,7 +278,6 @@ def create_conformal_coating_inspection_report():
             "message": f"Error processing request: {str(e)}"
         }), 500
 
-
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection/<int:report_id>', methods=['GET'])
 def get_conformal_coating_inspection_report(report_id):
     """Get conformal coating inspection report details
@@ -336,7 +334,6 @@ def get_conformal_coating_inspection_report(report_id):
     except Exception as e:
         print(f"Error fetching conformal coating inspection report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching conformal coating inspection report: {str(e)}")
-
 
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection/<int:report_id>', methods=['PUT'])
 def update_conformal_coating_inspection_report(report_id):
@@ -474,7 +471,6 @@ def update_conformal_coating_inspection_report(report_id):
         if conn:
             conn.close()
 
-
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection/notify', methods=['POST'])
 def notify_qa_heads_conformal_coating():
     """Notify QA Heads when a conformal coating inspection report is submitted"""
@@ -550,7 +546,6 @@ def notify_qa_heads_conformal_coating():
     except Exception as e:
         print(f"Error notifying QA Heads for conformal coating report: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error notifying QA Heads: {str(e)}")
-
 
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection/notify-approval', methods=['POST'])
 def notify_qa_heads_approval_conformal_coating():
@@ -672,7 +667,6 @@ def notify_qa_heads_approval_conformal_coating():
     except Exception as e:
         print(f"Error notifying QA Heads for conformal coating report approval: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error notifying QA Heads for approval: {str(e)}")
-
 
 @conformal_coating_bp.route('/api/reports/conformal-coating-inspection', methods=['GET'])
 def get_conformal_coating_inspection_reports():

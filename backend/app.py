@@ -1,6 +1,4 @@
-"""
-Main Flask application with modular structure using blueprints
-"""
+# ------------------ Main Application Entry Point ------------------ #
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -23,6 +21,9 @@ from routes.report_templates.assembled_board_report import assembled_board_bp
 from routes.report_templates.conformal_coating_inspection import conformal_coating_bp
 from routes.report_templates.mechanical_inspection import mechanical_inspection_bp
 from routes.report_templates.kit_of_parts import kit_of_parts_bp
+from routes.report_templates.cots_screening_inspection import cots_screening_bp
+from routes.report_templates.bare_pcb_inspection import bare_pcb_bp
+from routes.report_templates.raw_material_inspection import raw_material_bp
 from routes.login_logs import login_logs_bp
 from routes.tech_support import tech_support_bp
 
@@ -40,9 +41,6 @@ def create_app():
     # Create upload directories
     create_upload_directories()
     
-    # Initialize database - DISABLED: Tables are managed manually in pgAdmin
-    # initialize_database()
-    
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(projects_bp)
@@ -59,6 +57,9 @@ def create_app():
     app.register_blueprint(kit_of_parts_bp)
     app.register_blueprint(login_logs_bp)
     app.register_blueprint(tech_support_bp)
+    app.register_blueprint(cots_screening_bp)
+    app.register_blueprint(bare_pcb_bp)
+    app.register_blueprint(raw_material_bp)
     
     return app
 
@@ -113,7 +114,6 @@ def get_reviewers():
         # Don't close conn - it's a shared global connection
 
 # Comments and Annotations API Endpoints
-
 # Get comments for a document
 @app.route('/api/comments', methods=['GET'])
 def get_comments():
@@ -736,74 +736,6 @@ def reject_comment(comment_id):
             except:
                 pass
 
-# Test endpoint to check database tables
-@app.route('/api/test-db', methods=['GET'])
-def test_database():
-    """Test endpoint to check if database tables exist and are accessible"""
-    conn = None
-    cur = None
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-        
-        # Check if document_comments table exists
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_name = 'document_comments'
-            );
-        """)
-        comments_table_exists = cur.fetchone()[0]
-        
-        # Check if document_annotations table exists
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_name = 'document_annotations'
-            );
-        """)
-        annotations_table_exists = cur.fetchone()[0]
-        
-        # Get table schemas
-        cur.execute("""
-            SELECT column_name, data_type, is_nullable
-            FROM information_schema.columns 
-            WHERE table_name = 'document_comments'
-            ORDER BY ordinal_position;
-        """)
-        comments_schema = cur.fetchall()
-        
-        cur.execute("""
-            SELECT column_name, data_type, is_nullable
-            FROM information_schema.columns 
-            WHERE table_name = 'document_annotations'
-            ORDER BY ordinal_position;
-        """)
-        annotations_schema = cur.fetchall()
-        
-        return jsonify({
-            "success": True,
-            "tables": {
-                "document_comments": {
-                    "exists": comments_table_exists,
-                    "schema": [{"column": row[0], "type": row[1], "nullable": row[2]} for row in comments_schema]
-                },
-                "document_annotations": {
-                    "exists": annotations_table_exists,
-                    "schema": [{"column": row[0], "type": row[1], "nullable": row[2]} for row in annotations_schema]
-                }
-            }
-        })
-        
-    except Exception as e:
-        return jsonify({"success": False, "message": f"Database test failed: {str(e)}"}), 500
-    finally:
-        if cur:
-            try:
-                cur.close()
-            except:
-                pass
-        # Don't close conn - it's a shared global connection
 
 if __name__ == '__main__':
     app.run(debug=True, host='127.0.0.1', port=8000)
