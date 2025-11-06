@@ -50,7 +50,7 @@ frontend/cypress.config.js
 frontend/test-results.json
 
 # Root directory reports and documentation
-reports/
+
 TEST_FIXES_SUMMARY.md
 TEST_SETUP_SUMMARY.md
 

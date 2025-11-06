@@ -7,7 +7,6 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, send_file
 from config import get_db_connection, Config
 from utils.helpers import handle_database_error, allowed_file, validate_file_size
-import json
 from config import get_db_connection
 from utils.helpers import handle_database_error
 
