@@ -19,69 +19,165 @@
       <!-- Inspection Form -->
       <form @submit.prevent="submitForm" class="inspection-form">
         <div class="report-container">
-          <div class="report-info">
-            <div>
-              <strong>Project Name:</strong>
-              <input
-                v-model="projectName"
-                type="text"
-                :disabled="isFormReadonly"
-              />
-            </div>
-            <div>
-              <strong>Report Ref No:</strong>
-              <input
-                v-model="reportRefNo"
-                type="text"
-                :disabled="isFormReadonly"
-              />
-            </div>
-            <div>
-              <strong>DP Name:</strong>
-              <input v-model="dpName" type="text" :disabled="isFormReadonly" />
-            </div>
-            <div>
-              <strong>Part No:</strong>
-              <input v-model="partNo" type="text" :disabled="isFormReadonly" />
-            </div>
-            <div>
-              <strong>SL No's:</strong>
-              <input v-model="slNo" type="text" :disabled="isFormReadonly" />
-            </div>
-            <div>
-              <strong>End Date:</strong>
-              <input v-model="endDate" type="date" :disabled="isFormReadonly" />
-            </div>
-            <div>
-              <strong>SRU Name:</strong>
-              <input v-model="sruName" type="text" :disabled="isFormReadonly" />
-            </div>
-            <div>
-              <strong>Start Date:</strong>
-              <input
-                v-model="startDate"
-                type="date"
-                :disabled="isFormReadonly"
-              />
-            </div>
-            <div>
-              <strong>Inspection Stage:</strong>
-              <input
-                v-model="inspectionStage"
-                type="text"
-                :disabled="isFormReadonly"
-              />
-            </div>
-            <div>
-              <strong>Test Venue:</strong>
-              <input
-                v-model="testVenue"
-                type="text"
-                :disabled="isFormReadonly"
-              />
+          <!-- Report Details Section -->
+          <div class="form-section">
+            <h2 class="section-title">Report Details</h2>
+            <div class="general-info-grid">
+              <!-- Left Column -->
+              <div class="info-column">
+                <div class="form-group">
+                  <label for="projectName">Project Name:</label>
+                  <input
+                    type="text"
+                    id="projectName"
+                    v-model="projectName"
+                    :disabled="isFormReadonly"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="reportRefNo">Report Ref No:</label>
+                  <input
+                    type="text"
+                    id="reportRefNo"
+                    v-model="reportRefNo"
+                    :disabled="isFormReadonly"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="memoRefNo">Memo Ref No:</label>
+                  <input
+                    type="text"
+                    id="memoRefNo"
+                    v-model="memoRefNo"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="lruName">LRU Name:</label>
+                  <input
+                    type="text"
+                    id="lruName"
+                    v-model="lruName"
+                    :disabled="isFormReadonly"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="inspectionStage">Inspection Stage:</label>
+                  <input
+                    type="text"
+                    id="inspectionStage"
+                    v-model="inspectionStage"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="testVenue">Test Venue:</label>
+                  <input
+                    type="text"
+                    id="testVenue"
+                    v-model="testVenue"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="slNo">SL.NO'S:</label>
+                  <input
+                    type="text"
+                    id="slNo"
+                    v-model="slNo"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+              </div>
+
+              <!-- Right Column -->
+              <div class="info-column">
+                <div class="form-group">
+                  <label for="dpName">DP Name:</label>
+                  <input
+                    type="text"
+                    id="dpName"
+                    v-model="dpName"
+                    :disabled="isFormReadonly"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="dated1">Dated:</label>
+                  <input
+                    type="date"
+                    id="dated1"
+                    v-model="dated1"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="dated2">Dated:</label>
+                  <input
+                    type="date"
+                    id="dated2"
+                    v-model="dated2"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="sruName">SRU Name:</label>
+                  <input
+                    type="text"
+                    id="sruName"
+                    v-model="sruName"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="partNo">Part No:</label>
+                  <input
+                    type="text"
+                    id="partNo"
+                    v-model="partNo"
+                    :disabled="isFormReadonly"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="quantity">Quantity:</label>
+                  <input
+                    type="number"
+                    id="quantity"
+                    v-model.number="quantity"
+                    :disabled="isFormReadonly"
+                    min="1"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="startDate">Start Date:</label>
+                  <input
+                    type="date"
+                    id="startDate"
+                    v-model="startDate"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="endDate">End Date:</label>
+                  <input
+                    type="date"
+                    id="endDate"
+                    v-model="endDate"
+                    :disabled="isFormReadonly"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-
+          <!-- Inspection Tests Section -->
+          <div class="form-section">
+            <h2 class="section-title">Inspection Tests</h2>
+          </div>
           <table class="inspection-table">
             <thead>
               <tr>
@@ -1480,27 +1576,57 @@ export default {
   border-radius: 5px;
 }
 
-.report-info {
+.form-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  color: #333;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.general-info-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
 }
 
-.report-info strong {
-  display: inline-block;
-  min-width: 100px; /* Aligns the labels */
+.info-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.report-info input[type="text"],
-.report-info input[type="date"] {
-  border: none;
-  border-bottom: 1px solid #ccc;
-  padding: 3px 5px;
-  width: 70%;
-  background-color: transparent;
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: #333;
+}
+
+.form-group input {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.form-group input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .inspection-table {
