@@ -312,6 +312,12 @@ const roleBasedCards = computed(() => {
     admin: [
       { id: "home", title: "Home", route: "HomePageAdmin", icon: HomeIcon },
       {
+        id: "user activities",
+        title: "User Activities",
+        route: "UserActivities",
+        icon: UserIcon,
+      },
+      {
         id: "documents",
         title: "Documents",
         route: "ProjectsDashboard",

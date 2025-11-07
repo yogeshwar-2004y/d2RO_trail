@@ -281,7 +281,7 @@ def delete_all_news():
         # Count visible news items
         cur.execute("""
             SELECT COUNT(*) FROM news_updates 
-            WHERE hidden = FALSE
+            WHERE hidden = FALSE or hidden IS NULL
         """)
         count = cur.fetchone()[0]
         
@@ -293,7 +293,7 @@ def delete_all_news():
         cur.execute("""
             UPDATE news_updates 
             SET hidden = TRUE 
-            WHERE hidden = FALSE
+            WHERE hidden = FALSE or hidden IS NULL
         """)
         
         conn.commit()
