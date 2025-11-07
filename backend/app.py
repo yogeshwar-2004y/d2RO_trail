@@ -37,7 +37,6 @@ def create_app():
     # Enable CORS
     CORS(app, resources={r"/api/*": {"origins": "*"}})
     
-
     # Create upload directories
     create_upload_directories()
     
