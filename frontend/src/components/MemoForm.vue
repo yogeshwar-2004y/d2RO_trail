@@ -2701,7 +2701,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #ebf7fd;
   min-height: 100vh;
 }
 

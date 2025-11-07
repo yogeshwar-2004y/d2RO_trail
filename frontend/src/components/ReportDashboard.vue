@@ -488,7 +488,7 @@ export default {
 .report-dashboard {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   padding-left: 50px;
 }
 

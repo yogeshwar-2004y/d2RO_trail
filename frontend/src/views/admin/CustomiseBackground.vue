@@ -466,7 +466,7 @@ export default {
 
 <style scoped>
 .customise-background-page {
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   min-height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;
@@ -481,9 +481,9 @@ export default {
 }
 
 .upload-section {
-  background-color: #fff;
+  background-color: #ebf7fd;
   border-radius: 15px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); */
   padding: 30px;
 }
 

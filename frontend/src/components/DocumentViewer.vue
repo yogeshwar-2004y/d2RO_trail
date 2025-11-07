@@ -3344,7 +3344,7 @@ export default {
 
 /* Header Section */
 .document-header {
-  background: white;
+  background: #ebf7fd;
   border-bottom: 1px solid #e0e0e0;
   padding: 1.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -3801,6 +3801,7 @@ export default {
   padding: 1rem;
   min-height: 0; /* Allow container to shrink */
   position: relative; /* For absolute positioning if needed */
+  background-color: #ebf7fd;
 }
 
 .document-area {
@@ -3917,6 +3918,10 @@ export default {
   align-items: center;
   justify-content: center;
   padding: 3rem;
+}
+
+.documents-list-panel {
+  background-color: #ebf7fd;
 }
 
 .empty-icon {

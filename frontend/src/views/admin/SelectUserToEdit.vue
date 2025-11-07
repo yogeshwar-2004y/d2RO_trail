@@ -135,7 +135,7 @@ export default {
 .select-user-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   display: flex;
   flex-direction: column;
   align-items: center;

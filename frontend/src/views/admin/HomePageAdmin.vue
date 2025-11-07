@@ -151,7 +151,7 @@ html, body {
 }
 
 .home-page {
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   /* height: calc(100vh - 240px); Fixed height to prevent scrolling */
   display: flex;
   flex-direction: column;
