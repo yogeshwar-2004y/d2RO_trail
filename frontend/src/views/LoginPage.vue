@@ -249,6 +249,8 @@ export default {
   height: 100%;
   object-fit: cover; /* Ensures complete image fits within container, crops if necessary */
   object-position: center; /* Centers the image within the container */
+  margin-top: 25px;
+  /* border-radius: 1%; */
 }
 
 /* Login Form Section */

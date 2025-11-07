@@ -1,5 +1,5 @@
 <script setup>
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
 import { computed, ref } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
@@ -20,17 +20,6 @@ const isSidebarCollapsed = ref(true); // Default to collapsed
 const showSidebar = computed(() => {
   return route.name !== "login" && route.name !== "TechSupport";
 });
-
-// Check if current route is login or dashboard
-// const isLoginOrDashboard = computed(() => {
-//   const routeName = route.name;
-//   return routeName === "login" || 
-//          routeName === "HomePageAdmin" || 
-//          routeName === "HomePageReviewer" || 
-//          routeName === "HomePageQAHead" || 
-//          routeName === "HomePageDesignHead" || 
-//          routeName === "HomePageDesigner";
-// });
 
 // Computed sidebar width based on collapsed state
 const sidebarWidth = computed(() => {
@@ -213,39 +202,3 @@ const closeNotifications = () => {
   overflow: hidden !important;
 }
 </style>
-
-<!-- simple flask connection -->
-<!-- <template>
-  <div id="app">
-    <h1>{{ message }}</h1>
-  </div>
-</template>
-
-<script>
-import axios from 'axios';
-
-export default {
-  name: 'App',
-  data() {
-    return {
-      message: ''
-    };
-  },
-  mounted() {
-    axios.get('http://127.0.0.1:5000/api')
-      .then(response => {
-        this.message = response.data.message;
-      })
-      .catch(error => {
-        console.error("There was an error!", error);
-      });
-  }
-};
-</script>
-
-<style>
-#app {
-  text-align: center;
-  color: #5595d4;
-}
-</style> -->

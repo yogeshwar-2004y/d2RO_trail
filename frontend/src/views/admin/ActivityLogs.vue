@@ -381,7 +381,7 @@ td {
 }
 
 th {
-  background-color: #d6d1d1;
+  background-color: #645656;
   font-weight: bold;
 }
 
@@ -396,36 +396,35 @@ th {
   text-align: center;
   width: 100px;
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .project-name {
   text-align: left;
   width: 200px;
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .activity {
   text-align: left;
   width: 250px;
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .performed-by {
   text-align: left;
   width: 180px;
   color: #fff;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .timestamp {
   text-align: left;
-  width: 200px;
+  width: 180px;
   color: #fff;
-  font-family: "Courier New", monospace;
-  font-size: 13px;
+  font-weight: 600;
 }
 
 .loading-message,

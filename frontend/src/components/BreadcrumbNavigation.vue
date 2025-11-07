@@ -615,7 +615,8 @@ function getHomePath() {
   top: 100px !important;
   left: var(--sidebar-width, 0) !important;
   right: 0 !important;
-  background-color: #f8f9fa !important;
+  /* background-color: #f8f9fa !important; */
+  background-color: #ffff !important;
   border-bottom: 1px solid #e9ecef !important;
   padding: 2px 0 !important;
   margin: 0 !important;
