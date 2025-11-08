@@ -330,12 +330,12 @@ const roleBasedCards = computed(() => {
         route: "ReportDashboard",
         icon: ReportIcon,
       },
-      {
-        id: "user activities",
-        title: "User Activities",
-        route: "UserActivities",
-        icon: UserIcon,
-      },
+      // {
+      //   id: "user activities",
+      //   title: "User Activities",
+      //   route: "UserActivities",
+      //   icon: UserIcon,
+      // },
     ],
     qareviewer: [
       { id: "home", title: "Home", route: "HomePageReviewer", icon: HomeIcon },
