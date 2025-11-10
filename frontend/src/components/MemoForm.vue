@@ -1957,7 +1957,7 @@ export default {
 
         // Use the new filtered API endpoint
         const response = await fetch(
-          `http://localhost:5000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
+          `http://localhost:8000/api/lrus-filtered?user_id=${currentUser.id}&user_role=${currentUserRole}`
         );
 
         if (!response.ok) {
@@ -2055,7 +2055,7 @@ export default {
 
     async checkBackendStatus() {
       try {
-        const response = await fetch("http://localhost:5000/api/lrus", {
+        const response = await fetch("http://localhost:8000/api/lrus", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });
@@ -2073,7 +2073,7 @@ export default {
         console.log(`Fetching serial numbers for LRU ID: ${lruId}`);
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/serial-numbers`
+          `http://localhost:8000/api/lrus/${lruId}/serial-numbers`
         );
 
         if (!response.ok) {
@@ -2111,7 +2111,7 @@ export default {
     async fetchTestGroups() {
       try {
         this.loadingTestGroups = true;
-        const response = await fetch("http://localhost:5000/api/test-groups");
+        const response = await fetch("http://localhost:8000/api/test-groups");
         const data = await response.json();
 
         if (data.success) {
@@ -2139,7 +2139,7 @@ export default {
         this.formData.selectedSubBulletin = "";
 
         const response = await fetch(
-          `http://localhost:5000/api/test-groups/${groupId}/sub-tests`
+          `http://localhost:8000/api/test-groups/${groupId}/sub-tests`
         );
         const data = await response.json();
 
@@ -2166,7 +2166,7 @@ export default {
         this.formData.selectedSubBulletin = "";
 
         const response = await fetch(
-          `http://localhost:5000/api/sub-tests/${subTestId}/bulletins`
+          `http://localhost:8000/api/sub-tests/${subTestId}/bulletins`
         );
         const data = await response.json();
 
@@ -2671,7 +2671,7 @@ export default {
         console.log("=== END DEBUG ===");
 
         // Submit memo to backend
-        const response = await fetch("http://localhost:5000/api/memos", {
+        const response = await fetch("http://localhost:8000/api/memos", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

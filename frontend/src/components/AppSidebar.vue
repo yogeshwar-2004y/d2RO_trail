@@ -495,7 +495,7 @@ const fetchUnreadCount = async () => {
     }
 
     const response = await fetch(
-      `http://localhost:5000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
+      `http://localhost:8000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
     );
     const data = await response.json();
 

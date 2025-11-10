@@ -607,7 +607,7 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/bare-pcb-inspection/by-report-card/${reportCardId}`
+          `http://localhost:8000/api/reports/bare-pcb-inspection/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
@@ -703,7 +703,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
+        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -776,7 +776,7 @@ export default {
         if (!reportCardId) return;
         
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/reports/bare-pcb-inspection", {
+        const response = await fetch("http://localhost:8000/api/reports/bare-pcb-inspection", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submissionData),
@@ -798,7 +798,7 @@ export default {
 
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/reports/bare-pcb-inspection", {
+        const response = await fetch("http://localhost:8000/api/reports/bare-pcb-inspection", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(submissionData),
