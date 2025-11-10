@@ -24,13 +24,25 @@
         <h1 class="page-title">INDIVIDUAL REPORT</h1>
       </div>
       <div class="header-right">
-        <button 
-          v-if="selectedTemplate && !showTemplateSelection && canDownloadReport" 
-          class="export-button" 
+        <button
+          v-if="selectedTemplate && !showTemplateSelection && canDownloadReport"
+          class="export-button"
           @click="downloadReportPDF"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+            ></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -81,25 +93,60 @@
           <!-- Show different messages based on role -->
           <div v-if="isQAReviewer" class="role-message qa-reviewer">
             <div class="role-icon">🔍</div>
-            <p><strong>QA Reviewer Access:</strong> Once the Design Head assigns a template, you will be able to fill out and submit this report.</p>
+            <p>
+              <strong>QA Reviewer Access:</strong> Once the Design Head assigns
+              a template, you will be able to fill out and submit this report.
+            </p>
           </div>
           <div v-else-if="isQAHead" class="role-message qa-head">
             <div class="role-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </div>
-            <p><strong>Quality Assurance Head - Read-Only Access Privilege:</strong> Upon template assignment by the Design Head, this report will be accessible for review and inspection purposes. Modification capabilities are not available at this access level.</p>
+            <p>
+              <strong
+                >Quality Assurance Head - Read-Only Access Privilege:</strong
+              >
+              Upon template assignment by the Design Head, this report will be
+              accessible for review and inspection purposes. Modification
+              capabilities are not available at this access level.
+            </p>
           </div>
           <div v-else class="role-message other-role">
             <div class="role-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                 <circle cx="12" cy="12" r="3"></circle>
               </svg>
             </div>
-            <p><strong>Read-Only Access Privilege:</strong> Upon template assignment, this report will be accessible for review purposes. Modification capabilities are restricted to authorized QA Reviewer personnel exclusively.</p>
+            <p>
+              <strong>Read-Only Access Privilege:</strong> Upon template
+              assignment, this report will be accessible for review purposes.
+              Modification capabilities are restricted to authorized QA Reviewer
+              personnel exclusively.
+            </p>
           </div>
         </div>
       </div>
@@ -124,47 +171,101 @@
           <!-- Role-based access message -->
           <div v-if="selectedTemplate" class="access-message">
             <!-- Assigned Reviewer (can edit) -->
-            <div v-if="canEditReport && isQAReviewer" class="access-info qa-reviewer">
+            <div
+              v-if="canEditReport && isQAReviewer"
+              class="access-info qa-reviewer"
+            >
               <div class="access-icon">🔍</div>
               <h4>Assigned Reviewer Access</h4>
-              <p>You are the assigned reviewer for this report. You can edit and submit this report. All fields are enabled for input.</p>
+              <p>
+                You are the assigned reviewer for this report. You can edit and
+                submit this report. All fields are enabled for input.
+              </p>
               <p v-if="!isReportSubmitted" class="download-info">
-                <strong>Note:</strong> Download PDF will be available after submitting the report.
+                <strong>Note:</strong> Download PDF will be available after
+                submitting the report.
               </p>
               <p v-else class="download-info success">
-                <strong>✓</strong> Report submitted! You can now download the PDF.
+                <strong>✓</strong> Report submitted! You can now download the
+                PDF.
               </p>
             </div>
             <!-- QA Reviewer but not assigned (read-only) -->
-            <div v-else-if="isQAReviewer && !canEditReport" class="access-info view-only">
+            <div
+              v-else-if="isQAReviewer && !canEditReport"
+              class="access-info view-only"
+            >
               <div class="access-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </div>
               <h4>QA Reviewer - Read-Only Access</h4>
-              <p>You are a QA Reviewer, but this report is assigned to another reviewer. You can view the report but cannot edit it. Only the assigned reviewer can modify report data.</p>
+              <p>
+                You are a QA Reviewer, but this report is assigned to another
+                reviewer. You can view the report but cannot edit it. Only the
+                assigned reviewer can modify report data.
+              </p>
             </div>
             <div v-else-if="isQAHead" class="access-info qa-head">
               <div class="access-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </div>
               <h4>Quality Assurance Head - Read-Only Access Privilege</h4>
-              <p>This report is available for review and inspection purposes only. Modification privileges are restricted to authorized QA Reviewer personnel exclusively. Report data modifications are not permitted at your current access level.</p>
+              <p>
+                This report is available for review and inspection purposes
+                only. Modification privileges are restricted to authorized QA
+                Reviewer personnel exclusively. Report data modifications are
+                not permitted at your current access level.
+              </p>
             </div>
             <div v-else class="access-info view-only">
               <div class="access-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3"></circle>
                 </svg>
               </div>
               <h4>Read-Only Access Privilege</h4>
-              <p>This report is available for review and inspection purposes only. Modification privileges are restricted to authorized QA Reviewer personnel exclusively.</p>
+              <p>
+                This report is available for review and inspection purposes
+                only. Modification privileges are restricted to authorized QA
+                Reviewer personnel exclusively.
+              </p>
             </div>
           </div>
 
@@ -295,19 +396,19 @@
 </template>
 
 <script>
-import { userStore } from '@/stores/userStore'
+import { userStore } from "@/stores/userStore";
 // Dynamic import for html2pdf to avoid blocking app initialization
 let html2pdf;
 
 // Import all template components
-import ObservationReport from '@/templates/ObservationReport.vue'
-import BarePcbInspectionReport from '@/templates/BarePcbInspectionReport.vue'
-import Conformalcoatinginspectionreport from '@/templates/Conformalcoatinginspectionreport.vue'
-import RawMaterialInspectionReport from '@/templates/RawMaterialInspectionReport.vue'
-import CotsScreeningInspectionReport from '@/templates/CotsScreeningInspectionReport.vue'
-import AssembledBoardInspectionReport from '@/templates/AssembledBoardInspectionReport.vue'
-import KitOfPartInsp from '@/templates/KitOfPartInsp.vue'
-import MechanicalInspection from '@/templates/MechanicalInspection.vue'
+import ObservationReport from "@/templates/ObservationReport.vue";
+import BarePcbInspectionReport from "@/templates/BarePcbInspectionReport.vue";
+import Conformalcoatinginspectionreport from "@/templates/Conformalcoatinginspectionreport.vue";
+import RawMaterialInspectionReport from "@/templates/RawMaterialInspectionReport.vue";
+import CotsScreeningInspectionReport from "@/templates/CotsScreeningInspectionReport.vue";
+import AssembledBoardInspectionReport from "@/templates/AssembledBoardInspectionReport.vue";
+import KitOfPartInsp from "@/templates/KitOfPartInsp.vue";
+import MechanicalInspection from "@/templates/MechanicalInspection.vue";
 
 export default {
   name: "IndividualReport",
@@ -389,7 +490,7 @@ export default {
       loading: false,
       showTemplateSelection: false,
       reportStatus: null,
-      assignedReviewerId: null
+      assignedReviewerId: null,
     };
   },
   computed: {
@@ -409,43 +510,43 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 3;
     },
-    
+
     isQAHead() {
       // QA Head has role_id = 2
       const currentUserRole = userStore.getters.currentUserRole();
       return currentUserRole === 2;
     },
-    
+
     canEditReport() {
       // Only the assigned reviewer can edit reports
       // Check if current user is the assigned reviewer
       const currentUser = userStore.getters.currentUser();
       const currentUserId = currentUser?.id || currentUser?.user_id;
-      
+
       // If no template is selected, cannot edit
       if (!this.selectedTemplate) {
         return false;
       }
-      
+
       // If no assigned reviewer, cannot edit
       if (!this.assignedReviewerId) {
         return false;
       }
-      
+
       // If report is already submitted, make it readonly
       if (this.isReportSubmitted) {
         return false;
       }
-      
+
       // Only the assigned reviewer can edit
       return currentUserId === this.assignedReviewerId;
     },
-    
+
     isReportSubmitted() {
       // Check if report has been submitted (status is not 'ASSIGNED')
-      return this.reportStatus && this.reportStatus !== 'ASSIGNED';
+      return this.reportStatus && this.reportStatus !== "ASSIGNED";
     },
-    
+
     canDownloadReport() {
       // QA Reviewer can download only after submitting the report
       // Other roles with view access can download anytime (if they have access)
@@ -455,7 +556,7 @@ export default {
       // For view-only users, they can download if they have access (but they don't have access anyway)
       return false;
     },
-    
+
     currentTemplateComponent() {
       if (!this.selectedTemplate) return null;
 
@@ -545,35 +646,37 @@ export default {
         this.loading = false;
       }
     },
-    
+
     // Method to update report status (called when report is submitted)
     updateReportStatus(newStatus) {
       this.reportStatus = newStatus;
-      console.log('Report status updated to:', newStatus);
+      console.log("Report status updated to:", newStatus);
     },
-    
+
     async loadReportDetails() {
       if (!this.reportId) return;
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/${this.reportId}`
+          `http://localhost:8000/api/reports/${this.reportId}`
         );
         const result = await response.json();
-        
+
         if (result.success) {
           // Set report status
           this.reportStatus = result.report.status;
-          
+
           // Store assigned reviewer ID
           this.assignedReviewerId = result.report.assigned_reviewer_id || null;
-          
+
           // Find the template that matches the template_id
           if (result.report.template_id) {
-            const template = this.availableTemplates.find(t => t.template_id === result.report.template_id);
+            const template = this.availableTemplates.find(
+              (t) => t.template_id === result.report.template_id
+            );
             if (template) {
               this.selectedTemplate = template;
-              
+
               // If template is selected and it's Conformal Coating, fetch the inspection data
               // The template component will receive reportId prop and should load data automatically
               // But we can also trigger a manual load here if needed
@@ -598,51 +701,56 @@ export default {
         `Create new report for Report ID: ${this.reportId} will be implemented soon!`
       );
     },
-    
+
     async downloadReportPDF() {
       try {
         // Dynamically import html2pdf to avoid blocking app initialization
         if (!html2pdf) {
-          const html2pdfModule = await import('html2pdf.js');
+          const html2pdfModule = await import("html2pdf.js");
           html2pdf = html2pdfModule.default || html2pdfModule;
         }
-        
+
         // Get the element you want to convert (the main report content)
-      const element = document.querySelector('.template-form-container');
-        
+        const element = document.querySelector(".template-form-container");
+
         if (!element) {
-          alert('Report content not found');
+          alert("Report content not found");
           return;
         }
-        
+
         // Configure options to match the page appearance
         const opt = {
           margin: 0.5,
-          filename: `Report_${this.reportId}_${this.reportName?.replace(/[^a-zA-Z0-9]/g, '_') || 'Individual'}_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
+          filename: `Report_${this.reportId}_${
+            this.reportName?.replace(/[^a-zA-Z0-9]/g, "_") || "Individual"
+          }_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
             scale: 2,
             useCORS: true,
             letterRendering: true,
             allowTaint: true,
             windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight
+            windowHeight: element.scrollHeight,
           },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
-        
+
         // Generate PDF from HTML
         await html2pdf().set(opt).from(element).save();
-        
+
         alert("Report PDF downloaded successfully!");
-        
       } catch (error) {
-        console.error('Error downloading report PDF:', error);
-        alert(`Error downloading report PDF: ${error.message || "Unknown error"}. Please try again.`);
+        console.error("Error downloading report PDF:", error);
+        alert(
+          `Error downloading report PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
     },
   },
@@ -1358,14 +1466,15 @@ export default {
   background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #faf5ff 100%);
   border: 1.5px solid #4a90e2;
   border-left: 5px solid #2c5282;
-  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12), 0 1px 3px rgba(44, 82, 130, 0.08);
+  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12),
+    0 1px 3px rgba(44, 82, 130, 0.08);
   padding: 20px 24px;
   position: relative;
   overflow: hidden;
 }
 
 .role-message.qa-head::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1400,7 +1509,11 @@ export default {
 }
 
 .role-message.qa-head .role-icon {
-  background: linear-gradient(135deg, rgba(44, 82, 130, 0.1), rgba(74, 144, 226, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(44, 82, 130, 0.1),
+    rgba(74, 144, 226, 0.1)
+  );
   border-color: rgba(44, 82, 130, 0.2);
 }
 
@@ -1457,14 +1570,15 @@ export default {
   background: linear-gradient(135deg, #f0f4f8 0%, #ffffff 50%, #faf5ff 100%);
   border: 1.5px solid #4a90e2;
   border-left: 5px solid #2c5282;
-  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12), 0 1px 3px rgba(44, 82, 130, 0.08);
+  box-shadow: 0 2px 8px rgba(44, 82, 130, 0.12),
+    0 1px 3px rgba(44, 82, 130, 0.08);
   border-radius: 6px;
   position: relative;
   overflow: hidden;
 }
 
 .access-info.qa-head::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1477,14 +1591,15 @@ export default {
   background: linear-gradient(135deg, #fff5f5 0%, #ffffff 50%, #fef5e7 100%);
   border: 1.5px solid #e53e3e;
   border-left: 5px solid #c53030;
-  box-shadow: 0 2px 8px rgba(197, 48, 48, 0.12), 0 1px 3px rgba(197, 48, 48, 0.08);
+  box-shadow: 0 2px 8px rgba(197, 48, 48, 0.12),
+    0 1px 3px rgba(197, 48, 48, 0.08);
   border-radius: 6px;
   position: relative;
   overflow: hidden;
 }
 
 .access-info.view-only::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1513,7 +1628,11 @@ export default {
 }
 
 .access-info.qa-head .access-icon {
-  background: linear-gradient(135deg, rgba(44, 82, 130, 0.1), rgba(74, 144, 226, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(44, 82, 130, 0.1),
+    rgba(74, 144, 226, 0.1)
+  );
   border-color: rgba(44, 82, 130, 0.2);
 }
 
@@ -1522,7 +1641,11 @@ export default {
 }
 
 .access-info.view-only .access-icon {
-  background: linear-gradient(135deg, rgba(197, 48, 48, 0.1), rgba(229, 62, 62, 0.1));
+  background: linear-gradient(
+    135deg,
+    rgba(197, 48, 48, 0.1),
+    rgba(229, 62, 62, 0.1)
+  );
   border-color: rgba(197, 48, 48, 0.2);
 }
 

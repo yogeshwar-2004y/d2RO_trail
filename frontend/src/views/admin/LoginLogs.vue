@@ -238,7 +238,7 @@ export default {
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/login-logs",
+          "http://localhost:8000/api/login-logs",
           {
             params: {
               limit: this.limit,
@@ -319,7 +319,7 @@ export default {
       try {
         this.loading = true;
         const response = await axios.get(
-          "http://localhost:5000/api/login-logs/pdf",
+          "http://localhost:8000/api/login-logs/pdf",
           {
             responseType: "blob",
           }

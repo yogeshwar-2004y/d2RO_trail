@@ -505,8 +505,8 @@ export default {
       approvedByError: "",
       approvedByUserId: null,
       preparedByUserId: null,
-      reportId: null,  // This will be set to the raw material inspection report ID after saving
-      parentReportCardId: null,  // Store the parent report card ID (from props/route) separately
+      reportId: null, // This will be set to the raw material inspection report ID after saving
+      parentReportCardId: null, // Store the parent report card ID (from props/route) separately
     };
   },
   computed: {
@@ -580,8 +580,8 @@ export default {
 
     // Capture the parent report card ID from props or route params
     // This should be stored in report_card_id column in the database
-    this.parentReportCardId = 
-      this.reportId ||  // From props (parent report card ID)
+    this.parentReportCardId =
+      this.reportId || // From props (parent report card ID)
       this.$route?.params?.reportCardId ||
       this.$route?.params?.report_id ||
       this.$route?.params?.reportId ||
@@ -594,8 +594,13 @@ export default {
         this.loadReportData();
       });
     }
-    
-    console.log("Mounted - parentReportCardId:", this.parentReportCardId, "reportId prop:", this.reportId);
+
+    console.log(
+      "Mounted - parentReportCardId:",
+      this.parentReportCardId,
+      "reportId prop:",
+      this.reportId
+    );
   },
   methods: {
     handleFileUpload(event, section, index) {
@@ -638,7 +643,7 @@ export default {
       try {
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:5000/api/reports/raw-material-inspection",
+          "http://localhost:8000/api/reports/raw-material-inspection",
           {
             method: "POST",
             headers: {
@@ -772,17 +777,18 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/users/verify-signature",
+          "http://localhost:8000/api/users/verify-signature",
           {
             method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            signature_password: password,
-          }),
-        });
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: username,
+              signature_password: password,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -848,8 +854,10 @@ export default {
     },
     async autoSubmitReport() {
       try {
-        console.log("Starting autoSubmitReport - saving form data to database...");
-        
+        console.log(
+          "Starting autoSubmitReport - saving form data to database..."
+        );
+
         // Update all remarks before submitting
         this.formData.checkPoints.forEach((checkpoint, index) => {
           if (checkpoint.compliance) {
@@ -859,9 +867,9 @@ export default {
 
         const reportData = this.prepareReportData();
         console.log("Prepared report data:", reportData);
-        
+
         const response = await fetch(
-          "http://localhost:5000/api/reports/raw-material-inspection",
+          "http://localhost:8000/api/reports/raw-material-inspection",
           {
             method: "POST",
             headers: {
@@ -871,7 +879,11 @@ export default {
           }
         );
 
-        console.log("API Response status:", response.status, response.statusText);
+        console.log(
+          "API Response status:",
+          response.status,
+          response.statusText
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -909,7 +921,9 @@ export default {
       } catch (error) {
         console.error("Error auto-submitting report:", error);
         console.error("Error details:", error.message, error.stack);
-        alert(`Error submitting report: ${error.message || "Please try again."}`);
+        alert(
+          `Error submitting report: ${error.message || "Please try again."}`
+        );
         // Clear signature on error so user can retry
         this.preparedBySignatureUrl = "";
         this.preparedByVerifiedName = "";
@@ -933,7 +947,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/reports/raw-material-inspection/${this.reportId}`,
+          `http://localhost:8000/api/reports/raw-material-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -1029,7 +1043,7 @@ export default {
 
         // Send notification to backend
         const response = await fetch(
-          "http://localhost:5000/api/reports/raw-material-inspection/notify",
+          "http://localhost:8000/api/reports/raw-material-inspection/notify",
           {
             method: "POST",
             headers: {
@@ -1063,9 +1077,11 @@ export default {
       }
 
       try {
-        console.log(`Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`);
+        console.log(
+          `Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`
+        );
         const response = await fetch(
-          `http://localhost:5000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
+          `http://localhost:8000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -1076,7 +1092,9 @@ export default {
 
         if (!response.ok) {
           if (response.status === 404) {
-            console.log(`Report with report_card_id ${reportCardIdToLoad} not found`);
+            console.log(
+              `Report with report_card_id ${reportCardIdToLoad} not found`
+            );
             return;
           }
           throw new Error(`Failed to fetch report: ${response.statusText}`);
@@ -1103,7 +1121,7 @@ export default {
           this.formData.quantity = report.quantity || null;
           this.formData.slNos = report.sl_nos || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          
+
           // Update projectName and lruName from loaded data
           if (report.project_name) {
             this.projectName = report.project_name;
@@ -1151,11 +1169,15 @@ export default {
             const index = i + 1;
             if (this.formData.checkPoints[i]) {
               const dbApplicability = report[`applicability${index}`];
-              this.formData.checkPoints[i].applicability = convertApplicability(dbApplicability);
-              this.formData.checkPoints[i].compliance = report[`compliance${index}`] || "";
-              this.formData.checkPoints[i].remarks = report[`rem${index}`] || "";
-              this.formData.checkPoints[i].upload = report[`upload${index}`] || "";
-              
+              this.formData.checkPoints[i].applicability =
+                convertApplicability(dbApplicability);
+              this.formData.checkPoints[i].compliance =
+                report[`compliance${index}`] || "";
+              this.formData.checkPoints[i].remarks =
+                report[`rem${index}`] || "";
+              this.formData.checkPoints[i].upload =
+                report[`upload${index}`] || "";
+
               // Update remarks based on compliance if needed
               if (this.formData.checkPoints[i].compliance) {
                 this.updateRemarks(i);
@@ -1216,7 +1238,7 @@ export default {
 
         // Send approval notification to backend
         const response = await fetch(
-          "http://localhost:5000/api/reports/raw-material-inspection/notify-approval",
+          "http://localhost:8000/api/reports/raw-material-inspection/notify-approval",
           {
             method: "POST",
             headers: {
@@ -1247,8 +1269,13 @@ export default {
       // Use parentReportCardId which was captured in mounted()
       // This is the parent report card ID (from reports table) that should be stored in report_card_id column
       const reportCardId = this.parentReportCardId;
-      
-      console.log("Preparing report data - report_card_id:", reportCardId, "parentReportCardId:", this.parentReportCardId);
+
+      console.log(
+        "Preparing report data - report_card_id:",
+        reportCardId,
+        "parentReportCardId:",
+        this.parentReportCardId
+      );
 
       // Helper function to convert applicability to database format
       const convertApplicability = (applicability) => {
@@ -1259,7 +1286,11 @@ export default {
       };
 
       return {
-        report_card_id: reportCardId ? (typeof reportCardId === 'number' ? reportCardId : parseInt(reportCardId)) : null,
+        report_card_id: reportCardId
+          ? typeof reportCardId === "number"
+            ? reportCardId
+            : parseInt(reportCardId)
+          : null,
         project_name: this.formData.projectName,
         report_ref_no: this.formData.reportRefNo,
         memo_ref_no: this.formData.memoRefNo,
@@ -1289,7 +1320,7 @@ export default {
         prepared_by: this.preparedBySignatureUrl
           ? `${this.preparedBy}|${this.preparedBySignatureUrl}`
           : this.preparedBy,
-        prepared_by_user_id: this.preparedByUserId || null,  // For activity logging
+        prepared_by_user_id: this.preparedByUserId || null, // For activity logging
         verified_by: this.verifiedBySignatureUrl
           ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}`
           : this.verifiedBy,

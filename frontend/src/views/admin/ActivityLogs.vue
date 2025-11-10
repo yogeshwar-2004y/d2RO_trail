@@ -153,7 +153,7 @@ export default {
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/api/activity-logs"
+          "http://localhost:8000/api/activity-logs"
         );
 
         if (response.data.success) {
@@ -214,7 +214,7 @@ export default {
       try {
         this.loading = true;
         const response = await axios.get(
-          "http://localhost:5000/api/activity-logs/pdf",
+          "http://localhost:8000/api/activity-logs/pdf",
           {
             responseType: "blob",
           }

@@ -212,7 +212,10 @@
                     {{ testCase.description }}
                   </td>
                   <td>
-                    <select v-model="testCase.testNature" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="testCase.testNature"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="Passive (Power Off Condition)">
                         Passive (Power Off Condition)
@@ -223,7 +226,10 @@
                     </select>
                   </td>
                   <td>
-                    <select v-model="testCase.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="testCase.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -250,11 +256,19 @@
             <div class="signature-item">
               <label>Prepared By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
-                  Please fill in all form fields (Report Details and Test Cases) before verifying signature.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!areAllFieldsFilled"
+                  class="signature-disabled-message"
+                >
+                  Please fill in all form fields (Report Details and Test Cases)
+                  before verifying signature.
                 </div>
                 <div v-else class="signature-inputs">
                   <div class="input-group">
@@ -278,7 +292,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('preparedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('preparedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isPreparedByEnabled ||
                       !signatures.preparedBy.signatureUsername ||
@@ -288,7 +305,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.preparedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.preparedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -297,13 +317,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.preparedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.preparedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.preparedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.preparedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.preparedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.preparedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.preparedBy.signatureError }}
                 </div>
               </div>
@@ -313,10 +343,17 @@
             <div class="signature-item">
               <label>Verified By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!isPreparedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Prepared By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -341,7 +378,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('verifiedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('verifiedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isVerifiedByEnabled ||
                       !signatures.verifiedBy.signatureUsername ||
@@ -351,7 +391,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.verifiedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -360,13 +403,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.verifiedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.verifiedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.verifiedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.verifiedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.verifiedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.verifiedBy.signatureError }}
                 </div>
               </div>
@@ -376,10 +429,17 @@
             <div class="signature-item">
               <label>Approved By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!isVerifiedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Verified By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -404,7 +464,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('approvedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('approvedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isApprovedByEnabled ||
                       !signatures.approvedBy.signatureUsername ||
@@ -414,7 +477,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.approvedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.approvedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -423,13 +489,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.approvedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.approvedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.approvedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.approvedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.approvedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.approvedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.approvedBy.signatureError }}
                 </div>
               </div>
@@ -553,13 +629,13 @@ export default {
     },
     areAllFieldsFilled() {
       if (!this.isFormValid) return false;
-      
+
       for (const testCase of this.formData.testCases) {
         if (!testCase.testNature || !testCase.remarks) {
           return false;
         }
       }
-      
+
       return true;
     },
     canAccessSignatures() {
@@ -591,21 +667,21 @@ export default {
     if (reportCardId) {
       this.loadReportData(reportCardId);
     } else {
-    // Get parameters from route
-    this.lruName = this.$route.params.lruName || "";
-    this.projectName = this.$route.params.projectName || "";
+      // Get parameters from route
+      this.lruName = this.$route.params.lruName || "";
+      this.projectName = this.$route.params.projectName || "";
 
-    // Set default values
-    this.formData.lruName = this.lruName;
-    this.formData.projectName = this.projectName;
-    this.formData.startDate = this.currentDate;
+      // Set default values
+      this.formData.lruName = this.lruName;
+      this.formData.projectName = this.projectName;
+      this.formData.startDate = this.currentDate;
     }
   },
   methods: {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        if (section === 'testCase') {
+        if (section === "testCase") {
           this.formData.testCases[index].fileName = file.name;
         }
       }
@@ -613,20 +689,22 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/cot-screening/by-report-card/${reportCardId}`
+          `http://localhost:8000/api/reports/cot-screening/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
           if (response.status === 404) {
             // Report doesn't exist yet, show empty form
-            this.lruName = this.$route.params.lruName || '';
-            this.projectName = this.$route.params.projectName || '';
+            this.lruName = this.$route.params.lruName || "";
+            this.projectName = this.$route.params.projectName || "";
             this.formData.lruName = this.lruName;
             this.formData.projectName = this.projectName;
             this.formData.startDate = this.currentDate;
             return;
           }
-          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+          throw new Error(
+            `Failed to fetch report: ${response.statusText} (${response.status})`
+          );
         }
 
         const result = await response.json();
@@ -643,29 +721,38 @@ export default {
           this.formData.inspectionStage = report.inspection_stage || "";
           this.formData.testVenue = report.test_venue || "";
           this.formData.slNos = report.sl_nos || "";
-          this.formData.dated1 = report.dated1 ? report.dated1.split('T')[0] : "";
-          this.formData.dated2 = report.dated2 ? report.dated2.split('T')[0] : "";
+          this.formData.dated1 = report.dated1
+            ? report.dated1.split("T")[0]
+            : "";
+          this.formData.dated2 = report.dated2
+            ? report.dated2.split("T")[0]
+            : "";
           this.formData.sruName = report.sru_name || "";
           this.formData.partNo = report.part_no || "";
           this.formData.quantity = report.quantity || "";
-          this.formData.startDate = report.start_date ? report.start_date.split('T')[0] : this.currentDate;
-          this.formData.endDate = report.end_date ? report.end_date.split('T')[0] : "";
-          
+          this.formData.startDate = report.start_date
+            ? report.start_date.split("T")[0]
+            : this.currentDate;
+          this.formData.endDate = report.end_date
+            ? report.end_date.split("T")[0]
+            : "";
+
           this.projectName = report.project_name || "";
           this.lruName = report.lru_name || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          this.inspectionCount = report.inspection_count || this.inspectionCount;
+          this.inspectionCount =
+            report.inspection_count || this.inspectionCount;
 
           // Map test cases data
           if (this.formData.testCases.length >= 3) {
             this.formData.testCases[0].testNature = report.test_nature1 || "";
             this.formData.testCases[0].remarks = report.rem1 || "";
             this.formData.testCases[0].fileName = report.upload1 || null;
-            
+
             this.formData.testCases[1].testNature = report.test_nature2 || "";
             this.formData.testCases[1].remarks = report.rem2 || "";
             this.formData.testCases[1].fileName = report.upload2 || null;
-            
+
             this.formData.testCases[2].testNature = report.test_nature3 || "";
             this.formData.testCases[2].remarks = report.rem3 || "";
             this.formData.testCases[2].fileName = report.upload3 || null;
@@ -685,7 +772,10 @@ export default {
           throw new Error(result.message || "Failed to load report data");
         }
       } catch (error) {
-        if (error.message.includes('404') || error.message.includes('not found')) {
+        if (
+          error.message.includes("404") ||
+          error.message.includes("not found")
+        ) {
           return;
         }
         alert(`Error loading report data: ${error.message}. Please try again.`);
@@ -695,19 +785,23 @@ export default {
       const signature = this.signatures[signatureType];
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError = "Please enter both username and signature password";
+        signature.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -718,13 +812,15 @@ export default {
           signature.signatureError = "";
           await this.autoSaveReport();
         } else {
-          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureError =
+            data.message || "Failed to verify signature";
           signature.signatureUrl = "";
           signature.verifiedUserName = "";
           signature.verifiedUserRole = "";
         }
       } catch (error) {
-        signature.signatureError = "Error verifying signature: " + error.message;
+        signature.signatureError =
+          "Error verifying signature: " + error.message;
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
         signature.verifiedUserRole = "";
@@ -732,36 +828,36 @@ export default {
     },
     prepareSubmissionData() {
       const reportCardId = this.reportId || this.$route.params.reportId;
-      
+
       return {
         report_card_id: reportCardId,
-            project_name: this.formData.projectName,
-            report_ref_no: this.formData.reportRefNo,
-            memo_ref_no: this.formData.memoRefNo,
-            lru_name: this.formData.lruName,
-            sru_name: this.formData.sruName,
-            dp_name: this.formData.dpName,
-            part_no: this.formData.partNo,
-            inspection_stage: this.formData.inspectionStage,
-            test_venue: this.formData.testVenue,
-            quantity: this.formData.quantity,
-            sl_nos: this.formData.slNos,
-            serial_number: this.serialNumber,
-            start_date: this.formData.startDate,
-            end_date: this.formData.endDate,
-            dated1: this.formData.dated1,
-            dated2: this.formData.dated2,
+        project_name: this.formData.projectName,
+        report_ref_no: this.formData.reportRefNo,
+        memo_ref_no: this.formData.memoRefNo,
+        lru_name: this.formData.lruName,
+        sru_name: this.formData.sruName,
+        dp_name: this.formData.dpName,
+        part_no: this.formData.partNo,
+        inspection_stage: this.formData.inspectionStage,
+        test_venue: this.formData.testVenue,
+        quantity: this.formData.quantity,
+        sl_nos: this.formData.slNos,
+        serial_number: this.serialNumber,
+        start_date: this.formData.startDate,
+        end_date: this.formData.endDate,
+        dated1: this.formData.dated1,
+        dated2: this.formData.dated2,
 
-            test_nature1: this.formData.testCases[0]?.testNature || "",
-            rem1: this.formData.testCases[0]?.remarks || "",
+        test_nature1: this.formData.testCases[0]?.testNature || "",
+        rem1: this.formData.testCases[0]?.remarks || "",
         upload1: this.formData.testCases[0]?.fileName || "",
 
         test_nature2: this.formData.testCases[1]?.testNature || "",
-            rem2: this.formData.testCases[1]?.remarks || "",
+        rem2: this.formData.testCases[1]?.remarks || "",
         upload2: this.formData.testCases[1]?.fileName || "",
 
         test_nature3: this.formData.testCases[2]?.testNature || "",
-            rem3: this.formData.testCases[2]?.remarks || "",
+        rem3: this.formData.testCases[2]?.remarks || "",
         upload3: this.formData.testCases[2]?.fileName || "",
 
         prepared_by: this.signatures.preparedBy.signatureUrl || "",
@@ -773,14 +869,17 @@ export default {
       try {
         const reportCardId = this.reportId || this.$route.params.reportId;
         if (!reportCardId) return;
-        
+
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(`http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`, {
-              method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
         if (!result.success) {
@@ -799,20 +898,25 @@ export default {
       try {
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(`http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
-
-          const result = await response.json();
-
-          if (result.success) {
-          alert("COTS Screening inspection report submitted successfully! Notifications have been sent.");
-          } else {
-            alert(`Error: ${result.message}`);
+        const response = await fetch(
+          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
           }
-        } catch (error) {
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(
+            "COTS Screening inspection report submitted successfully! Notifications have been sent."
+          );
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
       }

@@ -183,9 +183,9 @@
           </svg>
         </div>
         <div class="card-info">
-          <span class="card-title">{{ report.name || 'N/A' }}</span>
+          <span class="card-title">{{ report.name || "N/A" }}</span>
           <span class="card-report-id">Report ID: #{{ report.id }}</span>
-          <span>{{ templates[report.template_id] || 'N/A' }}</span>
+          <span>{{ templates[report.template_id] || "N/A" }}</span>
         </div>
       </div>
 
@@ -273,7 +273,7 @@ export default {
         4: "mechanical inspection report",
         5: "assembled board inspection report",
         6: "raw material inspection report",
-        7: "kit of part inspection report"
+        7: "kit of part inspection report",
       },
     };
   },
@@ -325,7 +325,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:5000/api/reports";
+        let apiUrl = "http://localhost:8000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
@@ -333,13 +333,15 @@ export default {
         console.log("API URL:", apiUrl);
 
         const response = await fetch(apiUrl, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }).catch((networkError) => {
           // Handle network errors (backend not running, CORS, etc.)
-          throw new Error(`Network error: Unable to connect to backend server. Please ensure the backend is running at ${apiUrl}`);
+          throw new Error(
+            `Network error: Unable to connect to backend server. Please ensure the backend is running at ${apiUrl}`
+          );
         });
 
         if (!response.ok) {
@@ -358,8 +360,8 @@ export default {
 
         if (data.success) {
           this.reports = data.reports;
-          console.log('REPORTSSSS: ',this.reports);
-          
+          console.log("REPORTSSSS: ", this.reports);
+
           console.log(
             `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
           );
@@ -368,7 +370,9 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching reports:", error);
-        this.error = error.message || "Failed to fetch reports. Please check if the backend server is running.";
+        this.error =
+          error.message ||
+          "Failed to fetch reports. Please check if the backend server is running.";
         console.error("Full error details:", error);
       } finally {
         this.loading = false;
@@ -377,7 +381,7 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch("http://localhost:5000/api/projects");
+        const response = await fetch("http://localhost:8000/api/projects");
 
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
@@ -430,24 +434,26 @@ export default {
       try {
         // Dynamically import html2pdf to avoid blocking app initialization
         if (!html2pdf) {
-          const html2pdfModule = await import('html2pdf.js');
+          const html2pdfModule = await import("html2pdf.js");
           html2pdf = html2pdfModule.default || html2pdfModule;
         }
-        
+
         // Get the element you want to convert (the main dashboard content)
-        const element = document.querySelector('.report-dashboard');
-        
+        const element = document.querySelector(".report-dashboard");
+
         if (!element) {
-          alert('Dashboard content not found');
+          alert("Dashboard content not found");
           return;
         }
-        
+
         // Configure options to match the page appearance
         const opt = {
           margin: 0.5,
-          filename: `Reports_Dashboard_Summary_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
+          filename: `Reports_Dashboard_Summary_${new Date()
+            .toISOString()
+            .slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
             scale: 2,
             useCORS: true,
             letterRendering: true,
@@ -455,23 +461,26 @@ export default {
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight,
             scrollX: 0,
-            scrollY: 0
+            scrollY: 0,
           },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
-        
+
         // Generate PDF from HTML
         await html2pdf().set(opt).from(element).save();
-        
+
         alert("Reports dashboard PDF downloaded successfully!");
-        
       } catch (error) {
         console.error("Error downloading dashboard PDF:", error);
-        alert(`Error downloading dashboard PDF: ${error.message || "Unknown error"}. Please try again.`);
+        alert(
+          `Error downloading dashboard PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
     },
 
