@@ -1717,7 +1717,7 @@ export default {
   margin: 0 auto;
   padding: 20px;
   font-family: Arial, sans-serif;
-  background: white;
+  background: #ebf7fd;
 }
 
 .form-header {

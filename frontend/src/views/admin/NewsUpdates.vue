@@ -814,7 +814,7 @@ export default {
 .news-updates-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #ebf7fd;
 }
 
 /* Header */
@@ -1341,14 +1341,15 @@ export default {
 }
 
 .modal-content {
-  background: white;
+  background: #ebf7fd;
   border-radius: 12px;
   width: 90%;
   max-width: 800px;
-  max-height: 80vh;
+  max-height: 70vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  margin-top: 35px;
 }
 
 .modal-header {

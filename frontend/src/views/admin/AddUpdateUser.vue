@@ -36,7 +36,7 @@
             <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
-          Manage Users
+          View Users
         </button>
         <button class="header-button" @click="goToUpdateUser">
           <svg
@@ -306,7 +306,7 @@ export default {
 .add-update-user-page {
   font-family: Arial, sans-serif;
   min-height: 100vh;
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   display: flex;
   flex-direction: column;
   align-items: center;

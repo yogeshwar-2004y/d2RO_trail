@@ -371,7 +371,7 @@ export default {
 
 <style scoped>
 .login-logs-page {
-  background-color: #f5f5f5;
+  background-color: #ebf7fd;
   min-height: 100vh;
   padding: 20px;
 }
@@ -393,7 +393,7 @@ export default {
 }
 
 .back-button {
-  background: #e74c3c;
+  background: #3498db;
   color: white;
   border: none;
   padding: 12px;
@@ -607,7 +607,7 @@ export default {
 
 .activity {
   font-weight: 600;
-  text-align: center;
+  text-align: right;
   width: 140px;
   padding: 8px 16px;
   font-size: 12px;

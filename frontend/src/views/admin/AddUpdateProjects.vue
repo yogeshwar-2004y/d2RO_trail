@@ -239,9 +239,14 @@ export default {
 </script>
 
 <style scoped>
+
+.AddUpdateProjects {
+  background-color: #ebf7fd;
+}
+
 .add-update-projects {
   font-family: Arial, sans-serif;
-  background-color: #e5e5e5;
+  background-color: #ebf7fd;
   min-height: 100vh;
   padding: 20px;
 }
@@ -282,7 +287,7 @@ export default {
 }
 
 .form-card {
-  margin: 50px auto;
+  margin: 20px auto;
   background: #f8f8f8;
   padding: 30px 40px;
   border-radius: 15px;

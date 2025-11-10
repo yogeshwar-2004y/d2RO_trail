@@ -221,7 +221,7 @@ export default {
   font-family: Arial, sans-serif;
   padding-left: 60px;
   padding-top: 15px;
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   min-height: 100vh;
 }
 

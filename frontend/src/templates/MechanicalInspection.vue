@@ -1087,7 +1087,7 @@ export default {
 <style scoped>
 .mechanical-inspection-page {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #ebf7fd;
   font-family: "Arial", sans-serif;
 }
 

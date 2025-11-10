@@ -1196,7 +1196,7 @@ export default {
 <style scoped>
 .assembled-board-inspection-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #ebf7fd;
 }
 
 /* Main Content */

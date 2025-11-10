@@ -1979,7 +1979,7 @@ export default {
 
 /* Sub-tests Section */
 .sub-tests-section {
-  background: white;
+  background: #ebf7fd;
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   padding: 30px;

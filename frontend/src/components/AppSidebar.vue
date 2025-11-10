@@ -312,6 +312,12 @@ const roleBasedCards = computed(() => {
     admin: [
       { id: "home", title: "Home", route: "HomePageAdmin", icon: HomeIcon },
       {
+        id: "user activities",
+        title: "User Activities",
+        route: "UserActivities",
+        icon: UserIcon,
+      },
+      {
         id: "documents",
         title: "Documents",
         route: "ProjectsDashboard",
@@ -324,12 +330,12 @@ const roleBasedCards = computed(() => {
         route: "ReportDashboard",
         icon: ReportIcon,
       },
-      {
-        id: "user activities",
-        title: "User Activities",
-        route: "UserActivities",
-        icon: UserIcon,
-      },
+      // {
+      //   id: "user activities",
+      //   title: "User Activities",
+      //   route: "UserActivities",
+      //   icon: UserIcon,
+      // },
     ],
     qareviewer: [
       { id: "home", title: "Home", route: "HomePageReviewer", icon: HomeIcon },

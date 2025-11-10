@@ -119,7 +119,7 @@ export default {
 
 <style scoped>
 .user-activities-page {
-  background-color: #f0f0f0;
+  background-color: #ebf7fd;
   min-height: calc(100vh - 240px);
   display: flex;
   flex-direction: column;

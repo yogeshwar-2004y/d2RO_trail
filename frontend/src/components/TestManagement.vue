@@ -27,7 +27,7 @@
         </p>
       </div>
       <div class="header-right">
-        <button
+        <!-- <button
           class="add-group-btn"
           @click="showAddGroupForm = !showAddGroupForm"
         >
@@ -46,7 +46,7 @@
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           ADD GROUP
-        </button>
+        </button> -->
       </div>
     </div>
 
@@ -504,7 +504,7 @@ export default {
 <style scoped>
 .test-management-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #ebf7fd;
 }
 
 /* Header */

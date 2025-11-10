@@ -258,7 +258,7 @@ export default {
 <style scoped>
 .notifications-page {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #ebf7fd;
 }
 
 /* Header */
@@ -321,10 +321,10 @@ export default {
 
 /* Notifications Section */
 .notifications-section {
-  background: white;
+  background: #ebf7fd;
   padding: 25px;
   border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); */
 }
 
 .table-container {
@@ -396,7 +396,7 @@ export default {
 }
 
 .status-badge.read {
-  background-color: #6c757d;
+  background-color: #5a82a5;
   color: white;
 }
 
@@ -499,9 +499,9 @@ export default {
 .overlay-content {
   background: white;
   border-radius: 15px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
+  width: 30%;
+  /* max-width: 600px; */
+  max-height: 60vh;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
@@ -543,6 +543,8 @@ export default {
 
 .overlay-body {
   padding: 25px;
+  margin: 0px;
+  /* margin-bottom: 70px; */
 }
 
 .form-group {
