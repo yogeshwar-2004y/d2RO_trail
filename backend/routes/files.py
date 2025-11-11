@@ -85,7 +85,7 @@ def upload_login_background():
         file.save(file_path)
         
         # Return the URL for the uploaded background
-        background_url = f"http://127.0.0.1:8000/api/login-background/{unique_filename}"
+        background_url = f"http://127.0.0.1:5000/api/login-background/{unique_filename}"
         
         return jsonify({
             "success": True,
@@ -122,7 +122,7 @@ def get_current_background():
         for ext in Config.ALLOWED_IMAGE_EXTENSIONS:
             custom_background = os.path.join(Config.LOGIN_BACKGROUND_FOLDER, f"login_background.{ext}")
             if os.path.exists(custom_background):
-                background_url = f"http://127.0.0.1:8000/api/login-background/login_background.{ext}"
+                background_url = f"http://127.0.0.1:5000/api/login-background/login_background.{ext}"
                 return jsonify({
                     "success": True,
                     "background_url": background_url,
@@ -199,7 +199,7 @@ def upload_gallery_image(image_number):
         file.save(file_path)
         
         # Return the URL for the uploaded image
-        image_url = f"http://127.0.0.1:8000/api/gallery-image/{filename}"
+        image_url = f"http://127.0.0.1:5000/api/gallery-image/{filename}"
         
         return jsonify({
             "success": True,

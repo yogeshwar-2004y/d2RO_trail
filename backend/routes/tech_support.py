@@ -23,6 +23,8 @@ def submit_tech_support():
             if not data.get(field):
                 return jsonify({"success": False, "message": f"Missing required field: {field}"}), 400
         
+        print("Received tech support request data:", data)
+
         # Validate user_id is a valid integer
         try:
             user_id = int(data['userId'])
