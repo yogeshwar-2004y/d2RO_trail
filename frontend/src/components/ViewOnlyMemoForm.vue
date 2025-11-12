@@ -1412,6 +1412,7 @@ export default {
         });
 
         const data = await response.json();
+        console.log("DATAAAA Signature verification response:", data);
 
         if (data.success) {
           form.signatureUrl = data.signature_url;

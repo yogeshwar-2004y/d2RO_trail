@@ -588,12 +588,16 @@ def approve_memo(memo_id):
         print(f"Connecting to database...")
         conn = get_db_connection()
         cur = conn.cursor()
+        
+        # Store connection state to check later
+        connection_valid = True
 
         # Check if memo exists
         print(f"Checking if memo {memo_id} exists...")
         cur.execute("SELECT memo_id FROM memos WHERE memo_id = %s", (memo_id,))
         if not cur.fetchone():
             cur.close()
+            conn.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
 
         # Handle file upload
@@ -631,7 +635,7 @@ def approve_memo(memo_id):
             print(f"Updating memo {memo_id} with disapproved status...")
             cur.execute("""
                 UPDATE memos 
-                SET memo_status = 'disapproved'
+                SET memo_status = 'rejected'
                 WHERE memo_id = %s
             """, (memo_id,))
             
@@ -641,14 +645,17 @@ def approve_memo(memo_id):
                 print(f"Removed existing report for rejected memo {memo_id}")
             
             # Send notifications for rejected memo
+            # Use a separate connection for notification queries to avoid cursor conflicts
             try:
                 from utils.activity_logger import log_notification, get_users_by_role
 
                 performed_by = data.get('approved_by')
                 notified_user_ids = set()
 
-                # 1) First get submitter info and role
-                cur.execute("""
+                # 1) First get submitter info and role using a separate connection
+                conn_notify = get_db_connection()
+                cur_notify = conn_notify.cursor()
+                cur_notify.execute("""
                     SELECT m.submitted_by, u.name, ur.role_id 
                     FROM memos m 
                     LEFT JOIN users u ON m.submitted_by = u.user_id 
@@ -656,7 +663,10 @@ def approve_memo(memo_id):
                     WHERE m.memo_id = %s
                 """, (memo_id,))
                 
-                rows = cur.fetchall()
+                rows = cur_notify.fetchall()
+                cur_notify.close()
+                conn_notify.close()
+                
                 submitted_by_id = rows[0][0] if rows else None
                 submitted_by_name = rows[0][1] if rows and rows[0][1] else None
                 submitter_roles = [r[2] for r in rows] if rows else []
@@ -715,6 +725,8 @@ def approve_memo(memo_id):
         # Store approval_date as current timestamp when approval is made
         approval_timestamp = datetime.now()
         print(f"Approval timestamp: {approval_timestamp}")
+
+        
         
         # Parse test_date if provided
         test_date = None
@@ -727,9 +739,59 @@ def approve_memo(memo_id):
                 test_date = None
         
         # Check if approval record already exists
-        cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
-        existing_approval = cur.fetchone()
-        
+        # Ensure connection and cursor are still valid before using them
+        # Recreate connection/cursor if needed (after notification code may have affected them)
+        try:
+            # Try to use the cursor - if it fails, we'll recreate
+            # First, verify connection is still open by checking its state
+            try:
+                # Try a simple query to test connection
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            except:
+                # Connection is invalid, recreate it
+                print("Connection invalid, recreating...")
+                try:
+                    if 'cur' in locals() and cur:
+                        cur.close()
+                except:
+                    pass
+                try:
+                    if 'conn' in locals() and conn:
+                        conn.close()
+                except:
+                    pass
+                conn = get_db_connection()
+                cur = conn.cursor()
+                connection_valid = True
+            
+            cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
+            existing_approval = cur.fetchone()
+        except (Exception, AttributeError) as cursor_err:
+            # If cursor or connection is invalid, create new ones
+            print(f"Cursor/connection error, recreating connection and cursor: {cursor_err}")
+            try:
+                if 'cur' in locals() and cur:
+                    try:
+                        cur.close()
+                    except:
+                        pass
+            except:
+                pass
+            try:
+                if 'conn' in locals() and conn:
+                    try:
+                        conn.close()
+                    except:
+                        pass
+            except:
+                pass
+            # Create fresh connection and cursor
+            conn = get_db_connection()
+            cur = conn.cursor()
+            connection_valid = True
+            cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
+            existing_approval = cur.fetchone()
         # Get user_id for database operations (NULL for rejections)
         user_id_for_db = data.get('user_id') if status == 'accepted' else None
         
@@ -771,7 +833,55 @@ def approve_memo(memo_id):
             ))
 
         print("Committing transaction...")
-        conn.commit()
+        try:
+            conn.commit()
+            print("Transaction committed successfully")
+        except Exception as commit_err:
+            print(f"Error committing transaction: {commit_err}")
+            # If commit fails due to connection issues, recreate and retry
+            try:
+                if hasattr(conn, 'closed') and conn.closed:
+                    print("Connection was closed, recreating...")
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    # Re-execute the insert/update
+                    if existing_approval:
+                        cur.execute("""
+                            UPDATE memo_approval 
+                            SET approval_date = %s, user_id = %s, comments = %s, authentication = %s, 
+                                attachment_path = %s, status = %s, approved_by = %s, test_date = %s
+                            WHERE memo_id = %s
+                        """, (
+                            approval_timestamp,
+                            user_id_for_db,
+                            data.get('comments'),
+                            data.get('authentication'),
+                            attachment_path,
+                            status,
+                            data.get('approved_by'),
+                            test_date,
+                            memo_id
+                        ))
+                    else:
+                        cur.execute("""
+                            INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status, approved_by, test_date)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            memo_id,
+                            approval_timestamp,
+                            user_id_for_db,
+                            data.get('comments'),
+                            data.get('authentication'),
+                            attachment_path,
+                            status,
+                            data.get('approved_by'),
+                            test_date
+                        ))
+                    conn.commit()
+                    print("Transaction committed successfully after recreating connection")
+            except Exception as retry_err:
+                print(f"Error retrying commit: {retry_err}")
+                raise retry_err
         
         # Create report for assigned memo
         if status == 'accepted':
