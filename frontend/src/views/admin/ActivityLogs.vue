@@ -30,7 +30,6 @@
             type="number"
             v-model.number="recordLimit"
             min="1"
-            placeholder="All"
             class="limit-input"
             @change="loadActivityLogs"
           />
@@ -153,7 +152,7 @@ export default {
       filteredLogs: [],
       loading: false,
       error: null,
-      recordLimit: null, // null means no limit (all records)
+      recordLimit: 50, // Default limit of 50 records, can be edited
     };
   },
   async mounted() {
@@ -165,10 +164,9 @@ export default {
       this.error = null;
 
       try {
-        const params = {};
-        if (this.recordLimit && this.recordLimit > 0) {
-          params.limit = this.recordLimit;
-        }
+        const params = {
+          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50
+        };
         
         const response = await axios.get(
           "http://localhost:8000/api/activity-logs",
@@ -232,10 +230,9 @@ export default {
     async downloadPDF() {
       try {
         this.loading = true;
-        const params = {};
-        if (this.recordLimit && this.recordLimit > 0) {
-          params.limit = this.recordLimit;
-        }
+        const params = {
+          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50
+        };
         
         const response = await axios.get(
           "http://localhost:8000/api/activity-logs/pdf",

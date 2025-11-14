@@ -30,7 +30,6 @@
             type="number"
             v-model.number="recordLimit"
             min="1"
-            placeholder="All"
             class="limit-input"
             @change="refreshLogs"
           />
@@ -238,7 +237,7 @@ export default {
       totalLogs: 0,
       limit: 50, // Default limit for pagination
       offset: 0,
-      recordLimit: null, // null means no limit (all records) for display/export
+      recordLimit: 50, // Default limit of 50 records, can be edited
     };
   },
   async mounted() {
