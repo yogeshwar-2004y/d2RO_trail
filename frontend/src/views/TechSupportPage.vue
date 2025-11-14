@@ -112,6 +112,9 @@ export default {
     };
   },
   mounted() {
+    // Check if user is logged in and auto-fill username and user ID
+    this.initializeUserData();
+
     // Trigger sync when page loads (in case we just came back online)
     if (navigator.onLine) {
       techSupportSync.syncOfflineRequests();
@@ -128,6 +131,28 @@ export default {
     window.removeEventListener("offline", this.handleOffline);
   },
   methods: {
+    initializeUserData() {
+      // Check if user is logged in (from localStorage or userStore)
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const storedUser = localStorage.getItem("user");
+
+      if (isLoggedIn && storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          // Auto-fill username and user ID if user is logged in
+          if (user.name) {
+            this.formData.username = user.name;
+          }
+          if (user.id) {
+            this.formData.userId = user.id.toString();
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          // If there's an error, keep fields empty (coming from login page)
+        }
+      }
+      // If not logged in, fields remain empty (coming from login page)
+    },
     async submitForm() {
       if (!this.validateForm()) {
         return;
