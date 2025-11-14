@@ -139,8 +139,15 @@
                 class="form-textarea"
                 placeholder="Enter news content..."
                 rows="4"
+                :maxlength="500"
                 required
               ></textarea>
+              <div class="character-constraint">
+                <span class="character-count" :class="{ 'character-limit-warning': item.newsText.length > 450 }">
+                  {{ item.newsText.length }}/500 characters
+                </span>
+                <span class="constraint-message">Maximum 500 characters per news box</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1042,6 +1049,29 @@ export default {
 .form-textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+.character-constraint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.character-count {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.character-count.character-limit-warning {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.constraint-message {
+  color: #6c757d;
+  font-style: italic;
 }
 
 /* Existing News Section */
