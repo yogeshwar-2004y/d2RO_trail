@@ -2,6 +2,25 @@
   <div class="tech-support-page">
     <div class="main-content">
       <div class="form-container">
+        <div class="back-button-container">
+          <button type="button" @click="goBack" class="back-button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5"></path>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
         <div class="form-header">
           <h1>Technical Support</h1>
           <p>
@@ -79,9 +98,6 @@
           </div>
 
           <div class="form-actions">
-            <button type="button" @click="goBack" class="btn-secondary">
-              Back to Login
-            </button>
             <button type="submit" class="btn-primary" :disabled="isSubmitting">
               {{ isSubmitting ? "Submitting..." : "Submit" }}
             </button>
@@ -235,7 +251,25 @@ export default {
     },
 
     goBack() {
-      this.$router.push({ name: "login" });
+      // Check if user is logged in
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (isLoggedIn) {
+        // If logged in, go back to previous page or home
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const role = user.role?.toLowerCase().replace(/\s+/g, "") || "admin";
+        const roleToHomePath = {
+          admin: "/admin",
+          qareviewer: "/reviewer",
+          qahead: "/qahead",
+          designhead: "/designhead",
+          designer: "/designer"
+        };
+        const homePath = roleToHomePath[role] || "/admin";
+        this.$router.push(homePath);
+      } else {
+        // If not logged in, go back to login page
+        this.$router.push({ name: "login" });
+      }
     },
 
     storeLocally() {
@@ -440,6 +474,33 @@ export default {
   color: #856404;
   font-weight: 500;
   font-size: 0.95rem;
+}
+
+.back-button-container {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #162845;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #0f1d35;
+}
+
+.back-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .support-form {

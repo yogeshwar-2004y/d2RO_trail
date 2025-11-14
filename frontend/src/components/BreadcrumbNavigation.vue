@@ -136,6 +136,14 @@ const breadcrumbs = computed(() => {
     return []
   }
   
+  // Don't show breadcrumbs on TechSupport page if user is not logged in (coming from login page)
+  if (currentRoute.name === 'TechSupport') {
+    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true'
+    if (!isLoggedIn) {
+      return []
+    }
+  }
+  
   // Determine the correct home name based on user role
   const getHomeName = () => {
     const roleToHomeName = {

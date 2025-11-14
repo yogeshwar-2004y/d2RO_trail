@@ -1,8 +1,27 @@
 <template>
   <div class="tech-support-management">
     <div class="page-header">
-      <h1>Tech Support Management</h1>
-      <p>Manage and respond to technical support requests</p>
+      <button class="back-button" @click="goBack">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M19 12H5"></path>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back</span>
+      </button>
+      <div class="header-content">
+        <h1>Tech Support Management</h1>
+        <p>Manage and respond to technical support requests</p>
+      </div>
     </div>
 
     <!-- Success Popup Modal -->
@@ -273,6 +292,10 @@ export default {
     document.removeEventListener("keydown", this.handleKeydown);
   },
   methods: {
+    goBack() {
+      // Go back to user activities page or admin dashboard
+      this.$router.push("/user-activities");
+    },
     async loadRequests() {
       try {
         this.loading = true;
@@ -698,8 +721,16 @@ export default {
 }
 
 .page-header {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 20px;
   margin-bottom: 30px;
+  position: relative;
+}
+
+.page-header .header-content {
+  flex: 1;
+  text-align: center;
 }
 
 .page-header h1 {
@@ -711,6 +742,29 @@ export default {
 .page-header p {
   color: #666;
   font-size: 1.1rem;
+}
+
+.page-header .back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #162845;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.page-header .back-button:hover {
+  background-color: #0f1d35;
+}
+
+.page-header .back-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 /* Success Popup Modal Styles */
