@@ -115,8 +115,11 @@ def download_login_logs_pdf():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get all login logs
-        cur.execute("""
+        # Get limit from query parameters (default to None for all records)
+        limit = request.args.get('limit', type=int)
+        
+        # Build query with optional limit
+        query = """
             SELECT ll.serial_num, ll.user_id, ll.activity_performed,
                    ll.performed_by, ll.timestamp,
                    COALESCE(u.name, 'Unknown User') as user_name,
@@ -126,7 +129,13 @@ def download_login_logs_pdf():
             LEFT JOIN users u ON ll.user_id = u.user_id
             LEFT JOIN users p ON ll.performed_by = p.user_id
             ORDER BY ll.serial_num ASC
-        """)
+        """
+        
+        if limit and limit > 0:
+            query += " LIMIT %s"
+            cur.execute(query, (limit,))
+        else:
+            cur.execute(query)
         
         logs = cur.fetchall()
         cur.close()

@@ -23,6 +23,18 @@
         <span class="page-title">LOGIN LOGS</span>
       </div>
       <div class="header-right">
+        <div class="limit-input-box">
+          <label for="record-limit" class="limit-label">Records Limit:</label>
+          <input
+            id="record-limit"
+            type="number"
+            v-model.number="recordLimit"
+            min="1"
+            placeholder="All"
+            class="limit-input"
+            @change="refreshLogs"
+          />
+        </div>
         <div class="search-box">
           <svg
             class="search-icon"
@@ -187,7 +199,7 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalLogs > limit" class="pagination">
+      <div v-if="!recordLimit && totalLogs > limit" class="pagination">
         <button
           @click="previousPage"
           :disabled="offset === 0"
@@ -224,8 +236,9 @@ export default {
       loading: false,
       error: null,
       totalLogs: 0,
-      limit: 50,
+      limit: 50, // Default limit for pagination
       offset: 0,
+      recordLimit: null, // null means no limit (all records) for display/export
     };
   },
   async mounted() {
@@ -237,14 +250,16 @@ export default {
       this.error = null;
 
       try {
+        // If recordLimit is set, use it and reset offset to 0
+        // Otherwise use pagination with limit and offset
+        const params = {
+          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : this.limit,
+          offset: this.recordLimit && this.recordLimit > 0 ? 0 : this.offset,
+        };
+        
         const response = await axios.get(
           "http://localhost:8000/api/login-logs",
-          {
-            params: {
-              limit: this.limit,
-              offset: this.offset,
-            },
-          }
+          { params }
         );
 
         if (response.data.success) {
@@ -318,9 +333,15 @@ export default {
     async downloadPDF() {
       try {
         this.loading = true;
+        const params = {};
+        if (this.recordLimit && this.recordLimit > 0) {
+          params.limit = this.recordLimit;
+        }
+        
         const response = await axios.get(
           "http://localhost:8000/api/login-logs/pdf",
           {
+            params,
             responseType: "blob",
           }
         );
@@ -349,6 +370,13 @@ export default {
 
     async refreshLogs() {
       this.offset = 0;
+      // If recordLimit is set, use it; otherwise use default limit
+      if (this.recordLimit && this.recordLimit > 0) {
+        this.limit = this.recordLimit;
+      } else {
+        // Reset to default limit if recordLimit is cleared
+        this.limit = 50;
+      }
       await this.loadLoginLogs();
     },
 
@@ -436,6 +464,39 @@ export default {
   left: 12px;
   color: #7f8c8d;
   z-index: 1;
+}
+
+.limit-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 10px;
+}
+
+.limit-label {
+  font-size: 14px;
+  color: #2c3e50;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.limit-input {
+  width: 100px;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.limit-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.limit-input::placeholder {
+  color: #7f8c8d;
 }
 
 .search-input {

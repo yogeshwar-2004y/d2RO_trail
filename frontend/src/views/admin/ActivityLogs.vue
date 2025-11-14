@@ -23,6 +23,18 @@
         <span class="page-title">ACTIVITY LOGS</span>
       </div>
       <div class="header-right">
+        <div class="limit-input-box">
+          <label for="record-limit" class="limit-label">Records Limit:</label>
+          <input
+            id="record-limit"
+            type="number"
+            v-model.number="recordLimit"
+            min="1"
+            placeholder="All"
+            class="limit-input"
+            @change="loadActivityLogs"
+          />
+        </div>
         <div class="search-box">
           <svg
             class="search-icon"
@@ -141,6 +153,7 @@ export default {
       filteredLogs: [],
       loading: false,
       error: null,
+      recordLimit: null, // null means no limit (all records)
     };
   },
   async mounted() {
@@ -152,8 +165,14 @@ export default {
       this.error = null;
 
       try {
+        const params = {};
+        if (this.recordLimit && this.recordLimit > 0) {
+          params.limit = this.recordLimit;
+        }
+        
         const response = await axios.get(
-          "http://localhost:8000/api/activity-logs"
+          "http://localhost:8000/api/activity-logs",
+          { params }
         );
 
         if (response.data.success) {
@@ -213,9 +232,15 @@ export default {
     async downloadPDF() {
       try {
         this.loading = true;
+        const params = {};
+        if (this.recordLimit && this.recordLimit > 0) {
+          params.limit = this.recordLimit;
+        }
+        
         const response = await axios.get(
           "http://localhost:8000/api/activity-logs/pdf",
           {
+            params,
             responseType: "blob",
           }
         );
@@ -335,6 +360,34 @@ export default {
   top: 50%;
   transform: translateY(-50%);
   color: #050505;
+}
+
+.limit-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 10px;
+}
+
+.limit-label {
+  font-size: 14px;
+  color: #050505;
+  white-space: nowrap;
+}
+
+.limit-input {
+  width: 100px;
+  padding: 10px 15px;
+  border: none;
+  background-color: #e2e0e0;
+  color: #0f0f0f;
+  border-radius: 25px;
+  outline: none;
+  text-align: center;
+}
+
+.limit-input::placeholder {
+  color: #7f8c8d;
 }
 
 .search-input {
