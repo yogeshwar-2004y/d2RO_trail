@@ -153,7 +153,7 @@ def get_activity_logs(project_id: int = None, limit: int = 100):
                 LEFT JOIN users u ON al.performed_by = u.user_id
                 LEFT JOIN projects p ON al.project_id = p.project_id
                 WHERE al.project_id = %s
-                ORDER BY al.timestamp ASC
+                ORDER BY al.timestamp DESC
                 LIMIT %s
             """, (project_id, limit))
         else:
@@ -164,7 +164,7 @@ def get_activity_logs(project_id: int = None, limit: int = 100):
                 FROM activity_logs al
                 LEFT JOIN users u ON al.performed_by = u.user_id
                 LEFT JOIN projects p ON al.project_id = p.project_id
-                ORDER BY al.timestamp ASC
+                ORDER BY al.timestamp DESC
                 LIMIT %s
             """, (limit,))
         

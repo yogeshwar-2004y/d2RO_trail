@@ -31,7 +31,7 @@ def get_login_logs():
             FROM login_logs ll
             LEFT JOIN users u ON ll.user_id = u.user_id
             LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.serial_num ASC
+            ORDER BY ll.timestamp DESC
             LIMIT %s OFFSET %s
         """, (limit, offset))
         
@@ -128,7 +128,7 @@ def download_login_logs_pdf():
             FROM login_logs ll
             LEFT JOIN users u ON ll.user_id = u.user_id
             LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.serial_num ASC
+            ORDER BY ll.timestamp DESC
         """
         
         if limit and limit > 0:
