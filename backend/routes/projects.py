@@ -1475,35 +1475,35 @@ def download_activity_logs_pdf():
             # Get page dimensions
             page_width, page_height = A4
             
-            # Get the path to DRDO logo
+            # Get the paths to logos
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            logo_path = os.path.join(base_dir, 'static', 'images', 'DRDO.png')
+            drdo_logo_path = os.path.join(base_dir, 'static', 'images', 'DRDO.png')
+            aviatrax_logo_path = os.path.join(base_dir, 'static', 'images', 'Aviatrax_Trademark.png')
             
-            # Header - DRDO Logo and AVIATRAX branding
+            # Header - DRDO Logo on left and AVIATRAX Trademark on right
             logo_size = 0.8 * inch  # Logo size
             
-            # Draw DRDO logo if it exists
-            if os.path.exists(logo_path):
+            # Draw DRDO logo on the left side if it exists
+            if os.path.exists(drdo_logo_path):
                 try:
-                    # Draw logo on the left side
-                    canvas_obj.drawImage(logo_path, 50, page_height - 80, 
+                    canvas_obj.drawImage(drdo_logo_path, 50, page_height - 80, 
                                        width=logo_size, height=logo_size, 
                                        preserveAspectRatio=True, mask='auto')
                 except Exception as e:
                     print(f"Error drawing DRDO logo: {str(e)}")
                     # If logo fails, continue without it
             
-            # AVIATRAX text next to logo
-            text_start_x = 50 + logo_size + 15  # Start text after logo with some spacing
-            canvas_obj.setFont("Helvetica-Bold", 18)
-            # Purple color for AVIATRAX (#6A1B9A = RGB 106, 27, 154)
-            canvas_obj.setFillColorRGB(106/255.0, 27/255.0, 154/255.0)
-            canvas_obj.drawString(text_start_x, page_height - 40, "AVIATRAX™")
-            
-            canvas_obj.setFont("Helvetica", 10)
-            canvas_obj.setFillColor(colors.black)
-            canvas_obj.drawString(text_start_x, page_height - 55, "Defence Research and Development Org. (DRDO)")
-            canvas_obj.drawString(text_start_x, page_height - 68, "Combat Aircraft Systems Development and Integration Centre")
+            # Draw AVIATRAX Trademark logo on the right side if it exists
+            if os.path.exists(aviatrax_logo_path):
+                try:
+                    # Position on right side, parallel to DRDO logo
+                    aviatrax_x = page_width - 50 - logo_size
+                    canvas_obj.drawImage(aviatrax_logo_path, aviatrax_x, page_height - 80, 
+                                       width=logo_size, height=logo_size, 
+                                       preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Error drawing AVIATRAX trademark logo: {str(e)}")
+                    # If logo fails, continue without it
             
             # Draw a line under header
             canvas_obj.setStrokeColor(colors.grey)
