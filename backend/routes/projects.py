@@ -12,6 +12,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from datetime import datetime
 import io
+import os
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -1464,7 +1465,73 @@ def download_activity_logs_pdf():
         
         # Create PDF
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        export_timestamp = datetime.now()
+        
+        # Define header and footer functions
+        def add_header_footer(canvas_obj, doc_obj):
+            """Add header and footer to each page"""
+            canvas_obj.saveState()
+            
+            # Get page dimensions
+            page_width, page_height = A4
+            
+            # Get the path to DRDO logo
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            logo_path = os.path.join(base_dir, 'static', 'images', 'DRDO.png')
+            
+            # Header - DRDO Logo and AVIATRAX branding
+            logo_size = 0.8 * inch  # Logo size
+            
+            # Draw DRDO logo if it exists
+            if os.path.exists(logo_path):
+                try:
+                    # Draw logo on the left side
+                    canvas_obj.drawImage(logo_path, 50, page_height - 80, 
+                                       width=logo_size, height=logo_size, 
+                                       preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Error drawing DRDO logo: {str(e)}")
+                    # If logo fails, continue without it
+            
+            # AVIATRAX text next to logo
+            text_start_x = 50 + logo_size + 15  # Start text after logo with some spacing
+            canvas_obj.setFont("Helvetica-Bold", 18)
+            # Purple color for AVIATRAX (#6A1B9A = RGB 106, 27, 154)
+            canvas_obj.setFillColorRGB(106/255.0, 27/255.0, 154/255.0)
+            canvas_obj.drawString(text_start_x, page_height - 40, "AVIATRAX™")
+            
+            canvas_obj.setFont("Helvetica", 10)
+            canvas_obj.setFillColor(colors.black)
+            canvas_obj.drawString(text_start_x, page_height - 55, "Defence Research and Development Org. (DRDO)")
+            canvas_obj.drawString(text_start_x, page_height - 68, "Combat Aircraft Systems Development and Integration Centre")
+            
+            # Draw a line under header
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(1)
+            canvas_obj.line(50, page_height - 85, page_width - 50, page_height - 85)
+            
+            # Footer - Export timestamp
+            canvas_obj.setFont("Helvetica", 8)
+            canvas_obj.setFillColor(colors.grey)
+            footer_text = f"Exported on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_width = canvas_obj.stringWidth(footer_text, "Helvetica", 8)
+            canvas_obj.drawString((page_width - text_width) / 2, 30, footer_text)
+            
+            # Draw a line above footer
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(0.5)
+            canvas_obj.line(50, 40, page_width - 50, 40)
+            
+            canvas_obj.restoreState()
+        
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=A4,
+            rightMargin=50,
+            leftMargin=50,
+            topMargin=100,
+            bottomMargin=60
+        )
         story = []
         
         # Styles
@@ -1483,9 +1550,19 @@ def download_activity_logs_pdf():
         story.append(Spacer(1, 12))
         
         # Date
-        date_para = Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
+        date_para = Paragraph(f"Generated on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
         story.append(date_para)
         story.append(Spacer(1, 20))
+        
+        # Create a style for wrapped text in cells
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=10,
+            alignment=0,  # Left align
+            wordWrap='CJK'  # Enable word wrapping
+        )
         
         # Table data
         table_data = [['ID', 'User', 'Activity', 'Project', 'Timestamp']]
@@ -1511,16 +1588,27 @@ def download_activity_logs_pdf():
             activity = str(log.get('activity_performed', 'N/A')).strip()
             project = str(log.get('project_name', 'N/A')).strip()
             
+            # Use Paragraph for activity to enable text wrapping
+            # Escape any special characters that might break XML parsing
+            activity_escaped = activity.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            activity_para = Paragraph(activity_escaped, cell_style)
+            
+            # Also wrap project name if it's long
+            project_escaped = project.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            project_para = Paragraph(project_escaped, cell_style)
+            
             table_data.append([
                 str(log.get('activity_id', 'N/A')),
                 str(log.get('user_name', 'Unknown')).strip(),
-                activity,
-                project,
+                activity_para,  # Use Paragraph for wrapping
+                project_para,  # Use Paragraph for wrapping
                 timestamp_str
             ])
         
-        # Create table with better column widths (removed details column)
-        table = Table(table_data, colWidths=[0.6*inch, 1.5*inch, 2*inch, 1.5*inch, 1.8*inch])
+        # Create table with adjusted column widths - increased activity column width
+        # Total page width is ~8.27 inches, with margins we have ~7.27 inches
+        # Adjusting: ID(0.6) + User(1.3) + Activity(2.5) + Project(1.3) + Timestamp(1.5) = 7.2 inches
+        table = Table(table_data, colWidths=[0.6*inch, 1.3*inch, 2.5*inch, 1.3*inch, 1.5*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -1536,14 +1624,18 @@ def download_activity_logs_pdf():
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),    # Changed to TOP for better wrapping
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.beige]),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),    # Add padding for better readability
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
         
         story.append(table)
         
-        # Build PDF
-        doc.build(story)
+        # Build PDF with header and footer on all pages
+        doc.build(story, onFirstPage=add_header_footer, onLaterPages=add_header_footer)
         buffer.seek(0)
         
         return Response(

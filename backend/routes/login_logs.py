@@ -5,8 +5,10 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
 from datetime import datetime
 import io
+import os
 
 login_logs_bp = Blueprint('login_logs', __name__)
 
@@ -316,7 +318,73 @@ def download_login_logs_pdf():
         
         # Create PDF
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        export_timestamp = datetime.now()
+        
+        # Define header and footer functions
+        def add_header_footer(canvas_obj, doc_obj):
+            """Add header and footer to each page"""
+            canvas_obj.saveState()
+            
+            # Get page dimensions
+            page_width, page_height = A4
+            
+            # Get the path to DRDO logo
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            logo_path = os.path.join(base_dir, 'static', 'images', 'DRDO.png')
+            
+            # Header - DRDO Logo and AVIATRAX branding
+            logo_size = 0.8 * inch  # Logo size
+            
+            # Draw DRDO logo if it exists
+            if os.path.exists(logo_path):
+                try:
+                    # Draw logo on the left side
+                    canvas_obj.drawImage(logo_path, 50, page_height - 80, 
+                                       width=logo_size, height=logo_size, 
+                                       preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Error drawing DRDO logo: {str(e)}")
+                    # If logo fails, continue without it
+            
+            # AVIATRAX text next to logo
+            text_start_x = 50 + logo_size + 15  # Start text after logo with some spacing
+            canvas_obj.setFont("Helvetica-Bold", 18)
+            # Purple color for AVIATRAX (#6A1B9A = RGB 106, 27, 154)
+            canvas_obj.setFillColorRGB(106/255.0, 27/255.0, 154/255.0)
+            canvas_obj.drawString(text_start_x, page_height - 40, "AVIATRAX™")
+            
+            canvas_obj.setFont("Helvetica", 10)
+            canvas_obj.setFillColor(colors.black)
+            canvas_obj.drawString(text_start_x, page_height - 55, "Defence Research and Development Org. (DRDO)")
+            canvas_obj.drawString(text_start_x, page_height - 68, "Combat Aircraft Systems Development and Integration Centre")
+            
+            # Draw a line under header
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(1)
+            canvas_obj.line(50, page_height - 85, page_width - 50, page_height - 85)
+            
+            # Footer - Export timestamp
+            canvas_obj.setFont("Helvetica", 8)
+            canvas_obj.setFillColor(colors.grey)
+            footer_text = f"Exported on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_width = canvas_obj.stringWidth(footer_text, "Helvetica", 8)
+            canvas_obj.drawString((page_width - text_width) / 2, 30, footer_text)
+            
+            # Draw a line above footer
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(0.5)
+            canvas_obj.line(50, 40, page_width - 50, 40)
+            
+            canvas_obj.restoreState()
+        
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=A4,
+            rightMargin=50,
+            leftMargin=50,
+            topMargin=100,
+            bottomMargin=60
+        )
         story = []
         
         # Styles
@@ -335,7 +403,7 @@ def download_login_logs_pdf():
         story.append(Spacer(1, 12))
         
         # Date
-        date_para = Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
+        date_para = Paragraph(f"Generated on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
         story.append(date_para)
         story.append(Spacer(1, 20))
         
@@ -391,8 +459,8 @@ def download_login_logs_pdf():
         
         story.append(table)
         
-        # Build PDF
-        doc.build(story)
+        # Build PDF with header and footer on all pages
+        doc.build(story, onFirstPage=add_header_footer, onLaterPages=add_header_footer)
         buffer.seek(0)
         
         return Response(
