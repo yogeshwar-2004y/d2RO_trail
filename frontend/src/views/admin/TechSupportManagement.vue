@@ -258,6 +258,7 @@
 
 <script>
 import { currentUser } from "@/stores/userStore";
+import axios from "axios";
 
 export default {
   name: "TechSupportManagement",
@@ -423,144 +424,43 @@ export default {
           return;
         }
 
-        // Reload requests to ensure we have the latest data
-        await this.loadRequests();
-        this.loadOfflineRequests();
+        // Show loading state
+        this.loading = true;
 
-        // Get all requests (online + offline) up to the limit
-        // Use the actual requests arrays, not filtered ones, to ensure we have all data
-        const allRequests = [
-          ...this.requests.slice(0, this.exportLimit),
-          ...this.offlineRequests.slice(
-            0,
-            Math.max(0, this.exportLimit - this.requests.length)
-          ),
-        ];
-
-        if (allRequests.length === 0) {
-          alert("No requests to export");
-          return;
+        // Call backend PDF endpoint with limit
+        const params = {};
+        if (this.exportLimit && this.exportLimit > 0) {
+          params.limit = this.exportLimit;
         }
 
-        console.log(`Exporting ${allRequests.length} requests:`, allRequests);
-
-        // Create PDF content
-        const pdfContent = this.generatePDFContent(allRequests);
-
-        // Create and download PDF
-        this.downloadPDF(
-          pdfContent,
-          `tech_support_requests_${new Date().toISOString().split("T")[0]}.pdf`
+        const response = await axios.get(
+          "http://127.0.0.1:8000/api/tech-support/pdf",
+          {
+            params,
+            responseType: "blob",
+          }
         );
 
-        this.showSuccessNotification(
-          `Exported ${allRequests.length} requests to PDF`
-        );
+        // Create blob URL and trigger download
+        const blob = new Blob([response.data], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `tech_support_requests_${new Date().toISOString().split("T")[0]}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+
+        this.showSuccessNotification("Tech support requests exported to PDF successfully");
       } catch (error) {
         console.error("Error exporting to PDF:", error);
         alert("Failed to export PDF. Please try again.");
+      } finally {
+        this.loading = false;
       }
     },
 
-    generatePDFContent(requests) {
-      const currentDate = new Date().toLocaleDateString();
-      const totalRequests = requests.length;
-      const onlineRequests = requests.filter((r) => !r.isOffline).length;
-      const offlineRequests = requests.filter((r) => r.isOffline).length;
-
-      let content = `
-        <html>
-          <head>
-            <title>Tech Support Requests Report</title>
-            <style>
-              body { font-family: Arial, sans-serif; margin: 20px; }
-              .header { text-align: center; margin-bottom: 30px; }
-              .summary { background: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-              .request { border: 1px solid #ddd; margin-bottom: 15px; padding: 15px; border-radius: 5px; }
-              .request-header { font-weight: bold; color: #333; margin-bottom: 10px; }
-              .request-details { margin-left: 10px; }
-              .offline { background: #fff3cd; border-color: #ffeaa7; }
-              .status-pending { color: #856404; }
-              .status-in_progress { color: #0c5460; }
-              .status-resolved { color: #155724; }
-              .status-closed { color: #721c24; }
-              .status-offline_pending { color: #856404; font-style: italic; }
-            </style>
-          </head>
-          <body>
-            <div class="header">
-              <h1>Tech Support Requests Report</h1>
-              <p>Generated on: ${currentDate}</p>
-            </div>
-            
-            <div class="summary">
-              <h3>Summary</h3>
-              <p><strong>Total Requests:</strong> ${totalRequests}</p>
-              <p><strong>Online Requests:</strong> ${onlineRequests}</p>
-              <p><strong>Offline Requests:</strong> ${offlineRequests}</p>
-            </div>
-      `;
-
-      requests.forEach((request, index) => {
-        const statusClass = `status-${request.status}`;
-        const requestClass = request.isOffline ? "offline" : "";
-
-        // Handle both field name formats: backend uses user_id/issue_date/issue_description, 
-        // offline uses userId/date/issue
-        const userId = request.user_id || request.userId || 'N/A';
-        const issueDate = request.issue_date || request.date || null;
-        const issueDescription = request.issue_description || request.issue || 'N/A';
-
-        content += `
-          <div class="request ${requestClass}">
-            <div class="request-header">
-              Request #${index + 1} - ${request.username || 'Unknown'} (ID: ${userId})
-              <span class="${statusClass}">[${(request.status || 'pending').toUpperCase()}]</span>
-              ${
-                request.isOffline
-                  ? '<span style="color: #856404;">[OFFLINE]</span>'
-                  : ""
-              }
-            </div>
-            <div class="request-details">
-              <p><strong>Issue Date:</strong> ${issueDate ? this.formatDateOnly(issueDate) : 'N/A'}</p>
-              <p><strong>Submitted:</strong> ${this.formatDateTime(
-                request.created_at
-              )}</p>
-              ${
-                request.status_updated_at
-                  ? `<p><strong>Last Updated:</strong> ${this.formatDateTime(
-                      request.status_updated_at
-                    )}</p>`
-                  : ""
-              }
-              <p><strong>Issue Description:</strong></p>
-              <p style="margin-left: 20px; white-space: pre-wrap;">${issueDescription}</p>
-            </div>
-          </div>
-        `;
-      });
-
-      content += `
-          </body>
-        </html>
-      `;
-
-      return content;
-    },
-
-    downloadPDF(htmlContent, filename) {
-      // Create a new window with the HTML content
-      const printWindow = window.open("", "_blank");
-      printWindow.document.write(htmlContent);
-      printWindow.document.close();
-
-      // Wait for content to load, then print
-      printWindow.onload = function () {
-        printWindow.print();
-        printWindow.close();
-      };
-    },
 
     async updateStatus(requestId, newStatus) {
       try {
