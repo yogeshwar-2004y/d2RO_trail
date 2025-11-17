@@ -64,7 +64,7 @@ const closeNotifications = () => {
       <RouterView />
     </main>
     <NewsTicker
-      height="50px"
+      height="30px"
       backgroundColor="#2c3e50"
       textColor="#ffffff"
       class="app-news-ticker app-news-ticker-responsive"

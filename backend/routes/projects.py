@@ -12,6 +12,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from datetime import datetime
 import io
+import os
 
 projects_bp = Blueprint('projects', __name__)
 
@@ -1296,9 +1297,10 @@ def get_activity_logs():
         # Get query parameters
         project_id = request.args.get('project_id', type=int)
         limit = request.args.get('limit', 100, type=int)
+        search = request.args.get('search', '').strip()
         
         # Fetch activity logs
-        logs = get_activity_logs(project_id=project_id, limit=limit)
+        logs = get_activity_logs(project_id=project_id, limit=limit, search=search if search else None)
         
         return jsonify({
             "success": True,
@@ -1308,7 +1310,9 @@ def get_activity_logs():
         
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Error loading activity logs: {str(e)}"}), 500
 
 @projects_bp.route('/api/notifications/<int:user_id>', methods=['GET'])
 def get_user_notifications(user_id):
@@ -1427,12 +1431,107 @@ def download_activity_logs_pdf():
         from datetime import datetime
         import io
         
-        # Get all activity logs
-        logs = get_activity_logs(limit=1000)  # Get more logs for PDF
+        # Get query parameters
+        limit = request.args.get('limit', type=int)
+        search = request.args.get('search', '').strip()
+        user_name = request.args.get('user_name', '').strip()
+        activity_id = request.args.get('activity_id', '').strip()
+        project_id_filter = request.args.get('project_id', '').strip()
+        activity_type = request.args.get('activity_type', '').strip()
+        date_from = request.args.get('date_from', '').strip()
+        date_to = request.args.get('date_to', '').strip()
+        
+        # Determine if any filters are applied
+        has_filters = search or user_name or activity_id or project_id_filter or activity_type or date_from or date_to
+        
+        # Get activity logs with optional limit and filters
+        # If filters are applied, use a large limit to get all matching results
+        # If no filters, use the provided limit or default
+        if has_filters:
+            limit_value = 100000  # Large number to get all filtered results
+        else:
+            limit_value = limit if limit and limit > 0 else 100000
+        
+        logs = get_activity_logs(
+            limit=limit_value,
+            search=search if search else None,
+            user_name=user_name if user_name else None,
+            activity_id=activity_id if activity_id else None,
+            project_id_filter=project_id_filter if project_id_filter else None,
+            activity_type=activity_type if activity_type else None,
+            date_from=date_from if date_from else None,
+            date_to=date_to if date_to else None
+        )
         
         # Create PDF
         buffer = io.BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=A4)
+        export_timestamp = datetime.now()
+        
+        # Define header and footer functions
+        def add_header_footer(canvas_obj, doc_obj):
+            """Add header and footer to each page"""
+            canvas_obj.saveState()
+            
+            # Get page dimensions
+            page_width, page_height = A4
+            
+            # Get the paths to logos
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            drdo_logo_path = os.path.join(base_dir, 'static', 'images', 'DRDO.png')
+            aviatrax_logo_path = os.path.join(base_dir, 'static', 'images', 'Aviatrax_Trademark.png')
+            
+            # Header - DRDO Logo on left and AVIATRAX Trademark on right
+            logo_size = 0.8 * inch  # Logo size
+            
+            # Draw DRDO logo on the left side if it exists
+            if os.path.exists(drdo_logo_path):
+                try:
+                    canvas_obj.drawImage(drdo_logo_path, 50, page_height - 80, 
+                                       width=logo_size, height=logo_size, 
+                                       preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Error drawing DRDO logo: {str(e)}")
+                    # If logo fails, continue without it
+            
+            # Draw AVIATRAX Trademark logo on the right side if it exists
+            if os.path.exists(aviatrax_logo_path):
+                try:
+                    # Position on right side, parallel to DRDO logo
+                    aviatrax_x = page_width - 50 - logo_size
+                    canvas_obj.drawImage(aviatrax_logo_path, aviatrax_x, page_height - 80, 
+                                       width=logo_size, height=logo_size, 
+                                       preserveAspectRatio=True, mask='auto')
+                except Exception as e:
+                    print(f"Error drawing AVIATRAX trademark logo: {str(e)}")
+                    # If logo fails, continue without it
+            
+            # Draw a line under header
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(1)
+            canvas_obj.line(50, page_height - 85, page_width - 50, page_height - 85)
+            
+            # Footer - Export timestamp
+            canvas_obj.setFont("Helvetica", 8)
+            canvas_obj.setFillColor(colors.grey)
+            footer_text = f"Exported on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+            text_width = canvas_obj.stringWidth(footer_text, "Helvetica", 8)
+            canvas_obj.drawString((page_width - text_width) / 2, 30, footer_text)
+            
+            # Draw a line above footer
+            canvas_obj.setStrokeColor(colors.grey)
+            canvas_obj.setLineWidth(0.5)
+            canvas_obj.line(50, 40, page_width - 50, 40)
+            
+            canvas_obj.restoreState()
+        
+        doc = SimpleDocTemplate(
+            buffer, 
+            pagesize=A4,
+            rightMargin=50,
+            leftMargin=50,
+            topMargin=100,
+            bottomMargin=60
+        )
         story = []
         
         # Styles
@@ -1451,12 +1550,26 @@ def download_activity_logs_pdf():
         story.append(Spacer(1, 12))
         
         # Date
-        date_para = Paragraph(f"Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
+        date_para = Paragraph(f"Generated on: {export_timestamp.strftime('%Y-%m-%d %H:%M:%S')}", styles['Normal'])
         story.append(date_para)
         story.append(Spacer(1, 20))
         
+        # Create a style for wrapped text in cells
+        cell_style = ParagraphStyle(
+            'CellStyle',
+            parent=styles['Normal'],
+            fontSize=8,
+            leading=10,
+            alignment=0,  # Left align
+            wordWrap='CJK'  # Enable word wrapping
+        )
+        
         # Table data
         table_data = [['ID', 'User', 'Activity', 'Project', 'Timestamp']]
+        
+        # If no logs found, add a message row
+        if not logs or len(logs) == 0:
+            table_data.append(['No logs found', 'matching', 'search criteria', '', ''])
         
         for log in logs:
             # Format timestamp properly
@@ -1475,16 +1588,27 @@ def download_activity_logs_pdf():
             activity = str(log.get('activity_performed', 'N/A')).strip()
             project = str(log.get('project_name', 'N/A')).strip()
             
+            # Use Paragraph for activity to enable text wrapping
+            # Escape any special characters that might break XML parsing
+            activity_escaped = activity.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            activity_para = Paragraph(activity_escaped, cell_style)
+            
+            # Also wrap project name if it's long
+            project_escaped = project.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
+            project_para = Paragraph(project_escaped, cell_style)
+            
             table_data.append([
                 str(log.get('activity_id', 'N/A')),
                 str(log.get('user_name', 'Unknown')).strip(),
-                activity,
-                project,
+                activity_para,  # Use Paragraph for wrapping
+                project_para,  # Use Paragraph for wrapping
                 timestamp_str
             ])
         
-        # Create table with better column widths (removed details column)
-        table = Table(table_data, colWidths=[0.6*inch, 1.5*inch, 2*inch, 1.5*inch, 1.8*inch])
+        # Create table with adjusted column widths - increased activity column width
+        # Total page width is ~8.27 inches, with margins we have ~7.27 inches
+        # Adjusting: ID(0.6) + User(1.3) + Activity(2.5) + Project(1.3) + Timestamp(1.5) = 7.2 inches
+        table = Table(table_data, colWidths=[0.6*inch, 1.3*inch, 2.5*inch, 1.3*inch, 1.5*inch])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -1500,14 +1624,18 @@ def download_activity_logs_pdf():
             ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
             ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),    # Changed to TOP for better wrapping
             ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.beige]),
+            ('LEFTPADDING', (0, 0), (-1, -1), 4),    # Add padding for better readability
+            ('RIGHTPADDING', (0, 0), (-1, -1), 4),
+            ('TOPPADDING', (0, 0), (-1, -1), 6),
+            ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
         ]))
         
         story.append(table)
         
-        # Build PDF
-        doc.build(story)
+        # Build PDF with header and footer on all pages
+        doc.build(story, onFirstPage=add_header_footer, onLaterPages=add_header_footer)
         buffer.seek(0)
         
         return Response(

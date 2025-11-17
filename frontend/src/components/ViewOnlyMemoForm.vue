@@ -585,7 +585,7 @@
                 class="signature-display-footer"
               >
                 <img
-                  :src="memoApprovalStatus.authentication"
+                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
                   alt="Signature"
                   class="signature-image-footer"
                 />
@@ -654,7 +654,7 @@
                 class="signature-display-footer"
               >
                 <img
-                  :src="memoApprovalStatus.authentication"
+                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
                   alt="Signature"
                   class="signature-image-footer"
                 />
@@ -1102,9 +1102,22 @@ export default {
     await this.fetchMemoApprovalStatus();
   },
   methods: {
-    // Check if the authentication field contains a signature URL
+    // Check if the authentication field contains a signature URL or path
     isSignatureUrl(authentication) {
-      return authentication && authentication.includes("http://localhost:5000/api/users/signature/");
+      if (!authentication) return false;
+      return authentication.includes("http://localhost:8000/api/users/signature/") ||
+             authentication.startsWith("/api/users/signature/");
+    },
+    // Get the full URL for signature image
+    getSignatureImageUrl(authentication) {
+      if (!authentication) return "";
+      if (authentication.startsWith("http://") || authentication.startsWith("https://")) {
+        return authentication;
+      }
+      if (authentication.startsWith("/api/users/signature/")) {
+        return `http://localhost:8000${authentication}`;
+      }
+      return authentication;
     },
 
     async fetchMemoData() {
@@ -1119,7 +1132,7 @@ export default {
         }
 
         // Otherwise, fetch from API
-        const response = await fetch(`http://localhost:5000/api/memos/${this.id}`);
+        const response = await fetch(`http://localhost:8000/api/memos/${this.id}`);
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
@@ -1296,7 +1309,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/available-reviewers"
+          "http://localhost:8000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1314,7 +1327,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.id}/approval-status`
+          `http://localhost:8000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1347,7 +1360,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `http://localhost:8000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1483,7 +1496,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1534,7 +1547,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,

@@ -557,7 +557,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/${this.reportId}`
+          `http://localhost:8000/api/reports/${this.reportId}`
         );
         const result = await response.json();
         

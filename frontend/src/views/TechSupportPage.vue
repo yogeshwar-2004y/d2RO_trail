@@ -2,6 +2,25 @@
   <div class="tech-support-page">
     <div class="main-content">
       <div class="form-container">
+        <div class="back-button-container">
+          <button type="button" @click="goBack" class="back-button">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M19 12H5"></path>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back</span>
+          </button>
+        </div>
         <div class="form-header">
           <h1>Technical Support</h1>
           <p>
@@ -79,9 +98,6 @@
           </div>
 
           <div class="form-actions">
-            <button type="button" @click="goBack" class="btn-secondary">
-              Back to Login
-            </button>
             <button type="submit" class="btn-primary" :disabled="isSubmitting">
               {{ isSubmitting ? "Submitting..." : "Submit" }}
             </button>
@@ -112,6 +128,9 @@ export default {
     };
   },
   mounted() {
+    // Check if user is logged in and auto-fill username and user ID
+    this.initializeUserData();
+
     // Trigger sync when page loads (in case we just came back online)
     if (navigator.onLine) {
       techSupportSync.syncOfflineRequests();
@@ -128,6 +147,28 @@ export default {
     window.removeEventListener("offline", this.handleOffline);
   },
   methods: {
+    initializeUserData() {
+      // Check if user is logged in (from localStorage or userStore)
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const storedUser = localStorage.getItem("user");
+
+      if (isLoggedIn && storedUser) {
+        try {
+          const user = JSON.parse(storedUser);
+          // Auto-fill username and user ID if user is logged in
+          if (user.name) {
+            this.formData.username = user.name;
+          }
+          if (user.id) {
+            this.formData.userId = user.id.toString();
+          }
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          // If there's an error, keep fields empty (coming from login page)
+        }
+      }
+      // If not logged in, fields remain empty (coming from login page)
+    },
     async submitForm() {
       if (!this.validateForm()) {
         return;
@@ -137,7 +178,7 @@ export default {
 
       try {
         // Try to submit to backend first
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -210,7 +251,25 @@ export default {
     },
 
     goBack() {
-      this.$router.push({ name: "login" });
+      // Check if user is logged in
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (isLoggedIn) {
+        // If logged in, go back to previous page or home
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const role = user.role?.toLowerCase().replace(/\s+/g, "") || "admin";
+        const roleToHomePath = {
+          admin: "/admin",
+          qareviewer: "/reviewer",
+          qahead: "/qahead",
+          designhead: "/designhead",
+          designer: "/designer"
+        };
+        const homePath = roleToHomePath[role] || "/admin";
+        this.$router.push(homePath);
+      } else {
+        // If not logged in, go back to login page
+        this.$router.push({ name: "login" });
+      }
     },
 
     storeLocally() {
@@ -415,6 +474,33 @@ export default {
   color: #856404;
   font-weight: 500;
   font-size: 0.95rem;
+}
+
+.back-button-container {
+  margin-bottom: 20px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #162845;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: #0f1d35;
+}
+
+.back-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .support-form {

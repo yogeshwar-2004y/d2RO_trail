@@ -147,6 +147,32 @@
             <span v-if="!isCollapsed">Tech Support</span>
           </div>
 
+          <!-- Tech Support Requests - Admin Only -->
+          <div
+            v-if="isAdmin"
+            class="profile-item"
+            @click="handleProfileAction('tech-support-requests')"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span v-if="!isCollapsed">Tech Support Requests</span>
+          </div>
+
           <div
             class="profile-item password-item"
             @click="togglePasswordSubmenu"
@@ -259,12 +285,14 @@
       </div>
     </div>
 
-    <!-- Password Change Modal -->
-    <PasswordChangeModal
-      :isOpen="isPasswordModalOpen"
-      :passwordType="passwordType"
-      @close="closePasswordModal"
-    />
+    <!-- Password Change Modal - Teleported to body for proper centering -->
+    <Teleport to="body">
+      <PasswordChangeModal
+        :isOpen="isPasswordModalOpen"
+        :passwordType="passwordType"
+        @close="closePasswordModal"
+      />
+    </Teleport>
   </div>
 </template>
 
@@ -299,6 +327,12 @@ let notificationRefreshInterval = null;
 // Computed properties
 const userInfo = computed(() => {
   return userStore.getters.currentUser() || { name: "User", role: "Unknown" };
+});
+
+const isAdmin = computed(() => {
+  const userRole = userStore.getters.currentUserRole();
+  const roleName = userStore.getters.roleName();
+  return userRole === 1 || roleName?.toLowerCase() === "admin";
 });
 
 // Role-based cards configuration
@@ -446,17 +480,17 @@ const handleProfileAction = (action) => {
       console.log("Profile clicked");
       break;
     case "tech-support":
-      // Check if user is admin - if so, go to tech support management, otherwise go to tech support form
-      const userRole = userStore.getters.currentUserRole();
-      const roleName = userStore.getters.roleName();
+      // Navigate to tech support dashboard (shows user's requests) for all users including admin
+      router.push({ name: "TechSupportUserDashboard" });
 
-      if (userRole === 1 || roleName?.toLowerCase() === "admin") {
-        // Admin users go to tech support management page
-        router.push({ name: "TechSupportManagement" });
-      } else {
-        // Regular users go to their tech support dashboard
-        router.push({ name: "TechSupportUserDashboard" });
+      // Close sidebar after navigation on mobile
+      if (window.innerWidth <= 768) {
+        isOpen.value = false;
       }
+      break;
+    case "tech-support-requests":
+      // Navigate to tech support management page (admin only)
+      router.push({ name: "TechSupportManagement" });
 
       // Close sidebar after navigation on mobile
       if (window.innerWidth <= 768) {
@@ -501,7 +535,7 @@ const fetchUnreadCount = async () => {
     }
 
     const response = await fetch(
-      `http://localhost:5000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
+      `http://localhost:8000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
     );
     const data = await response.json();
 

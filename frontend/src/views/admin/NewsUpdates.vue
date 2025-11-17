@@ -139,8 +139,15 @@
                 class="form-textarea"
                 placeholder="Enter news content..."
                 rows="4"
+                :maxlength="500"
                 required
               ></textarea>
+              <div class="character-constraint">
+                <span class="character-count" :class="{ 'character-limit-warning': item.newsText.length > 450 }">
+                  {{ item.newsText.length }}/500 characters
+                </span>
+                <span class="constraint-message">Maximum 500 characters per news box</span>
+              </div>
             </div>
           </div>
         </div>
@@ -520,7 +527,7 @@ export default {
 
       this.saving = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news", {
+        const response = await fetch("http://localhost:8000/api/news", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -553,7 +560,7 @@ export default {
     async loadExistingNews() {
       this.loadingNews = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("http://localhost:8000/api/news");
         const data = await response.json();
         console.log("loadExistingNews data after jsonify:", data);
 
@@ -580,7 +587,7 @@ export default {
 
       this.deleting = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news/all", {
+        const response = await fetch("http://localhost:8000/api/news/all", {
           method: "DELETE",
         });
 
@@ -611,7 +618,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}`,
+          `http://localhost:8000/api/news/${newsId}`,
           {
             method: "DELETE",
           }
@@ -644,7 +651,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}/permanent`,
+          `http://localhost:8000/api/news/${newsId}/permanent`,
           {
             method: "DELETE",
           }
@@ -679,7 +686,7 @@ export default {
       this.reposting = true;
       try {
         const response = await fetch(
-          `http://localhost:5000/api/news/${newsId}/repost`,
+          `http://localhost:8000/api/news/${newsId}/repost`,
           {
             method: "PUT",
           }
@@ -756,7 +763,7 @@ export default {
     async loadAllNews() {
       this.loadingAllNews = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news/all");
+        const response = await fetch("http://localhost:8000/api/news/all");
         const data = await response.json();
 
         if (data.success) {
@@ -783,7 +790,7 @@ export default {
       this.deleting = true;
       try {
         const response = await fetch(
-          "http://localhost:5000/api/news/permanent/all",
+          "http://localhost:8000/api/news/permanent/all",
           {
             method: "DELETE",
           }
@@ -1042,6 +1049,29 @@ export default {
 .form-textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+.character-constraint {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.character-count {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.character-count.character-limit-warning {
+  color: #ff9800;
+  font-weight: 600;
+}
+
+.constraint-message {
+  color: #6c757d;
+  font-style: italic;
 }
 
 /* Existing News Section */
