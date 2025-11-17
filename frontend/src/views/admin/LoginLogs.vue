@@ -285,14 +285,14 @@ export default {
       const query = this.searchQuery.toLowerCase();
       this.filteredLogs = this.logs.filter(
         (log) =>
-          log.serial_number.toString().includes(query) ||
-          log.user_id.toString().includes(query) ||
-          log.activity_performed.toLowerCase().includes(query) ||
-          log.performed_by.toString().includes(query) ||
-          log.performed_by_name?.toLowerCase().includes(query) ||
-          log.user_name?.toLowerCase().includes(query) ||
-          log.user_email?.toLowerCase().includes(query) ||
-          log.suspicion_reason?.toLowerCase().includes(query) ||
+          (log.serial_number?.toString() || '').includes(query) ||
+          (log.user_id?.toString() || '').includes(query) ||
+          (log.activity_performed?.toLowerCase() || '').includes(query) ||
+          (log.performed_by?.toString() || '').includes(query) ||
+          (log.performed_by_name?.toLowerCase() || '').includes(query) ||
+          (log.user_name?.toLowerCase() || '').includes(query) ||
+          (log.user_email?.toLowerCase() || '').includes(query) ||
+          (log.suspicion_reason?.toLowerCase() || '').includes(query) ||
           (log.is_suspicious && "suspicious".includes(query)) ||
           this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
       );

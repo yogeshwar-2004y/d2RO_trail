@@ -13,6 +13,8 @@ login_logs_bp = Blueprint('login_logs', __name__)
 @login_logs_bp.route('/api/login-logs', methods=['GET'])
 def get_login_logs():
     """Get login logs for admin dashboard"""
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -21,20 +23,45 @@ def get_login_logs():
         limit = request.args.get('limit', 100, type=int)
         offset = request.args.get('offset', 0, type=int)
         
-        # Fetch login logs with user information
+        # Check if suspicious activity columns exist
         cur.execute("""
-            SELECT ll.serial_num, ll.user_id, ll.activity_performed, 
-                   ll.performed_by, ll.timestamp,
-                   COALESCE(u.name, 'Unknown User') as user_name, 
-                   COALESCE(u.email, 'N/A') as user_email,
-                   COALESCE(p.name, 'Unknown User') as performed_by_name
-            FROM login_logs ll
-            LEFT JOIN users u ON ll.user_id = u.user_id
-            LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.timestamp DESC
-            LIMIT %s OFFSET %s
-        """, (limit, offset))
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'login_logs' AND column_name = 'is_suspicious'
+        """)
+        has_suspicious_columns = cur.fetchone() is not None
         
+        # Build query based on whether suspicious columns exist
+        if has_suspicious_columns:
+            query = """
+                SELECT ll.serial_num, ll.user_id, ll.activity_performed, 
+                       ll.performed_by, ll.timestamp,
+                       COALESCE(u.name, 'Unknown User') as user_name, 
+                       COALESCE(u.email, 'N/A') as user_email,
+                       COALESCE(p.name, 'Unknown User') as performed_by_name,
+                       COALESCE(ll.is_suspicious, FALSE) as is_suspicious,
+                       ll.suspicion_reason
+                FROM login_logs ll
+                LEFT JOIN users u ON ll.user_id = u.user_id
+                LEFT JOIN users p ON ll.performed_by = p.user_id
+                ORDER BY ll.timestamp DESC
+                LIMIT %s OFFSET %s
+            """
+        else:
+            query = """
+                SELECT ll.serial_num, ll.user_id, ll.activity_performed, 
+                       ll.performed_by, ll.timestamp,
+                       COALESCE(u.name, 'Unknown User') as user_name, 
+                       COALESCE(u.email, 'N/A') as user_email,
+                       COALESCE(p.name, 'Unknown User') as performed_by_name
+                FROM login_logs ll
+                LEFT JOIN users u ON ll.user_id = u.user_id
+                LEFT JOIN users p ON ll.performed_by = p.user_id
+                ORDER BY ll.timestamp DESC
+                LIMIT %s OFFSET %s
+            """
+        
+        cur.execute(query, (limit, offset))
         logs = cur.fetchall()
         
         # Get total count
@@ -42,20 +69,39 @@ def get_login_logs():
         total_count = cur.fetchone()[0]
         
         cur.close()
+        cur = None
         
         # Convert to list of dictionaries
         log_list = []
         for log in logs:
-            log_list.append({
-                'serial_num': log[0],
+            # Normalize activity_performed to match frontend expectations
+            activity = log[2]
+            if activity == 'LOGIN':
+                activity = 'logged_in'
+            elif activity == 'LOGOUT':
+                activity = 'logged_out'
+            # 'login_failed' and other values remain as-is
+            
+            log_dict = {
+                'serial_number': log[0],  # Map serial_num to serial_number for frontend
                 'user_id': log[1],
-                'activity_performed': log[2],
+                'activity_performed': activity,
                 'performed_by': log[3],
                 'timestamp': log[4].isoformat() if log[4] else None,
                 'user_name': log[5],
                 'user_email': log[6],
                 'performed_by_name': log[7]
-            })
+            }
+            
+            # Add suspicious fields if they exist
+            if has_suspicious_columns and len(log) > 8:
+                log_dict['is_suspicious'] = log[8] if log[8] is not None else False
+                log_dict['suspicion_reason'] = log[9] if len(log) > 9 else None
+            else:
+                log_dict['is_suspicious'] = False
+                log_dict['suspicion_reason'] = None
+            
+            log_list.append(log_dict)
         
         return jsonify({
             "success": True,
@@ -67,7 +113,20 @@ def get_login_logs():
         
     except Exception as e:
         print(f"Error fetching login logs: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Error loading login logs: {str(e)}"}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
 
 @login_logs_bp.route('/api/login-logs', methods=['POST'])
 def log_login_activity():
