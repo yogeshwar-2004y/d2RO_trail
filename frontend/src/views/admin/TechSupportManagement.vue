@@ -417,12 +417,23 @@ export default {
 
     async exportToPDF() {
       try {
+        // Ensure data is loaded before exporting
+        if (this.loading) {
+          alert("Please wait for data to load before exporting.");
+          return;
+        }
+
+        // Reload requests to ensure we have the latest data
+        await this.loadRequests();
+        this.loadOfflineRequests();
+
         // Get all requests (online + offline) up to the limit
+        // Use the actual requests arrays, not filtered ones, to ensure we have all data
         const allRequests = [
-          ...this.filteredRequests.slice(0, this.exportLimit),
-          ...this.filteredOfflineRequests.slice(
+          ...this.requests.slice(0, this.exportLimit),
+          ...this.offlineRequests.slice(
             0,
-            Math.max(0, this.exportLimit - this.filteredRequests.length)
+            Math.max(0, this.exportLimit - this.requests.length)
           ),
         ];
 
@@ -430,6 +441,8 @@ export default {
           alert("No requests to export");
           return;
         }
+
+        console.log(`Exporting ${allRequests.length} requests:`, allRequests);
 
         // Create PDF content
         const pdfContent = this.generatePDFContent(allRequests);
@@ -492,13 +505,17 @@ export default {
         const statusClass = `status-${request.status}`;
         const requestClass = request.isOffline ? "offline" : "";
 
+        // Handle both field name formats: backend uses user_id/issue_date/issue_description, 
+        // offline uses userId/date/issue
+        const userId = request.user_id || request.userId || 'N/A';
+        const issueDate = request.issue_date || request.date || null;
+        const issueDescription = request.issue_description || request.issue || 'N/A';
+
         content += `
           <div class="request ${requestClass}">
             <div class="request-header">
-              Request #${index + 1} - ${request.username} (ID: ${
-          request.userId
-        })
-              <span class="${statusClass}">[${request.status.toUpperCase()}]</span>
+              Request #${index + 1} - ${request.username || 'Unknown'} (ID: ${userId})
+              <span class="${statusClass}">[${(request.status || 'pending').toUpperCase()}]</span>
               ${
                 request.isOffline
                   ? '<span style="color: #856404;">[OFFLINE]</span>'
@@ -506,9 +523,7 @@ export default {
               }
             </div>
             <div class="request-details">
-              <p><strong>Issue Date:</strong> ${this.formatDateOnly(
-                request.date
-              )}</p>
+              <p><strong>Issue Date:</strong> ${issueDate ? this.formatDateOnly(issueDate) : 'N/A'}</p>
               <p><strong>Submitted:</strong> ${this.formatDateTime(
                 request.created_at
               )}</p>
@@ -520,9 +535,7 @@ export default {
                   : ""
               }
               <p><strong>Issue Description:</strong></p>
-              <p style="margin-left: 20px; white-space: pre-wrap;">${
-                request.issue
-              }</p>
+              <p style="margin-left: 20px; white-space: pre-wrap;">${issueDescription}</p>
             </div>
           </div>
         `;
