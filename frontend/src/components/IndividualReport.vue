@@ -548,13 +548,35 @@ export default {
     },
 
     canDownloadReport() {
-      // QA Reviewer can download only after submitting the report
-      // Other roles with view access can download anytime (if they have access)
-      if (this.isQAReviewer) {
-        return this.isReportSubmitted;
+      // Allow download if template is selected and user has access to view the report
+      // All users who can view the report should be able to download it
+      if (!this.selectedTemplate) {
+        return false;
       }
-      // For view-only users, they can download if they have access (but they don't have access anyway)
-      return false;
+      
+      // QA Reviewer can download anytime once template is selected
+      if (this.isQAReviewer) {
+        return true;
+      }
+      
+      // QA Head can download
+      if (this.isQAHead) {
+        return true;
+      }
+      
+      // Design Head can download
+      if (this.isDesignHead) {
+        return true;
+      }
+      
+      // Designer can download
+      const currentUserRole = userStore.getters.currentUserRole();
+      if (currentUserRole === 5) {
+        return true;
+      }
+      
+      // Default: allow download if template is selected
+      return true;
     },
 
     currentTemplateComponent() {
