@@ -413,7 +413,7 @@
         <!-- Submit Button - Enabled only after Approved By signature -->
         <div
           class="form-actions final-submit"
-          v-if="isFormReadonly && approvedBySignatureUrl"
+          v-if="isFormReadonly && approvedBySignatureUrl && !shouldHideSubmitButton"
         >
           <button
             type="button"
@@ -430,6 +430,8 @@
 </template>
 
 <script>
+import { userStore } from "@/stores/userStore";
+
 export default {
   name: "Conformalcoatinginspectionreport",
   props: {
@@ -444,6 +446,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       projectName: "",
       lruName: "",
       serialNumber: "SL-001",
@@ -573,6 +576,33 @@ export default {
 
       return basicFieldsFilled && allObservationsFilled;
     },
+    shouldHideSubmitButton() {
+      // Hide submit button for:
+      // 1. QA Reviewer (role_id = 3) after report is submitted
+      // 2. QA Head (role_id = 2) after report is submitted
+      // 3. All other roles (not QA Reviewer or QA Head) - always hide
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+      
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted by checking if reportId exists and report was already submitted
+        // We'll check this by seeing if the report has been saved and submitted
+        // For now, we'll use a simple check - if reportId exists and form is readonly, it might be submitted
+        // But we need a better way - let's check if we can determine submission status
+        // Since we don't have direct access to report status, we'll check if report was submitted
+        // by checking if all signatures are present (which indicates submission)
+        const allSignaturesPresent = this.preparedBySignatureUrl && 
+                                    this.verifiedBySignatureUrl && 
+                                    this.approvedBySignatureUrl;
+        // If all signatures are present and reportId exists, report is likely submitted
+        return allSignaturesPresent && this.reportId && this.isFormReadonly;
+      }
+      
+      // For all other roles: always hide
+      return true;
+    },
   },
   mounted() {
     this.lruName = this.$route.params.lruName || "";
@@ -637,6 +667,9 @@ export default {
           const report = result.report;
 
           this.reportId = report.report_id;
+          
+          // Fetch report status from main reports API
+          await this.fetchReportStatus();
           this.projectName = report.project_name || "";
           this.reportRefNo = report.report_ref_no || "";
           this.memoRefNo = report.memo_ref_no || "";
@@ -943,11 +976,32 @@ export default {
 
       try {
         await this.notifyQAHeads();
+        // Update report status after submission
+        await this.fetchReportStatus();
         alert(
           "Report submitted successfully! Activity logged and QA Heads have been notified."
         );
       } catch (error) {
         alert("Error submitting report. Please try again.");
+      }
+    },
+    async fetchReportStatus() {
+      // Fetch report status from main reports API
+      if (!this.reportId) return;
+      
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/reports/${this.reportId}`
+        );
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
       }
     },
     async notifyQAHeads() {

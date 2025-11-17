@@ -546,11 +546,29 @@ export default {
       return this.reportStatus && this.reportStatus !== "ASSIGNED";
     },
 
+    shouldHideSubmitForReviewer() {
+      // Hide submit button for:
+      // 1. QA Reviewer (role_id = 3) after report is submitted
+      // 2. QA Head (role_id = 2) after report is submitted
+      // 3. All other roles (not QA Reviewer or QA Head) - always hide
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+      
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        return this.isReportSubmitted;
+      }
+      
+      // For all other roles: always hide
+      return true;
+    },
+
     canDownloadReport() {
       // Allow download if template is selected and user has access to view the report
       // All users who can view the report should be able to download it
       if (!this.selectedTemplate) {
-        return false;
+      return false;
       }
       
       // QA Reviewer can download anytime once template is selected
