@@ -285,12 +285,14 @@
       </div>
     </div>
 
-    <!-- Password Change Modal -->
-    <PasswordChangeModal
-      :isOpen="isPasswordModalOpen"
-      :passwordType="passwordType"
-      @close="closePasswordModal"
-    />
+    <!-- Password Change Modal - Teleported to body for proper centering -->
+    <Teleport to="body">
+      <PasswordChangeModal
+        :isOpen="isPasswordModalOpen"
+        :passwordType="passwordType"
+        @close="closePasswordModal"
+      />
+    </Teleport>
   </div>
 </template>
 
