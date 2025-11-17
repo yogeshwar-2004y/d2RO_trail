@@ -79,8 +79,7 @@ def log_notification(project_id: int = None, activity_performed: str = None, per
     finally:
         if cur:
             cur.close()
-        if conn:
-            conn.close()
+        # Don't close conn - it's a shared global connection
 
 def get_users_by_role(role_id: int):
     """
@@ -126,8 +125,7 @@ def get_users_by_role(role_id: int):
     finally:
         if cur:
             cur.close()
-        if conn:
-            conn.close()
+        # Don't close conn - it's a shared global connection
 
 def get_activity_logs(project_id: int = None, limit: int = 100):
     """
