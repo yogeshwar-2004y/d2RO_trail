@@ -791,17 +791,14 @@ export default {
       }
 
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username: signature.signatureUsername,
-              signature_password: signature.signaturePassword,
-            }),
-          }
-        );
+        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: signature.signatureUsername,
+            signature_password: signature.signaturePassword,
+          }),
+        });
 
         const data = await response.json();
 
@@ -872,14 +869,11 @@ export default {
 
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        const response = await fetch(`http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`, {
+              method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
         if (!result.success) {
@@ -898,14 +892,11 @@ export default {
       try {
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        const response = await fetch(`http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
 

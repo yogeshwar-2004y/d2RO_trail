@@ -1427,8 +1427,15 @@ def download_activity_logs_pdf():
         from datetime import datetime
         import io
         
-        # Get all activity logs
-        logs = get_activity_logs(limit=1000)  # Get more logs for PDF
+        # Get limit from query parameters (default to None for all records)
+        limit = request.args.get('limit', type=int)
+        
+        # Get activity logs with optional limit
+        if limit and limit > 0:
+            logs = get_activity_logs(limit=limit)
+        else:
+            # Get all logs if no limit specified (use a large number to get all)
+            logs = get_activity_logs(limit=100000)
         
         # Create PDF
         buffer = io.BytesIO()

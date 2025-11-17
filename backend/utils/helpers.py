@@ -45,3 +45,4 @@ def handle_database_error(conn, error_message="Database error"):
         pass
     print(f"Database error: {error_message}")
     return {"success": False, "message": f"Database error: {error_message}"}, 500
+

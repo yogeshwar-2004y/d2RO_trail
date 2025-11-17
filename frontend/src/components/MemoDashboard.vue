@@ -438,9 +438,7 @@ export default {
         console.log("CURRENT USER", currentUser);
         console.log("CURRENT USER ROLE", currentUserRole);
 
-        const response = await fetch(
-          `http://localhost:8000/api/memos?${params.toString()}`
-        );
+        const response = await fetch(`http://localhost:8000/api/memos?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }
@@ -545,9 +543,7 @@ export default {
     async viewMemo(memo) {
       try {
         // Fetch detailed memo data from backend
-        const response = await fetch(
-          `http://localhost:8000/api/memos/${memo.id}`
-        );
+        const response = await fetch(`http://localhost:8000/api/memos/${memo.id}`);
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
@@ -660,9 +656,7 @@ export default {
         const params = new URLSearchParams();
         params.append("current_user_id", currentUser.id);
 
-        const response = await fetch(
-          `http://localhost:8000/api/reviewers?${params.toString()}`
-        );
+        const response = await fetch(`http://localhost:8000/api/reviewers?${params.toString()}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
         }

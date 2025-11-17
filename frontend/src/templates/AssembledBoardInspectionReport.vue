@@ -1057,33 +1057,21 @@ export default {
           // Load signatures
           if (report.prepared_by) {
             this.signatures.preparedBy.signatureUrl = report.prepared_by;
-            if (
-              report.prepared_by.includes(
-                "http://localhost:8000/api/users/signature/"
-              )
-            ) {
+            if (report.prepared_by.includes('http://localhost:8000/api/users/signature/')) {
               this.signatures.preparedBy.verifiedUserName = "Verified User";
               this.signatures.preparedBy.verifiedUserRole = "QA";
             }
           }
           if (report.verified_by) {
             this.signatures.verifiedBy.signatureUrl = report.verified_by;
-            if (
-              report.verified_by.includes(
-                "http://localhost:8000/api/users/signature/"
-              )
-            ) {
+            if (report.verified_by.includes('http://localhost:8000/api/users/signature/')) {
               this.signatures.verifiedBy.verifiedUserName = "Verified User";
               this.signatures.verifiedBy.verifiedUserRole = "QA";
             }
           }
           if (report.approved_by) {
             this.signatures.approvedBy.signatureUrl = report.approved_by;
-            if (
-              report.approved_by.includes(
-                "http://localhost:8000/api/users/signature/"
-              )
-            ) {
+            if (report.approved_by.includes('http://localhost:8000/api/users/signature/')) {
               this.signatures.approvedBy.verifiedUserName = "Verified User";
               this.signatures.approvedBy.verifiedUserRole = "QA Head";
             }
@@ -1143,17 +1131,14 @@ export default {
       }
 
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username: signature.signatureUsername,
-              signature_password: signature.signaturePassword,
-            }),
-          }
-        );
+        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: signature.signatureUsername,
+            signature_password: signature.signaturePassword,
+          }),
+        });
 
         const data = await response.json();
 
@@ -1288,14 +1273,11 @@ export default {
     async autoSaveReport() {
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(
-          "http://localhost:8000/api/reports/assembled-board?user_role=4",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        const response = await fetch("http://localhost:8000/api/reports/assembled-board?user_role=4", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
         if (!result.success) {
@@ -1313,14 +1295,11 @@ export default {
 
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(
-          "http://localhost:8000/api/reports/assembled-board?user_role=4",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(submissionData),
-          }
-        );
+        const response = await fetch("http://localhost:8000/api/reports/assembled-board?user_role=4", {
+              method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData),
+        });
 
         const result = await response.json();
 
