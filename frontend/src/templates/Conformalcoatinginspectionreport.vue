@@ -618,7 +618,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
+          `http://localhost:5000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -750,7 +750,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -821,7 +821,7 @@ export default {
 
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection",
+          "http://localhost:5000/api/reports/conformal-coating-inspection",
           {
             method: "POST",
             headers: {
@@ -880,7 +880,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/reports/conformal-coating-inspection/${this.reportId}`,
+          `http://localhost:5000/api/reports/conformal-coating-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -960,7 +960,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection/notify",
+          "http://localhost:5000/api/reports/conformal-coating-inspection/notify",
           {
             method: "POST",
             headers: {
@@ -989,7 +989,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection/notify-approval",
+          "http://localhost:5000/api/reports/conformal-coating-inspection/notify-approval",
           {
             method: "POST",
             headers: {

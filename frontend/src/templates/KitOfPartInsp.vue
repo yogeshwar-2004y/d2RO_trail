@@ -824,7 +824,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -896,7 +896,7 @@ export default {
 
         const submissionData = this.prepareSubmissionData();
 
-        const response = await fetch("http://localhost:8000/api/kit-of-parts", {
+        const response = await fetch("http://localhost:5000/api/kit-of-parts", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -961,7 +961,7 @@ export default {
 
         // Update the existing record in the database
         const response = await fetch(
-          `http://localhost:8000/api/kit-of-parts/${reportIdToUse}`,
+          `http://localhost:5000/api/kit-of-parts/${reportIdToUse}`,
           {
             method: "PUT",
             headers: {
@@ -1024,7 +1024,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/kit-of-parts/${reportIdToLoad}`,
+          `http://localhost:5000/api/kit-of-parts/${reportIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -1227,7 +1227,7 @@ export default {
 
         // Send notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/kit-of-parts/notify",
+          "http://localhost:5000/api/kit-of-parts/notify",
           {
             method: "POST",
             headers: {
@@ -1271,7 +1271,7 @@ export default {
 
         // Send approval notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/kit-of-parts/notify-approval",
+          "http://localhost:5000/api/kit-of-parts/notify-approval",
           {
             method: "POST",
             headers: {
