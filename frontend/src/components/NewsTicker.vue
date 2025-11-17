@@ -196,14 +196,13 @@ export default {
   /* left: 20px; */
   top: 0;
   height: 100%;
-  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  background: linear-gradient(#c0392b);
   color: white;
   padding: 0 15px;
   display: flex;
   align-items: center;
   font-weight: bold;
   font-size: 12px;
-  animation: flash 2s infinite;
   z-index: 1;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
 }
