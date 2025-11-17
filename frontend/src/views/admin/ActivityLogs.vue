@@ -725,52 +725,54 @@ td {
   border: 1px solid #9f9c9c;
   padding: 15px;
   text-align: left;
+  color: #000;
 }
 
 th {
-  background-color: #645656;
+  background-color: #34495e;
   font-weight: bold;
+  color: #fff;
 }
 
 .activity-id {
   text-align: center;
   width: 120px;
   font-weight: 600;
-  color: #fff;
+  color: #000;
 }
 
 .project-id {
   text-align: center;
   width: 100px;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
 .project-name {
   text-align: left;
   width: 200px;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
 .activity {
   text-align: left;
   width: 250px;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
 .performed-by {
   text-align: left;
   width: 180px;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
 .timestamp {
   text-align: left;
   width: 180px;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
@@ -779,7 +781,7 @@ th {
 .no-data-message {
   text-align: center;
   padding: 40px;
-  color: #fff;
+  color: #000;
   font-size: 1.1em;
 }
 
