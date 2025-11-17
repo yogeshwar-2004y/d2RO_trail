@@ -1309,7 +1309,9 @@ def get_activity_logs():
         
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Error loading activity logs: {str(e)}"}), 500
 
 @projects_bp.route('/api/notifications/<int:user_id>', methods=['GET'])
 def get_user_notifications(user_id):

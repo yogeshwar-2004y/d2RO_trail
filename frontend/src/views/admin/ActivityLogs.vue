@@ -53,8 +53,9 @@
           <input
             type="text"
             v-model="searchQuery"
-            placeholder="Search "
+            placeholder="Search Activity Logs"
             class="search-input"
+            @input="filterLogs"
           />
         </div>
         <button class="icon-button" @click="goToLoginLogs">
@@ -180,7 +181,7 @@
         {{ error }}
         <button @click="loadActivityLogs" class="retry-button">Retry</button>
       </div>
-      <table v-else>
+      <table v-if="!loading && !error">
         <thead>
           <tr>
             <th class="activity-id">ACTIVITY ID</th>
@@ -192,10 +193,13 @@
           </tr>
         </thead>
         <tbody>
+          <tr v-if="filteredLogs.length === 0">
+            <td colspan="6" class="no-data-message">No activity logs found.</td>
+          </tr>
           <tr v-for="log in filteredLogs" :key="log.activity_id">
             <td class="activity-id">{{ log.activity_id || "N/A" }}</td>
-            <td class="project-id">{{ extractId(log.additional_info) }}</td>
-            <td class="project-name">{{ extractName(log.additional_info) }}</td>
+            <td class="project-id">{{ log.project_id || extractId(log.additional_info) || "N/A" }}</td>
+            <td class="project-name">{{ log.project_name || extractName(log.additional_info) || "N/A" }}</td>
             <td class="activity">{{ log.activity_performed || "N/A" }}</td>
             <td class="performed-by">
               {{ log.user_name || log.performed_by || "Unknown" }}
@@ -204,12 +208,6 @@
           </tr>
         </tbody>
       </table>
-      <div
-        v-if="!loading && !error && filteredLogs.length === 0"
-        class="no-data-message"
-      >
-        No activity logs found.
-      </div>
     </div>
   </div>
 </template>
@@ -257,14 +255,20 @@ export default {
         );
 
         if (response.data.success) {
-          this.logs = response.data.logs;
-          this.filteredLogs = [...this.logs];
+          this.logs = response.data.logs || [];
+          console.log("Raw response data:", response.data);
+          console.log("Loaded activity logs:", this.logs.length, "logs");
+          console.log("Sample log:", this.logs[0]);
+          // Apply any existing filters after loading
+          this.applyFilters();
+          console.log("Filtered activity logs:", this.filteredLogs.length, "logs");
         } else {
-          this.error = "Failed to load activity logs";
+          this.error = response.data.message || "Failed to load activity logs";
         }
       } catch (error) {
         console.error("Error loading activity logs:", error);
-        this.error = "Error loading activity logs. Please try again.";
+        console.error("Error details:", error.response?.data || error.message);
+        this.error = `Error loading activity logs: ${error.response?.data?.message || error.message || "Please try again."}`;
       } finally {
         this.loading = false;
       }
@@ -275,6 +279,11 @@ export default {
     },
 
     applyFilters() {
+      if (!this.logs || this.logs.length === 0) {
+        this.filteredLogs = [];
+        return;
+      }
+      
       let filtered = [...this.logs];
 
       // Apply simple search query if exists
@@ -282,12 +291,12 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(
           (log) =>
-            log.activity_performed.toLowerCase().includes(query) ||
-            log.user_name?.toLowerCase().includes(query) ||
-            log.project_name?.toLowerCase().includes(query) ||
-            log.project_id?.toString().includes(query) ||
-            log.activity_id?.toString().includes(query) ||
-            log.additional_info?.toLowerCase().includes(query)
+            (log.activity_performed?.toLowerCase() || '').includes(query) ||
+            (log.user_name?.toLowerCase() || '').includes(query) ||
+            (log.project_name?.toLowerCase() || '').includes(query) ||
+            (log.project_id?.toString() || '').includes(query) ||
+            (log.activity_id?.toString() || '').includes(query) ||
+            (log.additional_info?.toLowerCase() || '').includes(query)
         );
       }
 
@@ -561,24 +570,20 @@ export default {
 }
 
 .activity-logs-page {
-  font-family: Arial, sans-serif;
-  min-height: 100vh;
   background-color: #ebf7fd;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 30px;
+  min-height: 100vh;
+  padding: 20px;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
-  margin-bottom: 30px;
-  padding: 20px 0;
-  color: #121111;
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
 }
 
 .header-left {
@@ -587,46 +592,49 @@ export default {
 }
 
 .back-button {
-  background: none;
+  background: #3498db;
+  color: white;
   border: none;
+  padding: 12px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-right: 20px;
-  color: #060505;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease;
 }
 
-.logo {
-  width: 120px;
-  margin-right: 20px;
-}
-
-.page-title {
-  font-size: 1.5em;
-  font-weight: bold;
-  text-align: center;
-  flex-grow: 1;
+.back-button:hover {
+  background: #c0392b;
 }
 
 .header-center {
-  flex-grow: 1;
+  flex: 1;
   text-align: center;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2c3e50;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 15px;
 }
 
 .search-box {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-icon {
   position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #050505;
+  left: 12px;
+  color: #7f8c8d;
+  z-index: 1;
 }
 
 .limit-input-box {
@@ -638,19 +646,24 @@ export default {
 
 .limit-label {
   font-size: 14px;
-  color: #050505;
+  color: #2c3e50;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .limit-input {
   width: 100px;
-  padding: 10px 15px;
-  border: none;
-  background-color: #e2e0e0;
-  color: #0f0f0f;
-  border-radius: 25px;
-  outline: none;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
   text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.limit-input:focus {
+  outline: none;
+  border-color: #3498db;
 }
 
 .limit-input::placeholder {
@@ -658,34 +671,48 @@ export default {
 }
 
 .search-input {
-  width: 200px;
-  padding: 10px 15px;
-  padding-left: 40px;
-  border: none;
-  background-color: #e2e0e0;
-  color: #0f0f0f;
-  border-radius: 25px;
+  padding: 12px 12px 12px 40px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 250px;
+  transition: border-color 0.3s ease;
+}
+
+.search-input:focus {
   outline: none;
+  border-color: #3498db;
 }
 
 .icon-button {
-  background: none;
+  background: #3498db;
+  color: white;
   border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
   cursor: pointer;
-  color: #050505;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.icon-button:hover {
+  background: #2980b9;
+}
+
+.button-label {
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
   width: 100%;
-  max-width: 1200px;
-  background: #201e1e;
-  border-radius: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  padding: 20px;
-  color: #060505;
 }
 
 table {

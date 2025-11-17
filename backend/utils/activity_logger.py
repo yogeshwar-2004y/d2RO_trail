@@ -152,16 +152,34 @@ def get_activity_logs(project_id: int = None, limit: int = 100, search: str = No
         conn = get_db_connection()
         cur = conn.cursor()
         
+        # Check if notification columns exist
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'activity_logs' AND column_name = 'notification_type'
+        """)
+        has_notification_columns = cur.fetchone() is not None
+        
         # Build base query
-        base_query = """
-            SELECT al.activity_id, al.project_id, al.activity_performed, 
-                   al.performed_by, al.timestamp, al.additional_info,
-                   u.name as user_name, p.project_name
-            FROM activity_logs al
-            LEFT JOIN users u ON al.performed_by = u.user_id
-            LEFT JOIN projects p ON al.project_id = p.project_id
-            WHERE (al.notification_type IS NULL AND al.notified_user_id IS NULL)
-        """
+        if has_notification_columns:
+            base_query = """
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       u.name as user_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+                WHERE (al.notification_type IS NULL AND al.notified_user_id IS NULL)
+            """
+        else:
+            base_query = """
+                SELECT al.activity_id, al.project_id, al.activity_performed, 
+                       al.performed_by, al.timestamp, al.additional_info,
+                       u.name as user_name, p.project_name
+                FROM activity_logs al
+                LEFT JOIN users u ON al.performed_by = u.user_id
+                LEFT JOIN projects p ON al.project_id = p.project_id
+            """
         
         query_params = []
         where_conditions = []
@@ -231,27 +249,41 @@ def get_activity_logs(project_id: int = None, limit: int = 100, search: str = No
             base_query += " LIMIT %s"
             query_params.append(limit)
         
-        cur.execute(base_query, tuple(query_params))
+        # Debug: print query for troubleshooting
+        print(f"Activity Logs Query: {base_query}")
+        print(f"Activity Logs Params: {query_params}")
+        
+        # Execute query - handle empty params tuple
+        if query_params:
+            cur.execute(base_query, tuple(query_params))
+        else:
+            cur.execute(base_query)
         
         logs = cur.fetchall()
+        print(f"Activity Logs found {len(logs)} logs")
+        
         cur.close()
         
         # Convert to list of dictionaries
         log_list = []
         for log in logs:
-            log_list.append({
+            log_dict = {
                 "activity_id": log[0],
-                "project_id": log[1],
-                "activity_performed": log[2],
-                "performed_by": log[3],
+                "project_id": log[1] if log[1] is not None else None,
+                "activity_performed": log[2] if log[2] else None,
+                "performed_by": log[3] if log[3] else None,
                 "timestamp": log[4].isoformat() if log[4] else None,
-                "additional_info": log[5],
-                "user_name": log[6],
-                "project_name": log[7]
-            })
+                "additional_info": log[5] if log[5] else None,
+                "user_name": log[6] if log[6] else None,
+                "project_name": log[7] if log[7] else None
+            }
+            log_list.append(log_dict)
         
+        print(f"Activity Logs returning {len(log_list)} logs")
         return log_list
         
     except Exception as e:
         print(f"Error fetching activity logs: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return []
