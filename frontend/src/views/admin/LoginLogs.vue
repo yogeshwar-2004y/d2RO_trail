@@ -100,6 +100,69 @@
       </div>
     </div>
 
+    <!-- Advanced Search Panel -->
+    <div class="advanced-search-panel" v-if="showAdvancedSearch">
+      <div class="search-fields">
+        <div class="search-field">
+          <label>User Name:</label>
+          <input
+            type="text"
+            v-model="searchFilters.userName"
+            placeholder="Enter user name"
+            class="filter-input"
+            @input="applyFilters"
+          />
+        </div>
+        <div class="search-field">
+          <label>User ID:</label>
+          <input
+            type="text"
+            v-model="searchFilters.userId"
+            placeholder="Enter user ID"
+            class="filter-input"
+            @input="applyFilters"
+          />
+        </div>
+        <div class="search-field">
+          <label>Activity Type:</label>
+          <select v-model="searchFilters.activityType" class="filter-select" @change="applyFilters">
+            <option value="">All Activities</option>
+            <option value="logged_in">Login</option>
+            <option value="logged_out">Logout</option>
+            <option value="login_failed">Failed Login</option>
+          </select>
+        </div>
+        <div class="search-field">
+          <label>Date From:</label>
+          <input
+            type="date"
+            v-model="searchFilters.dateFrom"
+            class="filter-input"
+            @change="applyFilters"
+          />
+        </div>
+        <div class="search-field">
+          <label>Date To:</label>
+          <input
+            type="date"
+            v-model="searchFilters.dateTo"
+            class="filter-input"
+            @change="applyFilters"
+          />
+        </div>
+        <div class="search-field">
+          <button class="clear-filters-btn" @click="clearFilters">Clear Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toggle Advanced Search Button -->
+    <div class="search-toggle-container">
+      <button class="toggle-search-btn" @click="toggleAdvancedSearch">
+        {{ showAdvancedSearch ? 'Hide' : 'Show' }} Advanced Search
+      </button>
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -238,6 +301,14 @@ export default {
       limit: 50, // Default limit for pagination
       offset: 0,
       recordLimit: 50, // Default limit of 50 records, can be edited
+      showAdvancedSearch: false,
+      searchFilters: {
+        userName: "",
+        userId: "",
+        activityType: "",
+        dateFrom: "",
+        dateTo: "",
+      },
     };
   },
   async mounted() {
@@ -277,25 +348,94 @@ export default {
     },
 
     filterLogs() {
-      if (!this.searchQuery.trim()) {
-        this.filteredLogs = [...this.logs];
-        return;
+      // Apply both simple search and advanced filters
+      this.applyFilters();
+    },
+
+    applyFilters() {
+      let filtered = [...this.logs];
+
+      // Apply simple search query if exists
+      if (this.searchQuery.trim()) {
+        const query = this.searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (log) =>
+            (log.serial_number?.toString() || '').includes(query) ||
+            (log.user_id?.toString() || '').includes(query) ||
+            (log.activity_performed?.toLowerCase() || '').includes(query) ||
+            (log.performed_by?.toString() || '').includes(query) ||
+            (log.performed_by_name?.toLowerCase() || '').includes(query) ||
+            (log.user_name?.toLowerCase() || '').includes(query) ||
+            (log.user_email?.toLowerCase() || '').includes(query) ||
+            (log.suspicion_reason?.toLowerCase() || '').includes(query) ||
+            (log.is_suspicious && "suspicious".includes(query)) ||
+            this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
+        );
       }
 
-      const query = this.searchQuery.toLowerCase();
-      this.filteredLogs = this.logs.filter(
-        (log) =>
-          (log.serial_number?.toString() || '').includes(query) ||
-          (log.user_id?.toString() || '').includes(query) ||
-          (log.activity_performed?.toLowerCase() || '').includes(query) ||
-          (log.performed_by?.toString() || '').includes(query) ||
-          (log.performed_by_name?.toLowerCase() || '').includes(query) ||
-          (log.user_name?.toLowerCase() || '').includes(query) ||
-          (log.user_email?.toLowerCase() || '').includes(query) ||
-          (log.suspicion_reason?.toLowerCase() || '').includes(query) ||
-          (log.is_suspicious && "suspicious".includes(query)) ||
-          this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
-      );
+      // Apply advanced filters
+      if (this.searchFilters.userName.trim()) {
+        const userName = this.searchFilters.userName.toLowerCase();
+        filtered = filtered.filter(
+          (log) =>
+            (log.user_name?.toLowerCase() || '').includes(userName) ||
+            (log.performed_by_name?.toLowerCase() || '').includes(userName)
+        );
+      }
+
+      if (this.searchFilters.userId.trim()) {
+        const userId = this.searchFilters.userId;
+        filtered = filtered.filter(
+          (log) =>
+            log.user_id?.toString().includes(userId) ||
+            log.performed_by?.toString().includes(userId)
+        );
+      }
+
+      if (this.searchFilters.activityType) {
+        filtered = filtered.filter(
+          (log) => log.activity_performed === this.searchFilters.activityType
+        );
+      }
+
+      if (this.searchFilters.dateFrom) {
+        const dateFrom = new Date(this.searchFilters.dateFrom);
+        dateFrom.setHours(0, 0, 0, 0);
+        filtered = filtered.filter((log) => {
+          if (!log.timestamp) return false;
+          const logDate = new Date(log.timestamp);
+          logDate.setHours(0, 0, 0, 0);
+          return logDate >= dateFrom;
+        });
+      }
+
+      if (this.searchFilters.dateTo) {
+        const dateTo = new Date(this.searchFilters.dateTo);
+        dateTo.setHours(23, 59, 59, 999);
+        filtered = filtered.filter((log) => {
+          if (!log.timestamp) return false;
+          const logDate = new Date(log.timestamp);
+          return logDate <= dateTo;
+        });
+      }
+
+      this.filteredLogs = filtered;
+    },
+
+    toggleAdvancedSearch() {
+      this.showAdvancedSearch = !this.showAdvancedSearch;
+    },
+
+    clearFilters() {
+      this.searchQuery = "";
+      this.searchFilters = {
+        userName: "",
+        userId: "",
+        activityType: "",
+        dateFrom: "",
+        dateTo: "",
+      };
+      this.applyFilters();
     },
 
     getActivityDisplay(activity) {
@@ -333,8 +473,39 @@ export default {
       try {
         this.loading = true;
         const params = {};
-        if (this.recordLimit && this.recordLimit > 0) {
+        
+        // Set limit only if no search filters are applied
+        const hasFilters = this.searchQuery.trim() || 
+                          this.searchFilters.userName.trim() ||
+                          this.searchFilters.userId.trim() ||
+                          this.searchFilters.activityType ||
+                          this.searchFilters.dateFrom ||
+                          this.searchFilters.dateTo;
+        
+        if (!hasFilters && this.recordLimit && this.recordLimit > 0) {
           params.limit = this.recordLimit;
+        }
+        
+        // Include search query if filter is applied
+        if (this.searchQuery && this.searchQuery.trim()) {
+          params.search = this.searchQuery.trim();
+        }
+        
+        // Include advanced search filters
+        if (this.searchFilters.userName.trim()) {
+          params.user_name = this.searchFilters.userName.trim();
+        }
+        if (this.searchFilters.userId.trim()) {
+          params.user_id = this.searchFilters.userId.trim();
+        }
+        if (this.searchFilters.activityType) {
+          params.activity_type = this.searchFilters.activityType;
+        }
+        if (this.searchFilters.dateFrom) {
+          params.date_from = this.searchFilters.dateFrom;
+        }
+        if (this.searchFilters.dateTo) {
+          params.date_to = this.searchFilters.dateTo;
         }
         
         const response = await axios.get(
@@ -770,6 +941,86 @@ export default {
   color: #7f8c8d;
   font-size: 14px;
   font-weight: 500;
+}
+
+/* Advanced Search Panel */
+.advanced-search-panel {
+  background: white;
+  padding: 20px 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  align-items: end;
+}
+
+.search-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.search-field label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.filter-input,
+.filter-select {
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.clear-filters-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.clear-filters-btn:hover {
+  background: #c0392b;
+}
+
+.search-toggle-container {
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.toggle-search-btn {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.toggle-search-btn:hover {
+  background: #2980b9;
 }
 
 /* Responsive Design */

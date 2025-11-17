@@ -1296,9 +1296,10 @@ def get_activity_logs():
         # Get query parameters
         project_id = request.args.get('project_id', type=int)
         limit = request.args.get('limit', 100, type=int)
+        search = request.args.get('search', '').strip()
         
         # Fetch activity logs
-        logs = get_activity_logs(project_id=project_id, limit=limit)
+        logs = get_activity_logs(project_id=project_id, limit=limit, search=search if search else None)
         
         return jsonify({
             "success": True,
@@ -1427,15 +1428,37 @@ def download_activity_logs_pdf():
         from datetime import datetime
         import io
         
-        # Get limit from query parameters (default to None for all records)
+        # Get query parameters
         limit = request.args.get('limit', type=int)
+        search = request.args.get('search', '').strip()
+        user_name = request.args.get('user_name', '').strip()
+        activity_id = request.args.get('activity_id', '').strip()
+        project_id_filter = request.args.get('project_id', '').strip()
+        activity_type = request.args.get('activity_type', '').strip()
+        date_from = request.args.get('date_from', '').strip()
+        date_to = request.args.get('date_to', '').strip()
         
-        # Get activity logs with optional limit
-        if limit and limit > 0:
-            logs = get_activity_logs(limit=limit)
+        # Determine if any filters are applied
+        has_filters = search or user_name or activity_id or project_id_filter or activity_type or date_from or date_to
+        
+        # Get activity logs with optional limit and filters
+        # If filters are applied, use a large limit to get all matching results
+        # If no filters, use the provided limit or default
+        if has_filters:
+            limit_value = 100000  # Large number to get all filtered results
         else:
-            # Get all logs if no limit specified (use a large number to get all)
-            logs = get_activity_logs(limit=100000)
+            limit_value = limit if limit and limit > 0 else 100000
+        
+        logs = get_activity_logs(
+            limit=limit_value,
+            search=search if search else None,
+            user_name=user_name if user_name else None,
+            activity_id=activity_id if activity_id else None,
+            project_id_filter=project_id_filter if project_id_filter else None,
+            activity_type=activity_type if activity_type else None,
+            date_from=date_from if date_from else None,
+            date_to=date_to if date_to else None
+        )
         
         # Create PDF
         buffer = io.BytesIO()
@@ -1464,6 +1487,10 @@ def download_activity_logs_pdf():
         
         # Table data
         table_data = [['ID', 'User', 'Activity', 'Project', 'Timestamp']]
+        
+        # If no logs found, add a message row
+        if not logs or len(logs) == 0:
+            table_data.append(['No logs found', 'matching', 'search criteria', '', ''])
         
         for log in logs:
             # Format timestamp properly

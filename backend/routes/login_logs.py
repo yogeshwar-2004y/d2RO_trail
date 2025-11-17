@@ -170,34 +170,149 @@ def log_login_activity():
 @login_logs_bp.route('/api/login-logs/pdf', methods=['GET'])
 def download_login_logs_pdf():
     """Generate and download login logs as PDF"""
+    conn = None
+    cur = None
     try:
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Get limit from query parameters (default to None for all records)
+        # Get query parameters
         limit = request.args.get('limit', type=int)
+        search = request.args.get('search', '').strip()
+        user_name = request.args.get('user_name', '').strip()
+        user_id = request.args.get('user_id', '').strip()
+        activity_type = request.args.get('activity_type', '').strip()
+        date_from = request.args.get('date_from', '').strip()
+        date_to = request.args.get('date_to', '').strip()
         
-        # Build query with optional limit
-        query = """
-            SELECT ll.serial_num, ll.user_id, ll.activity_performed,
-                   ll.performed_by, ll.timestamp,
-                   COALESCE(u.name, 'Unknown User') as user_name,
-                   COALESCE(u.email, 'N/A') as user_email,
-                   COALESCE(p.name, 'Unknown User') as performed_by_name
-            FROM login_logs ll
-            LEFT JOIN users u ON ll.user_id = u.user_id
-            LEFT JOIN users p ON ll.performed_by = p.user_id
-            ORDER BY ll.timestamp DESC
-        """
+        # Check if suspicious activity columns exist
+        cur.execute("""
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'login_logs' AND column_name = 'is_suspicious'
+        """)
+        has_suspicious_columns = cur.fetchone() is not None
         
-        if limit and limit > 0:
-            query += " LIMIT %s"
-            cur.execute(query, (limit,))
+        # Build base query
+        if has_suspicious_columns:
+            base_query = """
+                SELECT ll.serial_num, ll.user_id, ll.activity_performed,
+                       ll.performed_by, ll.timestamp,
+                       COALESCE(u.name, 'Unknown User') as user_name,
+                       COALESCE(u.email, 'N/A') as user_email,
+                       COALESCE(p.name, 'Unknown User') as performed_by_name,
+                       COALESCE(ll.is_suspicious, FALSE) as is_suspicious,
+                       ll.suspicion_reason
+                FROM login_logs ll
+                LEFT JOIN users u ON ll.user_id = u.user_id
+                LEFT JOIN users p ON ll.performed_by = p.user_id
+            """
         else:
-            cur.execute(query)
+            base_query = """
+                SELECT ll.serial_num, ll.user_id, ll.activity_performed,
+                       ll.performed_by, ll.timestamp,
+                       COALESCE(u.name, 'Unknown User') as user_name,
+                       COALESCE(u.email, 'N/A') as user_email,
+                       COALESCE(p.name, 'Unknown User') as performed_by_name
+                FROM login_logs ll
+                LEFT JOIN users u ON ll.user_id = u.user_id
+                LEFT JOIN users p ON ll.performed_by = p.user_id
+            """
         
+        # Build WHERE conditions for all filters
+        where_conditions = []
+        query_params = []
+        
+        # General search (if provided)
+        if search:
+            search_pattern = f'%{search}%'
+            search_lower = search.lower()
+            
+            search_conditions = [
+                "CAST(ll.serial_num AS TEXT) ILIKE %s",
+                "CAST(ll.user_id AS TEXT) ILIKE %s",
+                "CAST(ll.performed_by AS TEXT) ILIKE %s",
+                "COALESCE(u.name, '') ILIKE %s",
+                "COALESCE(u.email, '') ILIKE %s",
+                "COALESCE(p.name, '') ILIKE %s",
+                "LOWER(ll.activity_performed) ILIKE %s"
+            ]
+            query_params.extend([search_pattern] * 7)
+            
+            if 'login' in search_lower and 'logout' not in search_lower and 'failed' not in search_lower:
+                search_conditions.append("ll.activity_performed IN ('LOGIN', 'logged_in')")
+            elif 'logout' in search_lower:
+                search_conditions.append("ll.activity_performed IN ('LOGOUT', 'logged_out')")
+            elif 'failed' in search_lower:
+                search_conditions.append("ll.activity_performed = 'login_failed'")
+            
+            if has_suspicious_columns:
+                search_conditions.append("COALESCE(ll.suspicion_reason, '') ILIKE %s")
+                if 'suspicious' in search_lower:
+                    search_conditions.append("ll.is_suspicious = TRUE")
+                query_params.append(search_pattern)
+            
+            search_conditions.append("TO_CHAR(ll.timestamp, 'YYYY-MM-DD HH24:MI:SS') ILIKE %s")
+            query_params.append(search_pattern)
+            
+            where_conditions.append("(" + " OR ".join(search_conditions) + ")")
+        
+        # Advanced filters
+        if user_name:
+            where_conditions.append("(COALESCE(u.name, '') ILIKE %s OR COALESCE(p.name, '') ILIKE %s)")
+            user_name_pattern = f'%{user_name}%'
+            query_params.extend([user_name_pattern, user_name_pattern])
+        
+        if user_id:
+            where_conditions.append("(CAST(ll.user_id AS TEXT) ILIKE %s OR CAST(ll.performed_by AS TEXT) ILIKE %s)")
+            user_id_pattern = f'%{user_id}%'
+            query_params.extend([user_id_pattern, user_id_pattern])
+        
+        if activity_type:
+            # Map frontend values to database values
+            if activity_type == 'logged_in':
+                where_conditions.append("ll.activity_performed IN ('LOGIN', 'logged_in')")
+            elif activity_type == 'logged_out':
+                where_conditions.append("ll.activity_performed IN ('LOGOUT', 'logged_out')")
+            elif activity_type == 'login_failed':
+                where_conditions.append("ll.activity_performed = 'login_failed'")
+            else:
+                where_conditions.append("ll.activity_performed = %s")
+                query_params.append(activity_type)
+        
+        if date_from:
+            where_conditions.append("DATE(ll.timestamp) >= %s")
+            query_params.append(date_from)
+        
+        if date_to:
+            where_conditions.append("DATE(ll.timestamp) <= %s")
+            query_params.append(date_to)
+        
+        # Add WHERE clause if we have any conditions
+        if where_conditions:
+            base_query += " WHERE " + " AND ".join(where_conditions)
+        
+        # Add ORDER BY
+        base_query += " ORDER BY ll.timestamp DESC"
+        
+        # Only apply limit if no filters are active (to export all filtered results when filters are applied)
+        has_any_filters = search or user_name or user_id or activity_type or date_from or date_to
+        if not has_any_filters and limit and limit > 0:
+            base_query += " LIMIT %s"
+            query_params.append(limit)
+        
+        # Debug: print query and params
+        print(f"PDF Export Query: {base_query}")
+        print(f"PDF Export Params: {query_params}")
+        print(f"Has filters: {has_any_filters}, Limit applied: {not has_any_filters and limit and limit > 0}")
+        
+        cur.execute(base_query, tuple(query_params) if query_params else None)
         logs = cur.fetchall()
+        
+        print(f"PDF Export found {len(logs)} logs matching filters")
+        
         cur.close()
+        cur = None
         
         # Create PDF
         buffer = io.BytesIO()
@@ -227,8 +342,22 @@ def download_login_logs_pdf():
         # Table data
         table_data = [['Serial', 'User ID', 'Activity', 'Performed By', 'Timestamp']]
         
+        # If no logs found, add a message row
+        if not logs or len(logs) == 0:
+            table_data.append(['No logs found', 'matching', 'search criteria', '', ''])
+        
         for log in logs:
-            activity_display = log[2]  # Use the activity_performed value directly
+            # Normalize activity for display
+            activity = log[2]
+            if activity == 'LOGIN':
+                activity_display = 'LOGIN'
+            elif activity == 'LOGOUT':
+                activity_display = 'LOGOUT'
+            elif activity == 'login_failed':
+                activity_display = 'FAILED LOGIN'
+            else:
+                activity_display = activity
+            
             timestamp = log[4].strftime('%Y-%m-%d %H:%M:%S') if log[4] else 'N/A'
             
             table_data.append([
@@ -276,4 +405,17 @@ def download_login_logs_pdf():
         
     except Exception as e:
         print(f"Error generating PDF: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return jsonify({"success": False, "message": "Error generating PDF"}), 500
+    finally:
+        if cur:
+            try:
+                cur.close()
+            except:
+                pass
+        if conn:
+            try:
+                conn.close()
+            except:
+                pass
