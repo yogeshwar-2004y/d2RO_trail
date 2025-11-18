@@ -462,7 +462,7 @@ const toggleSidebar = () => {
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
   // Emit the state change to parent component for responsive layout
-  emit('sidebar-state-changed', isCollapsed.value);
+  emit("sidebar-state-changed", isCollapsed.value);
 };
 
 const navigateToPage = (routeName) => {
@@ -554,7 +554,7 @@ onMounted(() => {
   // Refresh every 30 seconds
   notificationRefreshInterval = setInterval(fetchUnreadCount, 30000);
   // Emit initial sidebar state to parent
-  emit('sidebar-state-changed', isCollapsed.value);
+  emit("sidebar-state-changed", isCollapsed.value);
 });
 
 onUnmounted(() => {

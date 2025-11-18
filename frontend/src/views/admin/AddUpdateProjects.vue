@@ -239,7 +239,6 @@ export default {
 </script>
 
 <style scoped>
-
 .AddUpdateProjects {
   background-color: #ebf7fd;
 }

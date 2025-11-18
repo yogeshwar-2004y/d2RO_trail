@@ -1068,8 +1068,15 @@ export default {
     },
     // Check if memo is approved and has assigned reviewer
     isMemoApprovedWithReviewer() {
-      console.log("approval status:", this.memoApprovalStatus, "assigned reviewer:", this.assignedReviewer, "memo status", this.memoApprovalStatus);
-      return (                     
+      console.log(
+        "approval status:",
+        this.memoApprovalStatus,
+        "assigned reviewer:",
+        this.assignedReviewer,
+        "memo status",
+        this.memoApprovalStatus
+      );
+      return (
         this.memoApprovalStatus &&
         this.memoApprovalStatus.status === "accepted" &&
         this.assignedReviewer
@@ -1665,10 +1672,10 @@ export default {
       try {
         // Dynamically import html2pdf to avoid blocking app initialization
         if (!html2pdf) {
-          const html2pdfModule = await import('html2pdf.js');
+          const html2pdfModule = await import("html2pdf.js");
           html2pdf = html2pdfModule.default || html2pdfModule;
         }
-        
+
         console.log(`Downloading PDF for memo ID: ${this.id}`);
 
         // Show loading state
@@ -1676,45 +1683,47 @@ export default {
         const originalText = button.querySelector(".download-text").textContent;
         button.querySelector(".download-text").textContent = "Loading...";
         button.disabled = true;
-        
+
         // Get the element you want to convert (the main memo content)
-        const element = document.querySelector('.memo-form');
-        
+        const element = document.querySelector(".memo-form");
+
         if (!element) {
-          alert('Memo content not found');
+          alert("Memo content not found");
           return;
         }
-        
+
         // Configure options to match the page appearance
         const opt = {
           margin: 0.5,
-          filename: `memo_${this.id}_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
+          filename: `memo_${this.id}_${new Date()
+            .toISOString()
+            .slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
             scale: 2,
             useCORS: true,
             letterRendering: true,
             allowTaint: true,
             windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight
+            windowHeight: element.scrollHeight,
           },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
-        
+
         // Generate PDF from HTML
         await html2pdf().set(opt).from(element).save();
-        
+
         console.log(`PDF downloaded successfully for memo ${this.id}`);
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
       } finally {
         // Restore button state
-        const button = event.target.closest('.download-pdf-btn');
+        const button = event.target.closest(".download-pdf-btn");
         if (button) {
           button.querySelector(".download-text").textContent = originalText;
           button.disabled = false;

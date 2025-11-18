@@ -255,7 +255,12 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('prepared')"
-                  :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                  :disabled="
+                    isFormReadonly ||
+                    !areAllFieldsFilled ||
+                    !preparedByUsername ||
+                    !preparedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -268,7 +273,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      preparedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -304,7 +311,11 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('verified')"
-                  :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                  :disabled="
+                    !preparedBySignatureUrl ||
+                    !verifiedByUsername ||
+                    !verifiedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -317,7 +328,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      verifiedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -353,7 +366,11 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('approved')"
-                  :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                  :disabled="
+                    !verifiedBySignatureUrl ||
+                    !approvedByUsername ||
+                    !approvedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -366,7 +383,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      approvedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -1121,7 +1140,7 @@ export default {
           console.log("Fetching signatures from backend:", {
             prepared_by_qa_g1: report.prepared_by_qa_g1,
             verified_by_g1h_qa_g: report.verified_by_g1h_qa_g,
-            approved_by: report.approved_by
+            approved_by: report.approved_by,
           });
 
           // Prepared By signature - same logic as conformal coating
@@ -1132,7 +1151,7 @@ export default {
             this.preparedByVerifiedName = preparedParts[0] || "";
             console.log("✓ Prepared By signature fetched:", {
               name: this.reportData.preparedBy,
-              url: this.preparedBySignatureUrl
+              url: this.preparedBySignatureUrl,
             });
           } else {
             console.log("✗ Prepared By signature not found or empty");
@@ -1146,10 +1165,13 @@ export default {
             this.verifiedByVerifiedName = verifiedParts[0] || "";
             console.log("✓ Verified By signature fetched:", {
               name: this.reportData.verifiedBy,
-              url: this.verifiedBySignatureUrl
+              url: this.verifiedBySignatureUrl,
             });
           } else {
-            console.log("✗ Verified By signature not found or empty:", report.verified_by_g1h_qa_g);
+            console.log(
+              "✗ Verified By signature not found or empty:",
+              report.verified_by_g1h_qa_g
+            );
           }
 
           // Approved By signature - same logic as conformal coating
@@ -1160,10 +1182,13 @@ export default {
             this.approvedByVerifiedName = approvedParts[0] || "";
             console.log("✓ Approved By signature fetched:", {
               name: this.reportData.approvedBy,
-              url: this.approvedBySignatureUrl
+              url: this.approvedBySignatureUrl,
             });
           } else {
-            console.log("✗ Approved By signature not found or empty:", report.approved_by);
+            console.log(
+              "✗ Approved By signature not found or empty:",
+              report.approved_by
+            );
           }
 
           // Mark as submitted if all signatures exist

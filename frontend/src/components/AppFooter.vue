@@ -2,7 +2,7 @@
   <footer class="app-footer">
     <div class="footer-content">
       <p class="copyright-text">
-        AVIATRAX - Designed and Developed by VISTA Engineering Solutions Pvt Ltd  © All Rights Reserved  |  www.vistaes.com  |  info@vistaes.com  
+        AVIATRAX™️ - Designed and Developed by VISTA Engg Solutions Private Ltd  © All Rights Reserved  |  www.vistaes.com  |  info@vistaes.com  
       </p>
     </div>
   </footer>

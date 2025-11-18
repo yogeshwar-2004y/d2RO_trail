@@ -374,7 +374,7 @@
         <!-- Submit Button - Enabled only after Approved By signature -->
         <div
           class="form-actions final-submit"
-          v-if="isFormReadonly && approvedBySignatureUrl"
+          v-if="isFormReadonly && approvedBySignatureUrl && !shouldHideSubmitButton"
         >
           <button
             type="button"
@@ -392,6 +392,7 @@
 
 <script>
 import jsPDF from "jspdf";
+import { userStore } from "@/stores/userStore";
 
 export default {
   name: "RawMaterialInspectionReport",
@@ -411,6 +412,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       projectName: "",
       lruName: "",
       serialNumber: "SL-001",
@@ -505,8 +507,8 @@ export default {
       approvedByError: "",
       approvedByUserId: null,
       preparedByUserId: null,
-      reportId: null,  // This will be set to the raw material inspection report ID after saving
-      parentReportCardId: null,  // Store the parent report card ID (from props/route) separately
+      reportId: null, // This will be set to the raw material inspection report ID after saving
+      parentReportCardId: null, // Store the parent report card ID (from props/route) separately
     };
   },
   computed: {
@@ -533,6 +535,24 @@ export default {
       }
 
       return false;
+    },
+    shouldHideSubmitButton() {
+      // Hide submit button for:
+      // 1. QA Reviewer (role_id = 3) after report is submitted
+      // 2. QA Head (role_id = 2) after report is submitted
+      // 3. All other roles (not QA Reviewer or QA Head) - always hide
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+      
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
+      }
+      
+      // For all other roles: always hide
+      return true;
     },
     isFormValid() {
       return (
@@ -580,8 +600,8 @@ export default {
 
     // Capture the parent report card ID from props or route params
     // This should be stored in report_card_id column in the database
-    this.parentReportCardId = 
-      this.reportId ||  // From props (parent report card ID)
+    this.parentReportCardId =
+      this.reportId || // From props (parent report card ID)
       this.$route?.params?.reportCardId ||
       this.$route?.params?.report_id ||
       this.$route?.params?.reportId ||
@@ -594,8 +614,13 @@ export default {
         this.loadReportData();
       });
     }
-    
-    console.log("Mounted - parentReportCardId:", this.parentReportCardId, "reportId prop:", this.reportId);
+
+    console.log(
+      "Mounted - parentReportCardId:",
+      this.parentReportCardId,
+      "reportId prop:",
+      this.reportId
+    );
   },
   methods: {
     handleFileUpload(event, section, index) {
@@ -775,14 +800,15 @@ export default {
           "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: username,
-            signature_password: password,
-          }),
-        });
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: username,
+              signature_password: password,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -848,8 +874,10 @@ export default {
     },
     async autoSubmitReport() {
       try {
-        console.log("Starting autoSubmitReport - saving form data to database...");
-        
+        console.log(
+          "Starting autoSubmitReport - saving form data to database..."
+        );
+
         // Update all remarks before submitting
         this.formData.checkPoints.forEach((checkpoint, index) => {
           if (checkpoint.compliance) {
@@ -859,7 +887,7 @@ export default {
 
         const reportData = this.prepareReportData();
         console.log("Prepared report data:", reportData);
-        
+
         const response = await fetch(
           "http://localhost:5000/api/reports/raw-material-inspection",
           {
@@ -871,7 +899,11 @@ export default {
           }
         );
 
-        console.log("API Response status:", response.status, response.statusText);
+        console.log(
+          "API Response status:",
+          response.status,
+          response.statusText
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
@@ -909,7 +941,9 @@ export default {
       } catch (error) {
         console.error("Error auto-submitting report:", error);
         console.error("Error details:", error.message, error.stack);
-        alert(`Error submitting report: ${error.message || "Please try again."}`);
+        alert(
+          `Error submitting report: ${error.message || "Please try again."}`
+        );
         // Clear signature on error so user can retry
         this.preparedBySignatureUrl = "";
         this.preparedByVerifiedName = "";
@@ -1007,6 +1041,8 @@ export default {
       try {
         // Notify QA Heads and log to activity logs
         await this.notifyQAHeads();
+        // Update report status after submission
+        await this.fetchReportStatus();
         alert(
           "Report submitted successfully! Activity logged and QA Heads have been notified."
         );
@@ -1014,6 +1050,25 @@ export default {
       } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
+      }
+    },
+    async fetchReportStatus() {
+      // Fetch report status from main reports API
+      if (!this.reportId) return;
+      
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/reports/${this.reportId}`
+        );
+        
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
       }
     },
     async notifyQAHeads() {
@@ -1063,7 +1118,9 @@ export default {
       }
 
       try {
-        console.log(`Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`);
+        console.log(
+          `Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`
+        );
         const response = await fetch(
           `http://localhost:5000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
           {
@@ -1076,7 +1133,9 @@ export default {
 
         if (!response.ok) {
           if (response.status === 404) {
-            console.log(`Report with report_card_id ${reportCardIdToLoad} not found`);
+            console.log(
+              `Report with report_card_id ${reportCardIdToLoad} not found`
+            );
             return;
           }
           throw new Error(`Failed to fetch report: ${response.statusText}`);
@@ -1089,6 +1148,9 @@ export default {
 
           // Set reportId to the raw material inspection report ID from the response
           this.reportId = report.report_id;
+          
+          // Fetch report status from main reports API
+          await this.fetchReportStatus();
 
           // Map header fields to formData
           this.formData.projectName = report.project_name || "";
@@ -1103,7 +1165,7 @@ export default {
           this.formData.quantity = report.quantity || null;
           this.formData.slNos = report.sl_nos || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          
+
           // Update projectName and lruName from loaded data
           if (report.project_name) {
             this.projectName = report.project_name;
@@ -1151,11 +1213,15 @@ export default {
             const index = i + 1;
             if (this.formData.checkPoints[i]) {
               const dbApplicability = report[`applicability${index}`];
-              this.formData.checkPoints[i].applicability = convertApplicability(dbApplicability);
-              this.formData.checkPoints[i].compliance = report[`compliance${index}`] || "";
-              this.formData.checkPoints[i].remarks = report[`rem${index}`] || "";
-              this.formData.checkPoints[i].upload = report[`upload${index}`] || "";
-              
+              this.formData.checkPoints[i].applicability =
+                convertApplicability(dbApplicability);
+              this.formData.checkPoints[i].compliance =
+                report[`compliance${index}`] || "";
+              this.formData.checkPoints[i].remarks =
+                report[`rem${index}`] || "";
+              this.formData.checkPoints[i].upload =
+                report[`upload${index}`] || "";
+
               // Update remarks based on compliance if needed
               if (this.formData.checkPoints[i].compliance) {
                 this.updateRemarks(i);
@@ -1247,8 +1313,13 @@ export default {
       // Use parentReportCardId which was captured in mounted()
       // This is the parent report card ID (from reports table) that should be stored in report_card_id column
       const reportCardId = this.parentReportCardId;
-      
-      console.log("Preparing report data - report_card_id:", reportCardId, "parentReportCardId:", this.parentReportCardId);
+
+      console.log(
+        "Preparing report data - report_card_id:",
+        reportCardId,
+        "parentReportCardId:",
+        this.parentReportCardId
+      );
 
       // Helper function to convert applicability to database format
       const convertApplicability = (applicability) => {
@@ -1259,7 +1330,11 @@ export default {
       };
 
       return {
-        report_card_id: reportCardId ? (typeof reportCardId === 'number' ? reportCardId : parseInt(reportCardId)) : null,
+        report_card_id: reportCardId
+          ? typeof reportCardId === "number"
+            ? reportCardId
+            : parseInt(reportCardId)
+          : null,
         project_name: this.formData.projectName,
         report_ref_no: this.formData.reportRefNo,
         memo_ref_no: this.formData.memoRefNo,
@@ -1289,7 +1364,7 @@ export default {
         prepared_by: this.preparedBySignatureUrl
           ? `${this.preparedBy}|${this.preparedBySignatureUrl}`
           : this.preparedBy,
-        prepared_by_user_id: this.preparedByUserId || null,  // For activity logging
+        prepared_by_user_id: this.preparedByUserId || null, // For activity logging
         verified_by: this.verifiedBySignatureUrl
           ? `${this.verifiedBy}|${this.verifiedBySignatureUrl}`
           : this.verifiedBy,

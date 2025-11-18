@@ -212,12 +212,6 @@
           <div class="memo-project">{{ memo.project }}</div>
           <div class="memo-author">FROM - {{ memo.author }}</div>
         </div>
-        <div class="memo-schedule" v-if="memo.assignedDate">
-          <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
-          <div class="memo-scheduled">
-            TEST SCHEDULED ON : {{ memo.scheduledDate }}
-          </div>
-        </div>
         <!-- Share button for QA Reviewers -->
         <div v-if="currentUserRole === 3" class="memo-actions">
           <button
@@ -240,6 +234,12 @@
             </svg>
             <span class="share-text">Share</span>
           </button>
+        </div>
+        <div class="memo-schedule" v-if="memo.assignedDate">
+          <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
+          <div class="memo-scheduled">
+            TEST SCHEDULED ON : {{ memo.scheduledDate }}
+          </div>
         </div>
       </div>
     </div>
@@ -1036,6 +1036,8 @@ export default {
   text-align: right;
   font-size: 0.9em;
   color: #555;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* New button */
@@ -1138,12 +1140,10 @@ export default {
 
 /* Memo Actions */
 .memo-actions {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 100;
   display: flex;
   gap: 8px;
+  margin-right: 15px;
+  flex-shrink: 0;
 }
 
 .download-pdf-btn {

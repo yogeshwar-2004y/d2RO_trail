@@ -26,31 +26,73 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="formData.projectName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="formData.projectName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO's:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
             </div>
 
@@ -58,35 +100,83 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="formData.dpName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="formData.dpName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" :disabled="isPreparedByVerified" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -118,17 +208,29 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="item.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'visual', index)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'visual', index)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
 
@@ -143,17 +245,29 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="item.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'continuity', index)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'continuity', index)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
 
@@ -173,17 +287,29 @@
                     50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
-                    <input type="text" v-model="formData.fabricatorReport.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="formData.fabricatorReport.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="formData.fabricatorReport.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="formData.fabricatorReport.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'fabricator', 0)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -199,11 +325,19 @@
             <div class="signature-item">
               <label>Prepared By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
-                  Please fill in all form fields (General Information and Inspection Checklist) before verifying signature.
+                <div
+                  v-else-if="!areAllFieldsFilled"
+                  class="signature-disabled-message"
+                >
+                  Please fill in all form fields (General Information and
+                  Inspection Checklist) before verifying signature.
                 </div>
                 <div v-else class="signature-inputs">
                   <div class="input-group">
@@ -227,7 +361,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('preparedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('preparedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isPreparedByEnabled ||
                       !signatures.preparedBy.signatureUsername ||
@@ -237,7 +374,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.preparedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.preparedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -246,13 +386,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.preparedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.preparedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.preparedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.preparedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.preparedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.preparedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.preparedBy.signatureError }}
                 </div>
               </div>
@@ -262,10 +412,17 @@
             <div class="signature-item">
               <label>Verified By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
+                <div
+                  v-else-if="!isPreparedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Prepared By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -290,7 +447,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('verifiedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('verifiedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isVerifiedByEnabled ||
                       !signatures.verifiedBy.signatureUsername ||
@@ -300,7 +460,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.verifiedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -309,13 +472,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.verifiedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.verifiedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.verifiedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.verifiedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.verifiedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.verifiedBy.signatureError }}
                 </div>
               </div>
@@ -325,10 +498,17 @@
             <div class="signature-item">
               <label>Approved By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
+                <div
+                  v-else-if="!isVerifiedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Verified By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -353,7 +533,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('approvedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('approvedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isApprovedByEnabled ||
                       !signatures.approvedBy.signatureUsername ||
@@ -363,7 +546,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.approvedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.approvedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -372,13 +558,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.approvedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.approvedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.approvedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.approvedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.approvedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.approvedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.approvedBy.signatureError }}
                 </div>
               </div>
@@ -388,7 +584,11 @@
 
         <!-- Action Buttons -->
         <div class="form-actions" v-if="!readonly && isApprovedByVerified">
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -489,9 +689,9 @@ export default {
           },
         ],
         fabricatorReport: {
-          observation: '',
-          remarks: ''
-        }
+          observation: "",
+          remarks: "",
+        },
       },
       signatures: {
         preparedBy: {
@@ -523,33 +723,38 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.formData.projectName &&
-             this.formData.reportRefNo &&
-             this.formData.memoRefNo &&
-             this.formData.lruName &&
-             this.formData.dpName &&
-             this.formData.sruName &&
-             this.formData.partNo;
+      return (
+        this.formData.projectName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.dpName &&
+        this.formData.sruName &&
+        this.formData.partNo
+      );
     },
     areAllFieldsFilled() {
       if (!this.isFormValid) return false;
-      
+
       for (const item of this.formData.visualInspection) {
         if (!item.observation || !item.remarks) {
           return false;
         }
       }
-      
+
       for (const item of this.formData.continuityCheck) {
         if (!item.observation || !item.remarks) {
           return false;
         }
       }
-      
-      if (!this.formData.fabricatorReport.observation || !this.formData.fabricatorReport.remarks) {
+
+      if (
+        !this.formData.fabricatorReport.observation ||
+        !this.formData.fabricatorReport.remarks
+      ) {
         return false;
       }
-      
+
       return true;
     },
     canAccessSignatures() {
@@ -582,9 +787,9 @@ export default {
       this.loadReportData(reportCardId);
     } else {
       // Get parameters from route
-      this.lruName = this.$route.params.lruName || '';
-      this.projectName = this.$route.params.projectName || '';
-      
+      this.lruName = this.$route.params.lruName || "";
+      this.projectName = this.$route.params.projectName || "";
+
       // Set default values
       this.formData.lruName = this.lruName;
       this.formData.projectName = this.projectName;
@@ -595,11 +800,11 @@ export default {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        if (section === 'visual') {
+        if (section === "visual") {
           this.formData.visualInspection[index].fileName = file.name;
-        } else if (section === 'continuity') {
+        } else if (section === "continuity") {
           this.formData.continuityCheck[index].fileName = file.name;
-        } else if (section === 'fabricator') {
+        } else if (section === "fabricator") {
           this.formData.fabricatorReport.fileName = file.name;
         }
       }
@@ -613,14 +818,16 @@ export default {
         if (!response.ok) {
           if (response.status === 404) {
             // Report doesn't exist yet, show empty form
-            this.lruName = this.$route.params.lruName || '';
-            this.projectName = this.$route.params.projectName || '';
+            this.lruName = this.$route.params.lruName || "";
+            this.projectName = this.$route.params.projectName || "";
             this.formData.lruName = this.lruName;
             this.formData.projectName = this.projectName;
             this.formData.startDate = this.currentDate;
             return;
           }
-          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+          throw new Error(
+            `Failed to fetch report: ${response.statusText} (${response.status})`
+          );
         }
 
         const result = await response.json();
@@ -636,19 +843,28 @@ export default {
           this.formData.inspectionStage = report.inspection_stage || "";
           this.formData.testVenue = report.test_venue || "";
           this.formData.slNos = report.sl_nos || "";
-          this.formData.dated1 = report.dated1 ? report.dated1.split('T')[0] : "";
-          this.formData.dated2 = report.dated2 ? report.dated2.split('T')[0] : "";
+          this.formData.dated1 = report.dated1
+            ? report.dated1.split("T")[0]
+            : "";
+          this.formData.dated2 = report.dated2
+            ? report.dated2.split("T")[0]
+            : "";
           this.formData.dpName = report.dp_name || "";
           this.formData.sruName = report.sru_name || "";
           this.formData.partNo = report.part_no || "";
           this.formData.quantity = report.quantity || "";
-          this.formData.startDate = report.start_date ? report.start_date.split('T')[0] : this.currentDate;
-          this.formData.endDate = report.end_date ? report.end_date.split('T')[0] : "";
-          
+          this.formData.startDate = report.start_date
+            ? report.start_date.split("T")[0]
+            : this.currentDate;
+          this.formData.endDate = report.end_date
+            ? report.end_date.split("T")[0]
+            : "";
+
           this.projectName = report.project_name || "";
           this.lruName = report.lru_name || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          this.inspectionCount = report.inspection_count || this.inspectionCount;
+          this.inspectionCount =
+            report.inspection_count || this.inspectionCount;
 
           // Map visual inspection data (obs1-obs10)
           if (this.formData.visualInspection.length >= 10) {
@@ -656,9 +872,11 @@ export default {
               const obsKey = `obs${i + 1}`;
               const remKey = `rem${i + 1}`;
               const uploadKey = `upload${i + 1}`;
-              this.formData.visualInspection[i].observation = report[obsKey] || "";
+              this.formData.visualInspection[i].observation =
+                report[obsKey] || "";
               this.formData.visualInspection[i].remarks = report[remKey] || "";
-              this.formData.visualInspection[i].fileName = report[uploadKey] || null;
+              this.formData.visualInspection[i].fileName =
+                report[uploadKey] || null;
             }
           }
 
@@ -688,7 +906,10 @@ export default {
           throw new Error(result.message || "Failed to load report data");
         }
       } catch (error) {
-        if (error.message.includes('404') || error.message.includes('not found')) {
+        if (
+          error.message.includes("404") ||
+          error.message.includes("not found")
+        ) {
           return;
         }
         alert(`Error loading report data: ${error.message}. Please try again.`);
@@ -698,7 +919,8 @@ export default {
       const signature = this.signatures[signatureType];
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError = "Please enter both username and signature password";
+        signature.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
@@ -721,13 +943,15 @@ export default {
           signature.signatureError = "";
           await this.autoSaveReport();
         } else {
-          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureError =
+            data.message || "Failed to verify signature";
           signature.signatureUrl = "";
           signature.verifiedUserName = "";
           signature.verifiedUserRole = "";
         }
       } catch (error) {
-        signature.signatureError = "Error verifying signature: " + error.message;
+        signature.signatureError =
+          "Error verifying signature: " + error.message;
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
         signature.verifiedUserRole = "";
@@ -735,7 +959,7 @@ export default {
     },
     prepareSubmissionData() {
       const reportCardId = this.reportId || this.$route.params.reportId;
-      
+
       return {
         report_card_id: reportCardId,
         project_name: this.formData.projectName,
@@ -755,16 +979,16 @@ export default {
         end_date: this.formData.endDate,
         dated1: this.formData.dated1,
         dated2: this.formData.dated2,
-        
+
         // Visual inspection data (10 items)
         visual_inspection: this.formData.visualInspection,
-        
+
         // Continuity check data (1 item)
         continuity_check: this.formData.continuityCheck,
-        
+
         // Fabricator report data
         fabricator_report: this.formData.fabricatorReport,
-        
+
         prepared_by: this.signatures.preparedBy.signatureUrl || "",
         verified_by: this.signatures.verifiedBy.signatureUrl || "",
         approved_by: this.signatures.approvedBy.signatureUrl || "",
@@ -774,7 +998,7 @@ export default {
       try {
         const reportCardId = this.reportId || this.$route.params.reportId;
         if (!reportCardId) return;
-        
+
         const submissionData = this.prepareSubmissionData();
         const response = await fetch("http://localhost:5000/api/reports/bare-pcb-inspection", {
           method: "POST",
@@ -807,7 +1031,9 @@ export default {
         const result = await response.json();
 
         if (result.success) {
-          alert("Bare PCB inspection report submitted successfully! Notifications have been sent.");
+          alert(
+            "Bare PCB inspection report submitted successfully! Notifications have been sent."
+          );
         } else {
           alert(`Error: ${result.message}`);
         }
@@ -816,7 +1042,7 @@ export default {
         alert("Error submitting report. Please try again.");
       }
     },
-  }
+  },
 };
 </script>
 
@@ -1266,7 +1492,7 @@ select:disabled:focus {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .general-info-grid {
     grid-template-columns: 1fr;
     gap: 20px;
