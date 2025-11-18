@@ -61,6 +61,14 @@
         SUB : IQA Observation Report for {{ lruName }}
       </div>
 
+      <!-- Read-Only Warning -->
+      <div v-if="isReadOnly" class="read-only-warning">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
+        <span>This report has been submitted and is read-only. You can view the data but cannot make changes.</span>
+      </div>
+
       <!-- Document Details Grid -->
       <div class="document-details">
         <div class="details-left">
@@ -79,6 +87,7 @@
               v-model="lruPartNumber"
               placeholder="Enter LRU Part No."
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
           <div class="detail-item">
@@ -88,6 +97,7 @@
               v-model="serialNumber"
               placeholder="Enter Serial Number"
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
         </div>
@@ -99,6 +109,7 @@
               v-model="inspectionStage"
               placeholder="Enter Inspection stage"
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
           <div class="detail-item">
@@ -107,6 +118,7 @@
               type="date"
               v-model="docReviewDate"
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
           <div class="detail-item">
@@ -116,6 +128,7 @@
               v-model="reviewVenue"
               placeholder="Enter Review venue"
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
           <div class="detail-item">
@@ -125,6 +138,7 @@
               v-model="referenceDocument"
               placeholder="Enter Reference Document"
               class="detail-input"
+              :disabled="isReadOnly"
             />
           </div>
         </div>
@@ -197,7 +211,7 @@
               v-model="selectedDocumentId"
               @change="onVersionChange"
               class="version-select"
-              :disabled="loadingVersions"
+              :disabled="loadingVersions || isReadOnly"
             >
               <option value="">
                 {{
@@ -328,13 +342,14 @@
                     v-model="reviewedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
+                    :disabled="isReadOnly"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('reviewed')"
-                  :disabled="!reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
+                  :disabled="isReadOnly || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
@@ -365,6 +380,7 @@
                     v-model="approvedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
+                    :disabled="isReadOnly"
                   />
                 </div>
                 <div class="input-group">
@@ -374,13 +390,14 @@
                     v-model="approvedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
+                    :disabled="isReadOnly"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('approved')"
-                  :disabled="!approvedBy.signatureUsername || !approvedBy.signaturePassword"
+                  :disabled="isReadOnly || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
@@ -457,6 +474,19 @@ export default {
       selectedReportId: null,
       showSubmittedReports: false,
     };
+  },
+  computed: {
+    // Check if form should be read-only (when a submitted report is loaded)
+    isReadOnly() {
+      return this.selectedReportId !== null || this.reportSubmitted;
+    },
+    // Check if a report already exists for the selected document
+    reportExistsForDocument() {
+      if (!this.selectedDocumentId) return false;
+      return this.submittedReports.some(
+        r => r.document_id === parseInt(this.selectedDocumentId)
+      );
+    },
   },
   mounted() {
     // Get parameters from route
@@ -551,9 +581,22 @@ export default {
         await this.loadDocumentComments(parseInt(this.selectedDocumentId));
         // Refresh submitted reports when document changes
         await this.fetchSubmittedReports();
+        
+        // Reset read-only state if no report exists for this document
+        const reportForDocument = this.submittedReports.find(
+          r => r.document_id === parseInt(this.selectedDocumentId)
+        );
+        if (!reportForDocument) {
+          // No report exists for this document, allow editing
+          this.selectedReportId = null;
+          this.reportSubmitted = false;
+        }
       } else {
         this.selectedDocument = null;
         this.documentComments = [];
+        // Reset read-only state when no document is selected
+        this.selectedReportId = null;
+        this.reportSubmitted = false;
       }
     },
 
@@ -658,6 +701,18 @@ export default {
     // Submit IQA Observation Report
     async submitIqaObservationReport() {
       try {
+        // Prevent submission if report is read-only
+        if (this.isReadOnly) {
+          alert("This report has already been submitted and cannot be modified.");
+          return;
+        }
+
+        // Check if a report already exists for this document
+        if (this.reportExistsForDocument) {
+          alert("A report has already been submitted for this document version. Please select a different version or load the existing report.");
+          return;
+        }
+
         // Validate required fields
         if (!this.selectedDocumentId) {
           alert("Please select a document version before submitting the report.");
@@ -2233,5 +2288,38 @@ export default {
 
 .load-report-btn:hover {
   background: #218838;
+}
+
+/* Read-Only Warning Styles */
+.read-only-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #fff3cd;
+  border: 2px solid #ffc107;
+  border-radius: 8px;
+  margin: 20px 0;
+  color: #856404;
+  font-weight: 500;
+}
+
+.read-only-warning svg {
+  flex-shrink: 0;
+  color: #ffc107;
+}
+
+.detail-input:disabled,
+.signature-input:disabled,
+.version-select:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+  opacity: 0.7;
+  color: #6c757d;
+}
+
+.btn-verify-signature:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
