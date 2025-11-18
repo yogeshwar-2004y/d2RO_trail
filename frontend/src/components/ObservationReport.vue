@@ -66,37 +66,66 @@
         <div class="details-left">
           <div class="detail-item">
             <label>Project Name :</label>
-            <span>{{ projectName }}</span>
+            <span class="readonly-value">{{ projectName || "Not specified" }}</span>
           </div>
           <div class="detail-item">
             <label>LRU Name :</label>
-            <span>{{ lruName }}</span>
+            <span class="readonly-value">{{ lruName || "Not specified" }}</span>
           </div>
           <div class="detail-item">
             <label>LRU Part No. :</label>
-            <span>{{ lruPartNumber }}</span>
+            <input
+              type="text"
+              v-model="lruPartNumber"
+              placeholder="Enter LRU Part No."
+              class="detail-input"
+            />
           </div>
           <div class="detail-item">
             <label>Serial Number:</label>
-            <span>{{ serialNumber }}</span>
+            <input
+              type="text"
+              v-model="serialNumber"
+              placeholder="Enter Serial Number"
+              class="detail-input"
+            />
           </div>
         </div>
         <div class="details-right">
           <div class="detail-item">
             <label>Inspection stage :</label>
-            <span class="stage-value">Document review/report</span>
+            <input
+              type="text"
+              v-model="inspectionStage"
+              placeholder="Enter Inspection stage"
+              class="detail-input"
+            />
           </div>
           <div class="detail-item">
             <label>Date of doc review :</label>
-            <span>{{ docReviewDate }}</span>
+            <input
+              type="date"
+              v-model="docReviewDate"
+              class="detail-input"
+            />
           </div>
           <div class="detail-item">
             <label>Review venue :</label>
-            <span>{{ reviewVenue }}</span>
+            <input
+              type="text"
+              v-model="reviewVenue"
+              placeholder="Enter Review venue"
+              class="detail-input"
+            />
           </div>
           <div class="detail-item">
             <label>Reference Document:</label>
-            <span>{{ referenceDocument }}</span>
+            <input
+              type="text"
+              v-model="referenceDocument"
+              placeholder="Enter Reference Document"
+              class="detail-input"
+            />
           </div>
         </div>
       </div>
@@ -222,20 +251,96 @@
       <div class="signatures-section">
         <h2 class="section-title">Digital Signatures</h2>
         <div class="signatures-grid">
+          <!-- Reviewed By Signature -->
           <div class="signature-item">
             <label>Reviewed By:</label>
-            <div class="signature-display">
-              <span class="signature-name">QA Reviewer</span>
+            <div class="signature-auth-container">
+              <div class="signature-inputs">
+                <div class="input-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    v-model="reviewedBy.signatureUsername"
+                    placeholder="Enter username..."
+                    class="signature-input"
+                  />
+                </div>
+                <div class="input-group">
+                  <label>Signature Password:</label>
+                  <input
+                    type="password"
+                    v-model="reviewedBy.signaturePassword"
+                    placeholder="Enter signature password..."
+                    class="signature-input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="btn-verify-signature"
+                  @click="verifySignature('reviewed')"
+                  :disabled="!reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
+                >
+                  Verify & Load Signature
+                </button>
+              </div>
+              <div v-if="reviewedBy.signatureError" class="signature-error">
+                {{ reviewedBy.signatureError }}
+              </div>
+              <div v-if="reviewedBy.signatureUrl" class="signature-display">
+                <img :src="reviewedBy.signatureUrl" alt="Reviewed By Signature" class="signature-image" />
+                <div class="signature-name">{{ reviewedBy.verifiedUserName }}</div>
+              </div>
+              <div v-else class="signature-placeholder">
+                <span>No signature loaded</span>
+              </div>
+              <div class="signature-date">Date: {{ currentDate }}</div>
             </div>
-            <div class="signature-date">Date: {{ currentDate }}</div>
           </div>
 
+          <!-- Approved By Signature -->
           <div class="signature-item">
             <label>Approved By:</label>
-            <div class="signature-display">
-              <span class="signature-name">Design Team</span>
+            <div class="signature-auth-container">
+              <div class="signature-inputs">
+                <div class="input-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    v-model="approvedBy.signatureUsername"
+                    placeholder="Enter username..."
+                    class="signature-input"
+                  />
+                </div>
+                <div class="input-group">
+                  <label>Signature Password:</label>
+                  <input
+                    type="password"
+                    v-model="approvedBy.signaturePassword"
+                    placeholder="Enter signature password..."
+                    class="signature-input"
+                  />
+                </div>
+                <button
+                  type="button"
+                  class="btn-verify-signature"
+                  @click="verifySignature('approved')"
+                  :disabled="!approvedBy.signatureUsername || !approvedBy.signaturePassword"
+                >
+                  Verify & Load Signature
+                </button>
+              </div>
+              <div v-if="approvedBy.signatureError" class="signature-error">
+                {{ approvedBy.signatureError }}
+              </div>
+              <div v-if="approvedBy.signatureUrl" class="signature-display">
+                <img :src="approvedBy.signatureUrl" alt="Approved By Signature" class="signature-image" />
+                <div class="signature-name">{{ approvedBy.verifiedUserName }}</div>
+              </div>
+              <div v-else class="signature-placeholder">
+                <span>No signature loaded</span>
+              </div>
+              <div class="signature-date">Date: {{ currentDate }}</div>
             </div>
-            <div class="signature-date">Date: {{ currentDate }}</div>
           </div>
         </div>
       </div>
@@ -262,15 +367,31 @@ export default {
       documentComments: [],
       loadingComments: false,
       loadingVersions: false,
-      // Sample data
-      serialNumber: "SL-001",
+      // Input fields for user to fill
+      serialNumber: "",
       observationCount: "OBS-001",
-      currentYear: "2025",
-      currentDate: "2025-01-15",
-      lruPartNumber: "LRU-001",
-      docReviewDate: "2025-01-15",
-      reviewVenue: "QA Department",
-      referenceDocument: "Technical Specification",
+      currentYear: new Date().getFullYear().toString(),
+      currentDate: new Date().toISOString().split("T")[0],
+      lruPartNumber: "",
+      docReviewDate: new Date().toISOString().split("T")[0],
+      reviewVenue: "",
+      referenceDocument: "",
+      inspectionStage: "Document review/report",
+      // Signature authentication data
+      reviewedBy: {
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: "",
+      },
+      approvedBy: {
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: "",
+      },
     };
   },
   mounted() {
@@ -407,6 +528,47 @@ export default {
         });
       } catch (error) {
         return "Invalid Date";
+      }
+    },
+
+    // Verify signature credentials
+    async verifySignature(signatureType) {
+      const signature = signatureType === "reviewed" ? this.reviewedBy : this.approvedBy;
+
+      if (!signature.signatureUsername || !signature.signaturePassword) {
+        signature.signatureError = "Please enter both username and signature password";
+        return;
+      }
+
+      try {
+        signature.signatureError = "";
+        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: signature.signatureUsername,
+            signature_password: signature.signaturePassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
+          signature.verifiedUserName = data.user_name;
+          signature.signatureError = "";
+        } else {
+          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureUrl = "";
+          signature.verifiedUserName = "";
+        }
+      } catch (error) {
+        console.error("Error verifying signature:", error);
+        signature.signatureError = "Error verifying signature. Please try again.";
+        signature.signatureUrl = "";
+        signature.verifiedUserName = "";
       }
     },
 
@@ -617,7 +779,7 @@ export default {
         doc.text("Inspection stage :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
-          "Document review/report",
+          this.inspectionStage || "Not specified",
           rightValueStartX,
           rightColumnY
         );
@@ -627,8 +789,11 @@ export default {
         doc.setFont("helvetica", "bold");
         doc.text("Date of doc review :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
+        const formattedReviewDate = this.docReviewDate 
+          ? new Date(this.docReviewDate).toLocaleDateString("en-GB")
+          : "Not specified";
         doc.text(
-          this.docReviewDate || "Not specified",
+          formattedReviewDate,
           rightValueStartX,
           rightColumnY
         );
@@ -960,6 +1125,68 @@ export default {
           signatureY + signatureHeight
         );
 
+        // Load and add Reviewed By signature
+        if (this.reviewedBy.signatureUrl) {
+          try {
+            const reviewedSignatureData = await loadImageAsBase64(this.reviewedBy.signatureUrl);
+            const sigMaxWidth = leftSectionWidth - 10;
+            const sigMaxHeight = signatureHeight - 8;
+            const sigAspectRatio = reviewedSignatureData.width / reviewedSignatureData.height;
+            let sigWidth = sigMaxWidth;
+            let sigHeight = sigWidth / sigAspectRatio;
+            
+            if (sigHeight > sigMaxHeight) {
+              sigHeight = sigMaxHeight;
+              sigWidth = sigHeight * sigAspectRatio;
+            }
+            
+            const sigX = signatureStartX + (leftSectionWidth - sigWidth) / 2;
+            const sigY = signatureY + (signatureHeight - sigHeight) / 2;
+            
+            doc.addImage(
+              reviewedSignatureData.base64,
+              "PNG",
+              sigX,
+              sigY,
+              sigWidth,
+              sigHeight
+            );
+          } catch (error) {
+            console.warn("Could not load Reviewed By signature:", error);
+          }
+        }
+
+        // Load and add Approved By signature
+        if (this.approvedBy.signatureUrl) {
+          try {
+            const approvedSignatureData = await loadImageAsBase64(this.approvedBy.signatureUrl);
+            const sigMaxWidth = rightSectionWidth - 10;
+            const sigMaxHeight = signatureHeight - 8;
+            const sigAspectRatio = approvedSignatureData.width / approvedSignatureData.height;
+            let sigWidth = sigMaxWidth;
+            let sigHeight = sigWidth / sigAspectRatio;
+            
+            if (sigHeight > sigMaxHeight) {
+              sigHeight = sigMaxHeight;
+              sigWidth = sigHeight * sigAspectRatio;
+            }
+            
+            const sigX = signatureStartX + leftSectionWidth + (rightSectionWidth - sigWidth) / 2;
+            const sigY = signatureY + (signatureHeight - sigHeight) / 2;
+            
+            doc.addImage(
+              approvedSignatureData.base64,
+              "PNG",
+              sigX,
+              sigY,
+              sigWidth,
+              sigHeight
+            );
+          } catch (error) {
+            console.warn("Could not load Approved By signature:", error);
+          }
+        }
+
         // Add labels below the signature box
         yPosition += signatureHeight + 8;
 
@@ -981,24 +1208,26 @@ export default {
           { align: "center" }
         );
 
-        // Add names inside the signature boxes
-        yPosition -= 8;
+        // Add names below labels
+        yPosition += 6;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
 
         // Reviewed by name
+        const reviewedByName = this.reviewedBy.verifiedUserName || "Not specified";
         doc.text(
-          "QA Reviewer",
+          reviewedByName,
           signatureStartX + leftSectionWidth / 2,
-          signatureY + signatureHeight / 2 + 2,
+          yPosition,
           { align: "center" }
         );
 
         // Approved by name
+        const approvedByName = this.approvedBy.verifiedUserName || "Not specified";
         doc.text(
-          "Design Team",
+          approvedByName,
           signatureStartX + leftSectionWidth + rightSectionWidth / 2,
-          signatureY + signatureHeight / 2 + 2,
+          yPosition,
           { align: "center" }
         );
 
@@ -1191,6 +1420,37 @@ export default {
 .detail-item span {
   color: #2d3748;
   font-weight: 500;
+}
+
+.detail-item .readonly-value {
+  color: #2d3748;
+  font-weight: 600;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-radius: 6px;
+  display: inline-block;
+  min-width: 150px;
+}
+
+.detail-input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.95em;
+  color: #2d3748;
+  width: 100%;
+  max-width: 300px;
+  transition: border-color 0.3s ease;
+}
+
+.detail-input:focus {
+  outline: none;
+  border-color: #4a5568;
+  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+.detail-input[type="date"] {
+  cursor: pointer;
 }
 
 /* Version Selection Styles */
@@ -1466,6 +1726,93 @@ export default {
   color: #6c757d;
   margin-top: 5px;
   text-align: center;
+}
+
+/* Signature Authentication Styles */
+.signature-auth-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.signature-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.signature-inputs .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.signature-inputs .input-group label {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.signature-input {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.9em;
+  transition: border-color 0.3s ease;
+}
+
+.signature-input:focus {
+  outline: none;
+  border-color: #4a5568;
+  box-shadow: 0 0 0 3px rgba(74, 85, 104, 0.1);
+}
+
+.btn-verify-signature {
+  padding: 10px 16px;
+  background: #4a5568;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn-verify-signature:hover:not(:disabled) {
+  background: #2d3748;
+}
+
+.btn-verify-signature:disabled {
+  background: #cbd5e0;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.signature-error {
+  color: #dc3545;
+  font-size: 0.85em;
+  padding: 8px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+.signature-image {
+  max-width: 200px;
+  max-height: 80px;
+  object-fit: contain;
+  margin-bottom: 8px;
+}
+
+.signature-placeholder {
+  padding: 20px;
+  background: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 6px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.9em;
 }
 
 /* Responsive Design */
