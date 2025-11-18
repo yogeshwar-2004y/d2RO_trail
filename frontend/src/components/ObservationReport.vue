@@ -144,62 +144,6 @@
         </div>
       </div>
 
-      <!-- Submitted Reports Section -->
-      <div class="submitted-reports-section" v-if="submittedReports.length > 0">
-        <div class="section-header">
-          <h2 class="section-title">Submitted Reports</h2>
-          <button 
-            class="toggle-button" 
-            @click="showSubmittedReports = !showSubmittedReports"
-          >
-            {{ showSubmittedReports ? 'Hide' : 'Show' }} ({{ submittedReports.length }})
-          </button>
-        </div>
-        
-        <div v-if="showSubmittedReports" class="submitted-reports-list">
-          <table class="submitted-reports-table">
-            <thead>
-              <tr>
-                <th>Report ID</th>
-                <th>Document Version</th>
-                <th>Serial No.</th>
-                <th>Observations</th>
-                <th>Submitted Date</th>
-                <th>Reviewed By</th>
-                <th>Approved By</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr 
-                v-for="report in submittedReports" 
-                :key="report.report_id"
-                :class="{ 'selected': selectedReportId === report.report_id }"
-              >
-                <td>#{{ report.report_id }}</td>
-                <td>
-                  {{ report.document_number || 'N/A' }} 
-                  v{{ report.document_version || 'N/A' }}
-                </td>
-                <td>{{ report.serial_number || 'N/A' }}</td>
-                <td>{{ report.actual_observation_count || 0 }}</td>
-                <td>{{ formatDate(report.created_at) }}</td>
-                <td>{{ report.reviewed_by_verified_name || 'N/A' }}</td>
-                <td>{{ report.approved_by_verified_name || 'N/A' }}</td>
-                <td>
-                  <button 
-                    class="load-report-btn"
-                    @click="loadSubmittedReport(report.report_id)"
-                  >
-                    Load
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       <!-- Version Selection -->
       <div class="version-selection">
         <h2 class="section-title">Document Version Selection</h2>
@@ -211,7 +155,7 @@
               v-model="selectedDocumentId"
               @change="onVersionChange"
               class="version-select"
-              :disabled="loadingVersions || isReadOnly"
+              :disabled="loadingVersions"
             >
               <option value="">
                 {{
@@ -1040,8 +984,18 @@ export default {
         doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
         yPosition += 12; // Reduced from 15 to prevent overlap
 
+        // ===== DOCUMENT VERSION INFO =====
+        if (this.selectedDocument) {
+          yPosition += 6;
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          const versionInfo = `Document Version: ${this.selectedDocument.document_number || "N/A"} - Version ${this.selectedDocument.version || "N/A"}${this.selectedDocument.revision ? ` (Rev. ${this.selectedDocument.revision})` : ""}${this.selectedDocument.doc_ver ? ` - ${this.selectedDocument.doc_ver}` : ""}`;
+          doc.text(versionInfo, pageWidth / 2, yPosition, { align: "center" });
+          yPosition += 8;
+        }
+
         // ===== DOCUMENT DETAILS SECTION =====
-        yPosition += 8; // Add spacing after subject line
+        yPosition += 4; // Add spacing after subject line
         doc.setFontSize(10);
 
         // Left column details
