@@ -166,7 +166,7 @@
     
 
     <!-- Submit Button -->
-    <div class="submit-section">
+    <div class="submit-section" v-if="!isSubmitted">
       <button class="submit-button" @click="submitMemo">
         Submit
       </button>
@@ -190,6 +190,7 @@ export default {
     return {
       showShareModal: false,
       emailAddresses: '',
+      isSubmitted: false,
       memoData: {
         dgaqaRemarks: 'All records verified. Proceed as per plan.',
         from: 'CASCIC Design Team',
@@ -284,6 +285,10 @@ export default {
     },
 
     transformAndSetMemoData(backendMemo, references) {
+      // Check if memo is already submitted (has a test status set)
+      const submittedStatuses = ['successfully_completed', 'test_not_conducted', 'completed_with_observations', 'test_failed'];
+      this.isSubmitted = backendMemo.memo_status && submittedStatuses.includes(backendMemo.memo_status);
+      
       // Transform backend memo data to frontend format
       this.memoData = {
         // Basic memo information
@@ -455,6 +460,7 @@ export default {
         
         const result = await response.json();
         if (result.success) {
+          this.isSubmitted = true; // Hide submit button after successful submission
           alert('Memo status updated successfully!');
           this.goBack(); // Navigate back after successful submission
         } else {
