@@ -454,7 +454,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`
+          `http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`
         );
         const data = await response.json();
 
@@ -476,7 +476,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/sub-tests/${this.subTestId}/bulletins`,
+          `http://localhost:5000/api/sub-tests/${this.subTestId}/bulletins`,
           {
             method: "POST",
             headers: {
@@ -508,7 +508,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/bulletins/${this.editingBulletin.bulletin_id}`,
+          `http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`,
           {
             method: "PUT",
             headers: {
@@ -543,7 +543,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`,
+          `http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`,
           {
             method: "DELETE",
           }

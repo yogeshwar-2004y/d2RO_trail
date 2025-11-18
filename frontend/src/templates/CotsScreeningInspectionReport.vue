@@ -709,7 +709,7 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening/by-report-card/${reportCardId}`
+          `http://localhost:5000/api/reports/cot-screening/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
@@ -812,7 +812,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -893,7 +893,7 @@ export default {
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
         const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
+          `http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -919,7 +919,7 @@ export default {
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
         const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`,
+          `http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -949,7 +949,7 @@ export default {
     async fetchReportStatus(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/${reportCardId}`
+          `http://localhost:5000/api/reports/${reportCardId}`
         );
         if (response.ok) {
           const result = await response.json();

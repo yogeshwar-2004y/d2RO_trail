@@ -370,7 +370,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/upload-gallery-image/${imageNumber}`,
+          `http://127.0.0.1:5000/api/upload-gallery-image/${imageNumber}`,
           {
             method: "POST",
             body: formData,
@@ -407,7 +407,7 @@ export default {
     async resetGalleryImage(imageNumber) {
       try {
         const response = await fetch(
-          `http://127.0.0.1:8000/api/reset-gallery-image/${imageNumber}`,
+          `http://127.0.0.1:5000/api/reset-gallery-image/${imageNumber}`,
           {
             method: "POST",
           }
@@ -437,7 +437,7 @@ export default {
     async loadGalleryImages() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/get-gallery-images"
+          "http://127.0.0.1:5000/api/get-gallery-images"
         );
         const data = await response.json();
         if (data.success && data.gallery_images) {

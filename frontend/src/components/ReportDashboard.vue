@@ -335,7 +335,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:8000/api/reports";
+        let apiUrl = "http://localhost:5000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }

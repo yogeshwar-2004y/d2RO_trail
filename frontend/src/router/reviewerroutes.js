@@ -11,28 +11,33 @@ const reviewerRoutes = [
     path: '/reviewer',
     name: 'HomePageReviewer',
     component: HomePageReviewer,
+    meta: { requiresAuth: true } // All authenticated users
   },
   {
     path: '/reviewer/memo-dashboard',
     name: 'ReviewerMemoDashboard',
     component: ReviewerMemoDashboard,
+    meta: { requiresAuth: true } // All authenticated users
   },
   {
     path: '/reviewer/InspectionMemo/:id',
     name: 'InspectionMemo',
     component: InspectionMemo,
     props: true,
+    meta: { requiresAuth: true } // All authenticated users
   },
   {
     path: '/memos/shared-memos',
     name: 'SharedMemoDashboard',
     component: SharedMemoDashboard,
+    meta: { requiresAuth: true } // All authenticated users
   },
   {
     path: '/shared-memo-view/:id',
     name: 'SharedMemoView',
     component: SharedMemoView,
     props: true,
+    meta: { requiresAuth: true } // All authenticated users
   },
 ];
 

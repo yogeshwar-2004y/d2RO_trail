@@ -118,7 +118,7 @@ export default {
     async loadGalleryImages() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/api/get-gallery-images"
+          "http://127.0.0.1:5000/api/get-gallery-images"
         );
         const data = await response.json();
         if (data.success && data.gallery_images) {
@@ -135,7 +135,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:8000/api/login", {
+        const response = await fetch("http://127.0.0.1:5000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -156,22 +156,30 @@ export default {
           // Store user data in global state
           setUser(data.user);
 
-          // Role-based navigation - handle exact role names from database
-          const role = data.user.role.toLowerCase();
-
-          if (role === "admin") {
-            this.$router.push({ name: "HomePageAdmin" });
-          } else if (role === "qa reviewer") {
-            this.$router.push({ name: "HomePageReviewer" });
-          } else if (role === "qa head") {
-            this.$router.push({ name: "HomePageQAHead" });
-          } else if (role === "design head") {
-            this.$router.push({ name: "HomePageDesignHead" });
-          } else if (role === "designer") {
-            this.$router.push({ name: "HomePageDesigner" });
+          // Check if there's a redirect query parameter
+          const redirectPath = this.$route.query.redirect;
+          
+          if (redirectPath) {
+            // Redirect to the originally requested page
+            this.$router.push(redirectPath);
           } else {
-            console.error("Unknown role:", data.user.role);
-            alert(`Unknown role: ${data.user.role}. Please contact support.`);
+            // Role-based navigation - handle exact role names from database
+            const role = data.user.role.toLowerCase();
+
+            if (role === "admin") {
+              this.$router.push({ name: "HomePageAdmin" });
+            } else if (role === "qa reviewer") {
+              this.$router.push({ name: "HomePageReviewer" });
+            } else if (role === "qa head") {
+              this.$router.push({ name: "HomePageQAHead" });
+            } else if (role === "design head") {
+              this.$router.push({ name: "HomePageDesignHead" });
+            } else if (role === "designer") {
+              this.$router.push({ name: "HomePageDesigner" });
+            } else {
+              console.error("Unknown role:", data.user.role);
+              alert(`Unknown role: ${data.user.role}. Please contact support.`);
+            }
           }
         } else {
           alert(data.message);

@@ -7,13 +7,15 @@ const routes = [
   {
     path: '/designer',
     name: 'HomePageDesigner',
-    component: HomePageDesigner
+    component: HomePageDesigner,
+    meta: { requiresAuth: true } // All authenticated users
   },
   {
     path: '/designer/iqa-observation-report/:reportId',
     name: 'DesignerIqaObservationReport',
     component: IqaObservationReport,
-    props: true
+    props: true,
+    meta: { requiresAuth: true } // All authenticated users
   }
 ]
 
