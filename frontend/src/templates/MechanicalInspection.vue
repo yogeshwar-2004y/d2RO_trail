@@ -597,7 +597,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified">
+        <div class="form-actions" v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton">
           <button
             type="submit"
             class="btn btn-primary"
@@ -628,6 +628,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       currentYear: "2025",
       reportData: {
         projectName: "",
@@ -833,12 +834,28 @@ export default {
     isApprovedByEnabled() {
       return this.canAccessSignatures && this.isVerifiedByVerified;
     },
+    shouldHideSubmitButton() {
+      // Hide submit button for reviewers and heads after report is submitted
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+      
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
+      }
+      
+      // For all other roles: always hide
+      return true;
+    },
   },
   mounted() {
     const reportCardId = this.reportId || this.$route.params.reportId;
 
     if (reportCardId) {
       this.loadReportData(reportCardId);
+      this.fetchReportStatus(reportCardId);
     } else {
       this.reportData.projectName = this.$route.params.projectName || "";
       this.reportData.lruName = this.$route.params.lruName || "";
@@ -1191,6 +1208,11 @@ export default {
         const result = await response.json();
 
         if (result.success) {
+          // Update report status after submission
+          const reportCardId = this.reportId || this.$route.params.reportId;
+          if (reportCardId) {
+            await this.fetchReportStatus(reportCardId);
+          }
           alert(
             "Mechanical inspection report submitted successfully! Notifications have been sent."
           );
@@ -1200,6 +1222,19 @@ export default {
       } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
+      }
+    },
+    async fetchReportStatus(reportCardId) {
+      try {
+        const response = await fetch(`http://localhost:8000/api/reports/${reportCardId}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
       }
     },
   },

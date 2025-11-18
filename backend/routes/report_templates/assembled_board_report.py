@@ -239,7 +239,7 @@ def create_assembled_board_report():
                 RETURNING report_id
             """, values)
             
-        report_id = cur.fetchone()[0]
+            report_id = cur.fetchone()[0]
         
         print("Insert/Update query executed successfully")  # Debug log
         

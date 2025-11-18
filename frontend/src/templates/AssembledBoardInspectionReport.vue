@@ -664,7 +664,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified">
+        <div class="form-actions" v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton">
           <button
             type="submit"
             class="btn btn-primary"
@@ -695,6 +695,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       projectName: "",
       lruName: "",
       serialNumber: "SL-001",
@@ -876,12 +877,28 @@ export default {
     isApprovedByEnabled() {
       return this.canAccessSignatures && this.isVerifiedByVerified;
     },
+    shouldHideSubmitButton() {
+      // Hide submit button for reviewers and heads after report is submitted
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+      
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
+      }
+      
+      // For all other roles: always hide
+      return true;
+    },
   },
   mounted() {
     const reportCardId = this.reportId || this.$route.params.reportId;
 
     if (reportCardId) {
       this.loadReportData(reportCardId);
+      this.fetchReportStatus(reportCardId);
     } else {
       // Get parameters from route
       this.lruName = this.$route.params.lruName || "";
@@ -1054,27 +1071,51 @@ export default {
           this.formData.qcReport.remarks = report.rem20 || "";
           this.formData.qcReport.fileName = report.upload20 || null;
 
-          // Load signatures
+          // Load signatures (format: "Name|URL")
           if (report.prepared_by) {
-            this.signatures.preparedBy.signatureUrl = report.prepared_by;
-            if (report.prepared_by.includes('http://localhost:8000/api/users/signature/')) {
+            if (report.prepared_by.includes('|')) {
+              const preparedParts = report.prepared_by.split("|");
+              this.signatures.preparedBy.verifiedUserName = preparedParts[0] || "";
+              this.signatures.preparedBy.signatureUrl = preparedParts[1] || "";
+              this.signatures.preparedBy.verifiedUserRole = "QA";
+            } else {
+              // Legacy format: just URL
+              this.signatures.preparedBy.signatureUrl = report.prepared_by;
               this.signatures.preparedBy.verifiedUserName = "Verified User";
               this.signatures.preparedBy.verifiedUserRole = "QA";
             }
           }
           if (report.verified_by) {
-            this.signatures.verifiedBy.signatureUrl = report.verified_by;
-            if (report.verified_by.includes('http://localhost:8000/api/users/signature/')) {
+            if (report.verified_by.includes('|')) {
+              const verifiedParts = report.verified_by.split("|");
+              this.signatures.verifiedBy.verifiedUserName = verifiedParts[0] || "";
+              this.signatures.verifiedBy.signatureUrl = verifiedParts[1] || "";
+              this.signatures.verifiedBy.verifiedUserRole = "QA";
+            } else {
+              // Legacy format: just URL
+              this.signatures.verifiedBy.signatureUrl = report.verified_by;
               this.signatures.verifiedBy.verifiedUserName = "Verified User";
               this.signatures.verifiedBy.verifiedUserRole = "QA";
             }
           }
           if (report.approved_by) {
-            this.signatures.approvedBy.signatureUrl = report.approved_by;
-            if (report.approved_by.includes('http://localhost:8000/api/users/signature/')) {
+            if (report.approved_by.includes('|')) {
+              const approvedParts = report.approved_by.split("|");
+              this.signatures.approvedBy.verifiedUserName = approvedParts[0] || "";
+              this.signatures.approvedBy.signatureUrl = approvedParts[1] || "";
+              this.signatures.approvedBy.verifiedUserRole = "QA Head";
+            } else {
+              // Legacy format: just URL
+              this.signatures.approvedBy.signatureUrl = report.approved_by;
               this.signatures.approvedBy.verifiedUserName = "Verified User";
               this.signatures.approvedBy.verifiedUserRole = "QA Head";
             }
+          }
+          
+          // Fetch report status to check if already submitted
+          const reportCardId = this.reportId || this.$route.params.reportId;
+          if (reportCardId) {
+            await this.fetchReportStatus(reportCardId);
           }
         } else {
           throw new Error(result.message || "Failed to load report data");
@@ -1265,9 +1306,15 @@ export default {
         rem20: this.formData.qcReport?.remarks || "",
         upload20: this.formData.qcReport?.fileName || "",
 
-        prepared_by: this.signatures.preparedBy.signatureUrl || "",
-        verified_by: this.signatures.verifiedBy.signatureUrl || "",
-        approved_by: this.signatures.approvedBy.signatureUrl || "",
+        prepared_by: this.signatures.preparedBy.signatureUrl 
+          ? `${this.signatures.preparedBy.verifiedUserName || 'User'}|${this.signatures.preparedBy.signatureUrl}`
+          : "",
+        verified_by: this.signatures.verifiedBy.signatureUrl
+          ? `${this.signatures.verifiedBy.verifiedUserName || 'User'}|${this.signatures.verifiedBy.signatureUrl}`
+          : "",
+        approved_by: this.signatures.approvedBy.signatureUrl
+          ? `${this.signatures.approvedBy.verifiedUserName || 'User'}|${this.signatures.approvedBy.signatureUrl}`
+          : "",
       };
     },
     async autoSaveReport() {
@@ -1304,6 +1351,11 @@ export default {
         const result = await response.json();
 
         if (result.success) {
+          // Update report status after submission
+          const reportCardId = this.reportId || this.$route.params.reportId;
+          if (reportCardId) {
+            await this.fetchReportStatus(reportCardId);
+          }
           alert(
             "Assembled board inspection report submitted successfully! Notifications have been sent."
           );
@@ -1313,6 +1365,19 @@ export default {
       } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
+      }
+    },
+    async fetchReportStatus(reportCardId) {
+      try {
+        const response = await fetch(`http://localhost:8000/api/reports/${reportCardId}`);
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
       }
     },
   },

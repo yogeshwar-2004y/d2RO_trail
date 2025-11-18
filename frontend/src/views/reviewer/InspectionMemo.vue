@@ -483,12 +483,6 @@ export default {
         
         console.log(`Downloading PDF for memo ID: ${this.id}`);
         
-        // Show loading state
-        const button = event.target.closest('.download-pdf-btn');
-        const originalText = button.querySelector('.download-text').textContent;
-        button.querySelector('.download-text').textContent = 'Loading...';
-        button.disabled = true;
-        
         // Hide Test Status section for PDF
         const testStatusSection = document.querySelector('.exclude-from-pdf');
         let wasHidden = false;
@@ -547,13 +541,6 @@ export default {
         const testStatusSection = document.querySelector('.exclude-from-pdf');
         if (testStatusSection) {
           testStatusSection.style.display = '';
-        }
-      } finally {
-        // Restore button state
-        const button = event.target.closest('.download-pdf-btn');
-        if (button) {
-          button.querySelector('.download-text').textContent = originalText;
-          button.disabled = false;
         }
       }
     }

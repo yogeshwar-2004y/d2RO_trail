@@ -577,27 +577,15 @@ export default {
       return basicFieldsFilled && allObservationsFilled;
     },
     shouldHideSubmitButton() {
-      // Hide submit button for:
-      // 1. QA Reviewer (role_id = 3) after report is submitted
-      // 2. QA Head (role_id = 2) after report is submitted
-      // 3. All other roles (not QA Reviewer or QA Head) - always hide
+      // Hide submit button for reviewers and heads after report is submitted
       const currentUserRole = userStore.getters.currentUserRole();
       const isQAReviewer = currentUserRole === 3;
       const isQAHead = currentUserRole === 2;
       
       // For QA Reviewer and QA Head: hide only after submission
       if (isQAReviewer || isQAHead) {
-        // Check if report is submitted by checking if reportId exists and report was already submitted
-        // We'll check this by seeing if the report has been saved and submitted
-        // For now, we'll use a simple check - if reportId exists and form is readonly, it might be submitted
-        // But we need a better way - let's check if we can determine submission status
-        // Since we don't have direct access to report status, we'll check if report was submitted
-        // by checking if all signatures are present (which indicates submission)
-        const allSignaturesPresent = this.preparedBySignatureUrl && 
-                                    this.verifiedBySignatureUrl && 
-                                    this.approvedBySignatureUrl;
-        // If all signatures are present and reportId exists, report is likely submitted
-        return allSignaturesPresent && this.reportId && this.isFormReadonly;
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
       }
       
       // For all other roles: always hide
@@ -617,6 +605,8 @@ export default {
         this.reportId = reportIdToLoad;
       }
       this.loadReportData();
+      // Fetch report status to check if already submitted
+      this.fetchReportStatus();
     }
   },
   watch: {

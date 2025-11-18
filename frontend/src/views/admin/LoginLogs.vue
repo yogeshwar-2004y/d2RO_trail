@@ -331,7 +331,6 @@ export default {
 
     async downloadPDF() {
       try {
-        this.loading = true;
         const params = {};
         if (this.recordLimit && this.recordLimit > 0) {
           params.limit = this.recordLimit;
@@ -362,8 +361,6 @@ export default {
       } catch (error) {
         console.error("Error downloading PDF:", error);
         alert("Failed to download PDF. Please try again.");
-      } finally {
-        this.loading = false;
       }
     },
 

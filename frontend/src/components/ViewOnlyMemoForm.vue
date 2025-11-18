@@ -1677,12 +1677,6 @@ export default {
 
         console.log(`Downloading PDF for memo ID: ${this.id}`);
 
-        // Show loading state
-        const button = event.target.closest(".download-pdf-btn");
-        const originalText = button.querySelector(".download-text").textContent;
-        button.querySelector(".download-text").textContent = "Loading...";
-        button.disabled = true;
-
         // Get the element you want to convert (the main memo content)
         const element = document.querySelector(".memo-form");
 
@@ -1720,13 +1714,6 @@ export default {
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
-      } finally {
-        // Restore button state
-        const button = event.target.closest(".download-pdf-btn");
-        if (button) {
-          button.querySelector(".download-text").textContent = originalText;
-          button.disabled = false;
-        }
       }
     },
   },
