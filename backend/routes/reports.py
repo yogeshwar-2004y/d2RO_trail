@@ -1444,3 +1444,115 @@ def get_raw_material_inspection_reports():
         print(f"Error fetching raw material inspection reports: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching raw material inspection reports: {str(e)}")
 
+@reports_bp.route('/api/iqa-observation-reports', methods=['POST'])
+def create_iqa_observation_report():
+    """Create a new IQA observation report"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        required_fields = ['project_id', 'lru_id', 'document_id', 'created_by']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                "success": False,
+                "message": f"Missing required fields: {', '.join(missing_fields)}"
+            }), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verify document exists and get its info
+        cur.execute("""
+            SELECT pd.document_number, pd.version, pd.revision, pd.doc_ver,
+                   l.lru_name, p.project_name, p.project_id
+            FROM plan_documents pd
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.document_id = %s
+        """, (data['document_id'],))
+        
+        doc_info = cur.fetchone()
+        if not doc_info:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        # Get observation count from document_comments (auto-fetched)
+        cur.execute("""
+            SELECT COUNT(*) FROM document_comments
+            WHERE document_id = %s
+        """, (data['document_id'],))
+        
+        observation_count = cur.fetchone()[0]
+        
+        # Insert IQA observation report
+        cur.execute("""
+            INSERT INTO iqa_observation_reports (
+                project_id, lru_id, document_id,
+                observation_count, report_date, current_year,
+                lru_part_number, serial_number, inspection_stage,
+                doc_review_date, review_venue, reference_document,
+                reviewed_by_user_id, reviewed_by_signature_path, reviewed_by_verified_name,
+                approved_by_user_id, approved_by_signature_path, approved_by_verified_name,
+                created_by
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s
+            ) RETURNING report_id
+        """, (
+            data['project_id'],
+            data['lru_id'],
+            data['document_id'],
+            data.get('observation_count'),
+            data.get('report_date'),
+            data.get('current_year'),
+            data.get('lru_part_number'),
+            data.get('serial_number'),
+            data.get('inspection_stage'),
+            data.get('doc_review_date'),
+            data.get('review_venue'),
+            data.get('reference_document'),
+            data.get('reviewed_by_user_id'),
+            data.get('reviewed_by_signature_path'),
+            data.get('reviewed_by_verified_name'),
+            data.get('approved_by_user_id'),
+            data.get('approved_by_signature_path'),
+            data.get('approved_by_verified_name'),
+            data['created_by']
+        ))
+        
+        report_id = cur.fetchone()[0]
+        
+        document_info = f"{doc_info[0]} v{doc_info[1]}" if doc_info else "Unknown"
+        
+        # Log activity
+        from utils.activity_logger import log_activity
+        log_activity(
+            project_id=data['project_id'],
+            activity_performed="IQA Observation Report Submitted",
+            performed_by=data['created_by'],
+            additional_info=f"ID:{report_id}|LRU:{doc_info[4] if doc_info else 'Unknown'}|Document:{document_info}|Observations:{observation_count}"
+        )
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "IQA observation report created successfully",
+            "report_id": report_id,
+            "observation_count": observation_count,
+            "document_version": {
+                "document_number": doc_info[0] if doc_info else None,
+                "version": doc_info[1] if doc_info else None,
+                "revision": doc_info[2] if doc_info else None,
+                "doc_ver": doc_info[3] if doc_info else None
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error creating IQA observation report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error creating IQA observation report: {str(e)}")
+

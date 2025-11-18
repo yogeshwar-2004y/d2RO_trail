@@ -318,9 +318,91 @@ def create_memos_tables():
     except Exception as e:
         print(f"Error creating memos tables: {str(e)}")
 
+def create_iqa_observation_report_table():
+    """Create iqa_observation_reports table if it doesn't exist"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS iqa_observation_reports (
+                report_id SERIAL PRIMARY KEY,
+                
+                -- Foreign keys
+                project_id INT NOT NULL REFERENCES projects(project_id) ON DELETE CASCADE,
+                lru_id INT NOT NULL REFERENCES lrus(lru_id) ON DELETE CASCADE,
+                document_id INT REFERENCES plan_documents(document_id) ON DELETE SET NULL,
+                
+                -- Report identification
+                observation_count VARCHAR(50),
+                report_date DATE NOT NULL DEFAULT CURRENT_DATE,
+                current_year VARCHAR(10),
+                
+                -- Document details (user inputs)
+                lru_part_number VARCHAR(100),
+                serial_number VARCHAR(100),
+                inspection_stage VARCHAR(255) DEFAULT 'Document review/report',
+                doc_review_date DATE,
+                review_venue VARCHAR(255),
+                reference_document TEXT,
+                
+                -- Signature information - Reviewed By
+                reviewed_by_user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+                reviewed_by_signature_path TEXT,
+                reviewed_by_verified_name VARCHAR(255),
+                
+                -- Signature information - Approved By
+                approved_by_user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+                approved_by_signature_path TEXT,
+                approved_by_verified_name VARCHAR(255),
+                
+                -- Metadata
+                created_by INT NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
+                created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        
+        # Create indexes for better query performance
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_project_id ON iqa_observation_reports(project_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_lru_id ON iqa_observation_reports(lru_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_document_id ON iqa_observation_reports(document_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_created_by ON iqa_observation_reports(created_by)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_reviewed_by ON iqa_observation_reports(reviewed_by_user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_approved_by ON iqa_observation_reports(approved_by_user_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_iqa_report_date ON iqa_observation_reports(report_date)")
+        
+        # Create or replace the update trigger function
+        cur.execute("""
+            CREATE OR REPLACE FUNCTION update_updated_at_column()
+            RETURNS TRIGGER AS $$
+            BEGIN
+                NEW.updated_at = CURRENT_TIMESTAMP;
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        """)
+        
+        # Create trigger for updated_at
+        cur.execute("""
+            DROP TRIGGER IF EXISTS trg_update_updated_at_iqa_report ON iqa_observation_reports;
+            CREATE TRIGGER trg_update_updated_at_iqa_report
+            BEFORE UPDATE ON iqa_observation_reports
+            FOR EACH ROW
+            EXECUTE FUNCTION update_updated_at_column();
+        """)
+        
+        conn.commit()
+        cur.close()
+        print("IQA observation reports table created/verified successfully")
+        
+    except Exception as e:
+        print(f"Error creating IQA observation reports table: {str(e)}")
+
 def initialize_database():
     """Initialize all database tables and setup"""
     create_news_table()
     create_comments_tables()
     create_memos_tables()
+    create_iqa_observation_report_table()
     print("Database initialization completed")

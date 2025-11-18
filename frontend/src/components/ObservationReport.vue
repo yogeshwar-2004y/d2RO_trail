@@ -384,6 +384,7 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         signatureError: "",
+        userId: null,
       },
       approvedBy: {
         signatureUsername: "",
@@ -391,7 +392,9 @@ export default {
         signatureUrl: "",
         verifiedUserName: "",
         signatureError: "",
+        userId: null,
       },
+      reportSubmitted: false,
     };
   },
   mounted() {
@@ -559,6 +562,20 @@ export default {
           signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
           signature.verifiedUserName = data.user_name;
           signature.signatureError = "";
+          
+          // Store user_id for later use
+          if (data.user_id) {
+            if (signatureType === "reviewed") {
+              this.reviewedBy.userId = data.user_id;
+            } else {
+              this.approvedBy.userId = data.user_id;
+            }
+          }
+          
+          // Auto-submit report when Approved By is signed
+          if (signatureType === "approved") {
+            await this.submitIqaObservationReport();
+          }
         } else {
           signature.signatureError = data.message || "Failed to verify signature";
           signature.signatureUrl = "";
@@ -569,6 +586,95 @@ export default {
         signature.signatureError = "Error verifying signature. Please try again.";
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
+      }
+    },
+
+    // Submit IQA Observation Report
+    async submitIqaObservationReport() {
+      try {
+        // Validate required fields
+        if (!this.selectedDocumentId) {
+          alert("Please select a document version before submitting the report.");
+          return;
+        }
+
+        if (!this.lruId || !this.projectName || !this.lruName) {
+          alert("Missing required information. Please ensure project and LRU data are loaded.");
+          return;
+        }
+
+        // Get current user from localStorage
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) {
+          alert("User session not found. Please log in again.");
+          return;
+        }
+
+        const currentUser = JSON.parse(storedUser);
+        const createdBy = currentUser.id || currentUser.user_id;
+
+        // Get project_id from API
+        let projectId = null;
+        try {
+          const lruResponse = await fetch(`http://localhost:8000/api/lrus/${this.lruId}/metadata`);
+          const lruData = await lruResponse.json();
+          if (lruData.success && lruData.lru && lruData.lru.project_id) {
+            projectId = lruData.lru.project_id;
+          }
+        } catch (error) {
+          console.warn("Could not fetch project_id:", error);
+        }
+
+        if (!projectId) {
+          alert("Could not determine project ID. Please ensure the project is properly loaded.");
+          return;
+        }
+
+        // Prepare report data
+        const reportData = {
+          project_id: projectId,
+          lru_id: this.lruId,
+          document_id: parseInt(this.selectedDocumentId),
+          observation_count: this.observationCount,
+          report_date: this.currentDate,
+          current_year: this.currentYear,
+          lru_part_number: this.lruPartNumber,
+          serial_number: this.serialNumber,
+          inspection_stage: this.inspectionStage,
+          doc_review_date: this.docReviewDate,
+          review_venue: this.reviewVenue,
+          reference_document: this.referenceDocument,
+          reviewed_by_user_id: this.reviewedBy.userId,
+          reviewed_by_signature_path: this.reviewedBy.signatureUrl,
+          reviewed_by_verified_name: this.reviewedBy.verifiedUserName,
+          approved_by_user_id: this.approvedBy.userId,
+          approved_by_signature_path: this.approvedBy.signatureUrl,
+          approved_by_verified_name: this.approvedBy.verifiedUserName,
+          created_by: createdBy,
+        };
+
+        console.log("Submitting IQA Observation Report:", reportData);
+
+        const response = await fetch("http://localhost:8000/api/iqa-observation-reports", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reportData),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.reportSubmitted = true;
+          alert("IQA Observation Report submitted successfully!");
+          console.log("Report submitted with ID:", data.report_id);
+        } else {
+          alert(`Failed to submit report: ${data.message || "Unknown error"}`);
+        }
+      } catch (error) {
+        console.error("Error submitting IQA observation report:", error);
+        alert(`Error submitting report: ${error.message || "Please try again."}`);
       }
     },
 
