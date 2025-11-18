@@ -443,14 +443,13 @@ export default {
         }/SL.${this.serialNumber || "001"}/${this.observationCount || "001"}/${
           this.currentYear || "2025"
         }`;
-        doc.text(documentPath, margin, yPosition);
+        doc.text(documentPath, margin, yPosition, { align: "left" });
 
         // Right side - Date
         const dateText = `Date: ${
           this.currentDate || new Date().toLocaleDateString("en-GB")
         }`;
-        const dateWidth = doc.getTextWidth(dateText);
-        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        doc.text(dateText, pageWidth - margin, yPosition, { align: "right" });
         yPosition += 12;
 
         // ===== SUBJECT LINE =====
@@ -467,8 +466,10 @@ export default {
 
         // Left column details
         const leftColumnX = margin;
-        const rightColumnX = margin + contentWidth / 2;
-        const labelOffset = 40; // Space after label
+        const rightColumnX = margin + contentWidth / 2 + 10;
+        const labelWidth = 50; // Fixed width for labels to ensure alignment
+        const valueStartX = leftColumnX + labelWidth;
+        const rightValueStartX = rightColumnX + labelWidth;
 
         // Left column - Project details
         yPosition = margin + 42;
@@ -479,7 +480,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.projectName || "Not specified",
-          leftColumnX + labelOffset,
+          valueStartX,
           yPosition
         );
         yPosition += 8;
@@ -490,7 +491,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.lruName || "Not specified",
-          leftColumnX + labelOffset,
+          valueStartX,
           yPosition
         );
         yPosition += 8;
@@ -501,7 +502,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.lruPartNumber || "Not specified",
-          leftColumnX + labelOffset,
+          valueStartX,
           yPosition
         );
         yPosition += 8;
@@ -512,7 +513,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.serialNumber || "Not specified",
-          leftColumnX + labelOffset,
+          valueStartX,
           yPosition
         );
         yPosition += 8;
@@ -526,7 +527,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           "Document review/report",
-          rightColumnX + labelOffset,
+          rightValueStartX,
           yPosition
         );
         yPosition += 8;
@@ -537,7 +538,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.docReviewDate || "Not specified",
-          rightColumnX + labelOffset,
+          rightValueStartX,
           yPosition
         );
         yPosition += 8;
@@ -548,7 +549,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.reviewVenue || "Not specified",
-          rightColumnX + labelOffset,
+          rightValueStartX,
           yPosition
         );
         yPosition += 8;
@@ -559,7 +560,7 @@ export default {
         doc.setFont("helvetica", "normal");
         doc.text(
           this.referenceDocument || "Not specified",
-          rightColumnX + labelOffset,
+          rightValueStartX,
           yPosition
         );
         yPosition += 15;
@@ -571,209 +572,237 @@ export default {
         yPosition += 12;
 
         // ===== OBSERVATIONS TABLE =====
+        // Formal table structure with proper borders and formatting
+        const tableStartX = margin;
+        const tableEndX = pageWidth - margin;
+        const cellPadding = 2;
+        const headerHeight = 8;
+        
+        // Table column widths (optimized to fit page width: 170mm)
+        const snoWidth = 10;
+        const categoryWidth = 22;
+        const observationWidth = 34;
+        const acceptRejectWidth = 18;
+        const justificationWidth = 28;
+        const reviewerWidth = 18;
+        const pageWidth_col = 12;
+        const dateColWidth = 20;
+        
+        // Calculate column start positions
+        const colPositions = {
+          sno: tableStartX,
+          category: tableStartX + snoWidth,
+          observation: tableStartX + snoWidth + categoryWidth,
+          acceptReject: tableStartX + snoWidth + categoryWidth + observationWidth,
+          justification: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth,
+          reviewer: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth,
+          page: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth,
+          date: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col
+        };
+
+        // Draw table header box with filled background
+        const headerTopY = yPosition - headerHeight + 2;
+        const headerBottomY = yPosition + 2;
+        
+        // Draw header background (filled rectangle)
+        doc.setFillColor(220, 220, 220); // Light gray background
+        doc.rect(tableStartX, headerTopY, tableEndX - tableStartX, headerHeight, 'F');
+        
+        // Draw header border
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.5);
+        doc.rect(tableStartX, headerTopY, tableEndX - tableStartX, headerHeight);
+
+        // Table headers with proper alignment and formatting
         doc.setFontSize(9);
         doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        
+        const headerY = headerTopY + headerHeight / 2 + 2;
+        doc.text("S.No.", colPositions.sno + snoWidth / 2, headerY, { align: "center" });
+        doc.text("Category", colPositions.category + categoryWidth / 2, headerY, { align: "center" });
+        doc.text("Observations", colPositions.observation + observationWidth / 2, headerY, { align: "center" });
+        doc.text("Accept/Reject", colPositions.acceptReject + acceptRejectWidth / 2, headerY, { align: "center" });
+        doc.text("Justification", colPositions.justification + justificationWidth / 2, headerY, { align: "center" });
+        doc.text("Reviewer", colPositions.reviewer + reviewerWidth / 2, headerY, { align: "center" });
+        doc.text("Page", colPositions.page + pageWidth_col / 2, headerY, { align: "center" });
+        doc.text("Date", colPositions.date + dateColWidth / 2, headerY, { align: "center" });
+        
+        // Draw vertical lines in header
+        doc.setLineWidth(0.3);
+        doc.line(colPositions.category, headerTopY, colPositions.category, headerBottomY);
+        doc.line(colPositions.observation, headerTopY, colPositions.observation, headerBottomY);
+        doc.line(colPositions.acceptReject, headerTopY, colPositions.acceptReject, headerBottomY);
+        doc.line(colPositions.justification, headerTopY, colPositions.justification, headerBottomY);
+        doc.line(colPositions.reviewer, headerTopY, colPositions.reviewer, headerBottomY);
+        doc.line(colPositions.page, headerTopY, colPositions.page, headerBottomY);
+        doc.line(colPositions.date, headerTopY, colPositions.date, headerBottomY);
+        
+        yPosition = headerBottomY + 2;
 
-        // Table column widths and positions (optimized for single page)
-        const tableStartX = margin;
-        const snoWidth = 12;
-        const categoryWidth = 25;
-        const observationWidth = 40;
-        const acceptRejectWidth = 20;
-        const justificationWidth = 30;
-        const reviewerWidth = 20;
-        const pageWidth_col = 15;
-        const dateColWidth = 25;
-
-        // Table headers with proper spacing
-        doc.text("SNO", tableStartX, yPosition);
-        doc.text("Category", tableStartX + snoWidth, yPosition);
-        doc.text(
-          "Observations",
-          tableStartX + snoWidth + categoryWidth,
-          yPosition
-        );
-        doc.text(
-          "Accept/Reject",
-          tableStartX + snoWidth + categoryWidth + observationWidth,
-          yPosition
-        );
-        doc.text(
-          "Justification",
-          tableStartX +
-            snoWidth +
-            categoryWidth +
-            observationWidth +
-            acceptRejectWidth,
-          yPosition
-        );
-        doc.text(
-          "Reviewer",
-          tableStartX +
-            snoWidth +
-            categoryWidth +
-            observationWidth +
-            acceptRejectWidth +
-            justificationWidth,
-          yPosition
-        );
-        doc.text(
-          "Page",
-          tableStartX +
-            snoWidth +
-            categoryWidth +
-            observationWidth +
-            acceptRejectWidth +
-            justificationWidth +
-            reviewerWidth,
-          yPosition
-        );
-        doc.text(
-          "Date",
-          tableStartX +
-            snoWidth +
-            categoryWidth +
-            observationWidth +
-            acceptRejectWidth +
-            justificationWidth +
-            reviewerWidth +
-            pageWidth_col,
-          yPosition
-        );
-        yPosition += 6;
-
-        // Draw table header lines
-        doc.line(margin, yPosition - 3, pageWidth - margin, yPosition - 3);
-        doc.line(margin, yPosition, pageWidth - margin, yPosition);
-        yPosition += 4;
-
-        // Table data
+        // Table data rows with formal formatting
         doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        doc.setLineWidth(0.3);
 
         // Safety check - ensure comments array exists and has items
         if (!this.documentComments || this.documentComments.length === 0) {
+          // Draw empty table cell
+          const emptyRowHeight = 10;
+          doc.rect(tableStartX, yPosition, tableEndX - tableStartX, emptyRowHeight);
           doc.text(
-            "No comments available",
-            tableStartX + snoWidth + categoryWidth,
-            yPosition
+            "No observations available",
+            colPositions.observation + observationWidth / 2,
+            yPosition + emptyRowHeight / 2 + 2,
+            { align: "center" }
           );
-          yPosition += 15;
+          yPosition += emptyRowHeight + 2;
         } else {
           // Limit comments to fit on single page
           const maxComments = Math.min(this.documentComments.length, 8);
           const commentsToShow = this.documentComments.slice(0, maxComments);
 
           commentsToShow.forEach((comment, index) => {
-            yPosition += 6;
-
-            // SNO
-            doc.text((index + 1).toString(), tableStartX, yPosition);
-
-            // Category (shortened)
+            const rowStartY = yPosition;
+            const cellPadding = 1.5;
+            const minRowHeight = 8;
+            
+            // Prepare all cell content
+            const snoText = (index + 1).toString();
+            
             const categoryText = (
               comment.section && comment.section.trim() !== ""
                 ? comment.section
                 : "General"
-            ).substring(0, 15);
-            doc.text(categoryText, tableStartX + snoWidth, yPosition);
-
-            // Observations - handle long text with proper wrapping
-            const observationText = (
-              comment.description || "No comment"
-            ).substring(0, 60);
+            );
+            const categoryLines = doc.splitTextToSize(categoryText, categoryWidth - (cellPadding * 2));
+            
+            const observationText = comment.description || "No comment";
             const observationLines = doc.splitTextToSize(
               observationText,
-              observationWidth - 2
+              observationWidth - (cellPadding * 2)
             );
-            doc.text(
-              observationLines,
-              tableStartX + snoWidth + categoryWidth,
-              yPosition
-            );
-
-            // Accept/Reject
-            const acceptRejectText = (comment.status || "Pending").substring(
-              0,
-              15
-            );
-            doc.text(
-              acceptRejectText,
-              tableStartX + snoWidth + categoryWidth + observationWidth,
-              yPosition
-            );
-
-            // Justification - handle long text with proper wrapping
-            const justificationText = (
-              comment.justification || "No justification provided"
-            ).substring(0, 40);
+            
+            const acceptRejectText = comment.status || "Pending";
+            const acceptRejectLines = doc.splitTextToSize(acceptRejectText, acceptRejectWidth - (cellPadding * 2));
+            
+            const justificationText = comment.justification || "No justification provided";
             const justificationLines = doc.splitTextToSize(
               justificationText,
-              justificationWidth - 2
+              justificationWidth - (cellPadding * 2)
             );
-            doc.text(
-              justificationLines,
-              tableStartX +
-                snoWidth +
-                categoryWidth +
-                observationWidth +
-                acceptRejectWidth,
-              yPosition
-            );
-
-            // Reviewer
-            const reviewerText = (
-              comment.reviewer_id ? comment.reviewer_id.toString() : "Unknown"
-            ).substring(0, 15);
-            doc.text(
-              reviewerText,
-              tableStartX +
-                snoWidth +
-                categoryWidth +
-                observationWidth +
-                acceptRejectWidth +
-                justificationWidth,
-              yPosition
-            );
-
-            // Page
-            const pageText = (
-              comment.page_no ? comment.page_no.toString() : "N/A"
-            ).substring(0, 10);
-            doc.text(
-              pageText,
-              tableStartX +
-                snoWidth +
-                categoryWidth +
-                observationWidth +
-                acceptRejectWidth +
-                justificationWidth +
-                reviewerWidth,
-              yPosition
-            );
-
-            // Date
+            
+            const reviewerText = comment.reviewer_id ? comment.reviewer_id.toString() : "Unknown";
+            const reviewerLines = doc.splitTextToSize(reviewerText, reviewerWidth - (cellPadding * 2));
+            
+            const pageText = comment.page_no ? comment.page_no.toString() : "N/A";
+            
             const dateText = this.formatDate(comment.created_at) || "N/A";
-            doc.text(
-              dateText.substring(0, 20),
-              tableStartX +
-                snoWidth +
-                categoryWidth +
-                observationWidth +
-                acceptRejectWidth +
-                justificationWidth +
-                reviewerWidth +
-                pageWidth_col,
-              yPosition
-            );
-
+            const dateLines = doc.splitTextToSize(dateText, dateColWidth - (cellPadding * 2));
+            
             // Calculate row height based on the longest text
+            const lineHeight = 3.5;
             const maxLines = Math.max(
               observationLines.length,
               justificationLines.length,
+              categoryLines.length,
+              acceptRejectLines.length,
+              reviewerLines.length,
+              dateLines.length,
               1
             );
-            yPosition += Math.max(maxLines * 3, 8);
+            const rowHeight = Math.max(maxLines * lineHeight + (cellPadding * 2), minRowHeight);
+            const rowBottomY = rowStartY + rowHeight;
+            
+            // Draw row border
+            doc.rect(tableStartX, rowStartY, tableEndX - tableStartX, rowHeight);
+            
+            // Draw vertical lines between columns
+            doc.line(colPositions.category, rowStartY, colPositions.category, rowBottomY);
+            doc.line(colPositions.observation, rowStartY, colPositions.observation, rowBottomY);
+            doc.line(colPositions.acceptReject, rowStartY, colPositions.acceptReject, rowBottomY);
+            doc.line(colPositions.justification, rowStartY, colPositions.justification, rowBottomY);
+            doc.line(colPositions.reviewer, rowStartY, colPositions.reviewer, rowBottomY);
+            doc.line(colPositions.page, rowStartY, colPositions.page, rowBottomY);
+            doc.line(colPositions.date, rowStartY, colPositions.date, rowBottomY);
+            
+            // Calculate text Y position (top of cell with padding)
+            const textStartY = rowStartY + cellPadding + 2;
+            
+            // S.No. - centered vertically
+            const snoY = rowStartY + rowHeight / 2 + 1;
+            doc.text(
+              snoText,
+              colPositions.sno + snoWidth / 2,
+              snoY,
+              { align: "center" }
+            );
+
+            // Category - top aligned, centered horizontally
+            doc.text(
+              categoryLines,
+              colPositions.category + categoryWidth / 2,
+              textStartY,
+              { align: "center", maxWidth: categoryWidth - (cellPadding * 2) }
+            );
+
+            // Observations - top aligned, left aligned
+            doc.text(
+              observationLines,
+              colPositions.observation + cellPadding,
+              textStartY,
+              { align: "left", maxWidth: observationWidth - (cellPadding * 2) }
+            );
+
+            // Accept/Reject - top aligned, centered horizontally
+            doc.text(
+              acceptRejectLines,
+              colPositions.acceptReject + acceptRejectWidth / 2,
+              textStartY,
+              { align: "center", maxWidth: acceptRejectWidth - (cellPadding * 2) }
+            );
+
+            // Justification - top aligned, left aligned
+            doc.text(
+              justificationLines,
+              colPositions.justification + cellPadding,
+              textStartY,
+              { align: "left", maxWidth: justificationWidth - (cellPadding * 2) }
+            );
+
+            // Reviewer - top aligned, centered horizontally
+            doc.text(
+              reviewerLines,
+              colPositions.reviewer + reviewerWidth / 2,
+              textStartY,
+              { align: "center", maxWidth: reviewerWidth - (cellPadding * 2) }
+            );
+
+            // Page - centered vertically
+            const pageY = rowStartY + rowHeight / 2 + 1;
+            doc.text(
+              pageText,
+              colPositions.page + pageWidth_col / 2,
+              pageY,
+              { align: "center" }
+            );
+
+            // Date - top aligned, centered horizontally
+            doc.text(
+              dateLines,
+              colPositions.date + dateColWidth / 2,
+              textStartY,
+              { align: "center", maxWidth: dateColWidth - (cellPadding * 2) }
+            );
+            
+            yPosition = rowBottomY;
           });
+          
+          // Draw final bottom border
+          doc.setLineWidth(0.5);
+          doc.line(tableStartX, yPosition, tableEndX, yPosition);
+          yPosition += 2;
 
           // Show message if comments were truncated
           if (this.documentComments.length > maxComments) {
