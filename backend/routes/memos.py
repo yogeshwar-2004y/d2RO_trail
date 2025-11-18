@@ -632,6 +632,15 @@ def approve_memo(memo_id):
                 SET accepted_at = %s, accepted_by = %s, memo_status = 'assigned'
                 WHERE memo_id = %s
             """, (datetime.now(), data.get('approved_by'), memo_id))
+            
+            # Sync report status when memo is accepted and assigned
+            cur.execute("""
+                UPDATE reports 
+                SET status = 'ASSIGNED'
+                WHERE memo_id = %s
+            """, (memo_id,))
+            if cur.rowcount > 0:
+                print(f"Updated report status to ASSIGNED for memo {memo_id}")
         elif status == 'rejected':
             print(f"Updating memo {memo_id} with disapproved status...")
             cur.execute("""
@@ -1558,6 +1567,32 @@ def update_memo_status(memo_id):
         if cur.rowcount == 0:
             cur.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
+        
+        # Map memo status to report status
+        # Mapping: memo_status -> report status
+        status_mapping = {
+            'assigned': 'ASSIGNED',
+            'successfully_completed': 'SUCCESSFULLY COMPLETED',
+            'completed_with_observations': 'COMPLETED WITH OBSERVATIONS',
+            'test_failed': 'TEST FAILED',
+            'test_not_conducted': 'TEST NOT CONDUCTED'
+        }
+        
+        # Get corresponding report status
+        report_status = status_mapping.get(memo_status)
+        
+        if report_status:
+            # Update corresponding report status (one-to-one relationship)
+            cur.execute("""
+                UPDATE reports 
+                SET status = %s
+                WHERE memo_id = %s
+            """, (report_status, memo_id))
+            
+            if cur.rowcount > 0:
+                print(f"Updated report status to {report_status} for memo {memo_id}")
+            else:
+                print(f"Warning: No report found for memo {memo_id} to update status")
         
         conn.commit()
         cur.close()

@@ -69,10 +69,11 @@
           </svg>
         </div>
         <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleProjectFilter">
+          <button class="filter-button" @click.stop="toggleProjectFilter">
             Filter By Projects
+            <span v-if="activeProjectFilter" class="filter-badge">({{ activeProjectFilter }})</span>
           </button>
-          <div v-if="showProjectFilter" class="filter-panel">
+          <div v-if="showProjectFilter" class="filter-panel" @click.stop>
             <div
               v-for="project in projects"
               :key="project"
@@ -82,13 +83,17 @@
             >
               {{ project }}
             </div>
+            <div v-if="projects.length === 0" class="filter-option no-options">
+              No projects available
+            </div>
           </div>
         </div>
         <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleReportFilter">
+          <button class="filter-button" @click.stop="toggleReportFilter">
             Filter Reports
+            <span v-if="activeReportFilter" class="filter-badge">({{ activeReportFilter }})</span>
           </button>
-          <div v-if="showReportFilter" class="filter-panel">
+          <div v-if="showReportFilter" class="filter-panel" @click.stop>
             <div
               v-for="status in reportStatuses"
               :key="status.name"
@@ -239,6 +244,7 @@ export default {
         { name: "ASSIGNED", color: "assigned" },
         { name: "TEST NOT CONDUCTED", color: "not-conducted" },
         { name: "TEST FAILED", color: "failed" },
+        { name: "COMPLETED WITH OBSERVATIONS", color: "observations" },
       ],
       reports: [],
       loading: true,
@@ -257,24 +263,32 @@ export default {
   },
   computed: {
     filteredReports() {
-      let filtered = this.reports;
+      let filtered = [...this.reports]; // Create a copy to avoid mutating original array
 
+      // Filter by project
       if (this.activeProjectFilter) {
+        const beforeCount = filtered.length;
         filtered = filtered.filter(
           (report) => report.project === this.activeProjectFilter
         );
+        console.log(`Project filter "${this.activeProjectFilter}": ${beforeCount} -> ${filtered.length} reports`);
       }
 
+      // Filter by status
       if (this.activeReportFilter) {
+        const beforeCount = filtered.length;
         filtered = filtered.filter(
           (report) => report.status === this.activeReportFilter
         );
+        console.log(`Status filter "${this.activeReportFilter}": ${beforeCount} -> ${filtered.length} reports`);
+        console.log('Available statuses in reports:', [...new Set(this.reports.map(r => r.status))]);
       }
 
+      // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter((report) =>
-          report.name.toLowerCase().includes(query)
+          report.name && report.name.toLowerCase().includes(query)
         );
       }
 
@@ -288,7 +302,15 @@ export default {
   },
   async mounted() {
     await this.fetchReports();
-    await this.fetchProjects();
+    // Projects are now populated from unique report.project values in fetchReports()
+    // No need to call fetchProjects() separately
+    
+    // Add click outside listener to close filter panels
+    document.addEventListener('click', this.handleClickOutside);
+  },
+  beforeUnmount() {
+    // Remove click outside listener
+    document.removeEventListener('click', this.handleClickOutside);
   },
   methods: {
     async fetchReports() {
@@ -340,9 +362,20 @@ export default {
           this.reports = data.reports;
           console.log("REPORTSSSS: ", this.reports);
 
+          // Extract unique project names from report.project field
+          const uniqueProjects = [...new Set(
+            this.reports
+              .map(report => report.project)
+              .filter(project => project && project.trim() !== '')
+          )].sort();
+          
+          // Update projects list with unique project names from reports
+          this.projects = uniqueProjects;
+          
           console.log(
             `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
           );
+          console.log('Unique projects from reports:', uniqueProjects);
         } else {
           throw new Error(data.message || "Failed to fetch reports");
         }
@@ -357,26 +390,6 @@ export default {
       }
     },
 
-    async fetchProjects() {
-      try {
-        const response = await fetch("http://localhost:5000/api/projects");
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch projects: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          this.projects = data.projects.map((project) => project.name);
-        } else {
-          throw new Error(data.message || "Failed to fetch projects");
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        // Don't set error state for projects as it's not critical
-      }
-    },
 
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
@@ -387,14 +400,25 @@ export default {
       this.showProjectFilter = false;
     },
     selectProject(project) {
-      this.activeProjectFilter =
-        this.activeProjectFilter === project ? null : project;
+      const newFilter = this.activeProjectFilter === project ? null : project;
+      this.activeProjectFilter = newFilter;
       this.showProjectFilter = false;
+      console.log('Project filter selected:', newFilter);
+      console.log('Filtered reports count:', this.filteredReports.length);
     },
     selectReportStatus(status) {
-      this.activeReportFilter =
-        this.activeReportFilter === status ? null : status;
+      const newFilter = this.activeReportFilter === status ? null : status;
+      this.activeReportFilter = newFilter;
       this.showReportFilter = false;
+      console.log('Status filter selected:', newFilter);
+      console.log('Filtered reports count:', this.filteredReports.length);
+    },
+    handleClickOutside(event) {
+      // Close filter panels if clicking outside
+      if (!event.target.closest('.filter-dropdown')) {
+        this.showProjectFilter = false;
+        this.showReportFilter = false;
+      }
     },
     viewReport(report) {
       // Navigate to the individual report page
@@ -569,6 +593,15 @@ export default {
   padding: 10px 15px;
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-badge {
+  font-size: 0.85em;
+  color: #007bff;
+  font-weight: 600;
 }
 
 .export-all-button {
@@ -642,6 +675,10 @@ export default {
 .test-failed {
   background-color: #ffc4be;
 }
+.observations,
+.completed-with-observations {
+  background-color: #fff4e6;
+}
 
 .report-grid {
   display: grid;
@@ -682,6 +719,9 @@ export default {
 }
 .report-card.test-failed {
   background-color: #ffc4be;
+}
+.report-card.completed-with-observations {
+  background-color: #fff4e6;
 }
 
 .card-icon {

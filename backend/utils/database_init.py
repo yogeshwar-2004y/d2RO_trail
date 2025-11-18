@@ -222,7 +222,7 @@ def create_memos_tables():
                 report_id SERIAL PRIMARY KEY,
                 memo_id INT REFERENCES memos(memo_id) ON DELETE CASCADE,
                 status VARCHAR(50) DEFAULT 'ASSIGNED' 
-                    CHECK (status IN ('ASSIGNED', 'SUCCESSFULLY COMPLETED', 'TEST NOT CONDUCTED', 'TEST FAILED')),
+                    CHECK (status IN ('ASSIGNED', 'SUCCESSFULLY COMPLETED', 'TEST NOT CONDUCTED', 'TEST FAILED', 'COMPLETED WITH OBSERVATIONS')),
                 created_at TIMESTAMP DEFAULT NOW()
             )
         """)
