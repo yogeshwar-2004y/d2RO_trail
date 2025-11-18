@@ -1444,3 +1444,261 @@ def get_raw_material_inspection_reports():
         print(f"Error fetching raw material inspection reports: {str(e)}")
         return handle_database_error(get_db_connection(), f"Error fetching raw material inspection reports: {str(e)}")
 
+@reports_bp.route('/api/iqa-observation-reports', methods=['POST'])
+def create_iqa_observation_report():
+    """Create a new IQA observation report"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        # Validate required fields
+        required_fields = ['project_id', 'lru_id', 'document_id', 'created_by']
+        missing_fields = [field for field in required_fields if field not in data]
+        if missing_fields:
+            return jsonify({
+                "success": False,
+                "message": f"Missing required fields: {', '.join(missing_fields)}"
+            }), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Verify document exists and get its info
+        cur.execute("""
+            SELECT pd.document_number, pd.version, pd.revision, pd.doc_ver,
+                   l.lru_name, p.project_name, p.project_id
+            FROM plan_documents pd
+            JOIN lrus l ON pd.lru_id = l.lru_id
+            JOIN projects p ON l.project_id = p.project_id
+            WHERE pd.document_id = %s
+        """, (data['document_id'],))
+        
+        doc_info = cur.fetchone()
+        if not doc_info:
+            cur.close()
+            return jsonify({"success": False, "message": "Document not found"}), 404
+        
+        # Get observation count from document_comments (auto-fetched)
+        cur.execute("""
+            SELECT COUNT(*) FROM document_comments
+            WHERE document_id = %s
+        """, (data['document_id'],))
+        
+        observation_count = cur.fetchone()[0]
+        
+        # Insert IQA observation report
+        cur.execute("""
+            INSERT INTO iqa_observation_reports (
+                project_id, lru_id, document_id,
+                observation_count, report_date, current_year,
+                lru_part_number, serial_number, inspection_stage,
+                doc_review_date, review_venue, reference_document,
+                reviewed_by_user_id, reviewed_by_signature_path, reviewed_by_verified_name,
+                approved_by_user_id, approved_by_signature_path, approved_by_verified_name,
+                created_by
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                %s, %s, %s, %s, %s, %s, %s
+            ) RETURNING report_id
+        """, (
+            data['project_id'],
+            data['lru_id'],
+            data['document_id'],
+            data.get('observation_count'),
+            data.get('report_date'),
+            data.get('current_year'),
+            data.get('lru_part_number'),
+            data.get('serial_number'),
+            data.get('inspection_stage'),
+            data.get('doc_review_date'),
+            data.get('review_venue'),
+            data.get('reference_document'),
+            data.get('reviewed_by_user_id'),
+            data.get('reviewed_by_signature_path'),
+            data.get('reviewed_by_verified_name'),
+            data.get('approved_by_user_id'),
+            data.get('approved_by_signature_path'),
+            data.get('approved_by_verified_name'),
+            data['created_by']
+        ))
+        
+        report_id = cur.fetchone()[0]
+        
+        document_info = f"{doc_info[0]} v{doc_info[1]}" if doc_info else "Unknown"
+        
+        # Log activity
+        from utils.activity_logger import log_activity
+        log_activity(
+            project_id=data['project_id'],
+            activity_performed="IQA Observation Report Submitted",
+            performed_by=data['created_by'],
+            additional_info=f"ID:{report_id}|LRU:{doc_info[4] if doc_info else 'Unknown'}|Document:{document_info}|Observations:{observation_count}"
+        )
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "IQA observation report created successfully",
+            "report_id": report_id,
+            "observation_count": observation_count,
+            "document_version": {
+                "document_number": doc_info[0] if doc_info else None,
+                "version": doc_info[1] if doc_info else None,
+                "revision": doc_info[2] if doc_info else None,
+                "doc_ver": doc_info[3] if doc_info else None
+            }
+        })
+        
+    except Exception as e:
+        print(f"Error creating IQA observation report: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error creating IQA observation report: {str(e)}")
+
+@reports_bp.route('/api/iqa-observation-reports', methods=['GET'])
+def get_iqa_observation_reports():
+    """Get IQA observation reports with optional filtering"""
+    try:
+        # Get filter parameters from query string
+        project_name = request.args.get('project_name')
+        lru_name = request.args.get('lru_name')
+        document_id = request.args.get('document_id', type=int)
+        lru_id = request.args.get('lru_id', type=int)
+        project_id = request.args.get('project_id', type=int)
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Build query with optional filters
+        query = """
+            SELECT 
+                ior.report_id,
+                ior.project_id,
+                ior.lru_id,
+                ior.document_id,
+                ior.observation_count,
+                ior.report_date,
+                ior.current_year,
+                ior.lru_part_number,
+                ior.serial_number,
+                ior.inspection_stage,
+                ior.doc_review_date,
+                ior.review_venue,
+                ior.reference_document,
+                ior.reviewed_by_user_id,
+                ior.reviewed_by_signature_path,
+                ior.reviewed_by_verified_name,
+                ior.approved_by_user_id,
+                ior.approved_by_signature_path,
+                ior.approved_by_verified_name,
+                ior.created_by,
+                ior.created_at,
+                ior.updated_at,
+                p.project_name,
+                l.lru_name,
+                pd.document_number,
+                pd.version,
+                pd.revision,
+                pd.doc_ver,
+                u_creator.name as created_by_name,
+                u_reviewer.name as reviewed_by_name,
+                u_approver.name as approved_by_name
+            FROM iqa_observation_reports ior
+            JOIN projects p ON ior.project_id = p.project_id
+            JOIN lrus l ON ior.lru_id = l.lru_id
+            LEFT JOIN plan_documents pd ON ior.document_id = pd.document_id
+            LEFT JOIN users u_creator ON ior.created_by = u_creator.user_id
+            LEFT JOIN users u_reviewer ON ior.reviewed_by_user_id = u_reviewer.user_id
+            LEFT JOIN users u_approver ON ior.approved_by_user_id = u_approver.user_id
+            WHERE 1=1
+        """
+        
+        params = []
+        
+        # Add filters
+        if project_name:
+            query += " AND p.project_name = %s"
+            params.append(project_name)
+        
+        if lru_name:
+            query += " AND l.lru_name = %s"
+            params.append(lru_name)
+        
+        if document_id:
+            query += " AND ior.document_id = %s"
+            params.append(document_id)
+        
+        if lru_id:
+            query += " AND ior.lru_id = %s"
+            params.append(lru_id)
+        
+        if project_id:
+            query += " AND ior.project_id = %s"
+            params.append(project_id)
+        
+        query += " ORDER BY ior.created_at DESC"
+        
+        cur.execute(query, params)
+        reports = cur.fetchall()
+        
+        # Get observation count for each report
+        report_list = []
+        for report in reports:
+            # Get observation count from document_comments
+            if report[3]:  # document_id
+                cur.execute("""
+                    SELECT COUNT(*) FROM document_comments
+                    WHERE document_id = %s
+                """, (report[3],))
+                obs_count = cur.fetchone()[0]
+            else:
+                obs_count = 0
+            
+            report_list.append({
+                "report_id": report[0],
+                "project_id": report[1],
+                "lru_id": report[2],
+                "document_id": report[3],
+                "observation_count": report[4],
+                "report_date": report[5].isoformat() if report[5] else None,
+                "current_year": report[6],
+                "lru_part_number": report[7],
+                "serial_number": report[8],
+                "inspection_stage": report[9],
+                "doc_review_date": report[10].isoformat() if report[10] else None,
+                "review_venue": report[11],
+                "reference_document": report[12],
+                "reviewed_by_user_id": report[13],
+                "reviewed_by_signature_path": report[14],
+                "reviewed_by_verified_name": report[15],
+                "approved_by_user_id": report[16],
+                "approved_by_signature_path": report[17],
+                "approved_by_verified_name": report[18],
+                "created_by": report[19],
+                "created_at": report[20].isoformat() if report[20] else None,
+                "updated_at": report[21].isoformat() if report[21] else None,
+                "project_name": report[22],
+                "lru_name": report[23],
+                "document_number": report[24],
+                "document_version": report[25],
+                "document_revision": report[26],
+                "document_doc_ver": report[27],
+                "created_by_name": report[28],
+                "reviewed_by_name": report[29],
+                "approved_by_name": report[30],
+                "actual_observation_count": obs_count
+            })
+        
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "reports": report_list,
+            "count": len(report_list)
+        })
+        
+    except Exception as e:
+        print(f"Error fetching IQA observation reports: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching IQA observation reports: {str(e)}")
+

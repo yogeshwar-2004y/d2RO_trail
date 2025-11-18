@@ -71,7 +71,9 @@
         <div class="filter-dropdown">
           <button class="filter-button" @click.stop="toggleProjectFilter">
             Filter By Projects
-            <span v-if="activeProjectFilter" class="filter-badge">({{ activeProjectFilter }})</span>
+            <span v-if="activeProjectFilter" class="filter-badge"
+              >({{ activeProjectFilter }})</span
+            >
           </button>
           <div v-if="showProjectFilter" class="filter-panel" @click.stop>
             <div
@@ -91,7 +93,9 @@
         <div class="filter-dropdown">
           <button class="filter-button" @click.stop="toggleReportFilter">
             Filter Reports
-            <span v-if="activeReportFilter" class="filter-badge">({{ activeReportFilter }})</span>
+            <span v-if="activeReportFilter" class="filter-badge"
+              >({{ activeReportFilter }})</span
+            >
           </button>
           <div v-if="showReportFilter" class="filter-panel" @click.stop>
             <div
@@ -271,7 +275,9 @@ export default {
         filtered = filtered.filter(
           (report) => report.project === this.activeProjectFilter
         );
-        console.log(`Project filter "${this.activeProjectFilter}": ${beforeCount} -> ${filtered.length} reports`);
+        console.log(
+          `Project filter "${this.activeProjectFilter}": ${beforeCount} -> ${filtered.length} reports`
+        );
       }
 
       // Filter by status
@@ -280,15 +286,19 @@ export default {
         filtered = filtered.filter(
           (report) => report.status === this.activeReportFilter
         );
-        console.log(`Status filter "${this.activeReportFilter}": ${beforeCount} -> ${filtered.length} reports`);
-        console.log('Available statuses in reports:', [...new Set(this.reports.map(r => r.status))]);
+        console.log(
+          `Status filter "${this.activeReportFilter}": ${beforeCount} -> ${filtered.length} reports`
+        );
+        console.log("Available statuses in reports:", [
+          ...new Set(this.reports.map((r) => r.status)),
+        ]);
       }
 
       // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter((report) =>
-          report.name && report.name.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (report) => report.name && report.name.toLowerCase().includes(query)
         );
       }
 
@@ -304,13 +314,13 @@ export default {
     await this.fetchReports();
     // Projects are now populated from unique report.project values in fetchReports()
     // No need to call fetchProjects() separately
-    
+
     // Add click outside listener to close filter panels
-    document.addEventListener('click', this.handleClickOutside);
+    document.addEventListener("click", this.handleClickOutside);
   },
   beforeUnmount() {
     // Remove click outside listener
-    document.removeEventListener('click', this.handleClickOutside);
+    document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
     async fetchReports() {
@@ -325,7 +335,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:5000/api/reports";
+        let apiUrl = "http://localhost:8000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
@@ -363,19 +373,21 @@ export default {
           console.log("REPORTSSSS: ", this.reports);
 
           // Extract unique project names from report.project field
-          const uniqueProjects = [...new Set(
-            this.reports
-              .map(report => report.project)
-              .filter(project => project && project.trim() !== '')
-          )].sort();
-          
+          const uniqueProjects = [
+            ...new Set(
+              this.reports
+                .map((report) => report.project)
+                .filter((project) => project && project.trim() !== "")
+            ),
+          ].sort();
+
           // Update projects list with unique project names from reports
           this.projects = uniqueProjects;
-          
+
           console.log(
             `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
           );
-          console.log('Unique projects from reports:', uniqueProjects);
+          console.log("Unique projects from reports:", uniqueProjects);
         } else {
           throw new Error(data.message || "Failed to fetch reports");
         }
@@ -390,7 +402,6 @@ export default {
       }
     },
 
-
     toggleProjectFilter() {
       this.showProjectFilter = !this.showProjectFilter;
       this.showReportFilter = false;
@@ -403,19 +414,19 @@ export default {
       const newFilter = this.activeProjectFilter === project ? null : project;
       this.activeProjectFilter = newFilter;
       this.showProjectFilter = false;
-      console.log('Project filter selected:', newFilter);
-      console.log('Filtered reports count:', this.filteredReports.length);
+      console.log("Project filter selected:", newFilter);
+      console.log("Filtered reports count:", this.filteredReports.length);
     },
     selectReportStatus(status) {
       const newFilter = this.activeReportFilter === status ? null : status;
       this.activeReportFilter = newFilter;
       this.showReportFilter = false;
-      console.log('Status filter selected:', newFilter);
-      console.log('Filtered reports count:', this.filteredReports.length);
+      console.log("Status filter selected:", newFilter);
+      console.log("Filtered reports count:", this.filteredReports.length);
     },
     handleClickOutside(event) {
       // Close filter panels if clicking outside
-      if (!event.target.closest('.filter-dropdown')) {
+      if (!event.target.closest(".filter-dropdown")) {
         this.showProjectFilter = false;
         this.showReportFilter = false;
       }

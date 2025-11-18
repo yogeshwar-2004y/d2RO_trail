@@ -163,7 +163,9 @@
           />
         </div>
         <div class="search-field">
-          <button class="clear-filters-btn" @click="clearFilters">Clear Filters</button>
+          <button class="clear-filters-btn" @click="clearFilters">
+            Clear Filters
+          </button>
         </div>
       </div>
     </div>
@@ -171,7 +173,7 @@
     <!-- Toggle Advanced Search Button -->
     <div class="search-toggle-container">
       <button class="toggle-search-btn" @click="toggleAdvancedSearch">
-        {{ showAdvancedSearch ? 'Hide' : 'Show' }} Advanced Search
+        {{ showAdvancedSearch ? "Hide" : "Show" }} Advanced Search
       </button>
     </div>
 
@@ -198,8 +200,14 @@
           </tr>
           <tr v-for="log in filteredLogs" :key="log.activity_id">
             <td class="activity-id">{{ log.activity_id || "N/A" }}</td>
-            <td class="project-id">{{ log.project_id || extractId(log.additional_info) || "N/A" }}</td>
-            <td class="project-name">{{ log.project_name || extractName(log.additional_info) || "N/A" }}</td>
+            <td class="project-id">
+              {{ log.project_id || extractId(log.additional_info) || "N/A" }}
+            </td>
+            <td class="project-name">
+              {{
+                log.project_name || extractName(log.additional_info) || "N/A"
+              }}
+            </td>
             <td class="activity">{{ log.activity_performed || "N/A" }}</td>
             <td class="performed-by">
               {{ log.user_name || log.performed_by || "Unknown" }}
@@ -246,11 +254,12 @@ export default {
 
       try {
         const params = {
-          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50
+          limit:
+            this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50,
         };
-        
+
         const response = await axios.get(
-          "http://localhost:5000/api/activity-logs",
+          "http://localhost:8000/api/activity-logs",
           { params }
         );
 
@@ -261,14 +270,20 @@ export default {
           console.log("Sample log:", this.logs[0]);
           // Apply any existing filters after loading
           this.applyFilters();
-          console.log("Filtered activity logs:", this.filteredLogs.length, "logs");
+          console.log(
+            "Filtered activity logs:",
+            this.filteredLogs.length,
+            "logs"
+          );
         } else {
           this.error = response.data.message || "Failed to load activity logs";
         }
       } catch (error) {
         console.error("Error loading activity logs:", error);
         console.error("Error details:", error.response?.data || error.message);
-        this.error = `Error loading activity logs: ${error.response?.data?.message || error.message || "Please try again."}`;
+        this.error = `Error loading activity logs: ${
+          error.response?.data?.message || error.message || "Please try again."
+        }`;
       } finally {
         this.loading = false;
       }
@@ -283,7 +298,7 @@ export default {
         this.filteredLogs = [];
         return;
       }
-      
+
       let filtered = [...this.logs];
 
       // Apply simple search query if exists
@@ -291,39 +306,39 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(
           (log) =>
-            (log.activity_performed?.toLowerCase() || '').includes(query) ||
-            (log.user_name?.toLowerCase() || '').includes(query) ||
-            (log.project_name?.toLowerCase() || '').includes(query) ||
-            (log.project_id?.toString() || '').includes(query) ||
-            (log.activity_id?.toString() || '').includes(query) ||
-            (log.additional_info?.toLowerCase() || '').includes(query)
+            (log.activity_performed?.toLowerCase() || "").includes(query) ||
+            (log.user_name?.toLowerCase() || "").includes(query) ||
+            (log.project_name?.toLowerCase() || "").includes(query) ||
+            (log.project_id?.toString() || "").includes(query) ||
+            (log.activity_id?.toString() || "").includes(query) ||
+            (log.additional_info?.toLowerCase() || "").includes(query)
         );
       }
 
       // Apply advanced filters
       if (this.searchFilters.userName.trim()) {
         const userName = this.searchFilters.userName.toLowerCase();
-        filtered = filtered.filter(
-          (log) => log.user_name?.toLowerCase().includes(userName)
+        filtered = filtered.filter((log) =>
+          log.user_name?.toLowerCase().includes(userName)
         );
       }
 
       if (this.searchFilters.activityId.trim()) {
-        filtered = filtered.filter(
-          (log) => log.activity_id?.toString().includes(this.searchFilters.activityId)
+        filtered = filtered.filter((log) =>
+          log.activity_id?.toString().includes(this.searchFilters.activityId)
         );
       }
 
       if (this.searchFilters.projectId.trim()) {
-        filtered = filtered.filter(
-          (log) => log.project_id?.toString().includes(this.searchFilters.projectId)
+        filtered = filtered.filter((log) =>
+          log.project_id?.toString().includes(this.searchFilters.projectId)
         );
       }
 
       if (this.searchFilters.activityType.trim()) {
         const activityType = this.searchFilters.activityType.toLowerCase();
-        filtered = filtered.filter(
-          (log) => log.activity_performed?.toLowerCase().includes(activityType)
+        filtered = filtered.filter((log) =>
+          log.activity_performed?.toLowerCase().includes(activityType)
         );
       }
 
@@ -393,11 +408,12 @@ export default {
     async downloadPDF() {
       try {
         const params = {
-          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50
+          limit:
+            this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50,
         };
-        
+
         const response = await axios.get(
-          "http://localhost:5000/api/activity-logs/pdf",
+          "http://localhost:8000/api/activity-logs/pdf",
           {
             params,
             responseType: "blob",

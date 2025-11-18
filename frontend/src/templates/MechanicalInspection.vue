@@ -597,7 +597,10 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton">
+        <div
+          class="form-actions"
+          v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton"
+        >
           <button
             type="submit"
             class="btn btn-primary"
@@ -839,13 +842,13 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       const isQAReviewer = currentUserRole === 3;
       const isQAHead = currentUserRole === 2;
-      
+
       // For QA Reviewer and QA Head: hide only after submission
       if (isQAReviewer || isQAHead) {
         // Check if report is submitted (status is not 'ASSIGNED')
         return this.reportStatus && this.reportStatus !== "ASSIGNED";
       }
-      
+
       // For all other roles: always hide
       return true;
     },
@@ -931,7 +934,7 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/mechanical-inspection/by-report-card/${reportCardId}`
+          `http://localhost:8000/api/mechanical-inspection/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
@@ -1043,14 +1046,17 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -1176,7 +1182,9 @@ export default {
         if (!reportCardId) return;
 
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/mechanical-inspection", {
+        const response = await fetch(
+          "http://localhost:8000/api/mechanical-inspection",
+          {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(submissionData),
@@ -1199,11 +1207,14 @@ export default {
 
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/mechanical-inspection", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/mechanical-inspection",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
 
@@ -1226,7 +1237,9 @@ export default {
     },
     async fetchReportStatus(reportCardId) {
       try {
-        const response = await fetch(`http://localhost:8000/api/reports/${reportCardId}`);
+        const response = await fetch(
+          `http://localhost:8000/api/reports/${reportCardId}`
+        );
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.report) {

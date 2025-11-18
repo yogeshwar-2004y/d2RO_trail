@@ -47,73 +47,200 @@
 
     <!-- Form Content (for PDF generation) -->
     <div class="form-content">
-    <!-- Requisition Details Section -->
+      <!-- Requisition Details Section -->
       <div class="form-card read-only-section">
         <div class="section-header">
           <h2 class="card-title">REQUISITION FOR DGAQA INSPECTION</h2>
-    </div>
+        </div>
         <div class="grid-layout">
-          <div class="grid-item"><span>FROM:</span><input type="text" v-model="formData.from1" readonly /></div>
-          <div class="grid-item"><span>CASCIC Ref No.:</span><input type="text" v-model="formData.casdic" readonly /></div>
-          <div class="grid-item"><span>CASCIC/</span><input type="text" v-model="formData.casdic" readonly /></div>
-          <div class="grid-item"><span>Dated:</span><input type="text" v-model="formData.casdicDate" readonly /></div>
-          <div class="grid-item"><span>TO:</span><input type="text" v-model="formData.from2" readonly /></div>
-          <div class="grid-item"><span>Wing/Proj Ref No.:</span><input type="text" v-model="formData.wingRef" readonly /></div>
-          <div class="grid-item-full"><span>Name & contact No of CASCIC (Designs) coordinator:</span><input type="text" v-model="formData.coordinator" readonly /></div>
-              </div>
-    </div>
+          <div class="grid-item">
+            <span>FROM:</span
+            ><input type="text" v-model="formData.from1" readonly />
+          </div>
+          <div class="grid-item">
+            <span>CASCIC Ref No.:</span
+            ><input type="text" v-model="formData.casdic" readonly />
+          </div>
+          <div class="grid-item">
+            <span>CASCIC/</span
+            ><input type="text" v-model="formData.casdic" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Dated:</span
+            ><input type="text" v-model="formData.casdicDate" readonly />
+          </div>
+          <div class="grid-item">
+            <span>TO:</span
+            ><input type="text" v-model="formData.from2" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Wing/Proj Ref No.:</span
+            ><input type="text" v-model="formData.wingRef" readonly />
+          </div>
+          <div class="grid-item-full">
+            <span>Name & contact No of CASCIC (Designs) coordinator:</span
+            ><input type="text" v-model="formData.coordinator" readonly />
+          </div>
+        </div>
+      </div>
 
       <!-- LRU/SRU Details Section -->
       <div class="form-card read-only-section">
         <div class="section-header">
           <h3 class="section-title">LRU/SRU DETAILS</h3>
-              </div>
+        </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>LRU/SRU DETAILS</span><input type="text" v-model="formData.partNo" readonly /></div>
-          <div class="grid-item-half"><span>LRU/SRU Desc:</span><input type="text" v-model="formData.description" readonly /></div>
-              </div>
+          <div class="grid-item-half">
+            <span>LRU/SRU DETAILS</span
+            ><input type="text" v-model="formData.partNo" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>LRU/SRU Desc:</span
+            ><input type="text" v-model="formData.description" readonly />
+          </div>
+        </div>
         <div class="grid-layout two-col-doc">
-          <div class="grid-item"><span>Ref Doc</span><input type="text" v-model="formData.refDoc" readonly /></div>
-          <div class="grid-item"><span>Ref No of Document</span><input type="text" v-model="formData.refNo" readonly /></div>
-          <div class="grid-item"><span>ver</span><input type="text" v-model="formData.version" readonly /></div>
-          <div class="grid-item"><span>rev</span><input type="text" v-model="formData.revision" readonly /></div>
+          <div class="grid-item">
+            <span>Ref Doc</span
+            ><input type="text" v-model="formData.refDoc" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Ref No of Document</span
+            ><input type="text" v-model="formData.refNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>ver</span
+            ><input type="text" v-model="formData.version" readonly />
+          </div>
+          <div class="grid-item">
+            <span>rev</span
+            ><input type="text" v-model="formData.revision" readonly />
+          </div>
         </div>
         <div class="grid-layout">
-          <div class="grid-item"><span>Part No:</span><input type="text" v-model="formData.partNo" readonly /></div>
-          <div class="grid-item"><span>Manufacturer:</span><input type="text" v-model="formData.manufacturer" readonly /></div>
-          <div class="grid-item"><span>Sl.No of units:</span><input type="text" v-model="formData.serialNo" readonly /></div>
-          <div class="grid-item"><span>Drawing no/Rev:</span><input type="text" v-model="formData.drawingRev" readonly /></div>
-          <div class="grid-item"><span>Qty Offered:</span><input type="text" v-model="formData.qtyOffered" readonly /></div>
-          <div class="grid-item"><span>source:</span><input type="text" v-model="formData.source" readonly /></div>
+          <div class="grid-item">
+            <span>Part No:</span
+            ><input type="text" v-model="formData.partNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Manufacturer:</span
+            ><input type="text" v-model="formData.manufacturer" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Sl.No of units:</span
+            ><input type="text" v-model="formData.serialNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Drawing no/Rev:</span
+            ><input type="text" v-model="formData.drawingRev" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Qty Offered:</span
+            ><input type="text" v-model="formData.qtyOffered" readonly />
+          </div>
+          <div class="grid-item">
+            <span>source:</span
+            ><input type="text" v-model="formData.source" readonly />
+          </div>
         </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>UNIT IDENTIFICATION:</span><input type="text" v-model="formData.unitIdentification" readonly /></div>
-          <div class="grid-item-half"><span>MECHANICAL INSPN:</span><input type="text" v-model="formData.mechanicalInspection" readonly /></div>
+          <div class="grid-item-half">
+            <span>UNIT IDENTIFICATION:</span
+            ><input
+              type="text"
+              v-model="formData.unitIdentification"
+              readonly
+            />
+          </div>
+          <div class="grid-item-half">
+            <span>MECHANICAL INSPN:</span
+            ><input
+              type="text"
+              v-model="formData.mechanicalInspection"
+              readonly
+            />
+          </div>
         </div>
         <div class="grid-layout two-col">
-          <div class="grid-item-half"><span>INSPECTION /TEST STAGE OFFERED NOW:</span><input type="text" v-model="formData.testStageOffered" readonly /></div>
-          <div class="grid-item-half"><span>STTE Status:</span><input type="text" v-model="formData.stteStatus" readonly /></div>
+          <div class="grid-item-half">
+            <span>INSPECTION /TEST STAGE OFFERED NOW:</span
+            ><input type="text" v-model="formData.testStageOffered" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>STTE Status:</span
+            ><input type="text" v-model="formData.stteStatus" readonly />
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Testing Details Section - Page break before for PDF -->
+      <!-- Testing Details Section - Page break before for PDF -->
       <div class="form-card read-only-section page-break-before">
         <div class="section-header">
           <h3 class="section-title">TESTING DETAILS</h3>
         </div>
         <div class="grid-layout">
-          <div class="grid-item-half"><span>Above Unit is ready for Testing at venue, dated onwards.</span><input type="text" v-model="formData.venue" readonly /></div>
-          <div class="grid-item-half"><span>Test facility to be used:</span><input type="text" v-model="formData.testFacility" readonly /></div>
-          <div class="grid-item-half"><span>Calibration status OK/Due on:</span><input type="text" v-model="formData.calibrationStatus" readonly /></div>
-          <div class="grid-item-half"><span>SIGNATURE: NAME / DESIGNATION</span><input type="text" v-model="formData.nameDesignation" readonly /></div>
-          <div class="grid-item-quarter"><span>Test cycle / Duration:</span><input type="text" v-model="formData.testCycleDuration" readonly /><span>hrs</span></div>
-          <div class="grid-item-quarter"><span>Func. Check(Initial):</span><input type="text" v-model="formData.funcCheckInitial" readonly /><span>date/time</span></div>
-          <div class="grid-item-quarter"><span>Test Start on:</span><input type="text" v-model="formData.testStartOn" readonly /><span>date/time</span></div>
-          <div class="grid-item-quarter"><span>Perf. check (during):</span><input type="text" v-model="formData.perfCheckDuring" readonly /><span>date/time</span></div>
-          <div class="grid-item-half"><span>Test complete on:</span><input type="text" v-model="formData.testCompleteOn" readonly /><span>date/time</span></div>
-          <div class="grid-item-half"><span>Func Check (End):</span><input type="text" v-model="formData.funcCheckEnd" readonly /><span>date/time</span></div>
+          <div class="grid-item-half">
+            <span>Above Unit is ready for Testing at venue, dated onwards.</span
+            ><input type="text" v-model="formData.venue" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>Test facility to be used:</span
+            ><input type="text" v-model="formData.testFacility" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>Calibration status OK/Due on:</span
+            ><input type="text" v-model="formData.calibrationStatus" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>SIGNATURE: NAME / DESIGNATION</span
+            ><input type="text" v-model="formData.nameDesignation" readonly />
+          </div>
+          <div class="grid-item-quarter">
+            <span>Test cycle / Duration:</span
+            ><input
+              type="text"
+              v-model="formData.testCycleDuration"
+              readonly
+            /><span>hrs</span>
+          </div>
+          <div class="grid-item-quarter">
+            <span>Func. Check(Initial):</span
+            ><input
+              type="text"
+              v-model="formData.funcCheckInitial"
+              readonly
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-quarter">
+            <span>Test Start on:</span
+            ><input type="text" v-model="formData.testStartOn" readonly /><span
+              >date/time</span
+            >
+          </div>
+          <div class="grid-item-quarter">
+            <span>Perf. check (during):</span
+            ><input
+              type="text"
+              v-model="formData.perfCheckDuring"
+              readonly
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-half">
+            <span>Test complete on:</span
+            ><input
+              type="text"
+              v-model="formData.testCompleteOn"
+              readonly
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-half">
+            <span>Func Check (End):</span
+            ><input type="text" v-model="formData.funcCheckEnd" readonly /><span
+              >date/time</span
+            >
+          </div>
         </div>
-    </div>
+      </div>
 
       <!-- Certifications Section -->
       <div class="form-card read-only-section">
@@ -122,17 +249,60 @@
         </div>
         <div class="grid-layout one-col-checkbox">
           <p class="checkbox-title">It is certified that :</p>
-          <label><input type="checkbox" v-model="formData.certifications.mechanicalQualityRecords" disabled />Mechanical Quality Records of all the parts (Raw material TC (chemical & mechanical), Dimensional reports, NDT reports, Process certificates etc.) & Electrical Quality Records (Components Screening report, PCB manufacturing report, process compliance reports/ test reports, etc.) were verified thoroughly.</label>
-          <label><input type="checkbox" v-model="formData.certifications.cocVerified" disabled />CoC for SRU, fasteners & standard parts are verified and satisfactory</label>
-          <label><input type="checkbox" v-model="formData.certifications.sruSerialNoted" disabled />Sl no of the SRUs are noted down in the respective log book opened on _________</label>
-          <label><input type="checkbox" v-model="formData.certifications.noDefectInvestigation" disabled />No Defect investigation is pending against this LRU</label>
-          <label><input type="checkbox" v-model="formData.certifications.previousTestStagesCleared" disabled />All the previous test stages of this LRU/SRU are cleared</label>
-          <label><input type="checkbox" v-model="formData.certifications.cascicQAInspected" disabled />CASCIC QA has physically inspected and accepted the LRU on _________</label>
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.mechanicalQualityRecords"
+              disabled
+            />Mechanical Quality Records of all the parts (Raw material TC
+            (chemical & mechanical), Dimensional reports, NDT reports, Process
+            certificates etc.) & Electrical Quality Records (Components
+            Screening report, PCB manufacturing report, process compliance
+            reports/ test reports, etc.) were verified thoroughly.</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.cocVerified"
+              disabled
+            />CoC for SRU, fasteners & standard parts are verified and
+            satisfactory</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.sruSerialNoted"
+              disabled
+            />Sl no of the SRUs are noted down in the respective log book opened
+            on _________</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.noDefectInvestigation"
+              disabled
+            />No Defect investigation is pending against this LRU</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.previousTestStagesCleared"
+              disabled
+            />All the previous test stages of this LRU/SRU are cleared</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.cascicQAInspected"
+              disabled
+            />CASCIC QA has physically inspected and accepted the LRU on
+            _________</label
+          >
           <span class="signature-line">SIGNATURE of Rep, IQA CASCIC</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Remarks Section - Page break before for PDF -->
+      <!-- Remarks Section - Page break before for PDF -->
       <div class="form-card page-break-before">
         <div class="section-header">
           <h3 class="section-title">Action taken & remarks by DGAQA</h3>
@@ -141,153 +311,152 @@
           <div class="readonly-display">{{ formData.remarks }}</div>
           <span class="signature-line right">SIGNATURE OF DGAQA REP..</span>
         </div>
-    </div>
-
-    <!-- Approval and Assignment Information (show for all roles when memo is approved) -->
-    <div
-      class="form-card"
-      v-if="isMemoApprovedWithReviewer"
-    >
-      <div class="section-header">
-        <h3 class="section-title">APPROVAL AND ASSIGNMENT DETAILS</h3>
       </div>
-      <div class="grid-layout">
-        <div class="grid-item">
-          <label>Date of Test or Review</label>
-            <input
-              type="text"
-            :value="formatApprovalDate(
-                memoApprovalStatus.test_date || memoApprovalStatus.approval_date
-            )"
-              readonly
-          />
-          </div>
-        <div class="grid-item">
-          <label>Internal Tester ID</label>
-            <input
-              type="text"
-            :value="assignedReviewer.id"
-              readonly
-          />
-          </div>
-        <div class="grid-item">
-          <label>Internal Tester Name</label>
-            <input
-              type="text"
-            :value="assignedReviewer.name"
-              readonly
-          />
+
+      <!-- Approval and Assignment Information (show for all roles when memo is approved) -->
+      <div class="form-card" v-if="isMemoApprovedWithReviewer">
+        <div class="section-header">
+          <h3 class="section-title">APPROVAL AND ASSIGNMENT DETAILS</h3>
         </div>
-        <div class="grid-item-full">
-          <label>Comments</label>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <label>Date of Test or Review</label>
             <input
               type="text"
-            :value="memoApprovalStatus.comments || 'No comments provided'"
+              :value="
+                formatApprovalDate(
+                  memoApprovalStatus.test_date ||
+                    memoApprovalStatus.approval_date
+                )
+              "
               readonly
-          />
+            />
           </div>
-        <div class="grid-item">
-            <label>Authentication</label>
-          <div v-if="
-                  memoApprovalStatus.authentication &&
-                  isSignatureUrl(memoApprovalStatus.authentication)
-          " class="signature-display-pdf">
-                <img
-                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
-                  alt="Signature"
-              class="signature-image-pdf"
-                />
-            <span class="signature-line">SIGNATURE</span>
-              </div>
+          <div class="grid-item">
+            <label>Internal Tester ID</label>
+            <input type="text" :value="assignedReviewer.id" readonly />
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester Name</label>
+            <input type="text" :value="assignedReviewer.name" readonly />
+          </div>
+          <div class="grid-item-full">
+            <label>Comments</label>
             <input
-            v-else
               type="text"
-            :value="memoApprovalStatus.authentication || 'Not provided'"
+              :value="memoApprovalStatus.comments || 'No comments provided'"
               readonly
-          />
+            />
+          </div>
+          <div class="grid-item">
+            <label>Authentication</label>
+            <div
+              v-if="
+                memoApprovalStatus.authentication &&
+                isSignatureUrl(memoApprovalStatus.authentication)
+              "
+              class="signature-display-pdf"
+            >
+              <img
+                :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
+                alt="Signature"
+                class="signature-image-pdf"
+              />
+              <span class="signature-line">SIGNATURE</span>
             </div>
-        <div class="grid-item">
+            <input
+              v-else
+              type="text"
+              :value="memoApprovalStatus.authentication || 'Not provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
             <label>Attachments</label>
             <input
               type="text"
-            :value="memoApprovalStatus.attachment_path ? 'File attached' : 'No attachments'"
+              :value="
+                memoApprovalStatus.attachment_path
+                  ? 'File attached'
+                  : 'No attachments'
+              "
               readonly
-          />
+            />
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Rejection Information (show for all roles when memo is rejected) -->
-    <div
-      class="form-card"
-      v-if="isMemoRejected"
-    >
-      <div class="section-header">
-        <h3 class="section-title">REJECTION DETAILS</h3>
-          </div>
-      <div class="grid-layout">
-        <div class="grid-item">
-          <label>Date of Test or Review</label>
-            <input
-              type="text"
-            :value="formatApprovalDate(memoApprovalStatus.approval_date)"
-              readonly
-          />
-          </div>
-        <div class="grid-item">
-          <label>Internal Tester ID</label>
-            <input
-              type="text"
-            :value="memoApprovalStatus.approved_by"
-              readonly
-          />
+      <!-- Rejection Information (show for all roles when memo is rejected) -->
+      <div class="form-card" v-if="isMemoRejected">
+        <div class="section-header">
+          <h3 class="section-title">REJECTION DETAILS</h3>
         </div>
-        <div class="grid-item">
-          <label>Internal Tester Name</label>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <label>Date of Test or Review</label>
             <input
               type="text"
-            value="QA Head"
+              :value="formatApprovalDate(memoApprovalStatus.approval_date)"
               readonly
-          />
+            />
           </div>
-        <div class="grid-item-full">
-          <label>Comments</label>
+          <div class="grid-item">
+            <label>Internal Tester ID</label>
             <input
               type="text"
-            :value="memoApprovalStatus.comments || 'No comments provided'"
+              :value="memoApprovalStatus.approved_by"
               readonly
-          />
-        </div>
-        <div class="grid-item">
+            />
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester Name</label>
+            <input type="text" value="QA Head" readonly />
+          </div>
+          <div class="grid-item-full">
+            <label>Comments</label>
+            <input
+              type="text"
+              :value="memoApprovalStatus.comments || 'No comments provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
             <label>Authentication</label>
-          <div v-if="
-                  memoApprovalStatus.authentication &&
-                  isSignatureUrl(memoApprovalStatus.authentication)
-          " class="signature-display-pdf">
-                <img
-                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
-                  alt="Signature"
-              class="signature-image-pdf"
-                />
-            <span class="signature-line">SIGNATURE</span>
-              </div>
-            <input
-            v-else
-              type="text"
-            :value="memoApprovalStatus.authentication || 'Not provided'"
-              readonly
-          />
+            <div
+              v-if="
+                memoApprovalStatus.authentication &&
+                isSignatureUrl(memoApprovalStatus.authentication)
+              "
+              class="signature-display-pdf"
+            >
+              <img
+                :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
+                alt="Signature"
+                class="signature-image-pdf"
+              />
+              <span class="signature-line">SIGNATURE</span>
             </div>
-        <div class="grid-item">
+            <input
+              v-else
+              type="text"
+              :value="memoApprovalStatus.authentication || 'Not provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
             <label>Attachments</label>
             <input
               type="text"
-            :value="memoApprovalStatus.attachment_path ? 'File attached' : 'No attachments'"
+              :value="
+                memoApprovalStatus.attachment_path
+                  ? 'File attached'
+                  : 'No attachments'
+              "
               readonly
-          />
-    </div>
+            />
+          </div>
+        </div>
       </div>
-    </div>
     </div>
     <!-- End Form Content -->
 
@@ -737,17 +906,22 @@ export default {
     // Check if the authentication field contains a signature URL or path
     isSignatureUrl(authentication) {
       if (!authentication) return false;
-      return authentication.includes("http://localhost:5000/api/users/signature/") ||
-             authentication.startsWith("/api/users/signature/");
+      return (
+        authentication.includes("http://localhost:8000/api/users/signature/") ||
+        authentication.startsWith("/api/users/signature/")
+      );
     },
     // Get the full URL for signature image
     getSignatureImageUrl(authentication) {
       if (!authentication) return "";
-      if (authentication.startsWith("http://") || authentication.startsWith("https://")) {
+      if (
+        authentication.startsWith("http://") ||
+        authentication.startsWith("https://")
+      ) {
         return authentication;
       }
       if (authentication.startsWith("/api/users/signature/")) {
-        return `http://localhost:5000${authentication}`;
+        return `http://localhost:8000${authentication}`;
       }
       return authentication;
     },
@@ -764,7 +938,9 @@ export default {
         }
 
         // Otherwise, fetch from API
-        const response = await fetch(`http://localhost:5000/api/memos/${this.id}`);
+        const response = await fetch(
+          `http://localhost:8000/api/memos/${this.id}`
+        );
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
@@ -941,7 +1117,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/available-reviewers"
+          "http://localhost:8000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -959,7 +1135,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.id}/approval-status`
+          `http://localhost:8000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -992,7 +1168,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/users/${userId}`
+          `http://localhost:8000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1128,7 +1304,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1179,7 +1355,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1304,18 +1480,19 @@ export default {
         console.log(`Downloading PDF for memo ID: ${this.id}`);
 
         // Hide Test Status section for PDF (if it exists)
-        const testStatusSection = document.querySelector('.exclude-from-pdf');
+        const testStatusSection = document.querySelector(".exclude-from-pdf");
         let wasHidden = false;
         if (testStatusSection) {
-          wasHidden = testStatusSection.style.display === 'none';
-          testStatusSection.style.display = 'none';
+          wasHidden = testStatusSection.style.display === "none";
+          testStatusSection.style.display = "none";
         }
 
         // Ensure page break styles are applied for PDF generation
-        const pageBreakElements = document.querySelectorAll('.page-break-before');
-        pageBreakElements.forEach(element => {
-          element.style.pageBreakBefore = 'always';
-          element.style.breakBefore = 'page';
+        const pageBreakElements =
+          document.querySelectorAll(".page-break-before");
+        pageBreakElements.forEach((element) => {
+          element.style.pageBreakBefore = "always";
+          element.style.breakBefore = "page";
         });
 
         // Get the element you want to convert (the main memo content - exclude header/UI)
@@ -1325,7 +1502,7 @@ export default {
           alert("Memo content not found");
           // Restore Test Status section if it was hidden
           if (testStatusSection && !wasHidden) {
-            testStatusSection.style.display = '';
+            testStatusSection.style.display = "";
           }
           return;
         }
@@ -1359,16 +1536,16 @@ export default {
 
         // Restore Test Status section visibility
         if (testStatusSection && !wasHidden) {
-          testStatusSection.style.display = '';
+          testStatusSection.style.display = "";
         }
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
 
         // Restore Test Status section visibility on error
-        const testStatusSection = document.querySelector('.exclude-from-pdf');
+        const testStatusSection = document.querySelector(".exclude-from-pdf");
         if (testStatusSection) {
-          testStatusSection.style.display = '';
+          testStatusSection.style.display = "";
         }
       }
     },
@@ -1451,7 +1628,8 @@ export default {
   flex-direction: column;
 }
 
-.grid-item-half, .grid-item-quarter {
+.grid-item-half,
+.grid-item-quarter {
   display: flex;
   flex-direction: column;
 }
@@ -1462,7 +1640,10 @@ export default {
   flex-direction: column;
 }
 
-.grid-item input, .grid-item-full input, .grid-item-half input, .grid-item-quarter input {
+.grid-item input,
+.grid-item-full input,
+.grid-item-half input,
+.grid-item-quarter input {
   width: 100%;
   padding: 8px 12px;
   border: 1px solid #d0d0d0;
@@ -1474,7 +1655,10 @@ export default {
   transition: none;
 }
 
-.grid-item input:focus, .grid-item-full input:focus, .grid-item-half input:focus, .grid-item-quarter input:focus {
+.grid-item input:focus,
+.grid-item-full input:focus,
+.grid-item-half input:focus,
+.grid-item-quarter input:focus {
   outline: none;
   border-color: #b0b0b0;
   background-color: #f0f0f0;
@@ -1494,7 +1678,10 @@ export default {
   cursor: text;
 }
 
-.grid-item span, .grid-item-full span, .grid-item-half span, .grid-item-quarter span {
+.grid-item span,
+.grid-item-full span,
+.grid-item-half span,
+.grid-item-quarter span {
   font-size: 0.9em;
 }
 
@@ -1552,7 +1739,7 @@ export default {
 .read-only-section {
   border-left: none;
   background-color: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-color, #999);
 }
 

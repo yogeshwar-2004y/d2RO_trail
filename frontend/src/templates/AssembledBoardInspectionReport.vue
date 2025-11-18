@@ -664,7 +664,10 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton">
+        <div
+          class="form-actions"
+          v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton"
+        >
           <button
             type="submit"
             class="btn btn-primary"
@@ -882,13 +885,13 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       const isQAReviewer = currentUserRole === 3;
       const isQAHead = currentUserRole === 2;
-      
+
       // For QA Reviewer and QA Head: hide only after submission
       if (isQAReviewer || isQAHead) {
         // Check if report is submitted (status is not 'ASSIGNED')
         return this.reportStatus && this.reportStatus !== "ASSIGNED";
       }
-      
+
       // For all other roles: always hide
       return true;
     },
@@ -914,7 +917,7 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/assembled-board/by-report-card/${reportCardId}`
+          `http://localhost:8000/api/reports/assembled-board/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
@@ -1073,9 +1076,10 @@ export default {
 
           // Load signatures (format: "Name|URL")
           if (report.prepared_by) {
-            if (report.prepared_by.includes('|')) {
+            if (report.prepared_by.includes("|")) {
               const preparedParts = report.prepared_by.split("|");
-              this.signatures.preparedBy.verifiedUserName = preparedParts[0] || "";
+              this.signatures.preparedBy.verifiedUserName =
+                preparedParts[0] || "";
               this.signatures.preparedBy.signatureUrl = preparedParts[1] || "";
               this.signatures.preparedBy.verifiedUserRole = "QA";
             } else {
@@ -1086,9 +1090,10 @@ export default {
             }
           }
           if (report.verified_by) {
-            if (report.verified_by.includes('|')) {
+            if (report.verified_by.includes("|")) {
               const verifiedParts = report.verified_by.split("|");
-              this.signatures.verifiedBy.verifiedUserName = verifiedParts[0] || "";
+              this.signatures.verifiedBy.verifiedUserName =
+                verifiedParts[0] || "";
               this.signatures.verifiedBy.signatureUrl = verifiedParts[1] || "";
               this.signatures.verifiedBy.verifiedUserRole = "QA";
             } else {
@@ -1099,9 +1104,10 @@ export default {
             }
           }
           if (report.approved_by) {
-            if (report.approved_by.includes('|')) {
+            if (report.approved_by.includes("|")) {
               const approvedParts = report.approved_by.split("|");
-              this.signatures.approvedBy.verifiedUserName = approvedParts[0] || "";
+              this.signatures.approvedBy.verifiedUserName =
+                approvedParts[0] || "";
               this.signatures.approvedBy.signatureUrl = approvedParts[1] || "";
               this.signatures.approvedBy.verifiedUserRole = "QA Head";
             } else {
@@ -1111,7 +1117,7 @@ export default {
               this.signatures.approvedBy.verifiedUserRole = "QA Head";
             }
           }
-          
+
           // Fetch report status to check if already submitted
           const reportCardId = this.reportId || this.$route.params.reportId;
           if (reportCardId) {
@@ -1172,14 +1178,17 @@ export default {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -1306,25 +1315,34 @@ export default {
         rem20: this.formData.qcReport?.remarks || "",
         upload20: this.formData.qcReport?.fileName || "",
 
-        prepared_by: this.signatures.preparedBy.signatureUrl 
-          ? `${this.signatures.preparedBy.verifiedUserName || 'User'}|${this.signatures.preparedBy.signatureUrl}`
+        prepared_by: this.signatures.preparedBy.signatureUrl
+          ? `${this.signatures.preparedBy.verifiedUserName || "User"}|${
+              this.signatures.preparedBy.signatureUrl
+            }`
           : "",
         verified_by: this.signatures.verifiedBy.signatureUrl
-          ? `${this.signatures.verifiedBy.verifiedUserName || 'User'}|${this.signatures.verifiedBy.signatureUrl}`
+          ? `${this.signatures.verifiedBy.verifiedUserName || "User"}|${
+              this.signatures.verifiedBy.signatureUrl
+            }`
           : "",
         approved_by: this.signatures.approvedBy.signatureUrl
-          ? `${this.signatures.approvedBy.verifiedUserName || 'User'}|${this.signatures.approvedBy.signatureUrl}`
+          ? `${this.signatures.approvedBy.verifiedUserName || "User"}|${
+              this.signatures.approvedBy.signatureUrl
+            }`
           : "",
       };
     },
     async autoSaveReport() {
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/reports/assembled-board?user_role=4", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/reports/assembled-board?user_role=4",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
         if (!result.success) {
@@ -1342,11 +1360,14 @@ export default {
 
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:5000/api/reports/assembled-board?user_role=4", {
-              method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/reports/assembled-board?user_role=4",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
 
@@ -1369,7 +1390,9 @@ export default {
     },
     async fetchReportStatus(reportCardId) {
       try {
-        const response = await fetch(`http://localhost:8000/api/reports/${reportCardId}`);
+        const response = await fetch(
+          `http://localhost:8000/api/reports/${reportCardId}`
+        );
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.report) {

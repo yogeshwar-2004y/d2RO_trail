@@ -300,7 +300,7 @@ export default {
     async loadRequests() {
       try {
         this.loading = true;
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support");
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support");
         const data = await response.json();
 
         if (data.success) {
@@ -347,7 +347,7 @@ export default {
           issue: request.issue,
         };
 
-        const response = await fetch("http://127.0.0.1:5000/api/tech-support", {
+        const response = await fetch("http://127.0.0.1:8000/api/tech-support", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -434,7 +434,7 @@ export default {
         }
 
         const response = await axios.get(
-          "http://127.0.0.1:5000/api/tech-support/pdf",
+          "http://127.0.0.1:8000/api/tech-support/pdf",
           {
             params,
             responseType: "blob",
@@ -446,13 +446,17 @@ export default {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `tech_support_requests_${new Date().toISOString().split("T")[0]}.pdf`;
+        link.download = `tech_support_requests_${
+          new Date().toISOString().split("T")[0]
+        }.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
 
-        this.showSuccessNotification("Tech support requests exported to PDF successfully");
+        this.showSuccessNotification(
+          "Tech support requests exported to PDF successfully"
+        );
       } catch (error) {
         console.error("Error exporting to PDF:", error);
         alert("Failed to export PDF. Please try again.");
@@ -460,7 +464,6 @@ export default {
         this.loading = false;
       }
     },
-
 
     async updateStatus(requestId, newStatus) {
       try {
@@ -481,7 +484,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://127.0.0.1:5000/api/tech-support/${requestId}/status`,
+          `http://127.0.0.1:8000/api/tech-support/${requestId}/status`,
           {
             method: "PUT",
             headers: {

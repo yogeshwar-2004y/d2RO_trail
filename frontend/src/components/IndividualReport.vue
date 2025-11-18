@@ -554,12 +554,12 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       const isQAReviewer = currentUserRole === 3;
       const isQAHead = currentUserRole === 2;
-      
+
       // For QA Reviewer and QA Head: hide only after submission
       if (isQAReviewer || isQAHead) {
         return this.isReportSubmitted;
       }
-      
+
       // For all other roles: always hide
       return true;
     },
@@ -568,30 +568,30 @@ export default {
       // Allow download if template is selected and user has access to view the report
       // All users who can view the report should be able to download it
       if (!this.selectedTemplate) {
-      return false;
+        return false;
       }
-      
+
       // QA Reviewer can download anytime once template is selected
       if (this.isQAReviewer) {
         return true;
       }
-      
+
       // QA Head can download
       if (this.isQAHead) {
         return true;
       }
-      
+
       // Design Head can download
       if (this.isDesignHead) {
         return true;
       }
-      
+
       // Designer can download
       const currentUserRole = userStore.getters.currentUserRole();
       if (currentUserRole === 5) {
         return true;
       }
-      
+
       // Default: allow download if template is selected
       return true;
     },
@@ -697,7 +697,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/${this.reportId}`
+          `http://localhost:8000/api/reports/${this.reportId}`
         );
         const result = await response.json();
 
@@ -769,12 +769,16 @@ export default {
         );
 
         if (!reportResponse.ok) {
-          throw new Error(`Failed to fetch report: ${reportResponse.statusText}`);
+          throw new Error(
+            `Failed to fetch report: ${reportResponse.statusText}`
+          );
         }
 
         const reportResult = await reportResponse.json();
         if (!reportResult.success) {
-          throw new Error(reportResult.message || "Failed to fetch report details");
+          throw new Error(
+            reportResult.message || "Failed to fetch report details"
+          );
         }
 
         const reportData = reportResult.report;
@@ -814,10 +818,13 @@ export default {
 
         // Load DRDO logo
         let drdoLogoBase64 = null;
-        
+
         // Import image - Vite will handle the path resolution
         try {
-          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          const drdoLogoUrl = new URL(
+            "../assets/images/DRDO.png",
+            import.meta.url
+          ).href;
           drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
         } catch (e) {
           console.warn("Could not load DRDO logo:", e);
@@ -834,7 +841,15 @@ export default {
         };
 
         // Helper function to add text with wrapping and return height
-        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+        const addText = (
+          text,
+          x,
+          y,
+          maxWidth,
+          fontSize = 10,
+          isBold = false,
+          align = "left"
+        ) => {
           doc.setFontSize(fontSize);
           doc.setFont("helvetica", isBold ? "bold" : "normal");
           const lines = doc.splitTextToSize(text, maxWidth);
@@ -848,7 +863,7 @@ export default {
               const textWidth = doc.getTextWidth(line);
               xPos = x + maxWidth - textWidth;
             }
-            doc.text(line, xPos, y + (index * lineHeight));
+            doc.text(line, xPos, y + index * lineHeight);
           });
           return lines.length * lineHeight;
         };
@@ -856,7 +871,7 @@ export default {
         // ===== HEADER SECTION WITH LOGO =====
         const headerHeight = 25;
         yPosition = margin;
-        
+
         // Add DRDO logo (left corner)
         let textStartX = margin + 18;
         if (drdoLogoBase64) {
@@ -868,7 +883,7 @@ export default {
             textStartX = margin;
           }
         }
-        
+
         // Add AVIATRAX text (centered)
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
@@ -876,7 +891,7 @@ export default {
         const aviatraxText = "AVIATRAX™";
         const aviatraxWidth = doc.getTextWidth(aviatraxText);
         doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
-        
+
         // Add Defence Research text below AVIATRAX (centered)
         doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
@@ -886,22 +901,24 @@ export default {
         doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
         doc.setFont("helvetica", "italic");
         doc.setFontSize(7);
-        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreText =
+          "Combat Aircraft Systems Development and Integration Centre";
         const centreTextWidth = doc.getTextWidth(centreText);
         doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
-        
+
         // CASDIC path (left, below header)
         yPosition += headerHeight + 5;
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        const projectName = templateData?.project_name || reportData.project_name || "";
+        const projectName =
+          templateData?.project_name || reportData.project_name || "";
         const lruName = templateData?.lru_name || reportData.lru_name || "";
         const serialNumber = templateData?.serial_number || "SL-001";
         const inspectionCount = templateData?.inspection_count || "INS-001";
         const currentYear = new Date().getFullYear();
         const casdicPath = `CASDIC/${projectName}/${lruName}/SL.${serialNumber}/${inspectionCount}/${currentYear}`;
         doc.text(casdicPath, margin, yPosition);
-        
+
         // Date (right)
         const currentDate = new Date().toLocaleDateString("en-GB");
         const dateText = `Date: ${currentDate}`;
@@ -911,7 +928,9 @@ export default {
 
         // ===== SUBJECT LINE (CENTERED) =====
         const templateName = reportData.template_name || "Inspection Report";
-        const subjectText = `SUB: ${templateName} for ${lruName || projectName || ""}`;
+        const subjectText = `SUB: ${templateName} for ${
+          lruName || projectName || ""
+        }`;
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
         const subjectWidth = doc.getTextWidth(subjectText);
@@ -931,29 +950,73 @@ export default {
 
         // Left column fields
         const leftFields = [
-          { label: "Project Name", value: templateData?.project_name || reportData.project_name || "N/A" },
-          { label: "Report Ref No", value: templateData?.report_ref_no || "N/A" },
+          {
+            label: "Project Name",
+            value:
+              templateData?.project_name || reportData.project_name || "N/A",
+          },
+          {
+            label: "Report Ref No",
+            value: templateData?.report_ref_no || "N/A",
+          },
           { label: "Memo Ref No", value: templateData?.memo_ref_no || "N/A" },
-          { label: "LRU Name", value: templateData?.lru_name || reportData.lru_name || "N/A" },
-          { label: "Inspection Stage", value: templateData?.inspection_stage || reportData.inspection_stage || "N/A" },
-          { label: "Test Venue", value: templateData?.test_venue || reportData.review_venue || "N/A" },
-          { label: "SL.NO'S", value: templateData?.sl_nos || "N/A" }
+          {
+            label: "LRU Name",
+            value: templateData?.lru_name || reportData.lru_name || "N/A",
+          },
+          {
+            label: "Inspection Stage",
+            value:
+              templateData?.inspection_stage ||
+              reportData.inspection_stage ||
+              "N/A",
+          },
+          {
+            label: "Test Venue",
+            value: templateData?.test_venue || reportData.review_venue || "N/A",
+          },
+          { label: "SL.NO'S", value: templateData?.sl_nos || "N/A" },
         ];
 
         // Right column fields
         const rightFields = [
           { label: "DP Name", value: templateData?.dp_name || "N/A" },
-          { label: "Dated", value: templateData?.dated1 ? new Date(templateData.dated1).toLocaleDateString("en-GB") : "dd/mm/yyyy" },
-          { label: "Dated", value: templateData?.dated2 ? new Date(templateData.dated2).toLocaleDateString("en-GB") : "dd/mm/yyyy" },
+          {
+            label: "Dated",
+            value: templateData?.dated1
+              ? new Date(templateData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: templateData?.dated2
+              ? new Date(templateData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
           { label: "SRU Name", value: templateData?.sru_name || "N/A" },
           { label: "Part No", value: templateData?.part_no || "N/A" },
-          { label: "Quantity", value: templateData?.quantity ? templateData.quantity.toString() : "N/A" },
-          { label: "Start Date", value: templateData?.start_date ? new Date(templateData.start_date).toLocaleDateString("en-GB") : "N/A" },
-          { label: "End Date", value: templateData?.end_date ? new Date(templateData.end_date).toLocaleDateString("en-GB") : "N/A" }
+          {
+            label: "Quantity",
+            value: templateData?.quantity
+              ? templateData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: templateData?.start_date
+              ? new Date(templateData.start_date).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: templateData?.end_date
+              ? new Date(templateData.end_date).toLocaleDateString("en-GB")
+              : "N/A",
+          },
         ];
 
         // Draw left column
-        leftFields.forEach(field => {
+        leftFields.forEach((field) => {
           checkPageBreak(12);
           doc.setFont("helvetica", "bold");
           doc.setFontSize(10);
@@ -968,7 +1031,7 @@ export default {
         });
 
         // Draw right column
-        rightFields.forEach(field => {
+        rightFields.forEach((field) => {
           checkPageBreak(12);
           doc.setFont("helvetica", "bold");
           doc.setFontSize(10);
@@ -979,7 +1042,11 @@ export default {
           const valueText = field.value || "N/A";
           const valueLines = doc.splitTextToSize(valueText, colWidth - 20);
           const valueHeight = valueLines.length * 4;
-          doc.text(valueLines, rightX + doc.getTextWidth(labelText) + 3, rightY);
+          doc.text(
+            valueLines,
+            rightX + doc.getTextWidth(labelText) + 3,
+            rightY
+          );
           rightY += Math.max(valueHeight, 10);
         });
 
@@ -990,7 +1057,7 @@ export default {
         if (templateId === 1 && templateData) {
           yPosition += 5;
           checkPageBreak(80);
-          
+
           // Heading
           doc.setFontSize(12);
           doc.setFont("helvetica", "bold");
@@ -1008,20 +1075,20 @@ export default {
             "Pin holes and Soft spots",
             "Connectors surrounding and beneath",
             "Uniformity in coating across the board",
-            "Conformal coating thickness of 30 to 130 microns for acrylic material as per IPC-CC-830B"
+            "Conformal coating thickness of 30 to 130 microns for acrylic material as per IPC-CC-830B",
           ];
 
           // Table column widths with better spacing - ensure SL.NO, EXPECTED, OBSERVATIONS fit on one line
           // Calculate widths to ensure they add up exactly to contentWidth
           const colWidths = [
-            contentWidth * 0.09,  // SL.NO (slightly wider to ensure it fits)
-            contentWidth * 0.29,  // TEST CASES
-            contentWidth * 0.12,  // EXPECTED (wider to ensure it fits)
-            contentWidth * 0.13,  // OBSERVATIONS (wider to ensure it fits)
-            contentWidth * 0.19,  // REMARKS
-            contentWidth * 0.18   // UPLOAD
+            contentWidth * 0.09, // SL.NO (slightly wider to ensure it fits)
+            contentWidth * 0.29, // TEST CASES
+            contentWidth * 0.12, // EXPECTED (wider to ensure it fits)
+            contentWidth * 0.13, // OBSERVATIONS (wider to ensure it fits)
+            contentWidth * 0.19, // REMARKS
+            contentWidth * 0.18, // UPLOAD
           ];
-          
+
           // Ensure columns add up exactly to contentWidth (fix any rounding issues)
           const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
           if (Math.abs(totalWidth - contentWidth) > 0.1) {
@@ -1032,12 +1099,19 @@ export default {
           }
 
           const rowHeight = 12;
-          
+
           // Draw header cells with borders and background
           doc.setFontSize(7);
           doc.setFont("helvetica", "bold");
-          const headers = ["SL.NO", "TEST CASES", "EXPECTED", "OBSERVATIONS", "REMARKS (OK/NOT OK)", "UPLOAD"];
-          
+          const headers = [
+            "SL.NO",
+            "TEST CASES",
+            "EXPECTED",
+            "OBSERVATIONS",
+            "REMARKS (OK/NOT OK)",
+            "UPLOAD",
+          ];
+
           // First pass: calculate maximum lines needed for headers
           let maxHeaderLines = 1;
           const headerLinesArray = [];
@@ -1045,7 +1119,7 @@ export default {
             const availableWidth = colWidths[i] - 6; // More padding to prevent overflow
             const textWidth = doc.getTextWidth(header);
             let headerLines;
-            
+
             // Keep single-word headers (SL.NO, EXPECTED, OBSERVATIONS) on one line
             // Only wrap multi-word headers that exceed the width
             if (textWidth <= availableWidth) {
@@ -1053,7 +1127,11 @@ export default {
             } else {
               // For single-word headers, keep them on one line even if slightly over
               // Only split multi-word headers
-              if (header === "SL.NO" || header === "EXPECTED" || header === "OBSERVATIONS") {
+              if (
+                header === "SL.NO" ||
+                header === "EXPECTED" ||
+                header === "OBSERVATIONS"
+              ) {
                 headerLines = [header]; // Force single line
               } else {
                 headerLines = doc.splitTextToSize(header, availableWidth);
@@ -1062,30 +1140,37 @@ export default {
             headerLinesArray.push(headerLines);
             maxHeaderLines = Math.max(maxHeaderLines, headerLines.length);
           });
-          
+
           // Calculate header height based on maximum lines
           const lineHeight = 4.5;
           const headerHeight = Math.max(12, maxHeaderLines * lineHeight + 4);
-          
+
           // Draw header cells individually to ensure proper alignment
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             const headerLines = headerLinesArray[i];
             const totalTextHeight = headerLines.length * lineHeight;
-            const startY = yPosition - 7 + (headerHeight - totalTextHeight) / 2 + lineHeight;
-            
+            const startY =
+              yPosition - 7 + (headerHeight - totalTextHeight) / 2 + lineHeight;
+
             headerLines.forEach((line, lineIdx) => {
               const lineTextWidth = doc.getTextWidth(line);
               const cellCenterX = xPos + colWidths[i] / 2;
               // Ensure text doesn't overflow cell boundaries
-              const textX = Math.max(xPos + 2, Math.min(cellCenterX - lineTextWidth / 2, xPos + colWidths[i] - lineTextWidth - 2));
-              doc.text(line, textX, startY + (lineIdx * lineHeight));
+              const textX = Math.max(
+                xPos + 2,
+                Math.min(
+                  cellCenterX - lineTextWidth / 2,
+                  xPos + colWidths[i] - lineTextWidth - 2
+                )
+              );
+              doc.text(line, textX, startY + lineIdx * lineHeight);
             });
-            
+
             xPos += colWidths[i];
           });
           yPosition += headerHeight + 3;
@@ -1095,65 +1180,102 @@ export default {
           doc.setFontSize(9);
           for (let i = 1; i <= 9; i++) {
             checkPageBreak(rowHeight + 5);
-            
+
             const obs = templateData[`obs${i}`] || "";
             const expected = templateData[`expected${i}`] || "";
             const rem = templateData[`rem${i}`] || "";
-            const upload = templateData[`upload${i}`] ? "File uploaded" : "No file chosen";
+            const upload = templateData[`upload${i}`]
+              ? "File uploaded"
+              : "No file chosen";
 
             // Calculate row height based on content
-            const testCaseLines = doc.splitTextToSize(testCaseNames[i - 1], colWidths[1] - 6);
+            const testCaseLines = doc.splitTextToSize(
+              testCaseNames[i - 1],
+              colWidths[1] - 6
+            );
             const uploadLines = doc.splitTextToSize(upload, colWidths[5] - 6);
-            const maxLines = Math.max(testCaseLines.length, uploadLines.length, 1);
+            const maxLines = Math.max(
+              testCaseLines.length,
+              uploadLines.length,
+              1
+            );
             const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
 
             // Draw cell borders - draw outer border first, then internal lines
             doc.setLineWidth(0.1);
             // Draw outer rectangle for the entire row
-            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
-            
+            doc.rect(
+              margin,
+              yPosition - 6,
+              contentWidth,
+              currentRowHeight,
+              "D"
+            );
+
             // Draw vertical lines between columns
             xPos = margin;
             for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
               xPos += colWidths[colIdx - 1];
-              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+              doc.line(
+                xPos,
+                yPosition - 6,
+                xPos,
+                yPosition - 6 + currentRowHeight
+              );
             }
 
             // Draw cell content with proper alignment
             xPos = margin;
-            
+
             // SL.NO - centered
             doc.setFont("helvetica", "bold");
             const slNoText = i.toString();
             const slNoWidth = doc.getTextWidth(slNoText);
-            doc.text(slNoText, xPos + colWidths[0] / 2 - slNoWidth / 2, yPosition + 3);
+            doc.text(
+              slNoText,
+              xPos + colWidths[0] / 2 - slNoWidth / 2,
+              yPosition + 3
+            );
             xPos += colWidths[0];
             doc.setFont("helvetica", "normal");
-            
+
             // TEST CASES - left aligned with padding
             doc.text(testCaseLines, xPos + 3, yPosition + 3);
             xPos += colWidths[1];
-            
+
             // EXPECTED - centered
-            const expectedText = expected === "yes" ? "yes" : expected === "no" ? "no" : "";
+            const expectedText =
+              expected === "yes" ? "yes" : expected === "no" ? "no" : "";
             const expectedWidth = doc.getTextWidth(expectedText);
-            doc.text(expectedText, xPos + colWidths[2] / 2 - expectedWidth / 2, yPosition + 3);
+            doc.text(
+              expectedText,
+              xPos + colWidths[2] / 2 - expectedWidth / 2,
+              yPosition + 3
+            );
             xPos += colWidths[2];
-            
+
             // OBSERVATIONS - centered
             const obsText = obs === "yes" ? "yes" : obs === "no" ? "no" : "";
             const obsWidth = doc.getTextWidth(obsText);
-            doc.text(obsText, xPos + colWidths[3] / 2 - obsWidth / 2, yPosition + 3);
+            doc.text(
+              obsText,
+              xPos + colWidths[3] / 2 - obsWidth / 2,
+              yPosition + 3
+            );
             xPos += colWidths[3];
-            
+
             // REMARKS - centered
             const remWidth = doc.getTextWidth(rem || "");
-            doc.text(rem || "", xPos + colWidths[4] / 2 - remWidth / 2, yPosition + 3);
+            doc.text(
+              rem || "",
+              xPos + colWidths[4] / 2 - remWidth / 2,
+              yPosition + 3
+            );
             xPos += colWidths[4];
-            
+
             // UPLOAD - left aligned with padding
             doc.text(uploadLines, xPos + 3, yPosition + 3);
-            
+
             yPosition += currentRowHeight + 1;
           }
           yPosition += 5;
@@ -1163,7 +1285,7 @@ export default {
         if (templateId === 6 && templateData) {
           yPosition += 5;
           checkPageBreak(80);
-          
+
           // Heading
           doc.setFontSize(12);
           doc.setFont("helvetica", "bold");
@@ -1179,19 +1301,19 @@ export default {
             "Tensile Strength",
             "Hardness Test Results as specified in QAP",
             "UT Test",
-            "Any Other Observations:"
+            "Any Other Observations:",
           ];
 
           // Table column widths with better spacing
           // Calculate widths to ensure they add up exactly to contentWidth
           const colWidths = [
-            contentWidth * 0.08,  // SL.NO
-            contentWidth * 0.25,  // CHECK POINTS
-            contentWidth * 0.26,  // APPLICABILITY
-            contentWidth * 0.16,  // COMPLIANCE
-            contentWidth * 0.25   // REMARKS
+            contentWidth * 0.08, // SL.NO
+            contentWidth * 0.25, // CHECK POINTS
+            contentWidth * 0.26, // APPLICABILITY
+            contentWidth * 0.16, // COMPLIANCE
+            contentWidth * 0.25, // REMARKS
           ];
-          
+
           // Ensure columns add up exactly to contentWidth (fix any rounding issues)
           const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
           if (Math.abs(totalWidth - contentWidth) > 0.1) {
@@ -1202,12 +1324,18 @@ export default {
           }
 
           const rowHeight = 12;
-          
+
           // Draw header cells with borders and background
           doc.setFontSize(9);
           doc.setFont("helvetica", "bold");
-          const headers = ["SL.NO", "CHECK POINTS", "APPLICABILITY (A/NA)", "COMPLIANCE (YES/NO)", "REMARKS (OK/NOT OK)"];
-          
+          const headers = [
+            "SL.NO",
+            "CHECK POINTS",
+            "APPLICABILITY (A/NA)",
+            "COMPLIANCE (YES/NO)",
+            "REMARKS (OK/NOT OK)",
+          ];
+
           // First pass: calculate maximum lines needed for headers
           let maxHeaderLines = 1;
           const headerLinesArray = [];
@@ -1215,7 +1343,7 @@ export default {
             const availableWidth = colWidths[i] - 6; // More padding to prevent overflow
             const textWidth = doc.getTextWidth(header);
             let headerLines;
-            
+
             // Keep single-word headers (SL.NO) on one line
             // Only wrap multi-word headers that exceed the width
             if (textWidth <= availableWidth) {
@@ -1232,30 +1360,37 @@ export default {
             headerLinesArray.push(headerLines);
             maxHeaderLines = Math.max(maxHeaderLines, headerLines.length);
           });
-          
+
           // Calculate header height based on maximum lines
           const lineHeight = 4.5;
           const headerHeight = Math.max(12, maxHeaderLines * lineHeight + 4);
-          
+
           // Draw header cells individually to ensure proper alignment
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             const headerLines = headerLinesArray[i];
             const totalTextHeight = headerLines.length * lineHeight;
-            const startY = yPosition - 7 + (headerHeight - totalTextHeight) / 2 + lineHeight;
-            
+            const startY =
+              yPosition - 7 + (headerHeight - totalTextHeight) / 2 + lineHeight;
+
             headerLines.forEach((line, lineIdx) => {
               const lineTextWidth = doc.getTextWidth(line);
               const cellCenterX = xPos + colWidths[i] / 2;
               // Ensure text doesn't overflow cell boundaries
-              const textX = Math.max(xPos + 2, Math.min(cellCenterX - lineTextWidth / 2, xPos + colWidths[i] - lineTextWidth - 2));
-              doc.text(line, textX, startY + (lineIdx * lineHeight));
+              const textX = Math.max(
+                xPos + 2,
+                Math.min(
+                  cellCenterX - lineTextWidth / 2,
+                  xPos + colWidths[i] - lineTextWidth - 2
+                )
+              );
+              doc.text(line, textX, startY + lineIdx * lineHeight);
             });
-            
+
             xPos += colWidths[i];
           });
           yPosition += headerHeight + 3;
@@ -1270,53 +1405,83 @@ export default {
 
             if (applicability || compliance || remarks) {
               checkPageBreak(rowHeight + 5);
-              
+
               // Calculate row height based on content
-              const checkPointLines = doc.splitTextToSize(checkPointNames[i - 1], colWidths[1] - 6);
+              const checkPointLines = doc.splitTextToSize(
+                checkPointNames[i - 1],
+                colWidths[1] - 6
+              );
               const maxLines = Math.max(checkPointLines.length, 1);
               const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
 
               // Draw cell borders - draw outer border first, then internal lines
               doc.setLineWidth(0.1);
               // Draw outer rectangle for the entire row
-              doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
-              
+              doc.rect(
+                margin,
+                yPosition - 6,
+                contentWidth,
+                currentRowHeight,
+                "D"
+              );
+
               // Draw vertical lines between columns
               xPos = margin;
               for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
                 xPos += colWidths[colIdx - 1];
-                doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+                doc.line(
+                  xPos,
+                  yPosition - 6,
+                  xPos,
+                  yPosition - 6 + currentRowHeight
+                );
               }
 
               // Draw cell content with proper alignment
               xPos = margin;
-              
+
               // SL.NO - centered
               doc.setFont("helvetica", "bold");
               const slNoText = i.toString();
               const slNoWidth = doc.getTextWidth(slNoText);
-              doc.text(slNoText, xPos + colWidths[0] / 2 - slNoWidth / 2, yPosition + 3);
+              doc.text(
+                slNoText,
+                xPos + colWidths[0] / 2 - slNoWidth / 2,
+                yPosition + 3
+              );
               xPos += colWidths[0];
               doc.setFont("helvetica", "normal");
-              
+
               // CHECK POINTS - left aligned with padding
               doc.text(checkPointLines, xPos + 3, yPosition + 3);
               xPos += colWidths[1];
-              
+
               // APPLICABILITY - centered
               const appWidth = doc.getTextWidth(applicability);
-              doc.text(applicability, xPos + colWidths[2] / 2 - appWidth / 2, yPosition + 3);
+              doc.text(
+                applicability,
+                xPos + colWidths[2] / 2 - appWidth / 2,
+                yPosition + 3
+              );
               xPos += colWidths[2];
-              
+
               // COMPLIANCE - centered
               const compWidth = doc.getTextWidth(compliance);
-              doc.text(compliance, xPos + colWidths[3] / 2 - compWidth / 2, yPosition + 3);
+              doc.text(
+                compliance,
+                xPos + colWidths[3] / 2 - compWidth / 2,
+                yPosition + 3
+              );
               xPos += colWidths[3];
-              
+
               // REMARKS - centered
               const remWidth = doc.getTextWidth(remarks || "");
-              doc.text(remarks || "", xPos + colWidths[4] / 2 - remWidth / 2, yPosition + 3);
-              
+              doc.text(
+                remarks || "",
+                xPos + colWidths[4] / 2 - remWidth / 2,
+                yPosition + 3
+              );
+
               yPosition += currentRowHeight + 1;
             }
           }
@@ -1324,18 +1489,23 @@ export default {
         }
 
         // ===== SIGNATURE SECTION (VERTICAL LAYOUT) =====
-        if (templateData && (templateData.prepared_by || templateData.verified_by || templateData.approved_by)) {
+        if (
+          templateData &&
+          (templateData.prepared_by ||
+            templateData.verified_by ||
+            templateData.approved_by)
+        ) {
           checkPageBreak(60);
           yPosition += 10;
           doc.setFontSize(12);
           doc.setFont("helvetica", "bold");
           doc.text("Signatures", margin, yPosition);
           yPosition += 10;
-          
+
           const signatures = [
             { label: "Prepared By", value: templateData.prepared_by },
             { label: "Verified By", value: templateData.verified_by },
-            { label: "Approved By", value: templateData.approved_by }
+            { label: "Approved By", value: templateData.approved_by },
           ];
 
           signatures.forEach((sig) => {
@@ -1346,7 +1516,10 @@ export default {
             yPosition += 6;
             doc.setFont("helvetica", "normal");
             const valueText = sig.value || "N/A";
-            const valueLines = doc.splitTextToSize(valueText, contentWidth - 10);
+            const valueLines = doc.splitTextToSize(
+              valueText,
+              contentWidth - 10
+            );
             doc.text(valueLines, margin + 5, yPosition);
             yPosition += valueLines.length * 5 + 5;
           });
@@ -1360,7 +1533,9 @@ export default {
           doc.setFont("helvetica", "normal");
           doc.setTextColor(128, 128, 128);
           const footerText = `Generated on ${new Date().toLocaleString()} | Page ${i} of ${totalPages}`;
-          doc.text(footerText, pageWidth / 2, pageHeight - 10, { align: "center" });
+          doc.text(footerText, pageWidth / 2, pageHeight - 10, {
+            align: "center",
+          });
         }
 
         // Save PDF
