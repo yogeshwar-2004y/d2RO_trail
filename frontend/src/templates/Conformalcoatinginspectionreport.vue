@@ -413,7 +413,9 @@
         <!-- Submit Button - Enabled only after Approved By signature -->
         <div
           class="form-actions final-submit"
-          v-if="isFormReadonly && approvedBySignatureUrl && !shouldHideSubmitButton"
+          v-if="
+            isFormReadonly && approvedBySignatureUrl && !shouldHideSubmitButton
+          "
         >
           <button
             type="button"
@@ -581,13 +583,13 @@ export default {
       const currentUserRole = userStore.getters.currentUserRole();
       const isQAReviewer = currentUserRole === 3;
       const isQAHead = currentUserRole === 2;
-      
+
       // For QA Reviewer and QA Head: hide only after submission
       if (isQAReviewer || isQAHead) {
         // Check if report is submitted (status is not 'ASSIGNED')
         return this.reportStatus && this.reportStatus !== "ASSIGNED";
       }
-      
+
       // For all other roles: always hide
       return true;
     },
@@ -638,7 +640,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
+          `http://localhost:8000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -657,7 +659,7 @@ export default {
           const report = result.report;
 
           this.reportId = report.report_id;
-          
+
           // Fetch report status from main reports API
           await this.fetchReportStatus();
           this.projectName = report.project_name || "";
@@ -773,7 +775,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/users/verify-signature",
+          "http://localhost:8000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -844,7 +846,7 @@ export default {
 
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:5000/api/reports/conformal-coating-inspection",
+          "http://localhost:8000/api/reports/conformal-coating-inspection",
           {
             method: "POST",
             headers: {
@@ -903,7 +905,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/reports/conformal-coating-inspection/${this.reportId}`,
+          `http://localhost:8000/api/reports/conformal-coating-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -978,12 +980,12 @@ export default {
     async fetchReportStatus() {
       // Fetch report status from main reports API
       if (!this.reportId) return;
-      
+
       try {
         const response = await fetch(
           `http://localhost:8000/api/reports/${this.reportId}`
         );
-        
+
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.report) {
@@ -1004,7 +1006,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/reports/conformal-coating-inspection/notify",
+          "http://localhost:8000/api/reports/conformal-coating-inspection/notify",
           {
             method: "POST",
             headers: {
@@ -1033,7 +1035,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:5000/api/reports/conformal-coating-inspection/notify-approval",
+          "http://localhost:8000/api/reports/conformal-coating-inspection/notify-approval",
           {
             method: "POST",
             headers: {

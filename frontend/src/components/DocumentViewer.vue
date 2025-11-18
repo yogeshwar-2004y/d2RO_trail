@@ -1553,7 +1553,7 @@ export default {
       try {
         console.log(`Attempting to load metadata for LRU ${lruId}...`);
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/metadata`
+          `http://localhost:8000/api/lrus/${lruId}/metadata`
         );
 
         if (!response.ok) {
@@ -1586,7 +1586,7 @@ export default {
       try {
         console.log(`Attempting to load next doc_ver for LRU ${lruId}...`);
         const response = await fetch(
-          `http://localhost:5000/api/plan-documents/next-doc-ver/${lruId}`
+          `http://localhost:8000/api/plan-documents/next-doc-ver/${lruId}`
         );
 
         if (!response.ok) {
@@ -1621,7 +1621,7 @@ export default {
         console.log(`Loading existing documents for LRU ${lruId}...`);
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
 
         if (!response.ok) {
@@ -1652,7 +1652,7 @@ export default {
     async loadDocumentVersions(lruId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
         const result = await response.json();
 
@@ -1703,7 +1703,7 @@ export default {
 
         console.log("📄 Extracted filename:", filename);
 
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         console.log("🌐 File URL:", fileUrl);
 
         // Test if file is accessible
@@ -1835,7 +1835,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${lruId}/plan-documents`
         );
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -1871,7 +1871,7 @@ export default {
     /*async loadFileFromServer(filePath, originalFilename) {
       try {
         const filename = filePath.split('/').pop();
-        const fileUrl = `http://localhost:5000/api/files/plan-documents/${filename}`;
+        const fileUrl = `http://localhost:8000/api/files/plan-documents/${filename}`;
         
         // Determine file type from extension
         const extension = originalFilename.split('.').pop().toLowerCase();
@@ -1967,7 +1967,7 @@ export default {
         }
 
         // Make API call to accept the document
-        const url = `http://localhost:5000/api/documents/${this.documentId}/accept`;
+        const url = `http://localhost:8000/api/documents/${this.documentId}/accept`;
         console.log("Making request to:", url);
 
         const response = await fetch(url, {
@@ -2069,7 +2069,7 @@ export default {
         console.log("Sending comment acceptance/rejection data:", requestData);
         console.log("API endpoint:", endpoint);
 
-        const response = await fetch(`http://localhost:5000${endpoint}`, {
+        const response = await fetch(`http://localhost:8000${endpoint}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2143,7 +2143,7 @@ export default {
       try {
         this.loadingReviewerStatus = true;
         const response = await fetch(
-          `http://localhost:5000/api/assigned-reviewer?lru_name=${encodeURIComponent(
+          `http://localhost:8000/api/assigned-reviewer?lru_name=${encodeURIComponent(
             this.lruName
           )}&project_name=${encodeURIComponent(this.projectName)}`
         );
@@ -2303,7 +2303,7 @@ export default {
         );
 
         const response = await fetch(
-          "http://localhost:5000/api/plan-documents",
+          "http://localhost:8000/api/plan-documents",
           {
             method: "POST",
             body: formData,
@@ -2375,7 +2375,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:5000/api/plan-documents/${latestDocument.document_id}`,
+          `http://localhost:8000/api/plan-documents/${latestDocument.document_id}`,
           {
             method: "DELETE",
             headers: {
@@ -2714,7 +2714,7 @@ export default {
     async deleteCommentFromBackend(commentId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/comments/${commentId}`,
+          `http://localhost:8000/api/comments/${commentId}`,
           {
             method: "DELETE",
             headers: {
@@ -2984,7 +2984,7 @@ export default {
           page_no: commentData.page_no,
         });
 
-        const response = await fetch("http://localhost:5000/api/comments", {
+        const response = await fetch("http://localhost:8000/api/comments", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -3022,7 +3022,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/comments?document_id=${this.documentId}`
+          `http://localhost:8000/api/comments?document_id=${this.documentId}`
         );
 
         if (response.ok) {
@@ -3062,7 +3062,7 @@ export default {
 
         // Get all documents for this LRU/project
         const documentsResponse = await fetch(
-          `http://localhost:5000/api/lrus/${this.documentDetails.lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${this.documentDetails.lruId}/plan-documents`
         );
         console.log("Documents response status:", documentsResponse.status);
 
@@ -3087,7 +3087,7 @@ export default {
           console.log("Loading comments for document:", doc.document_id);
           try {
             const commentsResponse = await fetch(
-              `http://localhost:5000/api/comments?document_id=${doc.document_id}`
+              `http://localhost:8000/api/comments?document_id=${doc.document_id}`
             );
             if (commentsResponse.ok) {
               const commentsData = await commentsResponse.json();

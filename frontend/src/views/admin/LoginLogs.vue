@@ -125,7 +125,11 @@
         </div>
         <div class="search-field">
           <label>Activity Type:</label>
-          <select v-model="searchFilters.activityType" class="filter-select" @change="applyFilters">
+          <select
+            v-model="searchFilters.activityType"
+            class="filter-select"
+            @change="applyFilters"
+          >
             <option value="">All Activities</option>
             <option value="logged_in">Login</option>
             <option value="logged_out">Logout</option>
@@ -151,7 +155,9 @@
           />
         </div>
         <div class="search-field">
-          <button class="clear-filters-btn" @click="clearFilters">Clear Filters</button>
+          <button class="clear-filters-btn" @click="clearFilters">
+            Clear Filters
+          </button>
         </div>
       </div>
     </div>
@@ -159,7 +165,7 @@
     <!-- Toggle Advanced Search Button -->
     <div class="search-toggle-container">
       <button class="toggle-search-btn" @click="toggleAdvancedSearch">
-        {{ showAdvancedSearch ? 'Hide' : 'Show' }} Advanced Search
+        {{ showAdvancedSearch ? "Hide" : "Show" }} Advanced Search
       </button>
     </div>
 
@@ -323,12 +329,15 @@ export default {
         // If recordLimit is set, use it and reset offset to 0
         // Otherwise use pagination with limit and offset
         const params = {
-          limit: this.recordLimit && this.recordLimit > 0 ? this.recordLimit : this.limit,
+          limit:
+            this.recordLimit && this.recordLimit > 0
+              ? this.recordLimit
+              : this.limit,
           offset: this.recordLimit && this.recordLimit > 0 ? 0 : this.offset,
         };
-        
+
         const response = await axios.get(
-          "http://localhost:5000/api/login-logs",
+          "http://localhost:8000/api/login-logs",
           { params }
         );
 
@@ -360,14 +369,14 @@ export default {
         const query = this.searchQuery.toLowerCase();
         filtered = filtered.filter(
           (log) =>
-            (log.serial_number?.toString() || '').includes(query) ||
-            (log.user_id?.toString() || '').includes(query) ||
-            (log.activity_performed?.toLowerCase() || '').includes(query) ||
-            (log.performed_by?.toString() || '').includes(query) ||
-            (log.performed_by_name?.toLowerCase() || '').includes(query) ||
-            (log.user_name?.toLowerCase() || '').includes(query) ||
-            (log.user_email?.toLowerCase() || '').includes(query) ||
-            (log.suspicion_reason?.toLowerCase() || '').includes(query) ||
+            (log.serial_number?.toString() || "").includes(query) ||
+            (log.user_id?.toString() || "").includes(query) ||
+            (log.activity_performed?.toLowerCase() || "").includes(query) ||
+            (log.performed_by?.toString() || "").includes(query) ||
+            (log.performed_by_name?.toLowerCase() || "").includes(query) ||
+            (log.user_name?.toLowerCase() || "").includes(query) ||
+            (log.user_email?.toLowerCase() || "").includes(query) ||
+            (log.suspicion_reason?.toLowerCase() || "").includes(query) ||
             (log.is_suspicious && "suspicious".includes(query)) ||
             this.formatTimestamp(log.timestamp).toLowerCase().includes(query)
         );
@@ -378,8 +387,8 @@ export default {
         const userName = this.searchFilters.userName.toLowerCase();
         filtered = filtered.filter(
           (log) =>
-            (log.user_name?.toLowerCase() || '').includes(userName) ||
-            (log.performed_by_name?.toLowerCase() || '').includes(userName)
+            (log.user_name?.toLowerCase() || "").includes(userName) ||
+            (log.performed_by_name?.toLowerCase() || "").includes(userName)
         );
       }
 
@@ -472,24 +481,25 @@ export default {
     async downloadPDF() {
       try {
         const params = {};
-        
+
         // Set limit only if no search filters are applied
-        const hasFilters = this.searchQuery.trim() || 
-                          this.searchFilters.userName.trim() ||
-                          this.searchFilters.userId.trim() ||
-                          this.searchFilters.activityType ||
-                          this.searchFilters.dateFrom ||
-                          this.searchFilters.dateTo;
-        
+        const hasFilters =
+          this.searchQuery.trim() ||
+          this.searchFilters.userName.trim() ||
+          this.searchFilters.userId.trim() ||
+          this.searchFilters.activityType ||
+          this.searchFilters.dateFrom ||
+          this.searchFilters.dateTo;
+
         if (!hasFilters && this.recordLimit && this.recordLimit > 0) {
           params.limit = this.recordLimit;
         }
-        
+
         // Include search query if filter is applied
         if (this.searchQuery && this.searchQuery.trim()) {
           params.search = this.searchQuery.trim();
         }
-        
+
         // Include advanced search filters
         if (this.searchFilters.userName.trim()) {
           params.user_name = this.searchFilters.userName.trim();
@@ -506,9 +516,9 @@ export default {
         if (this.searchFilters.dateTo) {
           params.date_to = this.searchFilters.dateTo;
         }
-        
+
         const response = await axios.get(
-          "http://localhost:5000/api/login-logs/pdf",
+          "http://localhost:8000/api/login-logs/pdf",
           {
             params,
             responseType: "blob",
