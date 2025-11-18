@@ -528,6 +528,7 @@ def get_memo_details(memo_id):
             "coordinator": memo.get("coordinator"),
             "memo_status": memo.get("memo_status"),
             "qa_remarks": memo.get("qa_remarks"),
+            "qa_signature": memo.get("qa_signature"),
             "submitted_by_name": memo.get("submitted_by_name"),
             "accepted_by_name": memo.get("accepted_by_name")
         }
@@ -1550,19 +1551,28 @@ def update_memo_status(memo_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Update memo status, reviewer comments, and certification data
+        # Update memo status, reviewer comments, certification data, and signature
         reviewer_comments = data.get('reviewer_comments', '')
         certified = data.get('certified', [])
+        qa_signature = data.get('qa_signature', None)
         
         print(f"=== DEBUG: Certification data ===")
         print(f"certified: {certified}")
+        print(f"qa_signature: {qa_signature}")
         print(f"=== END DEBUG ===")
         
-        cur.execute("""
-            UPDATE memos 
-            SET memo_status = %s, qa_remarks = %s, certified = %s
-            WHERE memo_id = %s
-        """, (memo_status, reviewer_comments, certified, memo_id))
+        if qa_signature:
+            cur.execute("""
+                UPDATE memos 
+                SET memo_status = %s, qa_remarks = %s, certified = %s, qa_signature = %s
+                WHERE memo_id = %s
+            """, (memo_status, reviewer_comments, certified, qa_signature, memo_id))
+        else:
+            cur.execute("""
+                UPDATE memos 
+                SET memo_status = %s, qa_remarks = %s, certified = %s
+                WHERE memo_id = %s
+            """, (memo_status, reviewer_comments, certified, memo_id))
         
         if cur.rowcount == 0:
             cur.close()
