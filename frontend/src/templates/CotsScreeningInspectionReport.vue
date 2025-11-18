@@ -533,6 +533,7 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
+import jsPDF from "jspdf";
 
 export default {
   name: "CotsScreeningInspectionReport",
@@ -961,8 +962,26 @@ export default {
         console.error("Error fetching report status:", error);
       }
     },
-    exportReport() {
+    async exportReport() {
       try {
+        // Helper function to convert image URL to base64
+        const imageToBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
         const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -971,127 +990,349 @@ export default {
 
         let yPosition = margin;
 
-        // Set font styles
-        doc.setFont("helvetica");
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight) => {
+          if (yPosition + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+            return true;
+          }
+          return false;
+        };
 
-        // Header
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text("COTS SCREENING INSPECTION REPORT", pageWidth / 2, yPosition, {
-          align: "center",
-        });
-        yPosition += 15;
-
-        // Document path and date
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
-          this.lruName || "LRU"
-        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
-          this.currentYear || "2025"
-        }`;
-        doc.text(documentPath, margin, yPosition);
-
-        const dateText = `Date: ${
-          this.currentDate || new Date().toLocaleDateString("en-GB")
-        }`;
-        const dateWidth = doc.getTextWidth(dateText);
-        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
-        yPosition += 12;
-
-        // Subject line
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: COTS Screening Inspection Report for ${
-          this.lruName || "Unknown LRU"
-        }`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
-
-        // Report details
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("Report Details:", margin, yPosition);
-        yPosition += 8;
-
-        doc.setFont("helvetica", "normal");
-        const details = [
-          `Project Name: ${this.formData.projectName || "Not specified"}`,
-          `DP Name: ${this.formData.dpName || "Not specified"}`,
-          `Report Ref No: ${this.formData.reportRefNo || "Not specified"}`,
-          `Memo Ref No: ${this.formData.memoRefNo || "Not specified"}`,
-          `LRU Name: ${this.formData.lruName || "Not specified"}`,
-          `SRU Name: ${this.formData.sruName || "Not specified"}`,
-          `Part No: ${this.formData.partNo || "Not specified"}`,
-          `Quantity: ${this.formData.quantity || "Not specified"}`,
-          `Start Date: ${this.formData.startDate || "Not specified"}`,
-          `End Date: ${this.formData.endDate || "Not specified"}`,
-        ];
-
-        details.forEach((detail) => {
-          doc.text(detail, margin, yPosition);
-          yPosition += 6;
-        });
-
-        yPosition += 10;
-
-        // Test cases table
-        doc.setFont("helvetica", "bold");
-        doc.text("Test Cases:", margin, yPosition);
-        yPosition += 8;
-
-        if (this.formData.testCases && this.formData.testCases.length > 0) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "bold");
-
-          // Table headers
-          doc.text("SL.NO", margin, yPosition);
-          doc.text("TEST CASES", margin + 15, yPosition);
-          doc.text("TEST NATURE", margin + 100, yPosition);
-          doc.text("REMARKS", margin + 160, yPosition);
-          yPosition += 6;
-
-          // Table data
-          doc.setFont("helvetica", "normal");
-          this.formData.testCases.forEach((testCase, index) => {
-            doc.text((index + 1).toString(), margin, yPosition);
-            doc.text(
-              testCase.description.substring(0, 40),
-              margin + 15,
-              yPosition
-            );
-            doc.text(testCase.testNature || "", margin + 100, yPosition);
-            doc.text(testCase.remarks || "", margin + 160, yPosition);
-            yPosition += 6;
+        // Helper function to add text with wrapping
+        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+          doc.setFontSize(fontSize);
+          doc.setFont("helvetica", isBold ? "bold" : "normal");
+          const lines = doc.splitTextToSize(text || "", maxWidth);
+          const lineHeight = fontSize * 0.4;
+          lines.forEach((line, index) => {
+            let xPos = x;
+            if (align === "center") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + (maxWidth - textWidth) / 2;
+            } else if (align === "right") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + maxWidth - textWidth;
+            }
+            doc.text(line, xPos, y + index * lineHeight);
           });
+          return lines.length * lineHeight;
+        };
+
+        // ===== HEADER SECTION =====
+        // Load DRDO logo
+        let drdoLogoBase64 = null;
+        try {
+          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
+        } catch (e) {
+          console.warn("Could not load DRDO logo:", e);
         }
 
-        yPosition += 15;
+        // Add DRDO logo (left corner)
+        if (drdoLogoBase64) {
+          try {
+            doc.addImage(drdoLogoBase64, "PNG", margin, yPosition, 15, 15);
+          } catch (e) {
+            console.warn("Could not add DRDO logo:", e);
+          }
+        }
 
-        // Signatures
+        // Add AVIATRAX text (centered)
+        doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text("Signatures:", margin, yPosition);
+        doc.setTextColor(75, 0, 130);
+        const aviatraxText = "AVIATRAX™";
+        const aviatraxWidth = doc.getTextWidth(aviatraxText);
+        doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
+
+        // Add Defence Research text below AVIATRAX
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        const drdoText = "Defence Research and Development Org. (DRDO)";
+        const drdoTextWidth = doc.getTextWidth(drdoText);
+        doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreTextWidth = doc.getTextWidth(centreText);
+        doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
+
+        // CASDIC path and date
+        yPosition += 25;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${this.lruName || "LRU"}/SL.${this.serialNumber || "001"}/${this.inspectionCount || "INS-001"}/${this.currentYear || "2025"}`;
+        doc.text(documentPath, margin, yPosition);
+
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 10;
+
+        // Subject line
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: COTS Screening Inspection Report for ${this.lruName || "Unknown LRU"}`;
+        const subjectWidth = doc.getTextWidth(subjectText);
+        doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
+        yPosition += 12;
+
+        // ===== REPORT DETAILS SECTION =====
+        checkPageBreak(50);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details", margin, yPosition);
         yPosition += 8;
 
+        doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("Prepared By: _________________", margin, yPosition);
-        doc.text("Verified By: _________________", margin + 70, yPosition);
-        doc.text("Approved By: _________________", margin + 140, yPosition);
+        const colWidth = (contentWidth - 10) / 2;
+        let leftY = yPosition;
+        let rightY = yPosition;
+
+        // Left column fields
+        const leftFields = [
+          { label: "Project Name", value: this.formData.projectName || "N/A" },
+          { label: "Report Ref No", value: this.formData.reportRefNo || "N/A" },
+          { label: "Memo Ref No", value: this.formData.memoRefNo || "N/A" },
+          { label: "LRU Name", value: this.formData.lruName || "N/A" },
+          { label: "Inspection Stage", value: this.formData.inspectionStage || "N/A" },
+          { label: "Test Venue", value: this.formData.testVenue || "N/A" },
+          { label: "SL.NO'S", value: this.formData.slNos || "N/A" },
+        ];
+
+        // Right column fields
+        const rightFields = [
+          { label: "DP Name", value: this.formData.dpName || "N/A" },
+          {
+            label: "Dated",
+            value: this.formData.dated1
+              ? new Date(this.formData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: this.formData.dated2
+              ? new Date(this.formData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          { label: "SRU Name", value: this.formData.sruName || "N/A" },
+          { label: "Part No", value: this.formData.partNo || "N/A" },
+          {
+            label: "Quantity",
+            value: this.formData.quantity !== null && this.formData.quantity !== undefined
+              ? this.formData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: this.formData.startDate
+              ? new Date(this.formData.startDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: this.formData.endDate
+              ? new Date(this.formData.endDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+        ];
+
+        // Print left column
+        leftFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          leftY += height + 3;
+        });
+
+        // Print right column
+        rightFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          rightY += height + 3;
+        });
+
+        yPosition = Math.max(leftY, rightY) + 10;
+
+        // ===== TEST CASES TABLE =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection Tests", margin, yPosition);
+        yPosition += 10;
+
+        if (this.formData.testCases && this.formData.testCases.length > 0) {
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.35,  // TEST CASES
+            contentWidth * 0.25,  // TEST NATURE
+            contentWidth * 0.32,  // REMARKS
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "TEST CASES", "TEST NATURE", "REMARKS"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text
+            const headerWidth = doc.getTextWidth(header);
+            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          this.formData.testCases.forEach((testCase, index) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (index + 1).toString(),
+              testCase.description || "",
+              testCase.testNature || "",
+              testCase.remarks || "",
+            ];
+
+            // Calculate row height based on content
+            const maxLines = Math.max(...rowData.map((text, idx) => 
+              doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+            ));
+            const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += currentRowHeight + 1;
+          });
+          yPosition += 5;
+        }
+
+        // ===== SIGNATURES SECTION =====
+        checkPageBreak(30);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        // Helper to extract name from signature URL
+        const getSignatureName = (signatureUrl) => {
+          if (!signatureUrl) return "";
+          if (signatureUrl.includes("|")) {
+            return signatureUrl.split("|")[0];
+          }
+          return "";
+        };
+
+        // Helper to get signature image URL
+        const getSignatureImageUrl = (signatureUrl) => {
+          if (!signatureUrl) return null;
+          if (signatureUrl.includes("|")) {
+            const parts = signatureUrl.split("|");
+            return parts.length > 1 ? parts[1] : null;
+          }
+          return signatureUrl.startsWith("http") ? signatureUrl : null;
+        };
+
+        const signatures = [
+          {
+            label: "Prepared By",
+            signatureUrl: this.preparedBySignatureUrl,
+            verifiedName: this.preparedByVerifiedName || getSignatureName(this.preparedBySignatureUrl),
+          },
+          {
+            label: "Verified By",
+            signatureUrl: this.verifiedBySignatureUrl,
+            verifiedName: this.verifiedByVerifiedName || getSignatureName(this.verifiedBySignatureUrl),
+          },
+          {
+            label: "Approved By",
+            signatureUrl: this.approvedBySignatureUrl,
+            verifiedName: this.approvedByVerifiedName || getSignatureName(this.approvedBySignatureUrl),
+          },
+        ];
+
+        const sigColWidth = contentWidth / 3;
+        for (let index = 0; index < signatures.length; index++) {
+          const sig = signatures[index];
+          const xPos = margin + index * sigColWidth;
+          doc.text(`${sig.label}:`, xPos, yPosition);
+          
+          const imgUrl = getSignatureImageUrl(sig.signatureUrl);
+          if (imgUrl) {
+            try {
+              const imgBase64 = await imageToBase64(imgUrl);
+              doc.addImage(imgBase64, "PNG", xPos, yPosition + 3, 40, 15);
+              if (sig.verifiedName) {
+                doc.text(sig.verifiedName, xPos, yPosition + 20);
+              }
+            } catch (e) {
+              console.warn(`Could not load signature image for ${sig.label}:`, e);
+              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            }
+          } else {
+            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+          }
+        }
+
+        // Add page numbers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
 
         // Save PDF
-        const fileName = `COTS_Screening_Inspection_Report_${
-          this.lruName || "Unknown"
-        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `COTS_Screening_Inspection_Report_${this.lruName || "Unknown"}_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         alert("Report exported successfully as PDF!");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        alert(
-          `Error exporting PDF: ${
-            error.message || "Unknown error"
-          }. Please try again.`
-        );
+        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
       }
     },
   },

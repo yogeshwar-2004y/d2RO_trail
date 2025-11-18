@@ -272,6 +272,7 @@
           <!-- Dynamic Template Component -->
           <component
             v-if="currentTemplateComponent"
+            ref="templateComponent"
             :is="currentTemplateComponent"
             :projectName="projectName"
             :reportId="reportId"
@@ -743,6 +744,14 @@ export default {
 
     async downloadReportPDF() {
       try {
+        // Check if the template component has its own exportReport function
+        // If yes, use it (for templates 2, 3, 4, 5, 7)
+        if (this.$refs.templateComponent && typeof this.$refs.templateComponent.exportReport === 'function') {
+          this.$refs.templateComponent.exportReport();
+          return;
+        }
+
+        // Otherwise, use IndividualReport's export logic (for templates 1 and 6)
         // Dynamically import jsPDF
         const { jsPDF } = await import("jspdf");
 

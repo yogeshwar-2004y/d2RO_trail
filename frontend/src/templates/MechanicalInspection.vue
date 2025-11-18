@@ -616,6 +616,7 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
+import jsPDF from "jspdf";
 
 export default {
   name: "MechanicalInspection",
@@ -1248,6 +1249,467 @@ export default {
         }
       } catch (error) {
         console.error("Error fetching report status:", error);
+      }
+    },
+    async exportReport() {
+      try {
+        // Helper function to convert image URL to base64
+        const imageToBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
+        const doc = new jsPDF("p", "mm", "a4");
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - 2 * margin;
+
+        let yPosition = margin;
+        let currentPage = 1;
+
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight) => {
+          if (yPosition + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            currentPage++;
+            yPosition = margin;
+            return true;
+          }
+          return false;
+        };
+
+        // Helper function to add text with wrapping
+        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+          doc.setFontSize(fontSize);
+          doc.setFont("helvetica", isBold ? "bold" : "normal");
+          const lines = doc.splitTextToSize(text || "", maxWidth);
+          const lineHeight = fontSize * 0.4;
+          lines.forEach((line, index) => {
+            let xPos = x;
+            if (align === "center") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + (maxWidth - textWidth) / 2;
+            } else if (align === "right") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + maxWidth - textWidth;
+            }
+            doc.text(line, xPos, y + index * lineHeight);
+          });
+          return lines.length * lineHeight;
+        };
+
+        // ===== HEADER SECTION =====
+        // Load DRDO logo
+        let drdoLogoBase64 = null;
+        try {
+          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
+        } catch (e) {
+          console.warn("Could not load DRDO logo:", e);
+        }
+
+        // Add DRDO logo (left corner)
+        let textStartX = margin + 18;
+        if (drdoLogoBase64) {
+          try {
+            doc.addImage(drdoLogoBase64, "PNG", margin, yPosition, 15, 15);
+            textStartX = margin + 18;
+          } catch (e) {
+            console.warn("Could not add DRDO logo:", e);
+            textStartX = margin;
+          }
+        }
+
+        // Add AVIATRAX text (centered)
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(75, 0, 130);
+        const aviatraxText = "AVIATRAX™";
+        const aviatraxWidth = doc.getTextWidth(aviatraxText);
+        doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
+
+        // Add Defence Research text below AVIATRAX
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        const drdoText = "Defence Research and Development Org. (DRDO)";
+        const drdoTextWidth = doc.getTextWidth(drdoText);
+        doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreTextWidth = doc.getTextWidth(centreText);
+        doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
+
+        // CASDIC path and date
+        yPosition += 25;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.reportData.projectName || "PROJECT"}/${this.reportData.lruName || "LRU"}/SL.${this.reportData.slNos || "001"}/${this.reportData.reportRefNo || "INS-001"}/${this.currentYear}`;
+        doc.text(documentPath, margin, yPosition);
+
+        const dateText = `Date: ${this.formattedDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 10;
+
+        // Subject line
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Mechanical Inspection Report for ${this.reportData.lruName || "Unknown LRU"}`;
+        const subjectWidth = doc.getTextWidth(subjectText);
+        doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
+        yPosition += 12;
+
+        // ===== REPORT DETAILS SECTION =====
+        checkPageBreak(50);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const colWidth = (contentWidth - 10) / 2;
+        let leftY = yPosition;
+        let rightY = yPosition;
+
+        // Left column fields
+        const leftFields = [
+          { label: "Project Name", value: this.reportData.projectName || "N/A" },
+          { label: "Report Ref No", value: this.reportData.reportRefNo || "N/A" },
+          { label: "Memo Ref No", value: this.reportData.memoRefNo || "N/A" },
+          { label: "LRU Name", value: this.reportData.lruName || "N/A" },
+          { label: "Inspection Stage", value: this.reportData.inspectionStage || "N/A" },
+          { label: "Test Venue", value: this.reportData.testVenue || "N/A" },
+          { label: "SL.NO'S", value: this.reportData.slNos || "N/A" },
+        ];
+
+        // Right column fields
+        const rightFields = [
+          { label: "DP Name", value: this.reportData.dpName || "N/A" },
+          {
+            label: "Dated",
+            value: this.reportData.dated1
+              ? new Date(this.reportData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: this.reportData.dated2
+              ? new Date(this.reportData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          { label: "SRU Name", value: this.reportData.sruName || "N/A" },
+          { label: "Part No", value: this.reportData.partNo || "N/A" },
+          {
+            label: "Quantity",
+            value: this.reportData.quantity !== null && this.reportData.quantity !== undefined
+              ? this.reportData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: this.reportData.startDate
+              ? new Date(this.reportData.startDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: this.reportData.endDate
+              ? new Date(this.reportData.endDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+        ];
+
+        // Print left column
+        leftFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          leftY += height + 3;
+        });
+
+        // Print right column
+        rightFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          rightY += height + 3;
+        });
+
+        yPosition = Math.max(leftY, rightY) + 10;
+
+        // ===== DIMENSIONAL CHECKLIST SECTION =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Dimensional Checklist", margin, yPosition);
+        yPosition += 10;
+
+        if (this.dimensionalChecklist && this.dimensionalChecklist.length > 0) {
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.18,  // DIMENSION
+            contentWidth * 0.15,  // TOLERANCE
+            contentWidth * 0.18,  // OBSERVED VALUE
+            contentWidth * 0.18,  // INSTRUMENT USED
+            contentWidth * 0.23,  // REMARKS
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "DIMENSION", "TOLERANCE", "OBSERVED VALUE", "INSTRUMENT USED", "REMARKS"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const lineHeight = 4.5;
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text
+            const headerWidth = doc.getTextWidth(header);
+            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          this.dimensionalChecklist.forEach((item, index) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (index + 1).toString(),
+              item.dimension || "",
+              item.tolerance || "",
+              item.observedValue || "",
+              item.instrumentUsed || "",
+              item.remarks || "",
+            ];
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, rowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + rowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += rowHeight + 1;
+          });
+          yPosition += 5;
+        }
+
+        // ===== PARAMETER CHECKLIST SECTION =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Parameter Checklist", margin, yPosition);
+        yPosition += 10;
+
+        if (this.parameterChecklist && this.parameterChecklist.length > 0) {
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.30,  // PARAMETER
+            contentWidth * 0.25,  // EXPECTED
+            contentWidth * 0.20,  // OBSERVATION
+            contentWidth * 0.17,  // REMARKS
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "PARAMETER", "EXPECTED", "OBSERVATION", "REMARKS"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text
+            const headerWidth = doc.getTextWidth(header);
+            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          this.parameterChecklist.forEach((item, index) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (index + 1).toString(),
+              item.parameter || "",
+              item.expected || "",
+              item.complianceObservation || "",
+              item.remarks || "",
+            ];
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, rowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + rowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += rowHeight + 1;
+          });
+          yPosition += 5;
+        }
+
+        // ===== SIGNATURES SECTION =====
+        checkPageBreak(30);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        // Helper to extract name from signature URL
+        const getSignatureName = (signatureUrl) => {
+          if (!signatureUrl) return "";
+          if (signatureUrl.includes("|")) {
+            return signatureUrl.split("|")[0];
+          }
+          return "";
+        };
+
+        // Helper to get signature image URL
+        const getSignatureImageUrl = (signatureUrl) => {
+          if (!signatureUrl) return null;
+          if (signatureUrl.includes("|")) {
+            const parts = signatureUrl.split("|");
+            return parts.length > 1 ? parts[1] : null;
+          }
+          return signatureUrl.startsWith("http") ? signatureUrl : null;
+        };
+
+        const signatures = [
+          {
+            label: "Prepared By",
+            signatureUrl: this.signatures.preparedBy.signatureUrl,
+            verifiedName: this.signatures.preparedBy.verifiedUserName || getSignatureName(this.signatures.preparedBy.signatureUrl),
+          },
+          {
+            label: "Verified By",
+            signatureUrl: this.signatures.verifiedBy.signatureUrl,
+            verifiedName: this.signatures.verifiedBy.verifiedUserName || getSignatureName(this.signatures.verifiedBy.signatureUrl),
+          },
+          {
+            label: "Approved By",
+            signatureUrl: this.signatures.approvedBy.signatureUrl,
+            verifiedName: this.signatures.approvedBy.verifiedUserName || getSignatureName(this.signatures.approvedBy.signatureUrl),
+          },
+        ];
+
+        const sigColWidth = contentWidth / 3;
+        for (let index = 0; index < signatures.length; index++) {
+          const sig = signatures[index];
+          const xPos = margin + index * sigColWidth;
+          doc.text(`${sig.label}:`, xPos, yPosition);
+          
+          const imgUrl = getSignatureImageUrl(sig.signatureUrl);
+          if (imgUrl) {
+            try {
+              const imgBase64 = await imageToBase64(imgUrl);
+              doc.addImage(imgBase64, "PNG", xPos, yPosition + 3, 40, 15);
+              if (sig.verifiedName) {
+                doc.text(sig.verifiedName, xPos, yPosition + 20);
+              }
+            } catch (e) {
+              console.warn(`Could not load signature image for ${sig.label}:`, e);
+              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            }
+          } else {
+            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+          }
+        }
+
+        // Add page numbers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
+
+        // Save PDF
+        const fileName = `Mechanical_Inspection_Report_${this.reportData.lruName || "Unknown"}_${this.formattedDate.replace(/\//g, "-")}.pdf`;
+        doc.save(fileName);
+
+        alert("Report exported successfully as PDF!");
+      } catch (error) {
+        console.error("Error exporting PDF:", error);
+        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
       }
     },
   },
