@@ -277,6 +277,7 @@
                     v-model="reviewedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
+                    :disabled="isReadOnly || !reviewedByEnabled"
                   />
                 </div>
                 <div class="input-group">
@@ -286,17 +287,20 @@
                     v-model="reviewedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly"
+                    :disabled="isReadOnly || !reviewedByEnabled"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('reviewed')"
-                  :disabled="isReadOnly || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
+                  :disabled="isReadOnly || !reviewedByEnabled || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
+                <div v-if="!reviewedByEnabled && !isReadOnly" class="signature-help-text">
+                  Please fill all required fields to enable signature verification
+                </div>
               </div>
               <div v-if="reviewedBy.signatureError" class="signature-error">
                 {{ reviewedBy.signatureError }}
@@ -324,7 +328,7 @@
                     v-model="approvedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
-                    :disabled="isReadOnly"
+                    :disabled="isReadOnly || !approvedByEnabled"
                   />
                 </div>
                 <div class="input-group">
@@ -334,17 +338,21 @@
                     v-model="approvedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly"
+                    :disabled="isReadOnly || !approvedByEnabled"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('approved')"
-                  :disabled="isReadOnly || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
+                  :disabled="isReadOnly || !approvedByEnabled || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
+                <div v-if="!approvedByEnabled && !isReadOnly" class="signature-help-text">
+                  <span v-if="!reviewedByVerified">Please complete "Reviewed By" signature first</span>
+                  <span v-else-if="!allFieldsFilled">Please fill all required fields</span>
+                </div>
               </div>
               <div v-if="approvedBy.signatureError" class="signature-error">
                 {{ approvedBy.signatureError }}
@@ -430,6 +438,30 @@ export default {
       return this.submittedReports.some(
         r => r.document_id === parseInt(this.selectedDocumentId)
       );
+    },
+    // Check if all required fields are filled
+    allFieldsFilled() {
+      return !!(
+        this.selectedDocumentId &&
+        this.serialNumber &&
+        this.lruPartNumber &&
+        this.inspectionStage &&
+        this.docReviewDate &&
+        this.reviewVenue &&
+        this.referenceDocument
+      );
+    },
+    // Check if Reviewed By signature is verified
+    reviewedByVerified() {
+      return !!(this.reviewedBy.signatureUrl && this.reviewedBy.verifiedUserName);
+    },
+    // Check if Reviewed By section should be enabled
+    reviewedByEnabled() {
+      return !this.isReadOnly && this.allFieldsFilled;
+    },
+    // Check if Approved By section should be enabled
+    approvedByEnabled() {
+      return !this.isReadOnly && this.allFieldsFilled && this.reviewedByVerified;
     },
   },
   mounted() {
@@ -2349,5 +2381,24 @@ export default {
 .btn-verify-signature:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.signature-help-text {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 0.85em;
+  font-style: italic;
+}
+
+.signature-input:disabled,
+.signature-input[disabled] {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+  opacity: 0.6;
+  color: #6c757d;
 }
 </style>
