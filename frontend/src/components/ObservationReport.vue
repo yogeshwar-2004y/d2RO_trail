@@ -985,13 +985,33 @@ export default {
         yPosition += 12; // Reduced from 15 to prevent overlap
 
         // ===== DOCUMENT VERSION INFO =====
+        // Ensure selectedDocument is set if we have selectedDocumentId
+        if (!this.selectedDocument && this.selectedDocumentId) {
+          this.selectedDocument = this.availableDocuments.find(
+            (d) => d.document_id.toString() === this.selectedDocumentId
+          );
+        }
+        
         if (this.selectedDocument) {
           yPosition += 6;
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "normal");
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
           const versionInfo = `Document Version: ${this.selectedDocument.document_number || "N/A"} - Version ${this.selectedDocument.version || "N/A"}${this.selectedDocument.revision ? ` (Rev. ${this.selectedDocument.revision})` : ""}${this.selectedDocument.doc_ver ? ` - ${this.selectedDocument.doc_ver}` : ""}`;
           doc.text(versionInfo, pageWidth / 2, yPosition, { align: "center" });
-          yPosition += 8;
+          yPosition += 10;
+        } else if (this.selectedDocumentId) {
+          // Fallback: try to get document info from availableDocuments
+          const docInfo = this.availableDocuments.find(
+            (d) => d.document_id.toString() === this.selectedDocumentId
+          );
+          if (docInfo) {
+            yPosition += 6;
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "bold");
+            const versionInfo = `Document Version: ${docInfo.document_number || "N/A"} - Version ${docInfo.version || "N/A"}${docInfo.revision ? ` (Rev. ${docInfo.revision})` : ""}${docInfo.doc_ver ? ` - ${docInfo.doc_ver}` : ""}`;
+            doc.text(versionInfo, pageWidth / 2, yPosition, { align: "center" });
+            yPosition += 10;
+          }
         }
 
         // ===== DOCUMENT DETAILS SECTION =====
