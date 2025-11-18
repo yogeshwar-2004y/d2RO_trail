@@ -130,6 +130,62 @@
         </div>
       </div>
 
+      <!-- Submitted Reports Section -->
+      <div class="submitted-reports-section" v-if="submittedReports.length > 0">
+        <div class="section-header">
+          <h2 class="section-title">Submitted Reports</h2>
+          <button 
+            class="toggle-button" 
+            @click="showSubmittedReports = !showSubmittedReports"
+          >
+            {{ showSubmittedReports ? 'Hide' : 'Show' }} ({{ submittedReports.length }})
+          </button>
+        </div>
+        
+        <div v-if="showSubmittedReports" class="submitted-reports-list">
+          <table class="submitted-reports-table">
+            <thead>
+              <tr>
+                <th>Report ID</th>
+                <th>Document Version</th>
+                <th>Serial No.</th>
+                <th>Observations</th>
+                <th>Submitted Date</th>
+                <th>Reviewed By</th>
+                <th>Approved By</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr 
+                v-for="report in submittedReports" 
+                :key="report.report_id"
+                :class="{ 'selected': selectedReportId === report.report_id }"
+              >
+                <td>#{{ report.report_id }}</td>
+                <td>
+                  {{ report.document_number || 'N/A' }} 
+                  v{{ report.document_version || 'N/A' }}
+                </td>
+                <td>{{ report.serial_number || 'N/A' }}</td>
+                <td>{{ report.actual_observation_count || 0 }}</td>
+                <td>{{ formatDate(report.created_at) }}</td>
+                <td>{{ report.reviewed_by_verified_name || 'N/A' }}</td>
+                <td>{{ report.approved_by_verified_name || 'N/A' }}</td>
+                <td>
+                  <button 
+                    class="load-report-btn"
+                    @click="loadSubmittedReport(report.report_id)"
+                  >
+                    Load
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Version Selection -->
       <div class="version-selection">
         <h2 class="section-title">Document Version Selection</h2>
@@ -395,6 +451,11 @@ export default {
         userId: null,
       },
       reportSubmitted: false,
+      // Submitted reports tracking
+      submittedReports: [],
+      loadingSubmittedReports: false,
+      selectedReportId: null,
+      showSubmittedReports: false,
     };
   },
   mounted() {
@@ -409,6 +470,8 @@ export default {
     // Load available documents for the LRU
     if (this.lruId) {
       this.loadAvailableDocuments();
+      // Fetch submitted reports for this LRU
+      this.fetchSubmittedReports();
     } else {
       console.warn("No LRU ID provided, cannot load documents");
     }
@@ -450,6 +513,7 @@ export default {
       }
     },
 
+
     // Load document comments for selected document from document_comments table
     async loadDocumentComments(documentId) {
       if (!documentId) return;
@@ -479,12 +543,14 @@ export default {
     },
 
     // Handle document selection change
-    onVersionChange() {
+    async onVersionChange() {
       if (this.selectedDocumentId) {
         this.selectedDocument = this.availableDocuments.find(
           (d) => d.document_id.toString() === this.selectedDocumentId
         );
-        this.loadDocumentComments(this.selectedDocumentId);
+        await this.loadDocumentComments(parseInt(this.selectedDocumentId));
+        // Refresh submitted reports when document changes
+        await this.fetchSubmittedReports();
       } else {
         this.selectedDocument = null;
         this.documentComments = [];
@@ -669,12 +735,113 @@ export default {
           this.reportSubmitted = true;
           alert("IQA Observation Report submitted successfully!");
           console.log("Report submitted with ID:", data.report_id);
+          // Refresh submitted reports after successful submission
+          await this.fetchSubmittedReports();
         } else {
           alert(`Failed to submit report: ${data.message || "Unknown error"}`);
         }
       } catch (error) {
         console.error("Error submitting IQA observation report:", error);
         alert(`Error submitting report: ${error.message || "Please try again."}`);
+      }
+    },
+
+    // Fetch submitted IQA observation reports
+    async fetchSubmittedReports() {
+      try {
+        this.loadingSubmittedReports = true;
+        
+        // Build query parameters
+        const params = new URLSearchParams();
+        if (this.projectName) {
+          params.append('project_name', this.projectName);
+        }
+        if (this.lruName) {
+          params.append('lru_name', this.lruName);
+        }
+        if (this.lruId) {
+          params.append('lru_id', this.lruId);
+        }
+        if (this.selectedDocumentId) {
+          params.append('document_id', this.selectedDocumentId);
+        }
+
+        const response = await fetch(
+          `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          this.submittedReports = data.reports || [];
+          console.log(`Fetched ${this.submittedReports.length} submitted reports`);
+          
+          // If there's a selected document, try to load the most recent report for it
+          if (this.selectedDocumentId && this.submittedReports.length > 0) {
+            const reportForDocument = this.submittedReports.find(
+              r => r.document_id === parseInt(this.selectedDocumentId)
+            );
+            if (reportForDocument && !this.selectedReportId) {
+              // Auto-load the most recent report for the selected document
+              this.loadSubmittedReport(reportForDocument.report_id);
+            }
+          }
+        } else {
+          console.error("Error fetching submitted reports:", data.message);
+          this.submittedReports = [];
+        }
+      } catch (error) {
+        console.error("Error fetching submitted reports:", error);
+        this.submittedReports = [];
+      } finally {
+        this.loadingSubmittedReports = false;
+      }
+    },
+
+    // Load a submitted report's data into the form
+    async loadSubmittedReport(reportId) {
+      try {
+        const report = this.submittedReports.find(r => r.report_id === reportId);
+        if (!report) {
+          console.error("Report not found:", reportId);
+          return;
+        }
+
+        // Load the report data into form fields
+        this.selectedReportId = reportId;
+        this.serialNumber = report.serial_number || "";
+        this.observationCount = report.observation_count || "OBS-001";
+        this.currentYear = report.current_year || new Date().getFullYear().toString();
+        this.currentDate = report.report_date || new Date().toISOString().split("T")[0];
+        this.lruPartNumber = report.lru_part_number || "";
+        this.docReviewDate = report.doc_review_date || new Date().toISOString().split("T")[0];
+        this.reviewVenue = report.review_venue || "";
+        this.referenceDocument = report.reference_document || "";
+        this.inspectionStage = report.inspection_stage || "Document review/report";
+
+        // Load signature information
+        if (report.reviewed_by_signature_path) {
+          this.reviewedBy.signatureUrl = report.reviewed_by_signature_path;
+          this.reviewedBy.verifiedUserName = report.reviewed_by_verified_name || "";
+          this.reviewedBy.userId = report.reviewed_by_user_id;
+        }
+
+        if (report.approved_by_signature_path) {
+          this.approvedBy.signatureUrl = report.approved_by_signature_path;
+          this.approvedBy.verifiedUserName = report.approved_by_verified_name || "";
+          this.approvedBy.userId = report.approved_by_user_id;
+        }
+
+        // Select the document version if available
+        if (report.document_id) {
+          this.selectedDocumentId = report.document_id.toString();
+          await this.loadDocumentComments(report.document_id);
+        }
+
+        this.reportSubmitted = true;
+        console.log("Loaded submitted report:", report);
+      } catch (error) {
+        console.error("Error loading submitted report:", error);
       }
     },
 
@@ -1977,5 +2144,94 @@ export default {
     font-size: 0.75em;
     padding: 3px 8px;
   }
+}
+
+/* Submitted Reports Section Styles */
+.submitted-reports-section {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.toggle-button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background 0.2s;
+}
+
+.toggle-button:hover {
+  background: #0056b3;
+}
+
+.submitted-reports-list {
+  margin-top: 15px;
+}
+
+.submitted-reports-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.submitted-reports-table thead {
+  background: #343a40;
+  color: white;
+}
+
+.submitted-reports-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.submitted-reports-table td {
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.9em;
+}
+
+.submitted-reports-table tbody tr {
+  transition: background 0.2s;
+}
+
+.submitted-reports-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.submitted-reports-table tbody tr.selected {
+  background: #e7f3ff;
+  border-left: 3px solid #007bff;
+}
+
+.load-report-btn {
+  padding: 6px 12px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  transition: background 0.2s;
+}
+
+.load-report-btn:hover {
+  background: #218838;
 }
 </style>
