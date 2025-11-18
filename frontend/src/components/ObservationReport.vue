@@ -277,7 +277,7 @@
                     v-model="reviewedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
-                    :disabled="isReadOnly || !reviewedByEnabled"
+                    :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures"
                   />
                 </div>
                 <div class="input-group">
@@ -287,18 +287,21 @@
                     v-model="reviewedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly || !reviewedByEnabled"
+                    :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('reviewed')"
-                  :disabled="isReadOnly || !reviewedByEnabled || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
+                  :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
-                <div v-if="!reviewedByEnabled && !isReadOnly" class="signature-help-text">
+                <div v-if="!canAccessSignatures && !isReadOnly" class="signature-help-text">
+                  Signature access is restricted to QA Reviewer, QA Head, and Design Head roles only
+                </div>
+                <div v-else-if="!reviewedByEnabled && !isReadOnly" class="signature-help-text">
                   Please fill all required fields to enable signature verification
                 </div>
               </div>
@@ -328,7 +331,7 @@
                     v-model="approvedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
-                    :disabled="isReadOnly || !approvedByEnabled"
+                    :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures"
                   />
                 </div>
                 <div class="input-group">
@@ -338,18 +341,21 @@
                     v-model="approvedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly || !approvedByEnabled"
+                    :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures"
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('approved')"
-                  :disabled="isReadOnly || !approvedByEnabled || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
+                  :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
                 >
                   Verify & Load Signature
                 </button>
-                <div v-if="!approvedByEnabled && !isReadOnly" class="signature-help-text">
+                <div v-if="!canAccessSignatures && !isReadOnly" class="signature-help-text">
+                  Signature access is restricted to QA Reviewer, QA Head, and Design Head roles only
+                </div>
+                <div v-else-if="!approvedByEnabled && !isReadOnly" class="signature-help-text">
                   <span v-if="!reviewedByVerified">Please complete "Reviewed By" signature first</span>
                   <span v-else-if="!allFieldsFilled">Please fill all required fields</span>
                 </div>
@@ -377,6 +383,7 @@
 import jsPDF from "jspdf";
 import drdoLogo from "@/assets/images/DRDO_Logo.png";
 import aviatraxLogo from "@/assets/images/Aviatrax_Trademark.png";
+import { userStore } from "@/stores/userStore";
 
 export default {
   name: "ObservationReport",
@@ -462,6 +469,12 @@ export default {
     // Check if Approved By section should be enabled
     approvedByEnabled() {
       return !this.isReadOnly && this.allFieldsFilled && this.reviewedByVerified;
+    },
+    // Check if user has permission to access signature features
+    canAccessSignatures() {
+      const currentUserRole = userStore.getters.currentUserRole();
+      // Only QA Reviewer (3), QA Head (2), and Design Head (4) can access signatures
+      return currentUserRole === 2 || currentUserRole === 3 || currentUserRole === 4;
     },
   },
   mounted() {
