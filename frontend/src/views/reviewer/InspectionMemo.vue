@@ -1,24 +1,24 @@
  <template>
   <div class="inspection-memo-container">
     <header class="app-header">
-      <div class="logo-section">
-        <svg 
-          class="icon arrow-left" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="currentColor" 
-          stroke-width="2" 
-          stroke-linecap="round" 
-          stroke-linejoin="round"
-          @click="goBack"
-        >
-          <path d="M19 12H5M12 19l-7-7 7-7"/>
-        </svg>
-        <span class="logo-text">AVIATRAX</span>
-        <span class="memo-id">Memo ID: {{ id }}</span>
-      </div>
-      
-      <div class="header-actions">
+    </header>
+<div class="logo-section">
+        <div class="logo-left">
+          <svg 
+            class="icon arrow-left" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2" 
+            stroke-linecap="round" 
+            stroke-linejoin="round"
+            @click="goBack"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          <span class="logo-text">AVIATRAX</span>
+          <span class="memo-id">Memo ID: {{ id }}</span>
+        </div>
         <button class="download-pdf-btn" @click="downloadMemoPDF" title="Download PDF">
           <svg class="icon download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>
@@ -26,8 +26,6 @@
           <span class="download-text">Download PDF</span>
         </button>
       </div>
-    </header>
-
     <div class="form-content">
       <div class="form-card read-only-section">
         <div class="section-header">
@@ -115,7 +113,7 @@
           <span class="signature-line right">SIGNATURE OF DGAQA REP..</span>
         </div>
       </div>
-      <div class="form-card editable-section">
+      <div class="form-card editable-section exclude-from-pdf">
         <div class="section-header">
           <h3 class="section-title">TEST STATUS</h3>
         </div>
@@ -168,7 +166,7 @@
     
 
     <!-- Submit Button -->
-    <div class="submit-section">
+    <div class="submit-section" v-if="!isSubmitted">
       <button class="submit-button" @click="submitMemo">
         Submit
       </button>
@@ -192,6 +190,7 @@ export default {
     return {
       showShareModal: false,
       emailAddresses: '',
+      isSubmitted: false,
       memoData: {
         dgaqaRemarks: 'All records verified. Proceed as per plan.',
         from: 'CASCIC Design Team',
@@ -286,6 +285,10 @@ export default {
     },
 
     transformAndSetMemoData(backendMemo, references) {
+      // Check if memo is already submitted (has a test status set)
+      const submittedStatuses = ['successfully_completed', 'test_not_conducted', 'completed_with_observations', 'test_failed'];
+      this.isSubmitted = backendMemo.memo_status && submittedStatuses.includes(backendMemo.memo_status);
+      
       // Transform backend memo data to frontend format
       this.memoData = {
         // Basic memo information
@@ -338,12 +341,23 @@ export default {
           cascicQAInspected: backendMemo.certified?.includes('f') || false,
         },
         
-        // Test Status - single string value for radio button selection
-        testStatus: '',
+        // Test Status - map from database memo_status to frontend format
+        testStatus: this.mapMemoStatusToTestStatus(backendMemo.memo_status || ''),
         
-        // Reviewer comments (empty for view-only)
-        reviewerComments: ''
+        // Reviewer comments - fetch from database qa_remarks
+        reviewerComments: backendMemo.qa_remarks || ''
       };
+    },
+
+    mapMemoStatusToTestStatus(memoStatus) {
+      // Map database memo_status to frontend test status format
+      const statusMapping = {
+        'successfully_completed': 'Successfully completed',
+        'test_not_conducted': 'Test not conducted',
+        'completed_with_observations': 'Completed with observations',
+        'test_failed': 'Test failed'
+      };
+      return statusMapping[memoStatus] || '';
     },
 
     formatDate(dateString) {
@@ -446,6 +460,7 @@ export default {
         
         const result = await response.json();
         if (result.success) {
+          this.isSubmitted = true; // Hide submit button after successful submission
           alert('Memo status updated successfully!');
           this.goBack(); // Navigate back after successful submission
         } else {
@@ -474,11 +489,23 @@ export default {
         button.querySelector('.download-text').textContent = 'Loading...';
         button.disabled = true;
         
+        // Hide Test Status section for PDF
+        const testStatusSection = document.querySelector('.exclude-from-pdf');
+        let wasHidden = false;
+        if (testStatusSection) {
+          wasHidden = testStatusSection.style.display === 'none';
+          testStatusSection.style.display = 'none';
+        }
+        
         // Get the element you want to convert (the main memo content)
         const element = document.querySelector('.form-content');
         
         if (!element) {
           alert('Memo content not found');
+          // Restore Test Status section if it was hidden
+          if (testStatusSection && !wasHidden) {
+            testStatusSection.style.display = '';
+          }
           return;
         }
         
@@ -507,9 +534,20 @@ export default {
         
         console.log(`PDF downloaded successfully for memo ${this.id}`);
         
+        // Restore Test Status section visibility
+        if (testStatusSection && !wasHidden) {
+          testStatusSection.style.display = '';
+        }
+        
       } catch (error) {
         console.error('Error downloading memo PDF:', error);
         alert(`Error downloading PDF: ${error.message}`);
+        
+        // Restore Test Status section visibility on error
+        const testStatusSection = document.querySelector('.exclude-from-pdf');
+        if (testStatusSection) {
+          testStatusSection.style.display = '';
+        }
       } finally {
         // Restore button state
         const button = event.target.closest('.download-pdf-btn');
@@ -556,6 +594,14 @@ export default {
 .logo-section {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px;
+}
+
+.logo-left {
+  display: flex;
+  align-items: center;
 }
 
 .logo-section .icon {
@@ -579,8 +625,9 @@ export default {
 .download-pdf-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 5px;
+  margin-right: 25px;
+  padding: 8px 13px;
   background-color: #007bff;
   color: #fff;
   border: none;
@@ -596,13 +643,6 @@ export default {
   background-color: #0056b3;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
-}
-
-.download-pdf-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 2px 4px rgba(108, 117, 125, 0.2);
 }
 
 .download-pdf-btn .icon {
@@ -691,6 +731,7 @@ export default {
 .grid-item {
   display: flex;
   flex-direction: column;
+
 }
 
 .grid-item-half, .grid-item-quarter {
@@ -707,29 +748,31 @@ export default {
 .grid-item input, .grid-item-full input, .grid-item-half input, .grid-item-quarter input {
   width: 100%;
   padding: 8px 12px;
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--input-bg);
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  background-color: #f5f5f5;
   box-sizing: border-box;
   margin-top: 5px;
   font-size: 14px;
-  transition: border-color 0.3s ease;
+  transition: none;
 }
 
 .grid-item input:focus, .grid-item-full input:focus, .grid-item-half input:focus, .grid-item-quarter input:focus {
   outline: none;
-  border-color: #555;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+  border-color: #b0b0b0;
+  background-color: #f0f0f0;
+  box-shadow: none;
 }
 
 .grid-item input[readonly] {
-  background-color: #f8f9fa;
-  color: #6c757d;
-  cursor: not-allowed;
+  background-color: #f5f5f5;
+  color: #333;
+  cursor: default;
+  border: 1px solid #d0d0d0;
 }
 
 .grid-item input:not([readonly]) {
-  background-color: var(--input-bg);
+  background-color: #f5f5f5;
   color: var(--text-color);
   cursor: text;
 }
@@ -851,22 +894,23 @@ export default {
 .reviewer-comments {
   width: 100%;
   padding: 12px;
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
-  background-color: var(--input-bg);
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  background-color: #f5f5f5;
   font-size: 14px;
   font-family: inherit;
   resize: vertical;
   min-height: 100px;
   margin: 10px 0;
-  transition: border-color 0.3s ease;
+  transition: none;
   color: var(--text-color);
 }
 
 .reviewer-comments:focus {
   outline: none;
-  border-color: #555;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+  border-color: #b0b0b0;
+  background-color: #f0f0f0;
+  box-shadow: none;
 }
 
 .reviewer-comments::placeholder {
