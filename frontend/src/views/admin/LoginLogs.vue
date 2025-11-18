@@ -471,7 +471,6 @@ export default {
 
     async downloadPDF() {
       try {
-        this.loading = true;
         const params = {};
         
         // Set limit only if no search filters are applied
@@ -533,8 +532,6 @@ export default {
       } catch (error) {
         console.error("Error downloading PDF:", error);
         alert("Failed to download PDF. Please try again.");
-      } finally {
-        this.loading = false;
       }
     },
 

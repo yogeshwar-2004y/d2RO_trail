@@ -744,12 +744,6 @@ export default {
       try {
         console.log(`Downloading PDF for memo ID: ${memo.id}`);
 
-        // Show loading state
-        const button = event.target.closest(".download-pdf-btn");
-        const originalText = button.querySelector(".download-text").textContent;
-        button.querySelector(".download-text").textContent = "Loading...";
-        button.disabled = true;
-
         // Make request to backend PDF endpoint
         const response = await fetch(
           `http://localhost:5000/api/memos/${memo.id}/pdf`,
@@ -789,12 +783,6 @@ export default {
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
-      } finally {
-        // Restore button state
-        if (button) {
-          button.querySelector(".download-text").textContent = originalText;
-          button.disabled = false;
-        }
       }
     },
   },

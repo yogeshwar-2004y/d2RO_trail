@@ -532,15 +532,15 @@ def get_memo_details(memo_id):
             "accepted_by_name": memo.get("accepted_by_name")
         }
 
-        # Convert references to list
+        # Convert references to list (using RealDictCursor, so ref is already a dict)
         reference_list = []
         for ref in references:
             reference_list.append({
-                "ref_id": ref[0],
-                "ref_doc": ref[1],
-                "ref_no": ref[2],
-                "ver": ref[3],
-                "rev": ref[4]
+                "ref_id": ref.get("ref_id"),
+                "ref_doc": ref.get("ref_doc"),
+                "ref_no": ref.get("ref_no"),
+                "ver": ref.get("ver"),
+                "rev": ref.get("rev")
             })
 
         return jsonify({
