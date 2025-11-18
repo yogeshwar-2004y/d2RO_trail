@@ -522,18 +522,24 @@ export default {
         this.selectedDocument = this.availableDocuments.find(
           (d) => d.document_id.toString() === this.selectedDocumentId
         );
+        
+        // Load comments for the selected document version
         await this.loadDocumentComments(parseInt(this.selectedDocumentId));
+        
         // Refresh submitted reports when document changes
         await this.fetchSubmittedReports();
         
-        // Reset read-only state if no report exists for this document
+        // Check if a report exists for this document version
         const reportForDocument = this.submittedReports.find(
           r => r.document_id === parseInt(this.selectedDocumentId)
         );
-        if (!reportForDocument) {
-          // No report exists for this document, allow editing
-          this.selectedReportId = null;
-          this.reportSubmitted = false;
+        
+        if (reportForDocument) {
+          // Report exists for this version - load the submitted report data
+          await this.loadSubmittedReport(reportForDocument.report_id);
+        } else {
+          // No report exists for this version - clear form and allow editing
+          this.clearFormForNewVersion();
         }
       } else {
         this.selectedDocument = null;
@@ -541,7 +547,45 @@ export default {
         // Reset read-only state when no document is selected
         this.selectedReportId = null;
         this.reportSubmitted = false;
+        this.clearFormForNewVersion();
       }
+    },
+
+    // Clear form fields when switching to a version without submitted report
+    clearFormForNewVersion() {
+      // Clear all input fields (keep project and LRU name as they are read-only)
+      this.serialNumber = "";
+      this.observationCount = "OBS-001";
+      this.currentYear = new Date().getFullYear().toString();
+      this.currentDate = new Date().toISOString().split("T")[0];
+      this.lruPartNumber = "";
+      this.docReviewDate = new Date().toISOString().split("T")[0];
+      this.reviewVenue = "";
+      this.referenceDocument = "";
+      this.inspectionStage = "Document review/report";
+      
+      // Clear signature information
+      this.reviewedBy = {
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: "",
+        userId: null,
+      };
+      
+      this.approvedBy = {
+        signatureUsername: "",
+        signaturePassword: "",
+        signatureUrl: "",
+        verifiedUserName: "",
+        signatureError: "",
+        userId: null,
+      };
+      
+      // Reset read-only state
+      this.selectedReportId = null;
+      this.reportSubmitted = false;
     },
 
     // Get CSS class for category badge based on section
@@ -823,16 +867,26 @@ export default {
           this.reviewedBy.signatureUrl = report.reviewed_by_signature_path;
           this.reviewedBy.verifiedUserName = report.reviewed_by_verified_name || "";
           this.reviewedBy.userId = report.reviewed_by_user_id;
+        } else {
+          // Clear reviewed by signature if not present
+          this.reviewedBy.signatureUrl = "";
+          this.reviewedBy.verifiedUserName = "";
+          this.reviewedBy.userId = null;
         }
 
         if (report.approved_by_signature_path) {
           this.approvedBy.signatureUrl = report.approved_by_signature_path;
           this.approvedBy.verifiedUserName = report.approved_by_verified_name || "";
           this.approvedBy.userId = report.approved_by_user_id;
+        } else {
+          // Clear approved by signature if not present
+          this.approvedBy.signatureUrl = "";
+          this.approvedBy.verifiedUserName = "";
+          this.approvedBy.userId = null;
         }
 
-        // Select the document version if available
-        if (report.document_id) {
+        // Ensure document version is selected (should already be set, but just in case)
+        if (report.document_id && !this.selectedDocumentId) {
           this.selectedDocumentId = report.document_id.toString();
           await this.loadDocumentComments(report.document_id);
         }
