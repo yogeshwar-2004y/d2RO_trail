@@ -832,7 +832,24 @@ export default {
         doc.text("SIGNATURE of Rep, IQA CASCIC", margin, yPosition);
         yPosition += 15;
         
-        // ===== QA REVIEWER REMARKS (placed after certifications) =====
+        // ===== ACTION TAKEN & REMARKS BY DGAQA =====
+        checkPageBreak(30);
+        addSectionHeader("ACTION TAKEN & REMARKS BY DGAQA");
+        
+        // Add remarks text with proper wrapping
+        const remarksText = this.memoData.dgaqaRemarks || 'No remarks provided';
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const remarksLines = doc.splitTextToSize(remarksText, contentWidth);
+        doc.text(remarksLines, margin, yPosition);
+        yPosition += remarksLines.length * 5 + 15;
+        
+        // Signature line
+        doc.setFont("helvetica", "bold");
+        doc.text("SIGNATURE OF DGAQA REP..", pageWidth - margin, yPosition, { align: "right" });
+        yPosition += 15;
+        
+        // ===== QA REVIEWER REMARKS (placed after DGAQA section) =====
         if (this.memoData.reviewerComments) {
           checkPageBreak(30);
           addSectionHeader("REMARKS BY QA REVIEWER");
