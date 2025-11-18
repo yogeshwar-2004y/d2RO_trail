@@ -446,8 +446,9 @@ def get_memos():
 def get_memo_details(memo_id):
     """Get detailed memo information including references"""
     try:
+        import psycopg2.extras
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         # Get memo details
         cur.execute("""
@@ -486,49 +487,49 @@ def get_memo_details(memo_id):
                 return date_obj.isoformat()
             return str(date_obj)  # If it's already a string, return as is
 
-        # Convert memo to dictionary
-        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, memo_status, submitted_by_name, accepted_by_name
+        # Convert memo to dictionary (using RealDictCursor, so memo is already a dict)
         memo_dict = {
-            "memo_id": memo[0],
-            "from_person": memo[1],
-            "to_person": memo[2],
-            "thru_person": memo[3],
-            "casdic_ref_no": memo[4],
-            "dated": safe_isoformat(memo[5]),
-            "wing_proj_ref_no": memo[6],
-            "lru_sru_desc": memo[7],
-            "part_number": memo[8],
-            "slno_units": memo[9],
-            "qty_offered": memo[10],
-            "manufacturer": memo[11],
-            "drawing_no_rev": memo[12],
-            "source": memo[13],
-            "unit_identification": memo[14],
-            "mechanical_inspn": memo[15],
-            "inspn_test_stage_offered": memo[16],
-            "stte_status": memo[17],
-            "test_stage_cleared": memo[18],
-            "venue": memo[19],
-            "memo_date": safe_isoformat(memo[20]),
-            "name_designation": memo[21],
-            "test_facility": memo[22],
-            "test_cycle_duration": memo[23],
-            "test_start_on": safe_isoformat(memo[24]),
-            "test_complete_on": safe_isoformat(memo[25]),
-            "calibration_status": memo[26],
-            "func_check_initial": safe_isoformat(memo[27]),
-            "perf_check_during": safe_isoformat(memo[28]),
-            "func_check_end": safe_isoformat(memo[29]),
-            "certified": memo[30],
-            "remarks": memo[31],
-            "submitted_at": None,  # Not available in current schema
-            "submitted_by": None,  # Not available in current schema
-            "accepted_at": None,   # Not available in current schema
-            "accepted_by": None,   # Not available in current schema
-            "coordinator": memo[36],
-            "memo_status": memo[33],
-            "submitted_by_name": memo[34],
-            "accepted_by_name": memo[35]
+            "memo_id": memo.get("memo_id"),
+            "from_person": memo.get("from_person"),
+            "to_person": memo.get("to_person"),
+            "thru_person": memo.get("thru_person"),
+            "casdic_ref_no": memo.get("casdic_ref_no"),
+            "dated": safe_isoformat(memo.get("dated")),
+            "wing_proj_ref_no": memo.get("wing_proj_ref_no"),
+            "lru_sru_desc": memo.get("lru_sru_desc"),
+            "part_number": memo.get("part_number"),
+            "slno_units": memo.get("slno_units"),
+            "qty_offered": memo.get("qty_offered"),
+            "manufacturer": memo.get("manufacturer"),
+            "drawing_no_rev": memo.get("drawing_no_rev"),
+            "source": memo.get("source"),
+            "unit_identification": memo.get("unit_identification"),
+            "mechanical_inspn": memo.get("mechanical_inspn"),
+            "inspn_test_stage_offered": memo.get("inspn_test_stage_offered"),
+            "stte_status": memo.get("stte_status"),
+            "test_stage_cleared": memo.get("test_stage_cleared"),
+            "venue": memo.get("venue"),
+            "memo_date": safe_isoformat(memo.get("memo_date")),
+            "name_designation": memo.get("name_designation"),
+            "test_facility": memo.get("test_facility"),
+            "test_cycle_duration": memo.get("test_cycle_duration"),
+            "test_start_on": safe_isoformat(memo.get("test_start_on")),
+            "test_complete_on": safe_isoformat(memo.get("test_complete_on")),
+            "calibration_status": memo.get("calibration_status"),
+            "func_check_initial": safe_isoformat(memo.get("func_check_initial")),
+            "perf_check_during": safe_isoformat(memo.get("perf_check_during")),
+            "func_check_end": safe_isoformat(memo.get("func_check_end")),
+            "certified": memo.get("certified"),
+            "remarks": memo.get("remarks"),
+            "submitted_at": memo.get("submitted_at"),
+            "submitted_by": memo.get("submitted_by"),
+            "accepted_at": memo.get("accepted_at"),
+            "accepted_by": memo.get("accepted_by"),
+            "coordinator": memo.get("coordinator"),
+            "memo_status": memo.get("memo_status"),
+            "qa_remarks": memo.get("qa_remarks"),
+            "submitted_by_name": memo.get("submitted_by_name"),
+            "accepted_by_name": memo.get("accepted_by_name")
         }
 
         # Convert references to list

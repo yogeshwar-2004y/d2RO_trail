@@ -336,12 +336,23 @@ export default {
           cascicQAInspected: backendMemo.certified?.includes('f') || false,
         },
         
-        // Test Status - single string value for radio button selection
-        testStatus: '',
+        // Test Status - map from database memo_status to frontend format
+        testStatus: this.mapMemoStatusToTestStatus(backendMemo.memo_status || ''),
         
-        // Reviewer comments (empty for view-only)
-        reviewerComments: ''
+        // Reviewer comments - fetch from database qa_remarks
+        reviewerComments: backendMemo.qa_remarks || ''
       };
+    },
+
+    mapMemoStatusToTestStatus(memoStatus) {
+      // Map database memo_status to frontend test status format
+      const statusMapping = {
+        'successfully_completed': 'Successfully completed',
+        'test_not_conducted': 'Test not conducted',
+        'completed_with_observations': 'Completed with observations',
+        'test_failed': 'Test failed'
+      };
+      return statusMapping[memoStatus] || '';
     },
 
     formatDate(dateString) {
