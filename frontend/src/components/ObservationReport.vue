@@ -245,6 +245,8 @@
 
 <script>
 import jsPDF from "jspdf";
+import drdoLogo from "@/assets/images/DRDO_Logo.png";
+import aviatraxLogo from "@/assets/images/Aviatrax_Trademark.png";
 
 export default {
   name: "ObservationReport",
@@ -408,7 +410,7 @@ export default {
       }
     },
 
-    exportReport() {
+    async exportReport() {
       try {
         console.log("Starting PDF export...");
 
@@ -421,17 +423,104 @@ export default {
 
         let yPosition = margin;
 
+        // ===== HEADER WITH LOGOS =====
+        const logoHeight = 15; // Height for logos
+        const logoY = yPosition;
+        
+        // Helper function to load image and convert to base64
+        const loadImageAsBase64 = (imagePath) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              try {
+                const canvas = document.createElement("canvas");
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0);
+                const base64 = canvas.toDataURL("image/png");
+                resolve({ base64, width: img.width, height: img.height });
+              } catch (error) {
+                reject(error);
+              }
+            };
+            img.onerror = () => reject(new Error("Failed to load image"));
+            img.src = imagePath;
+          });
+        };
+
+        // Load and add DRDO logo (left side)
+        try {
+          const drdoData = await loadImageAsBase64(drdoLogo);
+          
+          // Calculate logo dimensions maintaining aspect ratio
+          const maxLogoWidth = 30;
+          const maxLogoHeight = logoHeight;
+          const aspectRatio = drdoData.width / drdoData.height;
+          let logoWidth = maxLogoWidth;
+          let logoHeightFinal = logoWidth / aspectRatio;
+          
+          if (logoHeightFinal > maxLogoHeight) {
+            logoHeightFinal = maxLogoHeight;
+            logoWidth = logoHeightFinal * aspectRatio;
+          }
+          
+          doc.addImage(
+            drdoData.base64,
+            "PNG",
+            margin,
+            logoY,
+            logoWidth,
+            logoHeightFinal
+          );
+        } catch (error) {
+          console.warn("Could not load DRDO logo:", error);
+        }
+
+        // Load and add Aviatrax logo (right side)
+        try {
+          const aviatraxData = await loadImageAsBase64(aviatraxLogo);
+          
+          // Calculate logo dimensions maintaining aspect ratio
+          const maxLogoWidth = 30;
+          const maxLogoHeight = logoHeight;
+          const aspectRatio = aviatraxData.width / aviatraxData.height;
+          let logoWidth = maxLogoWidth;
+          let logoHeightFinal = logoWidth / aspectRatio;
+          
+          if (logoHeightFinal > maxLogoHeight) {
+            logoHeightFinal = maxLogoHeight;
+            logoWidth = logoHeightFinal * aspectRatio;
+          }
+          
+          // Position on right side
+          const logoX = pageWidth - margin - logoWidth;
+          doc.addImage(
+            aviatraxData.base64,
+            "PNG",
+            logoX,
+            logoY,
+            logoWidth,
+            logoHeightFinal
+          );
+        } catch (error) {
+          console.warn("Could not load Aviatrax logo:", error);
+        }
+
         // Set font styles
         doc.setFont("helvetica");
 
-        // ===== HEADER SECTION =====
-        // Main Title - IQA OBSERVATION REPORT
+        // Main Title - IQA OBSERVATION REPORT (centered between logos)
+        // Add more space after logos to prevent overlap
+        yPosition = logoY + logoHeight + 8;
         doc.setFontSize(18);
         doc.setFont("helvetica", "bold");
-        doc.text("IQA OBSERVATION REPORT", pageWidth / 2, yPosition, {
+        const titleText = "IQA OBSERVATION REPORT";
+        doc.text(titleText, pageWidth / 2, yPosition, {
           align: "center",
         });
-        yPosition += 15;
+        yPosition += 12; // Reduced from 15 to prevent overlap
 
         // Document path and date on same line
         doc.setFontSize(10);
@@ -450,7 +539,7 @@ export default {
           this.currentDate || new Date().toLocaleDateString("en-GB")
         }`;
         doc.text(dateText, pageWidth - margin, yPosition, { align: "right" });
-        yPosition += 12;
+        yPosition += 10; // Reduced from 12 to prevent overlap
 
         // ===== SUBJECT LINE =====
         doc.setFontSize(12);
@@ -459,9 +548,10 @@ export default {
           this.lruName || "Unknown LRU"
         }`;
         doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
+        yPosition += 12; // Reduced from 15 to prevent overlap
 
         // ===== DOCUMENT DETAILS SECTION =====
+        yPosition += 8; // Add spacing after subject line
         doc.setFontSize(10);
 
         // Left column details
@@ -472,98 +562,101 @@ export default {
         const rightValueStartX = rightColumnX + labelWidth;
 
         // Left column - Project details
-        yPosition = margin + 42;
+        const detailsStartY = yPosition;
+        let leftColumnY = detailsStartY;
 
         // Project Name
         doc.setFont("helvetica", "bold");
-        doc.text("Project Name :", leftColumnX, yPosition);
+        doc.text("Project Name :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.projectName || "Not specified",
           valueStartX,
-          yPosition
+          leftColumnY
         );
-        yPosition += 8;
+        leftColumnY += 8;
 
         // LRU Name
         doc.setFont("helvetica", "bold");
-        doc.text("LRU Name :", leftColumnX, yPosition);
+        doc.text("LRU Name :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.lruName || "Not specified",
           valueStartX,
-          yPosition
+          leftColumnY
         );
-        yPosition += 8;
+        leftColumnY += 8;
 
         // LRU Part No
         doc.setFont("helvetica", "bold");
-        doc.text("LRU Part No. :", leftColumnX, yPosition);
+        doc.text("LRU Part No. :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.lruPartNumber || "Not specified",
           valueStartX,
-          yPosition
+          leftColumnY
         );
-        yPosition += 8;
+        leftColumnY += 8;
 
         // Serial Number
         doc.setFont("helvetica", "bold");
-        doc.text("Serial Number :", leftColumnX, yPosition);
+        doc.text("Serial Number :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.serialNumber || "Not specified",
           valueStartX,
-          yPosition
+          leftColumnY
         );
-        yPosition += 8;
+        leftColumnY += 8;
 
         // Right column details
-        yPosition = margin + 42;
+        let rightColumnY = detailsStartY;
 
         // Inspection stage
         doc.setFont("helvetica", "bold");
-        doc.text("Inspection stage :", rightColumnX, yPosition);
+        doc.text("Inspection stage :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           "Document review/report",
           rightValueStartX,
-          yPosition
+          rightColumnY
         );
-        yPosition += 8;
+        rightColumnY += 8;
 
         // Date of doc review
         doc.setFont("helvetica", "bold");
-        doc.text("Date of doc review :", rightColumnX, yPosition);
+        doc.text("Date of doc review :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.docReviewDate || "Not specified",
           rightValueStartX,
-          yPosition
+          rightColumnY
         );
-        yPosition += 8;
+        rightColumnY += 8;
 
         // Review venue
         doc.setFont("helvetica", "bold");
-        doc.text("Review venue :", rightColumnX, yPosition);
+        doc.text("Review venue :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.reviewVenue || "Not specified",
           rightValueStartX,
-          yPosition
+          rightColumnY
         );
-        yPosition += 8;
+        rightColumnY += 8;
 
         // Reference Document
         doc.setFont("helvetica", "bold");
-        doc.text("Reference Document :", rightColumnX, yPosition);
+        doc.text("Reference Document :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
         doc.text(
           this.referenceDocument || "Not specified",
           rightValueStartX,
-          yPosition
+          rightColumnY
         );
-        yPosition += 15;
+        
+        // Set yPosition to the maximum of both columns plus spacing
+        yPosition = Math.max(leftColumnY, rightColumnY) + 10;
 
         // ===== OBSERVATIONS SECTION =====
         doc.setFontSize(12);
@@ -580,10 +673,10 @@ export default {
         
         // Table column widths (optimized to fit page width: 170mm)
         const snoWidth = 10;
-        const categoryWidth = 22;
-        const observationWidth = 34;
-        const acceptRejectWidth = 18;
-        const justificationWidth = 28;
+        const categoryWidth = 20;
+        const observationWidth = 32;
+        const acceptRejectWidth = 22; // Increased to prevent overlap
+        const justificationWidth = 26;
         const reviewerWidth = 18;
         const pageWidth_col = 12;
         const dateColWidth = 20;
@@ -614,7 +707,7 @@ export default {
         doc.rect(tableStartX, headerTopY, tableEndX - tableStartX, headerHeight);
 
         // Table headers with proper alignment and formatting
-        doc.setFontSize(9);
+        doc.setFontSize(8.5); // Slightly smaller font for headers
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
         
@@ -622,7 +715,14 @@ export default {
         doc.text("S.No.", colPositions.sno + snoWidth / 2, headerY, { align: "center" });
         doc.text("Category", colPositions.category + categoryWidth / 2, headerY, { align: "center" });
         doc.text("Observations", colPositions.observation + observationWidth / 2, headerY, { align: "center" });
-        doc.text("Accept/Reject", colPositions.acceptReject + acceptRejectWidth / 2, headerY, { align: "center" });
+        
+        // Accept/Reject header - split into two lines to fit better
+        const acceptRejectHeaderX = colPositions.acceptReject + acceptRejectWidth / 2;
+        const acceptRejectHeaderY1 = headerTopY + 3;
+        const acceptRejectHeaderY2 = headerTopY + 6;
+        doc.text("Accept/", acceptRejectHeaderX, acceptRejectHeaderY1, { align: "center" });
+        doc.text("Reject", acceptRejectHeaderX, acceptRejectHeaderY2, { align: "center" });
+        
         doc.text("Justification", colPositions.justification + justificationWidth / 2, headerY, { align: "center" });
         doc.text("Reviewer", colPositions.reviewer + reviewerWidth / 2, headerY, { align: "center" });
         doc.text("Page", colPositions.page + pageWidth_col / 2, headerY, { align: "center" });
@@ -685,7 +785,9 @@ export default {
             );
             
             const acceptRejectText = comment.status || "Pending";
-            const acceptRejectLines = doc.splitTextToSize(acceptRejectText, acceptRejectWidth - (cellPadding * 2));
+            // Ensure Accept/Reject text fits within the column width
+            const acceptRejectMaxWidth = acceptRejectWidth - (cellPadding * 2) - 1;
+            const acceptRejectLines = doc.splitTextToSize(acceptRejectText, acceptRejectMaxWidth);
             
             const justificationText = comment.justification || "No justification provided";
             const justificationLines = doc.splitTextToSize(
@@ -755,12 +857,12 @@ export default {
               { align: "left", maxWidth: observationWidth - (cellPadding * 2) }
             );
 
-            // Accept/Reject - top aligned, centered horizontally
+            // Accept/Reject - top aligned, centered horizontally, with proper width constraint
             doc.text(
               acceptRejectLines,
               colPositions.acceptReject + acceptRejectWidth / 2,
               textStartY,
-              { align: "center", maxWidth: acceptRejectWidth - (cellPadding * 2) }
+              { align: "center", maxWidth: acceptRejectMaxWidth }
             );
 
             // Justification - top aligned, left aligned
