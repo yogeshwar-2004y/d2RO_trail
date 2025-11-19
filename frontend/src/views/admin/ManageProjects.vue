@@ -27,18 +27,19 @@
             <th>PROJECT ID</th>
             <th>PROJECT NAME</th>
             <th>LRU NAME</th>
+            <th>LRU PART NUMBER</th>
             <th>TOTAL SERIAL NUMBERS</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="4" class="loading-cell">Loading projects...</td>
+              <td colspan="5" class="loading-cell">Loading projects...</td>
             </tr>
           </template>
           <template v-else-if="projects.length === 0">
             <tr>
-              <td colspan="4" class="no-data-cell">No projects found</td>
+              <td colspan="5" class="no-data-cell">No projects found</td>
             </tr>
           </template>
           <template v-else>
@@ -48,6 +49,7 @@
                   <td>{{ project.project_id }}</td>
                   <td>{{ project.project_name }}</td>
                   <td class="no-data">No LRUs</td>
+                  <td class="no-data">-</td>
                   <td class="no-data">0</td>
                 </tr>
               </template>
@@ -60,6 +62,7 @@
                     {{ project.project_name }}
                   </td>
                   <td>{{ lru.lru_name }}</td>
+                  <td>{{ lru.lru_part_number || '-' }}</td>
                   <td>{{ lru.serial_numbers.length }}</td>
                 </tr>
               </template>
