@@ -31,8 +31,9 @@ def login():
         cur = conn.cursor()
         
         # Join users, user_roles, and roles tables to get proper role information
+        # Check for deleted and enabled status
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, u.password_hash, r.role_id, r.role_name
+            SELECT u.user_id, u.name, u.email, u.password_hash, r.role_id, r.role_name, u.deleted, u.enabled
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
@@ -56,6 +57,16 @@ def login():
             cur.close()
             return jsonify({"success": False, "message": "User not found"}), 401
 
+        # Check if user is deleted
+        if user[6]:  # deleted column
+            cur.close()
+            return jsonify({"success": False, "message": "User account has been deleted"}), 401
+        
+        # Check if user is enabled
+        if not user[7]:  # enabled column
+            cur.close()
+            return jsonify({"success": False, "message": "User account is disabled"}), 401
+        
         # Check if password matches
         if verify_password(password, user[3]):
             # Log successful login

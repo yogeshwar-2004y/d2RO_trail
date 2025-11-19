@@ -108,8 +108,29 @@
         </div>
       </div>
 
+      <div class="form-row">
+        <label>USER STATUS</label>
+        <div class="status-controls">
+          <div class="toggle-container">
+            <label class="toggle-label">Enable User</label>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                v-model="user.enabled"
+                @change="toggleEnabled"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+            <span class="toggle-status">{{ user.enabled ? 'Enabled' : 'Disabled' }}</span>
+          </div>
+        </div>
+      </div>
+
       <div class="button-group">
         <button class="cancel-button" @click="cancelEdit">CANCEL</button>
+        <button class="delete-button" @click="deleteUser" :disabled="loading">
+          DELETE USER
+        </button>
         <button class="update-button" @click="updateUser" :disabled="loading">
           {{ loading ? "UPDATING USER..." : "UPDATE USER" }}
         </button>
@@ -130,6 +151,7 @@ export default {
         password: "",
         roleId: "",
         currentRole: "",
+        enabled: true,
       },
       roles: [],
       loading: false,
@@ -194,6 +216,9 @@ export default {
 
         if (data.success) {
           const user = data.user;
+          // Load user enabled status
+          this.user.enabled = user.enabled !== undefined ? user.enabled : true;
+          
           // Load existing signature if it exists
           if (user.has_signature && user.signature_path) {
             // Extract filename from the path (handle both Windows and Unix paths)
@@ -345,6 +370,78 @@ export default {
       }
     },
 
+    async toggleEnabled() {
+      try {
+        this.loading = true;
+        const response = await fetch(
+          `http://localhost:8000/api/users/${this.userId}/toggle-enabled`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              enabled: this.user.enabled,
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.message);
+        } else {
+          alert("Error updating user status: " + data.message);
+          // Revert the toggle
+          this.user.enabled = !this.user.enabled;
+        }
+      } catch (error) {
+        console.error("Error toggling user status:", error);
+        alert("Error updating user status. Please check if the backend is running.");
+        // Revert the toggle
+        this.user.enabled = !this.user.enabled;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async deleteUser() {
+      if (
+        !confirm(
+          "Are you sure you want to delete this user? The user will be removed from the UI but their records and past activities will be preserved. They will not be able to log in."
+        )
+      ) {
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const response = await fetch(
+          `http://localhost:8000/api/users/${this.userId}/delete`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert(data.message);
+          this.$router.push({ name: "SelectUserToEdit" });
+        } else {
+          alert("Error deleting user: " + data.message);
+        }
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Error deleting user. Please check if the backend is running.");
+      } finally {
+        this.loading = false;
+      }
+    },
+
     cancelEdit() {
       if (
         confirm("Are you sure you want to cancel? All changes will be lost.")
@@ -463,7 +560,8 @@ export default {
 }
 
 .cancel-button,
-.update-button {
+.update-button,
+.delete-button {
   padding: 15px 30px;
   border: none;
   border-radius: 25px;
@@ -497,10 +595,22 @@ export default {
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
 }
 
-.update-button:disabled {
+.update-button:disabled,
+.delete-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .signature-upload-container {
@@ -572,5 +682,73 @@ export default {
   font-size: 12px;
   color: #666;
   font-style: italic;
+}
+
+.status-controls {
+  flex: 2;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.toggle-label {
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 30px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #28a745;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(30px);
+}
+
+.toggle-status {
+  font-weight: 600;
+  color: #333;
+  min-width: 70px;
 }
 </style>

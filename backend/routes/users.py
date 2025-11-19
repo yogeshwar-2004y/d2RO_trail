@@ -418,7 +418,9 @@ def get_user(user_id):
                 r.role_id,
                 r.role_name,
                 u.signature_path,
-                u.signature_password
+                u.signature_password,
+                u.enabled,
+                u.deleted
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
@@ -446,7 +448,9 @@ def get_user(user_id):
                 "role_name": user[4] if user[4] else "No Role Assigned",
                 "signature_path": signature_path,
                 "has_signature": user[5] is not None,
-                "signature_password": user[6]
+                "signature_password": user[6],
+                "enabled": user[7] if user[7] is not None else True,
+                "deleted": user[8] if user[8] is not None else False
             }
         })
         
@@ -462,12 +466,14 @@ def get_users_list():
         cur = conn.cursor()
         
         # Fetch all users with their names
+        # Exclude deleted users
         cur.execute("""
             SELECT 
                 u.user_id,
                 u.name,
                 u.email
             FROM users u
+            WHERE u.deleted = FALSE
             ORDER BY u.name
         """)
         
@@ -500,16 +506,20 @@ def get_users_with_roles():
         cur = conn.cursor()
         
         # Fetch all users with their roles using JOIN
+        # Exclude deleted users from the list
         cur.execute("""
             SELECT 
                 u.user_id,
                 u.name,
                 u.email,
                 r.role_name,
-                u.signature_path
+                u.signature_path,
+                u.enabled,
+                u.deleted
             FROM users u
             LEFT JOIN user_roles ur ON u.user_id = ur.user_id
             LEFT JOIN roles r ON ur.role_id = r.role_id
+            WHERE u.deleted = FALSE
             ORDER BY u.user_id
         """)
         
@@ -532,7 +542,9 @@ def get_users_with_roles():
                 "email": row[2],
                 "role": row[3] if row[3] else "No Role Assigned",
                 "has_signature": row[4] is not None,
-                "signature_url": signature_url
+                "signature_url": signature_url,
+                "enabled": row[5] if row[5] is not None else True,
+                "deleted": row[6] if row[6] is not None else False
             })
         
         return jsonify({
@@ -581,8 +593,9 @@ def verify_signature_credentials():
         
         # Find user by username (name field) and verify signature password
         # Join with user_roles and roles tables to get role information
+        # Check for deleted and enabled status
         cur.execute("""
-            SELECT u.user_id, u.name, u.signature_path, u.signature_password, r.role_id, r.role_name
+            SELECT u.user_id, u.name, u.signature_path, u.signature_password, r.role_id, r.role_name, u.deleted, u.enabled
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
@@ -594,6 +607,14 @@ def verify_signature_credentials():
         
         if not user:
             return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Check if user is deleted
+        if user[6]:  # deleted column
+            return jsonify({"success": False, "message": "User account has been deleted"}), 401
+        
+        # Check if user is enabled
+        if not user[7]:  # enabled column
+            return jsonify({"success": False, "message": "User account is disabled"}), 401
         
         # Verify signature password by comparing hashed versions
         provided_password_hash = hash_password(signature_password)
@@ -632,12 +653,13 @@ def get_available_reviewers():
         cur = conn.cursor()
         
         # Fetch users with QA Reviewer role (role_id = 3)
+        # Exclude deleted and disabled users
         cur.execute("""
             SELECT u.user_id, u.name, u.email, r.role_name
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
-            WHERE ur.role_id = 3
+            WHERE ur.role_id = 3 AND u.deleted = FALSE AND u.enabled = TRUE
             ORDER BY u.name
         """)
         
@@ -672,12 +694,13 @@ def get_available_designers():
         cur = conn.cursor()
         
         # Fetch users with Designer role (role_id = 5)
+        # Exclude deleted and disabled users
         cur.execute("""
             SELECT u.user_id, u.name, u.email, r.role_name
             FROM users u
             JOIN user_roles ur ON u.user_id = ur.user_id
             JOIN roles r ON ur.role_id = r.role_id
-            WHERE ur.role_id = 5
+            WHERE ur.role_id = 5 AND u.deleted = FALSE AND u.enabled = TRUE
             ORDER BY u.name
         """)
         
@@ -702,6 +725,98 @@ def get_available_designers():
     except Exception as e:
         print(f"Error fetching available designers: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
+
+@users_bp.route('/api/users/<user_id>/delete', methods=['POST'])
+def delete_user(user_id):
+    """Soft delete a user - marks as deleted but keeps records"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if user exists
+        cur.execute("SELECT user_id, name FROM users WHERE user_id = %s", (user_id,))
+        user = cur.fetchone()
+        
+        if not user:
+            cur.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Soft delete: mark as deleted
+        cur.execute("""
+            UPDATE users 
+            SET deleted = TRUE, updated_at = NOW()
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        conn.commit()
+        cur.close()
+        
+        # Log the user deletion activity
+        admin_user_id = 1002  # Default admin user ID
+        log_activity(
+            project_id=None,
+            activity_performed="User Deleted",
+            performed_by=admin_user_id,
+            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was soft deleted"
+        )
+        
+        return jsonify({
+            "success": True,
+            "message": "User deleted successfully (soft delete - records preserved)"
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error deleting user: {str(e)}")
+
+@users_bp.route('/api/users/<user_id>/toggle-enabled', methods=['POST'])
+def toggle_user_enabled(user_id):
+    """Toggle user enabled/disabled status"""
+    try:
+        data = request.get_json() or {}
+        enabled = data.get('enabled')
+        
+        if enabled is None:
+            return jsonify({"success": False, "message": "enabled status is required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if user exists
+        cur.execute("SELECT user_id, name, enabled FROM users WHERE user_id = %s", (user_id,))
+        user = cur.fetchone()
+        
+        if not user:
+            cur.close()
+            return jsonify({"success": False, "message": "User not found"}), 404
+        
+        # Update enabled status
+        cur.execute("""
+            UPDATE users 
+            SET enabled = %s, updated_at = NOW()
+            WHERE user_id = %s
+        """, (enabled, user_id))
+        
+        conn.commit()
+        cur.close()
+        
+        # Log the user status change
+        admin_user_id = 1002  # Default admin user ID
+        status_text = "enabled" if enabled else "disabled"
+        log_activity(
+            project_id=None,
+            activity_performed=f"User {status_text.capitalize()}",
+            performed_by=admin_user_id,
+            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was {status_text}"
+        )
+        
+        return jsonify({
+            "success": True,
+            "message": f"User {status_text} successfully",
+            "enabled": enabled
+        })
+        
+    except Exception as e:
+        return handle_database_error(get_db_connection(), f"Error toggling user status: {str(e)}")
 
 @users_bp.route('/api/test-qa-reviewers', methods=['GET'])
 def test_qa_reviewers():
