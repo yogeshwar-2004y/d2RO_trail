@@ -193,10 +193,58 @@
 
             <div class="form-group" v-if="!lru.lru_id">
               <label>Serial Number Quantity (New LRU)</label>
-              <select v-model="lru.serialQuantity">
-                <option disabled value="">Select Quantity</option>
-                <option v-for="n in 10" :key="n" :value="n">{{ n }}</option>
-              </select>
+              <div class="quantity-input-container">
+                <input
+                  type="number"
+                  v-model.number="lru.serialQuantity"
+                  min="1"
+                  :placeholder="'Enter quantity'"
+                  class="quantity-input"
+                  @input="validateQuantityInput(index, $event)"
+                />
+                <div class="quantity-buttons-wrapper">
+                  <button
+                    type="button"
+                    class="quantity-btn quantity-btn-up"
+                    @click="incrementQuantity(index)"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="quantity-btn quantity-btn-down"
+                    @click="decrementQuantity(index)"
+                    :disabled="!lru.serialQuantity || lru.serialQuantity <= 1"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -367,6 +415,35 @@ export default {
         this.project.lrus.splice(index, 1);
       }
     },
+    incrementQuantity(index) {
+      const lru = this.project.lrus[index];
+      const currentValue = parseInt(lru.serialQuantity) || 0;
+      lru.serialQuantity = currentValue + 1;
+    },
+    decrementQuantity(index) {
+      const lru = this.project.lrus[index];
+      const currentValue = parseInt(lru.serialQuantity) || 1;
+      if (currentValue > 1) {
+        lru.serialQuantity = currentValue - 1;
+      }
+    },
+    validateQuantityInput(index, event) {
+      const lru = this.project.lrus[index];
+      let value = parseInt(event.target.value);
+      
+      // If empty or invalid, set to empty string
+      if (isNaN(value) || value === '') {
+        lru.serialQuantity = '';
+        return;
+      }
+      
+      // Ensure minimum value is 1
+      if (value < 1) {
+        value = 1;
+      }
+      
+      lru.serialQuantity = value;
+    },
 
     validateProject() {
       if (!this.project.name) {
@@ -382,9 +459,9 @@ export default {
         }
 
         // For new LRUs, require serial quantity
-        if (!lru.lru_id && !lru.serialQuantity) {
+        if (!lru.lru_id && (!lru.serialQuantity || lru.serialQuantity < 1)) {
           alert(
-            `Please select a serial number quantity for new LRU "${lru.lru_name}".`
+            `Please enter a valid serial number quantity (minimum 1) for new LRU "${lru.lru_name}".`
           );
           return false;
         }
@@ -831,5 +908,80 @@ export default {
 
 .autocomplete-option:last-child {
   border-bottom: none;
+}
+
+.quantity-input-container {
+  position: relative;
+  flex: 2;
+  width: 100%;
+}
+
+.quantity-input {
+  width: 100%;
+  padding: 8px 50px 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #d3d3d3;
+  font-size: 14px;
+  text-align: left;
+  -moz-appearance: textfield;
+  box-sizing: border-box;
+}
+
+.quantity-input:focus {
+  outline: none;
+  background: #c8c8c8;
+}
+
+.quantity-input::-webkit-outer-spin-button,
+.quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quantity-buttons-wrapper {
+  position: absolute;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border-left: 1px solid #ccc;
+  background: #f5f5f5;
+  border-radius: 0 6px 6px 0;
+}
+
+.quantity-btn {
+  width: 24px;
+  height: 18px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #333;
+  padding: 0;
+  margin: 0;
+}
+
+.quantity-btn:hover:not(:disabled) {
+  background: #e0e0e0;
+  color: #000;
+}
+
+.quantity-btn:active:not(:disabled) {
+  background: #d0d0d0;
+}
+
+.quantity-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quantity-btn svg {
+  stroke-width: 2.5;
 }
 </style>
