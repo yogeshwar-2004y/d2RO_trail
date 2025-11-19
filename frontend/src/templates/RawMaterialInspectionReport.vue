@@ -665,7 +665,7 @@ export default {
       try {
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:8000/api/reports/raw-material-inspection",
+          "http://localhost:5000/api/reports/raw-material-inspection",
           {
             method: "POST",
             headers: {
@@ -799,7 +799,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -891,7 +891,7 @@ export default {
         console.log("Prepared report data:", reportData);
 
         const response = await fetch(
-          "http://localhost:8000/api/reports/raw-material-inspection",
+          "http://localhost:5000/api/reports/raw-material-inspection",
           {
             method: "POST",
             headers: {
@@ -969,7 +969,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/reports/raw-material-inspection/${this.reportId}`,
+          `http://localhost:5000/api/reports/raw-material-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -1060,7 +1060,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/${this.reportId}`
+          `http://localhost:5000/api/reports/${this.reportId}`
         );
 
         if (response.ok) {
@@ -1086,7 +1086,7 @@ export default {
 
         // Send notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/reports/raw-material-inspection/notify",
+          "http://localhost:5000/api/reports/raw-material-inspection/notify",
           {
             method: "POST",
             headers: {
@@ -1124,7 +1124,7 @@ export default {
           `Loading raw material inspection report with report_card_id: ${reportCardIdToLoad}`
         );
         const response = await fetch(
-          `http://localhost:8000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
+          `http://localhost:5000/api/reports/raw-material-inspection/${reportCardIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -1284,7 +1284,7 @@ export default {
 
         // Send approval notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/reports/raw-material-inspection/notify-approval",
+          "http://localhost:5000/api/reports/raw-material-inspection/notify-approval",
           {
             method: "POST",
             headers: {

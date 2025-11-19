@@ -337,7 +337,7 @@ export default {
         };
 
         const response = await axios.get(
-          "http://localhost:8000/api/login-logs",
+          "http://localhost:5000/api/login-logs",
           { params }
         );
 
@@ -518,7 +518,7 @@ export default {
         }
 
         const response = await axios.get(
-          "http://localhost:8000/api/login-logs/pdf",
+          "http://localhost:5000/api/login-logs/pdf",
           {
             params,
             responseType: "blob",

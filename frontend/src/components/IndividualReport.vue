@@ -698,7 +698,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/${this.reportId}`
+          `http://localhost:5000/api/reports/${this.reportId}`
         );
         const result = await response.json();
 
@@ -774,7 +774,7 @@ export default {
 
         // Fetch basic report details to get template_id
         const reportResponse = await fetch(
-          `http://localhost:8000/api/reports/${this.reportId}`
+          `http://localhost:5000/api/reports/${this.reportId}`
         );
 
         if (!reportResponse.ok) {
@@ -807,7 +807,7 @@ export default {
 
         if (templateEndpoints[templateId]) {
           const templateResponse = await fetch(
-            `http://localhost:8000${templateEndpoints[templateId]}`
+            `http://localhost:5000${templateEndpoints[templateId]}`
           );
           if (templateResponse.ok) {
             const templateResult = await templateResponse.json();
