@@ -342,34 +342,36 @@ def get_memos():
             # Get memos for QA reviewer
             cur.execute(base_query + " LIMIT %s OFFSET %s", (current_user_id, limit, offset))
         elif current_user_role == 5:  # Designer role
-            # For designers, show all memos (since there's no submitted_by column)
+            # For designers, show only memos they submitted
             base_query = """
                 SELECT 
                     m.memo_id, m.from_person, m.to_person, m.thru_person,
                     m.casdic_ref_no, m.dated, m.wing_proj_ref_no, m.lru_sru_desc,
                     m.part_number, m.manufacturer, m.qty_offered, m.venue,
-                    m.memo_date, ma.approval_date as submitted_at, ma.approval_date as accepted_at,
+                    m.memo_date, m.submitted_at, ma.approval_date as accepted_at,
                     u1.name as submitted_by_name,
                     u2.name as accepted_by_name,
                     m.coordinator, m.memo_status
                 FROM memos m
                 LEFT JOIN memo_approval ma ON m.memo_id = ma.memo_id
-                LEFT JOIN users u1 ON ma.approved_by = u1.user_id
+                LEFT JOIN users u1 ON m.submitted_by = u1.user_id
                 LEFT JOIN users u2 ON ma.approved_by = u2.user_id
-                ORDER BY COALESCE(ma.approval_date, m.memo_date) DESC
+                WHERE m.submitted_by = %s
+                ORDER BY COALESCE(m.submitted_at, m.memo_date) DESC
             """
             
             count_query = """
                 SELECT COUNT(*) 
                 FROM memos m
+                WHERE m.submitted_by = %s
             """
             
             # Get total count for designer
-            cur.execute(count_query)
+            cur.execute(count_query, (current_user_id,))
             total_count = cur.fetchone()[0]
             
             # Get memos for designer
-            cur.execute(base_query + " LIMIT %s OFFSET %s", (limit, offset))
+            cur.execute(base_query + " LIMIT %s OFFSET %s", (current_user_id, limit, offset))
         else:
             # For all other roles, show all memos
             base_query = """
