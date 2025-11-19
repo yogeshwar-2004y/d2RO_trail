@@ -100,7 +100,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          "http://localhost:5000/api/projects/manage"
+          "http://localhost:8000/api/projects/manage"
         );
         const data = await response.json();
 

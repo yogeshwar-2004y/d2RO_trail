@@ -72,7 +72,7 @@ def get_project_lrus(project_id):
         
         # Fetch LRUs for the specific project
         cur.execute("""
-            SELECT l.lru_id, l.lru_name, l.created_at
+            SELECT l.lru_id, l.lru_name, l.lru_part_number, l.created_at
             FROM lrus l
             WHERE l.project_id = %s
             ORDER BY l.lru_id
@@ -87,7 +87,8 @@ def get_project_lrus(project_id):
             lru_list.append({
                 "id": lru[0],
                 "name": lru[1],
-                "created_at": lru[2].isoformat() if lru[2] else None
+                "lru_part_number": lru[2] if lru[2] else None,
+                "created_at": lru[3].isoformat() if lru[3] else None
             })
         
         return jsonify({
@@ -101,7 +102,9 @@ def get_project_lrus(project_id):
         
     except Exception as e:
         print(f"Error fetching LRUs for project {project_id}: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 @projects_bp.route('/api/projects', methods=['POST'])
 def create_project():
@@ -151,11 +154,12 @@ def create_project():
         # Insert LRUs with project number as project_id
         for lru in lrus:
             # Insert LRU with project number as project_id
+            lru_part_number = lru.get('partNumber') or lru.get('lru_part_number') or None
             cur.execute("""
-                INSERT INTO lrus (project_id, lru_name)
-                VALUES (%s, %s)
+                INSERT INTO lrus (project_id, lru_name, lru_part_number)
+                VALUES (%s, %s, %s)
                 RETURNING lru_id
-            """, (project_number, lru['name']))
+            """, (project_number, lru['name'], lru_part_number))
             
             lru_id = cur.fetchone()[0]
             
@@ -212,6 +216,8 @@ def create_project():
         })
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return handle_database_error(get_db_connection(), f"Error creating project: {str(e)}")
 
 @projects_bp.route('/api/projects/<int:project_id>', methods=['PUT'])
@@ -262,19 +268,33 @@ def update_project(project_id):
                     lru_id = lru_data['lru_id']
                     existing_lru_ids.append(lru_id)
                     
+                    # Update existing LRU
+                    update_fields = []
+                    update_values = []
+                    
                     if 'lru_name' in lru_data:
-                        cur.execute("""
-                            UPDATE lrus SET lru_name = %s WHERE lru_id = %s
-                        """, (lru_data['lru_name'], lru_id))
+                        update_fields.append("lru_name = %s")
+                        update_values.append(lru_data['lru_name'])
+                    
+                    if 'lru_part_number' in lru_data:
+                        update_fields.append("lru_part_number = %s")
+                        update_values.append(lru_data['lru_part_number'] if lru_data['lru_part_number'] else None)
+                    
+                    if update_fields:
+                        update_values.append(lru_id)
+                        cur.execute(f"""
+                            UPDATE lrus SET {', '.join(update_fields)} WHERE lru_id = %s
+                        """, update_values)
                         
                 else:
                     # Create new LRU
                     if lru_data.get('lru_name') and lru_data.get('serialQuantity'):
+                        lru_part_number = lru_data.get('lru_part_number') or lru_data.get('partNumber') or None
                         cur.execute("""
-                            INSERT INTO lrus (project_id, lru_name)
-                            VALUES (%s, %s)
+                            INSERT INTO lrus (project_id, lru_name, lru_part_number)
+                            VALUES (%s, %s, %s)
                             RETURNING lru_id
-                        """, (project_id, lru_data['lru_name']))
+                        """, (project_id, lru_data['lru_name'], lru_part_number))
                         
                         new_lru_id = cur.fetchone()[0]
                         existing_lru_ids.append(new_lru_id)
@@ -325,6 +345,8 @@ def update_project(project_id):
         })
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return handle_database_error(get_db_connection(), f"Error updating project: {str(e)}")
 
 @projects_bp.route('/api/projects/<int:project_id>', methods=['GET'])
@@ -343,6 +365,7 @@ def get_project(project_id):
                 p.created_at,
                 l.lru_id,
                 l.lru_name,
+                l.lru_part_number,
                 s.serial_id,
                 s.serial_number
             FROM projects p
@@ -374,13 +397,14 @@ def get_project(project_id):
                     project_info["lrus"][lru_id] = {
                         "lru_id": lru_id,
                         "lru_name": row[5],
+                        "lru_part_number": row[6] if row[6] else None,
                         "serial_numbers": []
                     }
                 
-                if row[6]:  # serial_id exists
+                if row[7]:  # serial_id exists
                     project_info["lrus"][lru_id]["serial_numbers"].append({
-                        "serial_id": row[6],
-                        "serial_number": row[7]
+                        "serial_id": row[7],
+                        "serial_number": row[8]
                     })
         
         # Convert lrus dict to list
@@ -393,7 +417,9 @@ def get_project(project_id):
         
     except Exception as e:
         print(f"Error fetching project: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 @projects_bp.route('/api/projects/manage', methods=['GET'])
 def get_projects_with_details():
@@ -409,6 +435,7 @@ def get_projects_with_details():
                 p.project_name,
                 l.lru_id,
                 l.lru_name,
+                l.lru_part_number,
                 s.serial_id,
                 s.serial_number
             FROM projects p
@@ -428,8 +455,9 @@ def get_projects_with_details():
             project_name = row[1]
             lru_id = row[2]
             lru_name = row[3]
-            serial_id = row[4]
-            serial_number = row[5]
+            lru_part_number = row[4]
+            serial_id = row[5]
+            serial_number = row[6]
             
             # Initialize project if not exists
             if project_id not in projects_dict:
@@ -444,6 +472,7 @@ def get_projects_with_details():
                 projects_dict[project_id]["lrus"][lru_id] = {
                     "lru_id": lru_id,
                     "lru_name": lru_name,
+                    "lru_part_number": lru_part_number if lru_part_number else None,
                     "serial_numbers": []
                 }
             
@@ -471,7 +500,9 @@ def get_projects_with_details():
         
     except Exception as e:
         print(f"Error fetching projects with details: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 @projects_bp.route('/api/project-options', methods=['GET'])
 def get_project_options():
@@ -891,6 +922,7 @@ def get_all_lrus():
             SELECT 
                 l.lru_id,
                 l.lru_name,
+                l.lru_part_number,
                 l.project_id,
                 p.project_name,
                 l.created_at
@@ -908,9 +940,10 @@ def get_all_lrus():
             lru_list.append({
                 "lru_id": lru[0],
                 "lru_name": lru[1],
-                "project_id": lru[2],
-                "project_name": lru[3],
-                "created_at": lru[4].isoformat() if lru[4] else None
+                "lru_part_number": lru[2] if lru[2] else None,
+                "project_id": lru[3],
+                "project_name": lru[4],
+                "created_at": lru[5].isoformat() if lru[5] else None
             })
         
         return jsonify({
@@ -920,7 +953,9 @@ def get_all_lrus():
         
     except Exception as e:
         print(f"Error fetching LRUs: {str(e)}")
-        return jsonify({"success": False, "message": "Internal server error"}), 500
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": f"Internal server error: {str(e)}"}), 500
 
 @projects_bp.route('/api/lrus/<int:lru_id>/serial-numbers', methods=['GET'])
 def get_lru_serial_numbers(lru_id):

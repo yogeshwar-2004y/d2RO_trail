@@ -96,6 +96,15 @@
             </div>
 
             <div class="form-group">
+              <label>LRU Part Number</label>
+              <input
+                type="text"
+                v-model="lru.partNumber"
+                placeholder="Enter LRU Part Number (e.g., ABC-123-XYZ)"
+              />
+            </div>
+
+            <div class="form-group">
               <label>Serial Number Quantity</label>
               <select v-model="lru.serialQuantity">
                 <option disabled value="">Select Quantity</option>
@@ -125,6 +134,7 @@ export default {
         lrus: [
           {
             name: "",
+            partNumber: "",
             serialQuantity: "",
           },
         ],
@@ -144,6 +154,7 @@ export default {
     addLru() {
       this.project.lrus.push({
         name: "",
+        partNumber: "",
         serialQuantity: "",
       });
     },
@@ -194,7 +205,7 @@ export default {
           createdBy: this.currentUser.id,
         };
 
-        const response = await fetch("http://localhost:5000/api/projects", {
+        const response = await fetch("http://localhost:8000/api/projects", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -214,6 +225,7 @@ export default {
             lrus: [
               {
                 name: "",
+                partNumber: "",
                 serialQuantity: "",
               },
             ],

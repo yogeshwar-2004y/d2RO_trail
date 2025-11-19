@@ -88,6 +88,15 @@
               />
             </div>
 
+            <div class="form-group">
+              <label>LRU Part Number</label>
+              <input
+                type="text"
+                v-model="lru.lru_part_number"
+                placeholder="Enter LRU Part Number (e.g., ABC-123-XYZ)"
+              />
+            </div>
+
             <div
               v-if="lru.serial_numbers && lru.serial_numbers.length > 0"
               class="serial-numbers-info"
@@ -163,6 +172,7 @@ export default {
             this.project.lrus = lrusData.map((lru) => ({
               lru_id: lru.lru_id,
               lru_name: lru.lru_name,
+              lru_part_number: lru.lru_part_number || "",
               serial_numbers: lru.serial_numbers || [],
             }));
           } catch (e) {
@@ -175,6 +185,7 @@ export default {
         if (this.project.lrus.length === 0) {
           this.project.lrus.push({
             lru_name: "",
+            lru_part_number: "",
             serialQuantity: "",
           });
         }
@@ -194,6 +205,7 @@ export default {
     addLru() {
       this.project.lrus.push({
         lru_name: "",
+        lru_part_number: "",
         serialQuantity: "",
       });
     },
@@ -255,12 +267,13 @@ export default {
           lrus: this.project.lrus.map((lru) => ({
             lru_id: lru.lru_id,
             lru_name: lru.lru_name,
+            lru_part_number: lru.lru_part_number || "",
             serialQuantity: lru.serialQuantity || null,
           })),
         };
 
         const response = await fetch(
-          `http://localhost:5000/api/projects/${this.projectId}`,
+          `http://localhost:8000/api/projects/${this.projectId}`,
           {
             method: "PUT",
             headers: {
