@@ -1342,3 +1342,215 @@ def delete_plan_document(document_id):
         
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error deleting plan document: {str(e)}")
+
+# Document Types Management
+@documents_bp.route('/api/document-types', methods=['GET'])
+def get_document_types():
+    """Get all document types"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if table exists, if not create it
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'document_types'
+            );
+        """)
+        table_exists = cur.fetchone()[0]
+        
+        if not table_exists:
+            # Create document_types table
+            cur.execute("""
+                CREATE TABLE document_types (
+                    type_id SERIAL PRIMARY KEY,
+                    type_name VARCHAR(255) NOT NULL UNIQUE,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            conn.commit()
+            cur.close()
+            return jsonify({
+                "success": True,
+                "document_types": []
+            })
+        
+        # Fetch all document types
+        cur.execute("""
+            SELECT type_id, type_name, description, created_at, updated_at
+            FROM document_types
+            ORDER BY type_name ASC
+        """)
+        
+        types = cur.fetchall()
+        cur.close()
+        
+        document_types_list = []
+        for doc_type in types:
+            document_types_list.append({
+                "type_id": doc_type[0],
+                "type_name": doc_type[1],
+                "description": doc_type[2],
+                "created_at": doc_type[3].isoformat() if doc_type[3] else None,
+                "updated_at": doc_type[4].isoformat() if doc_type[4] else None
+            })
+        
+        return jsonify({
+            "success": True,
+            "document_types": document_types_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching document types: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error fetching document types: {str(e)}")
+
+@documents_bp.route('/api/document-types', methods=['POST'])
+def create_document_type():
+    """Create a new document type"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        type_name = data.get('type_name')
+        description = data.get('description', '')
+        
+        if not type_name:
+            return jsonify({"success": False, "message": "Type name is required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if table exists, if not create it
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'document_types'
+            );
+        """)
+        table_exists = cur.fetchone()[0]
+        
+        if not table_exists:
+            cur.execute("""
+                CREATE TABLE document_types (
+                    type_id SERIAL PRIMARY KEY,
+                    type_name VARCHAR(255) NOT NULL UNIQUE,
+                    description TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
+            conn.commit()
+        
+        # Insert new document type
+        cur.execute("""
+            INSERT INTO document_types (type_name, description)
+            VALUES (%s, %s)
+            RETURNING type_id, type_name, description, created_at, updated_at
+        """, (type_name.strip(), description.strip() if description else None))
+        
+        new_type = cur.fetchone()
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Document type created successfully",
+            "document_type": {
+                "type_id": new_type[0],
+                "type_name": new_type[1],
+                "description": new_type[2],
+                "created_at": new_type[3].isoformat() if new_type[3] else None,
+                "updated_at": new_type[4].isoformat() if new_type[4] else None
+            }
+        })
+        
+    except Exception as e:
+        error_msg = str(e)
+        if "unique constraint" in error_msg.lower() or "duplicate" in error_msg.lower():
+            return jsonify({"success": False, "message": "Document type with this name already exists"}), 400
+        print(f"Error creating document type: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error creating document type: {str(e)}")
+
+@documents_bp.route('/api/document-types/<int:type_id>', methods=['PUT'])
+def update_document_type(type_id):
+    """Update a document type"""
+    try:
+        data = request.json
+        if not data:
+            return jsonify({"success": False, "message": "No data provided"}), 400
+        
+        type_name = data.get('type_name')
+        description = data.get('description', '')
+        
+        if not type_name:
+            return jsonify({"success": False, "message": "Type name is required"}), 400
+        
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Update document type
+        cur.execute("""
+            UPDATE document_types
+            SET type_name = %s, description = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE type_id = %s
+            RETURNING type_id, type_name, description, created_at, updated_at
+        """, (type_name.strip(), description.strip() if description else None, type_id))
+        
+        updated_type = cur.fetchone()
+        
+        if not updated_type:
+            cur.close()
+            return jsonify({"success": False, "message": "Document type not found"}), 404
+        
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Document type updated successfully",
+            "document_type": {
+                "type_id": updated_type[0],
+                "type_name": updated_type[1],
+                "description": updated_type[2],
+                "created_at": updated_type[3].isoformat() if updated_type[3] else None,
+                "updated_at": updated_type[4].isoformat() if updated_type[4] else None
+            }
+        })
+        
+    except Exception as e:
+        error_msg = str(e)
+        if "unique constraint" in error_msg.lower() or "duplicate" in error_msg.lower():
+            return jsonify({"success": False, "message": "Document type with this name already exists"}), 400
+        print(f"Error updating document type: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error updating document type: {str(e)}")
+
+@documents_bp.route('/api/document-types/<int:type_id>', methods=['DELETE'])
+def delete_document_type(type_id):
+    """Delete a document type"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Check if document type exists
+        cur.execute("SELECT type_id FROM document_types WHERE type_id = %s", (type_id,))
+        if not cur.fetchone():
+            cur.close()
+            return jsonify({"success": False, "message": "Document type not found"}), 404
+        
+        # Delete document type
+        cur.execute("DELETE FROM document_types WHERE type_id = %s", (type_id,))
+        conn.commit()
+        cur.close()
+        
+        return jsonify({
+            "success": True,
+            "message": "Document type deleted successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error deleting document type: {str(e)}")
+        return handle_database_error(get_db_connection(), f"Error deleting document type: {str(e)}")
