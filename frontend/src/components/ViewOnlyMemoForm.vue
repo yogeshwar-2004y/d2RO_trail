@@ -951,6 +951,7 @@ export default {
         if (data.success) {
           this.transformAndSetMemoData(data.memo, data.references || []);
           console.log("Fetched memo data:", data.memo, data.references);
+          
         } else {
           throw new Error(data.message || "Failed to fetch memo details");
         }
@@ -1016,9 +1017,10 @@ export default {
         source: backendMemo.source || "NA",
         serialNo: this.formatSerialNumbers(backendMemo.slno_units),
         qtyOffered: backendMemo.qty_offered?.toString() || "0",
-        unitIdentification: this.formatUnitIdentification(
-          backendMemo.unit_identification
-        ),
+        // unitIdentification: this.formatUnitIdentification(
+        //   backendMemo.unit_identification
+        // ),
+        unitIdentification: backendMemo.unit_identification || "",
         mechanicalInspection: backendMemo.mechanical_inspn || "",
         testStageOffered: backendMemo.inspn_test_stage_offered || "",
         testStageCleared: backendMemo.test_stage_cleared || "",
@@ -1093,10 +1095,10 @@ export default {
       return serialArray.join(", ");
     },
 
-    formatUnitIdentification(unitIdArray) {
-      if (!unitIdArray || !Array.isArray(unitIdArray)) return "";
-      return unitIdArray.join(", ");
-    },
+    // formatUnitIdentification(unitIdArray) {
+    //   if (!unitIdArray || !Array.isArray(unitIdArray)) return "";
+    //   return unitIdArray.join(", ");
+    // },
 
     // Handle accept button click
     handleAccept() {

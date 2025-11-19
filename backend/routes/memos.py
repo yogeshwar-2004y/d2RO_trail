@@ -54,15 +54,17 @@ def submit_memo():
         print(f"=== DEBUG: slno_units type: {type(slno_units)} ===")
         print(f"=== DEBUG: slno_units length: {len(slno_units) if slno_units else 0} ===")
 
-        # Prepare unit identification array
-        unit_identification = form_data.get('unitIdentification', [])
+        # Prepare unit identification - now it's a simple string (ESS, SoFT, or QT)
+        unit_identification = form_data.get('unitIdentification', '')
         
-        # Ensure it's a list and all elements are strings
-        if not isinstance(unit_identification, list):
-            unit_identification = []
-        else:
-            # Convert all elements to strings to ensure consistent formatting
-            unit_identification = [str(item) if item is not None else "" for item in unit_identification]
+        # Ensure it's a string and one of the valid values
+        if not isinstance(unit_identification, str):
+            unit_identification = str(unit_identification) if unit_identification else ''
+        
+        # Validate it's one of the allowed values
+        valid_values = ['ESS', 'SoFT', 'QT']
+        if unit_identification and unit_identification not in valid_values:
+            unit_identification = ''
         
         print(f"=== DEBUG: Processed unit_identification: {unit_identification} ===")
         print(f"=== DEBUG: unit_identification type: {type(unit_identification)} ===")

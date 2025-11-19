@@ -161,7 +161,7 @@ def create_memos_tables():
                 manufacturer VARCHAR(255),
                 drawing_no_rev TEXT,
                 source TEXT,
-                unit_identification TEXT[],
+                unit_identification TEXT,
                 mechanical_inspn TEXT,
                 inspn_test_stage_offered TEXT,
                 stte_status TEXT,

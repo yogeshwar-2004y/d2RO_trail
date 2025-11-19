@@ -362,32 +362,70 @@
 
           <tr>
             <td class="lru-cell">
-              <div class="lru-field unit-identification-container">
+              <div class="lru-field">
                 <label>UNIT IDENTIFICATION :</label>
+                <select v-model="formData.unitIdentification" class="lru-select">
+                  <option value="">Select Unit Identification</option>
+                  <option value="ESS">ESS</option>
+                  <option value="SoFT">SoFT</option>
+                  <option value="QT">QT</option>
+                </select>
+              </div>
+              <div class="lru-field">
+                <label>MECHANICAL INSPN :</label>
+                <select v-model="formData.mechanicalInsp" class="lru-select">
+                  <option value="">Select Stage</option>
+                  <option value="STAGE">STAGE</option>
+                  <option value="PARTS">PARTS</option>
+                  <option value="ASSY">ASSY</option>
+                  <option value="FINAL">FINAL</option>
+                  <option value="INSTALL">INSTALL</option>
+                </select>
+              </div>
+            </td>
+            <td class="desc-cell"></td>
+            <td class="ref-cell">
+              <input type="text" v-model="formData.refDoc4" placeholder="" />
+            </td>
+            <td class="refno-cell">
+              <input type="text" v-model="formData.refNo4" placeholder="" />
+            </td>
+            <td class="ver-cell">
+              <input type="text" v-model="formData.version4" placeholder="" />
+            </td>
+            <td class="rev-cell">
+              <input type="text" v-model="formData.revision4" placeholder="" />
+            </td>
+          </tr>
+
+          <tr>
+            <td class="lru-cell">
+              <div class="lru-field unit-identification-container">
+                <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
                 <div class="cascading-dropdown">
                   <div
                     class="dropdown-trigger"
                     @click="toggleCascadingDropdown"
                   >
                     <span class="selected-text">{{
-                      getSelectedText() || "Select Test"
+                      getInspectionStageText() || "Select Test Group"
                     }}</span>
                     <span class="dropdown-arrow">▼</span>
                   </div>
 
-                  <!-- Level 1: Tests -->
+                  <!-- Level 1: Test Groups -->
                   <div
                     v-if="showCascadingDropdown"
                     class="cascading-menu level-1"
                   >
                     <div v-if="loadingTestGroups" class="menu-item loading">
-                      Loading tests...
+                      Loading test groups...
                     </div>
                     <div
                       v-else-if="testGroups.length === 0"
                       class="menu-item no-data"
                     >
-                      No tests available
+                      No test groups available
                     </div>
                     <div
                       v-else
@@ -431,114 +469,9 @@
                       @click="selectSubTest(subTest)"
                     >
                       <span class="item-text">{{ subTest.sub_test_name }}</span>
-                      <span class="arrow">▶</span>
-                    </div>
-                  </div>
-
-                  <!-- Level 3: Bulletins -->
-                  <div
-                    v-if="showBulletins && hoveredSubTest"
-                    class="cascading-menu level-3"
-                    @mouseenter="keepBulletinsOpen = true"
-                    @mouseleave="handleBulletinsLeave"
-                  >
-                    <div v-if="loadingBulletins" class="menu-item loading">
-                      Loading bulletins...
-                    </div>
-                    <div
-                      v-else-if="bulletins.length === 0"
-                      class="menu-item no-data"
-                    >
-                      No bulletins available
-                    </div>
-                    <div
-                      v-else
-                      v-for="bulletin in bulletins"
-                      :key="bulletin.bulletin_id"
-                      class="menu-item"
-                      :class="{
-                        active: hoveredBulletin === bulletin.bulletin_id,
-                      }"
-                      @mouseenter="handleBulletinHover(bulletin)"
-                      @click="selectBulletin(bulletin)"
-                    >
-                      <span class="item-text">{{
-                        bulletin.bulletin_name
-                      }}</span>
-                      <span
-                        v-if="
-                          bulletin.sub_bulletins &&
-                          bulletin.sub_bulletins.length > 0
-                        "
-                        class="arrow"
-                        >▶</span
-                      >
-                    </div>
-                  </div>
-
-                  <!-- Level 4: Sub-Bulletins -->
-                  <div
-                    v-if="showSubBulletins && hoveredBulletin"
-                    class="cascading-menu level-4"
-                    @mouseenter="keepSubBulletinsOpen = true"
-                    @mouseleave="handleSubBulletinsLeave"
-                  >
-                    <div
-                      v-if="subBulletins.length === 0"
-                      class="menu-item no-data"
-                    >
-                      No sub-bulletins available
-                    </div>
-                    <div
-                      v-else
-                      v-for="subBulletin in subBulletins"
-                      :key="subBulletin.bulletin_id"
-                      class="menu-item"
-                      @click="selectSubBulletin(subBulletin)"
-                    >
-                      <span class="item-text">{{
-                        subBulletin.bulletin_name
-                      }}</span>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div class="lru-field">
-                <label>MECHANICAL INSPN :</label>
-                <select v-model="formData.mechanicalInsp" class="lru-select">
-                  <option value="">Select Stage</option>
-                  <option value="STAGE">STAGE</option>
-                  <option value="PARTS">PARTS</option>
-                  <option value="ASSY">ASSY</option>
-                  <option value="FINAL">FINAL</option>
-                  <option value="INSTALL">INSTALL</option>
-                </select>
-              </div>
-            </td>
-            <td class="desc-cell"></td>
-            <td class="ref-cell">
-              <input type="text" v-model="formData.refDoc4" placeholder="" />
-            </td>
-            <td class="refno-cell">
-              <input type="text" v-model="formData.refNo4" placeholder="" />
-            </td>
-            <td class="ver-cell">
-              <input type="text" v-model="formData.version4" placeholder="" />
-            </td>
-            <td class="rev-cell">
-              <input type="text" v-model="formData.revision4" placeholder="" />
-            </td>
-          </tr>
-
-          <tr>
-            <td class="lru-cell">
-              <div class="lru-field">
-                <label>INSPECTION / TEST STAGE OFFERED NOW:</label>
-                <input
-                  type="text"
-                  v-model="formData.inspectionStage"
-                  placeholder=""
-                />
               </div>
             </td>
             <td class="desc-cell">
@@ -1488,26 +1421,18 @@ export default {
       serialNumberError: null,
       showSerialNumberDropdown: false,
 
-      // Hierarchical test data for Unit Identification
+      // Hierarchical test data for Inspection Stage
       testGroups: [],
       subTests: [],
-      bulletins: [],
-      subBulletins: [],
       loadingTestGroups: false,
       loadingSubTests: false,
-      loadingBulletins: false,
 
       // Cascading dropdown state
       showCascadingDropdown: false,
       showSubTests: false,
-      showBulletins: false,
-      showSubBulletins: false,
       hoveredTestGroup: null,
       hoveredSubTest: null,
-      hoveredBulletin: null,
       keepSubTestsOpen: false,
-      keepBulletinsOpen: false,
-      keepSubBulletinsOpen: false,
 
       // Time picker options
       hours: [
@@ -1572,11 +1497,9 @@ export default {
         revision3: "",
         mechanicalInsp: "",
         unitIdentification: "",
-        // Hierarchical test selection for Unit Identification
+        // Hierarchical test selection for Inspection Stage
         selectedTestGroup: "",
         selectedSubTest: "",
-        selectedBulletin: "",
-        selectedSubBulletin: "",
         refDoc4: "",
         refNo4: "",
         version4: "",
@@ -2132,11 +2055,7 @@ export default {
         this.loadingSubTests = true;
         // Reset dependent data
         this.subTests = [];
-        this.bulletins = [];
-        this.subBulletins = [];
         this.formData.selectedSubTest = "";
-        this.formData.selectedBulletin = "";
-        this.formData.selectedSubBulletin = "";
 
         const response = await fetch(
           `http://localhost:5000/api/test-groups/${groupId}/sub-tests`
@@ -2156,33 +2075,6 @@ export default {
       }
     },
 
-    async fetchBulletins(subTestId) {
-      try {
-        this.loadingBulletins = true;
-        // Reset dependent data
-        this.bulletins = [];
-        this.subBulletins = [];
-        this.formData.selectedBulletin = "";
-        this.formData.selectedSubBulletin = "";
-
-        const response = await fetch(
-          `http://localhost:5000/api/sub-tests/${subTestId}/bulletins`
-        );
-        const data = await response.json();
-
-        if (data.success) {
-          this.bulletins = data.bulletins;
-          console.log("Bulletins loaded:", this.bulletins);
-        } else {
-          console.error("Failed to fetch bulletins:", data.message);
-        }
-      } catch (error) {
-        console.error("Error fetching bulletins:", error);
-      } finally {
-        this.loadingBulletins = false;
-      }
-    },
-
     // Event handlers for cascading dropdown
     toggleCascadingDropdown() {
       this.showCascadingDropdown = !this.showCascadingDropdown;
@@ -2194,14 +2086,9 @@ export default {
     closeAllMenus() {
       this.showCascadingDropdown = false;
       this.showSubTests = false;
-      this.showBulletins = false;
-      this.showSubBulletins = false;
       this.hoveredTestGroup = null;
       this.hoveredSubTest = null;
-      this.hoveredBulletin = null;
       this.keepSubTestsOpen = false;
-      this.keepBulletinsOpen = false;
-      this.keepSubBulletinsOpen = false;
     },
 
     handleTestGroupHover(group) {
@@ -2209,69 +2096,26 @@ export default {
       this.showSubTests = true;
       this.fetchSubTests(group.group_id);
 
-      // Reset lower levels
-      this.showBulletins = false;
-      this.showSubBulletins = false;
+      // Reset sub-test selection
       this.hoveredSubTest = null;
-      this.hoveredBulletin = null;
     },
 
     handleSubTestHover(subTest) {
       this.hoveredSubTest = subTest.sub_test_id;
-      this.showBulletins = true;
-      this.fetchBulletins(subTest.sub_test_id);
-
-      // Reset lower levels
-      this.showSubBulletins = false;
-      this.hoveredBulletin = null;
-    },
-
-    handleBulletinHover(bulletin) {
-      this.hoveredBulletin = bulletin.bulletin_id;
-      if (bulletin.sub_bulletins && bulletin.sub_bulletins.length > 0) {
-        this.subBulletins = bulletin.sub_bulletins;
-        this.showSubBulletins = true;
-      } else {
-        this.showSubBulletins = false;
-        this.subBulletins = [];
-      }
+      // No need to fetch bulletins anymore - we only show test groups and sub-tests
     },
 
     selectTestGroup(group) {
-      // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(group.group_id, null, null, null);
+      // Capture the simplified hierarchy path (only test groups and sub-tests)
+      this.captureInspectionStageHierarchy(group.group_id, null);
       this.closeAllMenus();
     },
 
     selectSubTest(subTest) {
-      // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(
+      // Capture the simplified hierarchy path (only test groups and sub-tests)
+      this.captureInspectionStageHierarchy(
         this.hoveredTestGroup,
-        subTest.sub_test_id,
-        null,
-        null
-      );
-      this.closeAllMenus();
-    },
-
-    selectBulletin(bulletin) {
-      // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(
-        this.hoveredTestGroup,
-        this.hoveredSubTest,
-        bulletin.bulletin_id,
-        null
-      );
-      this.closeAllMenus();
-    },
-
-    selectSubBulletin(subBulletin) {
-      // Capture the full hierarchy path based on current hover state
-      this.captureFullHierarchy(
-        this.hoveredTestGroup,
-        this.hoveredSubTest,
-        this.hoveredBulletin,
-        subBulletin.bulletin_id
+        subTest.sub_test_id
       );
       this.closeAllMenus();
     },
@@ -2279,38 +2123,19 @@ export default {
     handleSubTestsLeave() {
       if (!this.keepSubTestsOpen) {
         this.showSubTests = false;
-        this.showBulletins = false;
-        this.showSubBulletins = false;
         this.hoveredSubTest = null;
-        this.hoveredBulletin = null;
       }
     },
 
-    handleBulletinsLeave() {
-      if (!this.keepBulletinsOpen) {
-        this.showBulletins = false;
-        this.showSubBulletins = false;
-        this.hoveredBulletin = null;
-      }
+    getInspectionStageText() {
+      return this.formData.inspectionStage;
     },
 
-    handleSubBulletinsLeave() {
-      if (!this.keepSubBulletinsOpen) {
-        this.showSubBulletins = false;
-      }
-    },
-
-    getSelectedText() {
-      return this.formData.unitIdentification;
-    },
-
-    // Capture the full hierarchy path based on hover state
-    captureFullHierarchy(testGroupId, subTestId, bulletinId, subBulletinId) {
+    // Capture the simplified hierarchy path (only test groups and sub-tests) for Inspection Stage
+    captureInspectionStageHierarchy(testGroupId, subTestId) {
       // Set the selected IDs
       this.formData.selectedTestGroup = testGroupId || "";
       this.formData.selectedSubTest = subTestId || "";
-      this.formData.selectedBulletin = bulletinId || "";
-      this.formData.selectedSubBulletin = subBulletinId || "";
 
       // Build the display text
       const parts = [];
@@ -2325,23 +2150,11 @@ export default {
         if (subTestName) parts.push(subTestName);
       }
 
-      if (bulletinId) {
-        const bulletinName = this.getBulletinName(bulletinId);
-        if (bulletinName) parts.push(bulletinName);
-      }
-
-      if (subBulletinId) {
-        const subBulletin = this.subBulletins.find(
-          (sb) => sb.bulletin_id == subBulletinId
-        );
-        if (subBulletin) parts.push(subBulletin.bulletin_name);
-      }
-
-      this.formData.unitIdentification = parts.join(" > ");
+      this.formData.inspectionStage = parts.join(" > ");
     },
 
-    // Build unit identification as array for database storage
-    buildUnitIdentificationArray() {
+    // Build inspection stage as array for database storage (only test groups and sub-tests)
+    buildInspectionStageArray() {
       const parts = [];
 
       // Get test group name
@@ -2353,23 +2166,6 @@ export default {
       const subTestName =
         this.getSubTestName(this.formData.selectedSubTest) || "";
       parts.push(subTestName);
-
-      // Get bulletin name
-      const bulletinName =
-        this.getBulletinName(this.formData.selectedBulletin) || "";
-      parts.push(bulletinName);
-
-      // Get sub-bulletin name
-      let subBulletinName = "";
-      if (this.formData.selectedSubBulletin) {
-        const subBulletin = this.subBulletins.find(
-          (sb) => sb.bulletin_id == this.formData.selectedSubBulletin
-        );
-        if (subBulletin) {
-          subBulletinName = subBulletin.bulletin_name;
-        }
-      }
-      parts.push(subBulletinName);
 
       return parts;
     },
@@ -2384,10 +2180,6 @@ export default {
       return subTest ? subTest.sub_test_name : "";
     },
 
-    getBulletinName(bulletinId) {
-      const bulletin = this.bulletins.find((b) => b.bulletin_id === bulletinId);
-      return bulletin ? bulletin.bulletin_name : "";
-    },
 
     handleCascadingClickOutside(event) {
       const cascadingDropdown = event.target.closest(".cascading-dropdown");
@@ -2554,13 +2346,18 @@ export default {
         return;
       }
 
-      if (!this.formData.selectedTestGroup) {
-        alert("Please select Unit Identification type.");
+      if (!this.formData.unitIdentification) {
+        alert("Please select Unit Identification (ESS, SoFT, or QT).");
         return;
       }
 
       if (!this.formData.mechanicalInsp) {
         alert("Please select Mechanical Inspection stage.");
+        return;
+      }
+
+      if (!this.formData.selectedTestGroup) {
+        alert("Please select Inspection / Test Stage Offered Now.");
         return;
       }
 
@@ -2593,12 +2390,14 @@ export default {
             // The backend will process the array directly
             slNo: this.formData.slNo || [],
 
-            // Unit Identification - send as array
-            unitIdentification: this.buildUnitIdentificationArray(),
+            // Unit Identification - simple dropdown value
+            unitIdentification: this.formData.unitIdentification,
+            // Inspection Stage - send as array (test groups and sub-tests only)
+            inspectionStageArray: this.buildInspectionStageArray(),
             mechanicalInsp: this.formData.mechanicalInsp,
 
             // Test Information
-            inspnTestStageOffered: this.formData.inspectionStage,
+            inspnTestStageOffered: this.formData.inspectionStage || "",
             stteStatus: this.formData.stteStatus,
             testStageCleared: this.formData.testStageCleared,
             venue: this.formData.testVenue,
@@ -5080,3 +4879,4 @@ export default {
   cursor: not-allowed;
 }
 </style>
+
