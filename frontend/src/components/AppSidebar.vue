@@ -342,7 +342,7 @@ const roleBasedCards = computed(() => {
   // const userRole = userInfo.value.role?.toLowerCase()
   const userRole = userInfo.value.role?.toLowerCase().replace(/\s+/g, "");
 
-  console.log("User Role:", userRole); // Debugging line
+  // console.log("User Role:", userRole); // Debugging line
 
   const cardDefinitions = {
     admin: [

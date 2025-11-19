@@ -128,8 +128,8 @@ const breadcrumbs = computed(() => {
   const userInfo = userStore.getters.currentUser()
   const userRole = userInfo?.role?.toLowerCase().replace(/\s+/g, '') || 'admin'
   
-  console.log('Breadcrumb Update - Current Route:', currentRoute.path, 'User Role:', userRole)
-  console.log('Path Segments:', pathSegments)
+  // console.log('Breadcrumb Update - Current Route:', currentRoute.path, 'User Role:', userRole)
+  // console.log('Path Segments:', pathSegments)
   
   // Don't show breadcrumbs on login page
   if (currentRoute.path === '/' || currentRoute.name === 'login') {
@@ -593,7 +593,7 @@ const breadcrumbs = computed(() => {
     }
   }
   
-  console.log('Generated Breadcrumbs:', crumbs.map(c => c.name).join(' > '))
+  // console.log('Generated Breadcrumbs:', crumbs.map(c => c.name).join(' > '))
   return crumbs
 })
 
@@ -602,7 +602,7 @@ function getHomePath() {
   const userInfo = userStore.getters.currentUser()
   const userRole = userInfo?.role?.toLowerCase().replace(/\s+/g, '') || 'admin'
   
-  console.log('Breadcrumb - User Role:', userRole) // Debug log
+  // console.log('Breadcrumb - User Role:', userRole) // Debug log
   
   // Map user roles to their corresponding home paths
   const roleToHomePath = {
