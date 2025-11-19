@@ -26,31 +26,73 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="projectName">Project Name:</label>
-                <input type="text" id="projectName" v-model="formData.projectName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="projectName"
+                  v-model="formData.projectName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="reportRefNo">Report Ref No:</label>
-                <input type="text" id="reportRefNo" v-model="formData.reportRefNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="reportRefNo"
+                  v-model="formData.reportRefNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="memoRefNo">Memo Ref No:</label>
-                <input type="text" id="memoRefNo" v-model="formData.memoRefNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="memoRefNo"
+                  v-model="formData.memoRefNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="lruName">LRU Name:</label>
-                <input type="text" id="lruName" v-model="formData.lruName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="lruName"
+                  v-model="formData.lruName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="inspectionStage">Inspection Stage:</label>
-                <input type="text" id="inspectionStage" v-model="formData.inspectionStage" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="inspectionStage"
+                  v-model="formData.inspectionStage"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="testVenue">Test Venue:</label>
-                <input type="text" id="testVenue" v-model="formData.testVenue" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="testVenue"
+                  v-model="formData.testVenue"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="slNos">SL.NO's:</label>
-                <input type="text" id="slNos" v-model="formData.slNos" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="slNos"
+                  v-model="formData.slNos"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
             </div>
 
@@ -58,35 +100,83 @@
             <div class="info-column">
               <div class="form-group">
                 <label for="dpName">DP Name:</label>
-                <input type="text" id="dpName" v-model="formData.dpName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="dpName"
+                  v-model="formData.dpName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated1">Dated:</label>
-                <input type="date" id="dated1" v-model="formData.dated1" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="dated1"
+                  v-model="formData.dated1"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="dated2">Dated:</label>
-                <input type="date" id="dated2" v-model="formData.dated2" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="dated2"
+                  v-model="formData.dated2"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="sruName">SRU Name:</label>
-                <input type="text" id="sruName" v-model="formData.sruName" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="sruName"
+                  v-model="formData.sruName"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="partNo">Part No:</label>
-                <input type="text" id="partNo" v-model="formData.partNo" :disabled="isPreparedByVerified" required>
+                <input
+                  type="text"
+                  id="partNo"
+                  v-model="formData.partNo"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="quantity">Quantity:</label>
-                <input type="number" id="quantity" v-model="formData.quantity" :disabled="isPreparedByVerified" required>
+                <input
+                  type="number"
+                  id="quantity"
+                  v-model="formData.quantity"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" v-model="formData.startDate" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="startDate"
+                  v-model="formData.startDate"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
               <div class="form-group">
                 <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" v-model="formData.endDate" :disabled="isPreparedByVerified" required>
+                <input
+                  type="date"
+                  id="endDate"
+                  v-model="formData.endDate"
+                  :disabled="isPreparedByVerified"
+                  required
+                />
               </div>
             </div>
           </div>
@@ -118,17 +208,29 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="item.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'visual', index)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'visual', index)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
 
@@ -143,17 +245,29 @@
                   <td>{{ index + 1 }}</td>
                   <td>{{ item.parameter }}</td>
                   <td>
-                    <input type="text" v-model="item.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="item.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="item.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="item.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'continuity', index)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'continuity', index)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
 
@@ -173,17 +287,29 @@
                     50884 for Flexi boards (or) IPC 6012 Class 3 DS)
                   </td>
                   <td>
-                    <input type="text" v-model="formData.fabricatorReport.observation" :disabled="isPreparedByVerified" placeholder="Enter observation">
+                    <input
+                      type="text"
+                      v-model="formData.fabricatorReport.observation"
+                      :disabled="isPreparedByVerified"
+                      placeholder="Enter observation"
+                    />
                   </td>
                   <td>
-                    <select v-model="formData.fabricatorReport.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="formData.fabricatorReport.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
                     </select>
                   </td>
                   <td>
-                    <input type="file" @change="handleFileUpload($event, 'fabricator', 0)" :disabled="isPreparedByVerified">
+                    <input
+                      type="file"
+                      @change="handleFileUpload($event, 'fabricator', 0)"
+                      :disabled="isPreparedByVerified"
+                    />
                   </td>
                 </tr>
               </tbody>
@@ -199,11 +325,19 @@
             <div class="signature-item">
               <label>Prepared By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
-                  Please fill in all form fields (General Information and Inspection Checklist) before verifying signature.
+                <div
+                  v-else-if="!areAllFieldsFilled"
+                  class="signature-disabled-message"
+                >
+                  Please fill in all form fields (General Information and
+                  Inspection Checklist) before verifying signature.
                 </div>
                 <div v-else class="signature-inputs">
                   <div class="input-group">
@@ -227,7 +361,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('preparedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('preparedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isPreparedByEnabled ||
                       !signatures.preparedBy.signatureUsername ||
@@ -237,7 +374,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.preparedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.preparedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -246,13 +386,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.preparedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.preparedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.preparedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.preparedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.preparedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.preparedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.preparedBy.signatureError }}
                 </div>
               </div>
@@ -262,10 +412,17 @@
             <div class="signature-item">
               <label>Verified By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
+                <div
+                  v-else-if="!isPreparedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Prepared By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -290,7 +447,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('verifiedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('verifiedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isVerifiedByEnabled ||
                       !signatures.verifiedBy.signatureUsername ||
@@ -300,7 +460,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.verifiedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -309,13 +472,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.verifiedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.verifiedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.verifiedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.verifiedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.verifiedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.verifiedBy.signatureError }}
                 </div>
               </div>
@@ -325,10 +498,17 @@
             <div class="signature-item">
               <label>Approved By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
                 </div>
-                <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
+                <div
+                  v-else-if="!isVerifiedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Verified By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -353,7 +533,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('approvedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('approvedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isApprovedByEnabled ||
                       !signatures.approvedBy.signatureUsername ||
@@ -363,7 +546,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.approvedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.approvedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -372,13 +558,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.approvedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.approvedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.approvedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.approvedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.approvedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.approvedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.approvedBy.signatureError }}
                 </div>
               </div>
@@ -387,8 +583,15 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified">
-          <button type="submit" class="btn btn-primary" :disabled="!isFormValid">
+        <div
+          class="form-actions"
+          v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton"
+        >
+          <button
+            type="submit"
+            class="btn btn-primary"
+            :disabled="!isFormValid"
+          >
             Submit Report
           </button>
         </div>
@@ -399,6 +602,7 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
+import jsPDF from "jspdf";
 
 export default {
   name: "BarePcbInspectionReport",
@@ -414,6 +618,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       projectName: "",
       lruName: "",
       serialNumber: "SL-001",
@@ -489,9 +694,9 @@ export default {
           },
         ],
         fabricatorReport: {
-          observation: '',
-          remarks: ''
-        }
+          observation: "",
+          remarks: "",
+        },
       },
       signatures: {
         preparedBy: {
@@ -523,33 +728,38 @@ export default {
   },
   computed: {
     isFormValid() {
-      return this.formData.projectName &&
-             this.formData.reportRefNo &&
-             this.formData.memoRefNo &&
-             this.formData.lruName &&
-             this.formData.dpName &&
-             this.formData.sruName &&
-             this.formData.partNo;
+      return (
+        this.formData.projectName &&
+        this.formData.reportRefNo &&
+        this.formData.memoRefNo &&
+        this.formData.lruName &&
+        this.formData.dpName &&
+        this.formData.sruName &&
+        this.formData.partNo
+      );
     },
     areAllFieldsFilled() {
       if (!this.isFormValid) return false;
-      
+
       for (const item of this.formData.visualInspection) {
         if (!item.observation || !item.remarks) {
           return false;
         }
       }
-      
+
       for (const item of this.formData.continuityCheck) {
         if (!item.observation || !item.remarks) {
           return false;
         }
       }
-      
-      if (!this.formData.fabricatorReport.observation || !this.formData.fabricatorReport.remarks) {
+
+      if (
+        !this.formData.fabricatorReport.observation ||
+        !this.formData.fabricatorReport.remarks
+      ) {
         return false;
       }
-      
+
       return true;
     },
     canAccessSignatures() {
@@ -574,17 +784,33 @@ export default {
     isApprovedByEnabled() {
       return this.canAccessSignatures && this.isVerifiedByVerified;
     },
+    shouldHideSubmitButton() {
+      // Hide submit button for reviewers and heads after report is submitted
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
+      }
+
+      // For all other roles: always hide
+      return true;
+    },
   },
   mounted() {
     const reportCardId = this.reportId || this.$route.params.reportId;
 
     if (reportCardId) {
       this.loadReportData(reportCardId);
+      this.fetchReportStatus(reportCardId);
     } else {
       // Get parameters from route
-      this.lruName = this.$route.params.lruName || '';
-      this.projectName = this.$route.params.projectName || '';
-      
+      this.lruName = this.$route.params.lruName || "";
+      this.projectName = this.$route.params.projectName || "";
+
       // Set default values
       this.formData.lruName = this.lruName;
       this.formData.projectName = this.projectName;
@@ -595,11 +821,11 @@ export default {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        if (section === 'visual') {
+        if (section === "visual") {
           this.formData.visualInspection[index].fileName = file.name;
-        } else if (section === 'continuity') {
+        } else if (section === "continuity") {
           this.formData.continuityCheck[index].fileName = file.name;
-        } else if (section === 'fabricator') {
+        } else if (section === "fabricator") {
           this.formData.fabricatorReport.fileName = file.name;
         }
       }
@@ -607,20 +833,22 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/bare-pcb-inspection/by-report-card/${reportCardId}`
+          `http://localhost:5000/api/reports/bare-pcb-inspection/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
           if (response.status === 404) {
             // Report doesn't exist yet, show empty form
-            this.lruName = this.$route.params.lruName || '';
-            this.projectName = this.$route.params.projectName || '';
+            this.lruName = this.$route.params.lruName || "";
+            this.projectName = this.$route.params.projectName || "";
             this.formData.lruName = this.lruName;
             this.formData.projectName = this.projectName;
             this.formData.startDate = this.currentDate;
             return;
           }
-          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+          throw new Error(
+            `Failed to fetch report: ${response.statusText} (${response.status})`
+          );
         }
 
         const result = await response.json();
@@ -636,19 +864,28 @@ export default {
           this.formData.inspectionStage = report.inspection_stage || "";
           this.formData.testVenue = report.test_venue || "";
           this.formData.slNos = report.sl_nos || "";
-          this.formData.dated1 = report.dated1 ? report.dated1.split('T')[0] : "";
-          this.formData.dated2 = report.dated2 ? report.dated2.split('T')[0] : "";
+          this.formData.dated1 = report.dated1
+            ? report.dated1.split("T")[0]
+            : "";
+          this.formData.dated2 = report.dated2
+            ? report.dated2.split("T")[0]
+            : "";
           this.formData.dpName = report.dp_name || "";
           this.formData.sruName = report.sru_name || "";
           this.formData.partNo = report.part_no || "";
           this.formData.quantity = report.quantity || "";
-          this.formData.startDate = report.start_date ? report.start_date.split('T')[0] : this.currentDate;
-          this.formData.endDate = report.end_date ? report.end_date.split('T')[0] : "";
-          
+          this.formData.startDate = report.start_date
+            ? report.start_date.split("T")[0]
+            : this.currentDate;
+          this.formData.endDate = report.end_date
+            ? report.end_date.split("T")[0]
+            : "";
+
           this.projectName = report.project_name || "";
           this.lruName = report.lru_name || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          this.inspectionCount = report.inspection_count || this.inspectionCount;
+          this.inspectionCount =
+            report.inspection_count || this.inspectionCount;
 
           // Map visual inspection data (obs1-obs10)
           if (this.formData.visualInspection.length >= 10) {
@@ -656,9 +893,11 @@ export default {
               const obsKey = `obs${i + 1}`;
               const remKey = `rem${i + 1}`;
               const uploadKey = `upload${i + 1}`;
-              this.formData.visualInspection[i].observation = report[obsKey] || "";
+              this.formData.visualInspection[i].observation =
+                report[obsKey] || "";
               this.formData.visualInspection[i].remarks = report[remKey] || "";
-              this.formData.visualInspection[i].fileName = report[uploadKey] || null;
+              this.formData.visualInspection[i].fileName =
+                report[uploadKey] || null;
             }
           }
 
@@ -688,7 +927,10 @@ export default {
           throw new Error(result.message || "Failed to load report data");
         }
       } catch (error) {
-        if (error.message.includes('404') || error.message.includes('not found')) {
+        if (
+          error.message.includes("404") ||
+          error.message.includes("not found")
+        ) {
           return;
         }
         alert(`Error loading report data: ${error.message}. Please try again.`);
@@ -698,19 +940,23 @@ export default {
       const signature = this.signatures[signatureType];
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError = "Please enter both username and signature password";
+        signature.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
       try {
-        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -721,13 +967,15 @@ export default {
           signature.signatureError = "";
           await this.autoSaveReport();
         } else {
-          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureError =
+            data.message || "Failed to verify signature";
           signature.signatureUrl = "";
           signature.verifiedUserName = "";
           signature.verifiedUserRole = "";
         }
       } catch (error) {
-        signature.signatureError = "Error verifying signature: " + error.message;
+        signature.signatureError =
+          "Error verifying signature: " + error.message;
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
         signature.verifiedUserRole = "";
@@ -735,7 +983,7 @@ export default {
     },
     prepareSubmissionData() {
       const reportCardId = this.reportId || this.$route.params.reportId;
-      
+
       return {
         report_card_id: reportCardId,
         project_name: this.formData.projectName,
@@ -755,16 +1003,16 @@ export default {
         end_date: this.formData.endDate,
         dated1: this.formData.dated1,
         dated2: this.formData.dated2,
-        
+
         // Visual inspection data (10 items)
         visual_inspection: this.formData.visualInspection,
-        
+
         // Continuity check data (1 item)
         continuity_check: this.formData.continuityCheck,
-        
+
         // Fabricator report data
         fabricator_report: this.formData.fabricatorReport,
-        
+
         prepared_by: this.signatures.preparedBy.signatureUrl || "",
         verified_by: this.signatures.verifiedBy.signatureUrl || "",
         approved_by: this.signatures.approvedBy.signatureUrl || "",
@@ -774,13 +1022,16 @@ export default {
       try {
         const reportCardId = this.reportId || this.$route.params.reportId;
         if (!reportCardId) return;
-        
+
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:8000/api/reports/bare-pcb-inspection", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/reports/bare-pcb-inspection",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
         if (!result.success) {
@@ -798,16 +1049,26 @@ export default {
 
       try {
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch("http://localhost:8000/api/reports/bare-pcb-inspection", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/reports/bare-pcb-inspection",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
 
         if (result.success) {
-          alert("Bare PCB inspection report submitted successfully! Notifications have been sent.");
+          // Update report status after submission
+          const reportCardId = this.reportId || this.$route.params.reportId;
+          if (reportCardId) {
+            await this.fetchReportStatus(reportCardId);
+          }
+          alert(
+            "Bare PCB inspection report submitted successfully! Notifications have been sent."
+          );
         } else {
           alert(`Error: ${result.message}`);
         }
@@ -816,7 +1077,505 @@ export default {
         alert("Error submitting report. Please try again.");
       }
     },
-  }
+    async fetchReportStatus(reportCardId) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/reports/${reportCardId}`
+        );
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
+      }
+    },
+    async exportReport() {
+      try {
+        // Helper function to convert image URL to base64
+        const imageToBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
+        const doc = new jsPDF("p", "mm", "a4");
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 20;
+        const contentWidth = pageWidth - 2 * margin;
+
+        let yPosition = margin;
+
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight) => {
+          if (yPosition + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+            return true;
+          }
+          return false;
+        };
+
+        // Helper function to add text with wrapping
+        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+          doc.setFontSize(fontSize);
+          doc.setFont("helvetica", isBold ? "bold" : "normal");
+          const lines = doc.splitTextToSize(text || "", maxWidth);
+          const lineHeight = fontSize * 0.4;
+          lines.forEach((line, index) => {
+            let xPos = x;
+            if (align === "center") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + (maxWidth - textWidth) / 2;
+            } else if (align === "right") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + maxWidth - textWidth;
+            }
+            doc.text(line, xPos, y + index * lineHeight);
+          });
+          return lines.length * lineHeight;
+        };
+
+        // ===== HEADER SECTION =====
+        // Load DRDO logo
+        let drdoLogoBase64 = null;
+        try {
+          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
+        } catch (e) {
+          console.warn("Could not load DRDO logo:", e);
+        }
+
+        // Add DRDO logo (left corner)
+        if (drdoLogoBase64) {
+          try {
+            doc.addImage(drdoLogoBase64, "PNG", margin, yPosition, 15, 15);
+          } catch (e) {
+            console.warn("Could not add DRDO logo:", e);
+          }
+        }
+
+        // Add AVIATRAX text (centered)
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(75, 0, 130);
+        const aviatraxText = "AVIATRAX™";
+        const aviatraxWidth = doc.getTextWidth(aviatraxText);
+        doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
+
+        // Add Defence Research text below AVIATRAX
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        const drdoText = "Defence Research and Development Org. (DRDO)";
+        const drdoTextWidth = doc.getTextWidth(drdoText);
+        doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreTextWidth = doc.getTextWidth(centreText);
+        doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
+
+        // CASDIC path and date
+        yPosition += 25;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${this.lruName || "LRU"}/SL.${this.serialNumber || "001"}/${this.inspectionCount || "INS-001"}/${this.currentYear || "2025"}`;
+        doc.text(documentPath, margin, yPosition);
+
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 10;
+
+        // Subject line
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Bare PCB Inspection Report for ${this.lruName || "Unknown LRU"}`;
+        const subjectWidth = doc.getTextWidth(subjectText);
+        doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
+        yPosition += 12;
+
+        // ===== REPORT DETAILS SECTION =====
+        checkPageBreak(50);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const colWidth = (contentWidth - 10) / 2;
+        let leftY = yPosition;
+        let rightY = yPosition;
+
+        // Left column fields
+        const leftFields = [
+          { label: "Project Name", value: this.formData.projectName || "N/A" },
+          { label: "Report Ref No", value: this.formData.reportRefNo || "N/A" },
+          { label: "Memo Ref No", value: this.formData.memoRefNo || "N/A" },
+          { label: "LRU Name", value: this.formData.lruName || "N/A" },
+          { label: "Inspection Stage", value: this.formData.inspectionStage || "N/A" },
+          { label: "Test Venue", value: this.formData.testVenue || "N/A" },
+          { label: "SL.NO'S", value: this.formData.slNos || "N/A" },
+        ];
+
+        // Right column fields
+        const rightFields = [
+          { label: "DP Name", value: this.formData.dpName || "N/A" },
+          {
+            label: "Dated",
+            value: this.formData.dated1
+              ? new Date(this.formData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: this.formData.dated2
+              ? new Date(this.formData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          { label: "SRU Name", value: this.formData.sruName || "N/A" },
+          { label: "Part No", value: this.formData.partNo || "N/A" },
+          {
+            label: "Quantity",
+            value: this.formData.quantity !== null && this.formData.quantity !== undefined && this.formData.quantity !== ""
+              ? this.formData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: this.formData.startDate
+              ? new Date(this.formData.startDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: this.formData.endDate
+              ? new Date(this.formData.endDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+        ];
+
+        // Print left column
+        leftFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          leftY += height + 3;
+        });
+
+        // Print right column
+        rightFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          rightY += height + 3;
+        });
+
+        yPosition = Math.max(leftY, rightY) + 10;
+
+        // ===== INSPECTION TESTS SECTION =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection Tests", margin, yPosition);
+        yPosition += 8;
+
+        // Helper function to print inspection section
+        const printInspectionSection = (title, items) => {
+          if (!items || items.length === 0) return;
+          
+          checkPageBreak(15);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.text(title, margin, yPosition);
+          yPosition += 10;
+
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.30,  // TEST CASES
+            contentWidth * 0.20,  // OBSERVATION
+            contentWidth * 0.25,  // REMARKS
+            contentWidth * 0.17,  // UPLOAD
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "TEST CASES", "OBSERVATION", "REMARKS (OK/NOT OK)", "UPLOAD"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text (wrap if needed)
+            const headerLines = doc.splitTextToSize(header, colWidths[i] - 6);
+            const startY = yPosition - 7 + (headerHeight - headerLines.length * 4.5) / 2 + 4.5;
+            headerLines.forEach((line, lineIdx) => {
+              const lineWidth = doc.getTextWidth(line);
+              doc.text(line, xPos + colWidths[i] / 2 - lineWidth / 2, startY + lineIdx * 4.5);
+            });
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          items.forEach((item, index) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (index + 1).toString(),
+              item.parameter || "",
+              item.observation || "",
+              item.remarks || "",
+              item.fileName ? "Yes" : "No",
+            ];
+
+            // Calculate row height based on content
+            const maxLines = Math.max(...rowData.map((text, idx) => 
+              doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+            ));
+            const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += currentRowHeight + 1;
+          });
+          yPosition += 5;
+        };
+
+        // Print all inspection sections
+        printInspectionSection("I. VISUAL INSPECTION", this.formData.visualInspection);
+        printInspectionSection("II. CONTINUITY CHECKING", this.formData.continuityCheck);
+        
+        // Fabricator Report (single item)
+        if (this.formData.fabricatorReport) {
+          checkPageBreak(15);
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "bold");
+          doc.text("III. FABRICATOR & VENDOR QC REPORTS VERIFICATION", margin, yPosition);
+          yPosition += 10;
+
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.30,  // TEST CASES
+            contentWidth * 0.20,  // OBSERVATION
+            contentWidth * 0.25,  // REMARKS
+            contentWidth * 0.17,  // UPLOAD
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "TEST CASES", "OBSERVATION", "REMARKS (OK/NOT OK)", "UPLOAD"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text (wrap if needed)
+            const headerLines = doc.splitTextToSize(header, colWidths[i] - 6);
+            const startY = yPosition - 7 + (headerHeight - headerLines.length * 4.5) / 2 + 4.5;
+            headerLines.forEach((line, lineIdx) => {
+              const lineWidth = doc.getTextWidth(line);
+              doc.text(line, xPos + colWidths[i] / 2 - lineWidth / 2, startY + lineIdx * 4.5);
+            });
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw row with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          checkPageBreak(rowHeight + 5);
+          
+          const rowData = [
+            "1",
+            "(Fabricator Report shall be as per Mil 551101 (Mil QML 31032) Group A & B Certificates for Rigid boards and Mil 50884 for Flexi boards (or) IPC 6012 Class 3 DS)",
+            this.formData.fabricatorReport.observation || "",
+            this.formData.fabricatorReport.remarks || "",
+            this.formData.fabricatorReport.fileName ? "Yes" : "No",
+          ];
+
+          // Calculate row height based on content
+          const maxLines = Math.max(...rowData.map((text, idx) => 
+            doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+          ));
+          const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
+
+          // Draw cell borders
+          doc.setLineWidth(0.1);
+          doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
+          
+          xPos = margin;
+          for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+            xPos += colWidths[colIdx - 1];
+            doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+          }
+
+          // Draw cell content
+          xPos = margin;
+          rowData.forEach((text, colIdx) => {
+            const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+            doc.text(textLines, xPos + 3, yPosition + 3);
+            xPos += colWidths[colIdx];
+          });
+          
+          yPosition += currentRowHeight + 10;
+        }
+
+        // ===== SIGNATURES SECTION =====
+        checkPageBreak(30);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        // Helper to extract name from signature URL
+        const getSignatureName = (signatureUrl) => {
+          if (!signatureUrl) return "";
+          if (signatureUrl.includes("|")) {
+            return signatureUrl.split("|")[0];
+          }
+          return "";
+        };
+
+        // Helper to get signature image URL
+        const getSignatureImageUrl = (signatureUrl) => {
+          if (!signatureUrl) return null;
+          if (signatureUrl.includes("|")) {
+            const parts = signatureUrl.split("|");
+            return parts.length > 1 ? parts[1] : null;
+          }
+          return signatureUrl.startsWith("http") ? signatureUrl : null;
+        };
+
+        const signatures = [
+          {
+            label: "Prepared By",
+            signatureUrl: this.signatures.preparedBy.signatureUrl,
+            verifiedName: this.signatures.preparedBy.verifiedUserName || getSignatureName(this.signatures.preparedBy.signatureUrl),
+          },
+          {
+            label: "Verified By",
+            signatureUrl: this.signatures.verifiedBy.signatureUrl,
+            verifiedName: this.signatures.verifiedBy.verifiedUserName || getSignatureName(this.signatures.verifiedBy.signatureUrl),
+          },
+          {
+            label: "Approved By",
+            signatureUrl: this.signatures.approvedBy.signatureUrl,
+            verifiedName: this.signatures.approvedBy.verifiedUserName || getSignatureName(this.signatures.approvedBy.signatureUrl),
+          },
+        ];
+
+        const sigColWidth = contentWidth / 3;
+        for (let index = 0; index < signatures.length; index++) {
+          const sig = signatures[index];
+          const xPos = margin + index * sigColWidth;
+          doc.text(`${sig.label}:`, xPos, yPosition);
+          
+          const imgUrl = getSignatureImageUrl(sig.signatureUrl);
+          if (imgUrl) {
+            try {
+              const imgBase64 = await imageToBase64(imgUrl);
+              doc.addImage(imgBase64, "PNG", xPos, yPosition + 3, 40, 15);
+              if (sig.verifiedName) {
+                doc.text(sig.verifiedName, xPos, yPosition + 20);
+              }
+            } catch (e) {
+              console.warn(`Could not load signature image for ${sig.label}:`, e);
+              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            }
+          } else {
+            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+          }
+        }
+
+        // Add page numbers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
+
+        // Save PDF
+        const fileName = `Bare_PCB_Inspection_Report_${this.lruName || "Unknown"}_${this.currentDate.replace(/\//g, "-")}.pdf`;
+        doc.save(fileName);
+
+        alert("Report exported successfully as PDF!");
+      } catch (error) {
+        console.error("Error exporting PDF:", error);
+        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
+      }
+    },
+  },
 };
 </script>
 
@@ -1266,7 +2025,7 @@ select:disabled:focus {
     padding: 0 20px;
     margin: 20px auto;
   }
-  
+
   .general-info-grid {
     grid-template-columns: 1fr;
     gap: 20px;

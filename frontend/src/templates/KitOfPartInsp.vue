@@ -255,7 +255,12 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('prepared')"
-                  :disabled="isFormReadonly || !areAllFieldsFilled || !preparedByUsername || !preparedByPassword"
+                  :disabled="
+                    isFormReadonly ||
+                    !areAllFieldsFilled ||
+                    !preparedByUsername ||
+                    !preparedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -268,7 +273,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ preparedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      preparedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -304,7 +311,11 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('verified')"
-                  :disabled="!preparedBySignatureUrl || !verifiedByUsername || !verifiedByPassword"
+                  :disabled="
+                    !preparedBySignatureUrl ||
+                    !verifiedByUsername ||
+                    !verifiedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -317,7 +328,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ verifiedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      verifiedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -353,7 +366,11 @@
                   type="button"
                   class="btn btn-verify"
                   @click="verifySignature('approved')"
-                  :disabled="!verifiedBySignatureUrl || !approvedByUsername || !approvedByPassword"
+                  :disabled="
+                    !verifiedBySignatureUrl ||
+                    !approvedByUsername ||
+                    !approvedByPassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
@@ -366,7 +383,9 @@
                     class="signature-image"
                   />
                   <div class="signature-info">
-                    <span class="signature-user">{{ approvedByVerifiedName }}</span>
+                    <span class="signature-user">{{
+                      approvedByVerifiedName
+                    }}</span>
                     <span class="signature-status">✓ Verified</span>
                   </div>
                 </div>
@@ -824,7 +843,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "http://localhost:5000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -896,7 +915,7 @@ export default {
 
         const submissionData = this.prepareSubmissionData();
 
-        const response = await fetch("http://localhost:8000/api/kit-of-parts", {
+        const response = await fetch("http://localhost:5000/api/kit-of-parts", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -961,7 +980,7 @@ export default {
 
         // Update the existing record in the database
         const response = await fetch(
-          `http://localhost:8000/api/kit-of-parts/${reportIdToUse}`,
+          `http://localhost:5000/api/kit-of-parts/${reportIdToUse}`,
           {
             method: "PUT",
             headers: {
@@ -1024,7 +1043,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/kit-of-parts/${reportIdToLoad}`,
+          `http://localhost:5000/api/kit-of-parts/${reportIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -1121,7 +1140,7 @@ export default {
           console.log("Fetching signatures from backend:", {
             prepared_by_qa_g1: report.prepared_by_qa_g1,
             verified_by_g1h_qa_g: report.verified_by_g1h_qa_g,
-            approved_by: report.approved_by
+            approved_by: report.approved_by,
           });
 
           // Prepared By signature - same logic as conformal coating
@@ -1132,7 +1151,7 @@ export default {
             this.preparedByVerifiedName = preparedParts[0] || "";
             console.log("✓ Prepared By signature fetched:", {
               name: this.reportData.preparedBy,
-              url: this.preparedBySignatureUrl
+              url: this.preparedBySignatureUrl,
             });
           } else {
             console.log("✗ Prepared By signature not found or empty");
@@ -1146,10 +1165,13 @@ export default {
             this.verifiedByVerifiedName = verifiedParts[0] || "";
             console.log("✓ Verified By signature fetched:", {
               name: this.reportData.verifiedBy,
-              url: this.verifiedBySignatureUrl
+              url: this.verifiedBySignatureUrl,
             });
           } else {
-            console.log("✗ Verified By signature not found or empty:", report.verified_by_g1h_qa_g);
+            console.log(
+              "✗ Verified By signature not found or empty:",
+              report.verified_by_g1h_qa_g
+            );
           }
 
           // Approved By signature - same logic as conformal coating
@@ -1160,10 +1182,13 @@ export default {
             this.approvedByVerifiedName = approvedParts[0] || "";
             console.log("✓ Approved By signature fetched:", {
               name: this.reportData.approvedBy,
-              url: this.approvedBySignatureUrl
+              url: this.approvedBySignatureUrl,
             });
           } else {
-            console.log("✗ Approved By signature not found or empty:", report.approved_by);
+            console.log(
+              "✗ Approved By signature not found or empty:",
+              report.approved_by
+            );
           }
 
           // Mark as submitted if all signatures exist
@@ -1227,7 +1252,7 @@ export default {
 
         // Send notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/kit-of-parts/notify",
+          "http://localhost:5000/api/kit-of-parts/notify",
           {
             method: "POST",
             headers: {
@@ -1271,7 +1296,7 @@ export default {
 
         // Send approval notification to backend
         const response = await fetch(
-          "http://localhost:8000/api/kit-of-parts/notify-approval",
+          "http://localhost:5000/api/kit-of-parts/notify-approval",
           {
             method: "POST",
             headers: {
@@ -1427,64 +1452,385 @@ export default {
           return item.expected || "";
       }
     },
-    exportReport() {
+    async exportReport() {
       try {
+        // Helper function to convert image URL to base64
+        const imageToBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
         const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 20;
+        const contentWidth = pageWidth - 2 * margin;
 
         let yPosition = margin;
 
-        // Set font styles
-        doc.setFont("helvetica");
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight) => {
+          if (yPosition + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+            return true;
+          }
+          return false;
+        };
 
-        // Header
-        doc.setFontSize(18);
+        // Helper function to add text with wrapping
+        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+          doc.setFontSize(fontSize);
+          doc.setFont("helvetica", isBold ? "bold" : "normal");
+          const lines = doc.splitTextToSize(text || "", maxWidth);
+          const lineHeight = fontSize * 0.4;
+          lines.forEach((line, index) => {
+            let xPos = x;
+            if (align === "center") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + (maxWidth - textWidth) / 2;
+            } else if (align === "right") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + maxWidth - textWidth;
+            }
+            doc.text(line, xPos, y + index * lineHeight);
+          });
+          return lines.length * lineHeight;
+        };
+
+        // ===== HEADER SECTION =====
+        // Load DRDO logo
+        let drdoLogoBase64 = null;
+        try {
+          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
+        } catch (e) {
+          console.warn("Could not load DRDO logo:", e);
+        }
+
+        // Add DRDO logo (left corner)
+        if (drdoLogoBase64) {
+          try {
+            doc.addImage(drdoLogoBase64, "PNG", margin, yPosition, 15, 15);
+          } catch (e) {
+            console.warn("Could not add DRDO logo:", e);
+          }
+        }
+
+        // Add AVIATRAX text (centered)
+        doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text("KIT OF PART INSPECTION REPORT", pageWidth / 2, yPosition, {
-          align: "center",
-        });
-        yPosition += 15;
+        doc.setTextColor(75, 0, 130);
+        const aviatraxText = "AVIATRAX™";
+        const aviatraxWidth = doc.getTextWidth(aviatraxText);
+        doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
 
-        // Document path and date
-        doc.setFontSize(10);
+        // Add Defence Research text below AVIATRAX
+        doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${
-          this.reportData.projectName || "PROJECT"
-        }/${this.reportData.lruName || "LRU"}/SL.${
-          this.reportData.slNos || "001"
-        }/${this.reportData.reportRefNo || "001"}/${this.currentYear}`;
+        doc.setTextColor(0, 0, 0);
+        const drdoText = "Defence Research and Development Org. (DRDO)";
+        const drdoTextWidth = doc.getTextWidth(drdoText);
+        doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreTextWidth = doc.getTextWidth(centreText);
+        doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
+
+        // CASDIC path and date
+        yPosition += 25;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.reportData.projectName || "PROJECT"}/${this.reportData.lruName || "LRU"}/SL.${this.reportData.slNos || "001"}/${this.reportData.reportRefNo || "INS-001"}/${this.currentYear}`;
         doc.text(documentPath, margin, yPosition);
 
-        const dateText = `Date: ${this.currentDate}`;
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString("en-GB")}`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
-        yPosition += 12;
+        yPosition += 10;
 
         // Subject line
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: Kit of Part Inspection Report for ${this.reportData.lruName || "Unknown LRU"}`;
+        const subjectWidth = doc.getTextWidth(subjectText);
+        doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
+        yPosition += 12;
+
+        // ===== REPORT DETAILS SECTION =====
+        checkPageBreak(50);
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: Kit of Part Inspection Report for ${
-          this.reportData.lruName || "Unknown LRU"
-        }`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
+        doc.text("Report Details", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const colWidth = (contentWidth - 10) / 2;
+        let leftY = yPosition;
+        let rightY = yPosition;
+
+        // Left column fields
+        const leftFields = [
+          { label: "Project Name", value: this.reportData.projectName || "N/A" },
+          { label: "Report Ref No", value: this.reportData.reportRefNo || "N/A" },
+          { label: "Memo Ref No", value: this.reportData.memoRefNo || "N/A" },
+          { label: "LRU Name", value: this.reportData.lruName || "N/A" },
+          { label: "Inspection Stage", value: this.reportData.inspectionStage || "N/A" },
+          { label: "Test Venue", value: this.reportData.testVenue || "N/A" },
+          { label: "SL.NO'S", value: this.reportData.slNos || "N/A" },
+        ];
+
+        // Right column fields
+        const rightFields = [
+          { label: "DP Name", value: this.reportData.dpName || "N/A" },
+          {
+            label: "Dated",
+            value: this.reportData.dated1
+              ? new Date(this.reportData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: this.reportData.dated2
+              ? new Date(this.reportData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          { label: "SRU Name", value: this.reportData.sruName || "N/A" },
+          { label: "Part No", value: this.reportData.partNo || "N/A" },
+          {
+            label: "Quantity",
+            value: this.reportData.quantity !== null && this.reportData.quantity !== undefined
+              ? this.reportData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: this.reportData.startDate
+              ? new Date(this.reportData.startDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: this.reportData.endDate
+              ? new Date(this.reportData.endDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+        ];
+
+        // Print left column
+        leftFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          leftY += height + 3;
+        });
+
+        // Print right column
+        rightFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          rightY += height + 3;
+        });
+
+        yPosition = Math.max(leftY, rightY) + 10;
+
+        // ===== INSPECTION ITEMS TABLE =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection Tests", margin, yPosition);
+        yPosition += 10;
+
+        if (this.reportData.inspectionItems && this.reportData.inspectionItems.length > 0) {
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.28,  // TEST CASES
+            contentWidth * 0.12,  // EXPECTED
+            contentWidth * 0.15,  // OBSERVATIONS
+            contentWidth * 0.20,  // REMARKS
+            contentWidth * 0.17,  // UPLOAD
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "TEST CASES", "EXPECTED", "OBSERVATIONS", "REMARKS (OK/NOT OK)", "UPLOAD"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text (wrap if needed)
+            const headerLines = doc.splitTextToSize(header, colWidths[i] - 6);
+            const startY = yPosition - 7 + (headerHeight - headerLines.length * 4.5) / 2 + 4.5;
+            headerLines.forEach((line, lineIdx) => {
+              const lineWidth = doc.getTextWidth(line);
+              doc.text(line, xPos + colWidths[i] / 2 - lineWidth / 2, startY + lineIdx * 4.5);
+            });
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          this.reportData.inspectionItems.forEach((item) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (item.slNo || "").toString(),
+              item.testCase || "",
+              item.expected || "",
+              item.observations || "",
+              item.remarks || "",
+              item.fileName ? "Yes" : "No",
+            ];
+
+            // Calculate row height based on content
+            const maxLines = Math.max(...rowData.map((text, idx) => 
+              doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+            ));
+            const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += currentRowHeight + 1;
+          });
+          yPosition += 5;
+        }
+
+        // ===== SIGNATURES SECTION =====
+        checkPageBreak(30);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        // Helper to extract name from signature URL
+        const getSignatureName = (signatureUrl) => {
+          if (!signatureUrl) return "";
+          if (signatureUrl.includes("|")) {
+            return signatureUrl.split("|")[0];
+          }
+          return "";
+        };
+
+        // Helper to get signature image URL
+        const getSignatureImageUrl = (signatureUrl) => {
+          if (!signatureUrl) return null;
+          if (signatureUrl.includes("|")) {
+            const parts = signatureUrl.split("|");
+            return parts.length > 1 ? parts[1] : null;
+          }
+          return signatureUrl.startsWith("http") ? signatureUrl : null;
+        };
+
+        const signatures = [
+          {
+            label: "Prepared By",
+            signatureUrl: this.preparedBySignatureUrl,
+            verifiedName: this.preparedByVerifiedName || getSignatureName(this.preparedBySignatureUrl),
+          },
+          {
+            label: "Verified By",
+            signatureUrl: this.verifiedBySignatureUrl,
+            verifiedName: this.verifiedByVerifiedName || getSignatureName(this.verifiedBySignatureUrl),
+          },
+          {
+            label: "Approved By",
+            signatureUrl: this.approvedBySignatureUrl,
+            verifiedName: this.approvedByVerifiedName || getSignatureName(this.approvedBySignatureUrl),
+          },
+        ];
+
+        const sigColWidth = contentWidth / 3;
+        for (let index = 0; index < signatures.length; index++) {
+          const sig = signatures[index];
+          const xPos = margin + index * sigColWidth;
+          doc.text(`${sig.label}:`, xPos, yPosition);
+          
+          const imgUrl = getSignatureImageUrl(sig.signatureUrl);
+          if (imgUrl) {
+            try {
+              const imgBase64 = await imageToBase64(imgUrl);
+              doc.addImage(imgBase64, "PNG", xPos, yPosition + 3, 40, 15);
+              if (sig.verifiedName) {
+                doc.text(sig.verifiedName, xPos, yPosition + 20);
+              }
+            } catch (e) {
+              console.warn(`Could not load signature image for ${sig.label}:`, e);
+              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            }
+          } else {
+            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+          }
+        }
+
+        // Add page numbers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
 
         // Save PDF
-        const fileName = `Kit_of_Part_Inspection_Report_${
-          this.reportData.lruName || "Unknown"
-        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `Kit_of_Part_Inspection_Report_${this.reportData.lruName || "Unknown"}_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         alert("Report exported successfully as PDF!");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        alert(
-          `Error exporting PDF: ${
-            error.message || "Unknown error"
-          }. Please try again.`
-        );
+        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
       }
     },
   },

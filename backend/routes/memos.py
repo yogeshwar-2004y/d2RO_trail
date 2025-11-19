@@ -446,8 +446,9 @@ def get_memos():
 def get_memo_details(memo_id):
     """Get detailed memo information including references"""
     try:
+        import psycopg2.extras
         conn = get_db_connection()
-        cur = conn.cursor()
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
         # Get memo details
         cur.execute("""
@@ -486,60 +487,61 @@ def get_memo_details(memo_id):
                 return date_obj.isoformat()
             return str(date_obj)  # If it's already a string, return as is
 
-        # Convert memo to dictionary
-        # Database column order: memo_id, from_person, to_person, thru_person, casdic_ref_no, dated, wing_proj_ref_no, lru_sru_desc, part_number, slno_units, qty_offered, manufacturer, drawing_no_rev, source, unit_identification, mechanical_inspn, inspn_test_stage_offered, stte_status, test_stage_cleared, venue, memo_date, name_designation, test_facility, test_cycle_duration, test_start_on, test_complete_on, calibration_status, func_check_initial, perf_check_during, func_check_end, certified, remarks, memo_status, submitted_by_name, accepted_by_name
+        # Convert memo to dictionary (using RealDictCursor, so memo is already a dict)
         memo_dict = {
-            "memo_id": memo[0],
-            "from_person": memo[1],
-            "to_person": memo[2],
-            "thru_person": memo[3],
-            "casdic_ref_no": memo[4],
-            "dated": safe_isoformat(memo[5]),
-            "wing_proj_ref_no": memo[6],
-            "lru_sru_desc": memo[7],
-            "part_number": memo[8],
-            "slno_units": memo[9],
-            "qty_offered": memo[10],
-            "manufacturer": memo[11],
-            "drawing_no_rev": memo[12],
-            "source": memo[13],
-            "unit_identification": memo[14],
-            "mechanical_inspn": memo[15],
-            "inspn_test_stage_offered": memo[16],
-            "stte_status": memo[17],
-            "test_stage_cleared": memo[18],
-            "venue": memo[19],
-            "memo_date": safe_isoformat(memo[20]),
-            "name_designation": memo[21],
-            "test_facility": memo[22],
-            "test_cycle_duration": memo[23],
-            "test_start_on": safe_isoformat(memo[24]),
-            "test_complete_on": safe_isoformat(memo[25]),
-            "calibration_status": memo[26],
-            "func_check_initial": safe_isoformat(memo[27]),
-            "perf_check_during": safe_isoformat(memo[28]),
-            "func_check_end": safe_isoformat(memo[29]),
-            "certified": memo[30],
-            "remarks": memo[31],
-            "submitted_at": None,  # Not available in current schema
-            "submitted_by": None,  # Not available in current schema
-            "accepted_at": None,   # Not available in current schema
-            "accepted_by": None,   # Not available in current schema
-            "coordinator": memo[36],
-            "memo_status": memo[33],
-            "submitted_by_name": memo[34],
-            "accepted_by_name": memo[35]
+            "memo_id": memo.get("memo_id"),
+            "from_person": memo.get("from_person"),
+            "to_person": memo.get("to_person"),
+            "thru_person": memo.get("thru_person"),
+            "casdic_ref_no": memo.get("casdic_ref_no"),
+            "dated": safe_isoformat(memo.get("dated")),
+            "wing_proj_ref_no": memo.get("wing_proj_ref_no"),
+            "lru_sru_desc": memo.get("lru_sru_desc"),
+            "part_number": memo.get("part_number"),
+            "slno_units": memo.get("slno_units"),
+            "qty_offered": memo.get("qty_offered"),
+            "manufacturer": memo.get("manufacturer"),
+            "drawing_no_rev": memo.get("drawing_no_rev"),
+            "source": memo.get("source"),
+            "unit_identification": memo.get("unit_identification"),
+            "mechanical_inspn": memo.get("mechanical_inspn"),
+            "inspn_test_stage_offered": memo.get("inspn_test_stage_offered"),
+            "stte_status": memo.get("stte_status"),
+            "test_stage_cleared": memo.get("test_stage_cleared"),
+            "venue": memo.get("venue"),
+            "memo_date": safe_isoformat(memo.get("memo_date")),
+            "name_designation": memo.get("name_designation"),
+            "test_facility": memo.get("test_facility"),
+            "test_cycle_duration": memo.get("test_cycle_duration"),
+            "test_start_on": safe_isoformat(memo.get("test_start_on")),
+            "test_complete_on": safe_isoformat(memo.get("test_complete_on")),
+            "calibration_status": memo.get("calibration_status"),
+            "func_check_initial": safe_isoformat(memo.get("func_check_initial")),
+            "perf_check_during": safe_isoformat(memo.get("perf_check_during")),
+            "func_check_end": safe_isoformat(memo.get("func_check_end")),
+            "certified": memo.get("certified"),
+            "remarks": memo.get("remarks"),
+            "submitted_at": memo.get("submitted_at"),
+            "submitted_by": memo.get("submitted_by"),
+            "accepted_at": memo.get("accepted_at"),
+            "accepted_by": memo.get("accepted_by"),
+            "coordinator": memo.get("coordinator"),
+            "memo_status": memo.get("memo_status"),
+            "qa_remarks": memo.get("qa_remarks"),
+            "qa_signature": memo.get("qa_signature"),
+            "submitted_by_name": memo.get("submitted_by_name"),
+            "accepted_by_name": memo.get("accepted_by_name")
         }
 
-        # Convert references to list
+        # Convert references to list (using RealDictCursor, so ref is already a dict)
         reference_list = []
         for ref in references:
             reference_list.append({
-                "ref_id": ref[0],
-                "ref_doc": ref[1],
-                "ref_no": ref[2],
-                "ver": ref[3],
-                "rev": ref[4]
+                "ref_id": ref.get("ref_id"),
+                "ref_doc": ref.get("ref_doc"),
+                "ref_no": ref.get("ref_no"),
+                "ver": ref.get("ver"),
+                "rev": ref.get("rev")
             })
 
         return jsonify({
@@ -588,12 +590,16 @@ def approve_memo(memo_id):
         print(f"Connecting to database...")
         conn = get_db_connection()
         cur = conn.cursor()
+        
+        # Store connection state to check later
+        connection_valid = True
 
         # Check if memo exists
         print(f"Checking if memo {memo_id} exists...")
         cur.execute("SELECT memo_id FROM memos WHERE memo_id = %s", (memo_id,))
         if not cur.fetchone():
             cur.close()
+            conn.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
 
         # Handle file upload
@@ -627,6 +633,15 @@ def approve_memo(memo_id):
                 SET accepted_at = %s, accepted_by = %s, memo_status = 'assigned'
                 WHERE memo_id = %s
             """, (datetime.now(), data.get('approved_by'), memo_id))
+            
+            # Sync report status when memo is accepted and assigned
+            cur.execute("""
+                UPDATE reports 
+                SET status = 'ASSIGNED'
+                WHERE memo_id = %s
+            """, (memo_id,))
+            if cur.rowcount > 0:
+                print(f"Updated report status to ASSIGNED for memo {memo_id}")
         elif status == 'rejected':
             print(f"Updating memo {memo_id} with disapproved status...")
             cur.execute("""
@@ -641,14 +656,17 @@ def approve_memo(memo_id):
                 print(f"Removed existing report for rejected memo {memo_id}")
             
             # Send notifications for rejected memo
+            # Use a separate connection for notification queries to avoid cursor conflicts
             try:
                 from utils.activity_logger import log_notification, get_users_by_role
 
                 performed_by = data.get('approved_by')
                 notified_user_ids = set()
 
-                # 1) First get submitter info and role
-                cur.execute("""
+                # 1) First get submitter info and role using a separate connection
+                conn_notify = get_db_connection()
+                cur_notify = conn_notify.cursor()
+                cur_notify.execute("""
                     SELECT m.submitted_by, u.name, ur.role_id 
                     FROM memos m 
                     LEFT JOIN users u ON m.submitted_by = u.user_id 
@@ -656,7 +674,10 @@ def approve_memo(memo_id):
                     WHERE m.memo_id = %s
                 """, (memo_id,))
                 
-                rows = cur.fetchall()
+                rows = cur_notify.fetchall()
+                cur_notify.close()
+                conn_notify.close()
+                
                 submitted_by_id = rows[0][0] if rows else None
                 submitted_by_name = rows[0][1] if rows and rows[0][1] else None
                 submitter_roles = [r[2] for r in rows] if rows else []
@@ -715,6 +736,8 @@ def approve_memo(memo_id):
         # Store approval_date as current timestamp when approval is made
         approval_timestamp = datetime.now()
         print(f"Approval timestamp: {approval_timestamp}")
+
+        
         
         # Parse test_date if provided
         test_date = None
@@ -727,9 +750,59 @@ def approve_memo(memo_id):
                 test_date = None
         
         # Check if approval record already exists
-        cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
-        existing_approval = cur.fetchone()
-        
+        # Ensure connection and cursor are still valid before using them
+        # Recreate connection/cursor if needed (after notification code may have affected them)
+        try:
+            # Try to use the cursor - if it fails, we'll recreate
+            # First, verify connection is still open by checking its state
+            try:
+                # Try a simple query to test connection
+                cur.execute("SELECT 1")
+                cur.fetchone()
+            except:
+                # Connection is invalid, recreate it
+                print("Connection invalid, recreating...")
+                try:
+                    if 'cur' in locals() and cur:
+                        cur.close()
+                except:
+                    pass
+                try:
+                    if 'conn' in locals() and conn:
+                        conn.close()
+                except:
+                    pass
+                conn = get_db_connection()
+                cur = conn.cursor()
+                connection_valid = True
+            
+            cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
+            existing_approval = cur.fetchone()
+        except (Exception, AttributeError) as cursor_err:
+            # If cursor or connection is invalid, create new ones
+            print(f"Cursor/connection error, recreating connection and cursor: {cursor_err}")
+            try:
+                if 'cur' in locals() and cur:
+                    try:
+                        cur.close()
+                    except:
+                        pass
+            except:
+                pass
+            try:
+                if 'conn' in locals() and conn:
+                    try:
+                        conn.close()
+                    except:
+                        pass
+            except:
+                pass
+            # Create fresh connection and cursor
+            conn = get_db_connection()
+            cur = conn.cursor()
+            connection_valid = True
+            cur.execute("SELECT approval_id FROM memo_approval WHERE memo_id = %s", (memo_id,))
+            existing_approval = cur.fetchone()
         # Get user_id for database operations (NULL for rejections)
         user_id_for_db = data.get('user_id') if status == 'accepted' else None
         
@@ -771,7 +844,55 @@ def approve_memo(memo_id):
             ))
 
         print("Committing transaction...")
-        conn.commit()
+        try:
+            conn.commit()
+            print("Transaction committed successfully")
+        except Exception as commit_err:
+            print(f"Error committing transaction: {commit_err}")
+            # If commit fails due to connection issues, recreate and retry
+            try:
+                if hasattr(conn, 'closed') and conn.closed:
+                    print("Connection was closed, recreating...")
+                    conn = get_db_connection()
+                    cur = conn.cursor()
+                    # Re-execute the insert/update
+                    if existing_approval:
+                        cur.execute("""
+                            UPDATE memo_approval 
+                            SET approval_date = %s, user_id = %s, comments = %s, authentication = %s, 
+                                attachment_path = %s, status = %s, approved_by = %s, test_date = %s
+                            WHERE memo_id = %s
+                        """, (
+                            approval_timestamp,
+                            user_id_for_db,
+                            data.get('comments'),
+                            data.get('authentication'),
+                            attachment_path,
+                            status,
+                            data.get('approved_by'),
+                            test_date,
+                            memo_id
+                        ))
+                    else:
+                        cur.execute("""
+                            INSERT INTO memo_approval (memo_id, approval_date, user_id, comments, authentication, attachment_path, status, approved_by, test_date)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """, (
+                            memo_id,
+                            approval_timestamp,
+                            user_id_for_db,
+                            data.get('comments'),
+                            data.get('authentication'),
+                            attachment_path,
+                            status,
+                            data.get('approved_by'),
+                            test_date
+                        ))
+                    conn.commit()
+                    print("Transaction committed successfully after recreating connection")
+            except Exception as retry_err:
+                print(f"Error retrying commit: {retry_err}")
+                raise retry_err
         
         # Create report for assigned memo
         if status == 'accepted':
@@ -1430,23 +1551,58 @@ def update_memo_status(memo_id):
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Update memo status, reviewer comments, and certification data
+        # Update memo status, reviewer comments, certification data, and signature
         reviewer_comments = data.get('reviewer_comments', '')
         certified = data.get('certified', [])
+        qa_signature = data.get('qa_signature', None)
         
         print(f"=== DEBUG: Certification data ===")
         print(f"certified: {certified}")
+        print(f"qa_signature: {qa_signature}")
         print(f"=== END DEBUG ===")
         
-        cur.execute("""
-            UPDATE memos 
-            SET memo_status = %s, qa_remarks = %s, certified = %s
-            WHERE memo_id = %s
-        """, (memo_status, reviewer_comments, certified, memo_id))
+        if qa_signature:
+            cur.execute("""
+                UPDATE memos 
+                SET memo_status = %s, qa_remarks = %s, certified = %s, qa_signature = %s
+                WHERE memo_id = %s
+            """, (memo_status, reviewer_comments, certified, qa_signature, memo_id))
+        else:
+            cur.execute("""
+                UPDATE memos 
+                SET memo_status = %s, qa_remarks = %s, certified = %s
+                WHERE memo_id = %s
+            """, (memo_status, reviewer_comments, certified, memo_id))
         
         if cur.rowcount == 0:
             cur.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
+        
+        # Map memo status to report status
+        # Mapping: memo_status -> report status
+        status_mapping = {
+            'assigned': 'ASSIGNED',
+            'successfully_completed': 'SUCCESSFULLY COMPLETED',
+            'completed_with_observations': 'COMPLETED WITH OBSERVATIONS',
+            'test_failed': 'TEST FAILED',
+            'test_not_conducted': 'TEST NOT CONDUCTED'
+        }
+        
+        # Get corresponding report status
+        report_status = status_mapping.get(memo_status)
+        
+        if report_status:
+            # Update corresponding report status (one-to-one relationship)
+            cur.execute("""
+                UPDATE reports 
+                SET status = %s
+                WHERE memo_id = %s
+            """, (report_status, memo_id))
+            
+            if cur.rowcount > 0:
+                print(f"Updated report status to {report_status} for memo {memo_id}")
+            else:
+                print(f"Warning: No report found for memo {memo_id} to update status")
         
         conn.commit()
         cur.close()
@@ -1902,7 +2058,7 @@ def download_memo_pdf(memo_id):
                         if authentication.startswith('http'):
                             signature_url = authentication
                         else:
-                            signature_url = f"http://localhost:8000{authentication}"
+                            signature_url = f"http://localhost:5000{authentication}"
                         
                         import requests
                         response = requests.get(signature_url, timeout=10)

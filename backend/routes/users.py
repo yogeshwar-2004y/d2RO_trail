@@ -531,6 +531,7 @@ def verify_signature_credentials():
     """Verify signature credentials and return signature path"""
     try:
         data = request.get_json()
+        print("Received data for signature verification:", data)
         username = data.get('username')
         signature_password = data.get('signature_password')
         

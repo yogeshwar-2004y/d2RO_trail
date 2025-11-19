@@ -87,7 +87,7 @@ export default {
         this.loading = true;
         this.error = null;
 
-        const response = await fetch("http://localhost:8000/api/projects");
+        const response = await fetch("http://localhost:5000/api/projects");
         const data = await response.json();
 
         if (data.success) {
@@ -126,7 +126,7 @@ export default {
   padding: 20px 30px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-left:  -50px;
+  margin-left: -50px;
 }
 .back-button {
   background: none;

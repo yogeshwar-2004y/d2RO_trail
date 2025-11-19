@@ -45,488 +45,422 @@
       </div>
     </div>
 
-    <!-- Requisition Details Section -->
-    <div class="form-section requisition-details">
-      <table class="form-table">
-        <tr>
-          <td class="form-cell">
-            <label>From :</label>
-            <input
-              type="text"
-              v-model="formData.from1"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>CASDIC Ref No.:</label>
-          </td>
-          <td class="form-cell">
-            <label>CASDIC/</label>
-            <input
-              type="text"
-              v-model="formData.casdic"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Dated:</label>
-            <input
-              type="text"
-              v-model="formData.casdicDate"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td class="form-cell">
-            <label>To :</label>
-            <input
-              type="text"
-              v-model="formData.from2"
-              readonly
-              class="readonly-field"
-            />
-            <input
-              type="text"
-              v-model="formData.from3"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Thru/: O I/c, WH</label>
-          </td>
-          <td class="form-cell">
-            <label>Wing/Proj Ref No.:</label>
-            <input
-              type="text"
-              v-model="formData.wingRef"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell"></td>
-        </tr>
-        <tr>
-          <td class="form-cell"></td>
-          <td class="form-cell">
-            <label>Name & contact No of CASDIC (Designs) coordinator:</label>
-            <input
-              type="text"
-              v-model="formData.coordinator"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell"></td>
-          <td class="form-cell"></td>
-        </tr>
-      </table>
-    </div>
+    <!-- Form Content (for PDF generation) -->
+    <div class="form-content">
+      <!-- Requisition Details Section -->
+      <div class="form-card read-only-section">
+        <div class="section-header">
+          <h2 class="card-title">REQUISITION FOR DGAQA INSPECTION</h2>
+        </div>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <span>FROM:</span
+            ><input type="text" v-model="formData.from1" readonly />
+          </div>
+          <div class="grid-item">
+            <span>CASCIC Ref No.:</span
+            ><input type="text" v-model="formData.casdic" readonly />
+          </div>
+          <div class="grid-item">
+            <span>CASCIC/</span
+            ><input type="text" v-model="formData.casdic" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Dated:</span
+            ><input type="text" v-model="formData.casdicDate" readonly />
+          </div>
+          <div class="grid-item">
+            <span>TO:</span
+            ><input type="text" v-model="formData.from2" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Wing/Proj Ref No.:</span
+            ><input type="text" v-model="formData.wingRef" readonly />
+          </div>
+          <div class="grid-item-full">
+            <span>Name & contact No of CASCIC (Designs) coordinator:</span
+            ><input type="text" v-model="formData.coordinator" readonly />
+          </div>
+        </div>
+      </div>
 
-    <!-- LRU/SRU Table Section -->
-    <div class="form-section lru-table">
-      <table class="lru-grid">
-        <thead>
-          <tr>
-            <th class="lru-header" rowspan="2">LRU/SRU DETAILS</th>
-            <th class="lru-header" rowspan="2">LRU/SRU Desc</th>
-            <th class="ref-header" colspan="4">Ref. Docnt</th>
-          </tr>
-          <tr>
-            <th class="ref-header">Ref Doc</th>
-            <th class="ref-header">Ref No of Document</th>
-            <th class="ver-header">ver</th>
-            <th class="rev-header">rev</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="lru-cell">
-              <div class="lru-field">
-                <label>Part No:</label>
-                <input
-                  type="text"
-                  v-model="formData.partNo"
-                  readonly
-                  class="readonly-field"
-                />
-              </div>
-              <div class="lru-field">
-                <label>Manufacturer:</label>
-                <input
-                  type="text"
-                  v-model="formData.manufacturer"
-                  readonly
-                  class="readonly-field"
-                />
-              </div>
-            </td>
-            <td class="desc-cell">
-              <input
-                type="text"
-                v-model="formData.description"
-                readonly
-                class="readonly-field lru-description-input"
-              />
-            </td>
-            <td class="ref-cell">
-              <input
-                type="text"
-                v-model="formData.refDoc"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="refno-cell">
-              <input
-                type="text"
-                v-model="formData.refNo"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="ver-cell">
-              <input
-                type="text"
-                v-model="formData.version"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="rev-cell">
-              <input
-                type="text"
-                v-model="formData.revision"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-          </tr>
-
-          <!-- Additional reference rows -->
-          <tr v-for="i in 5" :key="i">
-            <td class="lru-cell"></td>
-            <td class="desc-cell">
-              <input
-                type="text"
-                v-model="formData[`description${i + 1}`]"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="ref-cell">
-              <input
-                type="text"
-                v-model="formData[`refDoc${i + 1}`]"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="refno-cell">
-              <input
-                type="text"
-                v-model="formData[`refNo${i + 1}`]"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="ver-cell">
-              <input
-                type="text"
-                v-model="formData[`version${i + 1}`]"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-            <td class="rev-cell">
-              <input
-                type="text"
-                v-model="formData[`revision${i + 1}`]"
-                readonly
-                class="readonly-field"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Additional Details Section -->
-    <div class="form-section additional-details">
-      <table class="form-table">
-        <tr>
-          <td class="form-cell">
-            <label>Drawing no/Rev:</label>
-            <input
-              type="text"
-              v-model="formData.drawingRev"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>source:</label>
-            <input
-              type="text"
-              v-model="formData.source"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Sl.No of units:</label>
-            <input
-              type="text"
-              v-model="formData.serialNo"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Qty Offered:</label>
-            <input
-              type="text"
-              v-model="formData.qtyOffered"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td class="form-cell" colspan="2">
-            <label>UNIT IDENTIFICATION:</label>
-            <input
+      <!-- LRU/SRU Details Section -->
+      <div class="form-card read-only-section">
+        <div class="section-header">
+          <h3 class="section-title">LRU/SRU DETAILS</h3>
+        </div>
+        <div class="grid-layout two-col">
+          <div class="grid-item-half">
+            <span>LRU/SRU DETAILS</span
+            ><input type="text" v-model="formData.partNo" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>LRU/SRU Desc:</span
+            ><input type="text" v-model="formData.description" readonly />
+          </div>
+        </div>
+        <div class="grid-layout two-col-doc">
+          <div class="grid-item">
+            <span>Ref Doc</span
+            ><input type="text" v-model="formData.refDoc" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Ref No of Document</span
+            ><input type="text" v-model="formData.refNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>ver</span
+            ><input type="text" v-model="formData.version" readonly />
+          </div>
+          <div class="grid-item">
+            <span>rev</span
+            ><input type="text" v-model="formData.revision" readonly />
+          </div>
+        </div>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <span>Part No:</span
+            ><input type="text" v-model="formData.partNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Manufacturer:</span
+            ><input type="text" v-model="formData.manufacturer" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Sl.No of units:</span
+            ><input type="text" v-model="formData.serialNo" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Drawing no/Rev:</span
+            ><input type="text" v-model="formData.drawingRev" readonly />
+          </div>
+          <div class="grid-item">
+            <span>Qty Offered:</span
+            ><input type="text" v-model="formData.qtyOffered" readonly />
+          </div>
+          <div class="grid-item">
+            <span>source:</span
+            ><input type="text" v-model="formData.source" readonly />
+          </div>
+        </div>
+        <div class="grid-layout two-col">
+          <div class="grid-item-half">
+            <span>UNIT IDENTIFICATION:</span
+            ><input
               type="text"
               v-model="formData.unitIdentification"
               readonly
-              class="readonly-field"
             />
-          </td>
-          <td class="form-cell" colspan="2">
-            <label>MECHANICAL INSPN:</label>
-            <input
+          </div>
+          <div class="grid-item-half">
+            <span>MECHANICAL INSPN:</span
+            ><input
               type="text"
               v-model="formData.mechanicalInspection"
               readonly
-              class="readonly-field"
             />
-          </td>
-        </tr>
-        <tr>
-          <td class="form-cell" colspan="2">
-            <label>INSPECTION /TEST STAGE OFFERED NOW:</label>
-            <input
-              type="text"
-              v-model="formData.testStageOffered"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Test stage cleared:</label>
-            <input
-              type="text"
-              v-model="formData.testStageCleared"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>STTE Status:</label>
-            <input
-              type="text"
-              v-model="formData.stteStatus"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
+        </div>
+        <div class="grid-layout two-col">
+          <div class="grid-item-half">
+            <span>INSPECTION /TEST STAGE OFFERED NOW:</span
+            ><input type="text" v-model="formData.testStageOffered" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>STTE Status:</span
+            ><input type="text" v-model="formData.stteStatus" readonly />
+          </div>
+        </div>
+      </div>
 
-    <!-- Testing Details Section -->
-    <div class="form-section testing-details">
-      <table class="form-table">
-        <tr>
-          <td class="form-cell" colspan="2">
-            <label
-              >Above Unit is ready for Testing at venue, dated onwards.</label
-            >
-            <input
-              type="text"
-              v-model="formData.venue"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>memo date:</label>
-            <input
-              type="text"
-              v-model="formData.memoDate"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Name / designation:</label>
-            <input
-              type="text"
-              v-model="formData.nameDesignation"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td class="form-cell">
-            <label>Test facility to be used:</label>
-            <input
-              type="text"
-              v-model="formData.testFacility"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Test cycle / Duration:</label>
-            <input
+      <!-- Testing Details Section - Page break before for PDF -->
+      <div class="form-card read-only-section page-break-before">
+        <div class="section-header">
+          <h3 class="section-title">TESTING DETAILS</h3>
+        </div>
+        <div class="grid-layout">
+          <div class="grid-item-half">
+            <span>Above Unit is ready for Testing at venue, dated onwards.</span
+            ><input type="text" v-model="formData.venue" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>Test facility to be used:</span
+            ><input type="text" v-model="formData.testFacility" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>Calibration status OK/Due on:</span
+            ><input type="text" v-model="formData.calibrationStatus" readonly />
+          </div>
+          <div class="grid-item-half">
+            <span>SIGNATURE: NAME / DESIGNATION</span
+            ><input type="text" v-model="formData.nameDesignation" readonly />
+          </div>
+          <div class="grid-item-quarter">
+            <span>Test cycle / Duration:</span
+            ><input
               type="text"
               v-model="formData.testCycleDuration"
               readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Test Start on:</label>
-            <input
-              type="text"
-              v-model="formData.testStartOn"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Test complete on:</label>
-            <input
-              type="text"
-              v-model="formData.testCompleteOn"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-        </tr>
-        <tr>
-          <td class="form-cell">
-            <label>Calibration status OK/Due on:</label>
-            <input
-              type="text"
-              v-model="formData.calibrationStatus"
-              readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Func. Check(Initial):</label>
-            <input
+            /><span>hrs</span>
+          </div>
+          <div class="grid-item-quarter">
+            <span>Func. Check(Initial):</span
+            ><input
               type="text"
               v-model="formData.funcCheckInitial"
               readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Perf. check (during):</label>
-            <input
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-quarter">
+            <span>Test Start on:</span
+            ><input type="text" v-model="formData.testStartOn" readonly /><span
+              >date/time</span
+            >
+          </div>
+          <div class="grid-item-quarter">
+            <span>Perf. check (during):</span
+            ><input
               type="text"
               v-model="formData.perfCheckDuring"
               readonly
-              class="readonly-field"
-            />
-          </td>
-          <td class="form-cell">
-            <label>Func Check (End):</label>
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-half">
+            <span>Test complete on:</span
+            ><input
+              type="text"
+              v-model="formData.testCompleteOn"
+              readonly
+            /><span>date/time</span>
+          </div>
+          <div class="grid-item-half">
+            <span>Func Check (End):</span
+            ><input type="text" v-model="formData.funcCheckEnd" readonly /><span
+              >date/time</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Certifications Section -->
+      <div class="form-card read-only-section">
+        <div class="section-header">
+          <h3 class="section-title">CERTIFICATIONS</h3>
+        </div>
+        <div class="grid-layout one-col-checkbox">
+          <p class="checkbox-title">It is certified that :</p>
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.mechanicalQualityRecords"
+              disabled
+            />Mechanical Quality Records of all the parts (Raw material TC
+            (chemical & mechanical), Dimensional reports, NDT reports, Process
+            certificates etc.) & Electrical Quality Records (Components
+            Screening report, PCB manufacturing report, process compliance
+            reports/ test reports, etc.) were verified thoroughly.</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.cocVerified"
+              disabled
+            />CoC for SRU, fasteners & standard parts are verified and
+            satisfactory</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.sruSerialNoted"
+              disabled
+            />Sl no of the SRUs are noted down in the respective log book opened
+            on _________</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.noDefectInvestigation"
+              disabled
+            />No Defect investigation is pending against this LRU</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.previousTestStagesCleared"
+              disabled
+            />All the previous test stages of this LRU/SRU are cleared</label
+          >
+          <label
+            ><input
+              type="checkbox"
+              v-model="formData.certifications.cascicQAInspected"
+              disabled
+            />CASCIC QA has physically inspected and accepted the LRU on
+            _________</label
+          >
+          <span class="signature-line">SIGNATURE of Rep, IQA CASCIC</span>
+        </div>
+      </div>
+
+      <!-- Remarks Section - Page break before for PDF -->
+      <div class="form-card page-break-before">
+        <div class="section-header">
+          <h3 class="section-title">Action taken & remarks by DGAQA</h3>
+        </div>
+        <div class="grid-layout">
+          <div class="readonly-display">{{ formData.remarks }}</div>
+          <span class="signature-line right">SIGNATURE OF DGAQA REP..</span>
+        </div>
+      </div>
+
+      <!-- Approval and Assignment Information (show for all roles when memo is approved) -->
+      <div class="form-card" v-if="isMemoApprovedWithReviewer">
+        <div class="section-header">
+          <h3 class="section-title">APPROVAL AND ASSIGNMENT DETAILS</h3>
+        </div>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <label>Date of Test or Review</label>
             <input
               type="text"
-              v-model="formData.funcCheckEnd"
+              :value="
+                formatApprovalDate(
+                  memoApprovalStatus.test_date ||
+                    memoApprovalStatus.approval_date
+                )
+              "
               readonly
-              class="readonly-field"
             />
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester ID</label>
+            <input type="text" :value="assignedReviewer.id" readonly />
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester Name</label>
+            <input type="text" :value="assignedReviewer.name" readonly />
+          </div>
+          <div class="grid-item-full">
+            <label>Comments</label>
+            <input
+              type="text"
+              :value="memoApprovalStatus.comments || 'No comments provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Authentication</label>
+            <div
+              v-if="
+                memoApprovalStatus.authentication &&
+                isSignatureUrl(memoApprovalStatus.authentication)
+              "
+              class="signature-display-pdf"
+            >
+              <img
+                :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
+                alt="Signature"
+                class="signature-image-pdf"
+              />
+              <span class="signature-line">SIGNATURE</span>
+            </div>
+            <input
+              v-else
+              type="text"
+              :value="memoApprovalStatus.authentication || 'Not provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Attachments</label>
+            <input
+              type="text"
+              :value="
+                memoApprovalStatus.attachment_path
+                  ? 'File attached'
+                  : 'No attachments'
+              "
+              readonly
+            />
+          </div>
+        </div>
+      </div>
 
-    <!-- Certification Section -->
-    <div class="form-section certification">
-      <h3>It is certified that :</h3>
-      <div class="checkbox-group">
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.mechanicalQualityRecords"
-            disabled
-          />
-          <span>Mechanical Quality Records verified thoroughly</span>
-        </label>
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.cocVerified"
-            disabled
-          />
-          <span>CoC for SRU, fasteners & standard parts verified</span>
-        </label>
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.sruSerialNoted"
-            disabled
-          />
-          <span>Sl no of the SRUs noted in log book</span>
-        </label>
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.noDefectInvestigation"
-            disabled
-          />
-          <span>No Defect investigation pending</span>
-        </label>
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.previousTestStagesCleared"
-            disabled
-          />
-          <span>All previous test stages cleared</span>
-        </label>
-        <label class="checkbox-item">
-          <input
-            type="checkbox"
-            v-model="formData.certifications.cascicQAInspected"
-            disabled
-          />
-          <span>CASCIC QA has physically inspected and accepted</span>
-        </label>
+      <!-- Rejection Information (show for all roles when memo is rejected) -->
+      <div class="form-card" v-if="isMemoRejected">
+        <div class="section-header">
+          <h3 class="section-title">REJECTION DETAILS</h3>
+        </div>
+        <div class="grid-layout">
+          <div class="grid-item">
+            <label>Date of Test or Review</label>
+            <input
+              type="text"
+              :value="formatApprovalDate(memoApprovalStatus.approval_date)"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester ID</label>
+            <input
+              type="text"
+              :value="memoApprovalStatus.approved_by"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Internal Tester Name</label>
+            <input type="text" value="QA Head" readonly />
+          </div>
+          <div class="grid-item-full">
+            <label>Comments</label>
+            <input
+              type="text"
+              :value="memoApprovalStatus.comments || 'No comments provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Authentication</label>
+            <div
+              v-if="
+                memoApprovalStatus.authentication &&
+                isSignatureUrl(memoApprovalStatus.authentication)
+              "
+              class="signature-display-pdf"
+            >
+              <img
+                :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
+                alt="Signature"
+                class="signature-image-pdf"
+              />
+              <span class="signature-line">SIGNATURE</span>
+            </div>
+            <input
+              v-else
+              type="text"
+              :value="memoApprovalStatus.authentication || 'Not provided'"
+              readonly
+            />
+          </div>
+          <div class="grid-item">
+            <label>Attachments</label>
+            <input
+              type="text"
+              :value="
+                memoApprovalStatus.attachment_path
+                  ? 'File attached'
+                  : 'No attachments'
+              "
+              readonly
+            />
+          </div>
+        </div>
       </div>
     </div>
+    <!-- End Form Content -->
 
-    <!-- Remarks Section -->
-    <div class="form-section remarks">
-      <label>Remarks:</label>
-      <textarea
-        v-model="formData.remarks"
-        readonly
-        class="readonly-field remarks-textarea"
-      ></textarea>
-    </div>
-
-    <!-- QA Head Action Buttons (only show if memo is not processed) -->
+    <!-- QA Head Action Buttons (only show if memo is not processed) - Outside form-content to exclude from PDF -->
     <div
       class="form-section action-buttons"
       v-if="isQAHead && !isMemoProcessed"
@@ -534,146 +468,6 @@
       <div class="button-container">
         <button class="btn btn-accept" @click="handleAccept">ACCEPT</button>
         <button class="btn btn-reject" @click="handleReject">REJECT</button>
-      </div>
-    </div>
-
-    <!-- Assigned Reviewer Information (show for all roles when memo is approved) -->
-    <div
-      class="form-section reviewer-info-section approved-section"
-      v-if="isMemoApprovedWithReviewer"
-    >
-      <div class="status-badge approved-badge">
-        ✓ APPROVED AND ASSIGNED REVIEWER
-      </div>
-      <h3>Test or Review Details</h3>
-      <div class="test-review-grid">
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Date of Test or Review :</label>
-            <span class="test-review-value">{{
-              formatApprovalDate(
-                memoApprovalStatus.test_date || memoApprovalStatus.approval_date
-              )
-            }}</span>
-          </div>
-          <div class="test-review-field comments-field">
-            <label>Comments :</label>
-            <span class="test-review-value comments-value">{{
-              memoApprovalStatus.comments || "No comments provided"
-            }}</span>
-          </div>
-        </div>
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Internal Tester ID:</label>
-            <span class="test-review-value">{{ assignedReviewer.id }}</span>
-          </div>
-        </div>
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Internal Tester Name :</label>
-            <span class="test-review-value">{{ assignedReviewer.name }}</span>
-          </div>
-          <div class="test-review-field">
-            <label>Authentication</label>
-            <div class="test-review-value">
-              <div
-                v-if="
-                  memoApprovalStatus.authentication &&
-                  isSignatureUrl(memoApprovalStatus.authentication)
-                "
-                class="signature-display-footer"
-              >
-                <img
-                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
-                  alt="Signature"
-                  class="signature-image-footer"
-                />
-                <span class="signature-label">Signature</span>
-              </div>
-              <span v-else class="no-signature">
-                {{ memoApprovalStatus.authentication || "Not provided" }}
-              </span>
-            </div>
-          </div>
-          <div class="test-review-field">
-            <label>Attachments</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.attachment_path
-                ? "File attached"
-                : "No attachments"
-            }}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rejection Information (show for all roles when memo is rejected) -->
-    <div
-      class="form-section rejection-info-section rejected-section"
-      v-if="isMemoRejected"
-    >
-      <div class="status-badge rejected-badge">✗ REJECTED</div>
-      <h3>Test or Review Details</h3>
-      <div class="test-review-grid">
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Date of Test or Review :</label>
-            <span class="test-review-value">{{
-              formatApprovalDate(memoApprovalStatus.approval_date)
-            }}</span>
-          </div>
-          <div class="test-review-field comments-field">
-            <label>Comments :</label>
-            <span class="test-review-value comments-value">{{
-              memoApprovalStatus.comments || "No comments provided"
-            }}</span>
-          </div>
-        </div>
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Internal Tester ID:</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.approved_by
-            }}</span>
-          </div>
-        </div>
-        <div class="test-review-row">
-          <div class="test-review-field">
-            <label>Internal Tester Name :</label>
-            <span class="test-review-value">QA Head</span>
-          </div>
-          <div class="test-review-field">
-            <label>Authentication</label>
-            <div class="test-review-value">
-              <div
-                v-if="
-                  memoApprovalStatus.authentication &&
-                  isSignatureUrl(memoApprovalStatus.authentication)
-                "
-                class="signature-display-footer"
-              >
-                <img
-                  :src="getSignatureImageUrl(memoApprovalStatus.authentication)"
-                  alt="Signature"
-                  class="signature-image-footer"
-                />
-                <span class="signature-label">Signature</span>
-              </div>
-              <span v-else class="no-signature">
-                {{ memoApprovalStatus.authentication || "Not provided" }}
-              </span>
-            </div>
-          </div>
-          <div class="test-review-field">
-            <label>Attachments</label>
-            <span class="test-review-value">{{
-              memoApprovalStatus.attachment_path
-                ? "File attached"
-                : "No attachments"
-            }}</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1068,8 +862,15 @@ export default {
     },
     // Check if memo is approved and has assigned reviewer
     isMemoApprovedWithReviewer() {
-      console.log("approval status:", this.memoApprovalStatus, "assigned reviewer:", this.assignedReviewer, "memo status", this.memoApprovalStatus);
-      return (                     
+      console.log(
+        "approval status:",
+        this.memoApprovalStatus,
+        "assigned reviewer:",
+        this.assignedReviewer,
+        "memo status",
+        this.memoApprovalStatus
+      );
+      return (
         this.memoApprovalStatus &&
         this.memoApprovalStatus.status === "accepted" &&
         this.assignedReviewer
@@ -1105,17 +906,22 @@ export default {
     // Check if the authentication field contains a signature URL or path
     isSignatureUrl(authentication) {
       if (!authentication) return false;
-      return authentication.includes("http://localhost:8000/api/users/signature/") ||
-             authentication.startsWith("/api/users/signature/");
+      return (
+        authentication.includes("http://localhost:5000/api/users/signature/") ||
+        authentication.startsWith("/api/users/signature/")
+      );
     },
     // Get the full URL for signature image
     getSignatureImageUrl(authentication) {
       if (!authentication) return "";
-      if (authentication.startsWith("http://") || authentication.startsWith("https://")) {
+      if (
+        authentication.startsWith("http://") ||
+        authentication.startsWith("https://")
+      ) {
         return authentication;
       }
       if (authentication.startsWith("/api/users/signature/")) {
-        return `http://localhost:8000${authentication}`;
+        return `http://localhost:5000${authentication}`;
       }
       return authentication;
     },
@@ -1132,7 +938,9 @@ export default {
         }
 
         // Otherwise, fetch from API
-        const response = await fetch(`http://localhost:8000/api/memos/${this.id}`);
+        const response = await fetch(
+          `http://localhost:5000/api/memos/${this.id}`
+        );
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
@@ -1309,7 +1117,7 @@ export default {
     async fetchQAReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/available-reviewers"
+          "http://localhost:5000/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -1327,7 +1135,7 @@ export default {
     async fetchMemoApprovalStatus() {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.id}/approval-status`
+          `http://localhost:5000/api/memos/${this.id}/approval-status`
         );
         const data = await response.json();
 
@@ -1360,7 +1168,7 @@ export default {
     async fetchReviewerDetails(userId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/users/${userId}`
+          `http://localhost:5000/api/users/${userId}`
         );
         const data = await response.json();
 
@@ -1425,6 +1233,7 @@ export default {
         });
 
         const data = await response.json();
+        console.log("DATAAAA Signature verification response:", data);
 
         if (data.success) {
           form.signatureUrl = data.signature_url;
@@ -1495,7 +1304,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.approvalForm.memo_id}/approve`,
+          `http://localhost:5000/api/memos/${this.approvalForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1546,7 +1355,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/memos/${this.rejectionForm.memo_id}/approve`,
+          `http://localhost:5000/api/memos/${this.rejectionForm.memo_id}/approve`,
           {
             method: "POST",
             body: formData,
@@ -1664,59 +1473,79 @@ export default {
       try {
         // Dynamically import html2pdf to avoid blocking app initialization
         if (!html2pdf) {
-          const html2pdfModule = await import('html2pdf.js');
+          const html2pdfModule = await import("html2pdf.js");
           html2pdf = html2pdfModule.default || html2pdfModule;
         }
-        
+
         console.log(`Downloading PDF for memo ID: ${this.id}`);
 
-        // Show loading state
-        const button = event.target.closest(".download-pdf-btn");
-        const originalText = button.querySelector(".download-text").textContent;
-        button.querySelector(".download-text").textContent = "Loading...";
-        button.disabled = true;
-        
-        // Get the element you want to convert (the main memo content)
-        const element = document.querySelector('.memo-form');
-        
+        // Hide Test Status section for PDF (if it exists)
+        const testStatusSection = document.querySelector(".exclude-from-pdf");
+        let wasHidden = false;
+        if (testStatusSection) {
+          wasHidden = testStatusSection.style.display === "none";
+          testStatusSection.style.display = "none";
+        }
+
+        // Ensure page break styles are applied for PDF generation
+        const pageBreakElements =
+          document.querySelectorAll(".page-break-before");
+        pageBreakElements.forEach((element) => {
+          element.style.pageBreakBefore = "always";
+          element.style.breakBefore = "page";
+        });
+
+        // Get the element you want to convert (the main memo content - exclude header/UI)
+        const element = document.querySelector(".form-content");
+
         if (!element) {
-          alert('Memo content not found');
+          alert("Memo content not found");
+          // Restore Test Status section if it was hidden
+          if (testStatusSection && !wasHidden) {
+            testStatusSection.style.display = "";
+          }
           return;
         }
-        
+
         // Configure options to match the page appearance
         const opt = {
           margin: 0.5,
-          filename: `memo_${this.id}_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
+          filename: `memo_${this.id}_${new Date()
+            .toISOString()
+            .slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
             scale: 2,
             useCORS: true,
             letterRendering: true,
             allowTaint: true,
             windowWidth: element.scrollWidth,
-            windowHeight: element.scrollHeight
+            windowHeight: element.scrollHeight,
           },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
-        
+
         // Generate PDF from HTML
         await html2pdf().set(opt).from(element).save();
-        
+
         console.log(`PDF downloaded successfully for memo ${this.id}`);
+
+        // Restore Test Status section visibility
+        if (testStatusSection && !wasHidden) {
+          testStatusSection.style.display = "";
+        }
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
-      } finally {
-        // Restore button state
-        const button = event.target.closest('.download-pdf-btn');
-        if (button) {
-          button.querySelector(".download-text").textContent = originalText;
-          button.disabled = false;
+
+        // Restore Test Status section visibility on error
+        const testStatusSection = document.querySelector(".exclude-from-pdf");
+        if (testStatusSection) {
+          testStatusSection.style.display = "";
         }
       }
     },
@@ -1725,12 +1554,207 @@ export default {
 </script>
 
 <style scoped>
+/* Scoped styles to prevent them from affecting other components */
+:root {
+  --background-color: #f0f0f0;
+  --card-color: #e0e0e0;
+  --text-color: #333;
+  --border-color: #999;
+  --input-bg: #fff;
+  --button-bg: #007bff;
+  --button-text: #fff;
+}
+
 .memo-form {
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: sans-serif;
+  color: var(--text-color);
+  background-color: var(--background-color);
+}
+
+.form-content {
+  flex-grow: 1;
+  overflow-y: auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
-  background: #ebf7fd;
+  box-sizing: border-box;
+}
+
+.form-card {
+  background-color: var(--card-color, #e0e0e0);
+  border: 1px solid var(--border-color, #999);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+/* Page break for PDF generation */
+.page-break-before {
+  page-break-before: always;
+  break-before: page;
+}
+
+.card-title {
+  text-align: center;
+  margin-top: 0;
+  font-size: 1.1em;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.grid-layout.two-col {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-layout.two-col-doc {
+  grid-template-columns: 1fr 1fr 0.5fr 0.5fr;
+}
+
+.grid-layout.one-col-checkbox {
+  grid-template-columns: 1fr;
+}
+
+.grid-layout.one-col-radio {
+  grid-template-columns: 1fr;
+}
+
+.grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-item-half,
+.grid-item-quarter {
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-item-full {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+}
+
+.grid-item input,
+.grid-item-full input,
+.grid-item-half input,
+.grid-item-quarter input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 0;
+  background-color: #f5f5f5;
+  box-sizing: border-box;
+  margin-top: 5px;
+  font-size: 14px;
+  transition: none;
+}
+
+.grid-item input:focus,
+.grid-item-full input:focus,
+.grid-item-half input:focus,
+.grid-item-quarter input:focus {
+  outline: none;
+  border-color: #b0b0b0;
+  background-color: #f0f0f0;
+  box-shadow: none;
+}
+
+.grid-item input[readonly] {
+  background-color: #f5f5f5;
+  color: #333;
+  cursor: default;
+  border: 1px solid #d0d0d0;
+}
+
+.grid-item input:not([readonly]) {
+  background-color: #f5f5f5;
+  color: var(--text-color, #333);
+  cursor: text;
+}
+
+.grid-item span,
+.grid-item-full span,
+.grid-item-half span,
+.grid-item-quarter span {
+  font-size: 0.9em;
+}
+
+.signature-line {
+  display: block;
+  text-align: right;
+  margin-top: 20px;
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.signature-line.right {
+  text-align: right;
+}
+
+.one-col-checkbox label {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  font-size: 0.9em;
+  line-height: 1.2;
+}
+
+.one-col-checkbox input[type="checkbox"] {
+  margin-right: 10px;
+  margin-top: 2px;
+}
+
+.one-col-checkbox input[type="checkbox"]:not([disabled]) {
+  transform: scale(1.2);
+  accent-color: #000;
+}
+
+.one-col-checkbox input[type="checkbox"][disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #000;
+}
+
+.section-title {
+  margin: 0;
+  color: #000;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.read-only-section {
+  border-left: none;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color, #999);
+}
+
+.readonly-display {
+  grid-column: 1 / -1;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px solid #d0d0d0;
+  min-height: 50px;
+  margin-bottom: 10px;
+}
+
+.checkbox-title {
+  font-weight: bold;
+  margin-bottom: 10px;
 }
 
 .form-header {
@@ -2425,6 +2449,36 @@ export default {
   color: #666;
   font-style: italic;
   font-weight: 500;
+}
+
+/* Signature display for PDF format */
+.signature-display-pdf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  padding: 10px;
+  border: 1px solid #d0d0d0;
+  background-color: #f5f5f5;
+}
+
+.signature-image-pdf {
+  max-width: 150px;
+  max-height: 60px;
+  object-fit: contain;
+}
+
+.signature-line {
+  font-size: 12px;
+  font-weight: bold;
+  color: #000;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-top: 1px solid #000;
+  padding-top: 5px;
+  width: 100%;
+  text-align: center;
 }
 
 .no-signature {

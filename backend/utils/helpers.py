@@ -21,8 +21,8 @@ def hash_password(password):
 
 def verify_password(password, hashed_password):
     """Verify password against hash"""
-    return hash_password(password) == hashed_password
-    #return password == hashed_password
+    # return hash_password(password) == hashed_password
+    return password == hashed_password
 
 def create_upload_directories():
     """Create upload directories if they don't exist"""
@@ -45,3 +45,4 @@ def handle_database_error(conn, error_message="Database error"):
         pass
     print(f"Database error: {error_message}")
     return {"success": False, "message": f"Database error: {error_message}"}, 500
+

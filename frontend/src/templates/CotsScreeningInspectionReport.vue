@@ -212,7 +212,10 @@
                     {{ testCase.description }}
                   </td>
                   <td>
-                    <select v-model="testCase.testNature" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="testCase.testNature"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="Passive (Power Off Condition)">
                         Passive (Power Off Condition)
@@ -223,7 +226,10 @@
                     </select>
                   </td>
                   <td>
-                    <select v-model="testCase.remarks" :disabled="isPreparedByVerified">
+                    <select
+                      v-model="testCase.remarks"
+                      :disabled="isPreparedByVerified"
+                    >
                       <option value="">Select</option>
                       <option value="OK">OK</option>
                       <option value="NOT OK">NOT OK</option>
@@ -250,11 +256,19 @@
             <div class="signature-item">
               <label>Prepared By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!areAllFieldsFilled" class="signature-disabled-message">
-                  Please fill in all form fields (Report Details and Test Cases) before verifying signature.
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!areAllFieldsFilled"
+                  class="signature-disabled-message"
+                >
+                  Please fill in all form fields (Report Details and Test Cases)
+                  before verifying signature.
                 </div>
                 <div v-else class="signature-inputs">
                   <div class="input-group">
@@ -278,7 +292,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('preparedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('preparedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isPreparedByEnabled ||
                       !signatures.preparedBy.signatureUsername ||
@@ -288,7 +305,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.preparedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.preparedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -297,13 +317,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.preparedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.preparedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.preparedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.preparedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.preparedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.preparedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.preparedBy.signatureError }}
                 </div>
               </div>
@@ -313,10 +343,17 @@
             <div class="signature-item">
               <label>Verified By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!isPreparedByVerified" class="signature-disabled-message">
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!isPreparedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Prepared By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -341,7 +378,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('verifiedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('verifiedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isVerifiedByEnabled ||
                       !signatures.verifiedBy.signatureUsername ||
@@ -351,7 +391,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.verifiedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -360,13 +403,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.verifiedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.verifiedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.verifiedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.verifiedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.verifiedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.verifiedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.verifiedBy.signatureError }}
                 </div>
               </div>
@@ -376,10 +429,17 @@
             <div class="signature-item">
               <label>Approved By:</label>
               <div class="signature-auth-container">
-                <div v-if="!canAccessSignatures" class="signature-disabled-message">
-                  Signature authentication is only available for QA Reviewer and QA Head.
-            </div>
-                <div v-else-if="!isVerifiedByVerified" class="signature-disabled-message">
+                <div
+                  v-if="!canAccessSignatures"
+                  class="signature-disabled-message"
+                >
+                  Signature authentication is only available for QA Reviewer and
+                  QA Head.
+                </div>
+                <div
+                  v-else-if="!isVerifiedByVerified"
+                  class="signature-disabled-message"
+                >
                   Please complete "Verified By" signature first.
                 </div>
                 <div v-else class="signature-inputs">
@@ -404,7 +464,10 @@
                   <button
                     type="button"
                     class="btn btn-verify"
-                    @click="verifySignature('approvedBy'); $event.target.blur()"
+                    @click="
+                      verifySignature('approvedBy');
+                      $event.target.blur();
+                    "
                     :disabled="
                       !isApprovedByEnabled ||
                       !signatures.approvedBy.signatureUsername ||
@@ -414,7 +477,10 @@
                     Verify & Load Signature
                   </button>
                 </div>
-                <div v-if="signatures.approvedBy.signatureUrl" class="signature-display">
+                <div
+                  v-if="signatures.approvedBy.signatureUrl"
+                  class="signature-display"
+                >
                   <label>Verified Signature:</label>
                   <div class="signature-image-container">
                     <img
@@ -423,13 +489,23 @@
                       class="signature-image"
                     />
                     <div class="signature-info">
-                      <span class="signature-user">{{ signatures.approvedBy.verifiedUserName }}</span>
-                      <span class="signature-role">{{ signatures.approvedBy.verifiedUserRole }} Signature</span>
+                      <span class="signature-user">{{
+                        signatures.approvedBy.verifiedUserName
+                      }}</span>
+                      <span class="signature-role"
+                        >{{
+                          signatures.approvedBy.verifiedUserRole
+                        }}
+                        Signature</span
+                      >
                       <span class="signature-status">✓ Verified</span>
                     </div>
                   </div>
                 </div>
-                <div v-if="signatures.approvedBy.signatureError" class="signature-error">
+                <div
+                  v-if="signatures.approvedBy.signatureError"
+                  class="signature-error"
+                >
                   {{ signatures.approvedBy.signatureError }}
                 </div>
               </div>
@@ -438,7 +514,10 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="form-actions" v-if="!readonly && isApprovedByVerified">
+        <div
+          class="form-actions"
+          v-if="!readonly && isApprovedByVerified && !shouldHideSubmitButton"
+        >
           <button
             type="submit"
             class="btn btn-primary"
@@ -454,6 +533,7 @@
 
 <script>
 import { userStore } from "@/stores/userStore";
+import jsPDF from "jspdf";
 
 export default {
   name: "CotsScreeningInspectionReport",
@@ -469,6 +549,7 @@ export default {
   },
   data() {
     return {
+      reportStatus: null, // Store report status to check if submitted
       projectName: "",
       lruName: "",
       serialNumber: "SL-001",
@@ -553,13 +634,13 @@ export default {
     },
     areAllFieldsFilled() {
       if (!this.isFormValid) return false;
-      
+
       for (const testCase of this.formData.testCases) {
         if (!testCase.testNature || !testCase.remarks) {
           return false;
         }
       }
-      
+
       return true;
     },
     canAccessSignatures() {
@@ -584,28 +665,44 @@ export default {
     isApprovedByEnabled() {
       return this.canAccessSignatures && this.isVerifiedByVerified;
     },
+    shouldHideSubmitButton() {
+      // Hide submit button for reviewers and heads after report is submitted
+      const currentUserRole = userStore.getters.currentUserRole();
+      const isQAReviewer = currentUserRole === 3;
+      const isQAHead = currentUserRole === 2;
+
+      // For QA Reviewer and QA Head: hide only after submission
+      if (isQAReviewer || isQAHead) {
+        // Check if report is submitted (status is not 'ASSIGNED')
+        return this.reportStatus && this.reportStatus !== "ASSIGNED";
+      }
+
+      // For all other roles: always hide
+      return true;
+    },
   },
   mounted() {
     const reportCardId = this.reportId || this.$route.params.reportId;
 
     if (reportCardId) {
       this.loadReportData(reportCardId);
+      this.fetchReportStatus(reportCardId);
     } else {
-    // Get parameters from route
-    this.lruName = this.$route.params.lruName || "";
-    this.projectName = this.$route.params.projectName || "";
+      // Get parameters from route
+      this.lruName = this.$route.params.lruName || "";
+      this.projectName = this.$route.params.projectName || "";
 
-    // Set default values
-    this.formData.lruName = this.lruName;
-    this.formData.projectName = this.projectName;
-    this.formData.startDate = this.currentDate;
+      // Set default values
+      this.formData.lruName = this.lruName;
+      this.formData.projectName = this.projectName;
+      this.formData.startDate = this.currentDate;
     }
   },
   methods: {
     handleFileUpload(event, section, index) {
       const file = event.target.files[0];
       if (file) {
-        if (section === 'testCase') {
+        if (section === "testCase") {
           this.formData.testCases[index].fileName = file.name;
         }
       }
@@ -613,20 +710,22 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/cot-screening/by-report-card/${reportCardId}`
+          `http://localhost:5000/api/reports/cot-screening/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
           if (response.status === 404) {
             // Report doesn't exist yet, show empty form
-            this.lruName = this.$route.params.lruName || '';
-            this.projectName = this.$route.params.projectName || '';
+            this.lruName = this.$route.params.lruName || "";
+            this.projectName = this.$route.params.projectName || "";
             this.formData.lruName = this.lruName;
             this.formData.projectName = this.projectName;
             this.formData.startDate = this.currentDate;
             return;
           }
-          throw new Error(`Failed to fetch report: ${response.statusText} (${response.status})`);
+          throw new Error(
+            `Failed to fetch report: ${response.statusText} (${response.status})`
+          );
         }
 
         const result = await response.json();
@@ -643,29 +742,38 @@ export default {
           this.formData.inspectionStage = report.inspection_stage || "";
           this.formData.testVenue = report.test_venue || "";
           this.formData.slNos = report.sl_nos || "";
-          this.formData.dated1 = report.dated1 ? report.dated1.split('T')[0] : "";
-          this.formData.dated2 = report.dated2 ? report.dated2.split('T')[0] : "";
+          this.formData.dated1 = report.dated1
+            ? report.dated1.split("T")[0]
+            : "";
+          this.formData.dated2 = report.dated2
+            ? report.dated2.split("T")[0]
+            : "";
           this.formData.sruName = report.sru_name || "";
           this.formData.partNo = report.part_no || "";
           this.formData.quantity = report.quantity || "";
-          this.formData.startDate = report.start_date ? report.start_date.split('T')[0] : this.currentDate;
-          this.formData.endDate = report.end_date ? report.end_date.split('T')[0] : "";
-          
+          this.formData.startDate = report.start_date
+            ? report.start_date.split("T")[0]
+            : this.currentDate;
+          this.formData.endDate = report.end_date
+            ? report.end_date.split("T")[0]
+            : "";
+
           this.projectName = report.project_name || "";
           this.lruName = report.lru_name || "";
           this.serialNumber = report.serial_number || this.serialNumber;
-          this.inspectionCount = report.inspection_count || this.inspectionCount;
+          this.inspectionCount =
+            report.inspection_count || this.inspectionCount;
 
           // Map test cases data
           if (this.formData.testCases.length >= 3) {
             this.formData.testCases[0].testNature = report.test_nature1 || "";
             this.formData.testCases[0].remarks = report.rem1 || "";
             this.formData.testCases[0].fileName = report.upload1 || null;
-            
+
             this.formData.testCases[1].testNature = report.test_nature2 || "";
             this.formData.testCases[1].remarks = report.rem2 || "";
             this.formData.testCases[1].fileName = report.upload2 || null;
-            
+
             this.formData.testCases[2].testNature = report.test_nature3 || "";
             this.formData.testCases[2].remarks = report.rem3 || "";
             this.formData.testCases[2].fileName = report.upload3 || null;
@@ -685,7 +793,10 @@ export default {
           throw new Error(result.message || "Failed to load report data");
         }
       } catch (error) {
-        if (error.message.includes('404') || error.message.includes('not found')) {
+        if (
+          error.message.includes("404") ||
+          error.message.includes("not found")
+        ) {
           return;
         }
         alert(`Error loading report data: ${error.message}. Please try again.`);
@@ -695,19 +806,23 @@ export default {
       const signature = this.signatures[signatureType];
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError = "Please enter both username and signature password";
+        signature.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
       try {
-        const response = await fetch("http://localhost:8000/api/users/verify-signature", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:5000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
@@ -718,13 +833,15 @@ export default {
           signature.signatureError = "";
           await this.autoSaveReport();
         } else {
-          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureError =
+            data.message || "Failed to verify signature";
           signature.signatureUrl = "";
           signature.verifiedUserName = "";
           signature.verifiedUserRole = "";
         }
       } catch (error) {
-        signature.signatureError = "Error verifying signature: " + error.message;
+        signature.signatureError =
+          "Error verifying signature: " + error.message;
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
         signature.verifiedUserRole = "";
@@ -732,36 +849,36 @@ export default {
     },
     prepareSubmissionData() {
       const reportCardId = this.reportId || this.$route.params.reportId;
-      
+
       return {
         report_card_id: reportCardId,
-            project_name: this.formData.projectName,
-            report_ref_no: this.formData.reportRefNo,
-            memo_ref_no: this.formData.memoRefNo,
-            lru_name: this.formData.lruName,
-            sru_name: this.formData.sruName,
-            dp_name: this.formData.dpName,
-            part_no: this.formData.partNo,
-            inspection_stage: this.formData.inspectionStage,
-            test_venue: this.formData.testVenue,
-            quantity: this.formData.quantity,
-            sl_nos: this.formData.slNos,
-            serial_number: this.serialNumber,
-            start_date: this.formData.startDate,
-            end_date: this.formData.endDate,
-            dated1: this.formData.dated1,
-            dated2: this.formData.dated2,
+        project_name: this.formData.projectName,
+        report_ref_no: this.formData.reportRefNo,
+        memo_ref_no: this.formData.memoRefNo,
+        lru_name: this.formData.lruName,
+        sru_name: this.formData.sruName,
+        dp_name: this.formData.dpName,
+        part_no: this.formData.partNo,
+        inspection_stage: this.formData.inspectionStage,
+        test_venue: this.formData.testVenue,
+        quantity: this.formData.quantity,
+        sl_nos: this.formData.slNos,
+        serial_number: this.serialNumber,
+        start_date: this.formData.startDate,
+        end_date: this.formData.endDate,
+        dated1: this.formData.dated1,
+        dated2: this.formData.dated2,
 
-            test_nature1: this.formData.testCases[0]?.testNature || "",
-            rem1: this.formData.testCases[0]?.remarks || "",
+        test_nature1: this.formData.testCases[0]?.testNature || "",
+        rem1: this.formData.testCases[0]?.remarks || "",
         upload1: this.formData.testCases[0]?.fileName || "",
 
         test_nature2: this.formData.testCases[1]?.testNature || "",
-            rem2: this.formData.testCases[1]?.remarks || "",
+        rem2: this.formData.testCases[1]?.remarks || "",
         upload2: this.formData.testCases[1]?.fileName || "",
 
         test_nature3: this.formData.testCases[2]?.testNature || "",
-            rem3: this.formData.testCases[2]?.remarks || "",
+        rem3: this.formData.testCases[2]?.remarks || "",
         upload3: this.formData.testCases[2]?.fileName || "",
 
         prepared_by: this.signatures.preparedBy.signatureUrl || "",
@@ -773,14 +890,17 @@ export default {
       try {
         const reportCardId = this.reportId || this.$route.params.reportId;
         if (!reportCardId) return;
-        
+
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(`http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`, {
-              method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
+        const response = await fetch(
+          `http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
+          }
+        );
 
         const result = await response.json();
         if (!result.success) {
@@ -799,26 +919,69 @@ export default {
       try {
         const userRole = userStore.getters.currentUserRole();
         const submissionData = this.prepareSubmissionData();
-        const response = await fetch(`http://localhost:8000/api/reports/cot-screening?user_role=${userRole}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(submissionData),
-        });
-
-          const result = await response.json();
-
-          if (result.success) {
-          alert("COTS Screening inspection report submitted successfully! Notifications have been sent.");
-          } else {
-            alert(`Error: ${result.message}`);
+        const response = await fetch(
+          `http://localhost:5000/api/reports/cot-screening?user_role=${userRole}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(submissionData),
           }
-        } catch (error) {
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Update report status after submission
+          const reportCardId = this.reportId || this.$route.params.reportId;
+          if (reportCardId) {
+            await this.fetchReportStatus(reportCardId);
+          }
+          alert(
+            "COTS Screening inspection report submitted successfully! Notifications have been sent."
+          );
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      } catch (error) {
         console.error("Error submitting report:", error);
         alert("Error submitting report. Please try again.");
       }
     },
-    exportReport() {
+    async fetchReportStatus(reportCardId) {
       try {
+        const response = await fetch(
+          `http://localhost:5000/api/reports/${reportCardId}`
+        );
+        if (response.ok) {
+          const result = await response.json();
+          if (result.success && result.report) {
+            this.reportStatus = result.report.status;
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching report status:", error);
+      }
+    },
+    async exportReport() {
+      try {
+        // Helper function to convert image URL to base64
+        const imageToBase64 = (url) => {
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+              const canvas = document.createElement("canvas");
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0);
+              resolve(canvas.toDataURL("image/png"));
+            };
+            img.onerror = reject;
+            img.src = url;
+          });
+        };
+
         const doc = new jsPDF("p", "mm", "a4");
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
@@ -827,127 +990,349 @@ export default {
 
         let yPosition = margin;
 
-        // Set font styles
-        doc.setFont("helvetica");
+        // Helper function to add new page if needed
+        const checkPageBreak = (requiredHeight) => {
+          if (yPosition + requiredHeight > pageHeight - margin) {
+            doc.addPage();
+            yPosition = margin;
+            return true;
+          }
+          return false;
+        };
 
-        // Header
-        doc.setFontSize(18);
-        doc.setFont("helvetica", "bold");
-        doc.text("COTS SCREENING INSPECTION REPORT", pageWidth / 2, yPosition, {
-          align: "center",
-        });
-        yPosition += 15;
-
-        // Document path and date
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
-          this.lruName || "LRU"
-        }/SL.${this.serialNumber || "001"}/${this.inspectionCount || "001"}/${
-          this.currentYear || "2025"
-        }`;
-        doc.text(documentPath, margin, yPosition);
-
-        const dateText = `Date: ${
-          this.currentDate || new Date().toLocaleDateString("en-GB")
-        }`;
-        const dateWidth = doc.getTextWidth(dateText);
-        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
-        yPosition += 12;
-
-        // Subject line
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: COTS Screening Inspection Report for ${
-          this.lruName || "Unknown LRU"
-        }`;
-        doc.text(subjectText, pageWidth / 2, yPosition, { align: "center" });
-        yPosition += 15;
-
-        // Report details
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.text("Report Details:", margin, yPosition);
-        yPosition += 8;
-
-        doc.setFont("helvetica", "normal");
-        const details = [
-          `Project Name: ${this.formData.projectName || "Not specified"}`,
-          `DP Name: ${this.formData.dpName || "Not specified"}`,
-          `Report Ref No: ${this.formData.reportRefNo || "Not specified"}`,
-          `Memo Ref No: ${this.formData.memoRefNo || "Not specified"}`,
-          `LRU Name: ${this.formData.lruName || "Not specified"}`,
-          `SRU Name: ${this.formData.sruName || "Not specified"}`,
-          `Part No: ${this.formData.partNo || "Not specified"}`,
-          `Quantity: ${this.formData.quantity || "Not specified"}`,
-          `Start Date: ${this.formData.startDate || "Not specified"}`,
-          `End Date: ${this.formData.endDate || "Not specified"}`,
-        ];
-
-        details.forEach((detail) => {
-          doc.text(detail, margin, yPosition);
-          yPosition += 6;
-        });
-
-        yPosition += 10;
-
-        // Test cases table
-        doc.setFont("helvetica", "bold");
-        doc.text("Test Cases:", margin, yPosition);
-        yPosition += 8;
-
-        if (this.formData.testCases && this.formData.testCases.length > 0) {
-          doc.setFontSize(9);
-          doc.setFont("helvetica", "bold");
-
-          // Table headers
-          doc.text("SL.NO", margin, yPosition);
-          doc.text("TEST CASES", margin + 15, yPosition);
-          doc.text("TEST NATURE", margin + 100, yPosition);
-          doc.text("REMARKS", margin + 160, yPosition);
-          yPosition += 6;
-
-          // Table data
-          doc.setFont("helvetica", "normal");
-          this.formData.testCases.forEach((testCase, index) => {
-            doc.text((index + 1).toString(), margin, yPosition);
-            doc.text(
-              testCase.description.substring(0, 40),
-              margin + 15,
-              yPosition
-            );
-            doc.text(testCase.testNature || "", margin + 100, yPosition);
-            doc.text(testCase.remarks || "", margin + 160, yPosition);
-            yPosition += 6;
+        // Helper function to add text with wrapping
+        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+          doc.setFontSize(fontSize);
+          doc.setFont("helvetica", isBold ? "bold" : "normal");
+          const lines = doc.splitTextToSize(text || "", maxWidth);
+          const lineHeight = fontSize * 0.4;
+          lines.forEach((line, index) => {
+            let xPos = x;
+            if (align === "center") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + (maxWidth - textWidth) / 2;
+            } else if (align === "right") {
+              const textWidth = doc.getTextWidth(line);
+              xPos = x + maxWidth - textWidth;
+            }
+            doc.text(line, xPos, y + index * lineHeight);
           });
+          return lines.length * lineHeight;
+        };
+
+        // ===== HEADER SECTION =====
+        // Load DRDO logo
+        let drdoLogoBase64 = null;
+        try {
+          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
+        } catch (e) {
+          console.warn("Could not load DRDO logo:", e);
         }
 
-        yPosition += 15;
+        // Add DRDO logo (left corner)
+        if (drdoLogoBase64) {
+          try {
+            doc.addImage(drdoLogoBase64, "PNG", margin, yPosition, 15, 15);
+          } catch (e) {
+            console.warn("Could not add DRDO logo:", e);
+          }
+        }
 
-        // Signatures
+        // Add AVIATRAX text (centered)
+        doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.text("Signatures:", margin, yPosition);
+        doc.setTextColor(75, 0, 130);
+        const aviatraxText = "AVIATRAX™";
+        const aviatraxWidth = doc.getTextWidth(aviatraxText);
+        doc.text(aviatraxText, (pageWidth - aviatraxWidth) / 2, yPosition + 8);
+
+        // Add Defence Research text below AVIATRAX
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(0, 0, 0);
+        const drdoText = "Defence Research and Development Org. (DRDO)";
+        const drdoTextWidth = doc.getTextWidth(drdoText);
+        doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(7);
+        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreTextWidth = doc.getTextWidth(centreText);
+        doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
+
+        // CASDIC path and date
+        yPosition += 25;
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${this.lruName || "LRU"}/SL.${this.serialNumber || "001"}/${this.inspectionCount || "INS-001"}/${this.currentYear || "2025"}`;
+        doc.text(documentPath, margin, yPosition);
+
+        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateWidth = doc.getTextWidth(dateText);
+        doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
+        yPosition += 10;
+
+        // Subject line
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const subjectText = `SUB: COTS Screening Inspection Report for ${this.lruName || "Unknown LRU"}`;
+        const subjectWidth = doc.getTextWidth(subjectText);
+        doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
+        yPosition += 12;
+
+        // ===== REPORT DETAILS SECTION =====
+        checkPageBreak(50);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Report Details", margin, yPosition);
         yPosition += 8;
 
+        doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        doc.text("Prepared By: _________________", margin, yPosition);
-        doc.text("Verified By: _________________", margin + 70, yPosition);
-        doc.text("Approved By: _________________", margin + 140, yPosition);
+        const colWidth = (contentWidth - 10) / 2;
+        let leftY = yPosition;
+        let rightY = yPosition;
+
+        // Left column fields
+        const leftFields = [
+          { label: "Project Name", value: this.formData.projectName || "N/A" },
+          { label: "Report Ref No", value: this.formData.reportRefNo || "N/A" },
+          { label: "Memo Ref No", value: this.formData.memoRefNo || "N/A" },
+          { label: "LRU Name", value: this.formData.lruName || "N/A" },
+          { label: "Inspection Stage", value: this.formData.inspectionStage || "N/A" },
+          { label: "Test Venue", value: this.formData.testVenue || "N/A" },
+          { label: "SL.NO'S", value: this.formData.slNos || "N/A" },
+        ];
+
+        // Right column fields
+        const rightFields = [
+          { label: "DP Name", value: this.formData.dpName || "N/A" },
+          {
+            label: "Dated",
+            value: this.formData.dated1
+              ? new Date(this.formData.dated1).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          {
+            label: "Dated",
+            value: this.formData.dated2
+              ? new Date(this.formData.dated2).toLocaleDateString("en-GB")
+              : "dd/mm/yyyy",
+          },
+          { label: "SRU Name", value: this.formData.sruName || "N/A" },
+          { label: "Part No", value: this.formData.partNo || "N/A" },
+          {
+            label: "Quantity",
+            value: this.formData.quantity !== null && this.formData.quantity !== undefined
+              ? this.formData.quantity.toString()
+              : "N/A",
+          },
+          {
+            label: "Start Date",
+            value: this.formData.startDate
+              ? new Date(this.formData.startDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+          {
+            label: "End Date",
+            value: this.formData.endDate
+              ? new Date(this.formData.endDate).toLocaleDateString("en-GB")
+              : "N/A",
+          },
+        ];
+
+        // Print left column
+        leftFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          leftY += height + 3;
+        });
+
+        // Print right column
+        rightFields.forEach((field) => {
+          const text = `${field.label}: ${field.value}`;
+          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          rightY += height + 3;
+        });
+
+        yPosition = Math.max(leftY, rightY) + 10;
+
+        // ===== TEST CASES TABLE =====
+        checkPageBreak(40);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Inspection Tests", margin, yPosition);
+        yPosition += 10;
+
+        if (this.formData.testCases && this.formData.testCases.length > 0) {
+          // Calculate column widths as percentages of contentWidth
+          const colWidths = [
+            contentWidth * 0.08,  // SL.NO
+            contentWidth * 0.35,  // TEST CASES
+            contentWidth * 0.25,  // TEST NATURE
+            contentWidth * 0.32,  // REMARKS
+          ];
+
+          // Ensure columns add up exactly to contentWidth
+          const totalWidth = colWidths.reduce((sum, width) => sum + width, 0);
+          if (Math.abs(totalWidth - contentWidth) > 0.1) {
+            const adjustment = (contentWidth - totalWidth) / colWidths.length;
+            colWidths.forEach((width, i) => {
+              colWidths[i] = width + adjustment;
+            });
+          }
+
+          const rowHeight = 12;
+          const headers = ["SL.NO", "TEST CASES", "TEST NATURE", "REMARKS"];
+          
+          // Draw header with borders and background
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "bold");
+          const headerHeight = 12;
+          
+          let xPos = margin;
+          headers.forEach((header, i) => {
+            // Draw cell border and background
+            doc.setFillColor(240, 240, 240);
+            doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
+            
+            // Draw header text
+            const headerWidth = doc.getTextWidth(header);
+            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            xPos += colWidths[i];
+          });
+          yPosition += headerHeight + 3;
+
+          // Draw rows with borders
+          doc.setFont("helvetica", "normal");
+          doc.setFontSize(9);
+          this.formData.testCases.forEach((testCase, index) => {
+            checkPageBreak(rowHeight + 5);
+            
+            const rowData = [
+              (index + 1).toString(),
+              testCase.description || "",
+              testCase.testNature || "",
+              testCase.remarks || "",
+            ];
+
+            // Calculate row height based on content
+            const maxLines = Math.max(...rowData.map((text, idx) => 
+              doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+            ));
+            const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
+
+            // Draw cell borders
+            doc.setLineWidth(0.1);
+            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
+            
+            xPos = margin;
+            for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
+              xPos += colWidths[colIdx - 1];
+              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+            }
+
+            // Draw cell content
+            xPos = margin;
+            rowData.forEach((text, colIdx) => {
+              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              doc.text(textLines, xPos + 3, yPosition + 3);
+              xPos += colWidths[colIdx];
+            });
+            
+            yPosition += currentRowHeight + 1;
+          });
+          yPosition += 5;
+        }
+
+        // ===== SIGNATURES SECTION =====
+        checkPageBreak(30);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Signatures", margin, yPosition);
+        yPosition += 8;
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+
+        // Helper to extract name from signature URL
+        const getSignatureName = (signatureUrl) => {
+          if (!signatureUrl) return "";
+          if (signatureUrl.includes("|")) {
+            return signatureUrl.split("|")[0];
+          }
+          return "";
+        };
+
+        // Helper to get signature image URL
+        const getSignatureImageUrl = (signatureUrl) => {
+          if (!signatureUrl) return null;
+          if (signatureUrl.includes("|")) {
+            const parts = signatureUrl.split("|");
+            return parts.length > 1 ? parts[1] : null;
+          }
+          return signatureUrl.startsWith("http") ? signatureUrl : null;
+        };
+
+        const signatures = [
+          {
+            label: "Prepared By",
+            signatureUrl: this.preparedBySignatureUrl,
+            verifiedName: this.preparedByVerifiedName || getSignatureName(this.preparedBySignatureUrl),
+          },
+          {
+            label: "Verified By",
+            signatureUrl: this.verifiedBySignatureUrl,
+            verifiedName: this.verifiedByVerifiedName || getSignatureName(this.verifiedBySignatureUrl),
+          },
+          {
+            label: "Approved By",
+            signatureUrl: this.approvedBySignatureUrl,
+            verifiedName: this.approvedByVerifiedName || getSignatureName(this.approvedBySignatureUrl),
+          },
+        ];
+
+        const sigColWidth = contentWidth / 3;
+        for (let index = 0; index < signatures.length; index++) {
+          const sig = signatures[index];
+          const xPos = margin + index * sigColWidth;
+          doc.text(`${sig.label}:`, xPos, yPosition);
+          
+          const imgUrl = getSignatureImageUrl(sig.signatureUrl);
+          if (imgUrl) {
+            try {
+              const imgBase64 = await imageToBase64(imgUrl);
+              doc.addImage(imgBase64, "PNG", xPos, yPosition + 3, 40, 15);
+              if (sig.verifiedName) {
+                doc.text(sig.verifiedName, xPos, yPosition + 20);
+              }
+            } catch (e) {
+              console.warn(`Could not load signature image for ${sig.label}:`, e);
+              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            }
+          } else {
+            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+          }
+        }
+
+        // Add page numbers
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setFont("helvetica", "normal");
+          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+        }
 
         // Save PDF
-        const fileName = `COTS_Screening_Inspection_Report_${
-          this.lruName || "Unknown"
-        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `COTS_Screening_Inspection_Report_${this.lruName || "Unknown"}_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         alert("Report exported successfully as PDF!");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        alert(
-          `Error exporting PDF: ${
-            error.message || "Unknown error"
-          }. Please try again.`
-        );
+        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
       }
     },
   },

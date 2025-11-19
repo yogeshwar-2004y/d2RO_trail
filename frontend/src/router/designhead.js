@@ -12,21 +12,25 @@ const designheadRoutes = [
     path: '/designhead',
     name: 'HomePageDesignHead',
     component: HomePageDesignHead,
+    meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
   },
   {
     path: '/assign-projects',
     name: 'ProjectsForAssigning',
     component: ProjectsForAssigning,
+    meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
   },
   {
     path: '/assign-projects/:projectId/members',
     name: 'ProjectMembers',
     component: ProjectMembers,
+    meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
   },
   {
     path: '/assign-projects/:projectId/members/add',
     name: 'AddMember',
     component: AddMember,
+    meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
   },
 ]
 

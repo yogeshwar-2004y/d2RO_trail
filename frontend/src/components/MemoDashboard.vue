@@ -212,12 +212,6 @@
           <div class="memo-project">{{ memo.project }}</div>
           <div class="memo-author">FROM - {{ memo.author }}</div>
         </div>
-        <div class="memo-schedule" v-if="memo.assignedDate">
-          <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
-          <div class="memo-scheduled">
-            TEST SCHEDULED ON : {{ memo.scheduledDate }}
-          </div>
-        </div>
         <!-- Share button for QA Reviewers -->
         <div v-if="currentUserRole === 3" class="memo-actions">
           <button
@@ -240,6 +234,12 @@
             </svg>
             <span class="share-text">Share</span>
           </button>
+        </div>
+        <div class="memo-schedule" v-if="memo.assignedDate">
+          <div class="memo-assigned">ASSIGNED ON : {{ memo.assignedDate }}</div>
+          <div class="memo-scheduled">
+            TEST SCHEDULED ON : {{ memo.scheduledDate }}
+          </div>
         </div>
       </div>
     </div>
@@ -313,29 +313,13 @@ export default {
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        {
-          name: "SUCCESSFULLY COMPLETED",
-          color: "success",
-          dbValue: "successfully_completed",
-        },
+        { name: "SUCCESSFULLY COMPLETED", color: "success", dbValue: "successfully_completed",},
         { name: "REJECTED", color: "rejected", dbValue: "disapproved" },
-        { name: "DISAPPROVED", color: "disapproved", dbValue: "disapproved" },
+        // { name: "DISAPPROVED", color: "disapproved", dbValue: "disapproved" },
         { name: "ASSIGNED", color: "assigned", dbValue: "assigned" },
-        {
-          name: "COMPLETED WITH OBSERVATIONS",
-          color: "observation",
-          dbValue: "completed_with_observations",
-        },
-        {
-          name: "TEST NOT CONDUCTED",
-          color: "not-conducted",
-          dbValue: "test_not_conducted",
-        },
-        {
-          name: "NOT ASSIGNED",
-          color: "not-assigned",
-          dbValue: "not_assigned",
-        },
+        { name: "COMPLETED WITH OBSERVATIONS", color: "observation", dbValue: "completed_with_observations",},
+        { name: "TEST NOT CONDUCTED", color: "not-conducted", dbValue: "test_not_conducted",},
+        { name: "NOT ASSIGNED", color: "not-assigned", dbValue: "not_assigned",},
         { name: "TEST FAILED", color: "test-failed", dbValue: "test_failed" },
       ],
       memos: [],
@@ -438,7 +422,9 @@ export default {
         console.log("CURRENT USER", currentUser);
         console.log("CURRENT USER ROLE", currentUserRole);
 
-        const response = await fetch(`http://localhost:8000/api/memos?${params.toString()}`);
+        const response = await fetch(
+          `http://localhost:5000/api/memos?${params.toString()}`
+        );
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
         }
@@ -461,7 +447,7 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch("http://localhost:8000/api/projects");
+        const response = await fetch("http://localhost:5000/api/projects");
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
@@ -543,7 +529,9 @@ export default {
     async viewMemo(memo) {
       try {
         // Fetch detailed memo data from backend
-        const response = await fetch(`http://localhost:8000/api/memos/${memo.id}`);
+        const response = await fetch(
+          `http://localhost:5000/api/memos/${memo.id}`
+        );
         if (!response.ok) {
           throw new Error(
             `Failed to fetch memo details: ${response.statusText}`
@@ -656,7 +644,9 @@ export default {
         const params = new URLSearchParams();
         params.append("current_user_id", currentUser.id);
 
-        const response = await fetch(`http://localhost:8000/api/reviewers?${params.toString()}`);
+        const response = await fetch(
+          `http://localhost:5000/api/reviewers?${params.toString()}`
+        );
         if (!response.ok) {
           throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
         }
@@ -744,15 +734,9 @@ export default {
       try {
         console.log(`Downloading PDF for memo ID: ${memo.id}`);
 
-        // Show loading state
-        const button = event.target.closest(".download-pdf-btn");
-        const originalText = button.querySelector(".download-text").textContent;
-        button.querySelector(".download-text").textContent = "Loading...";
-        button.disabled = true;
-
         // Make request to backend PDF endpoint
         const response = await fetch(
-          `http://localhost:8000/api/memos/${memo.id}/pdf`,
+          `http://localhost:5000/api/memos/${memo.id}/pdf`,
           {
             method: "GET",
             headers: {
@@ -789,12 +773,6 @@ export default {
       } catch (error) {
         console.error("Error downloading memo PDF:", error);
         alert(`Error downloading PDF: ${error.message}`);
-      } finally {
-        // Restore button state
-        if (button) {
-          button.querySelector(".download-text").textContent = originalText;
-          button.disabled = false;
-        }
       }
     },
   },
@@ -1036,6 +1014,8 @@ export default {
   text-align: right;
   font-size: 0.9em;
   color: #555;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 /* New button */
@@ -1138,12 +1118,10 @@ export default {
 
 /* Memo Actions */
 .memo-actions {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 100;
   display: flex;
   gap: 8px;
+  margin-right: 15px;
+  flex-shrink: 0;
 }
 
 .download-pdf-btn {

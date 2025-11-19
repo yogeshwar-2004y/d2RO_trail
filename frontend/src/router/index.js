@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { userStore } from "@/stores/userStore";
 
 import reviewerRoutes from './reviewerroutes'
 import qaheadRoutes from './qaheadroutes'
@@ -61,265 +62,315 @@ const router = createRouter({
       path: "/",
       name: "login",
       component: LoginPage,
+      meta: { requiresAuth: false } // Public route
     },
     {
       path: "/tech-support",
       name: "TechSupport",
       component: TechSupportPage,
+      meta: { requiresAuth: false } // Public route
     },
     {
       path: "/my-tech-support",
       name: "TechSupportUserDashboard",
       component: TechSupportUserDashboard,
+      meta: { requiresAuth: true } // Authenticated users only
     },
     {
       path: "/user-activities/activity-logs",
       name: "ActivityLogs",
-      component: ActivityLogs
+      component: ActivityLogs,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/login-logs",
       name: "LoginLogs",
-      component: LoginLogs
+      component: LoginLogs,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/add-update-projects",
       name: "AddUpdateProjects",
       component: AddUpdateProjects,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/add-update-users",
       name: "AddUpdateUser",
-      component: AddUpdateUser
+      component: AddUpdateUser,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/admin",
       name: "HomePageAdmin",
       component: HomePageAdmin,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/manage-projects",
       name: "ManageProjects",
-      component: ManageProjects
+      component: ManageProjects,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/manage-users",
       name: "ManageUsers",
-      component: ManageUsers
+      component: ManageUsers,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/select-user-to-edit",
       name: "SelectUserToEdit",
-      component: SelectUserToEdit
+      component: SelectUserToEdit,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/edit-user/:userId",
       name: "EditUser",
       component: EditUser,
-      props: true
+      props: true,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/select-project-to-edit",
       name: "SelectProjectToEdit",
-      component: SelectProjectToEdit
+      component: SelectProjectToEdit,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/edit-project/:projectId",
       name: "EditProject",
       component: EditProject,
-      props: true
+      props: true,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/memos",
       name: "MemoDashboard",
       component: MemoDashboard,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: "/projects",
       name: "ProjectsDashboard",
       component: ProjectsDashboard,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: "/projects/:projectId/lrus",
       name: "LruDashboard",
       component: LruDashboard,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: "/reports",
       name: "ReportDashboard",
       component: ReportDashboard,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: "/reports/individual/:reportId",
       name: "IndividualReport",
       component: IndividualReport,
       props: true,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: "/user-activities/major-test-groups",
       name: "MajorTestGroups",
-      component: MajorTestGroups
+      component: MajorTestGroups,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/test-management",
       name: "TestManagement",
-      component: TestManagement
+      component: TestManagement,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/test-management/group/:groupId/:groupName",
       name: "GroupDetail",
       component: GroupDetail,
-      props: true
+      props: true,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/test-management/group/:groupId/:groupName/sub-test/:subTestId/:subTestName",
       name: "SubTestDetail",
       component: SubTestDetail,
-      props: true
+      props: true,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/manufacturing-test-group",
       name: "ManufacturingTestGroup",
-      component: ManufacturingTestGroup
+      component: ManufacturingTestGroup,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/cots-screening-test-group",
       name: "CoTSScreeningTestGroup",
-      component: CoTSScreeningTestGroup
+      component: CoTSScreeningTestGroup,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/ess-test-group",
       name: "ESSTestGroup",
-      component: ESSTestGroup
+      component: ESSTestGroup,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/qt-test-group",
       name: "QTTestGroup",
-      component: QTTestGroup
+      component: QTTestGroup,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/soft-test-group",
       name: "SoFTTestGroup",
-      component: SoFTTestGroup
+      component: SoFTTestGroup,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/news-updates",
       name: "NewsUpdates",
-      component: NewsUpdates
+      component: NewsUpdates,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/customise-background",
       name: "CustomiseBackground",
-      component: CustomiseBackground
+      component: CustomiseBackground,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities/tech-support",
       name: "TechSupportManagement",
-      component: TechSupportManagement
+      component: TechSupportManagement,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/user-activities",
       name: "UserActivities",
       component: UserActivities,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {
       path: "/reports/memo-id/:memoId",
       name: "TestReports",
       component: ObservationReport,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
     path: '/view-observations/:lruId/:lruName/:projectId',
     name: 'ObservationReport',
     component: ObservationReport,
+    meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: '/memos/:memoId',
       name: 'MemoForm',
       component: MemoForm,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: '/memos/view/:id',
       name: 'ViewOnlyMemoForm',
       component: ViewOnlyMemoForm,
       props: true,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
       path: '/memos/submit/new',
       name: 'NewMemoForm',
       component: MemoForm,
+      meta: { requiresAuth: true } // All authenticated users
     },
     {
     path: '/document-viewer/:lruId/:lruName/:projectId',
     name: 'DocumentViewer',
     component: DocumentViewer,
+    meta: { requiresAuth: true } // All authenticated users
     },
     {
     path: '/memos/submit',
     name: 'SubmitMemo',             
     component: SubmitMemo,
+    meta: { requiresAuth: true } // All authenticated users
     },
           {
         path: '/test-role-system',
         name: 'RoleTestComponent',
         component: RoleTestComponent,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/test-plan-docs',
         name: 'PlanDocsTestComponent',
         component: PlanDocsTestComponent,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/reports/templates',
         name: 'TemplateDashboard',
         component: TemplateDashboard,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/view/:templateName',
         name: 'TemplateViewer',
         component: TemplateViewer,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/bare-pcb-inspection/:projectName?/:lruName?',
         name: 'BarePcbInspectionReport',
         component: BarePcbInspectionReport,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/conformal-coating-inspection/:projectName?/:lruName?',
         name: 'Conformalcoatinginspectionreport',
         component: Conformalcoatinginspectionreport,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/raw-material-inspection/:projectName?/:lruName?',
         name: 'RawMaterialInspectionReport',
         component: RawMaterialInspectionReport,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/cots-screening-inspection/:projectName?/:lruName?',
         name: 'CotsScreeningInspectionReport',
         component: CotsScreeningInspectionReport,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/assembled-board-inspection/:projectName?/:lruName?',
         name: 'AssembledBoardInspectionReport',
         component: AssembledBoardInspectionReport,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/kit-of-part-inspection/:projectName?/:lruName?',
         name: 'KitOfPartInsp',
         component: KitOfPartInsp,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
       {
         path: '/templates/mechanical-inspection/:projectName?/:lruName?',
         name: 'MechanicalInspection',
         component: MechanicalInspection,
         props: true,
+        meta: { requiresAuth: true } // All authenticated users
       },
     ...reviewerRoutes,
     ...qaheadRoutes,
@@ -327,6 +378,74 @@ const router = createRouter({
     ...designerRoutes,
   ],
   
+});
+
+// Navigation guard for authentication and role-based access
+router.beforeEach((to, from, next) => {
+  // Get authentication state
+  const isLoggedIn = userStore.getters.isLoggedIn();
+  const userRole = userStore.getters.currentUserRole();
+  
+  // Check if route requires authentication
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false);
+  
+  // If route requires auth and user is not logged in, redirect to login
+  if (requiresAuth && !isLoggedIn) {
+    // Store the intended destination
+    next({
+      name: 'login',
+      query: { redirect: to.fullPath }
+    });
+    return;
+  }
+  
+  // If user is logged in and trying to access login page, redirect to their dashboard
+  if (to.name === 'login' && isLoggedIn) {
+    // Redirect based on role
+    const role = userRole;
+    if (role === 1) {
+      next({ name: 'HomePageAdmin' });
+    } else if (role === 2) {
+      next({ name: 'HomePageQAHead' });
+    } else if (role === 3) {
+      next({ name: 'HomePageReviewer' });
+    } else if (role === 4) {
+      next({ name: 'HomePageDesignHead' });
+    } else if (role === 5) {
+      next({ name: 'HomePageDesigner' });
+    } else {
+      next();
+    }
+    return;
+  }
+  
+  // Check role-based access
+  const requiresRole = to.matched.some(record => record.meta.requiresRole);
+  if (requiresRole && isLoggedIn) {
+    const requiredRole = to.matched.find(record => record.meta.requiresRole)?.meta.requiresRole;
+    
+    if (userRole !== requiredRole) {
+      // User doesn't have required role, redirect to their dashboard
+      alert('You do not have permission to access this page.');
+      if (userRole === 1) {
+        next({ name: 'HomePageAdmin' });
+      } else if (userRole === 2) {
+        next({ name: 'HomePageQAHead' });
+      } else if (userRole === 3) {
+        next({ name: 'HomePageReviewer' });
+      } else if (userRole === 4) {
+        next({ name: 'HomePageDesignHead' });
+      } else if (userRole === 5) {
+        next({ name: 'HomePageDesigner' });
+      } else {
+        next({ name: 'login' });
+      }
+      return;
+    }
+  }
+  
+  // Allow navigation
+  next();
 });
 
 export default router

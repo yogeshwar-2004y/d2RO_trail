@@ -69,10 +69,13 @@
           </svg>
         </div>
         <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleProjectFilter">
+          <button class="filter-button" @click.stop="toggleProjectFilter">
             Filter By Projects
+            <span v-if="activeProjectFilter" class="filter-badge"
+              >({{ activeProjectFilter }})</span
+            >
           </button>
-          <div v-if="showProjectFilter" class="filter-panel">
+          <div v-if="showProjectFilter" class="filter-panel" @click.stop>
             <div
               v-for="project in projects"
               :key="project"
@@ -82,13 +85,19 @@
             >
               {{ project }}
             </div>
+            <div v-if="projects.length === 0" class="filter-option no-options">
+              No projects available
+            </div>
           </div>
         </div>
         <div class="filter-dropdown">
-          <button class="filter-button" @click="toggleReportFilter">
+          <button class="filter-button" @click.stop="toggleReportFilter">
             Filter Reports
+            <span v-if="activeReportFilter" class="filter-badge"
+              >({{ activeReportFilter }})</span
+            >
           </button>
-          <div v-if="showReportFilter" class="filter-panel">
+          <div v-if="showReportFilter" class="filter-panel" @click.stop>
             <div
               v-for="status in reportStatuses"
               :key="status.name"
@@ -103,28 +112,6 @@
             </div>
           </div>
         </div>
-        <button class="export-all-button" @click="downloadDashboardPDF">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-            ></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" y1="13" x2="8" y2="13"></line>
-            <line x1="16" y1="17" x2="8" y2="17"></line>
-            <line x1="10" y1="9" x2="8" y2="9"></line>
-          </svg>
-          DOWNLOAD PDF
-        </button>
       </div>
     </div>
 
@@ -183,9 +170,9 @@
           </svg>
         </div>
         <div class="card-info">
-          <span class="card-title">{{ report.name || 'N/A' }}</span>
+          <span class="card-title">{{ report.name || "N/A" }}</span>
           <span class="card-report-id">Report ID: #{{ report.id }}</span>
-          <span>{{ templates[report.template_id] || 'N/A' }}</span>
+          <span>{{ templates[report.template_id] || "N/A" }}</span>
         </div>
       </div>
 
@@ -261,6 +248,7 @@ export default {
         { name: "ASSIGNED", color: "assigned" },
         { name: "TEST NOT CONDUCTED", color: "not-conducted" },
         { name: "TEST FAILED", color: "failed" },
+        { name: "COMPLETED WITH OBSERVATIONS", color: "observations" },
       ],
       reports: [],
       loading: true,
@@ -273,30 +261,44 @@ export default {
         4: "mechanical inspection report",
         5: "assembled board inspection report",
         6: "raw material inspection report",
-        7: "kit of part inspection report"
+        7: "kit of part inspection report",
       },
     };
   },
   computed: {
     filteredReports() {
-      let filtered = this.reports;
+      let filtered = [...this.reports]; // Create a copy to avoid mutating original array
 
+      // Filter by project
       if (this.activeProjectFilter) {
+        const beforeCount = filtered.length;
         filtered = filtered.filter(
           (report) => report.project === this.activeProjectFilter
         );
-      }
-
-      if (this.activeReportFilter) {
-        filtered = filtered.filter(
-          (report) => report.status === this.activeReportFilter
+        console.log(
+          `Project filter "${this.activeProjectFilter}": ${beforeCount} -> ${filtered.length} reports`
         );
       }
 
+      // Filter by status
+      if (this.activeReportFilter) {
+        const beforeCount = filtered.length;
+        filtered = filtered.filter(
+          (report) => report.status === this.activeReportFilter
+        );
+        console.log(
+          `Status filter "${this.activeReportFilter}": ${beforeCount} -> ${filtered.length} reports`
+        );
+        console.log("Available statuses in reports:", [
+          ...new Set(this.reports.map((r) => r.status)),
+        ]);
+      }
+
+      // Filter by search query
       if (this.searchQuery) {
         const query = this.searchQuery.toLowerCase();
-        filtered = filtered.filter((report) =>
-          report.name.toLowerCase().includes(query)
+        filtered = filtered.filter(
+          (report) => report.name && report.name.toLowerCase().includes(query)
         );
       }
 
@@ -310,7 +312,15 @@ export default {
   },
   async mounted() {
     await this.fetchReports();
-    await this.fetchProjects();
+    // Projects are now populated from unique report.project values in fetchReports()
+    // No need to call fetchProjects() separately
+
+    // Add click outside listener to close filter panels
+    document.addEventListener("click", this.handleClickOutside);
+  },
+  beforeUnmount() {
+    // Remove click outside listener
+    document.removeEventListener("click", this.handleClickOutside);
   },
   methods: {
     async fetchReports() {
@@ -325,7 +335,7 @@ export default {
         console.log("Current user role:", currentUserRole);
 
         // Build API URL with user context
-        let apiUrl = "http://localhost:8000/api/reports";
+        let apiUrl = "http://localhost:5000/api/reports";
         if (currentUser && currentUserRole) {
           apiUrl += `?user_id=${currentUser.id}&user_role=${currentUserRole}`;
         }
@@ -333,13 +343,15 @@ export default {
         console.log("API URL:", apiUrl);
 
         const response = await fetch(apiUrl, {
-          method: 'GET',
+          method: "GET",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }).catch((networkError) => {
           // Handle network errors (backend not running, CORS, etc.)
-          throw new Error(`Network error: Unable to connect to backend server. Please ensure the backend is running at ${apiUrl}`);
+          throw new Error(
+            `Network error: Unable to connect to backend server. Please ensure the backend is running at ${apiUrl}`
+          );
         });
 
         if (!response.ok) {
@@ -358,41 +370,35 @@ export default {
 
         if (data.success) {
           this.reports = data.reports;
-          console.log('REPORTSSSS: ',this.reports);
-          
+          console.log("REPORTSSSS: ", this.reports);
+
+          // Extract unique project names from report.project field
+          const uniqueProjects = [
+            ...new Set(
+              this.reports
+                .map((report) => report.project)
+                .filter((project) => project && project.trim() !== "")
+            ),
+          ].sort();
+
+          // Update projects list with unique project names from reports
+          this.projects = uniqueProjects;
+
           console.log(
             `Fetched ${data.reports.length} reports for user ${data.user_id} with role ${data.user_role}`
           );
+          console.log("Unique projects from reports:", uniqueProjects);
         } else {
           throw new Error(data.message || "Failed to fetch reports");
         }
       } catch (error) {
         console.error("Error fetching reports:", error);
-        this.error = error.message || "Failed to fetch reports. Please check if the backend server is running.";
+        this.error =
+          error.message ||
+          "Failed to fetch reports. Please check if the backend server is running.";
         console.error("Full error details:", error);
       } finally {
         this.loading = false;
-      }
-    },
-
-    async fetchProjects() {
-      try {
-        const response = await fetch("http://localhost:8000/api/projects");
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch projects: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (data.success) {
-          this.projects = data.projects.map((project) => project.name);
-        } else {
-          throw new Error(data.message || "Failed to fetch projects");
-        }
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-        // Don't set error state for projects as it's not critical
       }
     },
 
@@ -405,14 +411,25 @@ export default {
       this.showProjectFilter = false;
     },
     selectProject(project) {
-      this.activeProjectFilter =
-        this.activeProjectFilter === project ? null : project;
+      const newFilter = this.activeProjectFilter === project ? null : project;
+      this.activeProjectFilter = newFilter;
       this.showProjectFilter = false;
+      console.log("Project filter selected:", newFilter);
+      console.log("Filtered reports count:", this.filteredReports.length);
     },
     selectReportStatus(status) {
-      this.activeReportFilter =
-        this.activeReportFilter === status ? null : status;
+      const newFilter = this.activeReportFilter === status ? null : status;
+      this.activeReportFilter = newFilter;
       this.showReportFilter = false;
+      console.log("Status filter selected:", newFilter);
+      console.log("Filtered reports count:", this.filteredReports.length);
+    },
+    handleClickOutside(event) {
+      // Close filter panels if clicking outside
+      if (!event.target.closest(".filter-dropdown")) {
+        this.showProjectFilter = false;
+        this.showReportFilter = false;
+      }
     },
     viewReport(report) {
       // Navigate to the individual report page
@@ -430,24 +447,26 @@ export default {
       try {
         // Dynamically import html2pdf to avoid blocking app initialization
         if (!html2pdf) {
-          const html2pdfModule = await import('html2pdf.js');
+          const html2pdfModule = await import("html2pdf.js");
           html2pdf = html2pdfModule.default || html2pdfModule;
         }
-        
+
         // Get the element you want to convert (the main dashboard content)
-        const element = document.querySelector('.report-dashboard');
-        
+        const element = document.querySelector(".report-dashboard");
+
         if (!element) {
-          alert('Dashboard content not found');
+          alert("Dashboard content not found");
           return;
         }
-        
+
         // Configure options to match the page appearance
         const opt = {
           margin: 0.5,
-          filename: `Reports_Dashboard_Summary_${new Date().toISOString().slice(0, 10)}.pdf`,
-          image: { type: 'jpeg', quality: 0.98 },
-          html2canvas: { 
+          filename: `Reports_Dashboard_Summary_${new Date()
+            .toISOString()
+            .slice(0, 10)}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
             scale: 2,
             useCORS: true,
             letterRendering: true,
@@ -455,23 +474,26 @@ export default {
             windowWidth: element.scrollWidth,
             windowHeight: element.scrollHeight,
             scrollX: 0,
-            scrollY: 0
+            scrollY: 0,
           },
-          jsPDF: { 
-            unit: 'in', 
-            format: 'a4', 
-            orientation: 'portrait' 
-          }
+          jsPDF: {
+            unit: "in",
+            format: "a4",
+            orientation: "portrait",
+          },
         };
-        
+
         // Generate PDF from HTML
         await html2pdf().set(opt).from(element).save();
-        
+
         alert("Reports dashboard PDF downloaded successfully!");
-        
       } catch (error) {
         console.error("Error downloading dashboard PDF:", error);
-        alert(`Error downloading dashboard PDF: ${error.message || "Unknown error"}. Please try again.`);
+        alert(
+          `Error downloading dashboard PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
     },
 
@@ -582,6 +604,15 @@ export default {
   padding: 10px 15px;
   font-weight: bold;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-badge {
+  font-size: 0.85em;
+  color: #007bff;
+  font-weight: 600;
 }
 
 .export-all-button {
@@ -655,6 +686,10 @@ export default {
 .test-failed {
   background-color: #ffc4be;
 }
+.observations,
+.completed-with-observations {
+  background-color: #fff4e6;
+}
 
 .report-grid {
   display: grid;
@@ -695,6 +730,9 @@ export default {
 }
 .report-card.test-failed {
   background-color: #ffc4be;
+}
+.report-card.completed-with-observations {
+  background-color: #fff4e6;
 }
 
 .card-icon {

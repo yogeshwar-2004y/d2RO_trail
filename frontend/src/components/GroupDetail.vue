@@ -1020,7 +1020,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/test-groups/${this.groupId}/sub-tests`
+          `http://localhost:5000/api/test-groups/${this.groupId}/sub-tests`
         );
         const data = await response.json();
 
@@ -1053,7 +1053,7 @@ export default {
       for (const subTest of this.subTests) {
         try {
           const response = await fetch(
-            `http://localhost:8000/api/sub-tests/${subTest.sub_test_id}/bulletins`
+            `http://localhost:5000/api/sub-tests/${subTest.sub_test_id}/bulletins`
           );
           const data = await response.json();
 
@@ -1203,7 +1203,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/test-groups/${this.groupId}/sub-tests`,
+          `http://localhost:5000/api/test-groups/${this.groupId}/sub-tests`,
           {
             method: "POST",
             headers: {
@@ -1251,7 +1251,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/sub-tests/${this.editingSubTest.sub_test_id}`,
+          `http://localhost:5000/api/sub-tests/${this.editingSubTest.sub_test_id}`,
           {
             method: "PUT",
             headers: {
@@ -1288,7 +1288,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/sub-tests/${subTest.sub_test_id}`,
+          `http://localhost:5000/api/sub-tests/${subTest.sub_test_id}`,
           {
             method: "DELETE",
           }
@@ -1394,7 +1394,7 @@ export default {
       for (const bulletin of parentBulletins) {
         try {
           const response = await fetch(
-            `http://localhost:8000/api/sub-tests/${subTestId}/bulletins`,
+            `http://localhost:5000/api/sub-tests/${subTestId}/bulletins`,
             {
               method: "POST",
               headers: {
@@ -1427,7 +1427,7 @@ export default {
         if (parentBulletin && parentBulletin.actualId) {
           try {
             await fetch(
-              `http://localhost:8000/api/sub-tests/${subTestId}/bulletins`,
+              `http://localhost:5000/api/sub-tests/${subTestId}/bulletins`,
               {
                 method: "POST",
                 headers: {
@@ -1481,7 +1481,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/sub-tests/${subTestId}/bulletins`,
+          `http://localhost:5000/api/sub-tests/${subTestId}/bulletins`,
           {
             method: "POST",
             headers: {
@@ -1534,7 +1534,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`,
+          `http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`,
           {
             method: "PUT",
             headers: {
@@ -1577,7 +1577,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/bulletins/${bulletin.bulletin_id}`,
+          `http://localhost:5000/api/bulletins/${bulletin.bulletin_id}`,
           {
             method: "DELETE",
           }
@@ -1633,7 +1633,7 @@ export default {
         };
 
         const response = await fetch(
-          `http://localhost:8000/api/bulletins/${this.editingBulletin.bulletin_id}`,
+          `http://localhost:5000/api/bulletins/${this.editingBulletin.bulletin_id}`,
           {
             method: "PUT",
             headers: {

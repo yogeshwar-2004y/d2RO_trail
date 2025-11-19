@@ -164,7 +164,9 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              ></path>
               <polyline points="14 2 14 8 20 8"></polyline>
               <line x1="16" y1="13" x2="8" y2="13"></line>
               <line x1="16" y1="17" x2="8" y2="17"></line>
@@ -462,7 +464,7 @@ const toggleSidebar = () => {
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value;
   // Emit the state change to parent component for responsive layout
-  emit('sidebar-state-changed', isCollapsed.value);
+  emit("sidebar-state-changed", isCollapsed.value);
 };
 
 const navigateToPage = (routeName) => {
@@ -535,7 +537,7 @@ const fetchUnreadCount = async () => {
     }
 
     const response = await fetch(
-      `http://localhost:8000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
+      `http://localhost:5000/api/notifications/${currentUser.id}?limit=50&unread_only=true`
     );
     const data = await response.json();
 
@@ -554,7 +556,7 @@ onMounted(() => {
   // Refresh every 30 seconds
   notificationRefreshInterval = setInterval(fetchUnreadCount, 30000);
   // Emit initial sidebar state to parent
-  emit('sidebar-state-changed', isCollapsed.value);
+  emit("sidebar-state-changed", isCollapsed.value);
 });
 
 onUnmounted(() => {
