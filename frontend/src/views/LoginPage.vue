@@ -159,7 +159,7 @@ export default {
 
           // Check if there's a redirect query parameter
           const redirectPath = this.$route.query.redirect;
-          
+
           if (redirectPath) {
             // Redirect to the originally requested page
             this.$router.push(redirectPath);

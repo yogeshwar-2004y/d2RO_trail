@@ -30,15 +30,51 @@ def login():
         conn = get_db_connection()
         cur = conn.cursor()
         
-        # Join users, user_roles, and roles tables to get proper role information
-        # Check for deleted and enabled status
+        # Check if deleted and enabled columns exist
         cur.execute("""
-            SELECT u.user_id, u.name, u.email, u.password_hash, r.role_id, r.role_name, u.deleted, u.enabled
-            FROM users u
-            JOIN user_roles ur ON u.user_id = ur.user_id
-            JOIN roles r ON ur.role_id = r.role_id
-            WHERE u.email = %s
-        """, (email,))
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'users' AND column_name IN ('deleted', 'enabled')
+        """)
+        existing_columns = [row[0] for row in cur.fetchall()]
+        has_deleted = 'deleted' in existing_columns
+        has_enabled = 'enabled' in existing_columns
+        
+        # Build query based on which columns exist
+        if has_deleted and has_enabled:
+            # Both columns exist - use full query
+            cur.execute("""
+                SELECT 
+                    u.user_id, 
+                    u.name, 
+                    u.email, 
+                    u.password_hash, 
+                    r.role_id, 
+                    r.role_name, 
+                    u.deleted, 
+                    u.enabled
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.email = %s
+            """, (email,))
+        else:
+            # Columns don't exist - use query without deleted/enabled checks
+            cur.execute("""
+                SELECT 
+                    u.user_id, 
+                    u.name, 
+                    u.email, 
+                    u.password_hash, 
+                    r.role_id, 
+                    r.role_name, 
+                    FALSE as deleted, 
+                    TRUE as enabled
+                FROM users u
+                JOIN user_roles ur ON u.user_id = ur.user_id
+                JOIN roles r ON ur.role_id = r.role_id
+                WHERE u.email = %s
+            """, (email,))
         
         user = cur.fetchone()
 
@@ -57,13 +93,13 @@ def login():
             cur.close()
             return jsonify({"success": False, "message": "User not found"}), 401
 
-        # Check if user is deleted
-        if user[6]:  # deleted column
+        # Check if user is deleted (only if column exists)
+        if has_deleted and user[6]:  # deleted column
             cur.close()
             return jsonify({"success": False, "message": "User account has been deleted"}), 401
         
-        # Check if user is enabled
-        if not user[7]:  # enabled column
+        # Check if user is enabled (only if column exists)
+        if has_enabled and not user[7]:  # enabled column
             cur.close()
             return jsonify({"success": False, "message": "User account is disabled"}), 401
         

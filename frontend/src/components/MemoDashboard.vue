@@ -313,13 +313,29 @@ export default {
       activeMemoFilter: null,
       projects: [],
       memoStatuses: [
-        { name: "SUCCESSFULLY COMPLETED", color: "success", dbValue: "successfully_completed",},
+        {
+          name: "SUCCESSFULLY COMPLETED",
+          color: "success",
+          dbValue: "successfully_completed",
+        },
         { name: "REJECTED", color: "rejected", dbValue: "disapproved" },
         // { name: "DISAPPROVED", color: "disapproved", dbValue: "disapproved" },
         { name: "ASSIGNED", color: "assigned", dbValue: "assigned" },
-        { name: "COMPLETED WITH OBSERVATIONS", color: "observation", dbValue: "completed_with_observations",},
-        { name: "TEST NOT CONDUCTED", color: "not-conducted", dbValue: "test_not_conducted",},
-        { name: "NOT ASSIGNED", color: "not-assigned", dbValue: "not_assigned",},
+        {
+          name: "COMPLETED WITH OBSERVATIONS",
+          color: "observation",
+          dbValue: "completed_with_observations",
+        },
+        {
+          name: "TEST NOT CONDUCTED",
+          color: "not-conducted",
+          dbValue: "test_not_conducted",
+        },
+        {
+          name: "NOT ASSIGNED",
+          color: "not-assigned",
+          dbValue: "not_assigned",
+        },
         { name: "TEST FAILED", color: "test-failed", dbValue: "test_failed" },
       ],
       memos: [],
@@ -423,7 +439,7 @@ export default {
         console.log("CURRENT USER ROLE", currentUserRole);
 
         const response = await fetch(
-          `/api/memos?${params.toString()}`
+          `http://localhost:5000/api/memos?${params.toString()}`
         );
         if (!response.ok) {
           throw new Error(`Failed to fetch memos: ${response.statusText}`);
@@ -447,7 +463,7 @@ export default {
 
     async fetchProjects() {
       try {
-        const response = await fetch("/api/projects");
+        const response = await fetch("http://localhost:5000/api/projects");
         if (!response.ok) {
           throw new Error(`Failed to fetch projects: ${response.statusText}`);
         }
@@ -530,7 +546,7 @@ export default {
       try {
         // Fetch detailed memo data from backend
         const response = await fetch(
-          `/api/memos/${memo.id}`
+          `http://localhost:5000/api/memos/${memo.id}`
         );
         if (!response.ok) {
           throw new Error(
@@ -645,7 +661,7 @@ export default {
         params.append("current_user_id", currentUser.id);
 
         const response = await fetch(
-          `/api/reviewers?${params.toString()}`
+          `http://localhost:5000/api/reviewers?${params.toString()}`
         );
         if (!response.ok) {
           throw new Error(`Failed to fetch reviewers: ${response.statusText}`);
@@ -736,7 +752,7 @@ export default {
 
         // Make request to backend PDF endpoint
         const response = await fetch(
-          `/api/memos/${memo.id}/pdf`,
+          `http://localhost:5000/api/memos/${memo.id}/pdf`,
           {
             method: "GET",
             headers: {

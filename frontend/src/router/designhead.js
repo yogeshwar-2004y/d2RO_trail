@@ -4,6 +4,7 @@ import HomePageDesignHead from '@/views/designhead/HomePageDesignHead.vue'
 import ProjectsForAssigning from '@/views/designhead/ProjectsForAssigning.vue'
 import ProjectMembers from '@/views/designhead/ProjectMembers.vue'
 import AddMember from '@/views/designhead/AddMember.vue'
+import DocumentTypes from '@/views/designhead/DocumentTypes.vue'
 
 import SubmitMemo from '@/components/SubmitMemo.vue'
 
@@ -30,6 +31,12 @@ const designheadRoutes = [
     path: '/assign-projects/:projectId/members/add',
     name: 'AddMember',
     component: AddMember,
+    meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
+  },
+  {
+    path: '/document-types',
+    name: 'DocumentTypes',
+    component: DocumentTypes,
     meta: { requiresAuth: true, requiresRole: 4 } // Design Head only
   },
 ]

@@ -1292,7 +1292,15 @@ export default {
         };
 
         // Helper function to add text with wrapping
-        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+        const addText = (
+          text,
+          x,
+          y,
+          maxWidth,
+          fontSize = 10,
+          isBold = false,
+          align = "left"
+        ) => {
           doc.setFontSize(fontSize);
           doc.setFont("helvetica", isBold ? "bold" : "normal");
           const lines = doc.splitTextToSize(text || "", maxWidth);
@@ -1315,7 +1323,10 @@ export default {
         // Load DRDO logo
         let drdoLogoBase64 = null;
         try {
-          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          const drdoLogoUrl = new URL(
+            "../assets/images/DRDO.png",
+            import.meta.url
+          ).href;
           drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
         } catch (e) {
           console.warn("Could not load DRDO logo:", e);
@@ -1350,7 +1361,8 @@ export default {
         doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
         doc.setFont("helvetica", "italic");
         doc.setFontSize(7);
-        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreText =
+          "Combat Aircraft Systems Development and Integration Centre";
         const centreTextWidth = doc.getTextWidth(centreText);
         doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
 
@@ -1358,10 +1370,16 @@ export default {
         yPosition += 25;
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${this.reportData.projectName || "PROJECT"}/${this.reportData.lruName || "LRU"}/SL.${this.reportData.slNos || "001"}/${this.reportData.reportRefNo || "INS-001"}/${this.currentYear}`;
+        const documentPath = `CASDIC/${
+          this.reportData.projectName || "PROJECT"
+        }/${this.reportData.lruName || "LRU"}/SL.${
+          this.reportData.slNos || "001"
+        }/${this.reportData.reportRefNo || "INS-001"}/${this.currentYear}`;
         doc.text(documentPath, margin, yPosition);
 
-        const dateText = `Date: ${this.formattedDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateText = `Date: ${
+          this.formattedDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 10;
@@ -1369,7 +1387,9 @@ export default {
         // Subject line
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: Mechanical Inspection Report for ${this.reportData.lruName || "Unknown LRU"}`;
+        const subjectText = `SUB: Mechanical Inspection Report for ${
+          this.reportData.lruName || "Unknown LRU"
+        }`;
         const subjectWidth = doc.getTextWidth(subjectText);
         doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
         yPosition += 12;
@@ -1389,11 +1409,20 @@ export default {
 
         // Left column fields
         const leftFields = [
-          { label: "Project Name", value: this.reportData.projectName || "N/A" },
-          { label: "Report Ref No", value: this.reportData.reportRefNo || "N/A" },
+          {
+            label: "Project Name",
+            value: this.reportData.projectName || "N/A",
+          },
+          {
+            label: "Report Ref No",
+            value: this.reportData.reportRefNo || "N/A",
+          },
           { label: "Memo Ref No", value: this.reportData.memoRefNo || "N/A" },
           { label: "LRU Name", value: this.reportData.lruName || "N/A" },
-          { label: "Inspection Stage", value: this.reportData.inspectionStage || "N/A" },
+          {
+            label: "Inspection Stage",
+            value: this.reportData.inspectionStage || "N/A",
+          },
           { label: "Test Venue", value: this.reportData.testVenue || "N/A" },
           { label: "SL.NO'S", value: this.reportData.slNos || "N/A" },
         ];
@@ -1417,9 +1446,11 @@ export default {
           { label: "Part No", value: this.reportData.partNo || "N/A" },
           {
             label: "Quantity",
-            value: this.reportData.quantity !== null && this.reportData.quantity !== undefined
-              ? this.reportData.quantity.toString()
-              : "N/A",
+            value:
+              this.reportData.quantity !== null &&
+              this.reportData.quantity !== undefined
+                ? this.reportData.quantity.toString()
+                : "N/A",
           },
           {
             label: "Start Date",
@@ -1438,14 +1469,30 @@ export default {
         // Print left column
         leftFields.forEach((field) => {
           const text = `${field.label}: ${field.value}`;
-          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          const height = addText(
+            text,
+            margin,
+            leftY,
+            colWidth,
+            10,
+            false,
+            "left"
+          );
           leftY += height + 3;
         });
 
         // Print right column
         rightFields.forEach((field) => {
           const text = `${field.label}: ${field.value}`;
-          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          const height = addText(
+            text,
+            margin + colWidth + 10,
+            rightY,
+            colWidth,
+            10,
+            false,
+            "left"
+          );
           rightY += height + 3;
         });
 
@@ -1461,12 +1508,12 @@ export default {
         if (this.dimensionalChecklist && this.dimensionalChecklist.length > 0) {
           // Calculate column widths as percentages of contentWidth
           const colWidths = [
-            contentWidth * 0.08,  // SL.NO
-            contentWidth * 0.18,  // DIMENSION
-            contentWidth * 0.15,  // TOLERANCE
-            contentWidth * 0.18,  // OBSERVED VALUE
-            contentWidth * 0.18,  // INSTRUMENT USED
-            contentWidth * 0.23,  // REMARKS
+            contentWidth * 0.08, // SL.NO
+            contentWidth * 0.18, // DIMENSION
+            contentWidth * 0.15, // TOLERANCE
+            contentWidth * 0.18, // OBSERVED VALUE
+            contentWidth * 0.18, // INSTRUMENT USED
+            contentWidth * 0.23, // REMARKS
           ];
 
           // Ensure columns add up exactly to contentWidth
@@ -1479,23 +1526,34 @@ export default {
           }
 
           const rowHeight = 12;
-          const headers = ["SL.NO", "DIMENSION", "TOLERANCE", "OBSERVED VALUE", "INSTRUMENT USED", "REMARKS"];
-          
+          const headers = [
+            "SL.NO",
+            "DIMENSION",
+            "TOLERANCE",
+            "OBSERVED VALUE",
+            "INSTRUMENT USED",
+            "REMARKS",
+          ];
+
           // Draw header with borders and background
           doc.setFontSize(9);
           doc.setFont("helvetica", "bold");
           const lineHeight = 4.5;
           const headerHeight = 12;
-          
+
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             // Draw header text
             const headerWidth = doc.getTextWidth(header);
-            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            doc.text(
+              header,
+              xPos + colWidths[i] / 2 - headerWidth / 2,
+              yPosition + 2
+            );
             xPos += colWidths[i];
           });
           yPosition += headerHeight + 3;
@@ -1505,7 +1563,7 @@ export default {
           doc.setFontSize(9);
           this.dimensionalChecklist.forEach((item, index) => {
             checkPageBreak(rowHeight + 5);
-            
+
             const rowData = [
               (index + 1).toString(),
               item.dimension || "",
@@ -1518,7 +1576,7 @@ export default {
             // Draw cell borders
             doc.setLineWidth(0.1);
             doc.rect(margin, yPosition - 6, contentWidth, rowHeight, "D");
-            
+
             xPos = margin;
             for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
               xPos += colWidths[colIdx - 1];
@@ -1528,11 +1586,14 @@ export default {
             // Draw cell content
             xPos = margin;
             rowData.forEach((text, colIdx) => {
-              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              const textLines = doc.splitTextToSize(
+                text || "",
+                colWidths[colIdx] - 6
+              );
               doc.text(textLines, xPos + 3, yPosition + 3);
               xPos += colWidths[colIdx];
             });
-            
+
             yPosition += rowHeight + 1;
           });
           yPosition += 5;
@@ -1548,11 +1609,11 @@ export default {
         if (this.parameterChecklist && this.parameterChecklist.length > 0) {
           // Calculate column widths as percentages of contentWidth
           const colWidths = [
-            contentWidth * 0.08,  // SL.NO
-            contentWidth * 0.30,  // PARAMETER
-            contentWidth * 0.25,  // EXPECTED
-            contentWidth * 0.20,  // OBSERVATION
-            contentWidth * 0.17,  // REMARKS
+            contentWidth * 0.08, // SL.NO
+            contentWidth * 0.3, // PARAMETER
+            contentWidth * 0.25, // EXPECTED
+            contentWidth * 0.2, // OBSERVATION
+            contentWidth * 0.17, // REMARKS
           ];
 
           // Ensure columns add up exactly to contentWidth
@@ -1565,22 +1626,32 @@ export default {
           }
 
           const rowHeight = 12;
-          const headers = ["SL.NO", "PARAMETER", "EXPECTED", "OBSERVATION", "REMARKS"];
-          
+          const headers = [
+            "SL.NO",
+            "PARAMETER",
+            "EXPECTED",
+            "OBSERVATION",
+            "REMARKS",
+          ];
+
           // Draw header with borders and background
           doc.setFontSize(9);
           doc.setFont("helvetica", "bold");
           const headerHeight = 12;
-          
+
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             // Draw header text
             const headerWidth = doc.getTextWidth(header);
-            doc.text(header, xPos + colWidths[i] / 2 - headerWidth / 2, yPosition + 2);
+            doc.text(
+              header,
+              xPos + colWidths[i] / 2 - headerWidth / 2,
+              yPosition + 2
+            );
             xPos += colWidths[i];
           });
           yPosition += headerHeight + 3;
@@ -1590,7 +1661,7 @@ export default {
           doc.setFontSize(9);
           this.parameterChecklist.forEach((item, index) => {
             checkPageBreak(rowHeight + 5);
-            
+
             const rowData = [
               (index + 1).toString(),
               item.parameter || "",
@@ -1602,7 +1673,7 @@ export default {
             // Draw cell borders
             doc.setLineWidth(0.1);
             doc.rect(margin, yPosition - 6, contentWidth, rowHeight, "D");
-            
+
             xPos = margin;
             for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
               xPos += colWidths[colIdx - 1];
@@ -1612,11 +1683,14 @@ export default {
             // Draw cell content
             xPos = margin;
             rowData.forEach((text, colIdx) => {
-              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              const textLines = doc.splitTextToSize(
+                text || "",
+                colWidths[colIdx] - 6
+              );
               doc.text(textLines, xPos + 3, yPosition + 3);
               xPos += colWidths[colIdx];
             });
-            
+
             yPosition += rowHeight + 1;
           });
           yPosition += 5;
@@ -1655,17 +1729,23 @@ export default {
           {
             label: "Prepared By",
             signatureUrl: this.signatures.preparedBy.signatureUrl,
-            verifiedName: this.signatures.preparedBy.verifiedUserName || getSignatureName(this.signatures.preparedBy.signatureUrl),
+            verifiedName:
+              this.signatures.preparedBy.verifiedUserName ||
+              getSignatureName(this.signatures.preparedBy.signatureUrl),
           },
           {
             label: "Verified By",
             signatureUrl: this.signatures.verifiedBy.signatureUrl,
-            verifiedName: this.signatures.verifiedBy.verifiedUserName || getSignatureName(this.signatures.verifiedBy.signatureUrl),
+            verifiedName:
+              this.signatures.verifiedBy.verifiedUserName ||
+              getSignatureName(this.signatures.verifiedBy.signatureUrl),
           },
           {
             label: "Approved By",
             signatureUrl: this.signatures.approvedBy.signatureUrl,
-            verifiedName: this.signatures.approvedBy.verifiedUserName || getSignatureName(this.signatures.approvedBy.signatureUrl),
+            verifiedName:
+              this.signatures.approvedBy.verifiedUserName ||
+              getSignatureName(this.signatures.approvedBy.signatureUrl),
           },
         ];
 
@@ -1674,7 +1754,7 @@ export default {
           const sig = signatures[index];
           const xPos = margin + index * sigColWidth;
           doc.text(`${sig.label}:`, xPos, yPosition);
-          
+
           const imgUrl = getSignatureImageUrl(sig.signatureUrl);
           if (imgUrl) {
             try {
@@ -1684,11 +1764,22 @@ export default {
                 doc.text(sig.verifiedName, xPos, yPosition + 20);
               }
             } catch (e) {
-              console.warn(`Could not load signature image for ${sig.label}:`, e);
-              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+              console.warn(
+                `Could not load signature image for ${sig.label}:`,
+                e
+              );
+              doc.text(
+                sig.verifiedName || "_________________",
+                xPos,
+                yPosition + 5
+              );
             }
           } else {
-            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            doc.text(
+              sig.verifiedName || "_________________",
+              xPos,
+              yPosition + 5
+            );
           }
         }
 
@@ -1698,18 +1789,28 @@ export default {
           doc.setPage(i);
           doc.setFontSize(8);
           doc.setFont("helvetica", "normal");
-          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
-          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+          const pageText = `Generated on ${new Date().toLocaleString(
+            "en-GB"
+          )} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, {
+            align: "center",
+          });
         }
 
         // Save PDF
-        const fileName = `Mechanical_Inspection_Report_${this.reportData.lruName || "Unknown"}_${this.formattedDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `Mechanical_Inspection_Report_${
+          this.reportData.lruName || "Unknown"
+        }_${this.formattedDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         alert("Report exported successfully as PDF!");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
     },
   },

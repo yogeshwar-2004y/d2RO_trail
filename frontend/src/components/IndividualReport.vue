@@ -746,7 +746,10 @@ export default {
       try {
         // Check if the template component has its own exportReport function
         // If yes, use it (for templates 2, 3, 4, 5, 7)
-        if (this.$refs.templateComponent && typeof this.$refs.templateComponent.exportReport === 'function') {
+        if (
+          this.$refs.templateComponent &&
+          typeof this.$refs.templateComponent.exportReport === "function"
+        ) {
           this.$refs.templateComponent.exportReport();
           return;
         }
