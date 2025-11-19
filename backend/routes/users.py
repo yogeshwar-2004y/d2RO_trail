@@ -781,9 +781,51 @@ def delete_user(user_id):
     except Exception as e:
         return handle_database_error(get_db_connection(), f"Error deleting user: {str(e)}")
 
+@users_bp.route('/api/users/<user_id>/verify-status', methods=['GET'])
+def verify_user_status(user_id):
+    """Verify if user is enabled and not deleted - used for session validation"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT user_id, name, enabled, deleted 
+            FROM users 
+            WHERE user_id = %s
+        """, (user_id,))
+        
+        user = cur.fetchone()
+        cur.close()
+        
+        if not user:
+            return jsonify({
+                "success": False,
+                "message": "User not found",
+                "enabled": False,
+                "deleted": True
+            }), 404
+        
+        return jsonify({
+            "success": True,
+            "enabled": user[2] if user[2] is not None else True,
+            "deleted": user[3] if user[3] is not None else False,
+            "can_access": user[2] and not user[3]  # enabled and not deleted
+        })
+        
+    except Exception as e:
+        print(f"Error verifying user status: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/users/<user_id>/toggle-enabled', methods=['POST'])
 def toggle_user_enabled(user_id):
-    """Toggle user enabled/disabled status"""
+    """
+    Toggle user enabled/disabled status
+    
+    When a user is disabled:
+    - Their status is changed to disabled
+    - They cannot log in
+    - If they have an active session, they will be logged out on next route navigation
+    """
     try:
         data = request.get_json() or {}
         enabled = data.get('enabled')
@@ -819,12 +861,12 @@ def toggle_user_enabled(user_id):
             project_id=None,
             activity_performed=f"User {status_text.capitalize()}",
             performed_by=admin_user_id,
-            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was {status_text}"
+            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was {status_text}. Active sessions will be terminated."
         )
         
         return jsonify({
             "success": True,
-            "message": f"User {status_text} successfully",
+            "message": f"User {status_text} successfully. Active sessions will be terminated.",
             "enabled": enabled
         })
         
