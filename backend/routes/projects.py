@@ -568,6 +568,9 @@ def get_projects_with_details():
             project = {
                 "project_id": project_data["project_id"],
                 "project_name": project_data["project_name"],
+                "project_director": project_data["project_director"],
+                "deputy_project_director": project_data["deputy_project_director"],
+                "qa_manager": project_data["qa_manager"],
                 "lrus": list(project_data["lrus"].values())
             }
             projects_list.append(project)
