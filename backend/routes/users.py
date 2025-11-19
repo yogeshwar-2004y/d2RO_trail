@@ -728,7 +728,19 @@ def get_available_designers():
 
 @users_bp.route('/api/users/<user_id>/delete', methods=['POST'])
 def delete_user(user_id):
-    """Soft delete a user - marks as deleted but keeps records"""
+    """
+    Soft delete a user - marks as deleted but keeps all records
+    
+    This performs a SOFT DELETE:
+    - User is marked as deleted (deleted = TRUE)
+    - User is removed from UI lists (filtered by WHERE deleted = FALSE)
+    - User cannot log in (login route checks deleted status)
+    - All past activities and records are PRESERVED:
+      * Activity logs remain intact (references user_id)
+      * Login logs remain intact (references user_id)
+      * All other records referencing this user remain intact
+    - No actual database records are deleted
+    """
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -741,7 +753,8 @@ def delete_user(user_id):
             cur.close()
             return jsonify({"success": False, "message": "User not found"}), 404
         
-        # Soft delete: mark as deleted
+        # Soft delete: mark as deleted (NO CASCADE - all records preserved)
+        # This only sets a flag, so all foreign key references remain valid
         cur.execute("""
             UPDATE users 
             SET deleted = TRUE, updated_at = NOW()
@@ -757,12 +770,12 @@ def delete_user(user_id):
             project_id=None,
             activity_performed="User Deleted",
             performed_by=admin_user_id,
-            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was soft deleted"
+            additional_info=f"ID:{user_id}|Name:{user[1]}|User '{user[1]}' (ID: {user_id}) was soft deleted - all records preserved"
         )
         
         return jsonify({
             "success": True,
-            "message": "User deleted successfully (soft delete - records preserved)"
+            "message": "User deleted successfully. "
         })
         
     except Exception as e:
