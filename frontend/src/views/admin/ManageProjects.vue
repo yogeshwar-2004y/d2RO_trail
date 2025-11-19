@@ -56,7 +56,9 @@
                   <td>{{ project.qa_manager || '-' }}</td>
                   <td class="no-data">No LRUs</td>
                   <td class="no-data">-</td>
-                  <td class="no-data">0</td>
+                  <td class="no-data">
+                    <span class="serial-count">0</span>
+                  </td>
                 </tr>
               </template>
               <template v-else>
@@ -78,7 +80,9 @@
                   </td>
                   <td>{{ lru.lru_name }}</td>
                   <td>{{ lru.lru_part_number || '-' }}</td>
-                  <td>{{ lru.serial_numbers.length }}</td>
+                  <td>
+                    <span class="serial-count">{{ lru.serial_numbers.length }}</span>
+                  </td>
                 </tr>
               </template>
             </template>
@@ -148,7 +152,7 @@ export default {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  max-width: 900px;
+  max-width: 1400px;
   margin-bottom: 30px;
 }
 
@@ -173,28 +177,118 @@ export default {
 
 .table-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 1400px;
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px;
+  overflow-x: auto;
 }
 
 table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
 th,
 td {
-  border: 1px solid #ccc;
-  padding: 15px;
+  border: 1px solid #ddd;
+  padding: 12px 10px;
+}
+
+/* Table header base styles */
+th {
+  background-color: #667eea;
+  color: white;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Table data base styles */
+td {
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Column 1: Project ID - Centered */
+th:nth-child(1),
+td:nth-child(1) {
+  width: 80px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Column 2: Project Name - Left aligned */
+th:nth-child(2),
+td:nth-child(2) {
+  width: 150px;
+  min-width: 150px;
   text-align: left;
 }
 
-th {
-  background-color: #f8f8f8;
-  font-weight: bold;
+/* Column 3: Project Director - Left aligned */
+th:nth-child(3),
+td:nth-child(3) {
+  width: 140px;
+  min-width: 140px;
+  text-align: left;
+}
+
+/* Column 4: Deputy Project Director - Left aligned */
+th:nth-child(4),
+td:nth-child(4) {
+  width: 160px;
+  min-width: 160px;
+  text-align: left;
+}
+
+/* Column 5: QA Manager - Left aligned */
+th:nth-child(5),
+td:nth-child(5) {
+  width: 120px;
+  min-width: 120px;
+  text-align: left;
+}
+
+/* Column 6: LRU Name - Left aligned */
+th:nth-child(6),
+td:nth-child(6) {
+  width: 180px;
+  min-width: 180px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Column 7: LRU Part Number - Left aligned */
+th:nth-child(7),
+td:nth-child(7) {
+  width: 150px;
+  min-width: 150px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Column 8: Total Serial Numbers - Centered */
+th:nth-child(8) {
+  width: 120px;
+  text-align: center;
+  vertical-align: middle;
+  font-weight: 600;
+}
+
+td:nth-child(8) {
+  width: 120px;
+  text-align: center !important;
+  vertical-align: middle;
+  font-weight: 600;
+  padding: 12px 10px;
 }
 
 .loading-cell {
@@ -211,25 +305,111 @@ th {
 }
 
 .no-data {
-  color: #999;
+  color: #95a5a6;
   font-style: italic;
+  text-align: center;
 }
 
-tr:nth-child(even) {
-  background-color: #f9f9f9;
+/* Empty state styling */
+.no-data-cell {
+  background-color: #f5f7fa;
 }
 
-tr:hover {
-  background-color: #f0f0f0;
+.loading-cell {
+  background-color: #f5f7fa;
+  font-weight: 500;
 }
 
-td {
-  vertical-align: top;
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .table-container {
+    padding: 20px;
+  }
+  
+  table {
+    font-size: 13px;
+  }
+  
+  th,
+  td {
+    padding: 10px 8px;
+  }
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+  background-color: #e3f2fd;
+  transform: scale(1.001);
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Center no-data cells */
+td.no-data {
+  text-align: center;
 }
 
 /* Styling for merged cells */
 td[rowspan] {
-  background-color: #f8f8f8;
+  background-color: #f5f7fa;
+  font-weight: 600;
+  color: #2c3e50;
+  vertical-align: middle;
+}
+
+/* Ensure all cells have consistent padding and alignment */
+td {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Ensure serial count badge is centered - override any conflicting styles */
+td:nth-child(8) {
+  text-align: center !important;
+}
+
+td:nth-child(8) .serial-count {
+  display: inline-block;
+  text-align: center;
+}
+
+/* Management fields styling */
+td:nth-child(3),
+td:nth-child(4),
+td:nth-child(5) {
+  color: #34495e;
   font-weight: 500;
+}
+
+/* Project name styling */
+td:nth-child(2) {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* LRU name styling */
+td:nth-child(6) {
+  color: #27ae60;
+  font-weight: 500;
+}
+
+/* Serial count badge */
+.serial-count {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-weight: 600;
+  min-width: 30px;
+  text-align: center;
+}
+
+td:nth-child(8).no-data .serial-count {
+  background-color: #f5f5f5;
+  color: #95a5a6;
 }
 </style>
