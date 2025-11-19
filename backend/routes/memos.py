@@ -1515,6 +1515,8 @@ def get_shared_memos():
 @memos_bp.route('/api/memos/<int:memo_id>/status', methods=['PUT'])
 def update_memo_status(memo_id):
     """Update memo status based on reviewer's test status selection"""
+    conn = None
+    cur = None
     try:
         data = request.json
         if not data:
@@ -1575,7 +1577,10 @@ def update_memo_status(memo_id):
             """, (memo_status, reviewer_comments, certified, memo_id))
         
         if cur.rowcount == 0:
-            cur.close()
+            if cur:
+                cur.close()
+            if conn:
+                conn.close()
             return jsonify({"success": False, "message": "Memo not found"}), 404
         
         # Map memo status to report status
@@ -1606,6 +1611,7 @@ def update_memo_status(memo_id):
         
         conn.commit()
         cur.close()
+        conn.close()
         
         return jsonify({
             "success": True,
@@ -1614,7 +1620,17 @@ def update_memo_status(memo_id):
         })
         
     except Exception as e:
-        return handle_database_error(get_db_connection(), f"Error updating memo status: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        if cur:
+            cur.close()
+        if conn:
+            conn.rollback()
+            conn.close()
+        return jsonify({
+            "success": False,
+            "message": f"Error updating memo status: {str(e)}"
+        }), 500
 
 @memos_bp.route('/api/memos/<int:memo_id>/pdf', methods=['GET'])
 def download_memo_pdf(memo_id):

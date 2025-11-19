@@ -107,7 +107,7 @@ let actions = {
     try {
       // Call backend logout endpoint to log the logout activity
       if (state.user && state.user.id) {
-        await fetch("http://localhost:8000/api/logout", {
+        await fetch("/api/logout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: state.user.id }),
@@ -131,12 +131,19 @@ let actions = {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/users/${state.user.id}/verify-status`,
+        `/api/users/${state.user.id}/verify-status`,
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         }
       );
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        // If server returns an error, log it but don't fail the user
+        console.warn(`User status verification returned ${response.status}`);
+        return { canAccess: true }; // Assume OK on server errors
+      }
 
       const data = await response.json();
 
@@ -152,7 +159,7 @@ let actions = {
 
           // Log logout activity before clearing user data
           try {
-            await fetch("http://localhost:8000/api/logout", {
+            await fetch("/api/logout", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ 
@@ -177,8 +184,14 @@ let actions = {
         return { canAccess: false, reason: "Unable to verify account status." };
       }
     } catch (error) {
+      // Handle network errors gracefully
+      if (error.message && (error.message.includes("Failed to fetch") || error.message.includes("NetworkError"))) {
+        // Network error - backend might be down, don't log out the user
+        console.warn("Network error verifying user status - backend may be unavailable:", error.message);
+        return { canAccess: true }; // Assume OK if we can't verify due to network issues
+      }
       console.error("Error verifying user status:", error);
-      // On error, don't log out - might be network issue
+      // On other errors, assume OK to avoid false logouts
       return { canAccess: true }; // Assume OK if we can't verify
     }
   },
