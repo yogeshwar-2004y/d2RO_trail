@@ -50,11 +50,10 @@ def get_reports():
         # Build query based on user role
         if user_role == 5:  # Designer role
             # For designers, show only reports for memos they submitted
-            
             base_query = """
                 SELECT 
                     r.report_id,
-                    NULL as memo_id,
+                    r.memo_id,
                     r.project_id,
                     r.lru_id,
                     r.serial_id,
@@ -66,17 +65,16 @@ def get_reports():
                     r.date_of_review as created_at,
                     p.project_name,
                     l.lru_name,
-                    NULL as wing_proj_ref_no,
-                    NULL as lru_sru_desc,
-                    NULL as part_number,
-                    NULL as memo_id,
+                    m.wing_proj_ref_no,
+                    m.lru_sru_desc,
+                    m.part_number,
+                    r.memo_id,
                     r.template_id
                 FROM reports r
                 LEFT JOIN projects p ON r.project_id = p.project_id
                 LEFT JOIN lrus l ON r.lru_id = l.lru_id
-                WHERE r.project_id IN (
-                    SELECT project_id FROM projects WHERE created_by = %s
-                )
+                LEFT JOIN memos m ON r.memo_id = m.memo_id
+                WHERE m.submitted_by = %s
                 ORDER BY r.date_of_review DESC
             """
             query_params = (user_id,)

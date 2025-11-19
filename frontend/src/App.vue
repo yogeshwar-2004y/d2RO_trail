@@ -1,14 +1,16 @@
 <script setup>
-import { RouterView, useRoute } from "vue-router";
-import { computed, ref } from "vue";
+import { RouterView, useRoute, useRouter } from "vue-router";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import AppHeader from "@/components/AppHeader.vue";
 import AppFooter from "@/components/AppFooter.vue";
 import NewsTicker from "@/components/NewsTicker.vue";
 import BreadcrumbNavigation from "@/components/BreadcrumbNavigation.vue";
 import AppSidebar from "@/components/AppSidebar.vue";
 import NotificationsOverlay from "@/components/NotificationsOverlay.vue";
+import { userStore } from "@/stores/userStore";
 
 const route = useRoute();
+const router = useRouter();
 
 // Notifications state
 const isNotificationsOpen = ref(false);
@@ -40,6 +42,18 @@ const handleOpenNotifications = () => {
 const closeNotifications = () => {
   isNotificationsOpen.value = false;
 };
+
+// Start periodic status check when app mounts if user is logged in
+onMounted(() => {
+  if (userStore.getters.isLoggedIn()) {
+    userStore.actions.startStatusCheck();
+  }
+});
+
+onUnmounted(() => {
+  // Clean up status check interval
+  userStore.actions.stopStatusCheck();
+});
 </script>
 
 <template>

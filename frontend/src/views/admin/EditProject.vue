@@ -43,6 +43,81 @@
           <input type="date" v-model="project.date" />
         </div>
 
+        <div class="form-group">
+          <label>PROJECT DIRECTOR</label>
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              v-model="project.director"
+              @input="handleDirectorInput"
+              @focus="showDirectorDropdown = true"
+              @blur="hideDirectorDropdown"
+              placeholder="Type to search users or enter name manually"
+              class="autocomplete-input"
+            />
+            <div v-if="showDirectorDropdown && filteredDirectorUsers.length > 0" class="autocomplete-dropdown">
+              <div
+                v-for="user in filteredDirectorUsers"
+                :key="user.user_id"
+                @mousedown="selectDirectorUser(user)"
+                class="autocomplete-option"
+              >
+                {{ user.name }} ({{ user.email }})
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>DEPUTY PROJECT DIRECTOR</label>
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              v-model="project.deputyDirector"
+              @input="handleDeputyDirectorInput"
+              @focus="showDeputyDirectorDropdown = true"
+              @blur="hideDeputyDirectorDropdown"
+              placeholder="Type to search users or enter name manually"
+              class="autocomplete-input"
+            />
+            <div v-if="showDeputyDirectorDropdown && filteredDeputyDirectorUsers.length > 0" class="autocomplete-dropdown">
+              <div
+                v-for="user in filteredDeputyDirectorUsers"
+                :key="user.user_id"
+                @mousedown="selectDeputyDirectorUser(user)"
+                class="autocomplete-option"
+              >
+                {{ user.name }} ({{ user.email }})
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>QA MANAGER</label>
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              v-model="project.qaManager"
+              @input="handleQAManagerInput"
+              @focus="showQAManagerDropdown = true"
+              @blur="hideQAManagerDropdown"
+              placeholder="Type to search users or enter name manually"
+              class="autocomplete-input"
+            />
+            <div v-if="showQAManagerDropdown && filteredQAManagerUsers.length > 0" class="autocomplete-dropdown">
+              <div
+                v-for="user in filteredQAManagerUsers"
+                :key="user.user_id"
+                @mousedown="selectQAManagerUser(user)"
+                class="autocomplete-option"
+              >
+                {{ user.name }} ({{ user.email }})
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- LRUs Section -->
         <div class="lrus-section">
           <div class="section-header">
@@ -85,6 +160,15 @@
                 type="text"
                 v-model="lru.lru_name"
                 placeholder="Enter LRU Name"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>LRU Part Number</label>
+              <input
+                type="text"
+                v-model="lru.lru_part_number"
+                placeholder="Enter LRU Part Number (e.g., ABC-123-XYZ)"
               />
             </div>
 
@@ -139,13 +223,50 @@ export default {
       project: {
         name: "",
         date: "",
+        director: "",
+        directorId: null,
+        deputyDirector: "",
+        deputyDirectorId: null,
+        qaManager: "",
+        qaManagerId: null,
         lrus: [],
       },
       loading: false,
       originalData: {},
+      users: [],
+      showDirectorDropdown: false,
+      showDeputyDirectorDropdown: false,
+      showQAManagerDropdown: false,
     };
   },
+  computed: {
+    filteredDirectorUsers() {
+      if (!this.project.director) return this.users;
+      const search = this.project.director.toLowerCase();
+      return this.users.filter(user => 
+        user.name.toLowerCase().includes(search) || 
+        user.email.toLowerCase().includes(search)
+      );
+    },
+    filteredDeputyDirectorUsers() {
+      if (!this.project.deputyDirector) return this.users;
+      const search = this.project.deputyDirector.toLowerCase();
+      return this.users.filter(user => 
+        user.name.toLowerCase().includes(search) || 
+        user.email.toLowerCase().includes(search)
+      );
+    },
+    filteredQAManagerUsers() {
+      if (!this.project.qaManager) return this.users;
+      const search = this.project.qaManager.toLowerCase();
+      return this.users.filter(user => 
+        user.name.toLowerCase().includes(search) || 
+        user.email.toLowerCase().includes(search)
+      );
+    },
+  },
   async mounted() {
+    await this.fetchUsers();
     await this.loadProjectData();
   },
   methods: {
@@ -154,6 +275,36 @@ export default {
         // Get project data from query parameters passed from the previous page
         const query = this.$route.query;
         this.project.name = query.name || "";
+        
+        // Set values - if user_id exists, get name from users list, otherwise use text
+        if (query.directorId) {
+          this.project.directorId = parseInt(query.directorId);
+          // Find user name from users list
+          const user = this.users.find(u => u.user_id === this.project.directorId);
+          this.project.director = user ? user.name : query.director || "";
+        } else {
+          this.project.director = query.director || "";
+          this.project.directorId = null;
+        }
+        
+        if (query.deputyDirectorId) {
+          this.project.deputyDirectorId = parseInt(query.deputyDirectorId);
+          const user = this.users.find(u => u.user_id === this.project.deputyDirectorId);
+          this.project.deputyDirector = user ? user.name : query.deputyDirector || "";
+        } else {
+          this.project.deputyDirector = query.deputyDirector || "";
+          this.project.deputyDirectorId = null;
+        }
+        
+        if (query.qaManagerId) {
+          this.project.qaManagerId = parseInt(query.qaManagerId);
+          const user = this.users.find(u => u.user_id === this.project.qaManagerId);
+          this.project.qaManager = user ? user.name : query.qaManager || "";
+        } else {
+          this.project.qaManager = query.qaManager || "";
+          this.project.qaManagerId = null;
+        }
+        
         this.originalData.created_at = query.created_at;
 
         // Parse LRUs data
@@ -163,6 +314,7 @@ export default {
             this.project.lrus = lrusData.map((lru) => ({
               lru_id: lru.lru_id,
               lru_name: lru.lru_name,
+              lru_part_number: lru.lru_part_number || "",
               serial_numbers: lru.serial_numbers || [],
             }));
           } catch (e) {
@@ -175,6 +327,7 @@ export default {
         if (this.project.lrus.length === 0) {
           this.project.lrus.push({
             lru_name: "",
+            lru_part_number: "",
             serialQuantity: "",
           });
         }
@@ -194,6 +347,7 @@ export default {
     addLru() {
       this.project.lrus.push({
         lru_name: "",
+        lru_part_number: "",
         serialQuantity: "",
       });
     },
@@ -247,14 +401,21 @@ export default {
       try {
         this.loading = true;
 
-        // Prepare update data
+        // Prepare update data with user IDs or text names
         const updateData = {
           project_id: this.projectId,
           name: this.project.name,
           date: this.project.date,
+          director: this.project.directorId ? null : this.project.director,
+          directorId: this.project.directorId,
+          deputyDirector: this.project.deputyDirectorId ? null : this.project.deputyDirector,
+          deputyDirectorId: this.project.deputyDirectorId,
+          qaManager: this.project.qaManagerId ? null : this.project.qaManager,
+          qaManagerId: this.project.qaManagerId,
           lrus: this.project.lrus.map((lru) => ({
             lru_id: lru.lru_id,
             lru_name: lru.lru_name,
+            lru_part_number: lru.lru_part_number || "",
             serialQuantity: lru.serialQuantity || null,
           })),
         };
@@ -296,6 +457,77 @@ export default {
       }
     },
 
+    async fetchUsers() {
+      try {
+        const response = await fetch("http://localhost:8000/api/users/list");
+        const data = await response.json();
+        if (data.success) {
+          this.users = data.users;
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    },
+    handleDirectorInput() {
+      this.showDirectorDropdown = true;
+      // Check if current input exactly matches a user's name
+      const exactMatch = this.users.find(u => u.name === this.project.director);
+      if (exactMatch) {
+        this.project.directorId = exactMatch.user_id;
+      } else {
+        // If not exact match, clear user_id (custom text entry)
+        this.project.directorId = null;
+      }
+    },
+    handleDeputyDirectorInput() {
+      this.showDeputyDirectorDropdown = true;
+      const exactMatch = this.users.find(u => u.name === this.project.deputyDirector);
+      if (exactMatch) {
+        this.project.deputyDirectorId = exactMatch.user_id;
+      } else {
+        this.project.deputyDirectorId = null;
+      }
+    },
+    handleQAManagerInput() {
+      this.showQAManagerDropdown = true;
+      const exactMatch = this.users.find(u => u.name === this.project.qaManager);
+      if (exactMatch) {
+        this.project.qaManagerId = exactMatch.user_id;
+      } else {
+        this.project.qaManagerId = null;
+      }
+    },
+    selectDirectorUser(user) {
+      this.project.director = user.name;
+      this.project.directorId = user.user_id;
+      this.showDirectorDropdown = false;
+    },
+    selectDeputyDirectorUser(user) {
+      this.project.deputyDirector = user.name;
+      this.project.deputyDirectorId = user.user_id;
+      this.showDeputyDirectorDropdown = false;
+    },
+    selectQAManagerUser(user) {
+      this.project.qaManager = user.name;
+      this.project.qaManagerId = user.user_id;
+      this.showQAManagerDropdown = false;
+    },
+    hideDirectorDropdown() {
+      // Delay to allow click event on dropdown option
+      setTimeout(() => {
+        this.showDirectorDropdown = false;
+      }, 200);
+    },
+    hideDeputyDirectorDropdown() {
+      setTimeout(() => {
+        this.showDeputyDirectorDropdown = false;
+      }, 200);
+    },
+    hideQAManagerDropdown() {
+      setTimeout(() => {
+        this.showQAManagerDropdown = false;
+      }, 200);
+    },
     formatDate(dateString) {
       if (!dateString) return "N/A";
       return new Date(dateString).toLocaleDateString();
@@ -551,5 +783,53 @@ export default {
   border-radius: 4px;
   font-size: 0.9em;
   color: #856404;
+}
+
+.autocomplete-wrapper {
+  position: relative;
+  flex: 2;
+}
+
+.autocomplete-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #d3d3d3;
+  box-sizing: border-box;
+}
+
+.autocomplete-input:focus {
+  outline: none;
+  background: #c8c8c8;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2px;
+}
+
+.autocomplete-option {
+  padding: 10px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.autocomplete-option:hover {
+  background-color: #f0f0f0;
+}
+
+.autocomplete-option:last-child {
+  border-bottom: none;
 }
 </style>

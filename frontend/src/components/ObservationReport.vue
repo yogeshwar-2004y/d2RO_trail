@@ -577,6 +577,7 @@ export default {
 
         // API call to fetch documents by LRU ID using the existing endpoint
         const response = await fetch(
+
           `http://localhost:8000/api/lrus/${this.lruId}/plan-documents`
         );
         const data = await response.json();
@@ -613,6 +614,7 @@ export default {
 
         // API call to fetch comments for the specific document using the existing endpoint
         const response = await fetch(
+          `http://localhost:8000/api/comments?document_id=${documentId}`
           `http://localhost:8000/api/comments?document_id=${documentId}`
         );
         const data = await response.json();
@@ -777,6 +779,7 @@ export default {
         const data = await response.json();
 
         if (data.success) {
+          signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
           signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
           signature.verifiedUserName = data.user_name;
           signature.signatureError = "";
@@ -950,6 +953,7 @@ export default {
         }
 
         const response = await fetch(
+          `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
           `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
         );
 

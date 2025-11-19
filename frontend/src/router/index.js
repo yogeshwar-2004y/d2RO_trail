@@ -381,13 +381,24 @@ const router = createRouter({
 });
 
 // Navigation guard for authentication and role-based access
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   // Get authentication state
   const isLoggedIn = userStore.getters.isLoggedIn();
   const userRole = userStore.getters.currentUserRole();
   
   // Check if route requires authentication
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false);
+  
+  // If user is logged in, verify their status (enabled/deleted)
+  if (isLoggedIn && requiresAuth) {
+    const statusCheck = await userStore.actions.verifyUserStatus();
+    if (!statusCheck.canAccess) {
+      // User is disabled or deleted - log them out
+      alert(statusCheck.reason || "Your account access has been revoked. You have been logged out.");
+      next({ name: 'login' });
+      return;
+    }
+  }
   
   // If route requires auth and user is not logged in, redirect to login
   if (requiresAuth && !isLoggedIn) {

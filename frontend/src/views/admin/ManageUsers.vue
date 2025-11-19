@@ -28,18 +28,19 @@
             <th>USER MAIL</th>
             <th>USER NAME</th>
             <th>ROLE</th>
+            <th>STATUS</th>
             <th>SIGNATURE</th>
           </tr>
         </thead>
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="5" class="loading-cell">Loading users...</td>
+              <td colspan="6" class="loading-cell">Loading users...</td>
             </tr>
           </template>
           <template v-else-if="users.length === 0">
             <tr>
-              <td colspan="5" class="no-data-cell">No users found</td>
+              <td colspan="6" class="no-data-cell">No users found</td>
             </tr>
           </template>
           <template v-else>
@@ -49,6 +50,11 @@
               <td>{{ user.name }}</td>
               <td :class="{ 'no-role': user.role === 'No Role Assigned' }">
                 {{ user.role }}
+              </td>
+              <td class="status-cell">
+                <span :class="user.enabled ? 'status-enabled' : 'status-disabled'">
+                  {{ user.enabled ? 'Enabled' : 'Disabled' }}
+                </span>
               </td>
               <td class="signature-cell">
                 <div v-if="user.has_signature" class="signature-container">
@@ -247,6 +253,31 @@ th {
 .no-role {
   color: #ff6b6b;
   font-style: italic;
+}
+
+.status-cell {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.status-enabled {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
+.status-disabled {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: 600;
+  font-size: 0.9em;
 }
 
 tr:nth-child(even) {

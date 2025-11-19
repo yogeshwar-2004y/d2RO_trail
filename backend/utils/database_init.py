@@ -186,7 +186,8 @@ def create_memos_tables():
                 accepted_by INT REFERENCES users(user_id) ON DELETE CASCADE,
                 memo_status VARCHAR(50) NOT NULL DEFAULT 'not_assigned'
                     CHECK (memo_status IN ('not_assigned', 'assigned', 'disapproved', 'rejected', 'successfully_completed', 'test_not_conducted', 'completed_with_observations', 'test_failed')),
-                qa_remarks TEXT
+                qa_remarks TEXT,
+                qa_signature TEXT
             )
         """)
         
