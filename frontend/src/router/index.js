@@ -38,6 +38,7 @@ import SubTestDetail from "@/components/SubTestDetail.vue";
 import NewsUpdates from "@/views/admin/NewsUpdates.vue";
 import CustomiseBackground from "@/views/admin/CustomiseBackground.vue";
 import TechSupportManagement from "@/views/admin/TechSupportManagement.vue";
+import DocumentTypes from "@/views/designhead/DocumentTypes.vue";
 import ObservationReport from "@/components/ObservationReport.vue";
 import MemoForm from "@/components/MemoForm.vue";
 import ViewOnlyMemoForm from "@/components/ViewOnlyMemoForm.vue";
@@ -116,6 +117,12 @@ const router = createRouter({
       path: "/user-activities/manage-users",
       name: "ManageUsers",
       component: ManageUsers,
+      meta: { requiresAuth: true, requiresRole: 1 } // Admin only
+    },
+    {
+      path: "/user-activities/document-types",
+      name: "DocumentTypes",
+      component: DocumentTypes,
       meta: { requiresAuth: true, requiresRole: 1 } // Admin only
     },
     {

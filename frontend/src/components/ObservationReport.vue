@@ -578,7 +578,7 @@ export default {
         // API call to fetch documents by LRU ID using the existing endpoint
         const response = await fetch(
 
-          `http://localhost:5000/api/lrus/${this.lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${this.lruId}/plan-documents`
         );
         const data = await response.json();
 
@@ -614,8 +614,8 @@ export default {
 
         // API call to fetch comments for the specific document using the existing endpoint
         const response = await fetch(
-          `http://localhost:5000/api/comments?document_id=${documentId}`
-          `http://localhost:5000/api/comments?document_id=${documentId}`
+          `http://localhost:8000/api/comments?document_id=${documentId}`
+          `http://localhost:8000/api/comments?document_id=${documentId}`
         );
         const data = await response.json();
 
@@ -763,7 +763,7 @@ export default {
       try {
         signature.signatureError = "";
         const response = await fetch(
-          "http://localhost:5000/api/users/verify-signature",
+          "http://localhost:8000/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -779,8 +779,8 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          signature.signatureUrl = `http://localhost:5000${data.signature_url}`;
-          signature.signatureUrl = `http://localhost:5000${data.signature_url}`;
+          signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
+          signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
           signature.verifiedUserName = data.user_name;
           signature.signatureError = "";
 
@@ -860,7 +860,7 @@ export default {
         let projectId = null;
         try {
           const lruResponse = await fetch(
-            `http://localhost:5000/api/lrus/${this.lruId}/metadata`
+            `http://localhost:8000/api/lrus/${this.lruId}/metadata`
           );
           const lruData = await lruResponse.json();
           if (lruData.success && lruData.lru && lruData.lru.project_id) {
@@ -903,7 +903,7 @@ export default {
         console.log("Submitting IQA Observation Report:", reportData);
 
         const response = await fetch(
-          "http://localhost:5000/api/iqa-observation-reports",
+          "http://localhost:8000/api/iqa-observation-reports",
           {
             method: "POST",
             headers: {
@@ -953,8 +953,8 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/iqa-observation-reports?${params.toString()}`
-          `http://localhost:5000/api/iqa-observation-reports?${params.toString()}`
+          `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
+          `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
         );
 
         const data = await response.json();
