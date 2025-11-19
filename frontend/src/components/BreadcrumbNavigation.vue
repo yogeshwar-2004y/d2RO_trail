@@ -55,9 +55,9 @@ const routeMappings = {
   'ManageProjects': 'Manage Projects',
   'AddUpdateUser': 'Add/Update Users',
   'ManageUsers': 'Manage Users',
-  'SelectUserToEdit': 'Select User',
+  'SelectUserToEdit': 'Edit User',
   'EditUser': 'Edit User',
-  'SelectProjectToEdit': 'Select Project',
+  'SelectProjectToEdit': 'Edit Project',
   'EditProject': 'Edit Project',
   'ActivityLogs': 'Activity Logs',
   'MajorTestGroups': 'Major Test Groups',
@@ -543,13 +543,13 @@ const breadcrumbs = computed(() => {
     // Handle select routes
     else if (currentRoute.path === '/select-user-to-edit') {
       crumbs.push({
-        name: routeMappings['SelectUserToEdit'] || 'Select User',
+        name: routeMappings['SelectUserToEdit'] || 'Edit User',
         path: currentRoute.path
       })
     }
     else if (currentRoute.path === '/select-project-to-edit') {
       crumbs.push({
-        name: routeMappings['SelectProjectToEdit'] || 'Select Project',
+        name: routeMappings['SelectProjectToEdit'] || 'Edit Project',
         path: currentRoute.path
       })
     }

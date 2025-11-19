@@ -2,7 +2,7 @@
   <div class="AddUpdateProjects">
     <!-- Header -->
     <div class="header">
-      <button class="back-button" @click="$router.go(-1)">
+      <button class="back-button" @click="$router.push({ name: 'UserActivities' })">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"

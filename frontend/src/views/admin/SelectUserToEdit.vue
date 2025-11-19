@@ -1,7 +1,7 @@
 <template>
   <div class="select-user-page">
     <div class="header">
-      <button class="back-button" @click="$router.go(-1)">
+      <button class="back-button" @click="$router.push({ name: 'AddUpdateUser' })">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
