@@ -1378,12 +1378,28 @@ def get_document_types():
                 "document_types": []
             })
         
-        # Fetch all document types
+        # Check if deleted column exists
         cur.execute("""
-            SELECT type_id, type_name, description, created_at, updated_at
-            FROM document_types
-            ORDER BY type_name ASC
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'document_types' AND column_name = 'deleted'
         """)
+        has_deleted_column = cur.fetchone() is not None
+        
+        # Fetch all document types (excluding deleted ones if column exists)
+        if has_deleted_column:
+            cur.execute("""
+                SELECT type_id, type_name, description, created_at, updated_at
+                FROM document_types
+                WHERE deleted = FALSE
+                ORDER BY type_name ASC
+            """)
+        else:
+            cur.execute("""
+                SELECT type_id, type_name, description, created_at, updated_at
+                FROM document_types
+                ORDER BY type_name ASC
+            """)
         
         types = cur.fetchall()
         cur.close()
