@@ -918,14 +918,14 @@ def get_filtered_lrus():
         
         if user_role == 4:  # Design Head - see all LRUs
             cur.execute("""
-                SELECT l.lru_id, l.lru_name, p.project_name, l.created_at
+                SELECT l.lru_id, l.lru_name, p.project_name, l.lru_part_number, l.created_at
                 FROM lrus l
                 JOIN projects p ON l.project_id = p.project_id
                 ORDER BY p.project_name, l.lru_name
             """)
         elif user_role == 5:  # Designer - see only LRUs from assigned projects
             cur.execute("""
-                SELECT DISTINCT l.lru_id, l.lru_name, p.project_name, l.created_at
+                SELECT DISTINCT l.lru_id, l.lru_name, p.project_name, l.lru_part_number, l.created_at
                 FROM lrus l
                 JOIN projects p ON l.project_id = p.project_id
                 JOIN project_users pu ON p.project_id = pu.project_id
@@ -951,7 +951,8 @@ def get_filtered_lrus():
                 "lru_id": lru[0],
                 "lru_name": lru[1],
                 "project_name": lru[2],
-                "created_at": lru[3].isoformat() if lru[3] else None
+                "lru_part_number": lru[3] if lru[3] else None,
+                "created_at": lru[4].isoformat() if lru[4] else None
             })
         
         return jsonify({

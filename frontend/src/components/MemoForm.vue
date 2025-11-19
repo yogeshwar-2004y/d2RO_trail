@@ -1784,18 +1784,33 @@ export default {
           console.log(
             `Selected LRU: ${selectedLru.lru_name} from project: ${selectedLru.project_name}`
           );
+          
+          // Dynamically fetch and set part number based on selected LRU
+          // If LRU has part number, populate it; otherwise set to blank
+          this.formData.partNo = selectedLru.lru_part_number || "";
+          if (selectedLru.lru_part_number) {
+            console.log(`Auto-populated part number: ${selectedLru.lru_part_number}`);
+          } else {
+            console.log("Selected LRU does not have a part number, field set to blank");
+          }
+          
           // Fetch serial numbers for the selected LRU
           this.fetchSerialNumbers(selectedLru.lru_id);
         }
       }
 
-      // Clear serial number selection when LRU changes
+      // Clear serial number selection and part number when LRU changes or is cleared
       if (newValue !== oldValue) {
         this.formData.slNo = [];
         this.formData.qtyOffered = 0;
         this.serialNumberOptions = [];
         this.serialNumberError = null;
         this.showSerialNumberDropdown = false;
+        
+        // Clear part number if LRU is deselected
+        if (!newValue) {
+          this.formData.partNo = "";
+        }
       }
     },
   },
