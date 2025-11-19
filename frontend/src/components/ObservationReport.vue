@@ -40,7 +40,7 @@
             <polyline points="7,10 12,15 17,10"></polyline>
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
-          EXPORT
+          Download as PDF
         </button>
       </div>
     </div>
@@ -63,10 +63,23 @@
 
       <!-- Read-Only Warning -->
       <div v-if="isReadOnly" class="read-only-warning">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
         </svg>
-        <span>This report has been submitted and is read-only. You can view the data but cannot make changes.</span>
+        <span
+          >This report has been submitted and is read-only. You can view the
+          data but cannot make changes.</span
+        >
       </div>
 
       <!-- Document Details Grid -->
@@ -74,7 +87,9 @@
         <div class="details-left">
           <div class="detail-item">
             <label>Project Name :</label>
-            <span class="readonly-value">{{ projectName || "Not specified" }}</span>
+            <span class="readonly-value">{{
+              projectName || "Not specified"
+            }}</span>
           </div>
           <div class="detail-item">
             <label>LRU Name :</label>
@@ -277,7 +292,9 @@
                     v-model="reviewedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
-                    :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures"
+                    :disabled="
+                      isReadOnly || !reviewedByEnabled || !canAccessSignatures
+                    "
                   />
                 </div>
                 <div class="input-group">
@@ -287,30 +304,52 @@
                     v-model="reviewedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures"
+                    :disabled="
+                      isReadOnly || !reviewedByEnabled || !canAccessSignatures
+                    "
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('reviewed')"
-                  :disabled="isReadOnly || !reviewedByEnabled || !canAccessSignatures || !reviewedBy.signatureUsername || !reviewedBy.signaturePassword"
+                  :disabled="
+                    isReadOnly ||
+                    !reviewedByEnabled ||
+                    !canAccessSignatures ||
+                    !reviewedBy.signatureUsername ||
+                    !reviewedBy.signaturePassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
-                <div v-if="!canAccessSignatures && !isReadOnly" class="signature-help-text">
-                  Signature access is restricted to QA Reviewer, QA Head, and Design Head roles only
+                <div
+                  v-if="!canAccessSignatures && !isReadOnly"
+                  class="signature-help-text"
+                >
+                  Signature access is restricted to QA Reviewer, QA Head, and
+                  Design Head roles only
                 </div>
-                <div v-else-if="!reviewedByEnabled && !isReadOnly" class="signature-help-text">
-                  Please fill all required fields to enable signature verification
+                <div
+                  v-else-if="!reviewedByEnabled && !isReadOnly"
+                  class="signature-help-text"
+                >
+                  Please fill all required fields to enable signature
+                  verification
                 </div>
               </div>
               <div v-if="reviewedBy.signatureError" class="signature-error">
                 {{ reviewedBy.signatureError }}
               </div>
               <div v-if="reviewedBy.signatureUrl" class="signature-display">
-                <img :src="reviewedBy.signatureUrl" alt="Reviewed By Signature" class="signature-image" />
-                <div class="signature-name">{{ reviewedBy.verifiedUserName }}</div>
+                <img
+                  :src="reviewedBy.signatureUrl"
+                  alt="Reviewed By Signature"
+                  class="signature-image"
+                />
+                <div class="signature-name">
+                  {{ reviewedBy.verifiedUserName }}
+                </div>
               </div>
               <div v-else class="signature-placeholder">
                 <span>No signature loaded</span>
@@ -331,7 +370,9 @@
                     v-model="approvedBy.signatureUsername"
                     placeholder="Enter username..."
                     class="signature-input"
-                    :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures"
+                    :disabled="
+                      isReadOnly || !approvedByEnabled || !canAccessSignatures
+                    "
                   />
                 </div>
                 <div class="input-group">
@@ -341,31 +382,56 @@
                     v-model="approvedBy.signaturePassword"
                     placeholder="Enter signature password..."
                     class="signature-input"
-                    :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures"
+                    :disabled="
+                      isReadOnly || !approvedByEnabled || !canAccessSignatures
+                    "
                   />
                 </div>
                 <button
                   type="button"
                   class="btn-verify-signature"
                   @click="verifySignature('approved')"
-                  :disabled="isReadOnly || !approvedByEnabled || !canAccessSignatures || !approvedBy.signatureUsername || !approvedBy.signaturePassword"
+                  :disabled="
+                    isReadOnly ||
+                    !approvedByEnabled ||
+                    !canAccessSignatures ||
+                    !approvedBy.signatureUsername ||
+                    !approvedBy.signaturePassword
+                  "
                 >
                   Verify & Load Signature
                 </button>
-                <div v-if="!canAccessSignatures && !isReadOnly" class="signature-help-text">
-                  Signature access is restricted to QA Reviewer, QA Head, and Design Head roles only
+                <div
+                  v-if="!canAccessSignatures && !isReadOnly"
+                  class="signature-help-text"
+                >
+                  Signature access is restricted to QA Reviewer, QA Head, and
+                  Design Head roles only
                 </div>
-                <div v-else-if="!approvedByEnabled && !isReadOnly" class="signature-help-text">
-                  <span v-if="!reviewedByVerified">Please complete "Reviewed By" signature first</span>
-                  <span v-else-if="!allFieldsFilled">Please fill all required fields</span>
+                <div
+                  v-else-if="!approvedByEnabled && !isReadOnly"
+                  class="signature-help-text"
+                >
+                  <span v-if="!reviewedByVerified"
+                    >Please complete "Reviewed By" signature first</span
+                  >
+                  <span v-else-if="!allFieldsFilled"
+                    >Please fill all required fields</span
+                  >
                 </div>
               </div>
               <div v-if="approvedBy.signatureError" class="signature-error">
                 {{ approvedBy.signatureError }}
               </div>
               <div v-if="approvedBy.signatureUrl" class="signature-display">
-                <img :src="approvedBy.signatureUrl" alt="Approved By Signature" class="signature-image" />
-                <div class="signature-name">{{ approvedBy.verifiedUserName }}</div>
+                <img
+                  :src="approvedBy.signatureUrl"
+                  alt="Approved By Signature"
+                  class="signature-image"
+                />
+                <div class="signature-name">
+                  {{ approvedBy.verifiedUserName }}
+                </div>
               </div>
               <div v-else class="signature-placeholder">
                 <span>No signature loaded</span>
@@ -443,7 +509,7 @@ export default {
     reportExistsForDocument() {
       if (!this.selectedDocumentId) return false;
       return this.submittedReports.some(
-        r => r.document_id === parseInt(this.selectedDocumentId)
+        (r) => r.document_id === parseInt(this.selectedDocumentId)
       );
     },
     // Check if all required fields are filled
@@ -460,7 +526,9 @@ export default {
     },
     // Check if Reviewed By signature is verified
     reviewedByVerified() {
-      return !!(this.reviewedBy.signatureUrl && this.reviewedBy.verifiedUserName);
+      return !!(
+        this.reviewedBy.signatureUrl && this.reviewedBy.verifiedUserName
+      );
     },
     // Check if Reviewed By section should be enabled
     reviewedByEnabled() {
@@ -468,13 +536,17 @@ export default {
     },
     // Check if Approved By section should be enabled
     approvedByEnabled() {
-      return !this.isReadOnly && this.allFieldsFilled && this.reviewedByVerified;
+      return (
+        !this.isReadOnly && this.allFieldsFilled && this.reviewedByVerified
+      );
     },
     // Check if user has permission to access signature features
     canAccessSignatures() {
       const currentUserRole = userStore.getters.currentUserRole();
       // Only QA Reviewer (3), QA Head (2), and Design Head (4) can access signatures
-      return currentUserRole === 2 || currentUserRole === 3 || currentUserRole === 4;
+      return (
+        currentUserRole === 2 || currentUserRole === 3 || currentUserRole === 4
+      );
     },
   },
   mounted() {
@@ -505,7 +577,7 @@ export default {
 
         // API call to fetch documents by LRU ID using the existing endpoint
         const response = await fetch(
-          `http://localhost:5000/api/lrus/${this.lruId}/plan-documents`
+          `http://localhost:8000/api/lrus/${this.lruId}/plan-documents`
         );
         const data = await response.json();
 
@@ -532,7 +604,6 @@ export default {
       }
     },
 
-
     // Load document comments for selected document from document_comments table
     async loadDocumentComments(documentId) {
       if (!documentId) return;
@@ -542,7 +613,7 @@ export default {
 
         // API call to fetch comments for the specific document using the existing endpoint
         const response = await fetch(
-          `http://localhost:5000/api/comments?document_id=${documentId}`
+          `http://localhost:8000/api/comments?document_id=${documentId}`
         );
         const data = await response.json();
 
@@ -567,18 +638,18 @@ export default {
         this.selectedDocument = this.availableDocuments.find(
           (d) => d.document_id.toString() === this.selectedDocumentId
         );
-        
+
         // Load comments for the selected document version
         await this.loadDocumentComments(parseInt(this.selectedDocumentId));
-        
+
         // Refresh submitted reports when document changes
         await this.fetchSubmittedReports();
-        
+
         // Check if a report exists for this document version
         const reportForDocument = this.submittedReports.find(
-          r => r.document_id === parseInt(this.selectedDocumentId)
+          (r) => r.document_id === parseInt(this.selectedDocumentId)
         );
-        
+
         if (reportForDocument) {
           // Report exists for this version - load the submitted report data
           await this.loadSubmittedReport(reportForDocument.report_id);
@@ -608,7 +679,7 @@ export default {
       this.reviewVenue = "";
       this.referenceDocument = "";
       this.inspectionStage = "Document review/report";
-      
+
       // Clear signature information
       this.reviewedBy = {
         signatureUsername: "",
@@ -618,7 +689,7 @@ export default {
         signatureError: "",
         userId: null,
       };
-      
+
       this.approvedBy = {
         signatureUsername: "",
         signaturePassword: "",
@@ -627,7 +698,7 @@ export default {
         signatureError: "",
         userId: null,
       };
-      
+
       // Reset read-only state
       this.selectedReportId = null;
       this.reportSubmitted = false;
@@ -678,33 +749,38 @@ export default {
 
     // Verify signature credentials
     async verifySignature(signatureType) {
-      const signature = signatureType === "reviewed" ? this.reviewedBy : this.approvedBy;
+      const signature =
+        signatureType === "reviewed" ? this.reviewedBy : this.approvedBy;
 
       if (!signature.signatureUsername || !signature.signaturePassword) {
-        signature.signatureError = "Please enter both username and signature password";
+        signature.signatureError =
+          "Please enter both username and signature password";
         return;
       }
 
       try {
         signature.signatureError = "";
-        const response = await fetch("http://localhost:5000/api/users/verify-signature", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: signature.signatureUsername,
-            signature_password: signature.signaturePassword,
-          }),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/users/verify-signature",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: signature.signatureUsername,
+              signature_password: signature.signaturePassword,
+            }),
+          }
+        );
 
         const data = await response.json();
 
         if (data.success) {
-          signature.signatureUrl = `http://localhost:5000${data.signature_url}`;
+          signature.signatureUrl = `http://localhost:8000${data.signature_url}`;
           signature.verifiedUserName = data.user_name;
           signature.signatureError = "";
-          
+
           // Store user_id for later use
           if (data.user_id) {
             if (signatureType === "reviewed") {
@@ -713,19 +789,21 @@ export default {
               this.approvedBy.userId = data.user_id;
             }
           }
-          
+
           // Auto-submit report when Approved By is signed
           if (signatureType === "approved") {
             await this.submitIqaObservationReport();
           }
         } else {
-          signature.signatureError = data.message || "Failed to verify signature";
+          signature.signatureError =
+            data.message || "Failed to verify signature";
           signature.signatureUrl = "";
           signature.verifiedUserName = "";
         }
       } catch (error) {
         console.error("Error verifying signature:", error);
-        signature.signatureError = "Error verifying signature. Please try again.";
+        signature.signatureError =
+          "Error verifying signature. Please try again.";
         signature.signatureUrl = "";
         signature.verifiedUserName = "";
       }
@@ -736,24 +814,32 @@ export default {
       try {
         // Prevent submission if report is read-only
         if (this.isReadOnly) {
-          alert("This report has already been submitted and cannot be modified.");
+          alert(
+            "This report has already been submitted and cannot be modified."
+          );
           return;
         }
 
         // Check if a report already exists for this document
         if (this.reportExistsForDocument) {
-          alert("A report has already been submitted for this document version. Please select a different version or load the existing report.");
+          alert(
+            "A report has already been submitted for this document version. Please select a different version or load the existing report."
+          );
           return;
         }
 
         // Validate required fields
         if (!this.selectedDocumentId) {
-          alert("Please select a document version before submitting the report.");
+          alert(
+            "Please select a document version before submitting the report."
+          );
           return;
         }
 
         if (!this.lruId || !this.projectName || !this.lruName) {
-          alert("Missing required information. Please ensure project and LRU data are loaded.");
+          alert(
+            "Missing required information. Please ensure project and LRU data are loaded."
+          );
           return;
         }
 
@@ -770,7 +856,9 @@ export default {
         // Get project_id from API
         let projectId = null;
         try {
-          const lruResponse = await fetch(`http://localhost:5000/api/lrus/${this.lruId}/metadata`);
+          const lruResponse = await fetch(
+            `http://localhost:8000/api/lrus/${this.lruId}/metadata`
+          );
           const lruData = await lruResponse.json();
           if (lruData.success && lruData.lru && lruData.lru.project_id) {
             projectId = lruData.lru.project_id;
@@ -780,7 +868,9 @@ export default {
         }
 
         if (!projectId) {
-          alert("Could not determine project ID. Please ensure the project is properly loaded.");
+          alert(
+            "Could not determine project ID. Please ensure the project is properly loaded."
+          );
           return;
         }
 
@@ -809,13 +899,16 @@ export default {
 
         console.log("Submitting IQA Observation Report:", reportData);
 
-        const response = await fetch("http://localhost:5000/api/iqa-observation-reports", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(reportData),
-        });
+        const response = await fetch(
+          "http://localhost:8000/api/iqa-observation-reports",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(reportData),
+          }
+        );
 
         const data = await response.json();
 
@@ -830,7 +923,9 @@ export default {
         }
       } catch (error) {
         console.error("Error submitting IQA observation report:", error);
-        alert(`Error submitting report: ${error.message || "Please try again."}`);
+        alert(
+          `Error submitting report: ${error.message || "Please try again."}`
+        );
       }
     },
 
@@ -838,36 +933,38 @@ export default {
     async fetchSubmittedReports() {
       try {
         this.loadingSubmittedReports = true;
-        
+
         // Build query parameters
         const params = new URLSearchParams();
         if (this.projectName) {
-          params.append('project_name', this.projectName);
+          params.append("project_name", this.projectName);
         }
         if (this.lruName) {
-          params.append('lru_name', this.lruName);
+          params.append("lru_name", this.lruName);
         }
         if (this.lruId) {
-          params.append('lru_id', this.lruId);
+          params.append("lru_id", this.lruId);
         }
         if (this.selectedDocumentId) {
-          params.append('document_id', this.selectedDocumentId);
+          params.append("document_id", this.selectedDocumentId);
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/iqa-observation-reports?${params.toString()}`
+          `http://localhost:8000/api/iqa-observation-reports?${params.toString()}`
         );
 
         const data = await response.json();
 
         if (data.success) {
           this.submittedReports = data.reports || [];
-          console.log(`Fetched ${this.submittedReports.length} submitted reports`);
-          
+          console.log(
+            `Fetched ${this.submittedReports.length} submitted reports`
+          );
+
           // If there's a selected document, try to load the most recent report for it
           if (this.selectedDocumentId && this.submittedReports.length > 0) {
             const reportForDocument = this.submittedReports.find(
-              r => r.document_id === parseInt(this.selectedDocumentId)
+              (r) => r.document_id === parseInt(this.selectedDocumentId)
             );
             if (reportForDocument && !this.selectedReportId) {
               // Auto-load the most recent report for the selected document
@@ -889,7 +986,9 @@ export default {
     // Load a submitted report's data into the form
     async loadSubmittedReport(reportId) {
       try {
-        const report = this.submittedReports.find(r => r.report_id === reportId);
+        const report = this.submittedReports.find(
+          (r) => r.report_id === reportId
+        );
         if (!report) {
           console.error("Report not found:", reportId);
           return;
@@ -899,18 +998,23 @@ export default {
         this.selectedReportId = reportId;
         this.serialNumber = report.serial_number || "";
         this.observationCount = report.observation_count || "OBS-001";
-        this.currentYear = report.current_year || new Date().getFullYear().toString();
-        this.currentDate = report.report_date || new Date().toISOString().split("T")[0];
+        this.currentYear =
+          report.current_year || new Date().getFullYear().toString();
+        this.currentDate =
+          report.report_date || new Date().toISOString().split("T")[0];
         this.lruPartNumber = report.lru_part_number || "";
-        this.docReviewDate = report.doc_review_date || new Date().toISOString().split("T")[0];
+        this.docReviewDate =
+          report.doc_review_date || new Date().toISOString().split("T")[0];
         this.reviewVenue = report.review_venue || "";
         this.referenceDocument = report.reference_document || "";
-        this.inspectionStage = report.inspection_stage || "Document review/report";
+        this.inspectionStage =
+          report.inspection_stage || "Document review/report";
 
         // Load signature information
         if (report.reviewed_by_signature_path) {
           this.reviewedBy.signatureUrl = report.reviewed_by_signature_path;
-          this.reviewedBy.verifiedUserName = report.reviewed_by_verified_name || "";
+          this.reviewedBy.verifiedUserName =
+            report.reviewed_by_verified_name || "";
           this.reviewedBy.userId = report.reviewed_by_user_id;
         } else {
           // Clear reviewed by signature if not present
@@ -921,7 +1025,8 @@ export default {
 
         if (report.approved_by_signature_path) {
           this.approvedBy.signatureUrl = report.approved_by_signature_path;
-          this.approvedBy.verifiedUserName = report.approved_by_verified_name || "";
+          this.approvedBy.verifiedUserName =
+            report.approved_by_verified_name || "";
           this.approvedBy.userId = report.approved_by_user_id;
         } else {
           // Clear approved by signature if not present
@@ -959,7 +1064,7 @@ export default {
         // ===== HEADER WITH LOGOS =====
         const logoHeight = 15; // Height for logos
         const logoY = yPosition;
-        
+
         // Helper function to load image and convert to base64
         const loadImageAsBase64 = (imagePath) => {
           return new Promise((resolve, reject) => {
@@ -986,19 +1091,19 @@ export default {
         // Load and add DRDO logo (left side)
         try {
           const drdoData = await loadImageAsBase64(drdoLogo);
-          
+
           // Calculate logo dimensions maintaining aspect ratio
           const maxLogoWidth = 30;
           const maxLogoHeight = logoHeight;
           const aspectRatio = drdoData.width / drdoData.height;
           let logoWidth = maxLogoWidth;
           let logoHeightFinal = logoWidth / aspectRatio;
-          
+
           if (logoHeightFinal > maxLogoHeight) {
             logoHeightFinal = maxLogoHeight;
             logoWidth = logoHeightFinal * aspectRatio;
           }
-          
+
           doc.addImage(
             drdoData.base64,
             "PNG",
@@ -1014,19 +1119,19 @@ export default {
         // Load and add Aviatrax logo (right side)
         try {
           const aviatraxData = await loadImageAsBase64(aviatraxLogo);
-          
+
           // Calculate logo dimensions maintaining aspect ratio
           const maxLogoWidth = 30;
           const maxLogoHeight = logoHeight;
           const aspectRatio = aviatraxData.width / aviatraxData.height;
           let logoWidth = maxLogoWidth;
           let logoHeightFinal = logoWidth / aspectRatio;
-          
+
           if (logoHeightFinal > maxLogoHeight) {
             logoHeightFinal = maxLogoHeight;
             logoWidth = logoHeightFinal * aspectRatio;
           }
-          
+
           // Position on right side
           const logoX = pageWidth - margin - logoWidth;
           doc.addImage(
@@ -1090,12 +1195,22 @@ export default {
             (d) => d.document_id.toString() === this.selectedDocumentId
           );
         }
-        
+
         if (this.selectedDocument) {
           yPosition += 6;
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          const versionInfo = `Document Version: ${this.selectedDocument.document_number || "N/A"} - Version ${this.selectedDocument.version || "N/A"}${this.selectedDocument.revision ? ` (Rev. ${this.selectedDocument.revision})` : ""}${this.selectedDocument.doc_ver ? ` - ${this.selectedDocument.doc_ver}` : ""}`;
+          const versionInfo = `Document Version: ${
+            this.selectedDocument.document_number || "N/A"
+          } - Version ${this.selectedDocument.version || "N/A"}${
+            this.selectedDocument.revision
+              ? ` (Rev. ${this.selectedDocument.revision})`
+              : ""
+          }${
+            this.selectedDocument.doc_ver
+              ? ` - ${this.selectedDocument.doc_ver}`
+              : ""
+          }`;
           doc.text(versionInfo, pageWidth / 2, yPosition, { align: "center" });
           yPosition += 10;
         } else if (this.selectedDocumentId) {
@@ -1107,8 +1222,14 @@ export default {
             yPosition += 6;
             doc.setFontSize(10);
             doc.setFont("helvetica", "bold");
-            const versionInfo = `Document Version: ${docInfo.document_number || "N/A"} - Version ${docInfo.version || "N/A"}${docInfo.revision ? ` (Rev. ${docInfo.revision})` : ""}${docInfo.doc_ver ? ` - ${docInfo.doc_ver}` : ""}`;
-            doc.text(versionInfo, pageWidth / 2, yPosition, { align: "center" });
+            const versionInfo = `Document Version: ${
+              docInfo.document_number || "N/A"
+            } - Version ${docInfo.version || "N/A"}${
+              docInfo.revision ? ` (Rev. ${docInfo.revision})` : ""
+            }${docInfo.doc_ver ? ` - ${docInfo.doc_ver}` : ""}`;
+            doc.text(versionInfo, pageWidth / 2, yPosition, {
+              align: "center",
+            });
             yPosition += 10;
           }
         }
@@ -1132,22 +1253,14 @@ export default {
         doc.setFont("helvetica", "bold");
         doc.text("Project Name :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
-        doc.text(
-          this.projectName || "Not specified",
-          valueStartX,
-          leftColumnY
-        );
+        doc.text(this.projectName || "Not specified", valueStartX, leftColumnY);
         leftColumnY += 8;
 
         // LRU Name
         doc.setFont("helvetica", "bold");
         doc.text("LRU Name :", leftColumnX, leftColumnY);
         doc.setFont("helvetica", "normal");
-        doc.text(
-          this.lruName || "Not specified",
-          valueStartX,
-          leftColumnY
-        );
+        doc.text(this.lruName || "Not specified", valueStartX, leftColumnY);
         leftColumnY += 8;
 
         // LRU Part No
@@ -1190,14 +1303,10 @@ export default {
         doc.setFont("helvetica", "bold");
         doc.text("Date of doc review :", rightColumnX, rightColumnY);
         doc.setFont("helvetica", "normal");
-        const formattedReviewDate = this.docReviewDate 
+        const formattedReviewDate = this.docReviewDate
           ? new Date(this.docReviewDate).toLocaleDateString("en-GB")
           : "Not specified";
-        doc.text(
-          formattedReviewDate,
-          rightValueStartX,
-          rightColumnY
-        );
+        doc.text(formattedReviewDate, rightValueStartX, rightColumnY);
         rightColumnY += 8;
 
         // Review venue
@@ -1220,7 +1329,7 @@ export default {
           rightValueStartX,
           rightColumnY
         );
-        
+
         // Set yPosition to the maximum of both columns plus spacing
         yPosition = Math.max(leftColumnY, rightColumnY) + 10;
 
@@ -1236,7 +1345,7 @@ export default {
         const tableEndX = pageWidth - margin;
         const cellPadding = 2;
         const headerHeight = 8;
-        
+
         // Table column widths (optimized to fit page width: 170mm)
         const snoWidth = 10;
         const categoryWidth = 20;
@@ -1246,64 +1355,168 @@ export default {
         const reviewerWidth = 18;
         const pageWidth_col = 12;
         const dateColWidth = 20;
-        
+
         // Calculate column start positions
         const colPositions = {
           sno: tableStartX,
           category: tableStartX + snoWidth,
           observation: tableStartX + snoWidth + categoryWidth,
-          acceptReject: tableStartX + snoWidth + categoryWidth + observationWidth,
-          justification: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth,
-          reviewer: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth,
-          page: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth,
-          date: tableStartX + snoWidth + categoryWidth + observationWidth + acceptRejectWidth + justificationWidth + reviewerWidth + pageWidth_col
+          acceptReject:
+            tableStartX + snoWidth + categoryWidth + observationWidth,
+          justification:
+            tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth,
+          reviewer:
+            tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth,
+          page:
+            tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth +
+            reviewerWidth,
+          date:
+            tableStartX +
+            snoWidth +
+            categoryWidth +
+            observationWidth +
+            acceptRejectWidth +
+            justificationWidth +
+            reviewerWidth +
+            pageWidth_col,
         };
 
         // Draw table header box with filled background
         const headerTopY = yPosition - headerHeight + 2;
         const headerBottomY = yPosition + 2;
-        
+
         // Draw header background (filled rectangle)
         doc.setFillColor(220, 220, 220); // Light gray background
-        doc.rect(tableStartX, headerTopY, tableEndX - tableStartX, headerHeight, 'F');
-        
+        doc.rect(
+          tableStartX,
+          headerTopY,
+          tableEndX - tableStartX,
+          headerHeight,
+          "F"
+        );
+
         // Draw header border
         doc.setDrawColor(0, 0, 0);
         doc.setLineWidth(0.5);
-        doc.rect(tableStartX, headerTopY, tableEndX - tableStartX, headerHeight);
+        doc.rect(
+          tableStartX,
+          headerTopY,
+          tableEndX - tableStartX,
+          headerHeight
+        );
 
         // Table headers with proper alignment and formatting
         doc.setFontSize(8.5); // Slightly smaller font for headers
         doc.setFont("helvetica", "bold");
         doc.setTextColor(0, 0, 0);
-        
+
         const headerY = headerTopY + headerHeight / 2 + 2;
-        doc.text("S.No.", colPositions.sno + snoWidth / 2, headerY, { align: "center" });
-        doc.text("Category", colPositions.category + categoryWidth / 2, headerY, { align: "center" });
-        doc.text("Observations", colPositions.observation + observationWidth / 2, headerY, { align: "center" });
-        
+        doc.text("S.No.", colPositions.sno + snoWidth / 2, headerY, {
+          align: "center",
+        });
+        doc.text(
+          "Category",
+          colPositions.category + categoryWidth / 2,
+          headerY,
+          { align: "center" }
+        );
+        doc.text(
+          "Observations",
+          colPositions.observation + observationWidth / 2,
+          headerY,
+          { align: "center" }
+        );
+
         // Accept/Reject header - split into two lines to fit better
-        const acceptRejectHeaderX = colPositions.acceptReject + acceptRejectWidth / 2;
+        const acceptRejectHeaderX =
+          colPositions.acceptReject + acceptRejectWidth / 2;
         const acceptRejectHeaderY1 = headerTopY + 3;
         const acceptRejectHeaderY2 = headerTopY + 6;
-        doc.text("Accept/", acceptRejectHeaderX, acceptRejectHeaderY1, { align: "center" });
-        doc.text("Reject", acceptRejectHeaderX, acceptRejectHeaderY2, { align: "center" });
-        
-        doc.text("Justification", colPositions.justification + justificationWidth / 2, headerY, { align: "center" });
-        doc.text("Reviewer", colPositions.reviewer + reviewerWidth / 2, headerY, { align: "center" });
-        doc.text("Page", colPositions.page + pageWidth_col / 2, headerY, { align: "center" });
-        doc.text("Date", colPositions.date + dateColWidth / 2, headerY, { align: "center" });
-        
+        doc.text("Accept/", acceptRejectHeaderX, acceptRejectHeaderY1, {
+          align: "center",
+        });
+        doc.text("Reject", acceptRejectHeaderX, acceptRejectHeaderY2, {
+          align: "center",
+        });
+
+        doc.text(
+          "Justification",
+          colPositions.justification + justificationWidth / 2,
+          headerY,
+          { align: "center" }
+        );
+        doc.text(
+          "Reviewer",
+          colPositions.reviewer + reviewerWidth / 2,
+          headerY,
+          { align: "center" }
+        );
+        doc.text("Page", colPositions.page + pageWidth_col / 2, headerY, {
+          align: "center",
+        });
+        doc.text("Date", colPositions.date + dateColWidth / 2, headerY, {
+          align: "center",
+        });
+
         // Draw vertical lines in header
         doc.setLineWidth(0.3);
-        doc.line(colPositions.category, headerTopY, colPositions.category, headerBottomY);
-        doc.line(colPositions.observation, headerTopY, colPositions.observation, headerBottomY);
-        doc.line(colPositions.acceptReject, headerTopY, colPositions.acceptReject, headerBottomY);
-        doc.line(colPositions.justification, headerTopY, colPositions.justification, headerBottomY);
-        doc.line(colPositions.reviewer, headerTopY, colPositions.reviewer, headerBottomY);
-        doc.line(colPositions.page, headerTopY, colPositions.page, headerBottomY);
-        doc.line(colPositions.date, headerTopY, colPositions.date, headerBottomY);
-        
+        doc.line(
+          colPositions.category,
+          headerTopY,
+          colPositions.category,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.observation,
+          headerTopY,
+          colPositions.observation,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.acceptReject,
+          headerTopY,
+          colPositions.acceptReject,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.justification,
+          headerTopY,
+          colPositions.justification,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.reviewer,
+          headerTopY,
+          colPositions.reviewer,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.page,
+          headerTopY,
+          colPositions.page,
+          headerBottomY
+        );
+        doc.line(
+          colPositions.date,
+          headerTopY,
+          colPositions.date,
+          headerBottomY
+        );
+
         yPosition = headerBottomY + 2;
 
         // Table data rows with formal formatting
@@ -1316,7 +1529,12 @@ export default {
         if (!this.documentComments || this.documentComments.length === 0) {
           // Draw empty table cell
           const emptyRowHeight = 10;
-          doc.rect(tableStartX, yPosition, tableEndX - tableStartX, emptyRowHeight);
+          doc.rect(
+            tableStartX,
+            yPosition,
+            tableEndX - tableStartX,
+            emptyRowHeight
+          );
           doc.text(
             "No observations available",
             colPositions.observation + observationWidth / 2,
@@ -1333,42 +1551,59 @@ export default {
             const rowStartY = yPosition;
             const cellPadding = 1.5;
             const minRowHeight = 8;
-            
+
             // Prepare all cell content
             const snoText = (index + 1).toString();
-            
-            const categoryText = (
+
+            const categoryText =
               comment.section && comment.section.trim() !== ""
                 ? comment.section
-                : "General"
+                : "General";
+            const categoryLines = doc.splitTextToSize(
+              categoryText,
+              categoryWidth - cellPadding * 2
             );
-            const categoryLines = doc.splitTextToSize(categoryText, categoryWidth - (cellPadding * 2));
-            
+
             const observationText = comment.description || "No comment";
             const observationLines = doc.splitTextToSize(
               observationText,
-              observationWidth - (cellPadding * 2)
+              observationWidth - cellPadding * 2
             );
-            
+
             const acceptRejectText = comment.status || "Pending";
             // Ensure Accept/Reject text fits within the column width
-            const acceptRejectMaxWidth = acceptRejectWidth - (cellPadding * 2) - 1;
-            const acceptRejectLines = doc.splitTextToSize(acceptRejectText, acceptRejectMaxWidth);
-            
-            const justificationText = comment.justification || "No justification provided";
+            const acceptRejectMaxWidth =
+              acceptRejectWidth - cellPadding * 2 - 1;
+            const acceptRejectLines = doc.splitTextToSize(
+              acceptRejectText,
+              acceptRejectMaxWidth
+            );
+
+            const justificationText =
+              comment.justification || "No justification provided";
             const justificationLines = doc.splitTextToSize(
               justificationText,
-              justificationWidth - (cellPadding * 2)
+              justificationWidth - cellPadding * 2
             );
-            
-            const reviewerText = comment.reviewer_id ? comment.reviewer_id.toString() : "Unknown";
-            const reviewerLines = doc.splitTextToSize(reviewerText, reviewerWidth - (cellPadding * 2));
-            
-            const pageText = comment.page_no ? comment.page_no.toString() : "N/A";
-            
+
+            const reviewerText = comment.reviewer_id
+              ? comment.reviewer_id.toString()
+              : "Unknown";
+            const reviewerLines = doc.splitTextToSize(
+              reviewerText,
+              reviewerWidth - cellPadding * 2
+            );
+
+            const pageText = comment.page_no
+              ? comment.page_no.toString()
+              : "N/A";
+
             const dateText = this.formatDate(comment.created_at) || "N/A";
-            const dateLines = doc.splitTextToSize(dateText, dateColWidth - (cellPadding * 2));
-            
+            const dateLines = doc.splitTextToSize(
+              dateText,
+              dateColWidth - cellPadding * 2
+            );
+
             // Calculate row height based on the longest text
             const lineHeight = 3.5;
             const maxLines = Math.max(
@@ -1380,39 +1615,79 @@ export default {
               dateLines.length,
               1
             );
-            const rowHeight = Math.max(maxLines * lineHeight + (cellPadding * 2), minRowHeight);
+            const rowHeight = Math.max(
+              maxLines * lineHeight + cellPadding * 2,
+              minRowHeight
+            );
             const rowBottomY = rowStartY + rowHeight;
-            
+
             // Draw row border
-            doc.rect(tableStartX, rowStartY, tableEndX - tableStartX, rowHeight);
-            
+            doc.rect(
+              tableStartX,
+              rowStartY,
+              tableEndX - tableStartX,
+              rowHeight
+            );
+
             // Draw vertical lines between columns
-            doc.line(colPositions.category, rowStartY, colPositions.category, rowBottomY);
-            doc.line(colPositions.observation, rowStartY, colPositions.observation, rowBottomY);
-            doc.line(colPositions.acceptReject, rowStartY, colPositions.acceptReject, rowBottomY);
-            doc.line(colPositions.justification, rowStartY, colPositions.justification, rowBottomY);
-            doc.line(colPositions.reviewer, rowStartY, colPositions.reviewer, rowBottomY);
-            doc.line(colPositions.page, rowStartY, colPositions.page, rowBottomY);
-            doc.line(colPositions.date, rowStartY, colPositions.date, rowBottomY);
-            
+            doc.line(
+              colPositions.category,
+              rowStartY,
+              colPositions.category,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.observation,
+              rowStartY,
+              colPositions.observation,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.acceptReject,
+              rowStartY,
+              colPositions.acceptReject,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.justification,
+              rowStartY,
+              colPositions.justification,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.reviewer,
+              rowStartY,
+              colPositions.reviewer,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.page,
+              rowStartY,
+              colPositions.page,
+              rowBottomY
+            );
+            doc.line(
+              colPositions.date,
+              rowStartY,
+              colPositions.date,
+              rowBottomY
+            );
+
             // Calculate text Y position (top of cell with padding)
             const textStartY = rowStartY + cellPadding + 2;
-            
+
             // S.No. - centered vertically
             const snoY = rowStartY + rowHeight / 2 + 1;
-            doc.text(
-              snoText,
-              colPositions.sno + snoWidth / 2,
-              snoY,
-              { align: "center" }
-            );
+            doc.text(snoText, colPositions.sno + snoWidth / 2, snoY, {
+              align: "center",
+            });
 
             // Category - top aligned, centered horizontally
             doc.text(
               categoryLines,
               colPositions.category + categoryWidth / 2,
               textStartY,
-              { align: "center", maxWidth: categoryWidth - (cellPadding * 2) }
+              { align: "center", maxWidth: categoryWidth - cellPadding * 2 }
             );
 
             // Observations - top aligned, left aligned
@@ -1420,7 +1695,7 @@ export default {
               observationLines,
               colPositions.observation + cellPadding,
               textStartY,
-              { align: "left", maxWidth: observationWidth - (cellPadding * 2) }
+              { align: "left", maxWidth: observationWidth - cellPadding * 2 }
             );
 
             // Accept/Reject - top aligned, centered horizontally, with proper width constraint
@@ -1436,7 +1711,7 @@ export default {
               justificationLines,
               colPositions.justification + cellPadding,
               textStartY,
-              { align: "left", maxWidth: justificationWidth - (cellPadding * 2) }
+              { align: "left", maxWidth: justificationWidth - cellPadding * 2 }
             );
 
             // Reviewer - top aligned, centered horizontally
@@ -1444,29 +1719,26 @@ export default {
               reviewerLines,
               colPositions.reviewer + reviewerWidth / 2,
               textStartY,
-              { align: "center", maxWidth: reviewerWidth - (cellPadding * 2) }
+              { align: "center", maxWidth: reviewerWidth - cellPadding * 2 }
             );
 
             // Page - centered vertically
             const pageY = rowStartY + rowHeight / 2 + 1;
-            doc.text(
-              pageText,
-              colPositions.page + pageWidth_col / 2,
-              pageY,
-              { align: "center" }
-            );
+            doc.text(pageText, colPositions.page + pageWidth_col / 2, pageY, {
+              align: "center",
+            });
 
             // Date - top aligned, centered horizontally
             doc.text(
               dateLines,
               colPositions.date + dateColWidth / 2,
               textStartY,
-              { align: "center", maxWidth: dateColWidth - (cellPadding * 2) }
+              { align: "center", maxWidth: dateColWidth - cellPadding * 2 }
             );
-            
+
             yPosition = rowBottomY;
           });
-          
+
           // Draw final bottom border
           doc.setLineWidth(0.5);
           doc.line(tableStartX, yPosition, tableEndX, yPosition);
@@ -1529,21 +1801,24 @@ export default {
         // Load and add Reviewed By signature
         if (this.reviewedBy.signatureUrl) {
           try {
-            const reviewedSignatureData = await loadImageAsBase64(this.reviewedBy.signatureUrl);
+            const reviewedSignatureData = await loadImageAsBase64(
+              this.reviewedBy.signatureUrl
+            );
             const sigMaxWidth = leftSectionWidth - 10;
             const sigMaxHeight = signatureHeight - 8;
-            const sigAspectRatio = reviewedSignatureData.width / reviewedSignatureData.height;
+            const sigAspectRatio =
+              reviewedSignatureData.width / reviewedSignatureData.height;
             let sigWidth = sigMaxWidth;
             let sigHeight = sigWidth / sigAspectRatio;
-            
+
             if (sigHeight > sigMaxHeight) {
               sigHeight = sigMaxHeight;
               sigWidth = sigHeight * sigAspectRatio;
             }
-            
+
             const sigX = signatureStartX + (leftSectionWidth - sigWidth) / 2;
             const sigY = signatureY + (signatureHeight - sigHeight) / 2;
-            
+
             doc.addImage(
               reviewedSignatureData.base64,
               "PNG",
@@ -1560,21 +1835,27 @@ export default {
         // Load and add Approved By signature
         if (this.approvedBy.signatureUrl) {
           try {
-            const approvedSignatureData = await loadImageAsBase64(this.approvedBy.signatureUrl);
+            const approvedSignatureData = await loadImageAsBase64(
+              this.approvedBy.signatureUrl
+            );
             const sigMaxWidth = rightSectionWidth - 10;
             const sigMaxHeight = signatureHeight - 8;
-            const sigAspectRatio = approvedSignatureData.width / approvedSignatureData.height;
+            const sigAspectRatio =
+              approvedSignatureData.width / approvedSignatureData.height;
             let sigWidth = sigMaxWidth;
             let sigHeight = sigWidth / sigAspectRatio;
-            
+
             if (sigHeight > sigMaxHeight) {
               sigHeight = sigMaxHeight;
               sigWidth = sigHeight * sigAspectRatio;
             }
-            
-            const sigX = signatureStartX + leftSectionWidth + (rightSectionWidth - sigWidth) / 2;
+
+            const sigX =
+              signatureStartX +
+              leftSectionWidth +
+              (rightSectionWidth - sigWidth) / 2;
             const sigY = signatureY + (signatureHeight - sigHeight) / 2;
-            
+
             doc.addImage(
               approvedSignatureData.base64,
               "PNG",
@@ -1615,7 +1896,8 @@ export default {
         doc.setFontSize(8);
 
         // Reviewed by name
-        const reviewedByName = this.reviewedBy.verifiedUserName || "Not specified";
+        const reviewedByName =
+          this.reviewedBy.verifiedUserName || "Not specified";
         doc.text(
           reviewedByName,
           signatureStartX + leftSectionWidth / 2,
@@ -1624,7 +1906,8 @@ export default {
         );
 
         // Approved by name
-        const approvedByName = this.approvedBy.verifiedUserName || "Not specified";
+        const approvedByName =
+          this.approvedBy.verifiedUserName || "Not specified";
         doc.text(
           approvedByName,
           signatureStartX + leftSectionWidth + rightSectionWidth / 2,

@@ -118,7 +118,7 @@ export default {
     async loadGalleryImages() {
       try {
         const response = await fetch(
-          "http://127.0.0.1:5000/api/get-gallery-images"
+          "http://127.0.0.1:8000/api/get-gallery-images"
         );
         const data = await response.json();
         if (data.success && data.gallery_images) {
@@ -135,7 +135,7 @@ export default {
       }
 
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/login", {
+        const response = await fetch("http://127.0.0.1:8000/api/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -158,7 +158,7 @@ export default {
 
           // Check if there's a redirect query parameter
           const redirectPath = this.$route.query.redirect;
-          
+
           if (redirectPath) {
             // Redirect to the originally requested page
             this.$router.push(redirectPath);

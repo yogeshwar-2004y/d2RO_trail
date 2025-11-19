@@ -918,7 +918,7 @@ export default {
     async loadReportData(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/assembled-board/by-report-card/${reportCardId}`
+          `http://localhost:8000/api/reports/assembled-board/by-report-card/${reportCardId}`
         );
 
         if (!response.ok) {
@@ -1180,7 +1180,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:5000/api/users/verify-signature",
+          "http://localhost:8000/api/users/verify-signature",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1337,7 +1337,7 @@ export default {
       try {
         const submissionData = this.prepareSubmissionData();
         const response = await fetch(
-          "http://localhost:5000/api/reports/assembled-board?user_role=4",
+          "http://localhost:8000/api/reports/assembled-board?user_role=4",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1362,7 +1362,7 @@ export default {
       try {
         const submissionData = this.prepareSubmissionData();
         const response = await fetch(
-          "http://localhost:5000/api/reports/assembled-board?user_role=4",
+          "http://localhost:8000/api/reports/assembled-board?user_role=4",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1392,7 +1392,7 @@ export default {
     async fetchReportStatus(reportCardId) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/reports/${reportCardId}`
+          `http://localhost:8000/api/reports/${reportCardId}`
         );
         if (response.ok) {
           const result = await response.json();
@@ -1443,7 +1443,15 @@ export default {
         };
 
         // Helper function to add text with wrapping
-        const addText = (text, x, y, maxWidth, fontSize = 10, isBold = false, align = "left") => {
+        const addText = (
+          text,
+          x,
+          y,
+          maxWidth,
+          fontSize = 10,
+          isBold = false,
+          align = "left"
+        ) => {
           doc.setFontSize(fontSize);
           doc.setFont("helvetica", isBold ? "bold" : "normal");
           const lines = doc.splitTextToSize(text || "", maxWidth);
@@ -1466,7 +1474,10 @@ export default {
         // Load DRDO logo
         let drdoLogoBase64 = null;
         try {
-          const drdoLogoUrl = new URL("../assets/images/DRDO.png", import.meta.url).href;
+          const drdoLogoUrl = new URL(
+            "../assets/images/DRDO.png",
+            import.meta.url
+          ).href;
           drdoLogoBase64 = await imageToBase64(drdoLogoUrl);
         } catch (e) {
           console.warn("Could not load DRDO logo:", e);
@@ -1498,7 +1509,8 @@ export default {
         doc.text(drdoText, (pageWidth - drdoTextWidth) / 2, yPosition + 12);
         doc.setFont("helvetica", "italic");
         doc.setFontSize(7);
-        const centreText = "Combat Aircraft Systems Development and Integration Centre";
+        const centreText =
+          "Combat Aircraft Systems Development and Integration Centre";
         const centreTextWidth = doc.getTextWidth(centreText);
         doc.text(centreText, (pageWidth - centreTextWidth) / 2, yPosition + 16);
 
@@ -1506,10 +1518,16 @@ export default {
         yPosition += 25;
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${this.lruName || "LRU"}/SL.${this.serialNumber || "001"}/${this.inspectionCount || "INS-001"}/${this.currentYear || "2025"}`;
+        const documentPath = `CASDIC/${this.projectName || "PROJECT"}/${
+          this.lruName || "LRU"
+        }/SL.${this.serialNumber || "001"}/${
+          this.inspectionCount || "INS-001"
+        }/${this.currentYear || "2025"}`;
         doc.text(documentPath, margin, yPosition);
 
-        const dateText = `Date: ${this.currentDate || new Date().toLocaleDateString("en-GB")}`;
+        const dateText = `Date: ${
+          this.currentDate || new Date().toLocaleDateString("en-GB")
+        }`;
         const dateWidth = doc.getTextWidth(dateText);
         doc.text(dateText, pageWidth - margin - dateWidth, yPosition);
         yPosition += 10;
@@ -1517,7 +1535,9 @@ export default {
         // Subject line
         doc.setFontSize(11);
         doc.setFont("helvetica", "bold");
-        const subjectText = `SUB: Assembled Board Inspection Report for ${this.lruName || "Unknown LRU"}`;
+        const subjectText = `SUB: Assembled Board Inspection Report for ${
+          this.lruName || "Unknown LRU"
+        }`;
         const subjectWidth = doc.getTextWidth(subjectText);
         doc.text(subjectText, (pageWidth - subjectWidth) / 2, yPosition);
         yPosition += 12;
@@ -1541,7 +1561,10 @@ export default {
           { label: "Report Ref No", value: this.formData.reportRefNo || "N/A" },
           { label: "Memo Ref No", value: this.formData.memoRefNo || "N/A" },
           { label: "LRU Name", value: this.formData.lruName || "N/A" },
-          { label: "Inspection Stage", value: this.formData.inspectionStage || "N/A" },
+          {
+            label: "Inspection Stage",
+            value: this.formData.inspectionStage || "N/A",
+          },
           { label: "Test Venue", value: this.formData.testVenue || "N/A" },
           { label: "SL.NO'S", value: this.formData.slNos || "N/A" },
         ];
@@ -1565,9 +1588,12 @@ export default {
           { label: "Part No", value: this.formData.partNo || "N/A" },
           {
             label: "Quantity",
-            value: this.formData.quantity !== null && this.formData.quantity !== undefined && this.formData.quantity !== ""
-              ? this.formData.quantity.toString()
-              : "N/A",
+            value:
+              this.formData.quantity !== null &&
+              this.formData.quantity !== undefined &&
+              this.formData.quantity !== ""
+                ? this.formData.quantity.toString()
+                : "N/A",
           },
           {
             label: "Start Date",
@@ -1586,14 +1612,30 @@ export default {
         // Print left column
         leftFields.forEach((field) => {
           const text = `${field.label}: ${field.value}`;
-          const height = addText(text, margin, leftY, colWidth, 10, false, "left");
+          const height = addText(
+            text,
+            margin,
+            leftY,
+            colWidth,
+            10,
+            false,
+            "left"
+          );
           leftY += height + 3;
         });
 
         // Print right column
         rightFields.forEach((field) => {
           const text = `${field.label}: ${field.value}`;
-          const height = addText(text, margin + colWidth + 10, rightY, colWidth, 10, false, "left");
+          const height = addText(
+            text,
+            margin + colWidth + 10,
+            rightY,
+            colWidth,
+            10,
+            false,
+            "left"
+          );
           rightY += height + 3;
         });
 
@@ -1609,7 +1651,7 @@ export default {
         // Helper function to print inspection section
         const printInspectionSection = (title, items) => {
           if (!items || items.length === 0) return;
-          
+
           checkPageBreak(15);
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
@@ -1618,11 +1660,11 @@ export default {
 
           // Calculate column widths as percentages of contentWidth
           const colWidths = [
-            contentWidth * 0.08,  // SL.NO
-            contentWidth * 0.30,  // TEST CASES
-            contentWidth * 0.20,  // OBSERVATION
-            contentWidth * 0.25,  // REMARKS
-            contentWidth * 0.17,  // UPLOAD
+            contentWidth * 0.08, // SL.NO
+            contentWidth * 0.3, // TEST CASES
+            contentWidth * 0.2, // OBSERVATION
+            contentWidth * 0.25, // REMARKS
+            contentWidth * 0.17, // UPLOAD
           ];
 
           // Ensure columns add up exactly to contentWidth
@@ -1635,25 +1677,39 @@ export default {
           }
 
           const rowHeight = 12;
-          const headers = ["SL.NO", "TEST CASES", "OBSERVATION", "REMARKS (OK/NOT OK)", "UPLOAD"];
-          
+          const headers = [
+            "SL.NO",
+            "TEST CASES",
+            "OBSERVATION",
+            "REMARKS (OK/NOT OK)",
+            "UPLOAD",
+          ];
+
           // Draw header with borders and background
           doc.setFontSize(9);
           doc.setFont("helvetica", "bold");
           const headerHeight = 12;
-          
+
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             // Draw header text (wrap if needed)
             const headerLines = doc.splitTextToSize(header, colWidths[i] - 6);
-            const startY = yPosition - 7 + (headerHeight - headerLines.length * 4.5) / 2 + 4.5;
+            const startY =
+              yPosition -
+              7 +
+              (headerHeight - headerLines.length * 4.5) / 2 +
+              4.5;
             headerLines.forEach((line, lineIdx) => {
               const lineWidth = doc.getTextWidth(line);
-              doc.text(line, xPos + colWidths[i] / 2 - lineWidth / 2, startY + lineIdx * 4.5);
+              doc.text(
+                line,
+                xPos + colWidths[i] / 2 - lineWidth / 2,
+                startY + lineIdx * 4.5
+              );
             });
             xPos += colWidths[i];
           });
@@ -1664,7 +1720,7 @@ export default {
           doc.setFontSize(9);
           items.forEach((item, index) => {
             checkPageBreak(rowHeight + 5);
-            
+
             const rowData = [
               (index + 1).toString(),
               item.parameter || "",
@@ -1674,55 +1730,88 @@ export default {
             ];
 
             // Calculate row height based on content
-            const maxLines = Math.max(...rowData.map((text, idx) => 
-              doc.splitTextToSize(text || "", colWidths[idx] - 6).length
-            ));
+            const maxLines = Math.max(
+              ...rowData.map(
+                (text, idx) =>
+                  doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+              )
+            );
             const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
 
             // Draw cell borders
             doc.setLineWidth(0.1);
-            doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
-            
+            doc.rect(
+              margin,
+              yPosition - 6,
+              contentWidth,
+              currentRowHeight,
+              "D"
+            );
+
             xPos = margin;
             for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
               xPos += colWidths[colIdx - 1];
-              doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+              doc.line(
+                xPos,
+                yPosition - 6,
+                xPos,
+                yPosition - 6 + currentRowHeight
+              );
             }
 
             // Draw cell content
             xPos = margin;
             rowData.forEach((text, colIdx) => {
-              const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+              const textLines = doc.splitTextToSize(
+                text || "",
+                colWidths[colIdx] - 6
+              );
               doc.text(textLines, xPos + 3, yPosition + 3);
               xPos += colWidths[colIdx];
             });
-            
+
             yPosition += currentRowHeight + 1;
           });
           yPosition += 5;
         };
 
         // Print all inspection sections
-        printInspectionSection("1. VISUAL INSPECTION OF BOARD", this.formData.visualInspection);
-        printInspectionSection("2. COMPONENT INSPECTION", this.formData.componentInspection);
-        printInspectionSection("3. CHECK FOR ASSEMBLY ISSUES", this.formData.assemblyIssues);
-        printInspectionSection("4. CONTINUITY CHECKING", this.formData.continuityCheck);
-        
+        printInspectionSection(
+          "1. VISUAL INSPECTION OF BOARD",
+          this.formData.visualInspection
+        );
+        printInspectionSection(
+          "2. COMPONENT INSPECTION",
+          this.formData.componentInspection
+        );
+        printInspectionSection(
+          "3. CHECK FOR ASSEMBLY ISSUES",
+          this.formData.assemblyIssues
+        );
+        printInspectionSection(
+          "4. CONTINUITY CHECKING",
+          this.formData.continuityCheck
+        );
+
         // QC Report (single item)
         if (this.formData.qcReport) {
           checkPageBreak(15);
           doc.setFontSize(10);
           doc.setFont("helvetica", "bold");
-          doc.text("5. ASSEMBLER & VENDOR QC REPORTS VERIFICATION", margin, yPosition);
+          doc.text(
+            "5. ASSEMBLER & VENDOR QC REPORTS VERIFICATION",
+            margin,
+            yPosition
+          );
           yPosition += 10;
 
           // Calculate column widths as percentages of contentWidth
           const colWidths = [
-            contentWidth * 0.08,  // SL.NO
-            contentWidth * 0.30,  // TEST CASES
-            contentWidth * 0.20,  // OBSERVATION
-            contentWidth * 0.25,  // REMARKS
-            contentWidth * 0.17,  // UPLOAD
+            contentWidth * 0.08, // SL.NO
+            contentWidth * 0.3, // TEST CASES
+            contentWidth * 0.2, // OBSERVATION
+            contentWidth * 0.25, // REMARKS
+            contentWidth * 0.17, // UPLOAD
           ];
 
           // Ensure columns add up exactly to contentWidth
@@ -1735,25 +1824,39 @@ export default {
           }
 
           const rowHeight = 12;
-          const headers = ["SL.NO", "TEST CASES", "OBSERVATION", "REMARKS (OK/NOT OK)", "UPLOAD"];
-          
+          const headers = [
+            "SL.NO",
+            "TEST CASES",
+            "OBSERVATION",
+            "REMARKS (OK/NOT OK)",
+            "UPLOAD",
+          ];
+
           // Draw header with borders and background
           doc.setFontSize(9);
           doc.setFont("helvetica", "bold");
           const headerHeight = 12;
-          
+
           let xPos = margin;
           headers.forEach((header, i) => {
             // Draw cell border and background
             doc.setFillColor(240, 240, 240);
             doc.rect(xPos, yPosition - 7, colWidths[i], headerHeight, "FD");
-            
+
             // Draw header text (wrap if needed)
             const headerLines = doc.splitTextToSize(header, colWidths[i] - 6);
-            const startY = yPosition - 7 + (headerHeight - headerLines.length * 4.5) / 2 + 4.5;
+            const startY =
+              yPosition -
+              7 +
+              (headerHeight - headerLines.length * 4.5) / 2 +
+              4.5;
             headerLines.forEach((line, lineIdx) => {
               const lineWidth = doc.getTextWidth(line);
-              doc.text(line, xPos + colWidths[i] / 2 - lineWidth / 2, startY + lineIdx * 4.5);
+              doc.text(
+                line,
+                xPos + colWidths[i] / 2 - lineWidth / 2,
+                startY + lineIdx * 4.5
+              );
             });
             xPos += colWidths[i];
           });
@@ -1763,7 +1866,7 @@ export default {
           doc.setFont("helvetica", "normal");
           doc.setFontSize(9);
           checkPageBreak(rowHeight + 5);
-          
+
           const rowData = [
             "1",
             "(Report shall be as per IPC 610G)",
@@ -1773,29 +1876,40 @@ export default {
           ];
 
           // Calculate row height based on content
-          const maxLines = Math.max(...rowData.map((text, idx) => 
-            doc.splitTextToSize(text || "", colWidths[idx] - 6).length
-          ));
+          const maxLines = Math.max(
+            ...rowData.map(
+              (text, idx) =>
+                doc.splitTextToSize(text || "", colWidths[idx] - 6).length
+            )
+          );
           const currentRowHeight = Math.max(rowHeight, maxLines * 5 + 4);
 
           // Draw cell borders
           doc.setLineWidth(0.1);
           doc.rect(margin, yPosition - 6, contentWidth, currentRowHeight, "D");
-          
+
           xPos = margin;
           for (let colIdx = 1; colIdx < colWidths.length; colIdx++) {
             xPos += colWidths[colIdx - 1];
-            doc.line(xPos, yPosition - 6, xPos, yPosition - 6 + currentRowHeight);
+            doc.line(
+              xPos,
+              yPosition - 6,
+              xPos,
+              yPosition - 6 + currentRowHeight
+            );
           }
 
           // Draw cell content
           xPos = margin;
           rowData.forEach((text, colIdx) => {
-            const textLines = doc.splitTextToSize(text || "", colWidths[colIdx] - 6);
+            const textLines = doc.splitTextToSize(
+              text || "",
+              colWidths[colIdx] - 6
+            );
             doc.text(textLines, xPos + 3, yPosition + 3);
             xPos += colWidths[colIdx];
           });
-          
+
           yPosition += currentRowHeight + 10;
         }
 
@@ -1832,17 +1946,23 @@ export default {
           {
             label: "Prepared By",
             signatureUrl: this.signatures.preparedBy.signatureUrl,
-            verifiedName: this.signatures.preparedBy.verifiedUserName || getSignatureName(this.signatures.preparedBy.signatureUrl),
+            verifiedName:
+              this.signatures.preparedBy.verifiedUserName ||
+              getSignatureName(this.signatures.preparedBy.signatureUrl),
           },
           {
             label: "Verified By",
             signatureUrl: this.signatures.verifiedBy.signatureUrl,
-            verifiedName: this.signatures.verifiedBy.verifiedUserName || getSignatureName(this.signatures.verifiedBy.signatureUrl),
+            verifiedName:
+              this.signatures.verifiedBy.verifiedUserName ||
+              getSignatureName(this.signatures.verifiedBy.signatureUrl),
           },
           {
             label: "Approved By",
             signatureUrl: this.signatures.approvedBy.signatureUrl,
-            verifiedName: this.signatures.approvedBy.verifiedUserName || getSignatureName(this.signatures.approvedBy.signatureUrl),
+            verifiedName:
+              this.signatures.approvedBy.verifiedUserName ||
+              getSignatureName(this.signatures.approvedBy.signatureUrl),
           },
         ];
 
@@ -1851,7 +1971,7 @@ export default {
           const sig = signatures[index];
           const xPos = margin + index * sigColWidth;
           doc.text(`${sig.label}:`, xPos, yPosition);
-          
+
           const imgUrl = getSignatureImageUrl(sig.signatureUrl);
           if (imgUrl) {
             try {
@@ -1861,11 +1981,22 @@ export default {
                 doc.text(sig.verifiedName, xPos, yPosition + 20);
               }
             } catch (e) {
-              console.warn(`Could not load signature image for ${sig.label}:`, e);
-              doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+              console.warn(
+                `Could not load signature image for ${sig.label}:`,
+                e
+              );
+              doc.text(
+                sig.verifiedName || "_________________",
+                xPos,
+                yPosition + 5
+              );
             }
           } else {
-            doc.text(sig.verifiedName || "_________________", xPos, yPosition + 5);
+            doc.text(
+              sig.verifiedName || "_________________",
+              xPos,
+              yPosition + 5
+            );
           }
         }
 
@@ -1875,18 +2006,28 @@ export default {
           doc.setPage(i);
           doc.setFontSize(8);
           doc.setFont("helvetica", "normal");
-          const pageText = `Generated on ${new Date().toLocaleString("en-GB")} | Page ${i} of ${totalPages}`;
-          doc.text(pageText, pageWidth / 2, pageHeight - 10, { align: "center" });
+          const pageText = `Generated on ${new Date().toLocaleString(
+            "en-GB"
+          )} | Page ${i} of ${totalPages}`;
+          doc.text(pageText, pageWidth / 2, pageHeight - 10, {
+            align: "center",
+          });
         }
 
         // Save PDF
-        const fileName = `Assembled_Board_Inspection_Report_${this.lruName || "Unknown"}_${this.currentDate.replace(/\//g, "-")}.pdf`;
+        const fileName = `Assembled_Board_Inspection_Report_${
+          this.lruName || "Unknown"
+        }_${this.currentDate.replace(/\//g, "-")}.pdf`;
         doc.save(fileName);
 
         alert("Report exported successfully as PDF!");
       } catch (error) {
         console.error("Error exporting PDF:", error);
-        alert(`Error exporting PDF: ${error.message || "Unknown error"}. Please try again.`);
+        alert(
+          `Error exporting PDF: ${
+            error.message || "Unknown error"
+          }. Please try again.`
+        );
       }
     },
   },
