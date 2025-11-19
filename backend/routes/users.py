@@ -454,6 +454,44 @@ def get_user(user_id):
         print(f"Error fetching user: {str(e)}")
         return jsonify({"success": False, "message": "Internal server error"}), 500
 
+@users_bp.route('/api/users/list', methods=['GET'])
+def get_users_list():
+    """Get simple list of all users for dropdowns"""
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        
+        # Fetch all users with their names
+        cur.execute("""
+            SELECT 
+                u.user_id,
+                u.name,
+                u.email
+            FROM users u
+            ORDER BY u.name
+        """)
+        
+        results = cur.fetchall()
+        cur.close()
+        
+        # Convert to list of dictionaries
+        users_list = []
+        for row in results:
+            users_list.append({
+                "user_id": row[0],
+                "name": row[1],
+                "email": row[2]
+            })
+        
+        return jsonify({
+            "success": True,
+            "users": users_list
+        })
+        
+    except Exception as e:
+        print(f"Error fetching users list: {str(e)}")
+        return jsonify({"success": False, "message": "Internal server error"}), 500
+
 @users_bp.route('/api/users/manage', methods=['GET'])
 def get_users_with_roles():
     """Get users with roles for management"""

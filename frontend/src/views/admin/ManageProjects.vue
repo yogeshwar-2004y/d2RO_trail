@@ -26,6 +26,9 @@
           <tr>
             <th>PROJECT ID</th>
             <th>PROJECT NAME</th>
+            <th>PROJECT DIRECTOR</th>
+            <th>DEPUTY PROJECT DIRECTOR</th>
+            <th>QA MANAGER</th>
             <th>LRU NAME</th>
             <th>LRU PART NUMBER</th>
             <th>TOTAL SERIAL NUMBERS</th>
@@ -34,12 +37,12 @@
         <tbody>
           <template v-if="loading">
             <tr>
-              <td colspan="5" class="loading-cell">Loading projects...</td>
+              <td colspan="8" class="loading-cell">Loading projects...</td>
             </tr>
           </template>
           <template v-else-if="projects.length === 0">
             <tr>
-              <td colspan="5" class="no-data-cell">No projects found</td>
+              <td colspan="8" class="no-data-cell">No projects found</td>
             </tr>
           </template>
           <template v-else>
@@ -48,6 +51,9 @@
                 <tr>
                   <td>{{ project.project_id }}</td>
                   <td>{{ project.project_name }}</td>
+                  <td>{{ project.project_director || '-' }}</td>
+                  <td>{{ project.deputy_project_director || '-' }}</td>
+                  <td>{{ project.qa_manager || '-' }}</td>
                   <td class="no-data">No LRUs</td>
                   <td class="no-data">-</td>
                   <td class="no-data">0</td>
@@ -60,6 +66,15 @@
                   </td>
                   <td v-if="lruIndex === 0" :rowspan="project.lrus.length">
                     {{ project.project_name }}
+                  </td>
+                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">
+                    {{ project.project_director || '-' }}
+                  </td>
+                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">
+                    {{ project.deputy_project_director || '-' }}
+                  </td>
+                  <td v-if="lruIndex === 0" :rowspan="project.lrus.length">
+                    {{ project.qa_manager || '-' }}
                   </td>
                   <td>{{ lru.lru_name }}</td>
                   <td>{{ lru.lru_part_number || '-' }}</td>
