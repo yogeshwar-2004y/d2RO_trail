@@ -7,10 +7,19 @@ const state = reactive({
   isLoggedIn: false,
   currentUserRole: null,
   roleName: null,
+  statusCheckInterval: null, // Store interval ID for periodic status checks
 });
 
-// Actions
-const actions = {
+// Helper functions for status checking (defined before actions to avoid circular reference)
+const stopStatusCheck = () => {
+  if (state.statusCheckInterval) {
+    clearInterval(state.statusCheckInterval);
+    state.statusCheckInterval = null;
+  }
+};
+
+// Actions (will be fully defined after the object is created)
+let actions = {
   // Set user data after successful login
   setUser(userData) {
     state.user = userData;
@@ -27,10 +36,16 @@ const actions = {
     console.log("User set:", userData);
     console.log("Current role ID:", state.currentUserRole);
     console.log("Role name:", state.roleName);
+    
+    // Start periodic status check
+    actions.startStatusCheck();
   },
 
   // Clear user data on logout
   clearUser() {
+    // Stop periodic status check
+    stopStatusCheck();
+    
     state.user = null;
     state.isLoggedIn = false;
     state.currentUserRole = null;
@@ -59,6 +74,9 @@ const actions = {
       console.log("User initialized from storage:", state.user);
       console.log("Current role ID:", state.currentUserRole);
       console.log("Role name:", state.roleName);
+      
+      // Start periodic status check for restored session
+      actions.startStatusCheck();
     }
   },
 
@@ -89,7 +107,7 @@ const actions = {
     try {
       // Call backend logout endpoint to log the logout activity
       if (state.user && state.user.id) {
-        await fetch("http://localhost:5000/api/logout", {
+        await fetch("/api/logout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_id: state.user.id }),
@@ -101,9 +119,106 @@ const actions = {
       // Don't fail logout if logging fails
     } finally {
       // Always clear user data
-      this.clearUser();
+      actions.clearUser();
     }
   },
+
+  // Verify user status (enabled/deleted) - for session validation
+  async verifyUserStatus() {
+    if (!state.user || !state.user.id) {
+      return { canAccess: false, reason: "No user logged in" };
+    }
+
+    try {
+      const response = await fetch(
+        `/api/users/${state.user.id}/verify-status`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      // Check if response is ok before trying to parse JSON
+      if (!response.ok) {
+        // If server returns an error, log it but don't fail the user
+        console.warn(`User status verification returned ${response.status}`);
+        return { canAccess: true }; // Assume OK on server errors
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (!data.can_access) {
+          // User is disabled or deleted
+          let reason = "";
+          if (data.deleted) {
+            reason = "Your account has been deleted.";
+          } else if (!data.enabled) {
+            reason = "Your account has been disabled.";
+          }
+
+          // Log logout activity before clearing user data
+          try {
+            await fetch("/api/logout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ 
+                user_id: state.user.id,
+                reason: "Account disabled/deleted - automatic logout"
+              }),
+              mode: "cors",
+            });
+          } catch (logError) {
+            console.error("Error logging automatic logout:", logError);
+            // Continue with logout even if logging fails
+          }
+
+          // Log out the user
+          actions.clearUser();
+          return { canAccess: false, reason };
+        }
+        return { canAccess: true };
+      } else {
+        // If verification fails, assume user should be logged out
+        actions.clearUser();
+        return { canAccess: false, reason: "Unable to verify account status." };
+      }
+    } catch (error) {
+      // Handle network errors gracefully
+      if (error.message && (error.message.includes("Failed to fetch") || error.message.includes("NetworkError"))) {
+        // Network error - backend might be down, don't log out the user
+        console.warn("Network error verifying user status - backend may be unavailable:", error.message);
+        return { canAccess: true }; // Assume OK if we can't verify due to network issues
+      }
+      console.error("Error verifying user status:", error);
+      // On other errors, assume OK to avoid false logouts
+      return { canAccess: true }; // Assume OK if we can't verify
+    }
+  },
+
+  // Stop periodic status check
+  stopStatusCheck,
+};
+
+// Now define startStatusCheck after actions is fully created
+actions.startStatusCheck = function startStatusCheck() {
+  // Clear any existing interval
+  stopStatusCheck();
+  
+  // Start new interval - check every 30 seconds
+  state.statusCheckInterval = setInterval(async () => {
+    if (state.isLoggedIn && state.user && state.user.id) {
+      const statusCheck = await actions.verifyUserStatus();
+      if (!statusCheck.canAccess) {
+        // User was disabled/deleted - verifyUserStatus already logged them out
+        // Just clear the interval
+        stopStatusCheck();
+      }
+    } else {
+      // User not logged in, stop checking
+      stopStatusCheck();
+    }
+  }, 30000); // Check every 30 seconds
 };
 
 // Getters
@@ -131,6 +246,7 @@ export const {
   hasRole,
   hasRoleName,
   logout,
+  verifyUserStatus,
 } = actions;
 
 export const { isLoggedIn, currentUser, currentUserRole, roleName } = getters;

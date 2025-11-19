@@ -96,7 +96,7 @@ export default {
 
       this.loading = true;
       try {
-        const response = await fetch("http://localhost:5000/api/news");
+        const response = await fetch("/api/news");
         const data = await response.json();
         // console.log("Debugging News API responseeeeee:", data);
 

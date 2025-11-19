@@ -100,7 +100,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          "http://localhost:5000/api/projects/manage"
+          "http://localhost:8000/api/projects/manage"
         );
         const data = await response.json();
 
@@ -127,6 +127,12 @@ export default {
         query: {
           name: project.project_name,
           created_at: project.created_at,
+          director: project.project_director || "",
+          directorId: project.project_director_id || "",
+          deputyDirector: project.deputy_project_director || "",
+          deputyDirectorId: project.deputy_project_director_id || "",
+          qaManager: project.qa_manager || "",
+          qaManagerId: project.qa_manager_id || "",
           lrusData: JSON.stringify(project.lrus || []),
         },
       });
