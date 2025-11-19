@@ -190,6 +190,7 @@ def upload_plan_document():
         revision = request.form.get('revision')
         doc_ver = request.form.get('doc_ver')
         uploaded_by = request.form.get('uploaded_by')
+        document_type = request.form.get('document_type')  # Get document type from form
         
         # Validate required fields
         if not all([lru_id, document_number, version, uploaded_by]):
@@ -255,13 +256,60 @@ def upload_plan_document():
         # Get file size for database
         file_size = os.path.getsize(file_path)
         
-        # Insert plan document with actual file path
+        # Check if document_type column exists, if not add it
         cur.execute("""
-            INSERT INTO plan_documents 
-            (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status, original_filename, file_size, upload_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned', %s, %s, %s)
-            RETURNING document_id
-        """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, file.filename, file_size, datetime.now()))
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = 'plan_documents' AND column_name = 'document_type'
+        """)
+        has_document_type_column = cur.fetchone() is not None
+        
+        if not has_document_type_column:
+            # Add document_type column
+            try:
+                cur.execute("""
+                    ALTER TABLE plan_documents 
+                    ADD COLUMN document_type INTEGER REFERENCES document_types(type_id) ON DELETE SET NULL;
+                """)
+                cur.execute("""
+                    CREATE INDEX IF NOT EXISTS idx_plan_documents_document_type 
+                    ON plan_documents(document_type);
+                """)
+                conn.commit()
+                has_document_type_column = True  # Column now exists
+            except Exception as e:
+                print(f"Note: Could not add document_type column (may already exist or table doesn't exist): {str(e)}")
+                conn.rollback()
+        
+        # Convert document_type to integer if provided
+        document_type_id = None
+        if document_type:
+            try:
+                document_type_id = int(document_type)
+                # Verify document type exists
+                cur.execute("SELECT type_id FROM document_types WHERE type_id = %s", (document_type_id,))
+                if not cur.fetchone():
+                    document_type_id = None  # Invalid document type, set to None
+            except (ValueError, TypeError):
+                document_type_id = None
+        
+        # Insert plan document with actual file path
+        if has_document_type_column:
+            # Insert with document_type if column exists
+            cur.execute("""
+                INSERT INTO plan_documents 
+                (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status, original_filename, file_size, upload_date, document_type)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned', %s, %s, %s, %s)
+                RETURNING document_id
+            """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, file.filename, file_size, datetime.now(), document_type_id))
+        else:
+            # Insert without document_type if column doesn't exist
+            cur.execute("""
+                INSERT INTO plan_documents 
+                (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, status, original_filename, file_size, upload_date)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, 'not assigned', %s, %s, %s)
+                RETURNING document_id
+            """, (lru_id, document_number, version, revision, doc_ver, uploaded_by, file_path, file.filename, file_size, datetime.now()))
         
         document_id = cur.fetchone()[0]
         conn.commit()

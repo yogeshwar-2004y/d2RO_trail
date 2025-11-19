@@ -106,6 +106,48 @@
             View Observations
           </button>
 
+          <!-- Document Details Form - Compact inline version when file is selected -->
+          <div v-if="selectedFile" class="document-form-inline">
+            <div class="form-group-inline">
+              <label>Doc Number:</label>
+              <input
+                type="text"
+                v-model="documentDetails.documentNumber"
+                placeholder="DOC-001"
+                class="form-input-inline"
+                required
+              />
+            </div>
+            <div class="form-group-inline">
+              <label>Version:</label>
+              <input
+                type="text"
+                v-model="documentDetails.version"
+                placeholder="v1.0"
+                class="form-input-inline"
+                required
+              />
+            </div>
+            <div class="form-group-inline">
+              <label>Revision:</label>
+              <input
+                type="text"
+                v-model="documentDetails.docVer"
+                placeholder="A"
+                class="form-input-inline"
+                readonly
+                style="background-color: #f3f4f6; cursor: not-allowed"
+              />
+            </div>
+            <button
+              @click="submitDocument"
+              class="submit-btn-inline"
+              :disabled="isUploading || !isFormValid"
+            >
+              {{ isUploading ? "Uploading..." : "Submit" }}
+            </button>
+          </div>
+
           <!-- Upload restriction message -->
           <div v-if="!canUploadDocument" class="upload-restriction-message">
             <div class="restriction-icon">⚠️</div>
@@ -171,50 +213,6 @@
               </p>
             </div>
           </div> -->
-
-          <!-- Document Details Form - Show when file is selected -->
-          <div v-if="selectedFile" class="document-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Document Number:</label>
-                <input
-                  type="text"
-                  v-model="documentDetails.documentNumber"
-                  placeholder="e.g., DOC-001"
-                  class="form-input"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label>Version:</label>
-                <input
-                  type="text"
-                  v-model="documentDetails.version"
-                  placeholder="e.g., v1.0"
-                  class="form-input"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <label>Revision (Auto-assigned):</label>
-                <input
-                  type="text"
-                  v-model="documentDetails.docVer"
-                  placeholder="e.g., A"
-                  class="form-input"
-                  readonly
-                  style="background-color: #f3f4f6; cursor: not-allowed"
-                />
-              </div>
-            </div>
-            <button
-              @click="submitDocument"
-              class="submit-btn"
-              :disabled="isUploading || !isFormValid"
-            >
-              {{ isUploading ? "Uploading..." : "Submit Document" }}
-            </button>
-          </div>
         </div>
       </template>
 
@@ -2360,6 +2358,10 @@ export default {
             userStore.getters.currentUser()?.user_id ||
             1001
         );
+        // Add document type if selected
+        if (this.selectedDocumentType) {
+          formData.append("document_type", this.selectedDocumentType);
+        }
 
         const response = await fetch(
           "http://localhost:8000/api/plan-documents",
@@ -3787,6 +3789,63 @@ export default {
   background: #f8f9fa;
   border-radius: 6px;
   border: 1px solid #e9ecef;
+}
+
+.document-form-inline {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-group-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group-inline label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #374151;
+  white-space: nowrap;
+}
+
+.form-input-inline {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  width: 120px;
+  transition: border-color 0.2s;
+}
+
+.form-input-inline:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+}
+
+.submit-btn-inline {
+  padding: 0.5rem 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.submit-btn-inline:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.submit-btn-inline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .form-row {
