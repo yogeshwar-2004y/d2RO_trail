@@ -382,12 +382,33 @@ const router = createRouter({
 
 // Navigation guard for authentication and role-based access
 router.beforeEach((to, from, next) => {
-  // Get authentication state
-  const isLoggedIn = userStore.getters.isLoggedIn();
-  const userRole = userStore.getters.currentUserRole();
+  // Initialize user from localStorage if not already initialized
+  // This ensures we have the latest state even if the store wasn't initialized yet
+  if (!userStore.state.isLoggedIn) {
+    userStore.actions.initializeUser();
+  }
   
-  // Check if route requires authentication
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false);
+  // Get authentication state - check both store and localStorage as fallback
+  let isLoggedIn = userStore.getters.isLoggedIn();
+  let userRole = userStore.getters.currentUserRole();
+  
+  // Fallback to localStorage if store values are not available
+  if (!isLoggedIn) {
+    const storedIsLoggedIn = localStorage.getItem("isLoggedIn");
+    const storedRole = localStorage.getItem("currentUserRole");
+    if (storedIsLoggedIn === "true") {
+      isLoggedIn = true;
+      userRole = storedRole ? parseInt(storedRole) : null;
+    }
+  }
+  
+  // Check if route explicitly requires authentication
+  // Routes with meta.requiresAuth === false are public, others require auth
+  // Check all matched route records for meta information
+  const requiresAuth = to.matched.some(record => {
+    const meta = record.meta || {};
+    return meta.requiresAuth !== false; // Default to requiring auth if not explicitly set to false
+  });
   
   // If route requires auth and user is not logged in, redirect to login
   if (requiresAuth && !isLoggedIn) {
@@ -402,16 +423,15 @@ router.beforeEach((to, from, next) => {
   // If user is logged in and trying to access login page, redirect to their dashboard
   if (to.name === 'login' && isLoggedIn) {
     // Redirect based on role
-    const role = userRole;
-    if (role === 1) {
+    if (userRole === 1) {
       next({ name: 'HomePageAdmin' });
-    } else if (role === 2) {
+    } else if (userRole === 2) {
       next({ name: 'HomePageQAHead' });
-    } else if (role === 3) {
+    } else if (userRole === 3) {
       next({ name: 'HomePageReviewer' });
-    } else if (role === 4) {
+    } else if (userRole === 4) {
       next({ name: 'HomePageDesignHead' });
-    } else if (role === 5) {
+    } else if (userRole === 5) {
       next({ name: 'HomePageDesigner' });
     } else {
       next();
@@ -420,11 +440,12 @@ router.beforeEach((to, from, next) => {
   }
   
   // Check role-based access
-  const requiresRole = to.matched.some(record => record.meta.requiresRole);
-  if (requiresRole && isLoggedIn) {
-    const requiredRole = to.matched.find(record => record.meta.requiresRole)?.meta.requiresRole;
-    
-    if (userRole !== requiredRole) {
+  // Find the first route record that specifies a required role
+  const routeWithRole = to.matched.find(record => record.meta && record.meta.requiresRole !== undefined);
+  const requiresRole = routeWithRole?.meta?.requiresRole;
+  
+  if (requiresRole !== undefined && isLoggedIn) {
+    if (userRole !== requiresRole) {
       // User doesn't have required role, redirect to their dashboard
       alert('You do not have permission to access this page.');
       if (userRole === 1) {

@@ -8,7 +8,7 @@ const routes = [
     path: '/designer',
     name: 'HomePageDesigner',
     component: HomePageDesigner,
-    meta: { requiresAuth: true } // All authenticated users
+    meta: { requiresAuth: true,requiresRole: 5 } // All authenticated users
   },
   {
     path: '/designer/iqa-observation-report/:reportId',

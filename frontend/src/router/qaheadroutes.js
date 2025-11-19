@@ -10,7 +10,7 @@ const qaheadRoutes = [
     path: '/qahead',
     name: 'HomePageQAHead',
     component: HomePageQAHead,
-    meta: { requiresAuth: true } // All authenticated users
+    meta: { requiresAuth: true, requiresRole: 2 } // All authenticated users
   },
   {
     path: '/qahead/projects/:projectName/lrus/:lruName/versions/:versionId',

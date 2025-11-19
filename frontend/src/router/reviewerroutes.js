@@ -11,7 +11,7 @@ const reviewerRoutes = [
     path: '/reviewer',
     name: 'HomePageReviewer',
     component: HomePageReviewer,
-    meta: { requiresAuth: true } // All authenticated users
+    meta: { requiresAuth: true, requiresRole: 3 } // All authenticated users
   },
   {
     path: '/reviewer/memo-dashboard',
