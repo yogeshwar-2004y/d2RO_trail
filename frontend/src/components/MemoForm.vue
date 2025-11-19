@@ -1669,8 +1669,13 @@ export default {
       );
     },
     availableSerialNumbers() {
-      // Return the serial number options for the selected LRU
-      return this.serialNumberOptions;
+      // Return the serial number options for the selected LRU, sorted in ascending order
+      return [...this.serialNumberOptions].sort((a, b) => {
+        // Convert to numbers for proper numeric sorting
+        const numA = Number(a.value);
+        const numB = Number(b.value);
+        return numA - numB;
+      });
     },
     selectedSerialNumbersDisplay() {
       // Return a display string for selected serial numbers
@@ -2057,10 +2062,17 @@ export default {
       };
 
       const serials = fallbackSerials[lruId] || [];
-      this.serialNumberOptions = serials.map((serial) => ({
+      // Map and sort serial numbers in ascending order
+      const mappedSerials = serials.map((serial) => ({
         value: serial,
         label: serial.toString(),
       }));
+      // Sort by numeric value in ascending order
+      this.serialNumberOptions = mappedSerials.sort((a, b) => {
+        const numA = Number(a.value);
+        const numB = Number(b.value);
+        return numA - numB;
+      });
 
       console.log(
         `Loaded fallback serial numbers for LRU ${lruId}:`,
@@ -2098,10 +2110,17 @@ export default {
         const data = await response.json();
 
         if (data.success) {
-          this.serialNumberOptions = data.serial_numbers.map((serial) => ({
+          // Map and sort serial numbers in ascending order
+          const mappedSerials = data.serial_numbers.map((serial) => ({
             value: serial.serial_number,
             label: serial.serial_number.toString(),
           }));
+          // Sort by numeric value in ascending order
+          this.serialNumberOptions = mappedSerials.sort((a, b) => {
+            const numA = Number(a.value);
+            const numB = Number(b.value);
+            return numA - numB;
+          });
           console.log(
             `Loaded serial numbers for LRU ${lruId}:`,
             this.serialNumberOptions

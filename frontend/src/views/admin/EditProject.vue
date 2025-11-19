@@ -182,7 +182,7 @@
               </p>
               <div class="serial-list">
                 <span
-                  v-for="serial in lru.serial_numbers"
+                  v-for="serial in getSortedSerialNumbers(lru.serial_numbers)"
                   :key="serial.serial_id"
                   class="serial-number"
                 >
@@ -399,7 +399,17 @@ export default {
         serialQuantity: "",
       });
     },
-
+    getSortedSerialNumbers(serialNumbers) {
+      // Sort serial numbers in ascending order
+      if (!serialNumbers || serialNumbers.length === 0) {
+        return [];
+      }
+      return [...serialNumbers].sort((a, b) => {
+        const numA = Number(a.serial_number);
+        const numB = Number(b.serial_number);
+        return numA - numB;
+      });
+    },
     removeLru(index) {
       if (this.project.lrus.length > 1) {
         const lru = this.project.lrus[index];
