@@ -222,16 +222,7 @@
               <td class="user-id">
                 {{ log.user_id === 0 ? "N/A" : log.user_id }}
               </td>
-              <td
-                class="activity"
-                :class="{
-                  login: log.activity_performed === 'logged_in',
-                  logout: log.activity_performed === 'logged_out',
-                  failed: log.activity_performed === 'login_failed',
-                }"
-              >
-                {{ getActivityDisplay(log.activity_performed) }}
-              </td>
+              <td class="activity">{{ log.activity_performed || "N/A" }}</td>
               <td class="performed-by">{{ log.performed_by_name }}</td>
               <td class="timestamp">{{ formatTimestamp(log.timestamp) }}</td>
             </tr>
@@ -447,18 +438,6 @@ export default {
       this.applyFilters();
     },
 
-    getActivityDisplay(activity) {
-      switch (activity) {
-        case "logged_in":
-          return "LOGIN";
-        case "logged_out":
-          return "LOGOUT";
-        case "login_failed":
-          return "FAILED LOGIN";
-        default:
-          return activity || "UNKNOWN";
-      }
-    },
 
     formatTimestamp(timestamp) {
       if (!timestamp) return "N/A";
@@ -844,32 +823,9 @@ export default {
 }
 
 .activity {
-  font-weight: 600;
-  text-align: right;
-  width: 140px;
-  padding: 8px 16px;
-  font-size: 12px;
-  border-radius: 16px;
-  display: inline-block;
-  min-width: 80px;
-  margin: 0 auto;
-}
-
-.activity.login {
-  color: #27ae60;
-  background: #d5f4e6;
-  font-weight: 600;
-}
-
-.activity.logout {
-  color: #e74c3c;
-  background: #fadbd8;
-  font-weight: 600;
-}
-
-.activity.failed {
-  color: #e74c3c;
-  background: #fadbd8;
+  text-align: left;
+  width: 250px;
+  color: #000;
   font-weight: 600;
 }
 
@@ -956,13 +912,13 @@ export default {
   padding: 20px 30px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .search-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  gap: 40px;
   align-items: end;
 }
 
@@ -970,6 +926,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.search-field:last-child {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
 }
 
 .search-field label {
@@ -998,12 +960,15 @@ export default {
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 18px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 15px;
   font-weight: 500;
   transition: background-color 0.3s ease;
-  margin-top: 20px;
+  width: auto;
+  margin-left: 45%;
+  margin-right: 45%;
 }
 
 .clear-filters-btn:hover {

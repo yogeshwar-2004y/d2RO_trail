@@ -114,16 +114,7 @@
             @input="applyFilters"
           />
         </div>
-        <div class="search-field">
-          <label>Activity ID:</label>
-          <input
-            type="text"
-            v-model="searchFilters.activityId"
-            placeholder="Enter activity ID"
-            class="filter-input"
-            @input="applyFilters"
-          />
-        </div>
+
         <div class="search-field">
           <label>Project ID:</label>
           <input
@@ -407,10 +398,46 @@ export default {
 
     async downloadPDF() {
       try {
-        const params = {
-          limit:
-            this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50,
-        };
+        const params = {};
+
+        // Set limit only if no search filters are applied
+        const hasFilters =
+          this.searchQuery.trim() ||
+          this.searchFilters.userName.trim() ||
+          this.searchFilters.activityId.trim() ||
+          this.searchFilters.projectId.trim() ||
+          this.searchFilters.activityType.trim() ||
+          this.searchFilters.dateFrom ||
+          this.searchFilters.dateTo;
+
+        if (!hasFilters && this.recordLimit && this.recordLimit > 0) {
+          params.limit = this.recordLimit;
+        }
+
+        // Include search query if filter is applied
+        if (this.searchQuery && this.searchQuery.trim()) {
+          params.search = this.searchQuery.trim();
+        }
+
+        // Include advanced search filters
+        if (this.searchFilters.userName.trim()) {
+          params.user_name = this.searchFilters.userName.trim();
+        }
+        if (this.searchFilters.activityId.trim()) {
+          params.activity_id = this.searchFilters.activityId.trim();
+        }
+        if (this.searchFilters.projectId.trim()) {
+          params.project_id = this.searchFilters.projectId.trim();
+        }
+        if (this.searchFilters.activityType.trim()) {
+          params.activity_type = this.searchFilters.activityType.trim();
+        }
+        if (this.searchFilters.dateFrom) {
+          params.date_from = this.searchFilters.dateFrom;
+        }
+        if (this.searchFilters.dateTo) {
+          params.date_to = this.searchFilters.dateTo;
+        }
 
         const response = await axios.get(
           "http://localhost:8000/api/activity-logs/pdf",
@@ -469,16 +496,16 @@ export default {
 /* Advanced Search Panel */
 .advanced-search-panel {
   background: white;
-  padding: 20px 30px;
+  padding: 25px 40px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .search-fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 40px;
   align-items: end;
 }
 
@@ -486,6 +513,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.search-field:last-child {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
 }
 
 .search-field label {
@@ -514,12 +547,15 @@ export default {
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 18px; /* small button size */
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 15px;
   font-weight: 500;
   transition: background-color 0.3s ease;
-  margin-top: 20px;
+  width: auto; /* keeps it narrow */
+  margin-left: 45%; /* optional horizontal spacing from other elements */
+  margin-right: 45%; /* optional horizontal spacing from other elements */
 }
 
 .clear-filters-btn:hover {
