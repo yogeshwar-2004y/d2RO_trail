@@ -114,16 +114,7 @@
             @input="applyFilters"
           />
         </div>
-        <div class="search-field">
-          <label>Activity ID:</label>
-          <input
-            type="text"
-            v-model="searchFilters.activityId"
-            placeholder="Enter activity ID"
-            class="filter-input"
-            @input="applyFilters"
-          />
-        </div>
+        
         <div class="search-field">
           <label>Project ID:</label>
           <input
@@ -467,18 +458,18 @@ export default {
 
 <style scoped>
 /* Advanced Search Panel */
-.advanced-search-panel {
+ .advanced-search-panel {
   background: white;
-  padding: 20px 30px;
+  padding: 25px 40px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .search-fields {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 40px;
   align-items: end;
 }
 
@@ -486,6 +477,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 5px;
+}
+
+.search-field:last-child {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
 }
 
 .search-field label {
@@ -510,16 +507,20 @@ export default {
   border-color: #3498db;
 }
 
+
 .clear-filters-btn {
   background: #e74c3c;
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  padding: 12px 18px;       /* small button size */
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 15px;
   font-weight: 500;
   transition: background-color 0.3s ease;
-  margin-top: 20px;
+  width: auto;             /* keeps it narrow */
+  margin-left: 45%;       /* optional horizontal spacing from other elements */
+  margin-right: 45%;      /* optional horizontal spacing from other elements */
 }
 
 .clear-filters-btn:hover {
