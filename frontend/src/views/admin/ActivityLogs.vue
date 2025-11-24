@@ -398,10 +398,46 @@ export default {
 
     async downloadPDF() {
       try {
-        const params = {
-          limit:
-            this.recordLimit && this.recordLimit > 0 ? this.recordLimit : 50,
-        };
+        const params = {};
+
+        // Set limit only if no search filters are applied
+        const hasFilters =
+          this.searchQuery.trim() ||
+          this.searchFilters.userName.trim() ||
+          this.searchFilters.activityId.trim() ||
+          this.searchFilters.projectId.trim() ||
+          this.searchFilters.activityType.trim() ||
+          this.searchFilters.dateFrom ||
+          this.searchFilters.dateTo;
+
+        if (!hasFilters && this.recordLimit && this.recordLimit > 0) {
+          params.limit = this.recordLimit;
+        }
+
+        // Include search query if filter is applied
+        if (this.searchQuery && this.searchQuery.trim()) {
+          params.search = this.searchQuery.trim();
+        }
+
+        // Include advanced search filters
+        if (this.searchFilters.userName.trim()) {
+          params.user_name = this.searchFilters.userName.trim();
+        }
+        if (this.searchFilters.activityId.trim()) {
+          params.activity_id = this.searchFilters.activityId.trim();
+        }
+        if (this.searchFilters.projectId.trim()) {
+          params.project_id = this.searchFilters.projectId.trim();
+        }
+        if (this.searchFilters.activityType.trim()) {
+          params.activity_type = this.searchFilters.activityType.trim();
+        }
+        if (this.searchFilters.dateFrom) {
+          params.date_from = this.searchFilters.dateFrom;
+        }
+        if (this.searchFilters.dateTo) {
+          params.date_to = this.searchFilters.dateTo;
+        }
 
         const response = await axios.get(
           "http://localhost:8000/api/activity-logs/pdf",
