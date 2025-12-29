@@ -57,7 +57,7 @@ TEST_SETUP_SUMMARY.md
 # Technical documentation files
 AVIATRAX_Technical_Documentation.md
 AVIATRAX_Technical_Documentation.html
-
+GIT_MERGE_FIX.md
 # Deployment and requirements files
 DEPLOYMENT_GUIDE.md
 requirements.txt
