@@ -65,6 +65,31 @@ def create_app():
 # Create the application instance
 app = create_app()
 
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for Docker and monitoring"""
+    try:
+        # Test database connection
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT 1")
+        cur.fetchone()
+        cur.close()
+        
+        return jsonify({
+            "status": "healthy",
+            "service": "aviatrax-backend",
+            "database": "connected"
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy",
+            "service": "aviatrax-backend",
+            "database": "disconnected",
+            "error": str(e)
+        }), 503
+
 # Users API Endpoints
 
 # Get available reviewers

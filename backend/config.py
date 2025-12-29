@@ -9,7 +9,8 @@ class Config:
     
     # Flask configuration
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    DEBUG = True
+    DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+    FLASK_ENV = os.environ.get('FLASK_ENV', 'development')
     
     # File upload configuration
     UPLOAD_FOLDER = 'plan_doc_uploads'
@@ -26,13 +27,13 @@ class Config:
     ALLOWED_SIGNATURE_EXTENSIONS = {'png'}
     MAX_SIGNATURE_SIZE = 5 * 1024 * 1024  # 5MB
     
-    # Database configuration
+    # Database configuration - uses environment variables with fallback to defaults
     DATABASE_CONFIG = {
-        'dbname': "ERP",
-        'user': "postgres", 
-        'password': "12345",
-        'host': "localhost",
-        'port': "5432"
+        'dbname': os.environ.get('DB_NAME', os.environ.get('DATABASE_NAME', "ERP")),
+        'user': os.environ.get('DB_USER', os.environ.get('DATABASE_USER', "postgres")), 
+        'password': os.environ.get('DB_PASSWORD', os.environ.get('DATABASE_PASSWORD', "12345")),
+        'host': os.environ.get('DB_HOST', os.environ.get('DATABASE_HOST', "localhost")),
+        'port': os.environ.get('DB_PORT', os.environ.get('DATABASE_PORT', "5432"))
     }
 
 class DatabaseConnection:

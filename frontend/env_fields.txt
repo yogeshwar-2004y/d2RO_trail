@@ -1,0 +1,18 @@
+# ============================================
+# Frontend .env File Fields (OPTIONAL)
+# ============================================
+# 
+# NOTE: You DON'T need this file because Nginx proxies /api to backend
+# This is only needed if you want to use environment variables in your code
+# ============================================
+
+# API Base URL (Optional)
+# Since Nginx handles /api routing, relative URLs work without this
+VITE_API_BASE_URL=http://localhost:5000
+
+# For production with domain:
+# VITE_API_BASE_URL=https://api.yourdomain.com
+
+# For EC2 deployment:
+# VITE_API_BASE_URL=http://YOUR_EC2_IP:5000
+
