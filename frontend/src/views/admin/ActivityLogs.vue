@@ -250,7 +250,7 @@ export default {
         };
 
         const response = await axios.get(
-          "http://localhost:8000/api/activity-logs",
+          "/api/activity-logs",
           { params }
         );
 
@@ -440,7 +440,7 @@ export default {
         }
 
         const response = await axios.get(
-          "http://localhost:8000/api/activity-logs/pdf",
+          "/api/activity-logs/pdf",
           {
             params,
             responseType: "blob",

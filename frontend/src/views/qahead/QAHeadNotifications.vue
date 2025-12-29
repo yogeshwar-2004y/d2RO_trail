@@ -183,7 +183,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/notifications/${currentUser.id}`,
+          `/api/notifications/${currentUser.id}`,
           {
             method: "GET",
             headers: {
@@ -223,7 +223,7 @@ export default {
     async markAsRead(notificationId) {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/notifications/${notificationId}/mark-read`,
+          `/api/notifications/${notificationId}/mark-read`,
           {
             method: "PUT",
             headers: {
