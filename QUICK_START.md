@@ -74,10 +74,23 @@ nano .env.production
 
 ### 6. Import Database Schema
 
+**Run from EC2 (Recommended)** or your local machine:
+
 ```bash
-# On your local machine or EC2
-psql "postgresql://user:pass@host.neon.tech:5432/dbname?sslmode=require" < ERP_full.sql
+# On EC2: Install PostgreSQL client first
+sudo apt install -y postgresql-client
+
+# Navigate to project directory
+cd /home/ubuntu/aviatrax/Aviatrax
+
+# Import database schema using your AWS RDS credentials
+psql "postgresql://postgres:aviatraxtrial@aviatrax-trial.cbgmomk60nq8.ap-south-1.rds.amazonaws.com:5432/postgres?sslmode=require" < ERP_full.sql
+
+# Verify tables were created
+psql "postgresql://postgres:aviatraxtrial@aviatrax-trial.cbgmomk60nq8.ap-south-1.rds.amazonaws.com:5432/postgres?sslmode=require" -c "\dt"
 ```
+
+**Note**: Ensure your RDS security group allows connections from your EC2 instance.
 
 ### 7. Deploy with Docker
 
