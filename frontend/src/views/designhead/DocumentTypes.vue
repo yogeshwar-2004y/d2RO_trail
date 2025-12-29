@@ -231,7 +231,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch('http://localhost:8000/api/document-types');
+        const response = await fetch('/api/document-types');
         const data = await response.json();
 
         if (data.success) {
@@ -294,8 +294,8 @@ export default {
       this.saving = true;
       try {
         const url = this.editingType
-          ? `http://localhost:8000/api/document-types/${this.editingType.type_id}`
-          : 'http://localhost:8000/api/document-types';
+          ? `/api/document-types/${this.editingType.type_id}`
+          : '/api/document-types';
         const method = this.editingType ? 'PUT' : 'POST';
 
         const response = await fetch(url, {
@@ -337,7 +337,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/document-types/${typeId}`,
+          `/api/document-types/${typeId}`,
           {
             method: 'DELETE'
           }

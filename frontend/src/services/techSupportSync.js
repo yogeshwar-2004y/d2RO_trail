@@ -55,7 +55,7 @@ class TechSupportSyncService {
           };
 
           const response = await fetch(
-            "http://127.0.0.1:8000/api/tech-support",
+            "/api/tech-support",
             {
               method: "POST",
               headers: {

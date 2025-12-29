@@ -640,7 +640,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
+          `/api/reports/conformal-coating-inspection/${reportIdToLoad}`,
           {
             method: "GET",
             headers: {
@@ -775,7 +775,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "/api/users/verify-signature",
           {
             method: "POST",
             headers: {
@@ -846,7 +846,7 @@ export default {
 
         const reportData = this.prepareReportData();
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection",
+          "/api/reports/conformal-coating-inspection",
           {
             method: "POST",
             headers: {
@@ -905,7 +905,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/reports/conformal-coating-inspection/${this.reportId}`,
+          `/api/reports/conformal-coating-inspection/${this.reportId}`,
           {
             method: "PUT",
             headers: {
@@ -983,7 +983,7 @@ export default {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/reports/${this.reportId}`
+          `/api/reports/${this.reportId}`
         );
 
         if (response.ok) {
@@ -1006,7 +1006,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection/notify",
+          "/api/reports/conformal-coating-inspection/notify",
           {
             method: "POST",
             headers: {
@@ -1035,7 +1035,7 @@ export default {
         }
 
         const response = await fetch(
-          "http://localhost:8000/api/reports/conformal-coating-inspection/notify-approval",
+          "/api/reports/conformal-coating-inspection/notify-approval",
           {
             method: "POST",
             headers: {

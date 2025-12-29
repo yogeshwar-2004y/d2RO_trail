@@ -178,15 +178,15 @@ export default {
         this.loading = true;
         this.error = null;
 
-        let apiUrl = "http://localhost:8000/api/projects";
+        let apiUrl = "/api/projects";
 
         // If user is a QA Reviewer, use the filtered endpoint
         if (this.isReviewer && this.currentUser?.id) {
-          apiUrl = `http://localhost:8000/api/reviewer/${this.currentUser.id}/assigned-projects`;
+          apiUrl = `/api/reviewer/${this.currentUser.id}/assigned-projects`;
         }
         // If user is a Designer, use the designer filtered endpoint
         else if (this.isDesigner && this.currentUser?.id) {
-          apiUrl = `http://localhost:8000/api/designer/${this.currentUser.id}/assigned-projects`;
+          apiUrl = `/api/designer/${this.currentUser.id}/assigned-projects`;
         }
 
         const response = await fetch(apiUrl);

@@ -263,7 +263,7 @@ export default {
         this.error = null;
 
         const response = await fetch(
-          `http://localhost:8000/api/projects/${this.projectId}/lrus`
+          `/api/projects/${this.projectId}/lrus`
         );
         const data = await response.json();
 

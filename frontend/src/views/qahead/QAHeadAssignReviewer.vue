@@ -362,8 +362,8 @@ export default {
       try {
         // Load both project and LRU data in parallel
         const [projectResponse, lruResponse] = await Promise.allSettled([
-          fetch("http://localhost:8000/api/project-options"),
-          fetch("http://localhost:8000/api/lru-options"),
+          fetch("/api/project-options"),
+          fetch("/api/lru-options"),
         ]);
 
         // Process project data
@@ -452,7 +452,7 @@ export default {
     async loadAvailableReviewers() {
       try {
         const response = await fetch(
-          "http://localhost:8000/api/available-reviewers"
+          "/api/available-reviewers"
         );
         const data = await response.json();
 
@@ -507,7 +507,7 @@ export default {
       this.loading = true;
       try {
         const response = await fetch(
-          "http://localhost:8000/api/assign-reviewer",
+          "/api/assign-reviewer",
           {
             method: "POST",
             headers: {
@@ -547,7 +547,7 @@ export default {
       this.loading = true;
       try {
         const response = await fetch(
-          "http://localhost:8000/api/update-reviewer",
+          "/api/update-reviewer",
           {
             method: "PUT",
             headers: {

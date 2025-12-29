@@ -141,8 +141,8 @@ export default {
 
         // Load project details and designers in parallel
         const [projectResponse, designersResponse] = await Promise.all([
-          fetch(`http://localhost:8000/api/projects/${this.projectId}/details`),
-          fetch("http://localhost:8000/api/available-designers"),
+          fetch(`/api/projects/${this.projectId}/details`),
+          fetch("/api/available-designers"),
         ]);
 
         const projectData = await projectResponse.json();
@@ -200,7 +200,7 @@ export default {
         this.assigning = true;
 
         const response = await fetch(
-          `http://localhost:8000/api/projects/${this.projectId}/members`,
+          `/api/projects/${this.projectId}/members`,
           {
             method: "POST",
             headers: {

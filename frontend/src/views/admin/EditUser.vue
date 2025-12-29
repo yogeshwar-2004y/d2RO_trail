@@ -184,7 +184,7 @@ export default {
     async fetchRoles() {
       try {
         this.loading = true;
-        const response = await fetch("http://localhost:8000/api/roles");
+        const response = await fetch("/api/roles");
         const data = await response.json();
 
         if (data.success) {
@@ -210,7 +210,7 @@ export default {
     async fetchUserDetails() {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/users/${this.userId}`
+          `/api/users/${this.userId}`
         );
         const data = await response.json();
 
@@ -231,7 +231,7 @@ export default {
             }
 
             // Set the signature preview URL
-            this.signaturePreview = `http://localhost:8000/api/users/signature/${filename}`;
+            this.signaturePreview = `/api/users/signature/${filename}`;
           }
         } else {
           console.error("Error fetching user details:", data.message);
@@ -343,7 +343,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://localhost:8000/api/users/${this.userId}`,
+          `/api/users/${this.userId}`,
           {
             method: "PUT",
             body: formData, // No Content-Type header for FormData
@@ -374,7 +374,7 @@ export default {
       try {
         this.loading = true;
         const response = await fetch(
-          `http://localhost:8000/api/users/${this.userId}/toggle-enabled`,
+          `/api/users/${this.userId}/toggle-enabled`,
           {
             method: "POST",
             headers: {
@@ -417,7 +417,7 @@ export default {
       try {
         this.loading = true;
         const response = await fetch(
-          `http://localhost:8000/api/users/${this.userId}/delete`,
+          `/api/users/${this.userId}/delete`,
           {
             method: "POST",
             headers: {

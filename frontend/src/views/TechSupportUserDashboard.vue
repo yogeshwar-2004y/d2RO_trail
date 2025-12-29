@@ -325,7 +325,7 @@ export default {
         }
 
         const response = await fetch(
-          `http://127.0.0.1:8000/api/tech-support/user/${currentUser.id}`
+          `/api/tech-support/user/${currentUser.id}`
         );
         const data = await response.json();
 

@@ -765,7 +765,7 @@ export default {
 
       try {
         const response = await fetch(
-          "http://localhost:8000/api/users/verify-signature",
+          "/api/users/verify-signature",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
