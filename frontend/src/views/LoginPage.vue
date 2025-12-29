@@ -88,6 +88,12 @@
 
 <script>
 import { setUser } from "@/stores/userStore";
+// Import default gallery images
+import Image1 from "@/assets/images/Image1.png";
+import Image2 from "@/assets/images/Image2.png";
+import Image3 from "@/assets/images/Image3.png";
+import Image4 from "@/assets/images/Image4.jpg";
+import Image5 from "@/assets/images/Image5.jpg";
 
 export default {
   name: "LoginPage",
@@ -104,13 +110,13 @@ export default {
       if (customUrl && customUrl.trim() !== "") {
         return customUrl;
       }
-      // Default images
+      // Default images (imported so Vite handles paths correctly)
       const defaults = {
-        1: "/src/assets/images/Image3.png",
-        2: "/src/assets/images/Image5.jpg",
-        3: "/src/assets/images/Image4.jpg",
-        4: "/src/assets/images/Image2.png",
-        5: "/src/assets/images/Image1.png",
+        1: Image3,
+        2: Image5,
+        3: Image4,
+        4: Image2,
+        5: Image1,
       };
       return defaults[imageNumber];
     },

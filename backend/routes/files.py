@@ -198,8 +198,8 @@ def upload_gallery_image(image_number):
         # Save new file
         file.save(file_path)
         
-        # Return the URL for the uploaded image
-        image_url = f"http://127.0.0.1:8000/api/gallery-image/{filename}"
+        # Return the URL for the uploaded image (use relative URL)
+        image_url = f"/api/gallery-image/{filename}"
         
         return jsonify({
             "success": True,
@@ -236,7 +236,7 @@ def get_gallery_images():
                 for ext in Config.ALLOWED_IMAGE_EXTENSIONS:
                     custom_image = os.path.join(Config.LOGIN_BACKGROUND_FOLDER, f"gallery_image_{image_num}.{ext}")
                     if os.path.exists(custom_image):
-                        gallery_images[f'image_{image_num}'] = f"http://127.0.0.1:8000/api/gallery-image/gallery_image_{image_num}.{ext}"
+                        gallery_images[f'image_{image_num}'] = f"/api/gallery-image/gallery_image_{image_num}.{ext}"
                         break
                 # If no custom image found, store empty string to indicate default should be used
                 if f'image_{image_num}' not in gallery_images:

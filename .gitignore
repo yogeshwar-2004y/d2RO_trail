@@ -61,6 +61,8 @@ GIT_MERGE_FIX.md
 # Deployment and requirements files
 DEPLOYMENT_GUIDE.md
 requirements.txt
+GALLERY_IMAGES_FIX.md
+GIT_DIVERGENT_BRANCHES.md
 
 # Upload directories
 plan_doc_uploads/
